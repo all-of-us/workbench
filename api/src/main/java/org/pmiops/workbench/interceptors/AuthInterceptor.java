@@ -155,18 +155,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // TODO(danrodney): start populating contact email in Google account, use it here.
       user =
           userService.createUser(
-              userInfo.getGivenName(),
-              userInfo.getFamilyName(),
-              userInfo.getEmail(),
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null);
+              userInfo.getGivenName(), userInfo.getFamilyName(), userInfo.getEmail());
     } else {
       if (user.getDisabled()) {
         throw new ForbiddenException(

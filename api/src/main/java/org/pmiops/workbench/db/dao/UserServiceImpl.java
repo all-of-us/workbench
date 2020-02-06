@@ -290,27 +290,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser createUser(
-      String givenName,
-      String familyName,
-      String userName,
-      String contactEmail,
-      String currentPosition,
-      String organization,
-      String areaOfResearch) {
+  public DbUser createUser(String givenName, String familyName, String userName) {
     return createUser(
-        givenName,
-        familyName,
-        userName,
-        contactEmail,
-        currentPosition,
-        organization,
-        areaOfResearch,
-        null,
-        null,
-        null,
-        null,
-        null);
+        givenName, familyName, userName, null, null, null, null, null, null, null, null, null);
   }
 
   @Override

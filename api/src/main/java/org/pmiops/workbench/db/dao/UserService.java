@@ -17,19 +17,13 @@ public interface UserService {
 
   DbUser createServiceAccountUser(String email);
 
-  DbUser createUser(
-      String givenName,
-      String familyName,
-      String email,
-      String contactEmail,
-      String currentPosition,
-      String organization,
-      String areaOfResearch);
+  // minimal version used by AuthInterceptor
+  DbUser createUser(String givenName, String familyName, String userName);
 
   DbUser createUser(
       String givenName,
       String familyName,
-      String email,
+      String userName,
       String contactEmail,
       String currentPosition,
       String organization,
