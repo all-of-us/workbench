@@ -186,7 +186,7 @@ interface State { // Browse survey
   // If concept metadata is still being gathered for any domain
   loadingDomains: boolean;
   // If we are still searching concepts and should show a spinner on the table
-  searchLoading: boolean;
+  countsLoading: boolean;
   // If we are in 'search mode' and should show the table
   searching: boolean;
   // Map of domain to selected concepts in domain
@@ -230,7 +230,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         domainErrors: [],
         domainInfoError: false,
         loadingDomains: true,
-        searchLoading: false,
+        countsLoading: false,
         searching: false,
         selectedConceptDomainMap: new Map<string, Concept[]>(),
         selectedDomain: {name: '', domain: undefined, conceptCount: 0},
@@ -342,19 +342,18 @@ export const ConceptHomepage = withCurrentWorkspace()(
         = this.state;
       const {namespace, id} = this.props.workspace;
       this.setState({completedDomainSearches: [], concepts: [], countsError: false,
-        domainErrors: [], searchLoading: true, searching: true});
+        domainErrors: [], countsLoading: true, searching: true});
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
       const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
-      if (!!selectedSurvey) {
-        request['surveyName'] = selectedSurvey;
-      }
       conceptsApi().domainCounts(namespace, id, request).then(counts => {
         // Filter Physical Measurements if feature flag disabled
         const conceptDomainCounts = !environment.enableNewConceptTabs
           ? counts.domainCounts.filter(dc => dc.domain !== Domain.PHYSICALMEASUREMENT)
           : counts.domainCounts;
-        this.setState({conceptDomainCounts: conceptDomainCounts});
+        // update selectedDomain with new conceptCount
+        selectedDomain.conceptCount = conceptDomainCounts.find(c => c.domain === selectedDomain.domain).conceptCount;
+        this.setState({conceptDomainCounts: conceptDomainCounts, countsLoading: false, selectedDomain: selectedDomain});
       }).catch(error => {
         console.error(error);
         this.setState({countsError: true});
@@ -363,6 +362,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
         selectedConceptDomainMap[cacheItem.domain] = [];
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         if (cacheItem.domain === Domain.SURVEY) {
+          if (!!selectedSurvey) {
+            request['surveyName'] = selectedSurvey;
+          }
           await conceptsApi().searchSurveys(namespace, id, request)
             .then(resp => cacheItem.items = resp)
             .catch(error => {
@@ -382,7 +384,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
         completedDomainSearches.push(cacheItem.domain);
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
-          this.setState({searchLoading: false});
           this.setConceptsAndVocabularies();
         }
       });
@@ -430,7 +431,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     domainLoading(domain) {
-      return this.state.searchLoading || !this.state.completedDomainSearches.includes(domain.domain);
+      return this.state.countsLoading || !this.state.completedDomainSearches.includes(domain.domain);
     }
 
     get noConceptsConstant() {
@@ -469,8 +470,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     renderConcepts() {
-      const {conceptDomainCounts, concepts, countsError, domainErrors, searchLoading,
-        selectedDomain, selectedConceptDomainMap} = this.state;
+      const {conceptDomainCounts, concepts, countsError, domainErrors, selectedDomain, selectedConceptDomainMap} = this.state;
       const domainError = domainErrors.includes(selectedDomain.domain);
       return <React.Fragment>
         <button style={styles.backBtn} type='button' onClick={() => this.setState({searching: false, selectedSurvey: ''})}>
@@ -506,12 +506,12 @@ export const ConceptHomepage = withCurrentWorkspace()(
               </FlexColumn>;
             })}
           </FlexRow>
-          {!searchLoading && selectedDomain.conceptCount > 1000 && !domainError &&
-            <div style={styles.conceptCounts}>Showing top {concepts.length} {selectedDomain.name}</div>
+          {!this.domainLoading(selectedDomain) && selectedDomain.conceptCount > 1000 && !domainError &&
+            <div style={styles.conceptCounts}>Showing top {concepts.length.toLocaleString()} {selectedDomain.name}</div>
           }
           <ConceptTable concepts={concepts}
                         domain={selectedDomain.domain}
-                        loading={searchLoading}
+                        loading={this.domainLoading(selectedDomain)}
                         onSelectConcepts={this.selectConcepts.bind(this)}
                         placeholderValue={this.noConceptsConstant}
                         searchTerm={this.state.currentSearchString}
