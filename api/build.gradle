@@ -470,6 +470,7 @@ dependencies {
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
+  testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
   testCompile "org.springframework.boot:spring-boot-starter-test:${SPRING_BOOT_VERSION}"
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.5.3'
