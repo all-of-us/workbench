@@ -578,32 +578,6 @@ def get_auth_login_account()
   return `gcloud config get-value account`.strip()
 end
 
-def register_service_account(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-        "--project [project]",
-        ->(opts, v) { opts.project = v},
-        "Project to register the service account for"
-  )
-  op.parse.validate
-  firecloud_base_url = get_firecloud_base_url(op.opts.project)
-  ServiceAccountContext.new(op.opts.project).run do
-    Dir.chdir("../firecloud-tools") do
-      common = Common.new
-      common.run_inline %W{./run.sh scripts/register_service_account/register_service_account.py
-           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com
-           -u #{firecloud_base_url}}
-    end
-  end
-end
-
-Common.register_command({
-  :invocation => "register-service-account",
-  :description => "Registers a service account with Firecloud; do this once per account we use.",
-  :fn => ->(*args) { register_service_account("register-service-account", *args) }
-})
-
-
 def drop_cloud_db(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
