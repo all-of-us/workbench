@@ -15,13 +15,8 @@ import {
 } from 'generated/fetch';
 
 const styles = {
-  width10: {
-    width: '10%'
-  },
-  width30: {
-    width: '30%'
-  },
-  marginRightSmall: {
+  columnWithRightMargin: {
+    width: '10rem',
     marginRight: '1rem'
   }
 };
@@ -87,9 +82,9 @@ export class AdminWorkspace extends React.Component<Props, State> {
     return <div>
       <h2>Manage Workspaces</h2>
       <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center'}}>
-        <label style={styles.marginRightSmall}>GCP Project ID</label>
+        <label style={{marginRight: '1rem'}}>GCP Project ID</label>
         <TextInput
-            style={{...styles.width10, ...styles.marginRightSmall}}
+            style={{...styles.columnWithRightMargin}}
             onChange={value => this.updateProject(value)}
             onKeyDown={event => this.maybeGetFederatedWorkspaceInformation(event)}
         />
@@ -102,35 +97,35 @@ export class AdminWorkspace extends React.Component<Props, State> {
       </FlexRow>
       {workspace && (resources.workspaceObjects || resources.cloudStorage) && <FlexColumn style={{flex: '1 0 auto'}}>
         <h3>Workspace Metadata</h3>
-        {resources.workspaceObjects && <FlexRow>
-            <label style={{alignSelf: 'center', ...styles.width10, ...styles.marginRightSmall}}>Workspace
+        {resources.workspaceObjects && <FlexRow style={{width: '100%'}}>
+            <label style={{alignSelf: 'center', ...styles.columnWithRightMargin}}>Workspace
               Objects</label>
-            <FlexColumn styles={{...styles.width30}}>
+            <FlexColumn style={{...styles.columnWithRightMargin}}>
               <label># of Cohorts</label>
               <div>{resources.workspaceObjects.cohortCount}</div>
             </FlexColumn>
-            <FlexColumn styles={{...styles.width30}}>
+            <FlexColumn style={{...styles.columnWithRightMargin}}>
               <label># of Concept Sets</label>
               <div>{resources.workspaceObjects.conceptSetCount}</div>
             </FlexColumn>
-            <FlexColumn styles={{...styles.width30}}>
+            <FlexColumn style={{...styles.columnWithRightMargin}}>
               <label># of Data Sets</label>
               <div>{resources.workspaceObjects.datasetCount}</div>
             </FlexColumn>
           </FlexRow>
         }
-        {resources.cloudStorage && <FlexRow>
-          <label style={{alignSelf: 'center', ...styles.width10, ...styles.marginRightSmall}}>Cloud
+        {resources.cloudStorage && <FlexRow style={{width: '100%'}}>
+          <label style={{alignSelf: 'center', ...styles.columnWithRightMargin}}>Cloud
             Storage</label>
-          <FlexColumn styles={{...styles.width30}}>
+          <FlexColumn style={{...styles.columnWithRightMargin}}>
             <label># of Notebook Files</label>
             <div>{resources.cloudStorage.notebookFileCount}</div>
           </FlexColumn>
-          <FlexColumn styles={{...styles.width30}}>
+          <FlexColumn style={{...styles.columnWithRightMargin}}>
             <label># of Non-Notebook Files</label>
             <div>{resources.cloudStorage.nonNotebookFileCount}</div>
           </FlexColumn>
-          <FlexColumn styles={{...styles.width30}}>
+          <FlexColumn style={{...styles.columnWithRightMargin}}>
             <label>Storage used (bytes)</label>
             <div>{resources.cloudStorage.storageBytesUsed}</div>
           </FlexColumn>

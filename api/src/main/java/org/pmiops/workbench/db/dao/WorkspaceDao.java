@@ -51,7 +51,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);
 
-  Optional<DbWorkspace> findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(String workspaceNamespace);
+  Optional<DbWorkspace> findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(
+      String workspaceNamespace);
 
   Optional<DbWorkspace> findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
       String workspaceNamespace, short activeStatus);
