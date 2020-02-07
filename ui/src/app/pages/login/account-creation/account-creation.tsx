@@ -727,7 +727,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
             <div style={styles.asideHeader}><i>All of Us</i> participants are most interested in knowing:</div>
             <ul style={styles.asideList}>
-              {researchPurposeList.map(value => <li style={styles.asideText}>{value}</li>)}
+              {researchPurposeList.map((value, index) => <li key={index} style={styles.asideText}>{value}</li>)}
             </ul>
           </FlexColumn>
         </FlexColumn>
