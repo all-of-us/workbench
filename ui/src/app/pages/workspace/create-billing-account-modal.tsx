@@ -5,12 +5,10 @@ import {FlexColumn} from 'app/components/flex';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
 import colors from 'app/styles/colors';
+import {withUserProfile} from 'app/utils';
+import {environment} from 'environments/environment';
+import {Profile} from 'generated/fetch';
 import * as React from 'react';
-import {environment} from '../../../environments/environment';
-import {FileDetail, Profile} from '../../../generated/fetch';
-import {ClrIcon} from '../../components/icons';
-import {withUserProfile} from '../../utils';
-import {WorkspaceData} from '../../utils/workspace-data';
 
 export const CreateBillingAccountModal = withUserProfile() (
   class extends React.Component<{
