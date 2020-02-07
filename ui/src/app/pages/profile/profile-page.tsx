@@ -15,11 +15,10 @@ import { ProfileRegistrationStepStatus } from 'app/pages/profile/profile-registr
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {convertAPIError} from 'app/utils/errors';
 import {globalErrorStore, serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
-import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
-import {convertAPIError} from 'app/utils/errors';
 
 const styles = reactStyles({
   h1: {
