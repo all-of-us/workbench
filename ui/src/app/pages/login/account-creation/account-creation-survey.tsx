@@ -103,7 +103,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     const {invitationKey, setProfile} = this.props;
     this.setState({creatingAccount: true});
     try {
-      await profileApi().createAccount({profile: this.profileObj, invitationKey: 'asdf'})
+      await profileApi().createAccount({profile: this.profileObj, invitationKey: invitationKey})
         .then((savedProfile) => {
           this.setState({profile: savedProfile, creatingAccount: false});
           setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: signedOutImages.login});
