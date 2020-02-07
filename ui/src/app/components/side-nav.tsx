@@ -322,6 +322,16 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         containsSubItems={true}
         ref={this.state.helpRef}
       />
+      <SideNavItem
+        content={'User Forum'}
+        onToggleSideNav={() => this.props.onToggleSideNav()}
+        parentOnClick={() => this.redirectToZendesk()}
+      />
+      <SideNavItem
+        content={'Contact Us'}
+        onToggleSideNav={() => this.props.onToggleSideNav()}
+        parentOnClick={() => this.openContactWidget()}
+      />
       {
         this.state.showHelpOptions && <SideNavItem
           content={'User Forum'}
