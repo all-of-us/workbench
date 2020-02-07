@@ -293,6 +293,9 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   test {
+    resources {
+      srcDir "config/"
+    }
     compileClasspath += generated.output
     runtimeClasspath += generated.output
   }

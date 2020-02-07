@@ -7,13 +7,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,8 +26,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -65,20 +64,18 @@ import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ProfileControllerTest {
+public class ProfileControllerTest extends BaseControllerTest {
 
   private static final Instant NOW = Instant.now();
   private static final Timestamp TIMESTAMP = new Timestamp(NOW.toEpochMilli());
@@ -96,38 +93,49 @@ public class ProfileControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
-  @Mock private Provider<DbUser> userProvider;
-  @Mock private Provider<UserAuthentication> userAuthenticationProvider;
+  @MockBean private Provider<DbUser> userProvider;
+  @MockBean private Provider<UserAuthentication> userAuthenticationProvider;
+  @MockBean private FireCloudService fireCloudService;
+  @MockBean private LeonardoNotebooksClient leonardoNotebooksClient;
+  @MockBean private DirectoryService directoryService;
+  @MockBean private CloudStorageService cloudStorageService;
+  @MockBean private FreeTierBillingService freeTierBillingService;
+  @MockBean private ComplianceService complianceTrainingService;
+  @MockBean private MailService mailService;
+  @MockBean private ProfileAuditor mockProfileAuditor;
+  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+
   @Autowired private UserDao userDao;
   @Autowired private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
-  @Mock private FireCloudService fireCloudService;
-  @Mock private LeonardoNotebooksClient leonardoNotebooksClient;
-  @Mock private DirectoryService directoryService;
-  @Mock private CloudStorageService cloudStorageService;
-  @Mock private FreeTierBillingService freeTierBillingService;
-  @Mock private ComplianceService complianceTrainingService;
-  @Mock private MailService mailService;
-  private UserService userService;
-  @Mock private ProfileAuditor mockProfileAuditor;
-  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
+  @Autowired private UserService userService;
+  @Autowired private ProfileService profileService;
+  @Autowired private ProfileController profileController;
 
-  private ProfileController profileController;
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
-  private FakeClock clock;
+  private static FakeClock fakeClock = new FakeClock(NOW);
+
   private DbUser dbUser;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
-  @Before
-  public void setUp() throws MessagingException {
-    WorkbenchConfig config = generateConfig();
+  @TestConfiguration
+  @Import({UserServiceImpl.class, ProfileService.class, ProfileController.class})
+  static class Configuration {
+    @Bean
+    Clock clock() {
+      return fakeClock;
+    }
+  }
 
-    createAccountRequest = new CreateAccountRequest();
-    invitationVerificationRequest = new InvitationVerificationRequest();
+  @Before
+  @Override
+  public void setUp() throws IOException {
+    super.setUp();
+
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -136,54 +144,38 @@ public class ProfileControllerTest {
     profile.setCurrentPosition(CURRENT_POSITION);
     profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
+    createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
+
+    invitationVerificationRequest = new InvitationVerificationRequest();
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
+
     googleUser = new com.google.api.services.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
 
-    clock = new FakeClock(NOW);
-
-    doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
-    userService =
-        spy(
-            new UserServiceImpl(
-                userProvider,
-                userDao,
-                adminActionHistoryDao,
-                userTermsOfServiceDao,
-                userDataUseAgreementDao,
-                clock,
-                new FakeLongRandom(NONCE_LONG),
-                fireCloudService,
-                Providers.of(config),
-                complianceTrainingService,
-                directoryService,
-                mockUserServiceAuditAdapter));
-    ProfileService profileService =
-        new ProfileService(userDao, freeTierBillingService, userTermsOfServiceDao);
-    this.profileController =
-        new ProfileController(
-            profileService,
-            userProvider,
-            userAuthenticationProvider,
-            userDao,
-            clock,
-            userService,
-            fireCloudService,
-            directoryService,
-            cloudStorageService,
-            Providers.of(config),
-            Providers.of(mailService),
-            mockProfileAuditor);
+    try {
+      doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
+    } catch (MessagingException e) {
+      e.printStackTrace();
+    }
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() throws Exception {
+    when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test
+  public void testCreateAccount_noRequireInvitationKey() throws Exception {
+    // When invitation key verification is turned off, even a bad invitation key should
+    // allow a user to be created.
+    config.access.requireInvitationKey = false;
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
@@ -295,7 +287,7 @@ public class ProfileControllerTest {
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
-    clock.increment(1);
+    fakeClock.increment(1);
     profile = profileController.getMe().getBody();
     assertProfile(
         profile,

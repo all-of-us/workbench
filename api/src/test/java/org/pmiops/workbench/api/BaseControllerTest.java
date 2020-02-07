@@ -1,25 +1,25 @@
-package org.pmiops.workbench;
+package org.pmiops.workbench.api;
 
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 @RunWith(SpringRunner.class)
-@WebAppConfiguration
-@Import({IntegrationTestConfig.class})
-public abstract class BaseIntegrationTest {
+@DataJpaTest
+public class BaseControllerTest {
 
   protected static WorkbenchConfig config;
 
@@ -32,6 +32,11 @@ public abstract class BaseIntegrationTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig getIntegrationTestConfig() throws IOException {
       return config;
+    }
+
+    @Bean
+    Random random() {
+      return new FakeLongRandom(123);
     }
   }
 

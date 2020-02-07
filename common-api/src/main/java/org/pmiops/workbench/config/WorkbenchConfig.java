@@ -184,19 +184,21 @@ public class WorkbenchConfig {
     public String host;
   }
 
-  // The access object specifies whether each of the following access requirements block access
-  // to the workbench.
+  // Config related to user sign-up and registration, including access modules and controls around
+  // the sign-up flow.
   public static class AccessConfig {
     // Allows a user to bypass their own access modules. This is used for testing purposes so that
     // We can give control over 3rd party access modules
     public boolean unsafeAllowSelfBypass;
-    // Controls whether an invitation key is required for a given environment.
-    public boolean requireInvitationKey;
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
+    // Controls whether an invitation key is required for user creation. When true, the account
+    // creation UI will show an invitation key form, and the server-side will valide the key before
+    // proceeding.
+    public boolean requireInvitationKey;
   }
 
   public static class CohortBuilderConfig {
