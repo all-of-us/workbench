@@ -1,47 +1,78 @@
+import {faTimes} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
 import colors from 'app/styles/colors';
 import * as React from 'react';
+import {environment} from '../../../environments/environment';
+import {FileDetail, Profile} from '../../../generated/fetch';
+import {ClrIcon} from '../../components/icons';
+import {withUserProfile} from '../../utils';
+import {WorkspaceData} from '../../utils/workspace-data';
 
-export const CreateBillingAccountModal = ({onClose}) => {
-  return <Modal width={600} onRequestClose={() => onClose()}>
-    <ModalTitle>Create a billing account</ModalTitle>
+export const CreateBillingAccountModal = withUserProfile() (
+  class extends React.Component<{
+    profileState: {profile: Profile},
+    onClose: Function
+  }, {}> {
+    constructor(props) {
+      super(props);
+    }
 
-    <ModalBody>
-      <FlexColumn style={{alignItems: 'flex-start'}}>
-        <img style={{width: '12rem', marginLeft: '-1.2rem'}} src='/assets/images/logo_lockup_cloud_rgb.png'/>
+    render() {
+      return <Modal width={600} onRequestClose={() => this.props.onClose()}>
+        <ModalTitle style={{marginBottom: '0.7rem'}}>Create a billing account</ModalTitle>
 
-        <TextColumn>
-          <div>Billing accounts are managed by via Google Cloud Platform.</div>
-          <div>Learn more on how to set up a billing account.</div>
-        </TextColumn>
+        <ModalBody>
+          <FlexColumn style={{alignItems: 'flex-start'}}>
+            <img style={{width: '12rem', marginLeft: '-0.7rem'}} src='/assets/images/gcp_logo.png'/>
 
-        <Button type='primary'
-                style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                onClick={() => onClose()}>
-          Read Instructions
-        </Button>
-      </FlexColumn>
-    </ModalBody>
+            <TextColumn>
+              <div>Billing accounts are managed via Google Cloud Platform™ service.</div>
+              <div>Learn more on how to set up a billing account.</div>
+            </TextColumn>
 
-    <hr style={{width: '100%', backgroundColor: colors.primary, borderWidth: '0px', height: '1px',
-      marginTop: '1rem',
-      marginBottom: '0.5rem'}}/>
+            <Button type='primary'
+                    style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
+                    onClick={() => window.open(environment.createBillingAccountHelpUrl, '_blank')}>
+              Read Instructions
+            </Button>
+          </FlexColumn>
+        </ModalBody>
 
-    <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
-      <FlexColumn>
-        <TextColumn>
-          <p style={{marginTop: 0}}>If you do not have a Google Cloud billing account.</p>
-          <a href='https://cloud.google.com' target='_blank'>Create billing account</a>
-        </TextColumn>
+        <hr style={{width: '100%', backgroundColor: colors.primary, borderWidth: '0px', height: '1px',
+          marginTop: '1rem',
+          marginBottom: '0.5rem'}}/>
 
-        <TextColumn>
-          <div>Add your <i>All of Us</i> user account to your existing Google Cloud account.</div>
-          <a href='https://console.cloud.google.com/billing' target='_blank'>Add your account</a>
-        </TextColumn>
-      </FlexColumn>
-    </ModalFooter>
-  </Modal>;
-};
+        <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
+          <FlexColumn>
+            <TextColumn>
+              <p style={{marginTop: 0}}>Don't already have a Google Cloud account?</p>
+              <a href='https://cloud.google.com' target='_blank'>Create billing account</a>
+            </TextColumn>
+
+            <TextColumn>
+              <div>Add [ {this.props.profileState.profile.username} ] as a 'User' to your Google Cloud billing account.</div>
+              <a href='https://console.cloud.google.com/billing' target='_blank'>Add user</a>
+            </TextColumn>
+          </FlexColumn>
+        </ModalFooter>
+
+        <FontAwesomeIcon
+          icon={faTimes}
+          size='lg'
+          style={{
+            color: colors.accent,
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            cursor: 'pointer'
+          }}
+          onClick={() => this.props.onClose()}
+        />
+      </Modal>;
+    }
+  }
+);
