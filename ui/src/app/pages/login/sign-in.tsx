@@ -164,8 +164,9 @@ export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(
           zipCode: '',
         },
         institutionalAffiliations: [
-          // We only allow entering a single institutional affiliation from the creat account
-          // page, so we pre-fill a single entry which will be bound to the form.
+          // We only allow entering a single institutional affiliation from the create account
+          // page, so we pre-fill a single empty entry which will be bound to the AccountCreation
+          // form.
           {
             institution: undefined,
             nonAcademicAffiliation: undefined,

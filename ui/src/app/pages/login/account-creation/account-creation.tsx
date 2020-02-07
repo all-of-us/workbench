@@ -176,6 +176,11 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   private usernameCheckTimeout: NodeJS.Timer;
 
   constructor(props: AccountCreationProps) {
+    // What's going on with this assertion: the account creation form only edits a single
+    // institutional affiliation entry, even though it's a repeated field. This component has
+    // a convention of requiring the Profile set in props to have a single, empty institutional
+    // affiliation already populated, for editing by this form. See sign-in.tsx where the "empty"
+    // profile object is created.
     if (props.profile.institutionalAffiliations.length !== 1) {
       throw new Error('Profile must be pre-allocated with 1 institutional affiliation.');
     }
