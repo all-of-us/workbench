@@ -1,104 +1,181 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
+import * as fp from 'lodash/fp';
 
+import {AccountCreation} from 'app/pages/login/account-creation/account-creation';
 import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
+import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
+import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
 import {InvitationKey} from 'app/pages/login/invitation-key';
 import {LoginReactComponent} from 'app/pages/login/login';
 import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, withWindowSize} from 'app/utils';
-import {AccountCreation} from './account-creation/account-creation';
+import {
+  reactStyles,
+  ReactWrapperBase, ServerConfigProps,
+  WindowSizeProps,
+  withServerConfig,
+  withWindowSize,
+} from 'app/utils';
 
-import {Profile} from 'generated/fetch';
+import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
-import {SignedOutImages, signedOutImages} from 'app/pages/login/signed-out-images';
 import * as React from 'react';
-import {AccountCreationSurvey} from './account-creation/account-creation-survey';
 
+// A template function which returns the appropriate style config based on window size and
+// background images.
+const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImageConfig) => {
+  // Lower bounds to prevent the small and large images from covering the
+  // creation controls, respectively.
+  const bgWidthMinPx = 900;
+  const bgWidthSmallLimitPx = 1600;
 
+  return {
+    backgroundImage: calculateImage(),
+    backgroundColor: colors.light,
+    backgroundRepeat: 'no-repeat',
+    flex: 1,
+    width: '100%',
+    backgroundSize: windowSize.width <= bgWidthMinPx ? '0% 0%' : 'contain',
+    backgroundPosition: calculateBackgroundPosition()
+  };
 
-interface Step {
-  stepName: string;
-  backgroundImages?: SignedOutImages;
-}
-
-export interface SignInProps {
-  onInit: () => void;
-  signIn: () => void;
-  windowSize: { width: number, height: number };
-}
-
-interface SignInState {
-  currentStep: Step;
-  invitationKey: string;
-  profile: Profile;
-}
-
-const styles = {
-  template: (windowSize, images: SignedOutImages) => {
-    // Lower bounds to prevent the small and large images from covering the
-    // creation controls, respectively.
-    const bgWidthMinPx = 900;
-    const bgWidthSmallLimitPx = 1600;
-
-    return {
-      backgroundImage: calculateImage(),
-      backgroundColor: colors.light,
-      backgroundRepeat: 'no-repeat',
-      width: '100%',
-      minHeight: '100vh',
-      backgroundSize: windowSize.width <= bgWidthMinPx ? '0% 0%' : 'contain',
-      backgroundPosition: calculateBackgroundPosition()
-    };
-
-    function calculateImage() {
-      if (images === undefined) {
-        return null;
-      }
-      let imageUrl = 'url(\'' + images.backgroundImgSrc + '\')';
-      if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
-        imageUrl = 'url(\'' + images.smallerBackgroundImgSrc + '\')';
-      }
-      return imageUrl;
+  function calculateImage() {
+    if (!imageConfig) {
+      return null;
     }
-
-    function calculateBackgroundPosition() {
-      let position = 'bottom right -1rem';
-      if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
-        position = 'bottom right';
-      }
-      return position;
+    let imageUrl = 'url(\'' + imageConfig.backgroundImgSrc + '\')';
+    if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
+      imageUrl = 'url(\'' + imageConfig.smallerBackgroundImgSrc + '\')';
     }
-  },
-  signedInContainer: {
+    return imageUrl;
+  }
+
+  function calculateBackgroundPosition() {
+    let position = 'bottom right -1rem';
+    if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
+      position = 'bottom right';
+    }
+    return position;
+  }
+};
+
+const styles = reactStyles({
+  signInContainer: {
     backgroundSize: 'contain',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
-    display: 'flex',
     justifyContent: 'space-around',
     alignItems: 'flex-start',
-    width: 'auto'
+    width: 'auto',
+    minHeight: '100vh'
   },
+});
 
-};
+// Tracks each major stage in the sign-in / sign-up flow. Most of the steps are related to new
+// account creation.
+enum SignInStep {
+  // Landing page. User can choose to sign in or create an account.
+  LANDING,
+  // Interstitial step, where a user must enter their invitation key.
+  //
+  // TODO: this needs to be controllable per-environment before beta launch!
+  INVITATION_KEY,
+  // Terms of Service page. User must read and acknowledge the privacy statement & TOS.
+  TERMS_OF_SERVICE,
+  // Basic account creation page. User chooses a username and provides basic name / address info.
+  ACCOUNT_CREATION,
+  // Optional demographic survey. Completion of this step triggers actual user creation.
+  DEMOGRAPHIC_SURVEY,
+  // Account creation success page.
+  SUCCESS_PAGE
+}
 
+interface BackgroundImageConfig {
+  backgroundImgSrc: string;
+  smallerBackgroundImgSrc: string;
+}
 
+export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map([
+  [SignInStep.LANDING, {
+    backgroundImgSrc: '/assets/images/login-group.png',
+    smallerBackgroundImgSrc: '/assets/images/login-standing.png'
+  }],
+  [SignInStep.SUCCESS_PAGE, {
+    backgroundImgSrc: '/assets/images/congrats-female.png',
+    smallerBackgroundImgSrc: 'assets/images/congrats-female-standing.png'
+  }]]
+);
 
+const HEADER_IMAGE = '/assets/images/logo-registration-non-signed-in.svg';
 
-const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
+export interface SignInProps extends ServerConfigProps, WindowSizeProps {
+  initialStep?: SignInStep;
+  onInit: () => void;
+  signIn: () => void;
+}
 
-export const SignInReact = withWindowSize()(
+interface SignInState {
+  currentStep: SignInStep;
+  // Tracks the invitation key provided by the user. This is a required parameter in the createUser
+  // API call.
+  invitationKey: string;
+  profile: Profile;
+  // Tracks the Terms of Service version that was viewed and acknowledged by the user.
+  // This is an optional parameter in the createUser API call.
+  termsOfServiceVersion?: number;
+}
+
+export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(
   class extends React.Component<SignInProps, SignInState> {
 
     constructor(props: SignInProps) {
       super(props);
       this.state = {
-        currentStep: {stepName: 'login', backgroundImages: signedOutImages.login},
-        invitationKey: '',
-        profile: {} as Profile
+        currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
+        invitationKey: null,
+        termsOfServiceVersion: null,
+        // This defines the profile state for a new user flow. This will get passed to each
+        // step component as a prop. When each sub-step completes, it will pass the updated Profile
+        // data in its onComplete callback.
+        profile: this.createEmptyProfile()
       };
-      this.setProfile = this.setProfile.bind(this);
+    }
+
+    createEmptyProfile(): Profile {
+      return {
+        // Note: We abuse the "username" field here by omitting "@domain.org". After
+        // profile creation, this field is populated with the full email address.
+        username: '',
+        dataAccessLevel: DataAccessLevel.Unregistered,
+        givenName: '',
+        familyName: '',
+        contactEmail: '',
+        currentPosition: '',
+        organization: '',
+        areaOfResearch: '',
+        address: {
+          streetAddress1: '',
+          streetAddress2: '',
+          city: '',
+          state: '',
+          country: '',
+          zipCode: '',
+        },
+        institutionalAffiliations: [
+          // We only allow entering a single institutional affiliation from the create account
+          // page, so we pre-fill a single empty entry which will be bound to the AccountCreation
+          // form.
+          {
+            institution: undefined,
+            nonAcademicAffiliation: undefined,
+            role: undefined,
+          },
+        ],
+        demographicSurvey: {},
+        degrees: [] as Degree[],
+      };
     }
 
     componentDidMount() {
@@ -106,64 +183,67 @@ export const SignInReact = withWindowSize()(
       this.props.onInit();
     }
 
-    nextDirective(index: string) {
-      switch (index) {
-        case 'login':
+    renderSignInStep(currentStep: SignInStep) {
+      const {enableNewAccountCreation} = this.props.serverConfig;
+
+      switch (currentStep) {
+        case SignInStep.LANDING:
           return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
-            this.setCurrentStep({stepName: 'invitationKey'})}/>;
-        case 'invitationKey':
-          return <InvitationKey onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
-        case 'accountCreation':
-          return <AccountCreation invitationKey={this.state.invitationKey} profile={this.state.profile}
-                                  setProfile={(profile, nextStep) => this.setProfile(profile, nextStep)}/>;
-        case 'accountCreationSurvey':
-          return <AccountCreationSurvey profile={this.state.profile}
-            invitationKey={this.state.invitationKey} setProfile={(profile, nextStep) => this.setProfile(profile, nextStep)}/>;
-        case 'accountCreationSuccess':
+            this.setState({
+              currentStep: SignInStep.INVITATION_KEY
+            })}/>;
+        case SignInStep.INVITATION_KEY:
+          return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
+            invitationKey: key,
+            // We skip over TERMS_OF_SERVICE if new-style account creation isn't enabled.
+            currentStep: enableNewAccountCreation ? SignInStep.TERMS_OF_SERVICE : SignInStep.ACCOUNT_CREATION
+          })}/>;
+        case SignInStep.TERMS_OF_SERVICE:
+          return <AccountCreationTos
+            pdfPath='/assets/documents/terms of service (draft).pdf'
+            onComplete={() => this.setState({
+              termsOfServiceVersion: 1,
+              currentStep: SignInStep.ACCOUNT_CREATION
+            })}/>;
+        case SignInStep.ACCOUNT_CREATION:
+          return <AccountCreation invitationKey={this.state.invitationKey}
+                                  profile={this.state.profile}
+                                  onComplete={(profile: Profile) => this.setState({
+                                    profile: profile,
+                                    // Skip over the demographic survey if new-style form isn't enabled.
+                                    currentStep: enableNewAccountCreation ? SignInStep.DEMOGRAPHIC_SURVEY :
+                                      SignInStep.SUCCESS_PAGE
+                                  })}/>;
+        case SignInStep.DEMOGRAPHIC_SURVEY:
+          return <AccountCreationSurvey
+            profile={this.state.profile}
+            invitationKey={this.state.invitationKey}
+            termsOfServiceVersion={this.state.termsOfServiceVersion}
+            onComplete={(profile: Profile) => this.setState({
+              profile: profile,
+              currentStep: SignInStep.SUCCESS_PAGE
+            })}
+            onPreviousClick={(profile: Profile) => this.setState({
+              profile: profile,
+              currentStep: SignInStep.ACCOUNT_CREATION
+            })}/>;
+        case SignInStep.SUCCESS_PAGE:
           return <AccountCreationSuccess profile={this.state.profile}/>;
         default:
           return;
       }
     }
 
-    setCurrentStep(nextStep: Step) {
-      this.setState({
-        currentStep: nextStep
-      });
-    }
-
-    onKeyVerified(invitationKey: string) {
-      this.setState({
-        invitationKey: invitationKey,
-        currentStep: {stepName: 'accountCreation'}
-      });
-    }
-
-    setProfile(profile, currentStep) {
-      this.setState({
-        profile: profile,
-        currentStep: currentStep
-      });
-    }
-
-
-
     render() {
-      const {stepName, backgroundImages} = this.state.currentStep;
-      const maxWidth = backgroundImages === undefined ? '100%' : '41.66667%';
-      return <div style={styles.signedInContainer}>
-        <FlexColumn style={{width: '100%'}}>
-          <div data-test-id='template'
-               style={styles.template(this.props.windowSize, backgroundImages)}>
-            <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
-                 src={headerImg}/>
-            <div style={{flex: `0 0 ${maxWidth}`,
-              maxWidth: maxWidth, minWidth: '25rem'}}>
-              {this.nextDirective(stepName)}
-            </div>
-          </div>
+      const backgroundImages = StepToImageConfig.get(this.state.currentStep);
+      return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
+        <FlexColumn data-test-id='sign-in-page'
+             style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
+          <div><img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
+                    src={HEADER_IMAGE}/></div>
+          {this.renderSignInStep(this.state.currentStep)}
         </FlexColumn>
-      </div>;
+      </FlexColumn>;
     }
   });
 
