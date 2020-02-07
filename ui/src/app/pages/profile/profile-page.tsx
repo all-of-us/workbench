@@ -99,6 +99,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
     try {
       await profileApi().updateProfile(this.state.profileEdits);
+      await reload();
     } catch (e) {
       if (e instanceof Response) {
         await globalErrorStore.next(await convertAPIError(e));

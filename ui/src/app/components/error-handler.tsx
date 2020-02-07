@@ -127,7 +127,6 @@ export const ErrorHandler = fp.flow(withUserProfile(), withGlobalError())(class 
   render() {
     const {globalError} = this.props;
     const {serverDownStatus: {apiDown, firecloudDown, notebooksDown}} = this.state;
-    console.log('Error handler render', this.props);
     return globalError !== undefined && <React.Fragment>
       {/* TODO(RW-RW-4392): this component should be revamped to be more generic, allowing display
       of arbitrary error messages as well as response code based messaging. */}

@@ -2,6 +2,7 @@ import {ListPageHeader} from 'app/components/headers';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
+import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -21,11 +22,9 @@ import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
 import {toggleIncludes} from 'app/utils';
-import * as validate from 'validate.js';
-import {AccountCreationOptions} from './account-creation-options';
-import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
-import {globalErrorStore} from 'app/utils/navigation';
 import {convertAPIError} from 'app/utils/errors';
+import {globalErrorStore} from 'app/utils/navigation';
+import {AccountCreationOptions} from './account-creation-options';
 
 
 const styles = {
@@ -104,7 +103,6 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     const {invitationKey, setProfile} = this.props;
     this.setState({creatingAccount: true});
     try {
-      console.log('Attempting account creation');
       await profileApi().createAccount({profile: this.profileObj, invitationKey: 'asdf'})
         .then((savedProfile) => {
           this.setState({profile: savedProfile, creatingAccount: false});
