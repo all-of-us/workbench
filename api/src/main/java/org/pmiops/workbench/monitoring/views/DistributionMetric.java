@@ -5,7 +5,7 @@ import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import java.util.Collections;
 import java.util.List;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 
 public enum DistributionMetric implements Metric {
   COHORT_OPERATION_TIME(

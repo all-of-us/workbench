@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;

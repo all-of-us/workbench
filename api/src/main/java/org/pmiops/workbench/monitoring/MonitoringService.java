@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
-import org.pmiops.workbench.monitoring.views.CumulativeMetric;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 
 public interface MonitoringService {
@@ -22,11 +22,11 @@ public interface MonitoringService {
    *
    * @param eventMetric
    */
-  default void recordEvent(CumulativeMetric eventMetric) {
+  default void recordEvent(EventMetric eventMetric) {
     recordValue(eventMetric, DELTA_VALUE);
   }
 
-  default void recordEvent(CumulativeMetric eventMetric, Map<TagKey, TagValue> tags) {
+  default void recordEvent(EventMetric eventMetric, Map<TagKey, TagValue> tags) {
     recordValues(ImmutableMap.of(eventMetric, DELTA_VALUE), tags);
   }
 

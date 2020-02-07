@@ -5,7 +5,10 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -13,6 +16,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -86,7 +90,7 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -150,7 +154,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
-      ManualWorkspaceMapper manualWorkspaceMapper) {
+      ManualWorkspaceMapper manualWorkspaceMapper,
+      MonitoringService monitoringService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -285,13 +290,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
           setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-          DbWorkspace reqWorkspace = WorkspaceConversionUtils.toDbWorkspace(workspace);
+          DbWorkspace reqWorkspace = manualWorkspaceMapper.toDbWorkspace(workspace);
           // TODO: enforce data access level authorization
           dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
           dbWorkspace.setName(reqWorkspace.getName());
 
           // Ignore incoming fields pertaining to review status; clients can only request a review.
-          WorkspaceConversionUtils.setResearchPurposeDetails(
+          manualWorkspaceMapper.setResearchPurposeDetails(
               dbWorkspace, workspace.getResearchPurpose());
           if (reqWorkspace.getReviewRequested()) {
             // Use a consistent timestamp.
@@ -319,13 +324,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           }
 
           Workspace createdWorkspace =
-              WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+              manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
           workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
           return ResponseEntity.ok(createdWorkspace);
         });
   }
 
-  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
+  private final Retryer<ProjectBillingInfo> cloudBillingRetryer =
       RetryerBuilder.<ProjectBillingInfo>newBuilder()
           .retryIfException(
               e ->
@@ -489,7 +494,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           }
           ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
           if (researchPurpose != null) {
-            WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+            manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
             if (researchPurpose.getReviewRequested()) {
               Timestamp now = new Timestamp(clock.instant().toEpochMilli());
               dbWorkspace.setTimeRequested(now);
@@ -517,7 +522,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceAuditor.fireEditAction(
               originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
           return ResponseEntity.ok(
-              WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
+              manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
         });
   }
 
