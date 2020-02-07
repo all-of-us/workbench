@@ -1,4 +1,4 @@
-package org.pmiops.workbench.utils.mappers;
+package org.pmiops.workbench.mappers;
 
 import java.sql.Timestamp;
 import java.util.Optional;

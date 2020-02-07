@@ -1,10 +1,9 @@
-package org.pmiops.workbench.dataset;
+package org.pmiops.workbench.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.model.DataDictionaryEntry;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
 
 @Mapper(
     componentModel = "spring",

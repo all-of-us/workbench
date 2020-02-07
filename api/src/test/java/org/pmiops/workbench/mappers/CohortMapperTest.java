@@ -1,4 +1,4 @@
-package org.pmiops.workbench.utils.mappers;
+package org.pmiops.workbench.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;

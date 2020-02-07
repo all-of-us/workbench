@@ -1,4 +1,4 @@
-package org.pmiops.workbench.utils.mappers;
+package org.pmiops.workbench.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
