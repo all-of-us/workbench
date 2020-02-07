@@ -60,7 +60,7 @@ export class AccountCreationSuccess
         </BolderHeader>
         <div>
           <SmallHeader style={{color: colors.primary}}>
-            Your All of Us research account has been created!
+            Your <i>All of Us</i> research account has been created!
           </SmallHeader>
         </div>
         <div>

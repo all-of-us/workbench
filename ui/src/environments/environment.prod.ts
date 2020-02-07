@@ -12,17 +12,12 @@ export const environment: Environment = {
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
+  zendeskWidgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   trainingUrl: 'https://aou.nnlm.gov',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
-  // Use care when changing these flags in prod!
-  //
-  // See environment-type.ts for more details on transient flags, including
-  // exit criteria and Jira ticket links.
-  enableHomepageRestyle: true,
   enablePublishedWorkspaces: false,
-  enableAccountPages: false,
   enableProfileCapsFeatures: false,
   enableNewConceptTabs: false
 };

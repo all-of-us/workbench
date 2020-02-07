@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
@@ -43,6 +44,7 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -59,6 +61,7 @@ public class UserMetricsControllerTest {
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
   @Autowired private CohortMapper cohortMapper;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private FakeClock fakeClock = new FakeClock(NOW);
 
@@ -75,7 +78,15 @@ public class UserMetricsControllerTest {
 
   @TestConfiguration
   @Import({CohortMapperImpl.class})
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.enableBillingLockout = true;
+      return workbenchConfig;
+    }
+  }
 
   @Before
   public void setUp() {
@@ -172,6 +183,7 @@ public class UserMetricsControllerTest {
     userMetricsController =
         new UserMetricsController(
             mockUserProvider,
+            workbenchConfigProvider,
             mockUserRecentResourceService,
             mockWorkspaceService,
             mockFireCloudService,

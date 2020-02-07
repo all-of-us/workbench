@@ -1026,7 +1026,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <div>
               If you are concerned that your research may result in <a href='/definitions/stigmatization' target='_blank'>
               stigmatization of research participants</a>,
-              please request review of your research purpose by the All of Us  Resource Access Board (RAB). The RAB
+              please request review of your research purpose by the <i>All of Us</i>  Resource Access Board (RAB). The RAB
               will provide feedback regarding the potential for stigmatizing specific groups of participants, and if
               needed, guidance for modifying your research purpose/scope. Even if you request a review, you will be
               able to continue creating the Workspace and proceed with your research, while RAB reviews your research
@@ -1037,12 +1037,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </FlexRow>
           <div>
             <RadioButton name='reviewRequested'
+                         disabled={this.isMode(WorkspaceEditMode.Edit)}
                          onChange={() => {
                            this.updateResearchPurpose('reviewRequested', true);
                          }}
                          checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>Yes</label>
             <RadioButton name='reviewRequested'
+                         disabled={this.isMode(WorkspaceEditMode.Edit)}
                          onChange={() => {
                            this.updateResearchPurpose('reviewRequested', false);
                          }}
@@ -1061,7 +1063,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.name && <div>{errors.name}</div>}
                 {errors.billingAccountName && <div>You must select a billing account</div>}
                 {errors.primaryPurpose && <div>You must choose at least one primary research purpose</div>}
-                {errors.reasonForAllOfUs && <div>You must specify a reason for using All of Us data</div>}
+                {errors.reasonForAllOfUs && <div>You must specify a reason for using <i>All of Us</i> data</div>}
                 {errors.intendedStudy && <div>You must specify a field of intended study</div>}
                 {errors.anticipatedFindings && <div>You must specify anticipated findings</div>}
                 {errors.specificPopulation && <div>You must specify a population of study</div>}

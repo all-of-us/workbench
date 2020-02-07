@@ -202,6 +202,9 @@ export class ConceptsApiStub extends ConceptsApi {
       };
       const foundDomain =
         DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
+      if (request.query === 'headerText') {
+        this.extendConceptListForHeaderText();
+      }
       this.concepts.forEach((concept) => {
         if (concept.domainId !== foundDomain.name) {
           return;
@@ -226,6 +229,27 @@ export class ConceptsApiStub extends ConceptsApi {
       });
       resolve(response);
     });
+  }
+
+  private extendConceptListForHeaderText() {
+    // Starting with id as 6 to continue with this.concepts
+    for (let i = 6; i < 46; i++) {
+      const concept = {
+        conceptId: i,
+        conceptName: 'Stub Concept ' + i,
+        domainId: 'Condition',
+        vocabularyId: 'SNOMED',
+        conceptCode: 'G8107',
+        conceptClassId: 'Ingredient',
+        standardConcept: true,
+        countValue: 1,
+        prevalence: 1,
+        conceptSynonyms: [
+          'blah', 'blahblah'
+        ]
+      };
+      this.concepts = this.concepts.concat(concept);
+    }
   }
 
   public searchSurveys(workspaceNamespace: string, workspaceId: string, request?: SearchConceptsRequest): Promise<Array<SurveyQuestions>> {

@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -46,6 +47,7 @@ public final class DbStorageEnums {
           .put(Authority.FEATURED_WORKSPACE_ADMIN, (short) 3)
           .put(Authority.COMMUNICATIONS_ADMIN, (short) 4)
           .put(Authority.SECURITY_ADMIN, (short) 5)
+          .put(Authority.INSTITUTION_ADMIN, (short) 6)
           .build();
 
   public static Authority authorityFromStorage(Short authority) {
@@ -260,6 +262,23 @@ public final class DbStorageEnums {
 
   public static Short degreeToStorage(Degree degree) {
     return CLIENT_TO_STORAGE_DEGREE.get(degree);
+  }
+
+  private static final BiMap<OrganizationType, Short> CLIENT_TO_STORAGE_ORGANIZATION_TYPE =
+      ImmutableBiMap.<OrganizationType, Short>builder()
+          .put(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION, (short) 0)
+          .put(OrganizationType.INDUSTRY, (short) 1)
+          .put(OrganizationType.EDUCATIONAL_INSTITUTION, (short) 2)
+          .put(OrganizationType.HEALTH_CENTER_NON_PROFIT, (short) 3)
+          .put(OrganizationType.OTHER, (short) 4)
+          .build();
+
+  public static OrganizationType organizationTypeFromStorage(Short organizationType) {
+    return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.inverse().get(organizationType);
+  }
+
+  public static Short organizationTypeToStorage(OrganizationType organizationType) {
+    return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.get(organizationType);
   }
 
   /** Utility class. */

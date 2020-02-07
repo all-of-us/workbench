@@ -1257,6 +1257,10 @@ definitions:
         items:
           type: string
         description: The scopes for the cluster.
+      stagingBucket:
+        type: string
+        description: Bucket name containing logs and staging resources for the cluster.
+
 
   ListClusterResponse:
     description: ''

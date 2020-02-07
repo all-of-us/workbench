@@ -5,10 +5,7 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudbilling.Cloudbilling;
-import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
-import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -16,7 +13,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -95,13 +91,16 @@ import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.zendesk.ZendeskRequests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.zendesk.client.v2.Zendesk;
+import org.zendesk.client.v2.ZendeskException;
+import org.zendesk.client.v2.model.Request;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
-
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
@@ -120,9 +119,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final UserDao userDao;
-  private Provider<DbUser> userProvider;
+  private final Provider<DbUser> userProvider;
   private final FireCloudService fireCloudService;
-  private Provider<Cloudbilling> cloudbillingProvider;
+  private final Provider<Cloudbilling> cloudbillingProvider;
+  private final Provider<Zendesk> zendeskProvider;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final NotebooksService notebooksService;
@@ -130,6 +130,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceAuditor workspaceAuditor;
   private WorkspaceMapper workspaceMapper;
+  private final ManualWorkspaceMapper manualWorkspaceMapper;
   private MonitoringService monitoringService;
 
   @Autowired
@@ -142,13 +143,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Provider<Cloudbilling> cloudBillingProvider,
+      Provider<Zendesk> zendeskProvider,
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
-      MonitoringService monitoringService) {
+	  ManualWorkspaceMapper manualWorkspaceMapper) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -157,13 +159,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
     this.cloudbillingProvider = cloudBillingProvider;
+    this.zendeskProvider = zendeskProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
-    this.monitoringService = monitoringService;
+	this.monitoringService = monitoringService;
+    this.manualWorkspaceMapper = manualWorkspaceMapper;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -219,6 +223,33 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
   }
 
+  private void maybeFileZendeskReviewRequest(Workspace workspace) {
+    if (!workspace.getResearchPurpose().getReviewRequested()) {
+      return;
+    }
+
+    final Request zdReq;
+    try {
+      zdReq =
+          zendeskProvider
+              .get()
+              .createRequest(
+                  ZendeskRequests.workspaceToReviewRequest(userProvider.get(), workspace));
+    } catch (ZendeskException e) {
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Failed to file Zendesk review ticket for workspace %s/%s",
+              workspace.getNamespace(), workspace.getId()),
+          e);
+      return;
+    }
+    log.info(
+        String.format(
+            "filed Zendesk review request ticket with title %s, ID %s",
+            zdReq.getSubject(), zdReq.getId()));
+  }
+
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
     return monitoringService.timeAndRecordOperation(
@@ -244,6 +275,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
           Timestamp now = new Timestamp(clock.instant().toEpochMilli());
           DbWorkspace dbWorkspace = new DbWorkspace();
+    // A little unintuitive but setting this here reflects the current state of the workspace
+    // while it was in the billing buffer. Setting this value will inform the update billing code to
+    // skip an unnecessary GCP API call if the billing account is being kept at the free tier
+    dbWorkspace.setBillingAccountName(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
           setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
           setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
@@ -559,13 +595,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // half-way cloned workspaces via AoU - so it will just appear as a
     // transient failure.
     DbWorkspace dbWorkspace = new DbWorkspace();
-
+    // A little unintuitive but setting this here reflects the current state of the workspace
+    // while it was in the billing buffer. Setting this value will inform the update billing code to
+    // skip an unnecessary GCP API call if the billing account is being kept at the free tier
+    dbWorkspace.setBillingAccountName(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     setDbWorkspaceFields(dbWorkspace, user, toFcWorkspaceId, toFcWorkspace, now);
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -585,14 +625,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    updateWorkspaceBillingAccount(dbWorkspace, body.getWorkspace().getBillingAccountName());
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, body.getWorkspace().getBillingAccountName());
+    } catch (Exception e) {
+      throw new ServerErrorException("Could not update the workspace's billing account", e);
+    }
 
     try {
       dbWorkspace =
           workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if our clone fails
-      updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
 
@@ -624,6 +670,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
+    maybeFileZendeskReviewRequest(savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
@@ -715,7 +762,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<DbWorkspace> workspaces = workspaceService.findForReview();
     response.setItems(
         workspaces.stream()
-            .map(WorkspaceConversionUtils::toApiWorkspace)
+            .map(ws -> manualWorkspaceMapper.toApiWorkspace(ws))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
@@ -957,7 +1004,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        WorkspaceConversionUtils.buildRecentWorkspaceList(
+        manualWorkspaceMapper.buildRecentWorkspaceList(
             userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
@@ -980,7 +1027,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        WorkspaceConversionUtils.buildRecentWorkspace(
+        manualWorkspaceMapper.buildRecentWorkspace(
             userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);

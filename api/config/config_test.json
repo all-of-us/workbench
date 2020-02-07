@@ -66,6 +66,9 @@
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
   },
+  "zendesk": {
+    "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
+  },
   "elasticsearch": {
     "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
     "enableBasicAuth": true,
@@ -90,7 +93,7 @@
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
     "enableRdrExport": true,
-    "enableBillingLockout": false,
+    "enableBillingLockout": true,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": false,

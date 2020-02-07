@@ -14,13 +14,12 @@ export const environment: Environment = {
   gaId: 'UA-112406425-5',
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
-  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
+  zendeskHelpCenterUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
+  zendeskWidgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enableHomepageRestyle: true,
-  enablePublishedWorkspaces: true,
-  enableAccountPages: true,
+  enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,
   enableNewConceptTabs: true
 };

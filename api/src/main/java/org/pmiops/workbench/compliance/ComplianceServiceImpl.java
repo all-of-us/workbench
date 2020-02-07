@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
@@ -35,7 +34,7 @@ public class ComplianceServiceImpl implements ComplianceService {
 
   private Provider<MoodleApi> moodleApiProvider;
 
-  private static final Logger logger = Logger.getLogger(MonitoringServiceImpl.class.getName());
+  private static final Logger logger = Logger.getLogger(ComplianceServiceImpl.class.getName());
 
   @Autowired
   public ComplianceServiceImpl(

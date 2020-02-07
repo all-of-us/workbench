@@ -10,14 +10,13 @@ export const testEnvironmentBase = {
   gaUserAgentDimension: 'dimension2',
   gaLoggedInDimension: 'dimension3',
   trainingUrl: 'https://aoudev.nnlm.gov',
-  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
+  zendeskHelpCenterUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
+  zendeskWidgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   shouldShowDisplayTag: true,
-  enablePublishedWorkspaces: true,
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enableHomepageRestyle: true,
+  enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,
-  enableAccountPages: true,
   enableNewConceptTabs: false
 };

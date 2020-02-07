@@ -33,7 +33,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -57,6 +57,7 @@ public class WorkspaceAuditorTest {
 
   @Autowired private WorkspaceAuditor workspaceAuditor;
   @Autowired private WorkspaceMapper workspaceMapper;
+  @Autowired private ManualWorkspaceMapper manualWorkspaceMapper;
   @MockBean private Provider<DbUser> mockUserProvider;
   @MockBean private ActionAuditService mockActionAuditService;
 
@@ -64,7 +65,12 @@ public class WorkspaceAuditorTest {
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
   @TestConfiguration
-  @Import({WorkspaceAuditorImpl.class, WorkspaceMapperImpl.class, ActionAuditTestConfig.class})
+  @Import({
+    WorkspaceAuditorImpl.class,
+    WorkspaceMapperImpl.class,
+    ManualWorkspaceMapper.class,
+    ActionAuditTestConfig.class
+  })
   static class Config {}
 
   @Before
@@ -87,7 +93,7 @@ public class WorkspaceAuditorTest {
     workspace1.setDataAccessLevel(DataAccessLevel.REGISTERED);
     workspace1.setPublished(false);
 
-    dbWorkspace1 = WorkspaceConversionUtils.toDbWorkspace(workspace1);
+    dbWorkspace1 = manualWorkspaceMapper.toDbWorkspace(workspace1);
     dbWorkspace1.setWorkspaceId(WORKSPACE_1_DB_ID);
     dbWorkspace1.setLastAccessedTime(new Timestamp(now));
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));

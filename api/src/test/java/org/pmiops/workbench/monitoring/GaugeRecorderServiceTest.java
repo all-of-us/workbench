@@ -19,7 +19,7 @@ import org.mockito.Captor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;

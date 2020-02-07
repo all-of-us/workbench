@@ -435,6 +435,12 @@ dependencies {
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
   compile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
 
+  // Force these dependencies to safe versions, Zendesk client depends on this.
+  compile 'io.netty:netty-codec-http:4.1.44.Final'
+  compile 'com.typesafe.netty:netty-reactive-streams:2.0.4'
+  compile 'com.beust:jcommander:1.78'
+  compile 'com.cloudbees.thirdparty:zendesk-java-client:0.12.0'
+
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.6'
@@ -464,6 +470,7 @@ dependencies {
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
+  testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
   testCompile "org.springframework.boot:spring-boot-starter-test:${SPRING_BOOT_VERSION}"
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.5.3'

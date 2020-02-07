@@ -10,6 +10,7 @@ import {formatRecentResourceDisplayDate} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
+import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {RecentResource, ResourceType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -18,6 +19,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
   resource: RecentResource;
   existingNameList: string[];
   onUpdate: Function;
+  disableExportToNotebook: boolean;
 }
 
 interface State {
@@ -92,7 +94,8 @@ export const DatasetResourceCard = fp.flow(
           AnalyticsTracker.DatasetBuilder.OpenExportModal();
           this.setState({showExportToNotebookModal: true});
         },
-        disabled: !this.canWrite
+        disabled: this.props.disableExportToNotebook || !this.canWrite,
+        hoverText: this.props.disableExportToNotebook && ACTION_DISABLED_INVALID_BILLING
       },
       {
         icon: 'trash',

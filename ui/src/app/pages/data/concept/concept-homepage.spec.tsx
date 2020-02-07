@@ -233,20 +233,31 @@ describe('ConceptHomepage', () => {
   it('should display all Concept selected message when header checkbox is selected', async() => {
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
-    searchTable('Stub Concept', wrapper);
+    searchTable('headerText', wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
+    // Select header checkbox
+    wrapper.find('span.p-checkbox-icon.p-clickable').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find('[data-test-id="selection"]').text()).toContain('All concepts on this page are selected.');
-    expect(wrapper.find('[data-test-id="banner-link"]').text()).toEqual('Select 1');
-    wrapper.find('[data-test-id="banner-link"]').simulate('click');
-    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(1);
+    expect(wrapper.find('[data-test-id="selection"]').text())
+      .toContain('You’ve selected all 20 concepts on this page.');
+    expect(wrapper.find('[data-test-id="banner-link"]').text())
+      .toBe('Select all 41 concepts');
 
-    expect(wrapper.find('[data-test-id="banner-link"]').text()).toEqual('Clear Selection');
+    // Select the "Select All Concept" link
     wrapper.find('[data-test-id="banner-link"]').simulate('click');
-    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toBe(1);
+
+    // Should have link to clear all selection
+    expect(wrapper.find('[data-test-id="selection"]').text())
+      .toContain('You’ve selected all 41 concepts');
+    expect(wrapper.find('[data-test-id="banner-link"]').text())
+      .toEqual('Clear Selection');
+
+    // Select "Clear all" should end up with 0 selectedConcepts
+    wrapper.find('[data-test-id="banner-link"]').simulate('click');
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toBe(0);
 
   });
 });

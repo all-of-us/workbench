@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.monitoring.views.CumulativeMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -79,7 +78,8 @@ public class MonitoringServiceTest {
     monitoringService.recordEvent(CumulativeMetric.NOTEBOOK_SAVE);
     verify(mockInitService).createAndRegister();
 
-    final int metricCount = GaugeMetric.values().length + CumulativeMetric.values().length;
+    // TODO(jaycarlton): include other metric types as they are re-added
+    final int metricCount = GaugeMetric.values().length;
     verify(mockViewManager, times(metricCount)).registerView(any(View.class));
 
     verify(mockStatsRecorder).newMeasureMap();

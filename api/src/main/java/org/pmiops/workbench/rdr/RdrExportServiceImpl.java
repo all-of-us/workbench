@@ -7,7 +7,8 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -20,11 +21,11 @@ import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.RdrEntity;
+import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.*;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
   private UserDao userDao;
+  private WorkspaceService workspaceService;
 
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
@@ -53,12 +55,14 @@ public class RdrExportServiceImpl implements RdrExportService {
       Provider<RdrApi> RdrApiProvider,
       RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService,
       UserDao userDao) {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = RdrApiProvider;
     this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
     this.userDao = userDao;
   }
 
@@ -137,17 +141,20 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public void exportWorkspaces(List<Long> workspaceIds) {
-    List<RdrWorkspace> RdrWorkspacesList;
+    List<RdrWorkspace> rdrWorkspacesList;
     try {
-      RdrWorkspacesList =
+      rdrWorkspacesList =
           workspaceIds.stream()
               .map(
                   workspaceId ->
                       toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
+              .filter(Objects::nonNull)
               .collect(Collectors.toList());
-      rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().exportWorkspaces(RdrWorkspacesList);
-      updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+      if (!rdrWorkspacesList.isEmpty()) {
+        rdrApiProvider.get().getApiClient().setDebugging(true);
+        rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
+        updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+      }
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
     }
@@ -188,22 +195,30 @@ public class RdrExportServiceImpl implements RdrExportService {
                     RdrExportEnums.ethnicityToRdrEthnicity(
                         dbDemographicSurvey.getEthnicityEnum()))));
       }
-      if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
-        researcher.setSexAtBirth(
-            RdrExportEnums.sexAtBirthToRdrSexAtBirth(
-                dbDemographicSurvey.getSexAtBirthEnum().get(0)));
-      }
+      researcher.setSexAtBirth(
+          Optional.ofNullable(
+                  dbDemographicSurvey.getSexAtBirthEnum().stream()
+                      .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<SexAtBirth>()));
+      researcher.setGender(
+          Optional.ofNullable(
+                  dbDemographicSurvey.getGenderIdentityEnumList().stream()
+                      .map(RdrExportEnums::genderToRdrGender)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<Gender>()));
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-    }
 
-    if (null != dbDemographicSurvey && dbDemographicSurvey.getRaceEnum() != null) {
       researcher.setRace(
-          dbDemographicSurvey.getRaceEnum().stream()
-              .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
-              .collect(Collectors.toList()));
-    } else {
-      researcher.setRace(new ArrayList<>());
+          Optional.ofNullable(
+                  dbDemographicSurvey.getRaceEnum().stream()
+                      .map(RdrExportEnums::raceToRdrRace)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<Race>()));
+
+      researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
+      researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
     }
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()
@@ -241,26 +256,35 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setDrugDevelopment(dbWorkspace.getDrugDevelopment());
     rdrWorkspace.setCommercialPurpose(dbWorkspace.getCommercialPurpose());
     rdrWorkspace.setEducational(dbWorkspace.getEducational());
-    rdrWorkspace.setReasonForInvestigation(dbWorkspace.getReasonForAllOfUs());
+    rdrWorkspace.setScientificApproaches(dbWorkspace.getReasonForAllOfUs());
     rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
 
-    // Call Firecloud to get a list of Collaborators
-    FirecloudWorkspaceACL firecloudResponse =
-        fireCloudService.getWorkspaceAcl(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    Map<String, FirecloudWorkspaceAccessEntry> aclMap = firecloudResponse.getAcl();
+    try {
+      // Call Firecloud to get a list of Collaborators
+      List<UserRole> collaboratorsMap =
+          workspaceService.getFirecloudUserRoles(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
-    // COLLABORATOR as ACTIVE
-    aclMap.forEach(
-        (email, access) -> {
-          RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
-          workspaceUserMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
-          workspaceUserMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
-          workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
-          rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
-        });
+      // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
+      // COLLABORATOR as ACTIVE
+      collaboratorsMap.forEach(
+          (userRole) -> {
+            RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
+            workspaceUserMap.setUserId(
+                (int) userDao.findUserByUsername(userRole.getEmail()).getUserId());
+            workspaceUserMap.setRole(
+                RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()));
+            workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
+            rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
+          });
+    } catch (Exception ex) {
+      log.warning(
+          String.format(
+              "Exception while retrieving workspace collaborators for workspace id %s, skipping this workspace for RDR Export",
+              rdrWorkspace.getWorkspaceId()));
+      return null;
+    }
 
     return rdrWorkspace;
   }

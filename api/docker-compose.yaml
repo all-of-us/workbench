@@ -17,7 +17,7 @@ services:
     volumes:
       - db:/var/lib/mysql
     ports:
-      - 3306:3306
+      - 127.0.0.1:3306:3306
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.0
     ports:
@@ -49,8 +49,8 @@ services:
     env_file:
       - db/vars.env
     ports:
-      - 8081:8081
-      - 8001:8001
+      - 127.0.0.1:8081:8081
+      - 127.0.0.1:8001:8001
   es-scripts:
     depends_on:
       - elastic

@@ -11,6 +11,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.Field;
@@ -117,6 +119,7 @@ import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -131,6 +134,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.zendesk.client.v2.Zendesk;
 
 // TODO(jaycarlton): many of the tests here are testing DataSetServiceImpl more than
 //   DataSetControllerImpl, so move those tests and setup stuff into DataSetServiceTest
@@ -231,6 +235,10 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceMapper workspaceMapper;
 
+  @Autowired ManualWorkspaceMapper manualWorkspaceMapper;
+
+  @Autowired Provider<Zendesk> mockZendeskProvider;
+
   @TestConfiguration
   @Import({
     CohortFactoryImpl.class,
@@ -239,7 +247,8 @@ public class DataSetControllerTest {
     UserServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class,
+    ManualWorkspaceMapper.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -260,12 +269,18 @@ public class DataSetControllerTest {
     CohortQueryBuilder.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    Zendesk.class
   })
   static class Configuration {
 
-    @Bean
-    Cloudbilling cloudbilling() {
+    @Bean(END_USER_CLOUD_BILLING)
+    Cloudbilling endUserCloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
+
+    @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
+    Cloudbilling serviceAccountCloudbilling() {
       return TestMockFactory.createMockedCloudbilling();
     }
 
@@ -290,6 +305,8 @@ public class DataSetControllerTest {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
       workbenchConfig.featureFlags.enableBillingLockout = true;
+      workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
+      workbenchConfig.billing.accountId = "free-tier";
       return workbenchConfig;
     }
   }
@@ -335,12 +352,14 @@ public class DataSetControllerTest {
             fireCloudService,
             cloudStorageService,
             cloudBillingProvider,
+            mockZendeskProvider,
             CLOCK,
             notebooksService,
             userService,
             workbenchConfigProvider,
             workspaceAuditor,
-            workspaceMapper);
+            workspaceMapper,
+            manualWorkspaceMapper);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,

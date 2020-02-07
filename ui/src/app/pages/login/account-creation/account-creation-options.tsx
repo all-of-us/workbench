@@ -4,6 +4,7 @@ import {
   Education,
   EducationalRole,
   Ethnicity,
+  GenderIdentity,
   IndustryRole,
   NonAcademicAffiliation,
   Race,
@@ -45,7 +46,7 @@ export const AccountCreationOptions = {
     {label: 'Industry', value: NonAcademicAffiliation.INDUSTRY },
     {label: `Educational institution (High school, Community college, 4-year college, trade
         school)`, value: NonAcademicAffiliation.EDUCATIONALINSTITUTION},
-    {label: `Community Scientist (i.e. I am accessing AoU for independent research, unrelated to my
+    {label: `Community Scientist (i.e. I am accessing All of Us for independent research, unrelated to my
         professional affiliation)`, value: NonAcademicAffiliation.COMMUNITYSCIENTIST},
     {label: `Other (free text)`, value: NonAcademicAffiliation.FREETEXT}
   ],
@@ -74,6 +75,14 @@ export const AccountCreationOptions = {
     {label: `Hispanic or Latino`, value: Ethnicity.HISPANIC},
     {label: `Not Hispanic or Latino`, value: Ethnicity.NOTHISPANIC},
     {label: ` Prefer not to answer`, value: Ethnicity.PREFERNOANSWER}
+  ],
+  genderIdentity: [
+    {label: 'Man', value: GenderIdentity.MAN},
+    {label: 'Non-Binary', value: GenderIdentity.NONBINARY},
+    {label: 'Transgender', value: GenderIdentity.TRANSGENDER},
+    {label: 'Woman', value: GenderIdentity.WOMAN},
+    {label: 'None of these describe me', value: GenderIdentity.NONEDESCRIBEME},
+    {label: 'Prefer not to answer', value: GenderIdentity.PREFERNOANSWER}
   ],
   sexAtBirth: [
     {label: 'Female', value: SexAtBirth.FEMALE},

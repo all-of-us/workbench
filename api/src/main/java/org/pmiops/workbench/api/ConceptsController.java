@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.model.DbConcept;
-import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.concept.ConceptService;
@@ -69,16 +68,14 @@ public class ConceptsController implements ConceptsApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    Slice<DbCriteria> questionList =
+    List<DbConcept> questionList =
         conceptService.searchSurveys(
             request.getQuery(),
             request.getSurveyName(),
             calculateResultLimit(request.getMaxResults()),
             Optional.ofNullable(request.getPageNumber()).orElse(0));
     return ResponseEntity.ok(
-        questionList.getContent().stream()
-            .map(this::toClientSurveyQuestions)
-            .collect(Collectors.toList()));
+        questionList.stream().map(this::toClientSurveyQuestions).collect(Collectors.toList()));
   }
 
   @Override
@@ -137,23 +134,26 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   public static Concept toClientConcept(DbConcept dbConcept) {
+    boolean standard = STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept());
     return new Concept()
         .conceptClassId(dbConcept.getConceptClassId())
         .conceptCode(dbConcept.getConceptCode())
         .conceptName(dbConcept.getConceptName())
         .conceptId(dbConcept.getConceptId())
-        .countValue(dbConcept.getCountValue())
+        .countValue(standard ? dbConcept.getCountValue() : dbConcept.getSourceCountValue())
         .domainId(dbConcept.getDomainId())
         .prevalence(dbConcept.getPrevalence())
-        .standardConcept(STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept()))
+        .standardConcept(standard)
         .vocabularyId(dbConcept.getVocabularyId())
         .conceptSynonyms(dbConcept.getSynonyms());
   }
 
-  private SurveyQuestions toClientSurveyQuestions(DbCriteria dbCriteria) {
+  private SurveyQuestions toClientSurveyQuestions(DbConcept dbConcept) {
+    boolean standard = STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept());
     return new SurveyQuestions()
-        .conceptId(dbCriteria.getLongConceptId())
-        .question(dbCriteria.getName());
+        .conceptId(dbConcept.getConceptId())
+        .question(dbConcept.getConceptName())
+        .countValue(standard ? dbConcept.getCountValue() : dbConcept.getSourceCountValue());
   }
 
   private DomainInfo toClientDomainInfo(DbDomainInfo dbDomainInfo) {

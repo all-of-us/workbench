@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -257,7 +258,7 @@ public class ConceptsControllerTest {
   private static DbUser currentUser;
 
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class})
+  @Import({WorkspaceServiceImpl.class, ManualWorkspaceMapper.class})
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,
@@ -417,28 +418,6 @@ public class ConceptsControllerTest {
             toDomainCount(MEASUREMENT_DOMAIN, false),
             toDomainCount(OBSERVATION_DOMAIN, false),
             toDomainCount(PROCEDURE_DOMAIN, false),
-            toDomainCount(SURVEY_DOMAIN, false)));
-  }
-
-  @Test
-  public void testDomainCountSourceAndStandardWithSearchTerm() {
-    saveConcepts();
-    saveDomains();
-    ResponseEntity<DomainCountsListResponse> response =
-        conceptsController.domainCounts(
-            "ns",
-            "name",
-            new DomainCountsRequest()
-                .query("conceptA")
-                .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
-    assertCounts(
-        response,
-        ImmutableList.of(
-            toDomainCount(CONDITION_DOMAIN, 1),
-            toDomainCount(DRUG_DOMAIN, 0),
-            toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(OBSERVATION_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0),
             toDomainCount(SURVEY_DOMAIN, 0)));
   }
 
@@ -486,28 +465,6 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSurveyCountSourceAndStandardWithSearchTerm() {
-    saveConcepts();
-    saveDomains();
-    ResponseEntity<DomainCountsListResponse> response =
-        conceptsController.domainCounts(
-            "ns",
-            "name",
-            new DomainCountsRequest()
-                .query("test")
-                .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
-    assertCounts(
-        response,
-        ImmutableList.of(
-            toDomainCount(CONDITION_DOMAIN, 2),
-            toDomainCount(DRUG_DOMAIN, 0),
-            toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(OBSERVATION_DOMAIN, 1),
-            toDomainCount(PROCEDURE_DOMAIN, 0),
-            toDomainCount(SURVEY_DOMAIN, 1)));
-  }
-
-  @Test
   public void testSurveyCountSourceAndStandardWithSurveyName() {
     saveConcepts();
     saveDomains();
@@ -526,7 +483,7 @@ public class ConceptsControllerTest {
             toDomainCount(MEASUREMENT_DOMAIN, false),
             toDomainCount(OBSERVATION_DOMAIN, false),
             toDomainCount(PROCEDURE_DOMAIN, false),
-            toDomainCount(SURVEY_DOMAIN, 1)));
+            toDomainCount(SURVEY_DOMAIN, 0)));
   }
 
   @Test
@@ -815,6 +772,7 @@ public class ConceptsControllerTest {
     result.setVocabularyId(concept.getVocabularyId());
     result.setDomainId(concept.getDomainId());
     result.setCountValue(concept.getCountValue());
+    result.setSourceCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
     result.setSynonymsStr(
         String.valueOf(concept.getConceptId())

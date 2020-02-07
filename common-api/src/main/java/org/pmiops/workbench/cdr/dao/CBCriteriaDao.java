@@ -2,10 +2,8 @@ package org.pmiops.workbench.cdr.dao;
 
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -238,83 +236,4 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
           "select distinct domain_id as domain, type, is_standard as standard from cb_criteria order by domain, type, is_standard",
       nativeQuery = true)
   List<DbMenuOption> findMenuOptions();
-
-  @Query(
-      value =
-          "select count(c) "
-              + "from DbCriteria c "
-              + "where domainId = 'SURVEY' and type = 'PPI' and subtype = 'QUESTION' "
-              + "and match(synonyms, :term) > 0")
-  long countSurveyByKeyword(@Param("term") String term);
-
-  @Query(
-      value =
-          "select c "
-              + "from DbCriteria c "
-              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
-              + "and match(c.synonyms, :term) > 0")
-  Page<DbCriteria> findSurveys(@Param("term") String term, Pageable page);
-
-  @Query(
-      value =
-          "select count(c) "
-              + "from DbCriteria c "
-              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
-              + "and c.path like CONCAT((select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName), '.%')")
-  long countSurveyByName(@Param("surveyName") String surveyName);
-
-  @Query(
-      value =
-          "select c "
-              + "from DbCriteria c "
-              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
-              + "and c.path like CONCAT((select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName), '.%')")
-  Page<DbCriteria> findSurveysByName(@Param("surveyName") String surveyName, Pageable page);
-
-  @Query(
-      value =
-          "select c "
-              + "from DbCriteria c "
-              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION'")
-  Page<DbCriteria> findSurveys(Pageable page);
-
-  @Query(
-      value =
-          "select count(c) "
-              + "from DbCriteria c "
-              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION'")
-  long countSurveys();
-
-  /**
-   * Find surveys by specified keyword or surveyName. If both keyword and surveyName are blank
-   * return all surveys.
-   *
-   * @param keyword
-   * @param surveyName
-   * @param pageable
-   * @return
-   */
-  default Page<DbCriteria> findSurveys(String keyword, String surveyName, Pageable pageable) {
-    if (StringUtils.isBlank(keyword)) {
-      return StringUtils.isBlank(surveyName)
-          ? findSurveys(pageable)
-          : findSurveysByName(surveyName, pageable);
-    }
-    return findSurveys(keyword, pageable);
-  }
-
-  /**
-   * Count surveys by specified keyword or surveyName. If both keyword and surveyName are blank
-   * count all surveys.
-   *
-   * @param keyword
-   * @param surveyName
-   * @return
-   */
-  default long countSurveys(String keyword, String surveyName) {
-    if (StringUtils.isBlank(keyword)) {
-      return StringUtils.isBlank(surveyName) ? countSurveys() : countSurveyByName(surveyName);
-    }
-    return countSurveyByKeyword(keyword);
-  }
 }

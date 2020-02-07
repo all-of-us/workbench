@@ -1,7 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +25,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -53,29 +56,25 @@ public class UserServiceTest {
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
+  @Deprecated private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
+  private static final long TIMESTAMP_SECS = START_INSTANT.getEpochSecond();
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 
-  @Autowired private FireCloudService mockFireCloudService;
-  @Autowired private ComplianceService mockComplianceService;
-  @Autowired private DirectoryService mockDirectoryService;
-  @Autowired private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private ComplianceService mockComplianceService;
+  @MockBean private DirectoryService mockDirectoryService;
+  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private AdminActionHistoryDao mockAdminActionHistoryDao;
+  @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
 
   @TestConfiguration
   @Import({UserServiceImpl.class})
-  @MockBean({
-    AdminActionHistoryDao.class,
-    FireCloudService.class,
-    ComplianceService.class,
-    DirectoryService.class,
-    UserServiceAuditor.class
-  })
   static class Configuration {
     @Bean
     Clock clock() {
@@ -151,7 +150,7 @@ public class UserServiceTest {
     providedWorkbenchConfig.featureFlags.enableMoodleV2Api = true;
 
     BadgeDetailsV2 retBadge = new BadgeDetailsV2();
-    long expiry = PROVIDED_CLOCK.instant().toEpochMilli() + 100000;
+    long expiry = PROVIDED_CLOCK.instant().getEpochSecond() + 100;
     retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
@@ -165,9 +164,9 @@ public class UserServiceTest {
     // The user should be updated in the database with a non-empty completion and expiration time.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime())
-        .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
+        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(expiry)));
+        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
@@ -181,7 +180,7 @@ public class UserServiceTest {
     providedWorkbenchConfig.featureFlags.enableMoodleV2Api = true;
 
     BadgeDetailsV2 retBadge = new BadgeDetailsV2();
-    long expiry = PROVIDED_CLOCK.instant().toEpochMilli();
+    long expiry = PROVIDED_CLOCK.instant().getEpochSecond();
     retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
@@ -195,12 +194,12 @@ public class UserServiceTest {
     // The user should be updated in the database with a non-empty completion and expiration time.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(TIMESTAMP_MSECS)));
+        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(expiry)));
+        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
 
     // Deprecate the old training.
-    long newExpiry = expiry - 1000;
+    long newExpiry = expiry - 1;
     retBadge.setDateexpire(newExpiry);
     retBadge.setValid(false);
 
@@ -209,16 +208,16 @@ public class UserServiceTest {
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
 
     // The user does a new training.
-    long newerExpiry = expiry + 1000;
+    long newerExpiry = expiry + 1;
     retBadge.setDateexpire(newerExpiry);
     retBadge.setValid(true);
 
     // Completion and expiry timestamp should be updated.
     userService.syncComplianceTrainingStatusV2();
     assertThat(user.getComplianceTrainingCompletionTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(TIMESTAMP_MSECS)));
+        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(newerExpiry)));
+        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(newerExpiry)));
 
     // A global expiration is set.
     long globalExpiry = expiry - 1000;
@@ -338,7 +337,7 @@ public class UserServiceTest {
   public void testClearsEraCommonsStatus() {
     DbUser testUser = userDao.findUserByUsername(USERNAME);
     // Put the test user in a state where eRA commons is completed.
-    testUser.setEraCommonsCompletionTime(new Timestamp(TIMESTAMP_MSECS));
+    testUser.setEraCommonsCompletionTime(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     testUser.setEraCommonsLinkedNihUsername("nih-user");
 
     //noinspection UnusedAssignment
@@ -449,5 +448,13 @@ public class UserServiceTest {
   private Optional<Instant> nullableTimestampToOptionalInstant(
       @Nullable Timestamp complianceTrainingBypassTime) {
     return Optional.ofNullable(complianceTrainingBypassTime).map(Timestamp::toInstant);
+  }
+
+  @Test
+  public void testSubmitTermsOfService() {
+    userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
+
+    verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
+    verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
   }
 }

@@ -131,7 +131,7 @@ definitions:
         type: boolean
       otherPurposeDetails:
         type: string
-      reasonForInvestigation:
+      scientificApproaches:
         type: string
       intendToStudy:
         type: string
@@ -197,9 +197,13 @@ definitions:
         items:
           $ref: '#/definitions/Race'
       sexAtBirth:
-        $ref: '#/definitions/SexAtBirth'
-      sexualOrientation:
-        $ref: '#/definitions/SexualOrientation'
+        type: array
+        items:
+          $ref: '#/definitions/SexAtBirth'
+      identifiesAsLgbtq:
+        type: boolean
+      lgbtqIdentity:
+        type: string
       education:
         $ref: '#/definitions/Education'
       disability:
@@ -216,7 +220,6 @@ definitions:
         type: string
       role:
         type: string
-#        Need to talk to Yu about this to be an ENUM
       nonAcademicAffiliation:
         type: boolean
 
@@ -230,12 +233,11 @@ definitions:
   Gender:
     type: string
     enum:
-      - MALE
-      - FEMALE
+      - MAN
+      - WOMAN
       - NON_BINARY
       - TRANSGENDER
-      - INTERSEX
-      - NONE
+      - NONE_DESCRIBE_ME
       - PREFER_NOT_TO_ANSWER
 
   Race:
@@ -277,10 +279,10 @@ definitions:
       - UNDERGRADUATE
       - MASTER
       - DOCTORATE
-      -
+
   Disability:
     type: string
     enum:
-      - YES
-      - NO
+      - "YES"
+      - "NO"
       - PREFER_NOT_TO_ANSWER
