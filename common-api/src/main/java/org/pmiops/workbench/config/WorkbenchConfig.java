@@ -190,6 +190,9 @@ public class WorkbenchConfig {
     // Allows a user to bypass their own access modules. This is used for testing purposes so that
     // We can give control over 3rd party access modules
     public boolean unsafeAllowSelfBypass;
+    // Controls whether an invitation key is required for a given environment.
+    public boolean requireInvitationKey;
+    // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
