@@ -8,18 +8,21 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.dao.VerifiedUserInstitutionDao;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedUserInstitution;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +40,20 @@ public class ProfileService {
 
               return result;
             }
+          };
+
+  private static final Function<DbVerifiedUserInstitution, VerifiedInstitutionalAffiliation>
+      TO_CLIENT_VERIFIED_INSTITUTIONAL_AFFILIATION =
+          verifiedInstitutionalAffiliation -> {
+            VerifiedInstitutionalAffiliation result = new VerifiedInstitutionalAffiliation();
+            result.setInstitutionShortName(
+                verifiedInstitutionalAffiliation.getInstitution().getShortName());
+            result.setInstitutionalRoleEnum(
+                verifiedInstitutionalAffiliation.getInstitutionalRoleEnum());
+            result.setInstitutionalRoleOtherText(
+                verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText());
+
+            return result;
           };
 
   private static final Function<DbPageVisit, PageVisit> TO_CLIENT_PAGE_VISIT =
@@ -93,15 +110,18 @@ public class ProfileService {
   private final UserDao userDao;
   private final FreeTierBillingService freeTierBillingService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
+  private final VerifiedUserInstitutionDao verifiedUserInstitutionDao;
 
   @Autowired
   public ProfileService(
       UserDao userDao,
       FreeTierBillingService freeTierBillingService,
-      UserTermsOfServiceDao userTermsOfServiceDao) {
+      UserTermsOfServiceDao userTermsOfServiceDao,
+      VerifiedUserInstitutionDao verifiedUserInstitutionDao) {
     this.userDao = userDao;
     this.freeTierBillingService = freeTierBillingService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
+    this.verifiedUserInstitutionDao = verifiedUserInstitutionDao;
   }
 
   public Profile getProfile(DbUser user) {
@@ -211,6 +231,15 @@ public class ProfileService {
         user.getInstitutionalAffiliations().stream()
             .map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList()));
+
+    verifiedUserInstitutionDao
+        .findFirstByUser(user)
+        .ifPresent(
+            verifiedInstitutionalAffiliation ->
+                profile.setVerifiedInstitutionalAffiliation(
+                    TO_CLIENT_VERIFIED_INSTITUTIONAL_AFFILIATION.apply(
+                        verifiedInstitutionalAffiliation)));
+
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
 
     profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="dchangelog-127-verified-institutional-affiliation">
+
+    <createTable tableName="verified_user_institution">
+      <column name="verified_user_institution_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints
+          unique="true"
+          nullable="false"
+          foreignKeyName="fk_verified_user_institution_user"
+          references="user(user_id)"
+          deleteCascade="true"
+          />
+      </column>
+      <column name="institution_id" type="bigint">
+        <constraints
+          nullable="false"
+          foreignKeyName="fk_verified_user_institution_institution"
+          references="institution(institution_id)"
+          deleteCascade="true"
+        />
+      </column>
+      <column name="institutional_role_enum" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="institutional_role_other_text" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

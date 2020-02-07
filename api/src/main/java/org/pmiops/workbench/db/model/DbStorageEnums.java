@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -279,6 +280,32 @@ public final class DbStorageEnums {
 
   public static Short organizationTypeToStorage(OrganizationType organizationType) {
     return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.get(organizationType);
+  }
+
+  private static final BiMap<InstitutionalRole, Short> CLIENT_TO_STORAGE_INSTITUTIONAL_ROLE =
+      ImmutableBiMap.<InstitutionalRole, Short>builder()
+          .put(InstitutionalRole.UNDERGRADUATE, (short) 0)
+          .put(InstitutionalRole.TRAINEE, (short) 1)
+          .put(InstitutionalRole.FELLOW, (short) 2)
+          .put(InstitutionalRole.EARLY_CAREER, (short) 3)
+          .put(InstitutionalRole.MID_CAREER, (short) 4)
+          .put(InstitutionalRole.LATE_CAREER, (short) 5)
+          .put(InstitutionalRole.PRE_DOCTORAL, (short) 6)
+          .put(InstitutionalRole.POST_DOCTORAL, (short) 7)
+          .put(InstitutionalRole.PI, (short) 8)
+          .put(InstitutionalRole.TEACHER, (short) 9)
+          .put(InstitutionalRole.STUDENT, (short) 10)
+          .put(InstitutionalRole.ADMIN, (short) 11)
+          .put(InstitutionalRole.PROJECT_PERSONNEL, (short) 12)
+          .put(InstitutionalRole.OTHER, (short) 13)
+          .build();
+
+  public static InstitutionalRole institutionalRoleFromStorage(Short institutionalRole) {
+    return CLIENT_TO_STORAGE_INSTITUTIONAL_ROLE.inverse().get(institutionalRole);
+  }
+
+  public static Short institutionalRoleToStorage(InstitutionalRole institutionalRole) {
+    return CLIENT_TO_STORAGE_INSTITUTIONAL_ROLE.get(institutionalRole);
   }
 
   /** Utility class. */

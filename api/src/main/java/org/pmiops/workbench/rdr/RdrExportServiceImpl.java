@@ -15,12 +15,14 @@ import javax.inject.Provider;
 import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VerifiedUserInstitutionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.rdr.api.RdrApi;
@@ -44,6 +46,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   private WorkspaceDao workspaceDao;
   private UserDao userDao;
   private WorkspaceService workspaceService;
+  private final VerifiedUserInstitutionDao verifiedUserInstitutionDao;
 
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
@@ -56,7 +59,8 @@ public class RdrExportServiceImpl implements RdrExportService {
       RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
-      UserDao userDao) {
+      UserDao userDao,
+      VerifiedUserInstitutionDao verifiedUserInstitutionDao) {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.rdrExportDao = rdrExportDao;
@@ -64,6 +68,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
+    this.verifiedUserInstitutionDao = verifiedUserInstitutionDao;
   }
 
   /**
@@ -229,6 +234,23 @@ public class RdrExportServiceImpl implements RdrExportService {
                       .role(inst.getRole());
                 })
             .collect(Collectors.toList()));
+
+    verifiedUserInstitutionDao
+        .findFirstByUser(dbUser)
+        .ifPresent(
+            verifiedInstitutionalAffiliation -> {
+              final InstitutionalRole roleEnum =
+                  verifiedInstitutionalAffiliation.getInstitutionalRoleEnum();
+              final String role =
+                  (roleEnum == InstitutionalRole.OTHER)
+                      ? verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText()
+                      : roleEnum.toString();
+
+              new ResearcherVerifiedInstitutionalAffiliation()
+                  .institutionShortName(
+                      verifiedInstitutionalAffiliation.getInstitution().getShortName())
+                  .institutionalRole(role);
+            });
     return researcher;
   }
 

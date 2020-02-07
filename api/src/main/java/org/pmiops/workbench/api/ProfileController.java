@@ -29,6 +29,7 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedUserInstitution;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
@@ -43,6 +44,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.Cr
 import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Address;
@@ -63,6 +65,7 @@ import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.moodle.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -182,6 +185,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<MailService> mailServiceProvider;
   private final ProfileAuditor profileAuditor;
+  private final InstitutionService institutionService;
 
   @Autowired
   ProfileController(
@@ -196,7 +200,8 @@ public class ProfileController implements ProfileApiDelegate {
       CloudStorageService cloudStorageService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<MailService> mailServiceProvider,
-      ProfileAuditor profileAuditor) {
+      ProfileAuditor profileAuditor,
+      InstitutionService institutionService) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -209,6 +214,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
+    this.institutionService = institutionService;
   }
 
   @Override
@@ -329,7 +335,7 @@ public class ProfileController implements ProfileApiDelegate {
       request.getProfile().setDemographicSurvey(new DemographicSurvey());
     }
     if (request.getProfile().getInstitutionalAffiliations() == null) {
-      request.getProfile().setInstitutionalAffiliations(new ArrayList<InstitutionalAffiliation>());
+      request.getProfile().setInstitutionalAffiliations(new ArrayList<>());
     }
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
@@ -365,7 +371,9 @@ public class ProfileController implements ProfileApiDelegate {
             FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
             request.getProfile().getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()),
+            fromClientVerifiedInstitutionalAffiliation(
+                request.getProfile().getVerifiedInstitutionalAffiliation()));
 
     if (request.getTermsOfServiceVersion() != null) {
       userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
@@ -383,6 +391,23 @@ public class ProfileController implements ProfileApiDelegate {
     final Profile createdProfile = profileService.getProfile(user);
     profileAuditor.fireCreateAction(createdProfile);
     return ResponseEntity.ok(createdProfile);
+  }
+
+  private DbVerifiedUserInstitution fromClientVerifiedInstitutionalAffiliation(
+      VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
+    if (verifiedInstitutionalAffiliation == null) return null;
+
+    DbVerifiedUserInstitution result =
+        new DbVerifiedUserInstitution()
+            .setInstitutionalRoleEnum(verifiedInstitutionalAffiliation.getInstitutionalRoleEnum())
+            .setInstitutionalRoleOtherText(
+                verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText());
+
+    institutionService
+        .getDbInstitution(verifiedInstitutionalAffiliation.getInstitutionShortName())
+        .ifPresent(result::setInstitution);
+
+    return result;
   }
 
   @Override

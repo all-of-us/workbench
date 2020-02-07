@@ -134,10 +134,11 @@
     <include file="changelog/db.changelog-124-add-demographic-gender-identity.xml"/>
     <include file="changelog/db.changelog-125-institution-tables.xml"/>
     <include file="changelog/db.changelog-126-institution-foreign-key.xml"/>
+    <include file="changelog/db.changelog-127-verified-institutional-affiliation.xml"/>
     <!--
-    Note: to update the DB locally, do the following:
-    - Migrate schema changes: `./project.rb run-local-all-migrations`
-    - Restart the local API service to generate the new API files.
-    - Restart the local UI service to generate the API files.
-    -->
+     Note: to update the DB locally, do the following:
+     - Migrate schema changes: `./project.rb run-local-all-migrations`
+     - Restart the local API service to generate the new API files.
+     - Restart the local UI service to generate the API files.
+     -->
 </databaseChangeLog>

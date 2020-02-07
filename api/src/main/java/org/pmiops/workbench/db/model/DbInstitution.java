@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
@@ -12,7 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.model.OrganizationType;
 
 @Entity
@@ -96,9 +97,10 @@ public class DbInstitution {
    *
    * <p>https://stackoverflow.com/questions/5587482/hibernate-a-collection-with-cascade-all-delete-orphan-was-no-longer-referenc
    *
-   * @param emailDomains the new set of domains for this Institution
+   * @param emailDomains the new collection of domains for this Institution
    */
-  public DbInstitution setEmailDomains(final Set<DbInstitutionEmailDomain> emailDomains) {
+  public DbInstitution setEmailDomains(
+      @NotNull final Collection<DbInstitutionEmailDomain> emailDomains) {
     final Set<DbInstitutionEmailDomain> attachedDomains =
         emailDomains.stream()
             .map(domain -> domain.setInstitution(this))
@@ -124,9 +126,13 @@ public class DbInstitution {
    *
    * <p>https://stackoverflow.com/questions/5587482/hibernate-a-collection-with-cascade-all-delete-orphan-was-no-longer-referenc
    *
-   * @param emailAddresses the new set of addresses for this Institution
+   * @param emailAddresses the new collection of addresses for this Institution
    */
-  public DbInstitution setEmailAddresses(final Set<DbInstitutionEmailAddress> emailAddresses) {
+  public DbInstitution setEmailAddresses(
+      @NotNull final Collection<DbInstitutionEmailAddress> emailAddresses) {
+
+    // TODO how am I getting null here?
+
     final Set<DbInstitutionEmailAddress> attachedAddresses =
         emailAddresses.stream()
             .map(address -> address.setInstitution(this))

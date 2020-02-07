@@ -32,6 +32,7 @@ import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedUserInstitution;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -86,6 +87,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
   private final UserServiceAuditor userServiceAuditor;
+  private final VerifiedUserInstitutionDao verifiedUserInstitutionDao;
+
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
@@ -101,7 +104,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditor) {
+      UserServiceAuditor userServiceAuditor,
+      VerifiedUserInstitutionDao verifiedUserInstitutionDao) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -114,6 +118,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.complianceService = complianceService;
     this.directoryService = directoryService;
     this.userServiceAuditor = userServiceAuditor;
+    this.verifiedUserInstitutionDao = verifiedUserInstitutionDao;
   }
 
   /**
@@ -292,7 +297,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser createUser(String givenName, String familyName, String userName) {
     return createUser(
-        givenName, familyName, userName, null, null, null, null, null, null, null, null, null);
+        givenName,
+        familyName,
+        userName,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   @Override
@@ -308,7 +325,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations) {
+      List<DbInstitutionalAffiliation> institutionalAffiliations,
+      DbVerifiedUserInstitution verifiedInstitutionalAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -338,6 +356,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       address.setUser(dbUser);
     }
     if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
+    // set via the older Institutional Affiliation flow, from the Demographic Survey
     if (institutionalAffiliations != null) {
       // We need an "effectively final" variable to be captured in the lambda
       // to pass to forEach.
@@ -348,8 +367,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             finalDbUserReference.addInstitutionalAffiliation(affiliation);
           });
     }
+
     try {
       dbUser = userDao.save(dbUser);
+      // set via the newer Institutional Affiliation flow, verified on creation
+      if (verifiedInstitutionalAffiliation != null) {
+        verifiedInstitutionalAffiliation.setUser(dbUser);
+        verifiedUserInstitutionDao.save(verifiedInstitutionalAffiliation);
+      }
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(userName);
       if (dbUser == null) {
