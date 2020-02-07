@@ -20,7 +20,7 @@
       "dom"
     ],
     "module": "es2015",
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "jsx": "react",
     "resolveJsonModule": true
   }
