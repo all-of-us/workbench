@@ -221,7 +221,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     constructor(props: Props) {
       super(props);
       this.state = {
-        activeIcon: 'help',
+        activeIcon: props.sidebarOpen ? 'help' : undefined,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
