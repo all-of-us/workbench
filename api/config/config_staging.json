@@ -16,9 +16,9 @@
     "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
-    "accountId": "014D91-FCB792-33D2C0",
+    "accountId": "00293C_5DEA2D_6887E7",
     "projectNamePrefix": "aou-rw-staging-",
-    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
+    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
     "bufferCapacity": 50,
     "bufferRefillProjectsPerTask": 1,
