@@ -26,6 +26,7 @@ import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLI
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
@@ -785,7 +786,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspace_freeTierBilling() throws Exception {
+  public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() throws Exception {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -799,6 +800,87 @@ public class WorkspacesControllerTest {
 
     verifyNoMoreInteractions(endUserCloudbillingProvider.get());
     verify(serviceAccountCloudbillingProvider.get()).projects();
+  }
+
+  @Test
+  public void testUpdateWorkspace_freeTierBilling_noCreditsRemaining() throws Exception {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    currentUser.setFreeTierCreditsLimitDollarsOverride(0.0);
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    request.setWorkspace(ws);
+    Workspace response = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+
+    assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+  }
+
+  @Test
+  public void testUpdateWorkspace_freeTierBilling_hasCreditsRemaining() throws Exception {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    currentUser.setFreeTierCreditsLimitDollarsOverride(Double.MAX_VALUE);
+
+    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+        ws.getNamespace(), ws.getId(), DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
+    );
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    request.setWorkspace(ws);
+    Workspace response = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+
+    assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+  }
+
+  @Test
+  public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount() throws Exception {
+    final String closedBillingAccountName = "closed-billing-account";
+
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    final String namespace = ws.getNamespace();
+    final String firecloudName = ws.getId();
+
+    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
+    doReturn(
+        new BillingAccount()
+            .setName(closedBillingAccountName)
+            .setOpen(false)
+    ).when(getRequest).execute();
+    doReturn(getRequest).when(endUserCloudbillingProvider.get().billingAccounts()).get(closedBillingAccountName);
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    ws.setBillingAccountName(closedBillingAccountName);
+    request.setWorkspace(ws);
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () ->
+          workspacesController.updateWorkspace(namespace, firecloudName, request));
+    assertThat(exception.getErrorResponse().getMessage()).contains("Closed billing account name provided");
+  }
+
+  @Test
+  public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount() {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+        ws.getNamespace(), ws.getId(), DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
+    );
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    ws.setBillingAccountName("active-billing-account");
+    request.setWorkspace(ws);
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+
+    assertThat(workspaceDao.findOne(dbWorkspace.getWorkspaceId()).getBillingStatus()).isEqualTo(WorkspaceActiveStatus.ACTIVE);
   }
 
   @Test
