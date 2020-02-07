@@ -6,6 +6,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
 import colors from 'app/styles/colors';
 import * as React from 'react';
+import {environment} from '../../../environments/environment';
 import {FileDetail, Profile} from '../../../generated/fetch';
 import {ClrIcon} from '../../components/icons';
 import {withUserProfile} from '../../utils';
@@ -35,7 +36,7 @@ export const CreateBillingAccountModal = withUserProfile() (
 
             <Button type='primary'
                     style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                    onClick={() => this.props.onClose()}>
+                    onClick={() => window.open(environment.createBillingAccountHelpUrl, '_blank')}>
               Read Instructions
             </Button>
           </FlexColumn>
