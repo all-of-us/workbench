@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -496,11 +497,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private QueryJobConfiguration buildQueryJobConfiguration(
       Map<String, QueryParameterValue> namedCohortParameters, String query) {
+    return QueryJobConfiguration.newBuilder(query)
+        .setNamedParameters(namedCohortParameters)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  private QueryJobConfiguration buildQueryJobConfigurationWithProjectInformation(
+      Map<String, QueryParameterValue> namedCohortParameters, String query) {
     return bigQueryService.filterBigQueryConfig(
-        QueryJobConfiguration.newBuilder(query)
-            .setNamedParameters(namedCohortParameters)
-            .setUseLegacySql(false)
-            .build());
+        buildQueryJobConfiguration(namedCohortParameters, query));
   }
 
   @VisibleForTesting
@@ -533,16 +539,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String prerequisites;
     switch (kernelTypeEnum) {
       case R:
-        prerequisites =
-            // RW-4241 workaround: update when the Jupyter image with the reticulate fix is fully
-            // rolled out
-            "require(devtools)\n"
-                + "devtools::install_github(\"rstudio/reticulate\", ref=\"00172079\")\n"
-                + "library(reticulate)\n"
-                + "pd <- reticulate::import(\"pandas\")";
+        prerequisites = "library(bigrquery)";
         break;
       case PYTHON:
-        prerequisites = "import pandas";
+        prerequisites = "import pandas\n" + "import os";
         break;
       default:
         throw new BadRequestException(
@@ -636,7 +636,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     final TableResult valuesLinkingTableResult =
         bigQueryService.executeQuery(
-            buildQueryJobConfiguration(
+            buildQueryJobConfigurationWithProjectInformation(
                 queryParameterValuesByDomain,
                 SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
 
@@ -664,6 +664,49 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return StringUtils.capitalize(text.toLowerCase());
   }
 
+  private static String generateSqlWithEnvironmentVariables(
+      String query, KernelTypeEnum kernelTypeEnum) {
+    switch (kernelTypeEnum) {
+      case PYTHON:
+        return query.replaceAll(
+            "\\$\\{projectId}.\\$\\{dataSetId}", "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"");
+      case R:
+        return query.replaceAll(
+            "\\$\\{projectId}.\\$\\{dataSetId}", "\", Sys.getenv(\"WORKSPACE_CDR\"), \"");
+      default:
+        return query;
+    }
+  }
+
+  private static String fillInQueryParams(
+      String query, Map<String, QueryParameterValue> queryParameterValueMap) {
+    StringBuilder stringBuilder = new StringBuilder(query);
+    queryParameterValueMap.forEach(
+        (key, value) -> {
+          if (StandardSQLTypeName.ARRAY.equals(value.getType())) {
+            String stringToReplace = "unnest(@".concat(key.concat(")"));
+            int startingIndex = stringBuilder.indexOf(stringToReplace);
+            stringBuilder.replace(
+                startingIndex,
+                startingIndex + stringToReplace.length(),
+                "("
+                    .concat(
+                        nullableListToEmpty(value.getArrayValues()).stream()
+                            .map(QueryParameterValue::getValue)
+                            .collect(Collectors.joining(", ")))
+                    .concat(")"));
+          } else {
+            String stringToReplace = "@".concat(key);
+            int startingIndex = stringBuilder.indexOf(stringToReplace);
+            stringBuilder.replace(
+                startingIndex,
+                startingIndex + stringToReplace.length(),
+                Optional.ofNullable(value.getValue()).orElse(""));
+          }
+        });
+    return stringBuilder.toString();
+  }
+
   private static String generateNotebookUserCode(
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
@@ -671,7 +714,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String qualifier,
       KernelTypeEnum kernelTypeEnum) {
 
-    // Define [namespace]_sql, [namespace]_query_config, and [namespace]_df variables
+    // Define [namespace]_sql, query parameters (as either [namespace]_query_config
+    // or [namespace]_query_parameters), and [namespace]_df variables
     String domainAsString = domain.toString().toLowerCase();
     String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
     // Comments in R and Python have the same syntax
@@ -690,7 +734,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .append("max_number_of_rows = '1000000'")
             .toString();
     String sqlSection;
-    String namedParamsSection;
     String dataFrameSection;
     String displayHeadSection;
 
@@ -699,62 +742,29 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         sqlSection =
             namespace
                 + "sql = \"\"\""
-                + queryJobConfiguration.getQuery()
+                + fillInQueryParams(
+                    generateSqlWithEnvironmentVariables(
+                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                    queryJobConfiguration.getNamedParameters())
                 + " \nLIMIT \"\"\" + max_number_of_rows";
-        namedParamsSection =
-            namespace
-                + "query_config = {\n"
-                + "  \'query\': {\n"
-                + "  \'parameterMode\': \'NAMED\',\n"
-                + "  \'queryParameters\': [\n"
-                + queryJobConfiguration.getNamedParameters().entrySet().stream()
-                    .map(
-                        entry ->
-                            convertNamedParameterToString(
-                                entry.getKey(), entry.getValue(), KernelTypeEnum.PYTHON))
-                    .collect(Collectors.joining(",\n"))
-                + "\n"
-                + "    ]\n"
-                + "  }\n"
-                + "}\n\n";
         dataFrameSection =
-            namespace
-                + "df = pandas.read_gbq("
-                + namespace
-                + "sql, dialect=\"standard\", configuration="
-                + namespace
-                + "query_config)";
+            namespace + "df = pandas.read_gbq(" + namespace + "sql, dialect=\"standard\")";
         displayHeadSection = namespace + "df.head(5)";
         break;
       case R:
         sqlSection =
             namespace
                 + "sql <- paste(\""
-                + queryJobConfiguration.getQuery()
-                + " \nLIMIT \", max_number_of_rows)";
-        namedParamsSection =
-            namespace
-                + "query_config <- list(\n"
-                + "  query = list(\n"
-                + "    parameterMode = 'NAMED',\n"
-                + "    queryParameters = list(\n"
-                + queryJobConfiguration.getNamedParameters().entrySet().stream()
-                    .map(
-                        entry ->
-                            convertNamedParameterToString(
-                                entry.getKey(), entry.getValue(), KernelTypeEnum.R))
-                    .collect(Collectors.joining(",\n"))
-                + "\n"
-                + "    )\n"
-                + "  )\n"
-                + ")";
+                + fillInQueryParams(
+                    generateSqlWithEnvironmentVariables(
+                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                    queryJobConfiguration.getNamedParameters())
+                + " \nLIMIT \", max_number_of_rows, sep=\"\")";
         dataFrameSection =
             namespace
-                + "df <- pd$read_gbq("
+                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
                 + namespace
-                + "sql, dialect=\"standard\", configuration="
-                + namespace
-                + "query_config)";
+                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")))";
         displayHeadSection = "head(" + namespace + "df, 5)";
         break;
       default:
@@ -767,84 +777,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         + "\n"
         + sqlSection
         + "\n\n"
-        + namedParamsSection
-        + "\n\n"
         + dataFrameSection
         + "\n\n"
         + displayHeadSection;
-  }
-
-  // BigQuery api returns parameter values either as a list or an object.
-  // To avoid warnings on our cast to list, we suppress those warnings here,
-  // as they are expected.
-  @SuppressWarnings("unchecked")
-  private static String convertNamedParameterToString(
-      String key, QueryParameterValue namedParameterValue, KernelTypeEnum kernelTypeEnum) {
-    if (namedParameterValue == null) {
-      return "";
-    }
-    final boolean isArrayParameter = namedParameterValue.getArrayType() != null;
-
-    final List<QueryParameterValue> arrayValues =
-        nullableListToEmpty(namedParameterValue.getArrayValues());
-
-    switch (kernelTypeEnum) {
-      case PYTHON:
-        return buildPythonNamedParameterQuery(
-            key, namedParameterValue, isArrayParameter, arrayValues);
-      case R:
-        return "      list(\n"
-            + "        name = \""
-            + key
-            + "\",\n"
-            + "        parameterType = list(type = \""
-            + namedParameterValue.getType().toString()
-            + "\""
-            + (isArrayParameter
-                ? ", arrayType = list(type = \"" + namedParameterValue.getArrayType() + "\")"
-                : "")
-            + "),\n"
-            + "        parameterValue = list("
-            + (isArrayParameter
-                ? "arrayValues = list("
-                    + arrayValues.stream()
-                        .map(arrayValue -> "list(value = " + arrayValue.getValue() + ")")
-                        .collect(Collectors.joining(","))
-                    + ")"
-                : "value = \"" + namedParameterValue.getValue() + "\"")
-            + ")\n"
-            + "      )";
-      default:
-        throw new BadRequestException("Language not supported");
-    }
-  }
-
-  private static String buildPythonNamedParameterQuery(
-      String key,
-      QueryParameterValue namedParameterValue,
-      boolean isArrayParameter,
-      List<QueryParameterValue> arrayValues) {
-    return "      {\n"
-        + "        'name': \""
-        + key
-        + "\",\n"
-        + "        'parameterType': {'type': \""
-        + namedParameterValue.getType().toString()
-        + "\""
-        + (isArrayParameter
-            ? ",'arrayType': {'type': \"" + namedParameterValue.getArrayType() + "\"},"
-            : "")
-        + "},\n"
-        + "        \'parameterValue\': {"
-        + (isArrayParameter
-            ? "\'arrayValues\': ["
-                + arrayValues.stream()
-                    .map(arrayValue -> "{\'value\': " + arrayValue.getValue() + "}")
-                    .collect(Collectors.joining(","))
-                + "]"
-            : "'value': \"" + namedParameterValue.getValue() + "\"")
-        + "}\n"
-        + "      }";
   }
 
   private static <T> List<T> nullableListToEmpty(List<T> nullableList) {

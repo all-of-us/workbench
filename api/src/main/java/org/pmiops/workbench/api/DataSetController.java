@@ -324,7 +324,14 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
     Map<String, QueryJobConfiguration> bigQueryJobConfig =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest).entrySet()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    stringQueryJobConfigurationEntry ->
+                        bigQueryService.filterBigQueryConfig(
+                            stringQueryJobConfigurationEntry.getValue())));
 
     if (bigQueryJobConfig.size() > 1) {
       throw new BadRequestException(
