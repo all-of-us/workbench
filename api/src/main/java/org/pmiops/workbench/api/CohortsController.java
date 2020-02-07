@@ -138,7 +138,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> createCohort(
       String workspaceNamespace, String workspaceId, Cohort cohort) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -178,7 +178,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> duplicateCohort(
       String workspaceNamespace, String workspaceId, DuplicateCohortRequest params) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "duplicateCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -216,7 +216,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -233,7 +233,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> getCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -249,7 +249,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortsInWorkspace"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -275,7 +275,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> updateCohort(
       String workspaceNamespace, String workspaceId, Long cohortId, Cohort cohort) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortsInWorkspace"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -348,7 +348,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(
       String workspaceNamespace, String workspaceId, MaterializeCohortRequest request) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "materializeCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -418,7 +418,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CdrQuery> getDataTableQuery(
       String workspaceNamespace, String workspaceId, DataTableSpecification request) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getDataTableQuery"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -471,7 +471,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(
       String workspaceNamespace, String workspaceId, CohortAnnotationsRequest request) {
-    return monitoringService.timeAndRecordOperation(
+    return monitoringService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortAnnotations"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {

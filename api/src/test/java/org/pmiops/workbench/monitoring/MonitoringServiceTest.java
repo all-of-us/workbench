@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -75,7 +76,7 @@ public class MonitoringServiceTest {
 
   @Test
   public void testRecordIncrement() {
-    monitoringService.recordEvent(CumulativeMetric.NOTEBOOK_SAVE);
+    monitoringService.recordEvent(EventMetric.NOTEBOOK_SAVE);
     verify(mockInitService).createAndRegister();
 
     // TODO(jaycarlton): include other metric types as they are re-added
@@ -83,7 +84,7 @@ public class MonitoringServiceTest {
     verify(mockViewManager, times(metricCount)).registerView(any(View.class));
 
     verify(mockStatsRecorder).newMeasureMap();
-    verify(mockMeasureMap).put(CumulativeMetric.NOTEBOOK_SAVE.getMeasureLong(), 1L);
+    verify(mockMeasureMap).put(EventMetric.NOTEBOOK_SAVE.getMeasureLong(), 1L);
     verify(mockMeasureMap).record(any(TagContext.class));
   }
 

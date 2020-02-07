@@ -4,9 +4,13 @@ import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Logging;
 import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Severity;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
+import java.util.function.Supplier;
+import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,6 +40,31 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
             .collect(ImmutableSet.toImmutableSet());
     // This list will never be empty because of the validation in the MeasurementBundle builder
     logging.write(logEntries);
+  }
+
+  @Override
+  public void timeAndRecordOperation(Builder measurementBundleBuilder,
+      DistributionMetric distributionMetric, Runnable operation) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+    operation.run();
+    stopwatch.stop();
+    record(
+        measurementBundleBuilder
+            .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
+            .build());
+  }
+
+  @Override
+  public <T> T timeAndRecordOperation(Builder measurementBundleBuilder,
+      DistributionMetric distributionMetric, Supplier<T> operation) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+    final T result = operation.get();
+    stopwatch.stop();
+    record(
+        measurementBundleBuilder
+            .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
+            .build());
+    return result;
   }
 
   /**

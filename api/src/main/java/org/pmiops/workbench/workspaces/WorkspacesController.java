@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.Etags;
@@ -88,8 +89,8 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
@@ -135,7 +136,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private WorkspaceAuditor workspaceAuditor;
   private WorkspaceMapper workspaceMapper;
   private final ManualWorkspaceMapper manualWorkspaceMapper;
-  private MonitoringService monitoringService;
+  private LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
   public WorkspacesController(
@@ -155,7 +156,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
       ManualWorkspaceMapper manualWorkspaceMapper,
-      MonitoringService monitoringService) {
+      LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -171,8 +172,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
-    this.monitoringService = monitoringService;
     this.manualWorkspaceMapper = manualWorkspaceMapper;
+    this.logsBasedMetricService = logsBasedMetricService;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -257,77 +258,84 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
-    return monitoringService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecordOperation(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createWorkspace"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {
-          validateWorkspaceApiModel(workspace);
-
-          DbUser user = userProvider.get();
-          String workspaceNamespace;
-          DbBillingProjectBufferEntry bufferedBillingProject;
-          try {
-            bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
-          } catch (EmptyBufferException e) {
-            throw new TooManyRequestsException();
-          }
-          workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
-
-          // Note: please keep any initialization logic here in sync with CloneWorkspace().
-          FirecloudWorkspaceId workspaceId =
-              generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-          FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
-
-          Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-          DbWorkspace dbWorkspace = new DbWorkspace();
-          // A little unintuitive but setting this here reflects the current state of the workspace
-          // while it was in the billing buffer. Setting this value will inform the update billing
-          // code to
-          // skip an unnecessary GCP API call if the billing account is being kept at the free tier
-          dbWorkspace.setBillingAccountName(
-              workbenchConfigProvider.get().billing.freeTierBillingAccountName());
-          setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
-
-          setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
-
-          DbWorkspace reqWorkspace = manualWorkspaceMapper.toDbWorkspace(workspace);
-          // TODO: enforce data access level authorization
-          dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
-          dbWorkspace.setName(reqWorkspace.getName());
-
-          // Ignore incoming fields pertaining to review status; clients can only request a review.
-          manualWorkspaceMapper.setResearchPurposeDetails(
-              dbWorkspace, workspace.getResearchPurpose());
-          if (reqWorkspace.getReviewRequested()) {
-            // Use a consistent timestamp.
-            dbWorkspace.setTimeRequested(now);
-          }
-          dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
-
-          dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
-
-          updateWorkspaceBillingAccount(dbWorkspace, workspace.getBillingAccountName());
-          try {
-            dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-          } catch (Exception e) {
-            // Tell Google to set the billing account back to the free tier if the workspace
-            // creation
-            // fails
-            log.log(
-                Level.SEVERE,
-                "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
-                e);
-
-            updateWorkspaceBillingAccount(
-                dbWorkspace, workbenchConfigProvider.get().billing.accountId);
-            throw e;
-          }
-
-          Workspace createdWorkspace =
-              manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
-          workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
+          Workspace createdWorkspace = createWorkspaceImpl(workspace);
           return ResponseEntity.ok(createdWorkspace);
         });
+  }
+
+  // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService & WorkspaceServiceImpl
+  @NotNull
+  private Workspace createWorkspaceImpl(Workspace workspace) {
+    validateWorkspaceApiModel(workspace);
+
+    DbUser user = userProvider.get();
+    String workspaceNamespace;
+    DbBillingProjectBufferEntry bufferedBillingProject;
+    try {
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+    } catch (EmptyBufferException e) {
+      throw new TooManyRequestsException();
+    }
+    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+
+    // Note: please keep any initialization logic here in sync with CloneWorkspace().
+    FirecloudWorkspaceId workspaceId =
+        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
+    FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
+
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    // A little unintuitive but setting this here reflects the current state of the workspace
+    // while it was in the billing buffer. Setting this value will inform the update billing
+    // code to
+    // skip an unnecessary GCP API call if the billing account is being kept at the free tier
+    dbWorkspace.setBillingAccountName(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
+
+    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+
+    DbWorkspace reqWorkspace = manualWorkspaceMapper.toDbWorkspace(workspace);
+    // TODO: enforce data access level authorization
+    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
+    dbWorkspace.setName(reqWorkspace.getName());
+
+    // Ignore incoming fields pertaining to review status; clients can only request a review.
+    manualWorkspaceMapper.setResearchPurposeDetails(
+        dbWorkspace, workspace.getResearchPurpose());
+    if (reqWorkspace.getReviewRequested()) {
+      // Use a consistent timestamp.
+      dbWorkspace.setTimeRequested(now);
+    }
+    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
+
+    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+
+    updateWorkspaceBillingAccount(dbWorkspace, workspace.getBillingAccountName());
+    try {
+      dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google to set the billing account back to the free tier if the workspace
+      // creation
+      // fails
+      log.log(
+          Level.SEVERE,
+          "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
+          e);
+
+      updateWorkspaceBillingAccount(
+          dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      throw e;
+    }
+
+    Workspace createdWorkspace =
+        manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
+    return createdWorkspace;
   }
 
   private final Retryer<ProjectBillingInfo> cloudBillingRetryer =
@@ -415,7 +423,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return monitoringService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecordOperation(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteWorkspace"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {
@@ -438,7 +446,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
     final WorkspaceResponse workspaceResponse =
-        monitoringService.timeAndRecordOperation(
+        logsBasedMetricService.timeAndRecordOperation(
             MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspace"),
             DistributionMetric.WORKSPACE_OPERATION_TIME,
             () -> workspaceService.getWorkspace(workspaceNamespace, workspaceId));
@@ -449,7 +457,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     List<WorkspaceResponse> workspaces =
-        monitoringService.timeAndRecordOperation(
+        logsBasedMetricService.timeAndRecordOperation(
             MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspaces"),
             DistributionMetric.WORKSPACE_OPERATION_TIME,
             workspaceService::getWorkspaces);
@@ -461,7 +469,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
       throws NotFoundException {
-    return monitoringService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecordOperation(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "updateWorkspace"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {
@@ -530,7 +538,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
       throws BadRequestException, TooManyRequestsException {
-    return monitoringService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecordOperation(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "cloneWorkspace"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> cloneWorkspaceImpl(fromWorkspaceNamespace, fromWorkspaceId, body));
@@ -785,7 +793,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<List<FileDetail>> getNoteBookList(
       String workspaceNamespace, String workspaceId) {
     List<FileDetail> fileList =
-        monitoringService.timeAndRecordOperation(
+        logsBasedMetricService.timeAndRecordOperation(
             MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getNoteBookList"),
             DistributionMetric.WORKSPACE_OPERATION_TIME,
             () -> notebooksService.getNotebooks(workspaceNamespace, workspaceId));
@@ -795,7 +803,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(
       String workspace, String workspaceName, String notebookName) {
-    monitoringService.timeAndRecordOperation(
+    logsBasedMetricService.timeAndRecordOperation(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteNotebook"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> notebooksService.deleteNotebook(workspace, workspaceName, notebookName));
@@ -808,7 +816,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceId,
       String fromNotebookName,
       CopyRequest copyRequest) {
-    return monitoringService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecordOperation(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "copyNotebook"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {

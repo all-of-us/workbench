@@ -69,7 +69,7 @@ public interface MonitoringService {
    *     don't make sense for timings
    * @param operation - Code to be run, e.g. () -> myService.computeThings()
    */
-  void timeAndRecordOperation(
+  void timeAndRecord(
       Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation);
 
   /**
@@ -81,7 +81,7 @@ public interface MonitoringService {
    *     don't make sense for timings
    * @param operation - Code to be run, e.g. myService::getFooList
    */
-  <T> T timeAndRecordOperation(
+  <T> T timeAndRecord(
       Builder measurementBundleBuilder,
       DistributionMetric distributionMetric,
       Supplier<T> operation);

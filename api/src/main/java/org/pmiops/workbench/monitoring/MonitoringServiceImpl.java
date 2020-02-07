@@ -85,7 +85,7 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   @Override
-  public void timeAndRecordOperation(
+  public void timeAndRecord(
       Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation) {
     final Stopwatch stopwatch = Stopwatch.createStarted();
     operation.run();
@@ -97,7 +97,7 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   @Override
-  public <T> T timeAndRecordOperation(
+  public <T> T timeAndRecord(
       Builder measurementBundleBuilder,
       DistributionMetric distributionMetric,
       Supplier<T> operation) {
