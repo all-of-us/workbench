@@ -11,6 +11,7 @@ import {LoginReactComponent} from 'app/pages/login/login';
 import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
 import {
+  reactStyles,
   ReactWrapperBase, ServerConfigProps,
   WindowSizeProps,
   withServerConfig,
@@ -22,44 +23,45 @@ import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 import {FlexColumn} from 'app/components/flex';
 import * as React from 'react';
 
-const styles = {
-  // A template function which returns the appropriate style config based on window size and
-  // background images.
-  template: (windowSize, imageConfig?: BackgroundImageConfig) => {
-    // Lower bounds to prevent the small and large images from covering the
-    // creation controls, respectively.
-    const bgWidthMinPx = 900;
-    const bgWidthSmallLimitPx = 1600;
+// A template function which returns the appropriate style config based on window size and
+// background images.
+const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImageConfig) => {
+  // Lower bounds to prevent the small and large images from covering the
+  // creation controls, respectively.
+  const bgWidthMinPx = 900;
+  const bgWidthSmallLimitPx = 1600;
 
-    return {
-      backgroundImage: calculateImage(),
-      backgroundColor: colors.light,
-      backgroundRepeat: 'no-repeat',
-      flex: 1,
-      width: '100%',
-      backgroundSize: windowSize.width <= bgWidthMinPx ? '0% 0%' : 'contain',
-      backgroundPosition: calculateBackgroundPosition()
-    };
+  return {
+    backgroundImage: calculateImage(),
+    backgroundColor: colors.light,
+    backgroundRepeat: 'no-repeat',
+    flex: 1,
+    width: '100%',
+    backgroundSize: windowSize.width <= bgWidthMinPx ? '0% 0%' : 'contain',
+    backgroundPosition: calculateBackgroundPosition()
+  };
 
-    function calculateImage() {
-      if (!imageConfig) {
-        return null;
-      }
-      let imageUrl = 'url(\'' + imageConfig.backgroundImgSrc + '\')';
-      if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
-        imageUrl = 'url(\'' + imageConfig.smallerBackgroundImgSrc + '\')';
-      }
-      return imageUrl;
+  function calculateImage() {
+    if (!imageConfig) {
+      return null;
     }
-
-    function calculateBackgroundPosition() {
-      let position = 'bottom right -1rem';
-      if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
-        position = 'bottom right';
-      }
-      return position;
+    let imageUrl = 'url(\'' + imageConfig.backgroundImgSrc + '\')';
+    if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
+      imageUrl = 'url(\'' + imageConfig.smallerBackgroundImgSrc + '\')';
     }
-  },
+    return imageUrl;
+  }
+
+  function calculateBackgroundPosition() {
+    let position = 'bottom right -1rem';
+    if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
+      position = 'bottom right';
+    }
+    return position;
+  }
+};
+
+const styles = reactStyles({
   signInContainer: {
     backgroundSize: 'contain',
     backgroundRepeat: 'no-repeat',
@@ -69,8 +71,7 @@ const styles = {
     width: 'auto',
     minHeight: '100vh'
   },
-
-};
+});
 
 // Tracks each major stage in the sign-in / sign-up flow. Most of the steps are related to new
 // account creation.
@@ -198,7 +199,7 @@ export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(
           })}/>;
         case SignInStep.TERMS_OF_SERVICE:
           return <AccountCreationTos
-            pdfPath='/assets/documents/terms-of-service.pdf'
+            pdfPath='/assets/documents/terms of service (draft).pdf'
             onComplete={() => this.setState({
               termsOfServiceVersion: 1,
               currentStep: SignInStep.ACCOUNT_CREATION
@@ -233,10 +234,10 @@ export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(
     }
 
     render() {
-      const backgroundImages = StepToImageConfig[this.state.currentStep];
+      const backgroundImages = StepToImageConfig.get(this.state.currentStep);
       return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
         <FlexColumn data-test-id='sign-in-page'
-             style={styles.template(this.props.windowSize, backgroundImages)}>
+             style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
           <div><img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
                     src={HEADER_IMAGE}/></div>
           {this.renderSignInStep(this.state.currentStep)}

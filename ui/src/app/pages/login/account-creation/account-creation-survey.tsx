@@ -1,26 +1,20 @@
-import {ListPageHeader} from 'app/components/headers';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
+import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {CheckBox, RadioButton} from 'app/components/inputs';
 import colors from 'app/styles/colors';
-import {
-  Profile,
-} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
 import {Section, TextInputWithLabel} from './account-creation';
-
+import {FormSection} from 'app/components/forms';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {
-  profileApi
-} from 'app/services/swagger-fetch-clients';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import {toggleIncludes} from 'app/utils';
-import * as validate from 'validate.js';
 import {AccountCreationOptions} from './account-creation-options';
-
 
 const styles = {
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
@@ -219,7 +213,7 @@ or another sexual and/or gender minority?'>
                        value={demographicSurvey.education}
                        onChange={
                          (e) => this.updateDemographicAttribute('education', e)}/>
-      <div style={{display: 'flex', paddingTop: '2rem'}}>
+      <FormSection style={{paddingBottom: '1rem'}}>
         <Button type='secondary' style={{marginRight: '1rem'}} disabled={creatingAccount}
                 onClick={() => this.props.onPreviousClick(this.state.profile)}>
           Previous
@@ -235,7 +229,7 @@ or another sexual and/or gender minority?'>
             Submit
           </Button>
         </TooltipTrigger>
-      </div>
+      </FormSection>
       {creatingAccount && <SpinnerOverlay />}
     </div>;
   }

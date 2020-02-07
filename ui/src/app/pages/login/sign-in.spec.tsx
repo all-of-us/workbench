@@ -34,7 +34,7 @@ describe('SignInReact', () => {
 
   it('should display login background image and directive by default', () => {
     const wrapper = component();
-    const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
+    const templateImage = wrapper.find('[data-test-id="sign-in-page"]').hostNodes();
     const backgroundImage = templateImage.prop('style').backgroundImage;
     expect(backgroundImage).toBe('url(\'' + '/assets/images/login-group.png' + '\')');
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
@@ -43,7 +43,7 @@ describe('SignInReact', () => {
   it('should display small background image when window width is moderately sized', () => {
     props.windowSize.width = 999;
     const wrapper = component();
-    const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
+    const templateImage = wrapper.find('[data-test-id="sign-in-page"]').hostNodes();
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(backgroundImage)
@@ -56,7 +56,7 @@ describe('SignInReact', () => {
     const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
     createAccountButton.simulate('click');
     wrapper.update();
-    const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
+    const templateImage = wrapper.find('[data-test-id="sign-in-page"]').hostNodes();
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(wrapper.exists('[data-test-id="invitationKey"]')).toBeTruthy();

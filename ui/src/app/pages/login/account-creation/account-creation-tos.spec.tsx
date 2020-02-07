@@ -1,15 +1,14 @@
 import {mount, ReactWrapper, shallow, ShallowWrapper} from 'enzyme';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Document, Page} from 'react-pdf';
 import AccountCreationTos, {AccountCreationTosProps} from './account-creation-tos';
-import {Document, Page, pdfjs} from 'react-pdf';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 const getPrivacyCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
-  return wrapper.find('[data-test-id="privacy-statement-check"]');
+  return wrapper.find('CheckBox[data-test-id="privacy-statement-check"]');
 };
 const getTosCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
-  return wrapper.find('[data-test-id="terms-of-service-check"]');
+  return wrapper.find('CheckBox[data-test-id="terms-of-service-check"]');
 };
 const getNextButton = (wrapper: AnyWrapper ): AnyWrapper => {
   return wrapper.find('[data-test-id="next-button"]');
@@ -23,7 +22,7 @@ beforeEach(() => {
   props = {
     windowSize: {width: 1700, height: 0},
     onComplete: onCompleteSpy,
-    pdfPath: '/assets/documents/terms-of-service.pdf'
+    pdfPath: '/assets/documents/fake-document-path.pdf'
   };
 });
 

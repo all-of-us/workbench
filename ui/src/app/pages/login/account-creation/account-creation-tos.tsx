@@ -76,7 +76,7 @@ export const AccountCreationTos = withWindowSize()(
      * This sets up the intersection listener which will change state when the user scrolls to the
      * end of the document.
      */
-    handleLastPageRender() {
+    private handleLastPageRender() {
       if (this.hasCreatedIntersectionObserver) {
         return;
       }
@@ -96,7 +96,7 @@ export const AccountCreationTos = withWindowSize()(
     /**
      * Attempts to scroll the last page of the PDF document into view.
      */
-    scrollToBottom() {
+    private scrollToBottom() {
       if (this.lastPage) {
         this.lastPage.scrollIntoView({block: 'end'});
       } else {
@@ -121,11 +121,13 @@ export const AccountCreationTos = withWindowSize()(
               Array.from(
                 new Array(numPages),
                 (el, index) => (
+                  // We can't set inline styles on the react-pdf Page element, so instead we set a
+                  // className and specify some style overrides in src/styles.css
                   <Page
                     renderAnnotationLayer={false}
                     renderTextLayer={false}
                     loading=''
-                    className='terms-of-service__page'
+                    className='tos-pdf-page'
                     width={Math.max(500, this.props.windowSize.width * .75)}
                     key={`page_${index + 1}`}
                     pageNumber={index + 1}

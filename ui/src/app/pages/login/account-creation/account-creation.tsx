@@ -321,13 +321,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.setState(fp.set(['profile', 'address', attribute], value));
   }
 
-  // As of now we can add just one industry name role, this will change later
   updateInstitutionAffiliation(attribute: string, value) {
-    this.setState((currentState) => {
-      const profile = currentState.profile;
-      profile.institutionalAffiliations[0][attribute] = value;
-      return currentState;
-    });
+    this.setState(fp.set(['profile', 'institutionalAffiliations', '0', attribute], value));
   }
 
   showFreeTextField(option) {
@@ -336,14 +331,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   clearInstitutionAffiliation() {
-    this.setState(currentState => {
-      const affiliation = currentState.profile.institutionalAffiliations[0];
-      affiliation.nonAcademicAffiliation = null;
-      affiliation.role = '';
-      affiliation.institution = '';
-      affiliation.other = '';
-      return currentState;
-    });
+    this.setState(fp.set(['profile', 'institutionalAffiliations', '0'], {
+      nonAcademicAffiliation: null,
+      role: '',
+      institution: '',
+      other: ''
+    }));
   }
 
   updateNonAcademicAffiliationRoles(nonAcademicAffiliation) {
@@ -543,10 +536,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 <MultiSelectWithLabel placeholder={'Select one or more'} options={AccountCreationOptions.degree}
                                       containerStyle={styles.multiInputSpacing} value={this.state.profile.degrees}
                                       labelText='Your degrees (optional)'
-                                      onChange={(e) => this.setState(currentState => {
-                                        currentState.profile.degrees = e.value;
-                                        return currentState;
-                                      })}/>
+                                      onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
+                                      />
               </FlexRow>
             </FlexColumn>
           </Section>
@@ -702,7 +693,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
             <div style={styles.asideHeader}><i>All of Us</i> participants are most interested in knowing:</div>
             <ul style={styles.asideList}>
-              {researchPurposeList.map(value => <li key={value.key} style={styles.asideText}>{value}</li>)}
+              {researchPurposeList.map((value, index) => <li key={index} style={styles.asideText}>{value}</li>)}
             </ul>
           </FlexColumn>
         </FlexColumn>
