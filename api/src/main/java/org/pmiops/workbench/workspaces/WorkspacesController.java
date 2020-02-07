@@ -150,7 +150,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
-	  ManualWorkspaceMapper manualWorkspaceMapper) {
+      ManualWorkspaceMapper manualWorkspaceMapper) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -166,7 +166,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
-	this.monitoringService = monitoringService;
+    this.monitoringService = monitoringService;
     this.manualWorkspaceMapper = manualWorkspaceMapper;
   }
 
@@ -275,11 +275,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
           Timestamp now = new Timestamp(clock.instant().toEpochMilli());
           DbWorkspace dbWorkspace = new DbWorkspace();
-    // A little unintuitive but setting this here reflects the current state of the workspace
-    // while it was in the billing buffer. Setting this value will inform the update billing code to
-    // skip an unnecessary GCP API call if the billing account is being kept at the free tier
-    dbWorkspace.setBillingAccountName(
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+          // A little unintuitive but setting this here reflects the current state of the workspace
+          // while it was in the billing buffer. Setting this value will inform the update billing
+          // code to
+          // skip an unnecessary GCP API call if the billing account is being kept at the free tier
+          dbWorkspace.setBillingAccountName(
+              workbenchConfigProvider.get().billing.freeTierBillingAccountName());
           setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
           setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
@@ -290,7 +291,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace.setName(reqWorkspace.getName());
 
           // Ignore incoming fields pertaining to review status; clients can only request a review.
-          WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+          WorkspaceConversionUtils.setResearchPurposeDetails(
+              dbWorkspace, workspace.getResearchPurpose());
           if (reqWorkspace.getReviewRequested()) {
             // Use a consistent timestamp.
             dbWorkspace.setTimeRequested(now);
@@ -303,21 +305,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           try {
             dbWorkspace = workspaceService.getDao().save(dbWorkspace);
           } catch (Exception e) {
-            // Tell Google to set the billing account back to the free tier if the workspace creation
+            // Tell Google to set the billing account back to the free tier if the workspace
+            // creation
             // fails
             log.log(
                 Level.SEVERE,
                 "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
                 e);
 
-            updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+            updateWorkspaceBillingAccount(
+                dbWorkspace, workbenchConfigProvider.get().billing.accountId);
             throw e;
           }
 
-          Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+          Workspace createdWorkspace =
+              WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
           workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
           return ResponseEntity.ok(createdWorkspace);
-
         });
   }
 
@@ -469,7 +473,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             throw new BadRequestException("Missing required update field 'etag'");
           }
 
-          final Workspace originalWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+          final Workspace originalWorkspace =
+              workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
           int version = Etags.toVersion(workspace.getEtag());
           if (dbWorkspace.getVersion() != version) {
@@ -492,23 +497,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
           }
 
-          updateWorkspaceBillingAccount(dbWorkspace, request.getWorkspace().getBillingAccountName());
+          updateWorkspaceBillingAccount(
+              dbWorkspace, request.getWorkspace().getBillingAccountName());
           try {
             // The version asserted on save is the same as the one we read via
             // getRequired() above, see RW-215 for details.
             dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
           } catch (Exception e) {
-            // Tell Google Cloud to set the billing account back to the original one since our update
+            // Tell Google Cloud to set the billing account back to the original one since our
+            // update
             // database call failed
             updateWorkspaceBillingAccount(dbWorkspace, originalWorkspace.getBillingAccountName());
             throw e;
           }
 
-          final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+          final Workspace editedWorkspace =
+              workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
           workspaceAuditor.fireEditAction(
               originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-          return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
+          return ResponseEntity.ok(
+              WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
         });
   }
 

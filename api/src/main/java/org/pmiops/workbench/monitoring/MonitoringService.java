@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
-import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.CumulativeMetric;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 
 public interface MonitoringService {

@@ -21,11 +21,11 @@ public enum EventMetric implements Metric {
   private final String description;
   private final List<MetricLabel> labels;
 
-  CumulativeMetric(String name, String description) {
+  EventMetric(String name, String description) {
     this(name, description, Collections.emptyList());
   }
 
-  CumulativeMetric(String name, String description, List<MetricLabel> labels) {
+  EventMetric(String name, String description, List<MetricLabel> labels) {
     this.name = name;
     this.description = description;
     this.labels = labels;

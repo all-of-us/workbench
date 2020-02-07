@@ -19,7 +19,6 @@ import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
-import org.pmiops.workbench.monitoring.views.CumulativeMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.CumulativeMetric;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,7 +50,7 @@ public class GaugeRecorderService {
   private void sendEvents(int eventCount) {
     int numEvents = (int) Math.round(random.nextDouble() * eventCount);
     IntStream.rangeClosed(0, numEvents - 1)
-        .forEach(i ->  monitoringService.recordEvent(CumulativeMetric.DEBUG_COUNT));
+        .forEach(i -> monitoringService.recordEvent(CumulativeMetric.DEBUG_COUNT));
   }
 
   private void sendDistribution(int sampleCount) {
