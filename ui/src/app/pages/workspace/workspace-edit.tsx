@@ -40,7 +40,6 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {TextColumn} from "app/components/text-column";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -913,9 +912,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         }
                       }}
             />
-            <div style={styles.text}>
-              <b>TIP: </b> For billing accounts, if creating a new billing account, refresh this page after creating account.
-            </div>
           </WorkspaceEditSection>
         }
         <WorkspaceEditSection header='Research Use Statement Questions'
