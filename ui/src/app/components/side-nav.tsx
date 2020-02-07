@@ -200,7 +200,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
 export interface SideNavProps {
   profile: Profile;
   bannerAdminActive: boolean;
-  clusterAdminActive: boolean;
+  workspaceAdminActive: boolean;
   homeActive: boolean;
   libraryActive: boolean;
   onToggleSideNav: Function;
@@ -345,10 +345,10 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       }
       {
         profile.authorities.includes(Authority.WORKSPACESVIEW) && this.state.showAdminOptions && <SideNavItem
-            content={'Manage Clusters'}
+            content={'Manage Workspaces'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
-            href={'admin/cluster'}
-            active={this.props.clusterAdminActive}
+            href={'admin/workspace'}
+            active={this.props.workspaceAdminActive}
         />
       }
     </div>;

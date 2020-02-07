@@ -8,9 +8,9 @@ import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {DataUseAgreementComponent} from 'app/pages/profile/data-use-agreement';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
-import {AdminClusterComponent} from './pages/admin/admin-cluster';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
+import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
@@ -282,9 +282,9 @@ const routes: Routes = [
         component: AdminBannerComponent,
         data: {title: 'Create Banner'}
       }, {
-        path: 'admin/cluster',
-        component: AdminClusterComponent,
-        data: { title: 'Manage Clusters'}
+        path: 'admin/workspace',
+        component: AdminWorkspaceComponent,
+        data: { title: 'Manage Workspaces'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,

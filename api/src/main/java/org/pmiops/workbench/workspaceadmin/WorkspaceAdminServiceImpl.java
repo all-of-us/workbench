@@ -6,8 +6,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.AdminWorkspaceResources;
-import org.pmiops.workbench.model.AdminWorkspaceResourcesWorkspaceObjects;
+import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,11 +39,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public AdminWorkspaceResourcesWorkspaceObjects getAdminWorkspaceObjects(long workspaceId) {
+  public AdminWorkspaceObjectsCounts getAdminWorkspaceObjects(long workspaceId) {
     int cohortCount = cohortDao.countByWorkspaceId(workspaceId);
     int conceptSetCount = conceptSetDao.countByWorkspaceId(workspaceId);
     int dataSetCount = dataSetDao.countByWorkspaceId(workspaceId);
-    return new AdminWorkspaceResourcesWorkspaceObjects()
+    return new AdminWorkspaceObjectsCounts()
         .cohortCount(cohortCount)
         .conceptSetCount(conceptSetCount)
         .datasetCount(dataSetCount);

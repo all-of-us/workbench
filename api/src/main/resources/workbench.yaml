@@ -4369,25 +4369,30 @@ definitions:
     type: object
     properties:
       workspaceObjects:
-        type: object
-        properties:
-          cohortCount:
-            type: integer
-          conceptSetCount:
-            type: integer
-          datasetCount:
-            type: integer
-#      cloudStorage:
-#        properties:
-#          notebookFileCount:
-#            type: integer
-#          nonNotebookFileCount:
-#            type: integer
-#          storageBytesUsed:
-#            type: integer
-#      analysis:
-#        properties:
-#          clusters:
-#            type: array
-#            items:
-#            $ref: "#/definitions/Cluster"
+        $ref: "#/definitions/AdminWorkspaceObjectsCounts"
+      cloudStorage:
+        $ref: "#/definitions/AdminWorkspaceCloudStorageCounts"
+      clusters:
+        type: array
+        items:
+          $ref: "#/definitions/ListClusterResponse"
+
+  AdminWorkspaceObjectsCounts:
+    type: object
+    properties:
+      cohortCount:
+        type: integer
+      conceptSetCount:
+        type: integer
+      datasetCount:
+        type: integer
+
+  AdminWorkspaceCloudStorageCounts:
+    type: object
+    properties:
+      notebookFileCount:
+        type: integer
+      nonNotebookFileCount:
+        type: integer
+      storageBytesUsed:
+        type: integer

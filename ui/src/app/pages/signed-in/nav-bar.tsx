@@ -63,7 +63,7 @@ const styles = reactStyles({
 export interface Props {
   profile: Profile;
   bannerAdminActive: boolean;
-  clusterAdminActive: boolean;
+  workspaceAdminActive: boolean;
   headerImg: string;
   displayTag: string;
   shouldShowDisplayTag: boolean;
@@ -235,7 +235,6 @@ export const NavBar = withUserProfile()(
           && <SideNav
             profile={this.props.profile}
             bannerAdminActive={this.props.bannerAdminActive}
-            clusterAdminActive={this.props.clusterAdminActive}
             homeActive={this.props.homeActive}
             libraryActive={this.props.libraryActive}
             // Passing the function itself deliberately, we want to be able to
@@ -243,6 +242,7 @@ export const NavBar = withUserProfile()(
             onToggleSideNav={this.onToggleSideNav}
             profileActive={this.props.profileActive}
             userAdminActive={this.props.userAdminActive}
+            workspaceAdminActive={this.props.workspaceAdminActive}
             workspacesActive={this.props.workspacesActive}
           />
         }
@@ -261,7 +261,7 @@ export class NavBarComponent extends ReactWrapperBase {
   @Input('displayTag') displayTag: Props['displayTag'];
   @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
   @Input('bannerAdminActive') bannerAdminActive: Props['bannerAdminActive'];
-  @Input('clusterAdminActive') clusterAdminActive: Props['clusterAdminActive'];
+  @Input('workspaceAdminActive') workspaceAdminActive: Props['workspaceAdminActive'];
   @Input('homeActive') homeActive: Props['homeActive'];
   @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
   @Input('libraryActive') libraryActive: Props['libraryActive'];
@@ -274,7 +274,7 @@ export class NavBarComponent extends ReactWrapperBase {
       'displayTag',
       'shouldShowDisplayTag',
       'bannerAdminActive',
-      'clusterAdminActive',
+      'workspaceAdminActive',
       'homeActive',
       'workspacesActive',
       'libraryActive',

@@ -228,12 +228,12 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.locationService.path() === '/admin/banner';
   }
 
-  get clusterAdminActive(): boolean {
-    return this.locationService.path() === '/admin/cluster';
-  }
-
   get userAdminActive(): boolean {
     return this.locationService.path() === '/admin/user';
+  }
+
+  get workspaceAdminActive(): boolean {
+    return this.locationService.path() === '/admin/workspace';
   }
 
   get homeActive(): boolean {

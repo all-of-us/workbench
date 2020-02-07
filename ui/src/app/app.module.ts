@@ -23,9 +23,9 @@ import {BugReportComponent} from './components/bug-report';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
-import {AdminClusterComponent} from './pages/admin/admin-cluster';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
+import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
@@ -128,7 +128,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AdminBannerComponent,
-    AdminClusterComponent,
+    AdminWorkspaceComponent,
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
     AppComponent,
