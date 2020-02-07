@@ -175,7 +175,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       try {
         this.setState({editSaving: true});
         await conceptSetsApi().updateConceptSet(ns, wsid, csid,
-          {...conceptSet, name: editName, description: editDescription});
+          {...conceptSet, name: editName, description: editDescription, concepts: null});
         await this.getConceptSet();
       } catch (error) {
         console.log(error);
