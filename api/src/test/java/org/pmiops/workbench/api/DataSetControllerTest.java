@@ -703,7 +703,7 @@ public class DataSetControllerTest {
     String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
-            "import pandas\n\n"
+            "import pandas\nimport os\n\n"
                 + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
                 + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
                 + "max_number_of_rows = '1000000'\n\n"
@@ -721,22 +721,9 @@ public class DataSetControllerTest {
                 + "LIMIT \"\"\" + max_number_of_rows\n"
                 + "\n"
                 + prefix
-                + "query_config = {\n"
-                + "  'query': {\n"
-                + "  'parameterMode': 'NAMED',\n"
-                + "  'queryParameters': [\n\n"
-                + "    ]\n"
-                + "  }\n"
-                + "}\n"
-                + "\n"
-                + "\n"
-                + "\n"
-                + prefix
                 + "df = pandas.read_gbq("
                 + prefix
-                + "sql, dialect=\"standard\", configuration="
-                + prefix
-                + "query_config)"
+                + "sql, dialect=\"standard\")"
                 + "\n"
                 + "\n"
                 + prefix
@@ -765,10 +752,7 @@ public class DataSetControllerTest {
     String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
-            "require(devtools)\n"
-                + "devtools::install_github(\"rstudio/reticulate\", ref=\"00172079\")\n"
-                + "library(reticulate)\n"
-                + "pd <- reticulate::import(\"pandas\")\n\n"
+            "library(bigrquery)\n\n"
                 + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
                 + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
                 + "max_number_of_rows = '1000000'\n\n"
@@ -782,23 +766,12 @@ public class DataSetControllerTest {
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
                 + ".person` person)) \n"
-                + "LIMIT \", max_number_of_rows)\n"
+                + "LIMIT \", max_number_of_rows, sep=\"\")\n"
                 + "\n"
                 + prefix
-                + "query_config <- list(\n"
-                + "  query = list(\n"
-                + "    parameterMode = 'NAMED',\n"
-                + "    queryParameters = list(\n\n"
-                + "    )\n"
-                + "  )\n"
-                + ")\n"
-                + "\n"
+                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
                 + prefix
-                + "df <- pd$read_gbq("
-                + prefix
-                + "sql, dialect=\"standard\", configuration="
-                + prefix
-                + "query_config)"
+                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")))"
                 + "\n"
                 + "\n"
                 + "head("
