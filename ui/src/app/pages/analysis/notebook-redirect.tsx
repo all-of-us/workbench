@@ -438,7 +438,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
             <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
           </div>
           <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
-            {Array.from(progressCardStates, ([key, index]) => {
+            {Array.from(progressCardStates, ([key, _], index) => {
               return <ProgressCard key={index} progressState={progress} cardState={key}
                                    creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
             })}
