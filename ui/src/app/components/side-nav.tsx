@@ -210,10 +210,8 @@ export interface SideNavProps {
 
 export interface SideNavState {
   showAdminOptions: boolean;
-  showHelpOptions: boolean;
   showUserOptions: boolean;
   adminRef: React.RefObject<SideNavItem>;
-  helpRef: React.RefObject<SideNavItem>;
   userRef: React.RefObject<SideNavItem>;
 }
 
@@ -222,24 +220,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     super(props);
     this.state = {
       showAdminOptions: false,
-      showHelpOptions: false,
       showUserOptions: false,
       adminRef: React.createRef(),
-      helpRef: React.createRef(),
       userRef: React.createRef(),
     };
   }
 
   onToggleUser() {
-    this.setState({showHelpOptions: false});
-    this.state.helpRef.current.closeSubItems();
     this.setState(previousState => ({showUserOptions: !previousState.showUserOptions}));
-  }
-
-  onToggleHelp() {
-    this.setState({showUserOptions: false});
-    this.state.userRef.current.closeSubItems();
-    this.setState(previousState => ({showHelpOptions: !previousState.showHelpOptions}));
   }
 
   onToggleAdmin() {
@@ -316,36 +304,16 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       />
       <SideNavItem
         icon='help'
-        content='User Support'
-        parentOnClick={() => this.onToggleHelp()}
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        containsSubItems={true}
-        ref={this.state.helpRef}
-      />
-      <SideNavItem
-        content={'User Forum'}
+        content={'User Support'}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         parentOnClick={() => this.redirectToZendesk()}
       />
       <SideNavItem
+        icon='envelope'
         content={'Contact Us'}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         parentOnClick={() => this.openContactWidget()}
       />
-      {
-        this.state.showHelpOptions && <SideNavItem
-          content={'User Forum'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
-          parentOnClick={() => this.redirectToZendesk()}
-        />
-      }
-      {
-        this.state.showHelpOptions && <SideNavItem
-          content={'Contact Us'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
-          parentOnClick={() => this.openContactWidget()}
-        />
-      }
       {
         (profile.authorities.includes(Authority.ACCESSCONTROLADMIN)
           || profile.authorities.includes(Authority.COMMUNICATIONSADMIN)) && <SideNavItem
