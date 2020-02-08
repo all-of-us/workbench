@@ -11,10 +11,6 @@ import org.pmiops.workbench.monitoring.views.EventMetric;
  */
 public interface LogsBasedMetricService {
 
-  String METRIC_VALUE_KEY = "data_point_value";
-  String METRIC_NAME_KEY = "metric_name";
-  String METRIC_LABELS_KEY = "labels";
-
   /**
    * This method of metric recording is essentially one LogEntry per Timeseries per sample; Reusing
    * the MeasurementBundle class from the Monitoring implementation is useful because of
@@ -45,7 +41,7 @@ public interface LogsBasedMetricService {
    *     don't make sense for timings
    * @param operation - Code to be run, e.g. () -> myService.computeThings()
    */
-  void timeAndRecordOperation(
+  void timeAndRecord(
       Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation);
 
   /**
@@ -57,7 +53,7 @@ public interface LogsBasedMetricService {
    *     don't make sense for timings
    * @param operation - Code to be run, e.g. myService::getFooList
    */
-  <T> T timeAndRecordOperation(
+  <T> T timeAndRecord(
       Builder measurementBundleBuilder,
       DistributionMetric distributionMetric,
       Supplier<T> operation);

@@ -43,7 +43,7 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
   }
 
   @Override
-  public void timeAndRecordOperation(Builder measurementBundleBuilder,
+  public void timeAndRecord(Builder measurementBundleBuilder,
       DistributionMetric distributionMetric, Runnable operation) {
     final Stopwatch stopwatch = Stopwatch.createStarted();
     operation.run();
@@ -55,7 +55,7 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
   }
 
   @Override
-  public <T> T timeAndRecordOperation(Builder measurementBundleBuilder,
+  public <T> T timeAndRecord(Builder measurementBundleBuilder,
       DistributionMetric distributionMetric, Supplier<T> operation) {
     final Stopwatch stopwatch = Stopwatch.createStarted();
     final T result = operation.get();
@@ -88,9 +88,10 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
             entry ->
                 JsonPayload.of(
                     ImmutableMap.of(
-                        LogsBasedMetricService.METRIC_VALUE_KEY, entry.getValue().doubleValue(),
-                        LogsBasedMetricService.METRIC_NAME_KEY, entry.getKey().getName(),
-                        LogsBasedMetricService.METRIC_LABELS_KEY, labelToValue)))
+                        MetricJsonKey.VALUE.getKeyName(), entry.getValue().doubleValue(),
+                        MetricJsonKey.NAME.getKeyName(), entry.getKey().getName(),
+                        MetricJsonKey.UNIT.getKeyName(), entry.getKey().getUnit(),
+                        MetricJsonKey.LABELS.getKeyName(), labelToValue)))
         .collect(ImmutableSet.toImmutableSet());
   }
 

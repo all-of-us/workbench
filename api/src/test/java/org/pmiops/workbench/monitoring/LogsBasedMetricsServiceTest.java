@@ -12,9 +12,12 @@ import com.google.cloud.logging.Payload.Type;
 import com.google.cloud.logging.Severity;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.junit.Before;
@@ -25,8 +28,10 @@ import org.mockito.Captor;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.monitoring.views.UnitOfMeasure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -45,6 +50,7 @@ public class LogsBasedMetricsServiceTest {
   @MockBean StackdriverStatsExporterService mockStackdriverStatsExporterService;
 
   @Captor ArgumentCaptor<Iterable<LogEntry>> logEntriesCaptor;
+  @Captor ArgumentCaptor<MeasurementBundle> measurementBundleCaptor;
   @Autowired LogsBasedMetricService logsBasedMetricService;
 
   @TestConfiguration
@@ -79,7 +85,7 @@ public class LogsBasedMetricsServiceTest {
     assertThat(logEntry.getSeverity()).isEqualTo(Severity.INFO);
 
     final Map<String, Object> payloadMap = logEntry.<JsonPayload>getPayload().getDataAsMap();
-    assertThat(payloadMap).hasSize(3);
+    assertThat(payloadMap).hasSize(4);
 
     final String metricName =
         (String) payloadMap.getOrDefault(LogsBasedMetricService.METRIC_NAME_KEY, "");
@@ -128,5 +134,68 @@ public class LogsBasedMetricsServiceTest {
         .containsAllIn(
             ImmutableSet.of(
                 EventMetric.NOTEBOOK_CLONE.getName(), EventMetric.NOTEBOOK_DELETE.getName()));
+  }
+
+  @Test
+  public void testTimeAndRecordWithRunnable() {
+    Set<Integer> aSet = new HashSet<>();
+    logsBasedMetricService.timeAndRecord(MeasurementBundle.builder()
+        .addTag(MetricLabel.OPERATION_NAME, "test1"),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        () -> {
+          aSet.add(3);
+          try {
+            Thread.sleep(5);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        });
+    assertThat(aSet).contains(3);
+    verify(mockLogging).write(logEntriesCaptor.capture());
+    final Map<String, Object> entryData = StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
+        .map(LogEntry::getPayload)
+        .map(p -> (JsonPayload)p)
+        .map(JsonPayload::getDataAsMap)
+        .findFirst()
+        .orElse(Collections.emptyMap());
+    assertThat(entryData).hasSize(4);
+    assertThat(entryData.get(LogsBasedMetricService.METRIC_NAME_KEY))
+        .isEqualTo(DistributionMetric.WORKSPACE_OPERATION_TIME.getName());
+    double value = (Double) entryData.get(LogsBasedMetricService.METRIC_VALUE_KEY);
+    assertThat(5.0 <= value).isTrue();
+  }
+
+  public void testTimeAndRecordWithSupplier() {
+    Set<Integer> aSet = new HashSet<>();
+    final int result = logsBasedMetricService.timeAndRecord(MeasurementBundle.builder()
+            .addTag(MetricLabel.OPERATION_NAME, "test1"),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        () -> {
+          aSet.add(3);
+          try {
+            Thread.sleep(5);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+          return 99;
+        });
+    assertThat(aSet).contains(3);
+    assertThat(result).isEqualTo(99);
+
+    verify(mockLogging).write(logEntriesCaptor.capture());
+    final Map<String, Object> entryData = StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
+        .map(LogEntry::getPayload)
+        .map(p -> (JsonPayload)p)
+        .map(JsonPayload::getDataAsMap)
+        .findFirst()
+        .orElse(Collections.emptyMap());
+    assertThat(entryData).hasSize(4);
+    assertThat(entryData.get(LogsBasedMetricService.METRIC_NAME_KEY))
+        .isEqualTo(DistributionMetric.WORKSPACE_OPERATION_TIME.getName());
+    assertThat(entryData.get(LogsBasedMetricService.METRIC_UNIT_KEY))
+        .isEqualTo(UnitOfMeasure.MILLISECOND.getUcmSymbol());
+
+    double value = (Double) entryData.get(LogsBasedMetricService.METRIC_VALUE_KEY);
+    assertThat(5.0 <= value).isTrue();
   }
 }

@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONArray;
@@ -44,8 +45,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Stubber;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -111,6 +114,10 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -155,8 +162,6 @@ public class DataSetControllerTest {
   private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
   private static final String TEST_CDR_DATA_SET_ID = "synthetic_cdr20180606";
   private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
-  private static final String NAMED_PARAMETER_NAME = "p1_706";
-  private static final String NAMED_PARAMETER_VALUE = "ICD9";
 
   private Long COHORT_ONE_ID;
   private Long CONCEPT_SET_ONE_ID;
@@ -237,7 +242,9 @@ public class DataSetControllerTest {
 
   @Autowired ManualWorkspaceMapper manualWorkspaceMapper;
 
-  @Autowired Provider<Zendesk> mockZendeskProvider;
+  @MockBean Provider<Zendesk> mockZendeskProvider;
+  @MockBean MonitoringService mockMonitoringService;
+  @MockBean LogsBasedMetricService mockLogsBasedMetricService;
 
   @TestConfiguration
   @Import({
@@ -269,8 +276,7 @@ public class DataSetControllerTest {
     CohortQueryBuilder.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class,
-    Zendesk.class
+    UserServiceAuditor.class
   })
   static class Configuration {
 
@@ -359,7 +365,8 @@ public class DataSetControllerTest {
             workbenchConfigProvider,
             workspaceAuditor,
             workspaceMapper,
-            manualWorkspaceMapper);
+            manualWorkspaceMapper,
+            mockLogsBasedMetricService);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,
@@ -372,7 +379,8 @@ public class DataSetControllerTest {
             userProvider,
             CLOCK,
             cdrVersionService,
-            userRecentResourceService);
+            userRecentResourceService,
+            mockMonitoringService);
     ConceptSetsController conceptSetsController =
         new ConceptSetsController(
             workspaceService,
@@ -391,6 +399,12 @@ public class DataSetControllerTest {
         .when(billingProjectBufferService)
         .assignBillingProject(any());
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
+
+    final Stubber stubber = (Stubber) doAnswer(
+        invocation -> ((Supplier) invocation.getArgument(2)).get())
+        .when(mockLogsBasedMetricService)
+        .timeAndRecord(any(MeasurementBundle.Builder.class), any(DistributionMetric.class),
+            ArgumentMatchers.<Supplier<Workspace>>any());
 
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =

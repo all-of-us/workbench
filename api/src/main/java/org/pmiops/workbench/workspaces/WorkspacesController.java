@@ -258,7 +258,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
-    return logsBasedMetricService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createWorkspace"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {
@@ -423,7 +423,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return logsBasedMetricService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteWorkspace"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {
@@ -446,7 +446,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
     final WorkspaceResponse workspaceResponse =
-        logsBasedMetricService.timeAndRecordOperation(
+        logsBasedMetricService.timeAndRecord(
             MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspace"),
             DistributionMetric.WORKSPACE_OPERATION_TIME,
             () -> workspaceService.getWorkspace(workspaceNamespace, workspaceId));
@@ -457,7 +457,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     List<WorkspaceResponse> workspaces =
-        logsBasedMetricService.timeAndRecordOperation(
+        logsBasedMetricService.timeAndRecord(
             MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspaces"),
             DistributionMetric.WORKSPACE_OPERATION_TIME,
             workspaceService::getWorkspaces);
@@ -469,7 +469,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
       throws NotFoundException {
-    return logsBasedMetricService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "updateWorkspace"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {
@@ -538,7 +538,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
       throws BadRequestException, TooManyRequestsException {
-    return logsBasedMetricService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "cloneWorkspace"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> cloneWorkspaceImpl(fromWorkspaceNamespace, fromWorkspaceId, body));
@@ -793,7 +793,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<List<FileDetail>> getNoteBookList(
       String workspaceNamespace, String workspaceId) {
     List<FileDetail> fileList =
-        logsBasedMetricService.timeAndRecordOperation(
+        logsBasedMetricService.timeAndRecord(
             MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getNoteBookList"),
             DistributionMetric.WORKSPACE_OPERATION_TIME,
             () -> notebooksService.getNotebooks(workspaceNamespace, workspaceId));
@@ -803,7 +803,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(
       String workspace, String workspaceName, String notebookName) {
-    logsBasedMetricService.timeAndRecordOperation(
+    logsBasedMetricService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteNotebook"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> notebooksService.deleteNotebook(workspace, workspaceName, notebookName));
@@ -816,7 +816,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceId,
       String fromNotebookName,
       CopyRequest copyRequest) {
-    return logsBasedMetricService.timeAndRecordOperation(
+    return logsBasedMetricService.timeAndRecord(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "copyNotebook"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {

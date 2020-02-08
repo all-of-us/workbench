@@ -80,6 +80,10 @@ public interface Metric {
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
   }
 
+  /**
+   * Only explicitly listed MetricLabels are allowed. This is stricter than
+   * the check for label values.
+   */
   default boolean supportsLabel(MetricLabel label) {
     return getLabels().contains(label);
   }
