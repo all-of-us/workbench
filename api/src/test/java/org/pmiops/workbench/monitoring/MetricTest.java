@@ -13,8 +13,7 @@ public class MetricTest {
   public void testMatchingLabelIsSupported() {
     assertThat(GaugeMetric.USER_COUNT.getLabels()).contains(MetricLabel.USER_BYPASSED_BETA);
     assertThat(GaugeMetric.USER_COUNT.supportsLabel(MetricLabel.USER_BYPASSED_BETA)).isTrue();
-    assertThat(EventMetric.NOTEBOOK_CLONE.supportsLabel(MetricLabel.USER_BYPASSED_BETA))
-        .isFalse();
+    assertThat(EventMetric.NOTEBOOK_CLONE.supportsLabel(MetricLabel.USER_BYPASSED_BETA)).isFalse();
   }
 
   @Test

@@ -8,8 +8,7 @@ import java.util.List;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 
 /**
- *  Metric enum values for events to be counted. The value associated with count
- *  metrics is thus 1.
+ * Metric enum values for events to be counted. The value associated with count metrics is thus 1.
  */
 public enum EventMetric implements Metric {
   CRON_JOB_END(

@@ -267,7 +267,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         });
   }
 
-  // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService & WorkspaceServiceImpl
+  // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService &
+  // WorkspaceServiceImpl
   @NotNull
   private Workspace createWorkspaceImpl(Workspace workspace) {
     validateWorkspaceApiModel(workspace);
@@ -305,8 +306,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setName(reqWorkspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    manualWorkspaceMapper.setResearchPurposeDetails(
-        dbWorkspace, workspace.getResearchPurpose());
+    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
     if (reqWorkspace.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -327,13 +327,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
           e);
 
-      updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
       throw e;
     }
 
-    Workspace createdWorkspace =
-        manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return createdWorkspace;
   }
@@ -529,8 +527,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
           workspaceAuditor.fireEditAction(
               originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-          return ResponseEntity.ok(
-              manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+          return ResponseEntity.ok(manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
         });
   }
 

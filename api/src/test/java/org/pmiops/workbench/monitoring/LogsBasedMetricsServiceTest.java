@@ -10,8 +10,10 @@ import com.google.cloud.logging.Logging;
 import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Payload.Type;
 import com.google.cloud.logging.Severity;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl.PayloadKey;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.EventMetric;
@@ -41,6 +44,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class LogsBasedMetricsServiceTest {
 
+  private static final Duration OPERATION_DURATION = Duration.ofMillis(15);
   private static MonitoredResource MONITORED_RESOURCE =
       MonitoredResource.newBuilder("resource_type_woot")
           .addLabel("height", "3 apples tall")
@@ -48,9 +52,9 @@ public class LogsBasedMetricsServiceTest {
           .build();
   @MockBean Logging mockLogging;
   @MockBean StackdriverStatsExporterService mockStackdriverStatsExporterService;
+  @MockBean Stopwatch mockStopwatch;
 
   @Captor ArgumentCaptor<Iterable<LogEntry>> logEntriesCaptor;
-  @Captor ArgumentCaptor<MeasurementBundle> measurementBundleCaptor;
   @Autowired LogsBasedMetricService logsBasedMetricService;
 
   @TestConfiguration
@@ -62,6 +66,7 @@ public class LogsBasedMetricsServiceTest {
     doReturn(MONITORED_RESOURCE)
         .when(mockStackdriverStatsExporterService)
         .getLoggingMonitoredResource();
+    doReturn(OPERATION_DURATION).when(mockStopwatch).elapsed();
   }
 
   @Test
@@ -87,18 +92,16 @@ public class LogsBasedMetricsServiceTest {
     final Map<String, Object> payloadMap = logEntry.<JsonPayload>getPayload().getDataAsMap();
     assertThat(payloadMap).hasSize(4);
 
-    final String metricName =
-        (String) payloadMap.getOrDefault(LogsBasedMetricService.METRIC_NAME_KEY, "");
+    final String metricName = (String) payloadMap.getOrDefault(PayloadKey.NAME.getKeyName(), "");
     assertThat(metricName).isEqualTo(GaugeMetric.WORKSPACE_COUNT.getName());
 
-    final Double metricValue =
-        (Double) payloadMap.getOrDefault(LogsBasedMetricService.METRIC_VALUE_KEY, "");
+    final Double metricValue = (Double) payloadMap.getOrDefault(PayloadKey.VALUE.getKeyName(), "");
     assertThat(metricValue).isEqualTo(3.0);
 
     @SuppressWarnings("unchecked")
     final Map<String, String> labelToValue =
         (Map<String, String>)
-            payloadMap.getOrDefault(LogsBasedMetricService.METRIC_LABELS_KEY, ImmutableMap.of());
+            payloadMap.getOrDefault(PayloadKey.LABELS.getKeyName(), ImmutableMap.of());
     assertThat(labelToValue).hasSize(2);
     assertThat(labelToValue.get(MetricLabel.DATA_ACCESS_LEVEL.getName()))
         .isEqualTo(DataAccessLevel.PROTECTED.toString());
@@ -127,7 +130,7 @@ public class LogsBasedMetricsServiceTest {
         sentEntries.stream()
             .map(e -> (JsonPayload) e.getPayload())
             .map(JsonPayload::getDataAsMap)
-            .map(m -> (String) m.get(LogsBasedMetricService.METRIC_NAME_KEY))
+            .map(m -> (String) m.get(PayloadKey.NAME.getKeyName()))
             .filter(Objects::nonNull)
             .collect(ImmutableSet.toImmutableSet());
     assertThat(metricNames)
@@ -138,64 +141,59 @@ public class LogsBasedMetricsServiceTest {
 
   @Test
   public void testTimeAndRecordWithRunnable() {
-    Set<Integer> aSet = new HashSet<>();
-    logsBasedMetricService.timeAndRecord(MeasurementBundle.builder()
-        .addTag(MetricLabel.OPERATION_NAME, "test1"),
+    Set<Integer> sideEffectSet = new HashSet<>();
+    logsBasedMetricService.timeAndRecord(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "test1"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {
-          aSet.add(3);
-          try {
-            Thread.sleep(5);
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
+          int innerInt = 2;
+          sideEffectSet.add(3);
+          innerInt -= 3;
+          assertThat(innerInt).isEqualTo(-1);
         });
-    assertThat(aSet).contains(3);
+    assertThat(sideEffectSet).contains(3);
     verify(mockLogging).write(logEntriesCaptor.capture());
-    final Map<String, Object> entryData = StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
-        .map(LogEntry::getPayload)
-        .map(p -> (JsonPayload)p)
-        .map(JsonPayload::getDataAsMap)
-        .findFirst()
-        .orElse(Collections.emptyMap());
+    final Map<String, Object> entryData =
+        StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
+            .map(LogEntry::getPayload)
+            .map(p -> (JsonPayload) p)
+            .map(JsonPayload::getDataAsMap)
+            .findFirst()
+            .orElse(Collections.emptyMap());
     assertThat(entryData).hasSize(4);
-    assertThat(entryData.get(LogsBasedMetricService.METRIC_NAME_KEY))
+    assertThat(entryData.get(PayloadKey.NAME.getKeyName()))
         .isEqualTo(DistributionMetric.WORKSPACE_OPERATION_TIME.getName());
-    double value = (Double) entryData.get(LogsBasedMetricService.METRIC_VALUE_KEY);
-    assertThat(5.0 <= value).isTrue();
+    assertThat((double) entryData.get(PayloadKey.VALUE.getKeyName()))
+        .isEqualTo((double) OPERATION_DURATION.toMillis());
   }
 
   public void testTimeAndRecordWithSupplier() {
     Set<Integer> aSet = new HashSet<>();
-    final int result = logsBasedMetricService.timeAndRecord(MeasurementBundle.builder()
-            .addTag(MetricLabel.OPERATION_NAME, "test1"),
-        DistributionMetric.WORKSPACE_OPERATION_TIME,
-        () -> {
-          aSet.add(3);
-          try {
-            Thread.sleep(5);
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-          return 99;
-        });
+    final int result =
+        logsBasedMetricService.timeAndRecord(
+            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "test1"),
+            DistributionMetric.WORKSPACE_OPERATION_TIME,
+            () -> {
+              return 99;
+            });
     assertThat(aSet).contains(3);
     assertThat(result).isEqualTo(99);
 
     verify(mockLogging).write(logEntriesCaptor.capture());
-    final Map<String, Object> entryData = StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
-        .map(LogEntry::getPayload)
-        .map(p -> (JsonPayload)p)
-        .map(JsonPayload::getDataAsMap)
-        .findFirst()
-        .orElse(Collections.emptyMap());
+    final Map<String, Object> entryData =
+        StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
+            .map(LogEntry::getPayload)
+            .map(p -> (JsonPayload) p)
+            .map(JsonPayload::getDataAsMap)
+            .findFirst()
+            .orElse(Collections.emptyMap());
     assertThat(entryData).hasSize(4);
-    assertThat(entryData.get(LogsBasedMetricService.METRIC_NAME_KEY))
+    assertThat(entryData.get(PayloadKey.NAME.getKeyName()))
         .isEqualTo(DistributionMetric.WORKSPACE_OPERATION_TIME.getName());
-    assertThat(entryData.get(LogsBasedMetricService.METRIC_UNIT_KEY))
+    assertThat(entryData.get(PayloadKey.UNIT.getKeyName()))
         .isEqualTo(UnitOfMeasure.MILLISECOND.getUcmSymbol());
 
-    double value = (Double) entryData.get(LogsBasedMetricService.METRIC_VALUE_KEY);
-    assertThat(5.0 <= value).isTrue();
+    assertThat((Double) entryData.get(PayloadKey.VALUE.getKeyName()))
+        .isEqualTo(OPERATION_DURATION.toMillis());
   }
 }

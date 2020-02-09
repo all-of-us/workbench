@@ -81,8 +81,8 @@ public interface Metric {
   }
 
   /**
-   * Only explicitly listed MetricLabels are allowed. This is stricter than
-   * the check for label values.
+   * Only explicitly listed MetricLabels are allowed. This is stricter than the check for label
+   * values.
    */
   default boolean supportsLabel(MetricLabel label) {
     return getLabels().contains(label);

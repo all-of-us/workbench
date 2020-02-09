@@ -400,11 +400,14 @@ public class DataSetControllerTest {
         .assignBillingProject(any());
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
-    final Stubber stubber = (Stubber) doAnswer(
-        invocation -> ((Supplier) invocation.getArgument(2)).get())
-        .when(mockLogsBasedMetricService)
-        .timeAndRecord(any(MeasurementBundle.Builder.class), any(DistributionMetric.class),
-            ArgumentMatchers.<Supplier<Workspace>>any());
+    final Stubber stubber =
+        (Stubber)
+            doAnswer(invocation -> ((Supplier) invocation.getArgument(2)).get())
+                .when(mockLogsBasedMetricService)
+                .timeAndRecord(
+                    any(MeasurementBundle.Builder.class),
+                    any(DistributionMetric.class),
+                    ArgumentMatchers.<Supplier<Workspace>>any());
 
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =

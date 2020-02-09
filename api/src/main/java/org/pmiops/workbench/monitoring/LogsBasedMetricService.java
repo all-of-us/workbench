@@ -6,8 +6,8 @@ import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 
 /**
- * We are temporarily using the Stackdriver Logs-based metric facility to record and chart
- * count (event), cumulative, and distribution metrics
+ * We are temporarily using the Stackdriver Logs-based metric facility to record and chart count
+ * (event), cumulative, and distribution metrics
  */
 public interface LogsBasedMetricService {
 
@@ -57,5 +57,4 @@ public interface LogsBasedMetricService {
       Builder measurementBundleBuilder,
       DistributionMetric distributionMetric,
       Supplier<T> operation);
-
 }
