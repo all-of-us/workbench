@@ -42,6 +42,7 @@ import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -95,7 +96,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final Clock clock;
   private final CdrVersionService cdrVersionService;
   private final UserRecentResourceService userRecentResourceService;
-  private MonitoringService monitoringService;
+  private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
   CohortsController(
@@ -110,7 +111,7 @@ public class CohortsController implements CohortsApiDelegate {
       Clock clock,
       CdrVersionService cdrVersionService,
       UserRecentResourceService userRecentResourceService,
-      MonitoringService monitoringService) {
+      LogsBasedMetricService logsBasedMetricService) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
@@ -122,7 +123,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.clock = clock;
     this.cdrVersionService = cdrVersionService;
     this.userRecentResourceService = userRecentResourceService;
-    this.monitoringService = monitoringService;
+    this.logsBasedMetricService = logsBasedMetricService;
   }
 
   private void checkForDuplicateCohortNameException(String newCohortName, DbWorkspace workspace) {
@@ -138,7 +139,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> createCohort(
       String workspaceNamespace, String workspaceId, Cohort cohort) {
-    return monitoringService.timeAndRecord(
+    final Cohort result = logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -170,15 +171,15 @@ public class CohortsController implements CohortsApiDelegate {
                     newCohort.getName()),
                 e);
           }
-
-          return ResponseEntity.ok(TO_CLIENT_COHORT.apply(newCohort));
+          return TO_CLIENT_COHORT.apply(newCohort);
         });
+    return ResponseEntity.ok(result);
   }
 
   @Override
   public ResponseEntity<Cohort> duplicateCohort(
       String workspaceNamespace, String workspaceId, DuplicateCohortRequest params) {
-    return monitoringService.timeAndRecord(
+    return logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "duplicateCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -216,7 +217,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    return monitoringService.timeAndRecord(
+    logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -226,14 +227,14 @@ public class CohortsController implements CohortsApiDelegate {
 
           DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
           cohortDao.delete(dbCohort);
-          return ResponseEntity.ok(new EmptyResponse());
         });
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<Cohort> getCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    return monitoringService.timeAndRecord(
+    final Cohort result = logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -242,14 +243,15 @@ public class CohortsController implements CohortsApiDelegate {
               workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
           DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
-          return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
+          return TO_CLIENT_COHORT.apply(dbCohort);
         });
+    return ResponseEntity.ok(result);
   }
 
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return monitoringService.timeAndRecord(
+    final CohortListResponse cohortListResponse = logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortsInWorkspace"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -268,14 +270,15 @@ public class CohortsController implements CohortsApiDelegate {
                     .sorted(Comparator.comparing(Cohort::getName))
                     .collect(Collectors.toList()));
           }
-          return ResponseEntity.ok(response);
+          return response;
         });
+      return ResponseEntity.ok(cohortListResponse);
   }
 
   @Override
   public ResponseEntity<Cohort> updateCohort(
       String workspaceNamespace, String workspaceId, Long cohortId, Cohort cohort) {
-    return monitoringService.timeAndRecord(
+    return logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortsInWorkspace"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -348,7 +351,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(
       String workspaceNamespace, String workspaceId, MaterializeCohortRequest request) {
-    return monitoringService.timeAndRecord(
+    return logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "materializeCohort"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -418,7 +421,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CdrQuery> getDataTableQuery(
       String workspaceNamespace, String workspaceId, DataTableSpecification request) {
-    return monitoringService.timeAndRecord(
+    return logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getDataTableQuery"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {
@@ -471,7 +474,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(
       String workspaceNamespace, String workspaceId, CohortAnnotationsRequest request) {
-    return monitoringService.timeAndRecord(
+    return logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortAnnotations"),
         DistributionMetric.COHORT_OPERATION_TIME,
         () -> {

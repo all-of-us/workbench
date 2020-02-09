@@ -41,7 +41,7 @@ public interface LogsBasedMetricService {
    *     don't make sense for timings
    * @param operation - Code to be run, e.g. () -> myService.computeThings()
    */
-  void timeAndRecord(
+  void recordElapsedTime(
       Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation);
 
   /**
@@ -53,7 +53,7 @@ public interface LogsBasedMetricService {
    *     don't make sense for timings
    * @param operation - Code to be run, e.g. myService::getFooList
    */
-  <T> T timeAndRecord(
+  <T> T recordElapsedTime(
       Builder measurementBundleBuilder,
       DistributionMetric distributionMetric,
       Supplier<T> operation);

@@ -48,7 +48,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Stubber;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -115,6 +114,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
@@ -241,10 +241,10 @@ public class DataSetControllerTest {
   @Autowired WorkspaceMapper workspaceMapper;
 
   @Autowired ManualWorkspaceMapper manualWorkspaceMapper;
+  @Autowired LogsBasedMetricService logsBasedMetricService;
 
   @MockBean Provider<Zendesk> mockZendeskProvider;
   @MockBean MonitoringService mockMonitoringService;
-  @MockBean LogsBasedMetricService mockLogsBasedMetricService;
 
   @TestConfiguration
   @Import({
@@ -255,7 +255,8 @@ public class DataSetControllerTest {
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -366,7 +367,7 @@ public class DataSetControllerTest {
             workspaceAuditor,
             workspaceMapper,
             manualWorkspaceMapper,
-            mockLogsBasedMetricService);
+            logsBasedMetricService);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,
@@ -380,7 +381,7 @@ public class DataSetControllerTest {
             CLOCK,
             cdrVersionService,
             userRecentResourceService,
-            mockMonitoringService);
+            logsBasedMetricService);
     ConceptSetsController conceptSetsController =
         new ConceptSetsController(
             workspaceService,
@@ -399,16 +400,6 @@ public class DataSetControllerTest {
         .when(billingProjectBufferService)
         .assignBillingProject(any());
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
-
-    final Stubber stubber =
-        (Stubber)
-            doAnswer(invocation -> ((Supplier) invocation.getArgument(2)).get())
-                .when(mockLogsBasedMetricService)
-                .timeAndRecord(
-                    any(MeasurementBundle.Builder.class),
-                    any(DistributionMetric.class),
-                    ArgumentMatchers.<Supplier<Workspace>>any());
-
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =
         gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"), CdrBigQuerySchemaConfig.class);

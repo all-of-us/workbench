@@ -142,7 +142,7 @@ public class LogsBasedMetricsServiceTest {
   @Test
   public void testTimeAndRecordWithRunnable() {
     Set<Integer> sideEffectSet = new HashSet<>();
-    logsBasedMetricService.timeAndRecord(
+    logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "test1"),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
         () -> {
@@ -170,7 +170,7 @@ public class LogsBasedMetricsServiceTest {
   public void testTimeAndRecordWithSupplier() {
     Set<Integer> aSet = new HashSet<>();
     final int result =
-        logsBasedMetricService.timeAndRecord(
+        logsBasedMetricService.recordElapsedTime(
             MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "test1"),
             DistributionMetric.WORKSPACE_OPERATION_TIME,
             () -> {

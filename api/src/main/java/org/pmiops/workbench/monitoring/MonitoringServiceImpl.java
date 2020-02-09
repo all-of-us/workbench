@@ -84,33 +84,6 @@ public class MonitoringServiceImpl implements MonitoringService {
     logger.info(String.format("Record measurements: %s, tags: %s", metricToValue, tags));
   }
 
-  @Override
-  public void timeAndRecord(
-      Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation) {
-    final Stopwatch stopwatch = Stopwatch.createStarted();
-    operation.run();
-    stopwatch.stop();
-    recordBundle(
-        measurementBundleBuilder
-            .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
-            .build());
-  }
-
-  @Override
-  public <T> T timeAndRecord(
-      Builder measurementBundleBuilder,
-      DistributionMetric distributionMetric,
-      Supplier<T> operation) {
-    final Stopwatch stopwatch = Stopwatch.createStarted();
-    final T result = operation.get();
-    stopwatch.stop();
-    recordBundle(
-        measurementBundleBuilder
-            .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
-            .build());
-    return result;
-  }
-
   /**
    * Insert either a MeasureLong or MeasureDouble with appropriate value into the appropriate
    * MeasureMap.
@@ -130,9 +103,5 @@ public class MonitoringServiceImpl implements MonitoringService {
           Level.WARNING,
           String.format("Unrecognized measure class %s", metric.getMeasureClass().getName()));
     }
-  }
-
-  private void logAndSwallow(RuntimeException e) {
-    logger.log(Level.WARNING, "Exception encountered during monitoring.", e);
   }
 }

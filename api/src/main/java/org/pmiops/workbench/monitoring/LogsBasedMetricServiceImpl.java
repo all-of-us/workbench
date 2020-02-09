@@ -13,9 +13,11 @@ import java.util.function.Supplier;
 import javax.inject.Provider;
 import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
 
   // We don't need to make this name different for each environment, as the
@@ -49,7 +51,7 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
   }
 
   @Override
-  public void timeAndRecord(
+  public void recordElapsedTime(
       Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation) {
     final Stopwatch stopwatch = stopwatchProvider.get();
 
@@ -64,7 +66,7 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
   }
 
   @Override
-  public <T> T timeAndRecord(
+  public <T> T recordElapsedTime(
       Builder measurementBundleBuilder,
       DistributionMetric distributionMetric,
       Supplier<T> operation) {
