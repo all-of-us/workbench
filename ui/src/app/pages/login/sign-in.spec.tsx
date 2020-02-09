@@ -11,7 +11,7 @@ import InvitationKey from 'app/pages/login/invitation-key';
 import LoginReactComponent from 'app/pages/login/login';
 import {getEmptyProfile} from 'app/pages/login/test-utils';
 import {serverConfigStore} from 'app/utils/navigation';
-import {SignInProps, SignInReact, StepToImageConfig} from './sign-in';
+import {SignInProps, SignInReact, SignInReactImpl, SignInStep} from './sign-in';
 
 describe('SignInReact', () => {
   let props: SignInProps;
@@ -20,7 +20,13 @@ describe('SignInReact', () => {
 
   const component = () => mount(<SignInReact {...props}/>);
 
-  const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: false};
+  const shallowComponent = () => shallow(<SignInReact {...props}/>).shallow().shallow();
+
+  const defaultConfig = {
+    gsuiteDomain: 'researchallofus.org',
+    enableNewAccountCreation: false,
+    requireInvitationKey: true
+  };
 
   beforeEach(() => {
     props = {
@@ -74,7 +80,7 @@ describe('SignInReact', () => {
   it('should handle sign-up flow for legacy account creation', () => {
     // To correctly shallow-render this component wrapped by two HOCs, we need to add two extra
     // .shallow() calls at the end.
-    const wrapper = shallow(<SignInReact {...props}/>).shallow().shallow();
+    const wrapper = shallowComponent();
 
     // To start, the landing page / login component should be shown.
     expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
@@ -97,7 +103,7 @@ describe('SignInReact', () => {
 
     // To correctly shallow-render this component wrapped by two HOCs, we need to add two extra
     // .shallow() calls at the end.
-    const wrapper = shallow(<SignInReact {...props}/>).shallow().shallow();
+    const wrapper = shallowComponent();
 
     // To start, the landing page / login component should be shown.
     expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
@@ -120,5 +126,24 @@ describe('SignInReact', () => {
     wrapper.find(AccountCreationSurvey).props().onComplete(getEmptyProfile());
 
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
+  });
+
+  it('should skip InvitationKey when requireInvitationKey is false', () => {
+    // The above two test cases do a more comprehensive check to ensure all of the prop callbacks
+    // and step-incrementing logic are wired up correctly. Rather than repeating all of the above
+    // boilerplate, this test focuses on the logic of creating the sign-in step order, ensuring
+    // that INVITATION_KEY is removed when the flag is false.
+    props.serverConfig = {...defaultConfig, requireInvitationKey: false, enableNewAccountCreation: true};
+
+    const wrapper = shallowComponent();
+    const signInImpl = wrapper.instance() as SignInReactImpl;
+    const steps = signInImpl.getAccountCreationSteps();
+    expect(steps).toEqual([
+      SignInStep.LANDING,
+      SignInStep.TERMS_OF_SERVICE,
+      SignInStep.ACCOUNT_CREATION,
+      SignInStep.DEMOGRAPHIC_SURVEY,
+      SignInStep.SUCCESS_PAGE
+    ]);
   });
 });
