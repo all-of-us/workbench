@@ -58,6 +58,7 @@ import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -134,6 +135,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.zendesk.client.v2.Zendesk;
 
 // TODO(jaycarlton): many of the tests here are testing DataSetServiceImpl more than
 //   DataSetControllerImpl, so move those tests and setup stuff into DataSetServiceTest
@@ -198,6 +200,10 @@ public class DataSetControllerTest {
 
   @Autowired ConceptDao conceptDao;
 
+  @Autowired ConceptService conceptService;
+
+  @Autowired ConceptSetService conceptSetService;
+
   @Autowired ConceptSetDao conceptSetDao;
 
   @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
@@ -236,9 +242,13 @@ public class DataSetControllerTest {
 
   @Autowired ManualWorkspaceMapper manualWorkspaceMapper;
 
+  @Autowired Provider<Zendesk> mockZendeskProvider;
+
   @TestConfiguration
   @Import({
     CohortFactoryImpl.class,
+    ConceptService.class,
+    ConceptSetService.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
     UserServiceImpl.class,
@@ -257,7 +267,6 @@ public class DataSetControllerTest {
     CohortMaterializationService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    ConceptSetService.class,
     DataSetService.class,
     DataSetMapper.class,
     FireCloudService.class,
@@ -266,7 +275,8 @@ public class DataSetControllerTest {
     CohortQueryBuilder.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    Zendesk.class
   })
   static class Configuration {
 
@@ -348,6 +358,7 @@ public class DataSetControllerTest {
             fireCloudService,
             cloudStorageService,
             cloudBillingProvider,
+            mockZendeskProvider,
             CLOCK,
             notebooksService,
             userService,
@@ -371,8 +382,8 @@ public class DataSetControllerTest {
     ConceptSetsController conceptSetsController =
         new ConceptSetsController(
             workspaceService,
-            conceptSetDao,
-            conceptDao,
+            conceptSetService,
+            conceptService,
             conceptBigQueryService,
             userRecentResourceService,
             userProvider,

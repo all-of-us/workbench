@@ -39,7 +39,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

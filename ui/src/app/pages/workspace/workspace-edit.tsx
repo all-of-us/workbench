@@ -9,6 +9,9 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
+
+import {TwoColPaddedTable} from 'app/components/tables';
+import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {colorWithWhiteness} from 'app/styles/colors';
@@ -50,6 +53,9 @@ import {
   SpecificPopulationItem,
   SpecificPopulationItems, toolTipText
 } from './workspace-edit-text';
+
+
+const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
 
 // Poll parameters to check Workspace ACLs after creation of a new workspace. See
 // SATURN-104 for details, eventually the root cause should be resolved by fixes
@@ -211,7 +217,7 @@ export interface WorkspaceEditState {
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
   billingAccounts: Array<BillingAccount>;
-  lengthColor: string;
+  showCreateBillingAccountModal: boolean;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -219,7 +225,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
-        lengthColor: colors.primary,
         cdrVersionItems: this.createInitialCdrVersionsList(),
         workspace: this.createInitialWorkspaceState(),
         selectResearchPurpose: this.updateSelectedResearch(),
@@ -232,7 +237,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
-        billingAccounts: []
+        billingAccounts: [],
+        showCreateBillingAccountModal: false
       };
     }
 
@@ -590,11 +596,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (category === 'population' && !value) {
         this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'], []));
       }
-      if (this.state.workspace.researchPurpose.reasonForAllOfUs.length > 10) {
-        this.setState({lengthColor: colors.danger});
-      } else {
-        this.setState({lengthColor: colors.primary});
-      }
       this.setState(fp.set(['workspace', 'researchPurpose', category], value));
     }
 
@@ -741,6 +742,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return this.props.routeConfigData.mode === mode;
     }
 
+    buildBillingAccountOptions() {
+      const options = this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}));
+      options.push({label: 'Create a new billing account', value: CREATE_BILLING_ACCOUNT_OPTION_VALUE});
+      return options;
+    }
+
     render() {
       const {
         workspace: {
@@ -839,8 +846,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </div>
             <Dropdown style={{width: '14rem'}}
                       value={this.state.workspace.billingAccountName}
-                      options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}
-                      onChange={e => this.setState(fp.set(['workspace', 'billingAccountName'], e.value))}
+                      options={this.buildBillingAccountOptions()}
+                      onChange={e => {
+                        if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                          this.setState({
+                            showCreateBillingAccountModal: true
+                          });
+                        } else {
+                          this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
+                        }
+                      }}
             />
           </WorkspaceEditSection>
         }
@@ -888,7 +903,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                       onChange={v => this.updateResearchPurpose('intendedStudy', v)}/>
             <FlexRow id='intendedStudyText' style={{justifyContent: 'flex-end', width: '50rem',
               backgroundColor: colorWithWhiteness(colors.primary, 0.95), fontSize: 12,
-              color: this.state.lengthColor, padding: '0.25rem', borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
+              color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
               border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
               {500 - this.state.workspace.researchPurpose.intendedStudy.length} characters remaining
             </FlexRow>
@@ -1090,6 +1105,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </ModalFooter>
         </Modal>
         }
+        {this.state.showCreateBillingAccountModal &&
+          <CreateBillingAccountModal onClose={() => this.setState({showCreateBillingAccountModal: false})} />}
         {this.state.workspaceCreationConflictError &&
         <Modal>
           <ModalTitle>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
@@ -1127,6 +1144,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </div>
       </FadeBox> ;
     }
+
   });
 
 @Component({

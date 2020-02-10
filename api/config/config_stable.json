@@ -12,8 +12,8 @@
     "xAppIdValue": "stable-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.9",
-    "welderDockerImage": "broadinstitute/welder-server:60e28bc"
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.11",
+    "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
     "accountId": "014D91-FCB792-33D2C0",
@@ -64,6 +64,9 @@
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
+  },
+  "zendesk": {
+    "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
   },
   "elasticsearch": {
     "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",

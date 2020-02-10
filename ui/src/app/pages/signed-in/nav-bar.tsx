@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {Breadcrumb} from 'app/components/breadcrumb';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
@@ -166,6 +167,10 @@ export const NavBar = withUserProfile()(
       }
     }
 
+    navigateToLink(link) {
+      window.open(link, '_blank');
+    }
+
     handleStatusAlertBannerUnmount() {
       if (cookiesEnabled()) {
         localStorage.setItem(cookieKey, `${this.state.statusAlertDetails.statusAlertId}`);
@@ -212,10 +217,15 @@ export const NavBar = withUserProfile()(
         <Breadcrumb/>
         {
           this.state.statusAlertVisible && <StatusAlertBanner
-              statusAlertId={this.state.statusAlertDetails.statusAlertId}
               title={this.state.statusAlertDetails.title}
               message={this.state.statusAlertDetails.message}
-              link={this.state.statusAlertDetails.link}
+              footer={
+                  this.state.statusAlertDetails.link &&
+                  <Button data-test-id='status-banner-read-more-button'
+                          onClick={() => this.navigateToLink(this.state.statusAlertDetails.link)}>
+                    READ MORE
+                  </Button>
+              }
               onClose={this.handleStatusAlertBannerUnmount}
           />
         }

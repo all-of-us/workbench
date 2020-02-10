@@ -68,7 +68,14 @@ jobs:
           - MYSQL_PASSWORD=ubuntu
     working_directory: ~/workbench
     environment:
-      JAVA_TOOL_OPTIONS: -Xmx2g
+      # Drop to ~1.5G; the local API server starts two Java processes (the API
+      # server and the cron emulator). The default machine has 4GB, so we want
+      # the Java memory limit to be below half of that: other things on the
+      # machine need memory as well. Using 2G here manifested in 137 errors.
+      # If this limit proves to be too low, an alternative would be to use a
+      # larger resource class:
+      #   https://circleci.com/docs/2.0/configuration-reference/#resource_class
+      JAVA_TOOL_OPTIONS: -Xmx1536m
       TERM: dumb
       MYSQL_ROOT_PASSWORD: ubuntu
     steps:

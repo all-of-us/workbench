@@ -76,6 +76,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -179,6 +180,8 @@ public class CohortsControllerTest {
     WorkspaceServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
+    ConceptSetService.class,
+    ConceptService.class,
     NotebooksServiceImpl.class,
     UserServiceImpl.class,
     WorkspacesController.class,
@@ -194,8 +197,6 @@ public class CohortsControllerTest {
     CohortMaterializationService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    ConceptService.class,
-    ConceptSetService.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
@@ -203,7 +204,8 @@ public class CohortsControllerTest {
     MonitoringService.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    LogsBasedMetricService.class
   })
   static class Configuration {
 

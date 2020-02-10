@@ -6,6 +6,7 @@ import static org.pmiops.workbench.model.StandardConceptFilter.STANDARD_CONCEPTS
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +16,6 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
-import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -120,6 +120,10 @@ public class ConceptService {
     return query2.toString();
   }
 
+  public Iterable<DbConcept> findAll(Collection<Long> conceptIds) {
+    return conceptDao.findAll(conceptIds);
+  }
+
   public List<DbDomainInfo> getDomainInfo() {
     return domainInfoDao.findByOrderByDomainId();
   }
@@ -140,10 +144,10 @@ public class ConceptService {
     return conceptDao.findConcepts(keyword, conceptTypes, domain, pageable);
   }
 
-  public Slice<DbCriteria> searchSurveys(String query, String surveyName, int limit, int page) {
+  public List<DbConcept> searchSurveys(String query, String surveyName, int limit, int page) {
     final String keyword = modifyMultipleMatchKeyword(query);
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.ASC, "id"));
-    return cbCriteriaDao.findSurveys(keyword, surveyName, pageable);
+    return conceptDao.findSurveys(keyword, surveyName, pageable);
   }
 
   public List<DomainCount> countDomains(
@@ -187,7 +191,7 @@ public class ConceptService {
     }
     long conceptCount = 0;
     if (allConcepts) {
-      conceptCount = cbCriteriaDao.countSurveys(matchExp, surveyName);
+      conceptCount = conceptDao.countSurveys(matchExp, surveyName);
     }
     domainCountList.add(
         new DomainCount()

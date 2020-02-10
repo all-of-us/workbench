@@ -19,6 +19,7 @@ public class WorkbenchConfig {
   public MandrillConfig mandrill;
   public ElasticsearchConfig elasticsearch;
   public MoodleConfig moodle;
+  public ZendeskConfig zendesk;
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
@@ -42,6 +43,7 @@ public class WorkbenchConfig {
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
     config.moodle = new MoodleConfig();
+    config.zendesk = new ZendeskConfig();
     config.server = new ServerConfig();
     config.billing = new BillingConfig();
     config.actionAudit = new ActionAuditConfig();
@@ -176,6 +178,10 @@ public class WorkbenchConfig {
     public boolean enableMoodleBackend;
     public String credentialsKeyV1;
     public String credentialsKeyV2;
+  }
+
+  public static class ZendeskConfig {
+    public String host;
   }
 
   // The access object specifies whether each of the following access requirements block access

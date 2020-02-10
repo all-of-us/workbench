@@ -23,7 +23,8 @@ public class DbUserDataUseAgreement {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "user_data_use_agreement_id")
+  // TODO(RW-4391): rename this column with a Liquibase change once we're post-beta launch!
+  @Column(name = "user_data_user_agreement_id")
   public long getUserDataUseAgreementId() {
     return userDataUseAgreementId;
   }

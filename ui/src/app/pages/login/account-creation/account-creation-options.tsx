@@ -4,6 +4,7 @@ import {
   Education,
   EducationalRole,
   Ethnicity,
+  GenderIdentity,
   IndustryRole,
   NonAcademicAffiliation,
   Race,
@@ -24,9 +25,6 @@ export const AccountCreationOptions = {
     {label: 'B.A.', value: Degree.BA},
     {label: 'B.S.', value: Degree.BS},
     {label: 'B.S.N.', value: Degree.BSN},
-    // This label can have a space in it when the following issue is resolved:
-    // https://github.com/primefaces/primereact/issues/1137
-    {label: 'None(blank)', value: Degree.NONE},
   ],
   roles: [
     {label: `Undergraduate (Bachelor level) student`, value: AcademicRole.UNDERGRADUATE},
@@ -74,6 +72,14 @@ export const AccountCreationOptions = {
     {label: `Hispanic or Latino`, value: Ethnicity.HISPANIC},
     {label: `Not Hispanic or Latino`, value: Ethnicity.NOTHISPANIC},
     {label: ` Prefer not to answer`, value: Ethnicity.PREFERNOANSWER}
+  ],
+  genderIdentity: [
+    {label: 'Man', value: GenderIdentity.MAN},
+    {label: 'Non-Binary', value: GenderIdentity.NONBINARY},
+    {label: 'Transgender', value: GenderIdentity.TRANSGENDER},
+    {label: 'Woman', value: GenderIdentity.WOMAN},
+    {label: 'None of these describe me', value: GenderIdentity.NONEDESCRIBEME},
+    {label: 'Prefer not to answer', value: GenderIdentity.PREFERNOANSWER}
   ],
   sexAtBirth: [
     {label: 'Female', value: SexAtBirth.FEMALE},

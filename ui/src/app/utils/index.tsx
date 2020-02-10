@@ -9,11 +9,16 @@ import {
   globalErrorStore,
   queryParamsStore,
   routeConfigDataStore,
+  serverConfigStore,
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
 import {DataAccessLevel, Domain} from 'generated';
-import {DataAccessLevel as FetchDataAccessLevel, Domain as FetchDomain} from 'generated/fetch';
+import {
+  ConfigResponse,
+  DataAccessLevel as FetchDataAccessLevel,
+  Domain as FetchDomain,
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -93,13 +98,23 @@ window.addEventListener('resize', throttleAnimation(() => {
   window.dispatchEvent(new CustomEvent('resizeAnimation'));
 }));
 
-const getWindowSize = () => {
+export interface WindowSize {
+  height: number;
+  width: number;
+}
+// Components using withWindowSize can use this props interface to ensure they are including the
+// correctly-named props, e.g. "interface MyClassProps extends WindowSizeProps".
+export interface WindowSizeProps {
+  windowSize: WindowSize;
+}
+
+const getWindowSize = (): WindowSize => {
   return {height: window.innerHeight, width: window.innerWidth};
 };
 
 export const withWindowSize = () => WrappedComponent => {
   class Wrapper extends React.Component<any,
-    { windowSize: { width: number, height: number } }> {
+    { windowSize: WindowSize }> {
     constructor(props) {
       super(props);
       this.state = {windowSize: getWindowSize()};
@@ -129,7 +144,7 @@ export const withWindowSize = () => WrappedComponent => {
     }
   }
 
-  return Wrapper as any;
+  return Wrapper;
 };
 
 export const nextSort = ({field, direction}, newField) => {
@@ -258,7 +273,8 @@ export const summarizeErrors = errors => {
   }
 };
 
-export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>, name: string) => {
+export const connectBehaviorSubject = <T extends {}>(
+  subject: BehaviorSubject<T>, name: string, preventRenderUntilDataIsPresent: boolean = false) => {
   return (WrappedComponent) => {
     class Wrapper extends React.Component<any, {value: T}> {
       static displayName = 'connectBehaviorSubject()';
@@ -283,6 +299,9 @@ export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>
         const {value} = this.state;
         // We allow overriding of the currentValue, for reuse of the same
         // logic outside of the scope of a current workspace.
+        if (preventRenderUntilDataIsPresent && value == null) {
+          return null;
+        }
         return <WrappedComponent {...{[name]: value}} {...this.props}/>;
       }
     }
@@ -368,6 +387,18 @@ export const withCdrVersions = () => {
 export const withQueryParams = () => {
   return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
+
+// A HOC that provides a 'serverConfig' prop,
+// For similar reasons to the withCdrVersions store above, we want the serverConfig HOC to not
+// render child components until the store has a non-empty value.
+// See discussion on https://github.com/all-of-us/workbench/pull/2603/ for details on the type of
+// bugs that motivated this approach.
+export const withServerConfig = () => {
+  return connectBehaviorSubject(serverConfigStore, 'serverConfig', /* preventRenderUntilValuePresent */ true);
+};
+export interface ServerConfigProps {
+  serverConfig: ConfigResponse;
+}
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
 export function generateDomain(domain: FetchDomain): Domain {

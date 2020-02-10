@@ -5,7 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 

@@ -418,28 +418,6 @@ public class ConceptsControllerTest {
             toDomainCount(MEASUREMENT_DOMAIN, false),
             toDomainCount(OBSERVATION_DOMAIN, false),
             toDomainCount(PROCEDURE_DOMAIN, false),
-            toDomainCount(SURVEY_DOMAIN, false)));
-  }
-
-  @Test
-  public void testDomainCountSourceAndStandardWithSearchTerm() {
-    saveConcepts();
-    saveDomains();
-    ResponseEntity<DomainCountsListResponse> response =
-        conceptsController.domainCounts(
-            "ns",
-            "name",
-            new DomainCountsRequest()
-                .query("conceptA")
-                .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
-    assertCounts(
-        response,
-        ImmutableList.of(
-            toDomainCount(CONDITION_DOMAIN, 1),
-            toDomainCount(DRUG_DOMAIN, 0),
-            toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(OBSERVATION_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0),
             toDomainCount(SURVEY_DOMAIN, 0)));
   }
 
@@ -487,28 +465,6 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSurveyCountSourceAndStandardWithSearchTerm() {
-    saveConcepts();
-    saveDomains();
-    ResponseEntity<DomainCountsListResponse> response =
-        conceptsController.domainCounts(
-            "ns",
-            "name",
-            new DomainCountsRequest()
-                .query("test")
-                .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
-    assertCounts(
-        response,
-        ImmutableList.of(
-            toDomainCount(CONDITION_DOMAIN, 2),
-            toDomainCount(DRUG_DOMAIN, 0),
-            toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(OBSERVATION_DOMAIN, 1),
-            toDomainCount(PROCEDURE_DOMAIN, 0),
-            toDomainCount(SURVEY_DOMAIN, 1)));
-  }
-
-  @Test
   public void testSurveyCountSourceAndStandardWithSurveyName() {
     saveConcepts();
     saveDomains();
@@ -527,7 +483,7 @@ public class ConceptsControllerTest {
             toDomainCount(MEASUREMENT_DOMAIN, false),
             toDomainCount(OBSERVATION_DOMAIN, false),
             toDomainCount(PROCEDURE_DOMAIN, false),
-            toDomainCount(SURVEY_DOMAIN, 1)));
+            toDomainCount(SURVEY_DOMAIN, 0)));
   }
 
   @Test
@@ -816,6 +772,7 @@ public class ConceptsControllerTest {
     result.setVocabularyId(concept.getVocabularyId());
     result.setDomainId(concept.getDomainId());
     result.setCountValue(concept.getCountValue());
+    result.setSourceCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
     result.setSynonymsStr(
         String.valueOf(concept.getConceptId())

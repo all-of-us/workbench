@@ -7,7 +7,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
-import {debouncer, hasRegisteredAccessFetch, resettableTimeout} from 'app/utils';
+import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
 import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
@@ -52,8 +52,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions = [];
 
   private getUserActivityTimer: () => Timeout;
-  private getLogoutTimer: () => Timeout;
-  private getInactivityModalTimer: () => Timeout;
+  private inactivityInterval: Timeout;
+  private logoutTimer: Timeout;
+  private inactivityModalTimer: Timeout;
 
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
 
@@ -93,14 +94,25 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.minimizeChrome = minimizeChrome;
     }));
 
-    const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
-    if (lastActive !== null && Date.now() - parseInt(lastActive, 10) > environment.inactivityTimeoutSeconds * 1000) {
-      localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-      this.signOut();
-    }
+    this.signOutIfLocalStorageInactivityElapsed();
 
     this.startUserActivityTracker();
-    this.startInactivityTimers();
+    this.startInactivityMonitoring();
+  }
+
+  private getInactivityElapsedMs(): number {
+    const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
+    if (!lastActive) {
+      return null;
+    }
+    return Date.now() - parseInt(lastActive, 10);
+  }
+
+  private signOutIfLocalStorageInactivityElapsed(): void {
+    const elapsedMs = this.getInactivityElapsedMs();
+    if (elapsedMs && elapsedMs > environment.inactivityTimeoutSeconds * 1000) {
+      this.signOut();
+    }
   }
 
   signOut(): void {
@@ -120,32 +132,47 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  startInactivityTimers() {
-    const resetLogoutTimeout = resettableTimeout(() => {
-      this.signOut();
-    }, environment.inactivityTimeoutSeconds * 1000);
-    this.getLogoutTimer = resetLogoutTimeout.getTimer;
+  private startInactivityTimers(elapsedMs: number = 0) {
+    clearTimeout(this.logoutTimer);
+    this.logoutTimer = setTimeout(
+      () => this.signOut(),
+      Math.max(0, environment.inactivityTimeoutSeconds * 1000 - elapsedMs));
 
-    const resetInactivityModalTimeout = resettableTimeout(() => {
-      this.showInactivityModal = true;
-    }, (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) * 1000);
-    this.getInactivityModalTimer = resetInactivityModalTimeout.getTimer;
+    clearTimeout(this.inactivityModalTimer);
+    this.inactivityModalTimer = setTimeout(
+      () => this.showInactivityModal = true,
+      Math.max(0, 1000 * (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) - elapsedMs));
+  }
+
+  startInactivityMonitoring() {
+    this.startInactivityTimers();
 
     const hideModal = () => this.showInactivityModal = false;
-
-    function resetTimers() {
+    const resetTimers = () => {
       hideModal();
-      resetLogoutTimeout.reset();
-      resetInactivityModalTimeout.reset();
-    }
+      this.startInactivityTimers();
+    };
 
     localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
     resetTimers();
+
+    // setTimeout does not necessary track real wall-time. Periodically
+    // clear/restart the timers so that they reflect the time which has elapsed
+    // since we last saw activity, as tracked in local storage.
+    this.inactivityInterval = setInterval(() => {
+      this.startInactivityTimers(this.getInactivityElapsedMs());
+    }, 60 * 1000);
 
     window.addEventListener('message', (e) => {
       if (e.data !== INACTIVITY_CONFIG.MESSAGE_KEY) {
         return;
       }
+
+      // setTimeout is not a reliable mechanism for forcing signout as it doesn't
+      // model actual wall-time, for example a sleeping machine does not progress
+      // a setTimeout timer. Always check whether the user's time has already
+      // elapsed before updating our inactivity time tracker.
+      this.signOutIfLocalStorageInactivityElapsed();
 
       window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
       resetTimers();
@@ -153,6 +180,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
     window.addEventListener('storage', (e) => {
       if (e.key === INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE && e.newValue !== null) {
+        this.signOutIfLocalStorageInactivityElapsed();
         resetTimers();
       }
     });
@@ -161,13 +189,14 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     // If we ever get a test Zendesk account,
     // the key should be templated in using an environment variable.
-    initializeZendeskWidget(this.elementRef, '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3');
+    initializeZendeskWidget(this.elementRef, environment.zendeskWidgetKey);
   }
 
   ngOnDestroy() {
     clearInterval(this.getUserActivityTimer());
-    clearTimeout(this.getLogoutTimer());
-    clearTimeout(this.getInactivityModalTimer());
+    clearInterval(this.inactivityInterval);
+    clearTimeout(this.logoutTimer);
+    clearTimeout(this.inactivityModalTimer);
 
     if (this.profileLoadingSub) {
       this.profileLoadingSub.unsubscribe();

@@ -206,18 +206,18 @@ definitions:
         lastissued:
           type: integer
           format: int64
-          description: Date of latest issued badge. As a stringy epoch.
+          description: Date of latest issued badge. As a stringy epoch in SECONDS.
         dateexpire:
           type: integer
           format: int64
-          description: Latest expiration of obtained badge. As a stringy epoch.
+          description: Latest expiration of obtained badge. As a stringy epoch in SECONDS.
         message:
           type: string
           description: General API message
         globalexpiration:
           type: integer
           format: int64
-          description: Global expiration, overrides badge expiration date. As a stringy epoch.
+          description: Global expiration, overrides badge expiration date. As a stringy epoch in SECONDS.
 
     BadgeDetailsV1:
       properties:

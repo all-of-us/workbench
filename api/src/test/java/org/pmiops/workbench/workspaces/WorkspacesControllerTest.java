@@ -153,6 +153,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -175,6 +176,8 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.zendesk.client.v2.Zendesk;
+import org.zendesk.client.v2.model.Request;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -277,7 +280,9 @@ public class WorkspacesControllerTest {
     UserRecentResourceService.class,
     ConceptService.class,
     MonitoringService.class,
-    WorkspaceAuditor.class
+    WorkspaceAuditor.class,
+    Zendesk.class,
+    LogsBasedMetricService.class
   })
   static class Configuration {
 
@@ -336,6 +341,7 @@ public class WorkspacesControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
+  @Autowired Zendesk mockZendesk;
 
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
@@ -381,6 +387,8 @@ public class WorkspacesControllerTest {
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
+
+    when(mockZendesk.createRequest(any())).thenReturn(new Request());
   }
 
   private DbUser createUser(String email) {
@@ -521,7 +529,6 @@ public class WorkspacesControllerTest {
     return createWorkspace("namespace", "name");
   }
 
-  // TODO(calbach): Clean up this test file to make better use of chained builders.
   private Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList =
         new ArrayList<DisseminateResearchEnum>();
@@ -650,6 +657,8 @@ public class WorkspacesControllerTest {
             "projects/" + workspace.getNamespace(),
             new ProjectBillingInfo().setBillingAccountName("billing-account"));
     assertThat(workspace2.getBillingAccountName()).isEqualTo("billing-account");
+
+    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
@@ -1092,6 +1101,8 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
+
+    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test

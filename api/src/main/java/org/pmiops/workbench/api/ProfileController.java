@@ -155,6 +155,9 @@ public class ProfileController implements ProfileApiDelegate {
               if (demographicSurvey.getDisability() != null)
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getGenderIdentityList() != null) {
+                result.setGenderIdentityEnumList(demographicSurvey.getGenderIdentityList());
+              }
               if (demographicSurvey.getSexAtBirth() != null)
                 result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
               if (demographicSurvey.getYearOfBirth() != null)
@@ -360,6 +363,10 @@ public class ProfileController implements ProfileApiDelegate {
             request.getProfile().getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
                 .collect(Collectors.toList()));
+
+    if (request.getTermsOfServiceVersion() != null) {
+      userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
+    }
 
     try {
       mailServiceProvider

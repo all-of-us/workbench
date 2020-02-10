@@ -55,7 +55,7 @@ export const RecentWorkspaces = withUserProfile()
             {
               this.state.recentWorkspaces.map(recentWorkspace => {
                 return <WorkspaceCard
-                  key={recentWorkspace.workspace.name}
+                  key={recentWorkspace.workspace.namespace}
                   userEmail={this.props.profileState.profile.username}
                   workspace={recentWorkspace.workspace}
                   accessLevel={recentWorkspace.accessLevel}

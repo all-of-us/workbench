@@ -5,14 +5,14 @@ import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {StandardConceptFilter, SurveyAnswerResponse, SurveyQuestions} from 'generated/fetch';
+import {StandardConceptFilter, SurveyQuestions} from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
 interface SurveyDetails {
   question: SurveyQuestions;
-  answer: Array<SurveyAnswerResponse>;
+  answer: Array<any>;
 }
 
 const style = reactStyles({
