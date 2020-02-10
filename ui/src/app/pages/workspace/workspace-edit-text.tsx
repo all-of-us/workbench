@@ -7,7 +7,8 @@ import * as React from 'react';
 
 export const ResearchPurposeDescription =
     <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
-      of <i>All of Us</i> data to provide a meaningful description of the intended purpose of data use
+      of <i>All of Us</i> data to provide a meaningful description of the intended purpose of data
+      use
       for each workspace they create. Your responses will not be used to make decisions about data
       access.</div>;
 
@@ -111,8 +112,10 @@ export const researchPurposeQuestions = [
     header: <div> Please provide a summary of your research purpose by responding to the
       questions below.</div>,
     description: <div>Your responses should cover the major components of a research summary:
-      hypothesis, methods and anticipated findings. <strong>Your response will be displayed publicly to
-        inform the <i>All of Us</i> Research participants.</strong> Therefore, please provide sufficiently
+      hypothesis, methods and anticipated findings. <strong>Your response will be displayed publicly
+        to
+        inform the <i>All of Us</i> Research participants.</strong> Therefore, please provide
+      sufficiently
       detailed responses in plain language (without jargon), using as few technical terms as
       possible.</div>
   }, {
@@ -129,7 +132,8 @@ export const researchPurposeQuestions = [
   }, {
     header: 'What are the anticipated findings from the study? How would your findings ' +
     'contribute to the body of scientific knowledge in the field?',
-    description: <div>This response will be displayed publicly.(Free text; 1000 Character limit)</div>
+    description: <div>This response will be displayed publicly.(Free text; 1000 Character
+      limit)</div>
   }, {
     header: 'The All of Us Research Program encourages researchers to disseminate their research ' +
     'findings to both scientific and lay/community audiences, to maximize the value of the resource ' +
@@ -144,33 +148,38 @@ export const researchPurposeQuestions = [
     description: <div>Answers not publicly displayed</div>
   }, {
     header: 'Population of interest',
-    description: <div>A primary aim of All of Us is to engage communities that have been historically
+    description: <div>A primary aim of All of Us is to engage communities that have been
+      historically
       underrepresented in biomedical research. The next set of questions is designed to help us
       assess how well we are serving underrepresented communities—and to protect against potentially
-    stigmatizing research findings, to which these groups are more vulnerable.
+      stigmatizing research findings, to which these groups are more vulnerable.
 
-    All of Us supports well-designed and responsible research that addresses questions relevant to
-    underrepresented communities, as well as research that compares different groups and
-    populations. At the same time, we recognize that research with underrepresented populations can
-    unintentionally result in harms, including the exacerbation of stigma. We encourage researchers
-    to consider whether their research design, methods, and analyses could potentially cause harm
-    to individuals, groups, and communities. <strong>Reminder: Your answers do not affect your
-      access to the data, but they will be displayed publicly on the Research Hub to inform All of Us research participants.  </strong>
-  </div>
+      All of Us supports well-designed and responsible research that addresses questions relevant to
+      underrepresented communities, as well as research that compares different groups and
+      populations. At the same time, we recognize that research with underrepresented populations
+      can
+      unintentionally result in harms, including the exacerbation of stigma. We encourage
+      researchers
+      to consider whether their research design, methods, and analyses could potentially cause harm
+      to individuals, groups, and communities. <strong>Reminder: Your answers do not affect your
+        access to the data, but they will be displayed publicly on the Research Hub to inform All of
+        Us research participants. </strong>
+    </div>
   }, {
     header: 'Request for Review of Research Purpose Description',
     description: <div>Any research that focuses on certain population characteristics or uses
-    demographic variables in analyses can result, often unintentionally, in findings that may be
-    misinterpreted or misused by others to foster stigma. While it may not be possible to
-    completely prevent misuse of research for stigmatizing purposes, data users can take important
-    steps to minimize the risk of this happening–taking this step is a condition of your Data Use
-    Agreement. If you are concerned that your research could inadvertently stigmatize participants
-    or communities, or if you are unsure, let us know. We encourage you to request a review of your
-    research purpose statement by the All of Us Resource Access Board (RAB) as a precaution.
-    The RAB will provide feedback and, if needed, guidance for modifying your research purpose or
-    scope. To learn more, please refer to the All of Us Stigmatizing Research Policy .If you
-    request a review, you can expect to receive an initial response within five business days.
-    During the RAB’s review, you may begin working in your workspace.</div>
+        demographic variables in analyses can result, often unintentionally, in findings that may be
+      misinterpreted or misused by others to foster stigma. While it may not be possible to
+      completely prevent misuse of research for stigmatizing purposes, data users can take important
+      steps to minimize the risk of this happening–taking this step is a condition of your Data Use
+      Agreement. If you are concerned that your research could inadvertently stigmatize participants
+      or communities, or if you are unsure, let us know. We encourage you to request a review of
+      your
+      research purpose statement by the All of Us Resource Access Board (RAB) as a precaution.
+      The RAB will provide feedback and, if needed, guidance for modifying your research purpose or
+      scope. To learn more, please refer to the All of Us Stigmatizing Research Policy .If you
+      request a review, you can expect to receive an initial response within five business days.
+      During the RAB’s review, you may begin working in your workspace.</div>
   }
 ];
 
@@ -190,13 +199,22 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
     ubrDescription: 'American Indian and Alaska Native (AIAN); Black, African American, or ' +
     'African; Middle Eastern or North African (MENA); Native Hawaiian or Other Pacific ' +
     'Islander (NHPI); Hispanic, Latino, or Spanish (H/L/S); Multi-Ancestry (2+ Races)',
-    subCategory: [{label: 'Asian', shortName: SpecificPopulationEnum.RACEASIAN },
-      {label: 'Black, African or African American', shortName: SpecificPopulationEnum.RACEAA },
+    subCategory: [{label: 'Asian', shortName: SpecificPopulationEnum.RACEASIAN},
+      {label: 'Black, African or African American', shortName: SpecificPopulationEnum.RACEAA},
       {label: 'Hispanic, Latino or Spanish', shortName: SpecificPopulationEnum.RACEHISPANIC},
-      {label: 'American Indian or Alaska Native (AIAN)', shortName: SpecificPopulationEnum.RACEAIAN},
+      {
+        label: 'American Indian or Alaska Native (AIAN)',
+        shortName: SpecificPopulationEnum.RACEAIAN
+      },
       {label: 'Middle Eastern or North African (MENA)', shortName: SpecificPopulationEnum.RACEMENA},
-      {label: 'Native Hawaiian or Pacific Islander (NHPI)', shortName: SpecificPopulationEnum.RACENHPI},
-      {label: 'Multi-Ancestry or more than one race', shortName: SpecificPopulationEnum.RACEMORETHANONE}]
+      {
+        label: 'Native Hawaiian or Pacific Islander (NHPI)',
+        shortName: SpecificPopulationEnum.RACENHPI
+      },
+      {
+        label: 'Multi-Ancestry or more than one race',
+        shortName: SpecificPopulationEnum.RACEMORETHANONE
+      }]
 
   }, {
     label: 'Age Groups',
@@ -204,7 +222,7 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
     ubrLabel: 'Age',
     ubrDescription: 'Children (0-11); Adolescents (12-17); Older Adults (65-74); Older ' +
     'Adults (75+)',
-    subCategory: [{label: 'Children (0-11)', shortName: SpecificPopulationEnum.AGECHILDREN },
+    subCategory: [{label: 'Children (0-11)', shortName: SpecificPopulationEnum.AGECHILDREN},
       {label: 'Adolescents (12-17) ', shortName: SpecificPopulationEnum.AGEADOLESCENTS},
       {label: 'Older adults (65-74)', shortName: SpecificPopulationEnum.AGEOLDER},
       {label: 'Older adults (75+) ', shortName: SpecificPopulationEnum.AGEOLDERMORETHAN75}]
@@ -246,54 +264,107 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
     shortName: SpecificPopulationEnum.GEOGRAPHY,
     ubrLabel: 'Geography',
     ubrDescription: 'Rural and Non-Metropolitan Zip codes',
-    subCategory: [{label: 'Participants who live in a rural or non-metropolitan setting', shortName: SpecificPopulationEnum.GEOGRAPHY}]
+    subCategory: [{
+      label: 'Participants who live in a rural or non-metropolitan setting',
+      shortName: SpecificPopulationEnum.GEOGRAPHY
+    }]
   }, {
     label: 'Disability status',
     shortName: SpecificPopulationEnum.DISABILITYSTATUS,
     ubrLabel: 'Disability Status',
     ubrDescription: 'Physical and Cognitive Disabilities',
-    subCategory: [{label: 'Participants with a physical and/or cognitive disability', shortName: SpecificPopulationEnum.DISABILITYSTATUS}]
+    subCategory: [{
+      label: 'Participants with a physical and/or cognitive disability',
+      shortName: SpecificPopulationEnum.DISABILITYSTATUS
+    }]
   }, {
     label: 'Access to care',
     shortName: SpecificPopulationEnum.ACCESSTOCARE,
     ubrLabel: 'Access to Care',
     ubrDescription: 'Limited access to care; Cannot easily obtain or access medical care',
-    subCategory: [{label: 'Participants who cannot easily obtain or access medical care', shortName: SpecificPopulationEnum.ACCESSTOCARE}]
+    subCategory: [{
+      label: 'Participants who cannot easily obtain or access medical care',
+      shortName: SpecificPopulationEnum.ACCESSTOCARE
+    }]
   }, {
     label: 'Education level',
     shortName: SpecificPopulationEnum.EDUCATIONLEVEL,
     ubrLabel: 'Educational Attainment',
     ubrDescription: 'Less than high school graduate or General Education Development (GED)',
-    subCategory: [{label: 'Participants with less than a high school degree or equivalent', shortName: SpecificPopulationEnum.EDUCATIONLEVEL}]
+    subCategory: [{
+      label: 'Participants with less than a high school degree or equivalent',
+      shortName: SpecificPopulationEnum.EDUCATIONLEVEL
+    }]
   }, {
     label: 'Income level',
     shortName: SpecificPopulationEnum.INCOMELEVEL,
     ubrLabel: 'Income Level',
     ubrDescription: 'Less than USD 25,000 [for a family of four]',
-    subCategory: [{label: 'Participants with household incomes equal to or below 200% of the Federal Poverty Level', shortName: SpecificPopulationEnum.INCOMELEVEL}]
+    subCategory: [{
+      label: 'Participants with household incomes equal to or below 200% of the Federal Poverty Level',
+      shortName: SpecificPopulationEnum.INCOMELEVEL
+    }]
   }
 ];
 
 export const disseminateFindings = [
-  {label: 'Publication in peer-reviewed scientific journals', shortName: DisseminateResearchEnum.PUBLICATIONPEERREVIEWEDJOURNALS},
-  {label: 'Social media (Facebook, Instagram, Twitter)', shortName: DisseminateResearchEnum.SOCIALMEDIA},
-  {label: 'Presentation at national or international scientific conferences', shortName: DisseminateResearchEnum.PRESENATATIONSCIENTIFICCONFERENCES},
-  {label: 'Presentation at community forums or advisory groups (such as town halls, advocacy group ' +
-    'meetings or community advisory boards)', shortName: DisseminateResearchEnum.PRESENTATIONADVISORYGROUPS},
-  {label: 'Press release or media article covering scientific publication', shortName: DisseminateResearchEnum.PRESSRELEASE},
-  {label: 'Publication in community-based journals or blog', shortName: DisseminateResearchEnum.PUBLICATIONCOMMUNITYBASEDBLOG},
-  {label: 'Publication of article in a personal blog', shortName: DisseminateResearchEnum.PUBLICATIONPERSONALBLOG},
+  {
+    label: 'Publication in peer-reviewed scientific journals',
+    shortName: DisseminateResearchEnum.PUBLICATIONPEERREVIEWEDJOURNALS
+  },
+  {
+    label: 'Social media (Facebook, Instagram, Twitter)',
+    shortName: DisseminateResearchEnum.SOCIALMEDIA
+  },
+  {
+    label: 'Presentation at national or international scientific conferences',
+    shortName: DisseminateResearchEnum.PRESENATATIONSCIENTIFICCONFERENCES
+  },
+  {
+    label: 'Presentation at community forums or advisory groups (such as town halls, advocacy group ' +
+    'meetings or community advisory boards)',
+    shortName: DisseminateResearchEnum.PRESENTATIONADVISORYGROUPS
+  },
+  {
+    label: 'Press release or media article covering scientific publication',
+    shortName: DisseminateResearchEnum.PRESSRELEASE
+  },
+  {
+    label: 'Publication in community-based journals or blog',
+    shortName: DisseminateResearchEnum.PUBLICATIONCOMMUNITYBASEDBLOG
+  },
+  {
+    label: 'Publication of article in a personal blog',
+    shortName: DisseminateResearchEnum.PUBLICATIONPERSONALBLOG
+  },
   {label: 'Other', shortName: DisseminateResearchEnum.OTHER}
 ];
 
 export const researchOutcomings = [
-  {label: 'This research project seeks to increase wellness and resilience, and promote ' +
-    'healthy living', shortName: ResearchOutcomingEnum.PROMOTEHEALTHYLIVING},
-  {label: 'This research project seeks to reduce health disparities and improve health equity ' +
-    'in underrepresented in biomedical research (UBR) populations', shortName: ResearchOutcomingEnum.UNDERRESP},
-  {label: 'This research project seeks to develop improved risk assessment and prevention strategies to preempt disease', shortName: ResearchOutcomingEnum.IMPROVEDRISKASSESMENT},
-  {label: 'This research project seeks to provide earlier and more accurate diagnosis to decrease illness burden', shortName: ResearchOutcomingEnum.DECREASEILLINESSBURDEN},
-  {label: 'This research project seeks to improve health outcomes and reduce disease/illness burden' +
-    ' through improved treatment and development of precision intervention', shortName: ResearchOutcomingEnum.PRECISIONINTERVENTION},
-  {label: 'None of these statements apply to this research project', shortName: ResearchOutcomingEnum.NONE}
+  {
+    label: 'This research project seeks to increase wellness and resilience, and promote ' +
+    'healthy living',
+    shortName: ResearchOutcomingEnum.PROMOTEHEALTHYLIVING
+  }, {
+    label: 'This research project seeks to reduce health disparities and improve health equity ' +
+    'in underrepresented in biomedical research (UBR) populations',
+    shortName: ResearchOutcomingEnum.UNDERRESP
+  }, {
+    label: 'This research project seeks to develop improved risk assessment and prevention ' +
+    'strategies to preempt disease',
+    shortName: ResearchOutcomingEnum.IMPROVEDRISKASSESMENT
+  },
+  {
+    label: 'This research project seeks to provide earlier and more accurate diagnosis to ' +
+    'decrease illness burden',
+    shortName: ResearchOutcomingEnum.DECREASEILLINESSBURDEN
+  },
+  {
+    label: 'This research project seeks to improve health outcomes and reduce disease/illness burden' +
+    ' through improved treatment and development of precision intervention',
+    shortName: ResearchOutcomingEnum.PRECISIONINTERVENTION
+  }, {
+    label: 'None of these statements apply to this research project',
+    shortName: ResearchOutcomingEnum.NONE
+  }
 ];

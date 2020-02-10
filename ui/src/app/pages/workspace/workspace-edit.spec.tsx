@@ -1,17 +1,14 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
-import {UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {DisseminateResearchEnum, ResearchOutcomingEnum,
+  SpecificPopulationEnum,UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {
-  DisseminateResearchEnum, ResearchOutcomingEnum,
-  SpecificPopulationEnum
-} from '../../../generated/fetch';
-import {WorkspaceData} from '../../utils/workspace-data';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditSection} from './workspace-edit';
 
 jest.mock('app/utils/navigation', () => ({
@@ -64,7 +61,7 @@ describe('WorkspaceEdit', () => {
     serverConfigStore.next({enableBillingLockout: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
   });
 
-  it('displays workspaces create page', async() => {
+  it('displays workspaces create page', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Create a new Workspace');
@@ -74,7 +71,7 @@ describe('WorkspaceEdit', () => {
       .toEqual(false);
   });
 
-  it('displays workspaces duplicate page', async() => {
+  it('displays workspaces duplicate page', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -85,7 +82,7 @@ describe('WorkspaceEdit', () => {
       .toEqual(true);
   });
 
-  it('displays workspaces edit page', async() => {
+  it('displays workspaces edit page', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -96,7 +93,7 @@ describe('WorkspaceEdit', () => {
       .toEqual(true);
   });
 
-  it('pre-fills "specific populations" form elements when editing', async() => {
+  it('pre-fills "specific populations" form elements when editing', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
     workspace.researchPurpose.population = true;
@@ -114,15 +111,16 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
   });
 
-  it('supports disable save button if Research Outcoming is not answered', async() => {
+  it('supports disable save button if Research Outcoming is not answered', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     workspace.researchPurpose.researchOutcoming = []
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
 
-    const s = wrapper.find('[data-test-id="workspace-save-btn"]').first().prop('disabled');
-    expect(s).toBeTruthy();
+    const saveButton = wrapper.find('[data-test-id="workspace-save-btn"]')
+        .first().prop('disabled');
+    expect(saveButton).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
   });
 
@@ -132,15 +130,13 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
 
     const numBefore = workspacesApi.workspaces.length;
-
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 
-
-  it('supports waiting on access delays', async() => {
+  it('supports waiting on access delays', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

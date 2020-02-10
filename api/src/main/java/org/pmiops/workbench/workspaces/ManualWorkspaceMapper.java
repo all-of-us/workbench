@@ -171,7 +171,10 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
 
     dbWorkspace.setDisseminateResearchEnumSet(
-        purpose.getDisseminateResearchFinding().stream().collect(Collectors.toSet()));
+        Optional.ofNullable(
+                purpose.getDisseminateResearchFinding().stream().collect(Collectors.toSet()))
+            .orElse(new HashSet<DisseminateResearchEnum>()));
+
     if (dbWorkspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
       dbWorkspace.setDisseminateResearchOther(purpose.getOtherdisseminateResearchFindings());
     }

@@ -41,9 +41,13 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {
-  disseminateFindings, researchOutcomings, ResearchPurposeDescription, ResearchPurposeItem,
+  disseminateFindings,
+  researchOutcomings,
+  ResearchPurposeDescription,
+  ResearchPurposeItem,
   ResearchPurposeItems,
-  researchPurposeQuestions, SpecificPopulationItem,
+  researchPurposeQuestions,
+  SpecificPopulationItem,
   SpecificPopulationItems, toolTipText
 } from './workspace-edit-text';
 
@@ -120,6 +124,16 @@ const styles = reactStyles({
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
   },
+  textBoxCharRemaining: {
+    justifyContent: 'flex-end',
+    width: '50rem',
+    backgroundColor: colorWithWhiteness(colors.primary, 0.95),
+    fontSize: 12,
+    colors: colors.primary,
+    padding: '0.25rem',
+    borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
+  }
 });
 
 export const WorkspaceEditSection = (props) => {
@@ -263,12 +277,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             });
           }
         } else {
-          // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
+          // Otherwise, use this as an opportunity to sync the fetched billing account name from
+          // the source of truth, Google
           this.setState(prevState => fp.set(
             ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
         }
       }
-
       this.setState({billingAccounts});
     }
 
@@ -449,20 +463,21 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       </div>;
     }
 
-    updateInfo(value) {
+    updateOtherDisseminateResearch(value) {
       this.setState(fp.set(['workspace', 'researchPurpose', 'otherdisseminateResearchFindings'], value));
     }
     /**
      * Creates a form element containing the checkbox, header, and description
-     * (plus optional child elements) for each of the "primary purpose of your
-     * project" options.
+     * (plus optional child elements) for each of the "Disseminate Research" options.
      */
     makeDisseminateForm(rp, index): React.ReactNode {
       let children: React.ReactNode;
       if (rp.label === 'Other') {
         children = <TextArea value={this.state.workspace.researchPurpose.otherdisseminateResearchFindings}
-                             onChange={v => this.updateInfo(v)}
-                             placeholder='Specify the name of the forum (journal, scientific conference, blog etc.) through which you will disseminate your findings, if available.'
+                             onChange={v => this.updateOtherDisseminateResearch(v)}
+                             placeholder='Specify the name of the forum (journal, scientific
+                             conference, blog etc.) through which you will disseminate your
+                             findings, if available.'
                              disabled={!this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)}
                              style={{marginTop: '0.5rem', width: '16rem'}}/>;
       }
@@ -887,10 +902,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         name='scientificApproach'
                         value={this.state.workspace.researchPurpose.scientificApproach}
                         onChange={v => this.updateResearchPurpose('scientificApproach', v)}/>
-              <FlexRow style={{justifyContent: 'flex-end', width: '50rem',
-                backgroundColor: colorWithWhiteness(colors.primary, 0.95), fontSize: 12,
-                color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-                border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
+              <FlexRow style={styles.textBoxCharRemaining}>
                 {this.state.workspace.researchPurpose.scientificApproach &&
                 <div>{1000 - this.state.workspace.researchPurpose.scientificApproach.length}
                 characters remaining</div>}
@@ -907,10 +919,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         name='anticipatedFindings'
                         value={this.state.workspace.researchPurpose.anticipatedFindings}
                         onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}/>
-              <FlexRow style={{justifyContent: 'flex-end', width: '50rem',
-                backgroundColor: colorWithWhiteness(colors.primary, 0.95), fontSize: 12,
-                color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-                border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
+              <FlexRow style={styles.textBoxCharRemaining}>
                 {1000 - this.state.workspace.researchPurpose.anticipatedFindings.length} characters remaining
               </FlexRow>
             </WorkspaceEditSection>
@@ -944,20 +953,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.'
                               description={researchPurposeQuestions[7].description}
                               style={{width: '50rem'}}>
-          {/*<Link onClick={() => this.setState({showUnderservedPopulationDetails:*/}
-              {/*!this.state.showUnderservedPopulationDetails})}>*/}
-            {/*More info on underserved populations*/}
-            {/*{this.state.showUnderservedPopulationDetails ? <ClrIcon shape='caret' dir='up'/> :*/}
-              {/*<ClrIcon shape='caret' dir='down'/>}*/}
-          {/*</Link>*/}
-          {/*{this.state.showUnderservedPopulationDetails && <div style={styles.text}>*/}
-            {/*A primary mission of the <i>All of Us</i> Research Program is to include research*/}
-            {/*participants who are medically underserved or are historically underrepresented in*/}
-            {/*Biomedical Research, or who, because of systematic social disadvantage, experience*/}
-            {/*health disparities.  As a way to assess the research being conducted with a focus on*/}
-            {/*these populations, <i>All of Us</i> requires that you indicate the demographic*/}
-            {/*categories you intend to focus your analysis on.*/}
-          {/*</div>}*/}
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
@@ -1014,35 +1009,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.'
                               description={researchPurposeQuestions[8].description}>
 
-          {/*<Link onClick={() => this.setState({showStigmatizationDetails:*/}
-              {/*!this.state.showStigmatizationDetails})}>*/}
-            {/*More info on stigmatization*/}
-            {/*{this.state.showStigmatizationDetails ? <ClrIcon shape='caret' dir='up'/> :*/}
-              {/*<ClrIcon shape='caret' dir='down'/>}*/}
-          {/*</Link>*/}
-          {/*{this.state.showStigmatizationDetails &&*/}
-            {/*<div>*/}
-              {/*<div style={styles.text}>*/}
-                {/*Populations that are historically medically underserved or underrepresented in*/}
-                {/*biomedical research are also more vulnerable to stigmatization. If your population*/}
-                {/*of interest includes the following categories defined as Underrepresented in*/}
-                {/*Biomedical Research (UBR) by the <i>All of Us</i> Research Program, you are*/}
-                {/*encouraged to request a review of your research purpose by the Resource Access*/}
-                {/*Board (RAB).*/}
-              {/*</div>*/}
-              {/*<TwoColPaddedTable header={true} headerLeft='Diversity Categories'*/}
-                 {/*headerRight='Groups that are Underrepresented in Biomedical Research (UBR)*'*/}
-                 {/*cellWidth={{left: '30%', right: '70%'}}*/}
-                 {/*contentLeft={SpecificPopulationItems.map(sp => sp.ubrLabel)}*/}
-                 {/*contentRight={SpecificPopulationItems.map(sp => sp.ubrDescription)}/>*/}
-            {/*</div>*/}
-          {/*}*/}
           <FlexRow style={{paddingTop: '0.3rem', marginLeft: '0.8rem'}}>
             <FlexColumn>
-            <label style={{...styles.header, marginBottom: '0.2rem'}}>Would you like to request a review of your research purpose
+            <label style={{...styles.header, marginBottom: '0.2rem'}}>Would you like to request a
+              review of your research purpose
               statement by the Resource Access Board?</label>
             <label style={styles.text}>
-                Note: Your response to this question is private and will not be displayed on the Research Hub.
+                Note: Your response to this question is private and will not be displayed on the
+              Research Hub.
             </label>
               <FlexColumn>
                 <FlexRow>
@@ -1052,7 +1026,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
                              checked={this.state.workspace.researchPurpose.reviewRequested}/>
-                <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request a review of my research purpose.</label>
+                <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
+                  a review of my research purpose.</label>
                 </FlexRow>
                 <FlexRow>
                 <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
