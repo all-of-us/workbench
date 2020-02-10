@@ -131,6 +131,7 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
@@ -140,6 +141,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
+import org.pmiops.workbench.model.ResearchOutcomingEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -521,27 +523,39 @@ public class WorkspacesControllerTest {
 
   // TODO(calbach): Clean up this test file to make better use of chained builders.
   private Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
-    ResearchPurpose researchPurpose = new ResearchPurpose();
-    researchPurpose.setDiseaseFocusedResearch(true);
-    researchPurpose.setDiseaseOfFocus("cancer");
-    researchPurpose.setMethodsDevelopment(true);
-    researchPurpose.setControlSet(true);
-    researchPurpose.setAncestry(true);
-    researchPurpose.setCommercialPurpose(true);
-    researchPurpose.setSocialBehavioral(true);
-    researchPurpose.setPopulationHealth(true);
-    researchPurpose.setEducational(true);
-    researchPurpose.setDrugDevelopment(true);
-    researchPurpose.setPopulation(false);
-    researchPurpose.setPopulationDetails(Collections.emptyList());
-    researchPurpose.setAdditionalNotes("additional notes");
-    researchPurpose.setReasonForAllOfUs("reason for aou");
-    researchPurpose.setIntendedStudy("intended study");
-    researchPurpose.setAnticipatedFindings("anticipated findings");
-    researchPurpose.setTimeRequested(1000L);
-    researchPurpose.setTimeReviewed(1500L);
-    researchPurpose.setReviewRequested(true);
-    researchPurpose.setApproved(false);
+    List<DisseminateResearchEnum> disseminateResearchEnums =
+        new ArrayList<DisseminateResearchEnum>();
+    disseminateResearchEnums.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
+    disseminateResearchEnums.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
+
+    List<ResearchOutcomingEnum> researchOutcomingEnums = new ArrayList<ResearchOutcomingEnum>();
+    researchOutcomingEnums.add(ResearchOutcomingEnum.IMPROVED_RISK_ASSESMENT);
+    ResearchPurpose researchPurpose =
+        new ResearchPurpose()
+            .disseminateResearchFinding(disseminateResearchEnums)
+            .researchOutcoming(researchOutcomingEnums)
+            .diseaseFocusedResearch(true)
+            .diseaseOfFocus("cancer")
+            .methodsDevelopment(true)
+            .controlSet(true)
+            .ancestry(true)
+            .commercialPurpose(true)
+            .socialBehavioral(true)
+            .populationHealth(true)
+            .educational(true)
+            .drugDevelopment(true)
+            .ethics(true)
+            .population(false)
+            .populationDetails(Collections.emptyList())
+            .additionalNotes("additional notes")
+            .reasonForAllOfUs("reason for aou")
+            .scientificApproach("Scientific Approach")
+            .intendedStudy("intended study")
+            .anticipatedFindings("anticipated findings")
+            .timeRequested(1000L)
+            .timeReviewed(1500L)
+            .reviewRequested(true)
+            .approved(false);
     Workspace workspace = new Workspace();
     workspace.setId(workspaceName);
     workspace.setName(workspaceName);

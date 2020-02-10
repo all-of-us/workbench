@@ -7,7 +7,7 @@ import {EditComponentReact} from 'app/icons/edit';
 import {
   ResearchPurposeDescription,
   ResearchPurposeItems,
-  SpecificPopulationItems} from 'app/pages/workspace/workspace-edit';
+  SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {sliceByHalfLength} from 'app/utils/index';

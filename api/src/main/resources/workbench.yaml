@@ -2662,9 +2662,10 @@ definitions:
       - reviewRequested
       - socialBehavioral
       - populationHealth
+      - ethics
       - educational
       - otherPurpose
-      - reasonForAllOfUs
+      - scientificApproach
       - intendedStudy
       - anticipatedFindings
       - drugDevelopment
@@ -2698,6 +2699,8 @@ definitions:
         default: false
       intendedStudy:
         type: string
+      scientificApproach:
+        type: string
       methodsDevelopment:
         type: boolean
         default: false
@@ -2709,6 +2712,9 @@ definitions:
       otherPurposeDetails:
         type: string
       population:
+        type: boolean
+        default: false
+      ethics:
         type: boolean
         default: false
       populationDetails:
@@ -2734,6 +2740,16 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      disseminateResearchFinding:
+        type: array
+        items:
+          $ref: "#/definitions/disseminateResearchEnum"
+      otherdisseminateResearchFindings:
+        type: string
+      researchOutcoming:
+        type: array
+        items:
+          $ref: "#/definitions/ResearchOutcomingEnum"
 
   specificPopulationEnum:
     type: string
@@ -2749,7 +2765,44 @@ definitions:
       ACCESS_TO_CARE,
       EDUCATION_LEVEL,
       INCOME_LEVEL,
+      OTHER,
+      RACE_ASIAN,
+      RACE_AA,
+      RACE_HISPANIC,
+      RACE_AIAN,
+      RACE_MENA,
+      RACE_NHPI,
+      RACE_MORE_THAN_ONE,
+      AGE_CHILDREN,
+      AGE_ADOLESCENTS,
+      AGE_OLDER,
+      AGE_OLDER_MORE_THAN_75
+    ]
+
+  disseminateResearchEnum:
+    type: string
+    description: Research findings
+    enum: [
+      PUBLICATION_PEER_REVIEWED_JOURNALS,
+      PRESENATATION_SCIENTIFIC_CONFERENCES,
+      PRESS_RELEASE,
+      PUBLICATION_COMMUNITY_BASED_BLOG,
+      PUBLICATION_PERSONAL_BLOG,
+      SOCIAL_MEDIA,
+      PRESENTATION_ADVISORY_GROUPS,
       OTHER
+    ]
+
+  ResearchOutcomingEnum:
+    type: string
+    description: Research outcoming
+    enum: [
+      PROMOTE_HEALTHY_LIVING,
+      UNDERRESP,
+      IMPROVED_RISK_ASSESMENT,
+      DECREASE_ILLINESS_BURDEN,
+      PRECISION_INTERVENTION,
+      NONE
     ]
 
   ResearchPurposeReviewRequest:
