@@ -48,7 +48,7 @@ export const CreateBillingAccountModal = withUserProfile() (
           <FlexColumn>
             <TextColumn>
               <p style={{marginTop: 0}}>Don't already have a Google Cloud account?</p>
-              <a href='https://cloud.google.com' target='_blank'>Create billing account</a>
+              <a href='https://cloud.google.com' target='_blank'>Create an account</a>
             </TextColumn>
 
             <TextColumn>
