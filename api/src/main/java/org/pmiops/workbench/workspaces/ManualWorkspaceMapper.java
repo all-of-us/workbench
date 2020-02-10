@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.Etags;
@@ -170,18 +169,23 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
 
-    dbWorkspace.setDisseminateResearchEnumSet(
-        Optional.ofNullable(
-                purpose.getDisseminateResearchFinding().stream().collect(Collectors.toSet()))
-            .orElse(new HashSet<DisseminateResearchEnum>()));
+    if (null != purpose.getDisseminateResearchFinding()) {
+      dbWorkspace.setDisseminateResearchEnumSet(
+          purpose.getDisseminateResearchFinding().stream().collect(Collectors.toSet()));
+    } else {
+      dbWorkspace.setDisseminateResearchEnumSet(new HashSet<DisseminateResearchEnum>());
+    }
 
     if (dbWorkspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
       dbWorkspace.setDisseminateResearchOther(purpose.getOtherdisseminateResearchFindings());
     }
 
-    dbWorkspace.setResearchOutcomingEnumSet(
-        Optional.ofNullable(purpose.getResearchOutcoming().stream().collect(Collectors.toSet()))
-            .orElse(new HashSet<ResearchOutcomingEnum>()));
+    if (null != purpose.getResearchOutcoming()) {
+      dbWorkspace.setResearchOutcomingEnumSet(
+          purpose.getResearchOutcoming().stream().collect(Collectors.toSet()));
+    } else {
+      dbWorkspace.setResearchOutcomingEnumSet(new HashSet<ResearchOutcomingEnum>());
+    }
   }
 
   private ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
