@@ -3,7 +3,6 @@ package org.pmiops.workbench.monitoring;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -15,7 +14,6 @@ public class GaugeRecorderService {
 
   private final List<GaugeDataCollector> gaugeDataCollectors;
   private final MonitoringService monitoringService;
-  private final Random random = new Random();
 
   // For local debugging, change this to Level.INFO or higher
   private final Level logLevel = Level.FINE;

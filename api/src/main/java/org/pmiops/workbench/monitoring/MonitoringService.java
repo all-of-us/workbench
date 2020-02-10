@@ -11,7 +11,7 @@ import org.pmiops.workbench.monitoring.views.Metric;
 
 public interface MonitoringService {
 
-  int DELTA_VALUE = 1;
+  int COUNT_INCREMENT = 1;
 
   /**
    * Record an occurrence of a counted (a.k.a. delta or cumulative) time series. These are events
@@ -20,11 +20,7 @@ public interface MonitoringService {
    * @param eventMetric
    */
   default void recordEvent(EventMetric eventMetric) {
-    recordValue(eventMetric, DELTA_VALUE);
-  }
-
-  default void recordEvent(EventMetric eventMetric, Map<TagKey, TagValue> tags) {
-    recordValues(ImmutableMap.of(eventMetric, DELTA_VALUE), tags);
+    recordValue(eventMetric, COUNT_INCREMENT);
   }
 
   default void recordValue(Metric metric, Number value) {
@@ -55,34 +51,4 @@ public interface MonitoringService {
   default void recordBundles(Collection<MeasurementBundle> viewBundles) {
     viewBundles.forEach(this::recordBundle);
   }
-
-  //  /**
-  //   * Use a Stopwatch to time the supplied operation, then add a measurement to the supplied
-  //   * measurementBundleBuilder and record the associated DistributionMetric.
-  //   *
-  //   * @param measurementBundleBuilder - Builder for a MeasurementBundle to be recorded. Typically
-  //   *     only has tags.
-  //   * @param distributionMetric - Metric to be recorded. Always a distribution, as gauge and
-  // count
-  //   *     don't make sense for timings
-  //   * @param operation - Code to be run, e.g. () -> myService.computeThings()
-  //   */
-  //  void timeAndRecord(
-  //      Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable
-  // operation);
-  //
-  //  /**
-  //   * Same as above, but returns the result of the operation
-  //   *
-  //   * @param measurementBundleBuilder - Builder for a MeasurementBundle to be recorded. Typically
-  //   *     only has tags.
-  //   * @param distributionMetric - Metric to be recorded. Always a distribution, as gauge and
-  // count
-  //   *     don't make sense for timings
-  //   * @param operation - Code to be run, e.g. myService::getFooList
-  //   */
-  //  <T> T timeAndRecord(
-  //      Builder measurementBundleBuilder,
-  //      DistributionMetric distributionMetric,
-  //      Supplier<T> operation);
 }

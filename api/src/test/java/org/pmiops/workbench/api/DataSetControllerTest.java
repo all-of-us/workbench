@@ -376,8 +376,7 @@ public class DataSetControllerTest {
             userProvider,
             CLOCK,
             cdrVersionService,
-            userRecentResourceService,
-            logsBasedMetricService);
+            userRecentResourceService);
     ConceptSetsController conceptSetsController =
         new ConceptSetsController(
             workspaceService,
