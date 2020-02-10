@@ -241,7 +241,7 @@ public class DataSetController implements DataSetApiDelegate {
       };
 
   private ConceptSet toClientConceptSet(DbConceptSet conceptSet) {
-    ConceptSet result = ConceptSetsController.TO_CLIENT_CONCEPT_SET.apply(conceptSet);
+    ConceptSet result = ConceptSetsController.toClientConceptSet(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<DbConcept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
       result.setConcepts(

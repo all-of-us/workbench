@@ -23,6 +23,26 @@ public class ConceptSetService {
     this.conceptBigQueryService = conceptBigQueryService;
   }
 
+  public DbConceptSet save(DbConceptSet dbConceptSet) {
+    return conceptSetDao.save(dbConceptSet);
+  }
+
+  public void delete(Long conceptSetId) {
+    conceptSetDao.delete(conceptSetId);
+  }
+
+  public DbConceptSet findOne(Long conceptSetId) {
+    return conceptSetDao.findOne(conceptSetId);
+  }
+
+  public List<DbConceptSet> findByWorkspaceId(long workspaceId) {
+    return conceptSetDao.findByWorkspaceId(workspaceId);
+  }
+
+  public List<DbConceptSet> findByWorkspaceIdAndSurvey(long workspaceId, short surveyId) {
+    return conceptSetDao.findByWorkspaceIdAndSurvey(workspaceId, surveyId);
+  }
+
   @Transactional
   public DbConceptSet cloneConceptSetAndConceptIds(
       DbConceptSet conceptSet, DbWorkspace targetWorkspace, boolean cdrVersionChanged) {
