@@ -425,7 +425,7 @@ public class DbWorkspace {
   public Set<DisseminateResearchEnum> getDisseminateResearchEnumSet() {
     Set<Short> from = getDisseminateResearchSet();
     if (from == null) {
-      return null;
+      return new HashSet<DisseminateResearchEnum>();
     }
     return from.stream()
         .map(DbStorageEnums::disseminateResearchEnumFromStorage)
@@ -466,7 +466,7 @@ public class DbWorkspace {
   public Set<ResearchOutcomingEnum> getResearchOutcomingEnumSet() {
     Set<Short> from = getResearchOutcomingSet();
     if (from == null) {
-      return null;
+      return new HashSet<ResearchOutcomingEnum>();
     }
     return from.stream()
         .map(DbStorageEnums::researchOutcomingEnumFromStorage)

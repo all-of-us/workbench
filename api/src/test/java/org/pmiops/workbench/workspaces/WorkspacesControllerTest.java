@@ -1032,6 +1032,10 @@ public class WorkspacesControllerTest {
     modPurpose.setPopulationDetails(
         ImmutableList.of(
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
+    modPurpose.setDisseminateResearchFinding(
+        ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
+    modPurpose.setResearchOutcoming(
+        ImmutableList.of(ResearchOutcomingEnum.DECREASE_ILLINESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -1080,7 +1084,6 @@ public class WorkspacesControllerTest {
     sortPopulationDetails(clonedWorkspace.getResearchPurpose());
     sortPopulationDetails(retrievedWorkspace.getResearchPurpose());
     sortPopulationDetails(modPurpose);
-
     assertWithMessage("get and clone responses are inconsistent")
         .that(clonedWorkspace)
         .isEqualTo(retrievedWorkspace);

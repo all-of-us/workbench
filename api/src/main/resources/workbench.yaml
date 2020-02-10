@@ -2781,7 +2781,7 @@ definitions:
 
   disseminateResearchEnum:
     type: string
-    description: Research findings
+    description: disseminate findings
     enum: [
       PUBLICATION_PEER_REVIEWED_JOURNALS,
       PRESENATATION_SCIENTIFIC_CONFERENCES,
