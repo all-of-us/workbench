@@ -170,7 +170,7 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
     dbWorkspace.setDisseminateResearchEnumSet(
-        Optional.ofNullable(purpose.getDisseminateResearchFinding())
+        Optional.ofNullable(purpose.getDisseminateResearchFindingList())
             .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toSet()))
             .orElse(new HashSet<DisseminateResearchEnum>()));
 
@@ -179,7 +179,7 @@ public class ManualWorkspaceMapper {
     }
 
     dbWorkspace.setResearchOutcomeEnumSet(
-        Optional.ofNullable(purpose.getResearchOutcome())
+        Optional.ofNullable(purpose.getResearchOutcomeList())
             .map(researchOutcoming -> researchOutcoming.stream().collect(Collectors.toSet()))
             .orElse(new HashSet<ResearchOutcomeEnum>()));
   }
@@ -209,9 +209,9 @@ public class ManualWorkspaceMapper {
             .reviewRequested(workspace.getReviewRequested())
             .approved(workspace.getApproved())
             .otherPopulationDetails(workspace.getOtherPopulationDetails())
-            .disseminateResearchFinding(
+            .disseminateResearchFindingList(
                 workspace.getDisseminateResearchEnumSet().stream().collect(Collectors.toList()))
-            .researchOutcome(
+            .researchOutcomeList(
                 workspace.getResearchOutcomeEnumSet().stream().collect(Collectors.toList()))
             .populationDetails(
                 workspace.getPopulationDetails().stream()

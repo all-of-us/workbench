@@ -2740,13 +2740,13 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-      disseminateResearchFinding:
+      disseminateResearchFindingList:
         type: array
         items:
           $ref: "#/definitions/disseminateResearchEnum"
       otherdisseminateResearchFindings:
         type: string
-      researchOutcome:
+      researchOutcomeList:
         type: array
         items:
           $ref: "#/definitions/ResearchOutcomeEnum"

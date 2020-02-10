@@ -485,7 +485,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return <div key={index} style={styles.categoryRow}>
         <CheckBox style={styles.checkboxStyle}
                   checked={this.disseminateCheckboxSelected(rp.shortName)}
-                  onChange={e => this.updateAttribute('disseminateResearchFinding', rp.shortName, e)}/>
+                  onChange={e => this.updateAttribute('disseminateResearchFindingList', rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
           <label style={styles.text}>
             {rp.label}
@@ -522,7 +522,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           labelStyle={styles.text}
           key={item.label}
           checked={this.researchOutcomeCheckboxSelected(item.shortName)}
-          onChange={v => this.updateAttribute('researchOutcome', item.shortName, v)}
+          onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
       />;
     }
     renderHeader() {
@@ -577,13 +577,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get isDisseminateResearchValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
-      return researchPurpose.disseminateResearchFinding &&
-          researchPurpose.disseminateResearchFinding.length !== 0;
+      return researchPurpose.disseminateResearchFindingList &&
+          researchPurpose.disseminateResearchFindingList.length !== 0;
     }
 
     get isResearchOutcome() {
       const researchPurpose = this.state.workspace.researchPurpose;
-      return researchPurpose.researchOutcome && researchPurpose.researchOutcome.length !== 0 ;
+      return researchPurpose.researchOutcomeList && researchPurpose.researchOutcomeList.length !== 0 ;
     }
 
     updateResearchPurpose(category, value) {
@@ -623,11 +623,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     disseminateCheckboxSelected(disseminateEnum: DisseminateResearchEnum): boolean {
-      return fp.includes(disseminateEnum, this.state.workspace.researchPurpose.disseminateResearchFinding);
+      return fp.includes(disseminateEnum, this.state.workspace.researchPurpose.disseminateResearchFindingList);
     }
 
     researchOutcomeCheckboxSelected(researchOutcomeEnum: ResearchOutcomeEnum): boolean {
-      return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcome);
+      return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcomeList);
     }
 
     onSaveClick() {

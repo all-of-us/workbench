@@ -141,7 +141,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
-import org.pmiops.workbench.model.ResearchOutcomingEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -528,12 +528,12 @@ public class WorkspacesControllerTest {
     disseminateResearchEnums.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnums.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
 
-    List<ResearchOutcomingEnum> researchOutcomingEnums = new ArrayList<ResearchOutcomingEnum>();
-    researchOutcomingEnums.add(ResearchOutcomingEnum.IMPROVED_RISK_ASSESMENT);
+    List<ResearchOutcomeEnum> ResearchOutcomeEnums = new ArrayList<ResearchOutcomeEnum>();
+    ResearchOutcomeEnums.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
             .disseminateResearchFinding(disseminateResearchEnums)
-            .researchOutcoming(researchOutcomingEnums)
+            .researchOutcome(ResearchOutcomeEnums)
             .diseaseFocusedResearch(true)
             .diseaseOfFocus("cancer")
             .methodsDevelopment(true)
@@ -1034,8 +1034,7 @@ public class WorkspacesControllerTest {
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
     modPurpose.setDisseminateResearchFinding(
         ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
-    modPurpose.setResearchOutcoming(
-        ImmutableList.of(ResearchOutcomingEnum.DECREASE_ILLINESS_BURDEN));
+    modPurpose.setResearchOutcome(ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLINESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");

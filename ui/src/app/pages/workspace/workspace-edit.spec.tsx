@@ -44,8 +44,8 @@ describe('WorkspaceEdit', () => {
         anticipatedFindings: 'everything',
         scientificApproach: 'science',
         drugDevelopment: true,
-        disseminateResearchFinding: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
-        researchOutcome: [ResearchOutcomeEnum.DECREASEILLINESSBURDEN]
+        disseminateResearchFindingList: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
+        researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLINESSBURDEN]
       }
     };
 
@@ -113,7 +113,7 @@ describe('WorkspaceEdit', () => {
 
   it('supports disable save button if Research Outcome is not answered', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
-    workspace.researchPurpose.researchOutcome = []
+    workspace.researchPurpose.researchOutcomeList = []
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
