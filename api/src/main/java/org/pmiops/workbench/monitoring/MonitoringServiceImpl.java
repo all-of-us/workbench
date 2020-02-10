@@ -1,6 +1,5 @@
 package org.pmiops.workbench.monitoring;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
@@ -13,13 +12,10 @@ import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
-import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;

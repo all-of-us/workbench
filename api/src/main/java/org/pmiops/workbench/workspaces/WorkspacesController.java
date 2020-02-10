@@ -5,10 +5,7 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudbilling.Cloudbilling;
-import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
-import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -16,7 +13,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -337,7 +333,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
-	maybeFileZendeskReviewRequest(createdWorkspace);
+    maybeFileZendeskReviewRequest(createdWorkspace);
     return createdWorkspace;
   }
 
@@ -452,16 +448,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
           if (researchPurpose != null) {
             manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
-            }
+          }
 
-    if (workspace.getBillingAccountName() != null) {
-      try {
-        workspaceService.updateWorkspaceBillingAccount(
-              dbWorkspace, request.getWorkspace().getBillingAccountName());
-      } catch (Exception e) {
-        throw new ServerErrorException("Could not update the workspace's billing account", e);
-      }
-    }
+          if (workspace.getBillingAccountName() != null) {
+            try {
+              workspaceService.updateWorkspaceBillingAccount(
+                  dbWorkspace, request.getWorkspace().getBillingAccountName());
+            } catch (Exception e) {
+              throw new ServerErrorException("Could not update the workspace's billing account", e);
+            }
+          }
           try {
             // The version asserted on save is the same as the one we read via
             // getRequired() above, see RW-215 for details.
@@ -470,12 +466,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             // Tell Google Cloud to set the billing account back to the original one since our
             // update
             // database call failed
-      workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, originalWorkspace.getBillingAccountName());
+            workspaceService.updateWorkspaceBillingAccount(
+                dbWorkspace, originalWorkspace.getBillingAccountName());
             throw e;
           }
 
-    final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+          final Workspace editedWorkspace =
+              workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
           workspaceAuditor.fireEditAction(
               originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());

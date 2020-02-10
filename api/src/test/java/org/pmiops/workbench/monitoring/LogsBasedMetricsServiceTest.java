@@ -196,4 +196,37 @@ public class LogsBasedMetricsServiceTest {
     assertThat((Double) entryData.get(PayloadKey.VALUE.getKeyName()))
         .isEqualTo(OPERATION_DURATION.toMillis());
   }
+
+  @Test(expected = IllegalAccessError.class)
+  public void testRecordElapsedTime_throws() {
+    logsBasedMetricService.recordElapsedTime(
+        MeasurementBundle.builder(),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          throw new IllegalAccessError("Boo!");
+        });
+  }
+
+  @Test
+  public void testRecordElapsedTime_nestedWorks() {
+    final Set<Integer> someSet = new HashSet<>();
+    logsBasedMetricService.recordElapsedTime(
+        MeasurementBundle.builder(),
+        DistributionMetric.UNIFORM_RANDOM_SAMPLE,
+        () -> {
+          someSet.add(1);
+          someSet.add(3);
+          Boolean b =
+              logsBasedMetricService.recordElapsedTime(
+                  MeasurementBundle.builder(),
+                  DistributionMetric.WORKSPACE_OPERATION_TIME,
+                  () -> {
+                    someSet.add(2);
+                    someSet.remove(3);
+                    return true;
+                  });
+          assertThat(b).isTrue();
+        });
+    assertThat(someSet).containsAllIn(ImmutableSet.of(1, 2));
+  }
 }

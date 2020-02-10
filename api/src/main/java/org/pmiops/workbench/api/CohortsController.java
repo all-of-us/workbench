@@ -44,7 +44,6 @@ import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -139,40 +138,43 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> createCohort(
       String workspaceNamespace, String workspaceId, Cohort cohort) {
-    final Cohort result = logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createCohort"),
-        DistributionMetric.COHORT_OPERATION_TIME,
-        () -> {
-          // This also enforces registered auth domain.
-          workspaceService.enforceWorkspaceAccessLevel(
-              workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-          DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    final Cohort result =
+        logsBasedMetricService.recordElapsedTime(
+            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createCohort"),
+            DistributionMetric.COHORT_OPERATION_TIME,
+            () -> {
+              // This also enforces registered auth domain.
+              workspaceService.enforceWorkspaceAccessLevel(
+                  workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+              DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-          checkForDuplicateCohortNameException(cohort.getName(), workspace);
+              checkForDuplicateCohortNameException(cohort.getName(), workspace);
 
-          DbCohort newCohort =
-              cohortFactory.createCohort(cohort, userProvider.get(), workspace.getWorkspaceId());
-          try {
-            // TODO Make this a pre-check within a transaction?
-            newCohort = cohortDao.save(newCohort);
-            userRecentResourceService.updateCohortEntry(
-                workspace.getWorkspaceId(),
-                userProvider.get().getUserId(),
-                newCohort.getCohortId());
-          } catch (DataIntegrityViolationException e) {
-            // TODO The exception message doesn't show up anywhere; neither logged nor returned to
-            // the
-            // client by Spring (the client gets a default reason string).
-            throw new ServerErrorException(
-                String.format(
-                    "Could not save Cohort (\"/%s/%s/%s\")",
-                    workspace.getWorkspaceNamespace(),
+              DbCohort newCohort =
+                  cohortFactory.createCohort(
+                      cohort, userProvider.get(), workspace.getWorkspaceId());
+              try {
+                // TODO Make this a pre-check within a transaction?
+                newCohort = cohortDao.save(newCohort);
+                userRecentResourceService.updateCohortEntry(
                     workspace.getWorkspaceId(),
-                    newCohort.getName()),
-                e);
-          }
-          return TO_CLIENT_COHORT.apply(newCohort);
-        });
+                    userProvider.get().getUserId(),
+                    newCohort.getCohortId());
+              } catch (DataIntegrityViolationException e) {
+                // TODO The exception message doesn't show up anywhere; neither logged nor returned
+                // to
+                // the
+                // client by Spring (the client gets a default reason string).
+                throw new ServerErrorException(
+                    String.format(
+                        "Could not save Cohort (\"/%s/%s/%s\")",
+                        workspace.getWorkspaceNamespace(),
+                        workspace.getWorkspaceId(),
+                        newCohort.getName()),
+                    e);
+              }
+              return TO_CLIENT_COHORT.apply(newCohort);
+            });
     return ResponseEntity.ok(result);
   }
 
@@ -234,45 +236,47 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> getCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    final Cohort result = logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohort"),
-        DistributionMetric.COHORT_OPERATION_TIME,
-        () -> {
-          // This also enforces registered auth domain.
-          workspaceService.enforceWorkspaceAccessLevel(
-              workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    final Cohort result =
+        logsBasedMetricService.recordElapsedTime(
+            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohort"),
+            DistributionMetric.COHORT_OPERATION_TIME,
+            () -> {
+              // This also enforces registered auth domain.
+              workspaceService.enforceWorkspaceAccessLevel(
+                  workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-          DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
-          return TO_CLIENT_COHORT.apply(dbCohort);
-        });
+              DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
+              return TO_CLIENT_COHORT.apply(dbCohort);
+            });
     return ResponseEntity.ok(result);
   }
 
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(
       String workspaceNamespace, String workspaceId) {
-    final CohortListResponse cohortListResponse = logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortsInWorkspace"),
-        DistributionMetric.COHORT_OPERATION_TIME,
-        () -> {
-          // This also enforces registered auth domain.
-          workspaceService.enforceWorkspaceAccessLevel(
-              workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    final CohortListResponse cohortListResponse =
+        logsBasedMetricService.recordElapsedTime(
+            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortsInWorkspace"),
+            DistributionMetric.COHORT_OPERATION_TIME,
+            () -> {
+              // This also enforces registered auth domain.
+              workspaceService.enforceWorkspaceAccessLevel(
+                  workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-          DbWorkspace workspace =
-              workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
-          CohortListResponse response = new CohortListResponse();
-          Set<DbCohort> cohorts = workspace.getCohorts();
-          if (cohorts != null) {
-            response.setItems(
-                cohorts.stream()
-                    .map(TO_CLIENT_COHORT)
-                    .sorted(Comparator.comparing(Cohort::getName))
-                    .collect(Collectors.toList()));
-          }
-          return response;
-        });
-      return ResponseEntity.ok(cohortListResponse);
+              DbWorkspace workspace =
+                  workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+              CohortListResponse response = new CohortListResponse();
+              Set<DbCohort> cohorts = workspace.getCohorts();
+              if (cohorts != null) {
+                response.setItems(
+                    cohorts.stream()
+                        .map(TO_CLIENT_COHORT)
+                        .sorted(Comparator.comparing(Cohort::getName))
+                        .collect(Collectors.toList()));
+              }
+              return response;
+            });
+    return ResponseEntity.ok(cohortListResponse);
   }
 
   @Override
