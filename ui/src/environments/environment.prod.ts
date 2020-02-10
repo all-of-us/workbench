@@ -12,6 +12,7 @@ export const environment: Environment = {
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
+  createBillingAccountHelpUrl: 'https://aousupporthelp.zendesk.com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account',
   zendeskWidgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   trainingUrl: 'https://aou.nnlm.gov',
