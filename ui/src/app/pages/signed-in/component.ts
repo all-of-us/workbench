@@ -7,7 +7,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
-import {debouncer, hasRegisteredAccessFetch, resettableTimeout} from 'app/utils';
+import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
 import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
