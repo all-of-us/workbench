@@ -523,17 +523,17 @@ public class WorkspacesControllerTest {
 
   // TODO(calbach): Clean up this test file to make better use of chained builders.
   private Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
-    List<DisseminateResearchEnum> disseminateResearchEnums =
+    List<DisseminateResearchEnum> disseminateResearchEnumsList =
         new ArrayList<DisseminateResearchEnum>();
-    disseminateResearchEnums.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
-    disseminateResearchEnums.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
+    disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
+    disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
 
-    List<ResearchOutcomeEnum> ResearchOutcomeEnums = new ArrayList<ResearchOutcomeEnum>();
-    ResearchOutcomeEnums.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
+    List<ResearchOutcomeEnum> ResearchOutcomeEnumsList = new ArrayList<ResearchOutcomeEnum>();
+    ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
-            .disseminateResearchFinding(disseminateResearchEnums)
-            .researchOutcome(ResearchOutcomeEnums)
+            .disseminateResearchFindingList(disseminateResearchEnumsList)
+            .researchOutcomeList(ResearchOutcomeEnumsList)
             .diseaseFocusedResearch(true)
             .diseaseOfFocus("cancer")
             .methodsDevelopment(true)
@@ -1032,9 +1032,9 @@ public class WorkspacesControllerTest {
     modPurpose.setPopulationDetails(
         ImmutableList.of(
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
-    modPurpose.setDisseminateResearchFinding(
+    modPurpose.setDisseminateResearchFindingList(
         ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
-    modPurpose.setResearchOutcome(ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLINESS_BURDEN));
+    modPurpose.setResearchOutcomeList(ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLINESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
