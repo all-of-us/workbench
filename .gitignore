@@ -59,4 +59,3 @@ common-api/out/*
 **/*.iws
 **/build
 **/.gradle
-**/*.orig
