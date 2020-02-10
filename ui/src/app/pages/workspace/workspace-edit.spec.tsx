@@ -1,7 +1,7 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
-import {DisseminateResearchEnum, ResearchOutcomingEnum,
+import {DisseminateResearchEnum, ResearchOutcomeEnum,
   SpecificPopulationEnum,UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -45,7 +45,7 @@ describe('WorkspaceEdit', () => {
         scientificApproach: 'science',
         drugDevelopment: true,
         disseminateResearchFinding: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
-        researchOutcoming: [ResearchOutcomingEnum.DECREASEILLINESSBURDEN]
+        researchOutcome: [ResearchOutcomeEnum.DECREASEILLINESSBURDEN]
       }
     };
 
@@ -111,9 +111,9 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
   });
 
-  it('supports disable save button if Research Outcoming is not answered', async () => {
+  it('supports disable save button if Research Outcome is not answered', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
-    workspace.researchPurpose.researchOutcoming = []
+    workspace.researchPurpose.researchOutcome = []
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 

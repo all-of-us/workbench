@@ -2746,10 +2746,10 @@ definitions:
           $ref: "#/definitions/disseminateResearchEnum"
       otherdisseminateResearchFindings:
         type: string
-      researchOutcoming:
+      researchOutcome:
         type: array
         items:
-          $ref: "#/definitions/ResearchOutcomingEnum"
+          $ref: "#/definitions/ResearchOutcomeEnum"
 
   specificPopulationEnum:
     type: string
@@ -2793,9 +2793,9 @@ definitions:
       OTHER
     ]
 
-  ResearchOutcomingEnum:
+  ResearchOutcomeEnum:
     type: string
-    description: Research outcoming
+    description: Research Outcomes
     enum: [
       PROMOTE_HEALTHY_LIVING,
       UNDERRESP,

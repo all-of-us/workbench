@@ -25,7 +25,7 @@ import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
-import org.pmiops.workbench.model.ResearchOutcomingEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
@@ -117,7 +117,7 @@ public class DbWorkspace {
 
   private Set<Short> disseminateResearchSet = new HashSet<Short>();
   private String disseminateResearchOther;
-  private Set<Short> researchOutcomingSet = new HashSet<>();
+  private Set<Short> researchOutcomeSet = new HashSet<>();
 
   private Boolean reviewRequested;
   private Boolean approved;
@@ -454,29 +454,29 @@ public class DbWorkspace {
       name = "workspace_research_outcomes",
       joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "research_outcome")
-  public Set<Short> getResearchOutcomingSet() {
-    return researchOutcomingSet;
+  public Set<Short> getResearchOutcomeSet() {
+    return researchOutcomeSet;
   }
 
-  public void setResearchOutcomingSet(Set<Short> researchOutcomingSet) {
-    this.researchOutcomingSet = researchOutcomingSet;
+  public void setResearchOutcomeSet(Set<Short> researchOutcomeSet) {
+    this.researchOutcomeSet = researchOutcomeSet;
   }
 
   @Transient
-  public Set<ResearchOutcomingEnum> getResearchOutcomingEnumSet() {
-    Set<Short> from = getResearchOutcomingSet();
+  public Set<ResearchOutcomeEnum> getResearchOutcomeEnumSet() {
+    Set<Short> from = getResearchOutcomeSet();
     if (from == null) {
-      return new HashSet<ResearchOutcomingEnum>();
+      return new HashSet<ResearchOutcomeEnum>();
     }
     return from.stream()
-        .map(DbStorageEnums::researchOutcomingEnumFromStorage)
+        .map(DbStorageEnums::researchOutcomeEnumFromStorage)
         .collect(Collectors.toSet());
   }
 
-  public void setResearchOutcomingEnumSet(Set<ResearchOutcomingEnum> researchOutcomingEnum) {
-    setResearchOutcomingSet(
-        researchOutcomingEnum.stream()
-            .map(DbStorageEnums::researchOutcomingToStorage)
+  public void setResearchOutcomeEnumSet(Set<ResearchOutcomeEnum> researchOutcomeEnum) {
+    setResearchOutcomeSet(
+        researchOutcomeEnum.stream()
+            .map(DbStorageEnums::researchOutcomeToStorage)
             .collect(Collectors.toSet()));
   }
 

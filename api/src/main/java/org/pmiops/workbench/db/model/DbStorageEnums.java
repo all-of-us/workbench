@@ -12,7 +12,7 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.ResearchOutcomingEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -242,21 +242,21 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.get(s);
   }
 
-  public static final BiMap<ResearchOutcomingEnum, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
-      ImmutableBiMap.<ResearchOutcomingEnum, Short>builder()
-          .put(ResearchOutcomingEnum.PROMOTE_HEALTHY_LIVING, (short) 0)
-          .put(ResearchOutcomingEnum.UNDERRESP, (short) 1)
-          .put(ResearchOutcomingEnum.IMPROVED_RISK_ASSESMENT, (short) 2)
-          .put(ResearchOutcomingEnum.DECREASE_ILLINESS_BURDEN, (short) 3)
-          .put(ResearchOutcomingEnum.PRECISION_INTERVENTION, (short) 4)
-          .put(ResearchOutcomingEnum.NONE, (short) 5)
+  public static final BiMap<ResearchOutcomeEnum, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
+      ImmutableBiMap.<ResearchOutcomeEnum, Short>builder()
+          .put(ResearchOutcomeEnum.PROMOTE_HEALTHY_LIVING, (short) 0)
+          .put(ResearchOutcomeEnum.UNDERRESP, (short) 1)
+          .put(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT, (short) 2)
+          .put(ResearchOutcomeEnum.DECREASE_ILLINESS_BURDEN, (short) 3)
+          .put(ResearchOutcomeEnum.PRECISION_INTERVENTION, (short) 4)
+          .put(ResearchOutcomeEnum.NONE, (short) 5)
           .build();
 
-  public static ResearchOutcomingEnum researchOutcomingEnumFromStorage(Short s) {
+  public static ResearchOutcomeEnum researchOutcomeEnumFromStorage(Short s) {
     return CLIENT_TO_STORAGE_RESEARCH_OUTCOME.inverse().get(s);
   }
 
-  public static Short researchOutcomingToStorage(ResearchOutcomingEnum s) {
+  public static Short researchOutcomeToStorage(ResearchOutcomeEnum s) {
     return CLIENT_TO_STORAGE_RESEARCH_OUTCOME.get(s);
   }
 

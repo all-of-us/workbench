@@ -65,9 +65,9 @@ public interface WorkspaceMapper {
       researchPurpose.setPopulationDetails(
           ImmutableList.copyOf(dbWorkspace.getSpecificPopulationsEnum()));
     }
-    if (null != dbWorkspace.getResearchOutcomingSet()) {
-      researchPurpose.setResearchOutcoming(
-          ImmutableList.copyOf(dbWorkspace.getResearchOutcomingEnumSet()));
+    if (null != dbWorkspace.getResearchOutcomeSet()) {
+      researchPurpose.setResearchOutcome(
+          ImmutableList.copyOf(dbWorkspace.getResearchOutcomeEnumSet()));
     }
     if (null != dbWorkspace.getDisseminateResearchEnumSet()) {
       researchPurpose.setDisseminateResearchFinding(

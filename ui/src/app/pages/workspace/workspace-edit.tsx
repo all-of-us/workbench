@@ -32,7 +32,7 @@ import {
   CdrVersionListResponse,
   DataAccessLevel,
   DisseminateResearchEnum,
-  ResearchOutcomingEnum,
+  ResearchOutcomeEnum,
   SpecificPopulationEnum,
   Workspace, WorkspaceAccessLevel
 } from 'generated/fetch';
@@ -522,7 +522,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           labelStyle={styles.text}
           key={item.label}
           checked={this.researchOutcomeCheckboxSelected(item.shortName)}
-          onChange={v => this.updateAttribute('researchOutcoming', item.shortName, v)}
+          onChange={v => this.updateAttribute('researchOutcome', item.shortName, v)}
       />;
     }
     renderHeader() {
@@ -583,7 +583,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get isResearchOutcome() {
       const researchPurpose = this.state.workspace.researchPurpose;
-      return researchPurpose.researchOutcoming && researchPurpose.researchOutcoming.length !== 0 ;
+      return researchPurpose.researchOutcome && researchPurpose.researchOutcome.length !== 0 ;
     }
 
     updateResearchPurpose(category, value) {
@@ -626,8 +626,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return fp.includes(disseminateEnum, this.state.workspace.researchPurpose.disseminateResearchFinding);
     }
 
-    researchOutcomeCheckboxSelected(researchOutcomeEnum: ResearchOutcomingEnum): boolean {
-      return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcoming);
+    researchOutcomeCheckboxSelected(researchOutcomeEnum: ResearchOutcomeEnum): boolean {
+      return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcome);
     }
 
     onSaveClick() {

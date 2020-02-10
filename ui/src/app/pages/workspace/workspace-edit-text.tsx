@@ -1,5 +1,6 @@
 import {
-  DisseminateResearchEnum, ResearchOutcomingEnum,
+  DisseminateResearchEnum,
+  ResearchOutcomeEnum,
   SpecificPopulationEnum
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -344,27 +345,27 @@ export const researchOutcomings = [
   {
     label: 'This research project seeks to increase wellness and resilience, and promote ' +
     'healthy living',
-    shortName: ResearchOutcomingEnum.PROMOTEHEALTHYLIVING
+    shortName: ResearchOutcomeEnum.PROMOTEHEALTHYLIVING
   }, {
     label: 'This research project seeks to reduce health disparities and improve health equity ' +
     'in underrepresented in biomedical research (UBR) populations',
-    shortName: ResearchOutcomingEnum.UNDERRESP
+    shortName: ResearchOutcomeEnum.UNDERRESP
   }, {
     label: 'This research project seeks to develop improved risk assessment and prevention ' +
     'strategies to preempt disease',
-    shortName: ResearchOutcomingEnum.IMPROVEDRISKASSESMENT
+    shortName: ResearchOutcomeEnum.IMPROVEDRISKASSESMENT
   },
   {
     label: 'This research project seeks to provide earlier and more accurate diagnosis to ' +
     'decrease illness burden',
-    shortName: ResearchOutcomingEnum.DECREASEILLINESSBURDEN
+    shortName: ResearchOutcomeEnum.DECREASEILLINESSBURDEN
   },
   {
     label: 'This research project seeks to improve health outcomes and reduce disease/illness burden' +
     ' through improved treatment and development of precision intervention',
-    shortName: ResearchOutcomingEnum.PRECISIONINTERVENTION
+    shortName: ResearchOutcomeEnum.PRECISIONINTERVENTION
   }, {
     label: 'None of these statements apply to this research project',
-    shortName: ResearchOutcomingEnum.NONE
+    shortName: ResearchOutcomeEnum.NONE
   }
 ];

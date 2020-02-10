@@ -20,7 +20,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.RecentWorkspace;
-import org.pmiops.workbench.model.ResearchOutcomingEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
@@ -178,10 +178,10 @@ public class ManualWorkspaceMapper {
       dbWorkspace.setDisseminateResearchOther(purpose.getOtherdisseminateResearchFindings());
     }
 
-    dbWorkspace.setResearchOutcomingEnumSet(
-        Optional.ofNullable(purpose.getResearchOutcoming())
+    dbWorkspace.setResearchOutcomeEnumSet(
+        Optional.ofNullable(purpose.getResearchOutcome())
             .map(researchOutcoming -> researchOutcoming.stream().collect(Collectors.toSet()))
-            .orElse(new HashSet<ResearchOutcomingEnum>()));
+            .orElse(new HashSet<ResearchOutcomeEnum>()));
   }
 
   private ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
@@ -211,8 +211,8 @@ public class ManualWorkspaceMapper {
             .otherPopulationDetails(workspace.getOtherPopulationDetails())
             .disseminateResearchFinding(
                 workspace.getDisseminateResearchEnumSet().stream().collect(Collectors.toList()))
-            .researchOutcoming(
-                workspace.getResearchOutcomingEnumSet().stream().collect(Collectors.toList()))
+            .researchOutcome(
+                workspace.getResearchOutcomeEnumSet().stream().collect(Collectors.toList()))
             .populationDetails(
                 workspace.getPopulationDetails().stream()
                     .map(DbStorageEnums::specificPopulationFromStorage)
