@@ -1043,7 +1043,7 @@ public class DataSetControllerTest {
     mockLinkingTableQuery(tables);
 
     final Map<String, QueryJobConfiguration> result =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+        dataSetService.domainToBigQueryConfig(dataSetRequest);
     assertThat(result).isNotEmpty();
   }
 

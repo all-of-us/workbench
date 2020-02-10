@@ -279,7 +279,7 @@ public class DataSetController implements DataSetApiDelegate {
     // TODO(jaycarlton): return better error information form this function for common validation
     // scenarios
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+        dataSetService.domainToBigQueryConfig(dataSetRequest);
 
     if (bigQueryJobConfigsByDomain.isEmpty()) {
       log.warning("Empty query map generated for this DataSetRequest");
@@ -323,15 +323,9 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
+    // Generate a query for the preview.
     Map<String, QueryJobConfiguration> bigQueryJobConfig =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest).entrySet()
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey,
-                    stringQueryJobConfigurationEntry ->
-                        bigQueryService.filterBigQueryConfig(
-                            stringQueryJobConfigurationEntry.getValue())));
+        dataSetService.domainToBigQueryConfig(dataSetRequest);
 
     if (bigQueryJobConfig.size() > 1) {
       throw new BadRequestException(
@@ -500,7 +494,7 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     Map<String, QueryJobConfiguration> queriesByDomain =
-        dataSetService.generateQueryJobConfigurationsByDomainName(
+        dataSetService.domainToBigQueryConfig(
             dataSetExportRequest.getDataSetRequest());
 
     String qualifier = generateRandomEightCharacterQualifier();

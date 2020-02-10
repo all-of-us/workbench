@@ -227,7 +227,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .build();
 
   @Override
-  public Map<String, QueryJobConfiguration> generateQueryJobConfigurationsByDomainName(
+  public Map<String, QueryJobConfiguration> domainToBigQueryConfig(
       DataSetRequest dataSetRequest) {
     final boolean includesAllParticipants =
         getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
