@@ -130,9 +130,6 @@
     <include file="changelog/db.changelog-120-update-demographics.xml"/>
     <include file="changelog/db.changelog-121-add-back-billing-account-name.xml"/>
     <include file="changelog/db.changelog-122-drop-demographics-tables.xml"/>
-    <include file="changelog/db.changelog-125-add-columns-workspace.xml"/>
-    <include file="changelog/db.changelog-126-add-research-outcomes-workspace.xml"/>
-    <include file="changelog/db.changelog-127-add-disseminate-research-workspace.xml"/>
 
     <!--
     Note: to update the DB locally, do the following:
