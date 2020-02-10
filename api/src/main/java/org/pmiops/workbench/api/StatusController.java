@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.StatusResponse;
-import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,16 +12,12 @@ public class StatusController implements StatusApiDelegate {
 
   private final FireCloudService fireCloudService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
-  private MonitoringService monitoringService;
 
   @Autowired
   StatusController(
-      FireCloudService fireCloudService,
-      LeonardoNotebooksClient leonardoNotebooksClient,
-      MonitoringService monitoringService) {
+      FireCloudService fireCloudService, LeonardoNotebooksClient leonardoNotebooksClient) {
     this.fireCloudService = fireCloudService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
-    this.monitoringService = monitoringService;
   }
 
   @Override
