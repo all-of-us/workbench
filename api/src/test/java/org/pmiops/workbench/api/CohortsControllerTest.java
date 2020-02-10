@@ -2,8 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
@@ -19,13 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Supplier;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -81,9 +77,7 @@ import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
-import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
@@ -154,7 +148,6 @@ public class CohortsControllerTest {
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
   private static DbUser currentUser;
 
-  @MockBean LogsBasedMetricService mockLogsBasedMetricService;
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
@@ -266,22 +259,6 @@ public class CohortsControllerTest {
 
     searchRequest = SearchRequests.males();
     cohortCriteria = new Gson().toJson(searchRequest);
-
-    // TODO(jaycarlton): can I  do this more generically?  Would that even
-    // be an improvement if I could?
-    doAnswer(invocation -> ((Supplier) invocation.getArgument(2)).get())
-        .when(mockLogsBasedMetricService)
-        .recordElapsedTime(
-            any(MeasurementBundle.Builder.class),
-            any(DistributionMetric.class),
-            ArgumentMatchers.<Supplier<Workspace>>any());
-
-    doAnswer(invocation -> ((Supplier) invocation.getArgument(2)).get())
-        .when(mockLogsBasedMetricService)
-        .recordElapsedTime(
-            any(MeasurementBundle.Builder.class),
-            any(DistributionMetric.class),
-            ArgumentMatchers.<Supplier<Cohort>>any());
 
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
