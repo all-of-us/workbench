@@ -1034,7 +1034,8 @@ public class WorkspacesControllerTest {
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
     modPurpose.setDisseminateResearchFindingList(
         ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
-    modPurpose.setResearchOutcomeList(ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLINESS_BURDEN));
+    modPurpose.setResearchOutcomeList(
+        ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLINESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
