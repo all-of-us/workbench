@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -53,6 +54,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
+  private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}";
+  private static final String PYTHON_CDR_ENV_VARIABLE = "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"";
+  private static final String R_CDR_ENV_VARIABLE = "\", Sys.getenv(\"WORKSPACE_CDR\"), \"";
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
@@ -503,8 +507,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         .build();
   }
 
-  private QueryJobConfiguration buildQueryJobConfigurationWithProjectInformation(
+  private QueryJobConfiguration buildAndFilterQueryJobConfiguration(
       Map<String, QueryParameterValue> namedCohortParameters, String query) {
+    // This runs filterBigQueryConfig as well, to make a runnable query.
     return bigQueryService.filterBigQueryConfig(
         buildQueryJobConfiguration(namedCohortParameters, query));
   }
@@ -636,7 +641,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     final TableResult valuesLinkingTableResult =
         bigQueryService.executeQuery(
-            buildQueryJobConfigurationWithProjectInformation(
+            buildAndFilterQueryJobConfiguration(
                 queryParameterValuesByDomain,
                 SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
 
@@ -669,42 +674,54 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     switch (kernelTypeEnum) {
       case PYTHON:
         return query.replaceAll(
-            "\\$\\{projectId}.\\$\\{dataSetId}", "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"");
+            CDR_STRING, PYTHON_CDR_ENV_VARIABLE);
       case R:
         return query.replaceAll(
-            "\\$\\{projectId}.\\$\\{dataSetId}", "\", Sys.getenv(\"WORKSPACE_CDR\"), \"");
+            CDR_STRING, R_CDR_ENV_VARIABLE);
       default:
         return query;
     }
   }
 
+  // This takes the query, and string replaces in the values for each of the named
+  // parameters generated.
   private static String fillInQueryParams(
       String query, Map<String, QueryParameterValue> queryParameterValueMap) {
     StringBuilder stringBuilder = new StringBuilder(query);
     queryParameterValueMap.forEach(
         (key, value) -> {
           if (StandardSQLTypeName.ARRAY.equals(value.getType())) {
+            // This handles the replacement of array parameters.
+            // It finds the parameter (specified by `unnest(NAME)`)
             String stringToReplace = "unnest(@".concat(key.concat(")"));
             int startingIndex = stringBuilder.indexOf(stringToReplace);
             stringBuilder.replace(
                 startingIndex,
                 startingIndex + stringToReplace.length(),
-                "("
-                    .concat(
-                        nullableListToEmpty(value.getArrayValues()).stream()
-                            .map(QueryParameterValue::getValue)
-                            .collect(Collectors.joining(", ")))
-                    .concat(")"));
+                arraySqlFromQueryParameter(value));
           } else {
+            // This handles the replacement of non-array parameters.
+            // getValue should always work, because it handles all value types except arrays and structs.
+            // We do not use structs.
             String stringToReplace = "@".concat(key);
             int startingIndex = stringBuilder.indexOf(stringToReplace);
-            stringBuilder.replace(
+            Optional.ofNullable(value.getValue()).ifPresent(v -> stringBuilder.replace(
                 startingIndex,
                 startingIndex + stringToReplace.length(),
-                Optional.ofNullable(value.getValue()).orElse(""));
+                v));
           }
         });
     return stringBuilder.toString();
+  }
+
+  @NotNull
+  private static String arraySqlFromQueryParameter(QueryParameterValue value) {
+    return "("
+        .concat(
+            nullableListToEmpty(value.getArrayValues()).stream()
+                .map(QueryParameterValue::getValue)
+                .collect(Collectors.joining(", ")))
+        .concat(")");
   }
 
   private static String generateNotebookUserCode(
