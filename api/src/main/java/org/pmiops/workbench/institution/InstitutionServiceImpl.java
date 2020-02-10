@@ -1,12 +1,11 @@
 package org.pmiops.workbench.institution;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.db.dao.InstitutionDao;
-import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
-import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
@@ -18,34 +17,27 @@ import org.springframework.stereotype.Service;
 public class InstitutionServiceImpl implements InstitutionService {
 
   private final InstitutionDao institutionDao;
-  private final InstitutionEmailDomainDao institutionEmailDomainDao;
-  private final InstitutionEmailAddressDao institutionEmailAddressDao;
 
   @Autowired
-  InstitutionServiceImpl(
-      InstitutionDao institutionDao,
-      InstitutionEmailDomainDao institutionEmailDomainDao,
-      InstitutionEmailAddressDao institutionEmailAddressDao) {
+  InstitutionServiceImpl(InstitutionDao institutionDao) {
     this.institutionDao = institutionDao;
-    this.institutionEmailDomainDao = institutionEmailDomainDao;
-    this.institutionEmailAddressDao = institutionEmailAddressDao;
   }
 
   @Override
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(this::toModelClass)
+        .map(this::toModel)
         .collect(Collectors.toList());
   }
 
   @Override
   public Optional<Institution> getInstitution(final String shortName) {
-    return getDbInstitution(shortName).map(this::toModelClass);
+    return getDbInstitution(shortName).map(this::toModel);
   }
 
   @Override
   public Institution createInstitution(final Institution institutionToCreate) {
-    return toModelClass(saveInstitution(institutionToCreate, new DbInstitution()));
+    return toModel(institutionDao.save(newDbObject(institutionToCreate)));
   }
 
   @Override
@@ -63,57 +55,47 @@ public class InstitutionServiceImpl implements InstitutionService {
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
     return getDbInstitution(shortName)
-        .map(dbInst -> toModelClass(saveInstitution(institutionToUpdate, dbInst)));
+        .map(dbInst -> toModel(institutionDao.save(updateDbObject(dbInst, institutionToUpdate))));
   }
 
   private Optional<DbInstitution> getDbInstitution(String shortName) {
     return institutionDao.findOneByShortName(shortName);
   }
 
-  private DbInstitution saveInstitution(final Institution modelClass, final DbInstitution dbClass) {
-    dbClass.setShortName(modelClass.getShortName());
-    dbClass.setDisplayName(modelClass.getDisplayName());
-    dbClass.setOrganizationTypeEnum(modelClass.getOrganizationTypeEnum());
-    dbClass.setOrganizationTypeOtherText(modelClass.getOrganizationTypeOtherText());
-
-    return saveInstitutionEmailPatterns(modelClass, institutionDao.save(dbClass));
+  private DbInstitution newDbObject(final Institution modelObject) {
+    return updateDbObject(new DbInstitution(), modelObject);
   }
 
-  private DbInstitution saveInstitutionEmailPatterns(
-      final Institution modelClass, final DbInstitution dbClass) {
+  private DbInstitution updateDbObject(
+      final DbInstitution dbObject, final Institution modelObject) {
+    dbObject.setShortName(modelObject.getShortName());
+    dbObject.setDisplayName(modelObject.getDisplayName());
+    dbObject.setOrganizationTypeEnum(modelObject.getOrganizationTypeEnum());
+    dbObject.setOrganizationTypeOtherText(modelObject.getOrganizationTypeOtherText());
 
-    institutionEmailDomainDao.deleteAllByInstitution(dbClass);
-    Optional.ofNullable(modelClass.getEmailDomains())
-        .ifPresent(
-            domains ->
-                dbClass.setEmailDomains(
-                    institutionEmailDomainDao.save(
-                        domains.stream()
-                            .map(domain -> new DbInstitutionEmailDomain(dbClass, domain))
-                            .collect(Collectors.toSet()))));
+    dbObject.setEmailDomains(
+        Optional.ofNullable(modelObject.getEmailDomains()).orElse(Collections.emptyList()).stream()
+            .map(domain -> new DbInstitutionEmailDomain().setEmailDomain(domain))
+            .collect(Collectors.toSet()));
 
-    institutionEmailAddressDao.deleteAllByInstitution(dbClass);
-    Optional.ofNullable(modelClass.getEmailAddresses())
-        .ifPresent(
-            addresses ->
-                dbClass.setEmailAddresses(
-                    institutionEmailAddressDao.save(
-                        addresses.stream()
-                            .map(address -> new DbInstitutionEmailAddress(dbClass, address))
-                            .collect(Collectors.toSet()))));
+    dbObject.setEmailAddresses(
+        Optional.ofNullable(modelObject.getEmailAddresses()).orElse(Collections.emptyList())
+            .stream()
+            .map(address -> new DbInstitutionEmailAddress().setEmailAddress(address))
+            .collect(Collectors.toSet()));
 
-    return institutionDao.save(dbClass);
+    return dbObject;
   }
 
-  private Institution toModelClass(final DbInstitution dbClass) {
+  private Institution toModel(final DbInstitution dbObject) {
     final Institution institution =
         new Institution()
-            .shortName(dbClass.getShortName())
-            .displayName(dbClass.getDisplayName())
-            .organizationTypeEnum(dbClass.getOrganizationTypeEnum())
-            .organizationTypeOtherText(dbClass.getOrganizationTypeOtherText());
+            .shortName(dbObject.getShortName())
+            .displayName(dbObject.getDisplayName())
+            .organizationTypeEnum(dbObject.getOrganizationTypeEnum())
+            .organizationTypeOtherText(dbObject.getOrganizationTypeOtherText());
 
-    Optional.ofNullable(dbClass.getEmailDomains())
+    Optional.ofNullable(dbObject.getEmailDomains())
         .ifPresent(
             domains ->
                 institution.emailDomains(
@@ -121,7 +103,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                         .map(DbInstitutionEmailDomain::getEmailDomain)
                         .collect(Collectors.toList())));
 
-    Optional.ofNullable(dbClass.getEmailAddresses())
+    Optional.ofNullable(dbObject.getEmailAddresses())
         .ifPresent(
             addresses ->
                 institution.emailAddresses(
