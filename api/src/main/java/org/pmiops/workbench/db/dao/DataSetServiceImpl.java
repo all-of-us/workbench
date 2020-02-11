@@ -55,7 +55,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}";
-  private static final String PYTHON_CDR_ENV_VARIABLE = "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"";
+  private static final String PYTHON_CDR_ENV_VARIABLE =
+      "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"";
   private static final String R_CDR_ENV_VARIABLE = "\", Sys.getenv(\"WORKSPACE_CDR\"), \"";
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
@@ -231,8 +232,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .build();
 
   @Override
-  public Map<String, QueryJobConfiguration> domainToBigQueryConfig(
-      DataSetRequest dataSetRequest) {
+  public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     final boolean includesAllParticipants =
         getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
     final ImmutableList<DbCohort> cohortsSelected =
@@ -673,11 +673,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String query, KernelTypeEnum kernelTypeEnum) {
     switch (kernelTypeEnum) {
       case PYTHON:
-        return query.replaceAll(
-            CDR_STRING, PYTHON_CDR_ENV_VARIABLE);
+        return query.replaceAll(CDR_STRING, PYTHON_CDR_ENV_VARIABLE);
       case R:
-        return query.replaceAll(
-            CDR_STRING, R_CDR_ENV_VARIABLE);
+        return query.replaceAll(CDR_STRING, R_CDR_ENV_VARIABLE);
       default:
         return query;
     }
@@ -701,14 +699,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 arraySqlFromQueryParameter(value));
           } else {
             // This handles the replacement of non-array parameters.
-            // getValue should always work, because it handles all value types except arrays and structs.
+            // getValue should always work, because it handles all value types except arrays and
+            // structs.
             // We do not use structs.
             String stringToReplace = "@".concat(key);
             int startingIndex = stringBuilder.indexOf(stringToReplace);
-            Optional.ofNullable(value.getValue()).ifPresent(v -> stringBuilder.replace(
-                startingIndex,
-                startingIndex + stringToReplace.length(),
-                v));
+            Optional.ofNullable(value.getValue())
+                .ifPresent(
+                    v ->
+                        stringBuilder.replace(
+                            startingIndex, startingIndex + stringToReplace.length(), v));
           }
         });
     return stringBuilder.toString();

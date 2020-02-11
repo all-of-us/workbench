@@ -494,8 +494,7 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     Map<String, QueryJobConfiguration> queriesByDomain =
-        dataSetService.domainToBigQueryConfig(
-            dataSetExportRequest.getDataSetRequest());
+        dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
     String qualifier = generateRandomEightCharacterQualifier();
 

@@ -159,9 +159,11 @@ public class DataSetControllerTest {
   private static final String TEST_CDR_DATA_SET_ID = "synthetic_cdr20180606";
   private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
   private static final String NAMED_PARAMETER_NAME = "p1_1";
-  private static final QueryParameterValue NAMED_PARAMETER_VALUE = QueryParameterValue.string("ICD9");
+  private static final QueryParameterValue NAMED_PARAMETER_VALUE =
+      QueryParameterValue.string("ICD9");
   private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
-  private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE = QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
+  private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
+      QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
 
   private Long COHORT_ONE_ID;
   private Long COHORT_TWO_ID;
@@ -546,7 +548,11 @@ public class DataSetControllerTest {
     when(cohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
             QueryJobConfiguration.newBuilder(
-                "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person WHERE @" + NAMED_PARAMETER_NAME + " IN unnest(@" + NAMED_PARAMETER_ARRAY_NAME + ")")
+                    "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person WHERE @"
+                        + NAMED_PARAMETER_NAME
+                        + " IN unnest(@"
+                        + NAMED_PARAMETER_ARRAY_NAME
+                        + ")")
                 .addNamedParameter(NAMED_PARAMETER_NAME, NAMED_PARAMETER_VALUE)
                 .addNamedParameter(NAMED_PARAMETER_ARRAY_NAME, NAMED_PARAMETER_ARRAY_VALUE)
                 .build());
@@ -722,7 +728,9 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person WHERE " + NAMED_PARAMETER_VALUE.getValue() + " IN (2, 5))) "
+                + ".person` person WHERE "
+                + NAMED_PARAMETER_VALUE.getValue()
+                + " IN (2, 5))) "
                 + "\n"
                 + "LIMIT \"\"\" + max_number_of_rows\n"
                 + "\n"
@@ -771,7 +779,9 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person WHERE " + NAMED_PARAMETER_VALUE.getValue() + " IN (2, 5))) \n"
+                + ".person` person WHERE "
+                + NAMED_PARAMETER_VALUE.getValue()
+                + " IN (2, 5))) \n"
                 + "LIMIT \", max_number_of_rows, sep=\"\")\n"
                 + "\n"
                 + prefix
