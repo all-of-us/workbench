@@ -260,9 +260,7 @@ definitions:
       country:
         type: string
       ethnicity:
-        type: array
-        items:
-          $ref: '#/definitions/Ethnicity'
+        $ref: '#/definitions/Ethnicity'
       gender:
         type: array
         items:
@@ -283,6 +281,10 @@ definitions:
         $ref: '#/definitions/Education'
       disability:
         $ref: '#/definitions/Disability'
+      degrees:
+        type: array
+        items:
+          $ref: '#/definitions/Degree'
       affiliations:
         type: array
         items:
@@ -361,3 +363,21 @@ definitions:
       - "YES"
       - "NO"
       - PREFER_NOT_TO_ANSWER
+
+  Degree:
+    type: string
+    enum:
+      - UNSET
+      - PHD
+      - MD
+      - JD
+      - EDD
+      - MSN
+      - MS
+      - MA
+      - MBA
+      - ME
+      - BA
+      - BS
+      - BSN
+

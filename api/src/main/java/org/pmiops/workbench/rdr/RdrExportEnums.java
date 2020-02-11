@@ -104,6 +104,23 @@ public class RdrExportEnums {
                   WorkspaceDemographic.AgeEnum.AGE_75_AND_MORE)
               .build();
 
+  private static final BiMap<Degree, org.pmiops.workbench.rdr.model.Degree> CLIENT_TO_RDR_DEGREE =
+      ImmutableBiMap.<Degree, org.pmiops.workbench.rdr.model.Degree>builder()
+          .put(Degree.PHD, org.pmiops.workbench.rdr.model.Degree.PHD)
+          .put(Degree.MD, org.pmiops.workbench.rdr.model.Degree.MD)
+          .put(Degree.JD, org.pmiops.workbench.rdr.model.Degree.JD)
+          .put(Degree.EDD, org.pmiops.workbench.rdr.model.Degree.EDD)
+          .put(Degree.MSN, org.pmiops.workbench.rdr.model.Degree.MSN)
+          .put(Degree.MS, org.pmiops.workbench.rdr.model.Degree.MS)
+          .put(Degree.MA, org.pmiops.workbench.rdr.model.Degree.MA)
+          .put(Degree.MBA, org.pmiops.workbench.rdr.model.Degree.MBA)
+          .put(Degree.ME, org.pmiops.workbench.rdr.model.Degree.MS)
+          .put(Degree.BA, org.pmiops.workbench.rdr.model.Degree.MA)
+          .put(Degree.BS, org.pmiops.workbench.rdr.model.Degree.MBA)
+          .put(Degree.BSN, org.pmiops.workbench.rdr.model.Degree.BSN)
+          .put(Degree.NONE, org.pmiops.workbench.rdr.model.Degree.UNSET)
+          .build();
+
   public static org.pmiops.workbench.rdr.model.Race raceToRdrRace(Race race) {
     if (race == null) return null;
     return CLIENT_TO_RDR_RACE.get(race);
@@ -155,5 +172,10 @@ public class RdrExportEnums {
     } else {
       return null;
     }
+  }
+
+  public static org.pmiops.workbench.rdr.model.Degree degreeToRdrDegree(Degree degree) {
+    if (degree == null) return null;
+    return CLIENT_TO_RDR_DEGREE.get(degree);
   }
 }

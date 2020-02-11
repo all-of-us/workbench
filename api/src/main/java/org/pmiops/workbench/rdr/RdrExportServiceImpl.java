@@ -176,6 +176,11 @@ public class RdrExportServiceImpl implements RdrExportService {
 
     researcher.setGivenName(dbUser.getGivenName());
     researcher.setFamilyName(dbUser.getFamilyName());
+    researcher.setDegrees(
+        dbUser.getDegreesEnum().stream()
+            .map(RdrExportEnums::degreeToRdrDegree)
+            .collect(Collectors.toList()));
+
     if (dbUser.getAddress() != null) {
       researcher.setStreetAddress1(dbUser.getAddress().getStreetAddress1());
       researcher.setStreetAddress2(dbUser.getAddress().getStreetAddress2());
@@ -190,13 +195,11 @@ public class RdrExportServiceImpl implements RdrExportService {
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
       researcher.setEducation(
           RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
-      if (dbDemographicSurvey.getEthnicityEnum() != null) {
-        researcher.setEthnicity(
-            new ArrayList<Ethnicity>(
-                Arrays.asList(
-                    RdrExportEnums.ethnicityToRdrEthnicity(
-                        dbDemographicSurvey.getEthnicityEnum()))));
-      }
+      researcher.setEthnicity(
+          Optional.ofNullable(dbDemographicSurvey.getEthnicityEnum())
+              .map(RdrExportEnums::ethnicityToRdrEthnicity)
+              .orElse(null));
+
       researcher.setSexAtBirth(
           Optional.ofNullable(
                   dbDemographicSurvey.getSexAtBirthEnum().stream()
@@ -209,6 +212,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                       .map(RdrExportEnums::genderToRdrGender)
                       .collect(Collectors.toList()))
               .orElse(new ArrayList<Gender>()));
+
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
 
@@ -344,10 +348,7 @@ public class RdrExportServiceImpl implements RdrExportService {
 
     demographic.setRaceEthnicity(
         dbPopulationEnumSet.stream()
-            .map(
-                db -> {
-                  return RdrExportEnums.specificPopulationToRaceEthnicity(db);
-                })
+            .map(RdrExportEnums::specificPopulationToRaceEthnicity)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
 
@@ -357,10 +358,7 @@ public class RdrExportServiceImpl implements RdrExportService {
 
     demographic.setAge(
         dbPopulationEnumSet.stream()
-            .map(
-                db -> {
-                  return RdrExportEnums.specificPopulationToAge(db);
-                })
+            .map(RdrExportEnums::specificPopulationToAge)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
 
