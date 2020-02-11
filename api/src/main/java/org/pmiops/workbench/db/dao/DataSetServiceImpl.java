@@ -58,6 +58,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String PYTHON_CDR_ENV_VARIABLE =
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"";
   private static final String R_CDR_ENV_VARIABLE = "\", Sys.getenv(\"WORKSPACE_CDR\"), \"";
+  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP = ImmutableMap.of(KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
@@ -671,18 +672,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private static String generateSqlWithEnvironmentVariables(
       String query, KernelTypeEnum kernelTypeEnum) {
-    switch (kernelTypeEnum) {
-      case PYTHON:
-        return query.replaceAll(CDR_STRING, PYTHON_CDR_ENV_VARIABLE);
-      case R:
-        return query.replaceAll(CDR_STRING, R_CDR_ENV_VARIABLE);
-      default:
-        return query;
-    }
+    return query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum));
   }
 
   // This takes the query, and string replaces in the values for each of the named
-  // parameters generated.
+  // parameters generated. For example:
+  //    SELECT * FROM cdr.dataset.person WHERE criteria IN unnest(@p1_1)
+  // becomes:
+  //    SELECT * FROM cdr.dataset.person WHERE criteria IN (1, 2, 3)
   private static String fillInQueryParams(
       String query, Map<String, QueryParameterValue> queryParameterValueMap) {
     StringBuilder stringBuilder = new StringBuilder(query);
@@ -716,12 +713,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @NotNull
   private static String arraySqlFromQueryParameter(QueryParameterValue value) {
-    return "("
-        .concat(
-            nullableListToEmpty(value.getArrayValues()).stream()
-                .map(QueryParameterValue::getValue)
-                .collect(Collectors.joining(", ")))
-        .concat(")");
+    return String.format("(%s)", nullableListToEmpty(value.getArrayValues()).stream()
+        .map(QueryParameterValue::getValue)
+        .collect(Collectors.joining(", ")));
   }
 
   private static String generateNotebookUserCode(
