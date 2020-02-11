@@ -21,6 +21,8 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -156,12 +158,14 @@ public class DataSetControllerTest {
   private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
   private static final String TEST_CDR_DATA_SET_ID = "synthetic_cdr20180606";
   private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
-  private static final String NAMED_PARAMETER_NAME = "p1_706";
-  private static final String NAMED_PARAMETER_VALUE = "ICD9";
+  private static final String NAMED_PARAMETER_NAME = "p1_1";
+  private static final QueryParameterValue NAMED_PARAMETER_VALUE = QueryParameterValue.string("ICD9");
+  private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
+  private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE = QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
 
   private Long COHORT_ONE_ID;
-  private Long CONCEPT_SET_ONE_ID;
   private Long COHORT_TWO_ID;
+  private Long CONCEPT_SET_ONE_ID;
   private Long CONCEPT_SET_TWO_ID;
   private Long CONCEPT_SET_SURVEY_ID;
 
@@ -542,7 +546,9 @@ public class DataSetControllerTest {
     when(cohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
             QueryJobConfiguration.newBuilder(
-                    "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
+                "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person WHERE @" + NAMED_PARAMETER_NAME + " IN unnest(@" + NAMED_PARAMETER_ARRAY_NAME + ")")
+                .addNamedParameter(NAMED_PARAMETER_NAME, NAMED_PARAMETER_VALUE)
+                .addNamedParameter(NAMED_PARAMETER_ARRAY_NAME, NAMED_PARAMETER_ARRAY_VALUE)
                 .build());
     // This is not great, but due to the interaction of mocks and bigquery, it is
     // exceptionally hard to fix it so that it calls the real filterBitQueryConfig
@@ -716,7 +722,7 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person)) "
+                + ".person` person WHERE " + NAMED_PARAMETER_VALUE.getValue() + " IN (2, 5))) "
                 + "\n"
                 + "LIMIT \"\"\" + max_number_of_rows\n"
                 + "\n"
@@ -765,7 +771,7 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person)) \n"
+                + ".person` person WHERE " + NAMED_PARAMETER_VALUE.getValue() + " IN (2, 5))) \n"
                 + "LIMIT \", max_number_of_rows, sep=\"\")\n"
                 + "\n"
                 + prefix
@@ -1065,5 +1071,12 @@ public class DataSetControllerTest {
     assertThat(domainValues)
         .containsExactly(
             new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
+  }
+
+  private JSONObject createDemoCriteria() {
+    JSONObject criteria = new JSONObject();
+    criteria.append("includes", new JSONArray());
+    criteria.append("excludes", new JSONArray());
+    return criteria;
   }
 }
