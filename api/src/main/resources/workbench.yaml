@@ -4343,10 +4343,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Institution"
-      type: array
-      items:
-        type: integer
-        format: int64
 
   AdminFederatedWorkspaceDetailsResponse:
     description: Admin-visible metadata about a workspace.
