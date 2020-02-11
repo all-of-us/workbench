@@ -67,6 +67,8 @@ public class LogsBasedMetricsServiceTest {
         .when(mockStackdriverStatsExporterService)
         .getLoggingMonitoredResource();
     doReturn(OPERATION_DURATION).when(mockStopwatch).elapsed();
+    doReturn(mockStopwatch).when(mockStopwatch).start();
+    doReturn(mockStopwatch).when(mockStopwatch).stop();
   }
 
   @Test

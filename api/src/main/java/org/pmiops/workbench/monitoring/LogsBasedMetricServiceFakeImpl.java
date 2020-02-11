@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * While it's possible to mock this service correctly, it's much less intrusive to simply provide a
- * No-op fake implementation. See
+ * no-op implementation. If you're curious on what the stubbing looks like, see
  * https://stackoverflow.com/questions/60138415/which-breaks-first-mockito-or-java-generics for
  * details on how to mock the generic supplier matcher.
  */
