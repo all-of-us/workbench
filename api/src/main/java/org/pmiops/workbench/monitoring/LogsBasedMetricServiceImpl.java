@@ -53,9 +53,7 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
   @Override
   public void recordElapsedTime(
       Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation) {
-    final Stopwatch stopwatch = stopwatchProvider.get();
-
-    stopwatch.start();
+    final Stopwatch stopwatch = stopwatchProvider.get().start();
     operation.run();
     stopwatch.stop();
 
@@ -70,9 +68,7 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
       Builder measurementBundleBuilder,
       DistributionMetric distributionMetric,
       Supplier<T> operation) {
-    final Stopwatch stopwatch = stopwatchProvider.get();
-
-    stopwatch.start();
+    final Stopwatch stopwatch = stopwatchProvider.get().start();
     final T result = operation.get();
     stopwatch.stop();
 
