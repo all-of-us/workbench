@@ -474,9 +474,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         return;
       }
 
-      // TODO: There is a lot of complexity here around loading domain values
-      // which is static data for a given CDR version. Consider refactoring this
-      // page to load all schema data before rendering.
+      // TODO(RW-4426): There is a lot of complexity here around loading domain
+      // values which is static data for a given CDR version. Consider
+      // refactoring this page to load all schema data before rendering.
 
       // If any of these new domains have already been loaded, autoselect all of
       // their value pairs. The desired product behavior is that when a new
