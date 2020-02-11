@@ -127,6 +127,8 @@ definitions:
         type: boolean
       educational:
         type: boolean
+      ethicalLegalSocialImplications:
+        type: boolean
       otherPurpose:
         type: boolean
       otherPurposeDetails:
@@ -137,7 +139,80 @@ definitions:
         type: string
       findingsFromStudy:
         type: string
+      focusOnUnderrepresentedPopulations:
+        type: boolean
+      workspaceDemographic:
+        $ref: '#/definitions/WorkspaceDemographic'
 
+
+  WorkspaceDemographic:
+    type: object
+    properties:
+      raceEthnicity:
+        type: array
+        items:
+          type: string
+          enum:
+            - UNSET
+            - AIAN
+            - ASIAN
+            - HISPANIC
+            - NHPI
+            - MENA
+            - AA
+            - MULTI
+      age:
+        type: array
+        items:
+          type: string
+          enum:
+            - UNSET
+            - AGE_0_11
+            - AGE_12_17
+            - AGE_65_74
+            - AGE_75_AND_MORE
+      sexAtBirth:
+        type: string
+        enum:
+          - UNSET
+          - INTERSEX
+      genderIdentity:
+        type: string
+        enum:
+          - UNSET
+          - OTHER_THAN_MAN_WOMAN
+      sexualOrientation:
+        type: string
+        enum:
+          - UNSET
+          - OTHER_THAN_STRAIGHT
+      geography:
+        type: string
+        enum:
+          - UNSET
+          - RURAL
+      disabilityStatus:
+        type: string
+        enum:
+          - UNSET
+          - DISABILITY
+      accessToCare:
+        type: string
+        enum:
+          - UNSET
+          - NOT_EASILY_ACCESS_CARE
+      educationLevel:
+        type: string
+        enum:
+          - UNSET
+          - LESS_THAN_HIGH_SCHOOL
+      incomeLevel:
+        type: string
+        enum:
+          - UNSET
+          - BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
+      others:
+        type: string
 
   RdrWorkspaceUser:
     type: object
