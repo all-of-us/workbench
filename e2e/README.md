@@ -4,8 +4,9 @@
 - `git clone git@github.com:all-of-us/workbench.git`
 
 #### Set up login credential
-- copy `.env.sample` file. Save new file as `.env` (do not commit `.env` file to version control)
-- edit `.env` to provide workbench login credential
+- copy `.env.sample` file, save new file as `.env` (do not commit `.env` file to version control).
+- edit new `.env` file to provide workbench login credential.
+  ** note: we have a 2FA-bypassed test user created to run tests in test env. if you don't know it, ask others for test user credential.
 
 #### install node libraries
 - change dir: `cd e2e`

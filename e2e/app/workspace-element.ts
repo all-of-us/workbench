@@ -1,5 +1,5 @@
-import {ElementHandle, Page} from 'puppeteer';
-import Widget from '../pages/elements/widget';
+import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import Widget from './elements/widget';
 
 // If element CSS/XPath selectors are used frequently, put it there.
 // abbriviation SELT: selector

@@ -1,11 +1,11 @@
-import Home from '../../pages/home';
-const Chrome = require('../../browser/ChromeBrowser');
+import Home from '../../app/home';
+const Chrome = require('../../driver/ChromeDriver');
 
 jest.setTimeout(60 * 1000);
 
 const configs = require('../../config/config');
 
-describe('Workspace creation tests:', () => {
+describe.skip('Workspace creation tests:', () => {
 
   let page;
 

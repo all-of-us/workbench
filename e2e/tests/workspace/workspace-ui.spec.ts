@@ -1,13 +1,15 @@
-import Workspaces from '../../app/Workspaces';
-import Home from '../../pages/home';
-import { getProperty } from '../../services/element-handler';
-const Chrome = require('../../browser/ChromeBrowser');
+import {ElementHandle, Page} from 'puppeteer';
+import Home from '../../app/home';
+import Workspaces from '../../app/workspace-page';
+import AouElement from '../../driver/AouElement'
+require('../../driver/puppeteer-element-extension');
 
+const Chrome = require('../../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
 
-describe('Workspace-editing page', () => {
+describe('Edit Workspace page', () => {
 
-  let page;
+  let page: Page;
 
   beforeEach(async () => {
     page = await Chrome.setup();
@@ -17,7 +19,8 @@ describe('Workspace-editing page', () => {
     await Chrome.teardown();
   });
 
-  test('Can Create new workspace from Home page', async () => {
+  // Click CreateNewWorkspace link in Home page => Open Create Workspace page
+  test('Home page: Click link Create New Workspace', async () => {
     const home = new Home(page);
     const link = await home.getCreateNewWorkspaceLink();
     expect(link).toBeTruthy();
@@ -28,78 +31,130 @@ describe('Workspace-editing page', () => {
     expect(actPageTitle).toMatch('Create Workspace');
 
     const workspace = new Workspaces(page);
-    // check Workspace-Name textfield
-    expect(await workspace.input_workspace_name()).toBeTruthy();
-    // check dataset select options
-    expect(await workspace.select_dataSet()).toBeTruthy();
+    // check Workspace-Name Input text field
+    const nameInput = await workspace.inputTextWorkspaceName();
+    // expect field exists and is NOT readOnly
+    const elem = new AouElement(nameInput);
+    expect(await elem.isVisible()).toBe(true);
+    expect(await elem.getProperty('readOnly')).toBe(false);
+
+    // check DataSet Select field
+    const dataSetSelect = (await workspace.select_dataSet()).asAouElement();
+    // expect field exists
+    expect(await dataSetSelect.isVisible()).toBe(true);
+
   }, 60 * 1000);
 
-
-  test('Create new workspace page', async () => {
+  // Click CreateNewWorkspace link in My Workpsaces page => Open Create Workspace page
+  test('My Workspaces page: Click link Create New Workspace', async () => {
     const workspaces = new Workspaces(page);
     await workspaces.goURL();
     await workspaces.click_button_CreateNewWorkspace();
 
-    // check page title
-    const actPageTitle = await page.title();
-    expect(actPageTitle).toMatch('Create Workspace');
+  }, 60 * 1000);
+
+  // Checking all fields out-of-box
+  test('Create Workspace page: Question 1', async () => {
+    const workspaces = new Workspaces(page);
+    await workspaces.goURL();
+    await workspaces.click_button_CreateNewWorkspace();
 
     const workspace = new Workspaces(page);
 
-    // webelement Disease-focused research: out-of-box
-    const elementDiseaseName = await workspace.element_diseaseName();
-    const diseaseNameCheckbox = await elementDiseaseName.checkbox();
-    expect(diseaseNameCheckbox).toBeTruthy();
-    expect(await getProperty(page, diseaseNameCheckbox, 'checked')).toBeFalsy();
-    expect(await getProperty(page, diseaseNameCheckbox, 'disabled')).toBeFalsy();
+    // Disease-focused research checkbox
+    const diseaseName = await workspace.element_diseaseName();
+    let cbox = (await diseaseName.checkbox()).asAouElement();
+    expect(await cbox.isVisible()).toBe(true);
+    expect(await cbox.getProperty('checked')).toBe(false);
+    expect(await cbox.getProperty('disabled')).toBe(false);
+    const txtField = (await diseaseName.textfield()).asAouElement();
+    expect(await txtField.isVisible()).toBe(true);
+    expect(await txtField.getProperty('disabled')).toBe(true);
 
-    const diseaseNameTextInput = await elementDiseaseName.textfield();
-    expect(diseaseNameTextInput).toBeTruthy();
-    expect(await getProperty(page, diseaseNameTextInput, 'disabled')).toBeTruthy();
-
-    // await (diseaseNameCheckbox).click(); // click checkbox to change
-    await page.evaluate(elem => elem.click(), diseaseNameCheckbox);
+    // Set the checkbox checked
+    await page.evaluate(elem => elem.click(), await diseaseName.checkbox());
     // TODO wait async for checked and disabled checking or test will fail
     await page.waitFor(1000);
-    expect(await getProperty(page, await elementDiseaseName.checkbox(), 'checked')).toBeTruthy();
-    expect(await getProperty(page, await elementDiseaseName.checkbox(), 'disabled')).toBeFalsy();
-
-
-    // check Workspace Name textfield
-    expect(await workspace.input_workspace_name()).toBeTruthy();
-
-    // check dataset select option
-    expect(await workspace.select_dataSet()).toBeTruthy();
+    cbox = (await diseaseName.checkbox()).asAouElement();
+    expect(await cbox.getProperty('checked')).toBe(true);
+    expect(await txtField.getProperty('disabled')).toBe(false);
 
     // check all fields in Question #1. What is the primary purpose of your project?
     expect(await workspace.element_question1_populationHealth().checkbox()).toBeTruthy();
     expect(await workspace.element_question1_MethodsDevelopment().checkbox()).toBeTruthy();
     expect(await workspace.element_question1_DrugTherapeuticsDevelopment().checkbox()).toBeTruthy();
+    expect(await workspace.element_question1_forProfitPurpose().checkbox()).toBeTruthy();
     expect(await workspace.element_question1_ResearchControl().checkbox()).toBeTruthy();
     expect(await workspace.element_question1_EducationalPurpose().checkbox()).toBeTruthy();
     expect(await workspace.element_question1_GeneticResearch().checkbox()).toBeTruthy();
     expect(await workspace.element_question1_SocialBehavioralResearch()).toBeTruthy();
     expect(await workspace.element_question1_OtherPurpose().checkbox()).toBeTruthy();
     expect(await workspace.element_question1_OtherPurpose().textarea()).toBeTruthy();
-    expect(await workspace.textarea_question2()).toBeTruthy();
-    expect(await workspace.textarea_question3()).toBeTruthy();
-    expect(await workspace.textarea_question4()).toBeTruthy();
-
-    // Question #5 out-of-box behavior
-    expect(await workspace.radiobutton_question5_notFocusingSpecificPopulation.get()).toBeTruthy();
-    expect(await workspace.radiobutton_question5_notFocusingSpecificPopulation.isChecked()).toBeTruthy();
-
-    // Question: Request a review ... out-of-box behavior
-    expect(await workspace.radiobutton_request_review_yes()).toBeTruthy();
-    expect(await workspace.radiobutton_request_review_no()).toBeTruthy();
-    expect(
-       await workspace.radiobutton_request_review_no()
-        .then(elem => elem.getProperty('checked'))
-        .then(elemhandle => elemhandle.jsonValue())
-    ).toBeTruthy();
 
   }, 60 * 1000);
 
+  test('Create Workspace page: Question 2', async () => {
+    const workspaces = new Workspaces(page);
+    await workspaces.goURL();
+    await workspaces.click_button_CreateNewWorkspace();
 
+    const workspace = new Workspaces(page);
+    const tarea = (await workspace.inputTextAreaProvideReason()).asAouElement();
+    expect(await tarea.getProperty('disabled')).toBe(false);
+    expect(await tarea.getProperty('value')).toEqual('');
+
+  }, 60 * 1000);
+
+  test('Create Workspace page: Question 3', async () => {
+    const workspaces = new Workspaces(page);
+    await workspaces.goURL();
+    await workspaces.click_button_CreateNewWorkspace();
+
+    const workspace = new Workspaces(page);
+
+    const tarea = (await workspace.inpuTextAreaWhatScienficQuestions()).asAouElement();
+    expect(await tarea.getProperty('disabled')).toBe(false);
+    expect(await tarea.getProperty('value')).toEqual('');
+
+  }, 60 * 1000);
+
+  test('Create Workspace page: Question 4', async () => {
+    const workspaces = new Workspaces(page);
+    await workspaces.goURL();
+    await workspaces.click_button_CreateNewWorkspace();
+
+    const workspace = new Workspaces(page);
+    const tarea = (await workspace.inputTextAreaWhatAnticipatedFindings()).asAouElement();
+    expect(await tarea.getProperty('disabled')).toBe(false);
+    expect(await tarea.getProperty('value')).toEqual('');
+
+  }, 60 * 1000);
+
+  test('Create Workspace page: Question 5', async () => {
+    const workspaces = new Workspaces(page);
+    await workspaces.goURL();
+    await workspaces.click_button_CreateNewWorkspace();
+
+    const workspace = new Workspaces(page);
+    expect(await workspace.radiobuttonQuestion5NotFocusingSpecificPopulation.get()).toBeTruthy();
+    expect(await workspace.radiobuttonQuestion5NotFocusingSpecificPopulation.isChecked()).toBeTruthy();
+
+  }, 60 * 1000);
+
+  test('Create Workspace page: Question on Request Review', async () => {
+    const workspaces = new Workspaces(page);
+    await workspaces.goURL();
+    await workspaces.click_button_CreateNewWorkspace();
+
+    const workspace = new Workspaces(page);
+    expect(await workspace.radioButtonRequestReviewYes()).toBeTruthy();
+    expect(await workspace.radioButtonRequestReviewNo()).toBeTruthy();
+    expect(
+       await workspace.radioButtonRequestReviewNo()
+       .then(elem => elem.getProperty('checked'))
+       .then(elemhandle => elemhandle.jsonValue())
+    ).toBeTruthy();
+
+  }, 60 * 1000);
 
 });

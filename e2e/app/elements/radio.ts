@@ -1,8 +1,9 @@
 import {Page} from 'puppeteer';
-import * as elementHandler from '../../services/element-handler';
+import {getAttribute, getProperty} from '../../driver/element-handler';
+import * as elementHandler from '../../driver/element-handler';
 import Widget from './widget';
 
-export default class Input extends Widget {
+export default class Radio extends Widget {
   public label: string;
 
   constructor(page: Page, label: string) {
@@ -11,7 +12,7 @@ export default class Input extends Widget {
   }
 
   public async get() {
-    return await this.findInput(this.label);
+    return await this.findRadio(this.label);
   }
 
   public async focus() {
@@ -30,8 +31,8 @@ export default class Input extends Widget {
     return await elementHandler.getValue(this.puppeteerPage, input);
   }
 
-  public async isDisabled() {
-    const attrChecked = await elementHandler.getProperty(this.puppeteerPage, await this.get(), 'disabled');
+  public async isChecked() {
+    const attrChecked = await getProperty(this.puppeteerPage, await this.get(), 'checked');
     return attrChecked !== null && attrChecked === true;
   }
 

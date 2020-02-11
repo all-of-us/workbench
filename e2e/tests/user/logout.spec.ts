@@ -1,12 +1,14 @@
-import GoogleLoginPage from '../../pages/google-login';
-import Home from '../../pages/home';
+import GoogleLoginPage from '../../app/google-login';
+import Home from '../../app/home';
+import {waitUntilURLMatch} from '../../driver/waitFuncs';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
+require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);
 
 const configs = require('../../config/config');
 
-describe('Logout tests:', () => {
+describe.skip('Logout tests:', () => {
 
   let browser;
   let incognitoContext;
@@ -38,7 +40,7 @@ describe('Logout tests:', () => {
     const homePage = new Home(page);
     await homePage.waitForReady();
     await homePage.navigation.signOut();
-    await homePage.waitUntilUrlMatch('login');
+    await waitUntilURLMatch(page, 'login');
     expect(await page.url()).toContain('login');
   });
 

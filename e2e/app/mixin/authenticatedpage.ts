@@ -1,6 +1,7 @@
 import {Page} from 'puppeteer';
+import {waitUntilTitleMatch} from '../../driver/waitFuncs';
 import BasePage from './basepage';
-import NavigationMenu from './mixin/navigationmenu';
+import NavigationMenu from './navigationmenu';
 
 const selectors = {
   signedInIndicator: 'body#body div',
@@ -31,7 +32,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   protected async isLoaded(documentTitle: string) {
     await this.puppeteerPage.waitForSelector(selectors.signedInIndicator);
     await this.puppeteerPage.waitForSelector(selectors.logo, {visible: true});
-    await this.waitUntilDocumentTitleMatch(documentTitle);
+    await waitUntilTitleMatch(this.puppeteerPage, documentTitle);
   }
 
   /**

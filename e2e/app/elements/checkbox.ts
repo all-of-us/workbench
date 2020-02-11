@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import * as elementHandler from '../../services/element-handler';
+import * as elementHandler from '../../driver/element-handler';
 import Widget from './widget';
 
 export default class Checkbox extends Widget {

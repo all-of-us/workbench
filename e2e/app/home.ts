@@ -1,6 +1,6 @@
 import {ElementHandle} from 'puppeteer';
 import * as xpathHandler from '../services/xpath-handler';
-import AuthenticatedPage from './authenticatedpage';
+import AuthenticatedPage from './mixin/authenticatedpage';
 
 const selectors = {
   pageTitle: 'Homepage',

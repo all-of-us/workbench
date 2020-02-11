@@ -1,12 +1,10 @@
 import {ElementHandle, JSHandle} from 'puppeteer';
-import authenticatedpage from '../pages/authenticatedpage';
-import Button from '../pages/elements/button';
-import Checkbox from '../pages/elements/checkbox';
-import Input from '../pages/elements/input';
-import Radio from '../pages/elements/radio';
-import radio from '../pages/elements/radio';
-import {waitUntilNetworkIdle} from '../services/page-wait';
+import {waitUntilTitleMatch} from '../driver/waitFuncs';
+import Button from './elements/button';
+import Radio from './elements/radio';
+import authenticatedpage from './mixin/authenticatedpage';
 import ProjectPurposeQuestion from './workspace-element';
+require('../driver/waitFuncs');
 
 const configs = require('../config/config');
 const selectors = {
@@ -31,9 +29,14 @@ const selectors = {
   radio_request_review_no: '//*[label[contains(normalize-space(.),\'Would you like to request a review of your research purpose\')]]/following-sibling::*/input[@type=\'radio\'][following-sibling::label[1]/text()=\'No\']',
 };
 
-class CommonFields extends authenticatedpage {
 
-  public async input_workspace_name(): Promise<ElementHandle> {
+export default class Workspaces extends authenticatedpage {
+
+
+  public buttonCreateWorkspace = new Button(this.puppeteerPage,'Create Workspace');
+  public radiobuttonQuestion5NotFocusingSpecificPopulation = new Radio(this.puppeteerPage, 'No, I am not interested in focusing on specific population(s) in my research');
+
+  public async inputTextWorkspaceName(): Promise<ElementHandle> {
     return await this.puppeteerPage.waitForXPath(selectors.workspaceName, { visible: true });
   }
 
@@ -41,8 +44,8 @@ class CommonFields extends authenticatedpage {
     return await this.puppeteerPage.waitFor(selectors.dataSet, { visible: true });
   }
 
-  public async checkbox_forProfitPurpose(): Promise<ElementHandle> {
-    return new Checkbox(this.puppeteerPage, 'For-Profit Purpose').get();
+  public element_question1_forProfitPurpose(): ProjectPurposeQuestion {
+    return new ProjectPurposeQuestion(this.puppeteerPage, 'For-Profit Purpose');
   }
 
   public element_diseaseName(): ProjectPurposeQuestion {
@@ -81,39 +84,32 @@ class CommonFields extends authenticatedpage {
     return new ProjectPurposeQuestion(this.puppeteerPage, 'Other Purpose');
   }
 
-  public async textarea_OtherPurpose(): Promise<ElementHandle> {
+  public async inputTextAreaOtherPurpose(): Promise<ElementHandle> {
     return await this.puppeteerPage.waitForXPath(selectors.otherPurpose);
   }
 
    // required field
-  public async textarea_question2(): Promise<ElementHandle> {
+  public async inputTextAreaProvideReason(): Promise<ElementHandle> {
     return await this.puppeteerPage.waitForXPath(selectors.question2);
   }
 
 // required field
-  public async textarea_question3(): Promise<ElementHandle> {
+  public async inpuTextAreaWhatScienficQuestions(): Promise<ElementHandle> {
     return await this.puppeteerPage.waitForXPath(selectors.question3);
   }
 
 // required field
-  public async textarea_question4(): Promise<ElementHandle> {
+  public async inputTextAreaWhatAnticipatedFindings(): Promise<ElementHandle> {
     return await this.puppeteerPage.waitForXPath(selectors.question4);
   }
 
-  public async radiobutton_request_review_yes(): Promise<ElementHandle> {
+  public async radioButtonRequestReviewYes(): Promise<ElementHandle> {
     return await this.puppeteerPage.waitForXPath(selectors.radio_request_review_yes);
   }
 
-  public async radiobutton_request_review_no(): Promise<ElementHandle> {
+  public async radioButtonRequestReviewNo(): Promise<ElementHandle> {
     return await this.puppeteerPage.waitForXPath(selectors.radio_request_review_no);
   }
-
-}
-
-export default class Workspaces extends CommonFields {
-
-  public buttonCreateWorkspace = new Button(this.puppeteerPage,'Create Workspace');
-  public radiobutton_question5_notFocusingSpecificPopulation = new Radio(this.puppeteerPage, 'No, I am not interested in focusing on specific population(s) in my research');
 
   public async waitForReady(): Promise<Workspaces> {
     await super.isLoaded(selectors.pageTitleRegex);
@@ -137,7 +133,7 @@ export default class Workspaces extends CommonFields {
     const buttonSelectr = '//*[@role="button" and normalize-space(.)="Create a New Workspace"]';
     const button = await this.puppeteerPage.waitForXPath(buttonSelectr, { visible: true });
     await button.click();
-    await this.waitUntilDocumentTitleMatch('Create Workspace');
+    await waitUntilTitleMatch(this.puppeteerPage, 'Create Workspace');
     await this.puppeteerPage.waitForXPath('//*[normalize-space(.)="Create a new Workspace"]', {visible: true});
     await this.select_dataSet();
     await this.buttonCreateWorkspace.get();

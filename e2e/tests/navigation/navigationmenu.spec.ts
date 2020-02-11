@@ -1,14 +1,14 @@
-import Workspaces from '../../app/Workspaces';
-import GoogleLoginPage from '../../pages/google-login';
-import Home from '../../pages/home';
-import Profile from '../../pages/profile';
+import GoogleLoginPage from '../../app/google-login';
+import Home from '../../app/home';
+import Profile from '../../app/profile';
+import Workspaces from '../../app/workspace-page';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);
 
 const configs = require('../../config/config');
 
-describe('Navigation menu tests:', () => {
+describe.skip('Navigation menu tests:', () => {
 
   let browser;
   let incognitoContext;

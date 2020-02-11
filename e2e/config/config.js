@@ -6,7 +6,8 @@ const env = process.env.WORKBENCH_ENV || 'test';
 const userCredential = {
     userEmail: process.env.USER_NAME,
     userPassword: process.env.PASSWORD,
-    userInvitationkey: process.env.INVITATION_KEY
+    userInvitationkey: process.env.INVITATION_KEY,
+    registerationContactEmail: 'hermione.owner@quality.firecloud.org'
 };
 
 const urlPath = {

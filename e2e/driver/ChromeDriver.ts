@@ -1,9 +1,9 @@
 import * as Puppeteer from 'puppeteer';
-import GoogleLoginPage from '../pages/google-login';
+import GoogleLoginPage from '../app/google-login';
 
 const configs = require('../config/config');
 
-export default class ChromeBrowser {
+export default class ChromeDriver {
 
   public chromeSwitches = [
     '--no-sandbox',
@@ -52,6 +52,10 @@ export default class ChromeBrowser {
     return this.page;
   }
 
+  public async closePage() {
+    return await this.page.close();
+  }
+
   public async teardown() {
      // should Sign Out before close browser?
     await this.browser.close();
@@ -64,6 +68,12 @@ export default class ChromeBrowser {
     return this.page;
   }
 
+  public async logIn():  Promise<Puppeteer.Page>{
+    const loginPage = new GoogleLoginPage(this.page);
+    await loginPage.login();
+    return this.page;
+  }
+
 }
 
-module.exports = new ChromeBrowser();
+module.exports = new ChromeDriver();
