@@ -4360,9 +4360,6 @@ definitions:
           $ref: "#/definitions/UserRole"
       resources:
         $ref: "#/definitions/AdminWorkspaceResources"
-#      activityLogs:
-#        description: Logs for all action audit events collected for the given workspace.
-#        $ref: "#/definitions/ActionAuditEvents"
 
   AdminWorkspaceResources:
     description: >

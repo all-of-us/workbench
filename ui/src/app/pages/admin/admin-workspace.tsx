@@ -49,11 +49,17 @@ interface State {
   detailsOpen: boolean;
 }
 
-export const FlexColumnWithRightMargin = ({style={}, children}) => {
+const FlexColumnWithRightMargin = ({style={}, children}) => {
   return <FlexColumn style={{...styles.columnWithRightMargin, ...style}}>
     {...children}
   </FlexColumn>
 };
+
+const LabelWithPrimaryColor = ({style={}, children}) => {
+  return <label style={{color: colors.primary, ...style}}>
+    {...children}
+  </label>
+}
 
 export class AdminWorkspace extends React.Component<Props, State> {
   constructor(props) {
@@ -140,31 +146,31 @@ export class AdminWorkspace extends React.Component<Props, State> {
           <h3>Basic Information</h3>
           <FlexRow style={{width: '100%'}}>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}>Workspace Name</label>
+              <LabelWithPrimaryColor>Workspace Name</LabelWithPrimaryColor>
               <div>{workspace.name}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}>Google Project ID</label>
+              <LabelWithPrimaryColor>Google Project ID</LabelWithPrimaryColor>
               <div>{workspace.namespace}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}>Billing Status</label>
+              <LabelWithPrimaryColor>Billing Status</LabelWithPrimaryColor>
               <div>{workspace.billingStatus}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}>Billing Account Type</label>
+              <LabelWithPrimaryColor>Billing Account Type</LabelWithPrimaryColor>
               <div>{workspace.billingAccountType}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}>Created Time</label>
+              <LabelWithPrimaryColor>Created Time</LabelWithPrimaryColor>
               <div>{new Date(workspace.creationTime).toDateString()}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}>Last Modified Time</label>
+              <LabelWithPrimaryColor>Last Modified Time</LabelWithPrimaryColor>
               <div>{new Date(workspace.lastModifiedTime).toDateString()}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}>Workspace Published</label>
+              <LabelWithPrimaryColor>Workspace Published</LabelWithPrimaryColor>
               <div>{workspace.published ? 'Yes' : 'No'}</div>
             </FlexColumnWithRightMargin>
           </FlexRow>
@@ -195,24 +201,24 @@ export class AdminWorkspace extends React.Component<Props, State> {
           <h3>Research Purpose</h3>
           <FlexRow>
             <FlexColumnWithRightMargin style={{width: '21rem'}}>
-              <label style={{color: colors.primary}}>Primary purpose of project</label>
+              <LabelWithPrimaryColor>Primary purpose of project</LabelWithPrimaryColor>
               {getSelectedResearchPurposeItems(workspace).map((researchPurposeItem, i) => <div key={i}>{researchPurposeItem}</div>)}
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin style={{width: '21rem'}}>
-              <label style={{color: colors.primary}}>Reason for choosing <i>All of Us</i></label>
+              <LabelWithPrimaryColor>Reason for choosing <i>All of Us</i></LabelWithPrimaryColor>
               <div style={{wordWrap: 'break-word'}}>{workspace.researchPurpose.reasonForAllOfUs}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin style={{width: '21rem'}}>
-              <label style={{color: colors.primary}}>Area of intended study</label>
+              <LabelWithPrimaryColor>Area of intended study</LabelWithPrimaryColor>
               <div style={{wordWrap: 'break-word'}}>{workspace.researchPurpose.intendedStudy}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin style={{width: '21rem'}}>
-              <label style={{color: colors.primary}}>Anticipated findings</label>
+              <LabelWithPrimaryColor>Anticipated findings</LabelWithPrimaryColor>
               <div style={{wordWrap: 'break-word'}}>{workspace.researchPurpose.anticipatedFindings}</div>
             </FlexColumnWithRightMargin>
             {
               workspace.researchPurpose.population && <FlexColumnWithRightMargin style={{width: '21rem'}}>
-                <label style={{color: colors.primary}}>Population area(s) of focus</label>
+                <LabelWithPrimaryColor>Population area(s) of focus</LabelWithPrimaryColor>
                 {getSelectedPopulations(workspace).map((selectedPopulation, i) => <div key={i}>{selectedPopulation}</div>)}
               </FlexColumnWithRightMargin>
             }
@@ -223,15 +229,15 @@ export class AdminWorkspace extends React.Component<Props, State> {
           <h3>Workspace Objects</h3>
           <FlexRow style={{width: '100%'}}>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}># of Cohorts</label>
+              <LabelWithPrimaryColor># of Cohorts</LabelWithPrimaryColor>
               <div>{resources.workspaceObjects.cohortCount}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}># of Concept Sets</label>
+              <LabelWithPrimaryColor># of Concept Sets</LabelWithPrimaryColor>
               <div>{resources.workspaceObjects.conceptSetCount}</div>
             </FlexColumnWithRightMargin>
             <FlexColumnWithRightMargin>
-              <label style={{color: colors.primary}}># of Data Sets</label>
+              <LabelWithPrimaryColor># of Data Sets</LabelWithPrimaryColor>
               <div>{resources.workspaceObjects.datasetCount}</div>
             </FlexColumnWithRightMargin>
           </FlexRow>
@@ -241,15 +247,15 @@ export class AdminWorkspace extends React.Component<Props, State> {
         <h3>Cloud Storage</h3>
         <FlexRow style={{width: '100%'}}>
           <FlexColumnWithRightMargin>
-            <label style={{color: colors.primary}}># of Notebook Files</label>
+            <LabelWithPrimaryColor># of Notebook Files</LabelWithPrimaryColor>
             <div>{resources.cloudStorage.notebookFileCount}</div>
           </FlexColumnWithRightMargin>
           <FlexColumnWithRightMargin>
-            <label style={{color: colors.primary}}># of Non-Notebook Files</label>
+            <LabelWithPrimaryColor># of Non-Notebook Files</LabelWithPrimaryColor>
             <div>{resources.cloudStorage.nonNotebookFileCount}</div>
           </FlexColumnWithRightMargin>
           <FlexColumnWithRightMargin>
-            <label style={{color: colors.primary}}>Storage used (bytes)</label>
+            <LabelWithPrimaryColor>Storage used (bytes)</LabelWithPrimaryColor>
             <div>{resources.cloudStorage.storageBytesUsed}</div>
           </FlexColumnWithRightMargin>
         </FlexRow>

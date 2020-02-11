@@ -45,7 +45,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  /** Returns the first workspace found for any given namespace. */
   public Optional<DbWorkspace> getFirstWorkspaceByNamespace(String workspaceNamespace) {
     return workspaceDao.findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(workspaceNamespace);
   }
