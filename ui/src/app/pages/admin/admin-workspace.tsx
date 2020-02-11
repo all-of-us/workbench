@@ -4,28 +4,25 @@ import {Component} from '@angular/core';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
+import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
-import {
-  ResearchPurposeItems,
-  SpecificPopulationItems
-} from 'app/pages/workspace/workspace-edit';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
-import colors from "app/styles/colors";
+import colors from 'app/styles/colors';
 import {ReactWrapperBase} from 'app/utils';
-
-import {
-  AdminWorkspaceResources, BillingAccountType,
-  UserRole,
-  Workspace
-} from 'generated/fetch';
-import {ClrIcon} from "../../components/icons";
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
-} from "../../utils/research-purpose";
+} from 'app/utils/research-purpose';
+
+import {
+  AdminWorkspaceResources,
+  UserRole,
+  Workspace
+} from 'generated/fetch';
+
 
 const styles = {
-  columnWithRightMargin: {
+  fixedWidthWithMargin: {
     width: '10rem',
     marginRight: '1rem'
   },
@@ -40,7 +37,18 @@ const styles = {
   }
 };
 
-interface Props {}
+const FlexColumnWithRightMargin = ({style = {}, children}) => {
+  return <FlexColumn style={{...styles.fixedWidthWithMargin, ...style}}>
+    {...children}
+  </FlexColumn>;
+};
+
+const LabelWithPrimaryColor = ({style = {}, children}) => {
+  return <label style={{color: colors.primary, ...style}}>
+    {...children}
+  </label>;
+};
+
 interface State {
   googleProject: string;
   workspace: Workspace;
@@ -49,19 +57,7 @@ interface State {
   detailsOpen: boolean;
 }
 
-const FlexColumnWithRightMargin = ({style={}, children}) => {
-  return <FlexColumn style={{...styles.columnWithRightMargin, ...style}}>
-    {...children}
-  </FlexColumn>
-};
-
-const LabelWithPrimaryColor = ({style={}, children}) => {
-  return <label style={{color: colors.primary, ...style}}>
-    {...children}
-  </label>
-}
-
-export class AdminWorkspace extends React.Component<Props, State> {
+export class AdminWorkspace extends React.Component<{}, State> {
   constructor(props) {
     super(props);
 
@@ -117,7 +113,7 @@ export class AdminWorkspace extends React.Component<Props, State> {
       <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center'}}>
         <label style={{marginRight: '1rem'}}>Google Project ID</label>
         <TextInput
-            style={styles.columnWithRightMargin}
+            style={styles.fixedWidthWithMargin}
             onChange={value => this.updateProject(value)}
             onKeyDown={event => this.maybeGetFederatedWorkspaceInformation(event)}
         />
@@ -144,7 +140,7 @@ export class AdminWorkspace extends React.Component<Props, State> {
       {workspace && (resources.workspaceObjects || resources.cloudStorage) &&
         <FlexColumn style={{flex: '1 0 auto'}}>
           <h3>Basic Information</h3>
-          <FlexRow style={{width: '100%'}}>
+          <FlexRow>
             <FlexColumnWithRightMargin>
               <LabelWithPrimaryColor>Workspace Name</LabelWithPrimaryColor>
               <div>{workspace.name}</div>
@@ -227,7 +223,7 @@ export class AdminWorkspace extends React.Component<Props, State> {
       }
       {detailsOpen && resources.workspaceObjects && <FlexColumn>
           <h3>Workspace Objects</h3>
-          <FlexRow style={{width: '100%'}}>
+          <FlexRow>
             <FlexColumnWithRightMargin>
               <LabelWithPrimaryColor># of Cohorts</LabelWithPrimaryColor>
               <div>{resources.workspaceObjects.cohortCount}</div>
@@ -273,19 +269,19 @@ export class AdminWorkspace extends React.Component<Props, State> {
       {detailsOpen && workspace && resources.clusters.length > 0 && <FlexColumn>
           <h3>Clusters</h3>
           <FlexRow>
-            <label style={{color: colors.primary, ...styles.columnWithRightMargin}}>Cluster Name</label>
-            <label style={{color: colors.primary, ...styles.columnWithRightMargin}}>Google Project</label>
-            <label style={{color: colors.primary, ...styles.columnWithRightMargin}}>Created Time</label>
-            <label style={{color: colors.primary, ...styles.columnWithRightMargin}}>Last Accessed Time</label>
-            <label style={{color: colors.primary, ...styles.columnWithRightMargin}}>Status</label>
+            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Cluster Name</LabelWithPrimaryColor>
+            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Google Project</LabelWithPrimaryColor>
+            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Created Time</LabelWithPrimaryColor>
+            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Last Accessed Time</LabelWithPrimaryColor>
+            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Status</LabelWithPrimaryColor>
           </FlexRow>
           {resources.clusters.map((cluster, i) =>
               <FlexRow key={i}>
-                <div style={styles.columnWithRightMargin}>{cluster.clusterName}</div>
-                <div style={styles.columnWithRightMargin}>{cluster.googleProject}</div>
-                <div style={styles.columnWithRightMargin}>{new Date(cluster.createdDate).toDateString()}</div>
-                <div style={styles.columnWithRightMargin}>{new Date(cluster.dateAccessed).toDateString()}</div>
-                <div style={styles.columnWithRightMargin}>{cluster.status}</div>
+                <div style={styles.fixedWidthWithMargin}>{cluster.clusterName}</div>
+                <div style={styles.fixedWidthWithMargin}>{cluster.googleProject}</div>
+                <div style={styles.fixedWidthWithMargin}>{new Date(cluster.createdDate).toDateString()}</div>
+                <div style={styles.fixedWidthWithMargin}>{new Date(cluster.dateAccessed).toDateString()}</div>
+                <div style={styles.fixedWidthWithMargin}>{cluster.status}</div>
                 <Button>Disable</Button>
               </FlexRow>
           )}

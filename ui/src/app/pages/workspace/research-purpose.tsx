@@ -4,21 +4,17 @@ import {Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {EditComponentReact} from 'app/icons/edit';
-import {
-  ResearchPurposeDescription,
-  ResearchPurposeItems,
-  SpecificPopulationItems} from 'app/pages/workspace/workspace-edit';
+import {ResearchPurposeDescription} from 'app/pages/workspace/workspace-edit';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {SpecificPopulationEnum} from 'generated/fetch';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
-} from "../../utils/research-purpose";
+} from 'app/utils/research-purpose';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
   mainHeader: {
