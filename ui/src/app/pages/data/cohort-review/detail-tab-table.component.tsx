@@ -259,6 +259,8 @@ interface State {
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     codeInputChange: Function;
+    private countAborter = new AbortController();
+    private dataAborter = new AbortController();
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -289,8 +291,12 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     componentDidUpdate(prevProps: any) {
       const {domain, filterState, participantId, updateState} = this.props;
-      const {lazyLoad} = this.state;
+      const {lazyLoad, loading} = this.state;
       if (prevProps.participantId !== participantId) {
+        if (loading) {
+          // cancel any pending count or data calls
+          this.abortPendingApiCalls();
+        }
         this.setState({
           data: null,
           filteredData: null,
@@ -303,6 +309,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       } else if (prevProps.updateState !== updateState) {
         const tabFilterState = JSON.parse(JSON.stringify(filterState.tabs[domain]));
         if (lazyLoad) {
+          if (loading) {
+            // cancel any pending count or data calls
+            this.abortPendingApiCalls();
+          }
           this.setState({
             data: null,
             filteredData: null,
@@ -374,43 +384,51 @@ export const DetailTabTable = withCurrentWorkspace()(
           });
         }
       } catch (error) {
-        console.error(error);
-        this.setState({loading: false, error: true});
+        // Ignore abort errors since those were intentional
+        if (error.name !== 'AbortError') {
+          console.error(error);
+          this.setState({loading: false, error: true});
+        }
       }
     }
 
     updatePageData(previous: boolean) {
-      this.setState({loadingPrevious: previous, updating: true});
-      const {columns, domain} = this.props;
-      const {range, sortField, sortOrder} = this.state;
-      let {filteredData} = this.state;
-      const requestPage = previous ? range[0] / lazyLoadSize : (filteredData.length + range[0]) / lazyLoadSize;
-      const filters = this.getFilters();
-      if (filters !== null) {
-        const pageFilterRequest = {
-          page: requestPage,
-          pageSize: lazyLoadSize,
-          sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-          sortColumn: columns.find(col => col.name === sortField).filter,
-          domain: domain,
-          filters
-        } as PageFilterRequest;
-        this.callDataApi(pageFilterRequest).then(data => {
-          if (previous) {
-            filteredData = [...data, ...filteredData];
-            if (filteredData.length > (lazyLoadSize * 3)) {
-              filteredData = filteredData.slice(0, filteredData.length - lazyLoadSize);
-              range[1] -= lazyLoadSize;
+      try {
+        this.setState({loadingPrevious: previous, updating: true, error: false});
+        const {columns, domain} = this.props;
+        const {range, sortField, sortOrder} = this.state;
+        let {filteredData} = this.state;
+        const requestPage = previous ? range[0] / lazyLoadSize : (filteredData.length + range[0]) / lazyLoadSize;
+        const filters = this.getFilters();
+        if (filters !== null) {
+          const pageFilterRequest = {
+            page: requestPage,
+            pageSize: lazyLoadSize,
+            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            sortColumn: columns.find(col => col.name === sortField).filter,
+            domain: domain,
+            filters
+          } as PageFilterRequest;
+          this.callDataApi(pageFilterRequest).then(data => {
+            if (previous) {
+              filteredData = [...data, ...filteredData];
+              if (filteredData.length > (lazyLoadSize * 3)) {
+                filteredData = filteredData.slice(0, filteredData.length - lazyLoadSize);
+                range[1] -= lazyLoadSize;
+              }
+            } else {
+              filteredData = [...filteredData, ...data];
+              if (filteredData.length > (lazyLoadSize * 3)) {
+                filteredData = filteredData.slice(lazyLoadSize);
+                range[0] += lazyLoadSize;
+              }
             }
-          } else {
-            filteredData = [...filteredData, ...data];
-            if (filteredData.length > (lazyLoadSize * 3)) {
-              filteredData = filteredData.slice(lazyLoadSize);
-              range[0] += lazyLoadSize;
-            }
-          }
-          this.setState({data, filteredData, range, loadingPrevious: false, updating: false});
-        });
+            this.setState({data, filteredData, range, loadingPrevious: false, updating: false});
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        this.setState({loadingPrevious: false, updating: false, error: true});
       }
     }
 
@@ -418,15 +436,17 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {domain, participantId, workspace: {id, namespace}} = this.props;
       const {cohortReviewId} = cohortReviewStore.getValue();
       let data = [];
-      await cohortReviewApi().getParticipantData(namespace, id, cohortReviewId, participantId, request).then(response => {
-        data = response.items.map(item => {
-          if (domain === DomainType.VITAL || domain === DomainType.LAB) {
-            item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
-          }
-          item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
-          return item;
+      await cohortReviewApi()
+        .getParticipantData(namespace, id, cohortReviewId, participantId, request, {signal: this.dataAborter.signal})
+        .then(response => {
+          data = response.items.map(item => {
+            if (domain === DomainType.VITAL || domain === DomainType.LAB) {
+              item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
+            }
+            item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+            return item;
+          });
         });
-      });
       return data;
     }
 
@@ -434,10 +454,19 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {participantId, workspace: {id, namespace}} = this.props;
       const {cohortReviewId} = cohortReviewStore.getValue();
       let count = null;
-      await cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, request).then(response => {
-        count = response.count;
-      });
+      await cohortReviewApi()
+        .getParticipantCount(namespace, id, cohortReviewId, participantId, request, {signal: this.countAborter.signal})
+        .then(response => {
+          count = response.count;
+        });
       return count;
+    }
+
+    abortPendingApiCalls() {
+      this.countAborter.abort();
+      this.dataAborter.abort();
+      this.countAborter = new AbortController();
+      this.dataAborter = new AbortController();
     }
 
     getFilters() {
