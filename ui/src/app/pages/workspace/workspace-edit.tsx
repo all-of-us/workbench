@@ -775,9 +775,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           length: { minimum: 1, maximum: 80 }
         },
         billingAccountName: { presence: true },
-        intendedStudy: { presence: true },
-        anticipatedFindings: {presence: true },
-        scientificApproach: { presence: true },
+        intendedStudy: { length: { minimum: 1, maximum: 500 } },
+        anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
+        scientificApproach: { length: { minimum: 1, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
         specificPopulation: { truthiness: true },
         diseaseOfFocus: { truthiness: true },
@@ -868,6 +868,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 to be specific to the project for which you are creating this particular
                 Workspace.</i></div>
             }/>
+
+        {/*Check box to select primary purpose */}
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
             description={researchPurposeQuestions[0].description} index='1.'>
           <FlexRow>
@@ -887,6 +889,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </FlexColumn>
           </FlexRow>
         </WorkspaceEditSection>
+
+        {/* TextBox: scientific question(s) researcher intend to study Section*/}
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header}
           description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
@@ -907,6 +911,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               {500 - this.state.workspace.researchPurpose.intendedStudy.length} characters remaining
             </FlexRow>
           </WorkspaceEditSection>
+
+            {/* TextBox: scientific approaches section*/}
             <WorkspaceEditSection
                 header={researchPurposeQuestions[3].header}
                 description={researchPurposeQuestions[3].description} index='2.2'>
@@ -925,6 +931,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </FlexRow>
             </WorkspaceEditSection>
 
+            {/*TextBox: anticipated findings from the study section*/}
             <WorkspaceEditSection header={researchPurposeQuestions[4].header}
                                   description={researchPurposeQuestions[4].description} index='2.3'>
               <TextArea style={{height: '15rem', resize: 'none', width: '50rem', borderRadius: '3px 3px 0 0',
@@ -939,6 +946,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </WorkspaceEditSection>
           </FlexColumn>
         </WorkspaceEditSection>
+
+          {/*disseminate  research Section */}
         <WorkspaceEditSection header={researchPurposeQuestions[5].header}
                               description={researchPurposeQuestions[5].description} style={{width: '50rem'}} index='3.'>
           <FlexRow>
@@ -953,6 +962,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </FlexRow>
         </WorkspaceEditSection>
 
+          {/*Research outcome section*/}
           <WorkspaceEditSection header={researchPurposeQuestions[6].header} index='4.'
                                 description={researchPurposeQuestions[6].description}
                                 style={{width: '50rem'}}>
@@ -964,6 +974,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </FlexRow>
           </WorkspaceEditSection>
 
+          {/*Underrespresented population section*/}
         <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.'
                               description={researchPurposeQuestions[7].description}
                               style={{width: '50rem'}}>
@@ -1020,6 +1031,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               have been well represented in prior research.</label>
           </div>
         </WorkspaceEditSection>
+
+          {/* Request for review section*/}
         <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.'
                               description={researchPurposeQuestions[8].description}>
 
@@ -1056,7 +1069,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </FlexColumn>
             </FlexColumn>
           </FlexRow>
-
         </WorkspaceEditSection>
         <div>
           <FlexRow style={{marginTop: '1rem', marginBottom: '1rem'}}>
@@ -1068,14 +1080,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               errors && <ul>
                 {errors.name && <div>{errors.name}</div>}
                 {errors.billingAccountName && <div>You must select a billing account</div>}
-                {errors.primaryPurpose && <div>You must choose at least one primary research purpose</div>}
-                {errors.scientificApproach && <div>Answer for Question 2.1 cannot be empty</div>}
-                {errors.intendedStudy && <div>Answer for Question 2.2 cannot be empty</div>}
-                {errors.anticipatedFindings && <div>Answer for Question 2.3 cannot be empty</div>}
+                {errors.primaryPurpose && <div>You must choose at least one primary research
+                  purpose (Question 1)</div>}
+                {errors.intendedStudy && <div>You must answer <i>What are the anticipated findings
+                  from the study? (Question # 2.1)</i></div>}
+                {errors.scientificApproach && <div>You must answer <i>What are the scientific
+                  approaches you plan to use for your study (Question # 2.2)</i></div>}
+                {errors.anticipatedFindings && <div>You must answer <i>What are the specific
+                  scientific question(s) you intend to study (Question # 2.3)</i></div>}
                 {errors.specificPopulation && <div>You must specify a population of study</div>}
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
-                {errors.researchOutcoming && <div>Answer for Question 4 cannot be empty</div>}
-                {errors.disseminate && <div>Answer for Question 3 cannot be empty</div>}
+                {errors.researchOutcoming && <div>You must specify the outcome of the research</div>}
+                {errors.disseminate && <div>You must specific how you plan to disseminate your research findings</div>}
               </ul>
             } disabled={!errors}>
               <Button type='primary'

@@ -58,6 +58,8 @@ public interface WorkspaceMapper {
   @Mapping(target = "timeReviewed", ignore = true)
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
+  // This method (defined by AfterMapping annotation) handles the scenario in which the name of the
+  // parameters are different
   @AfterMapping
   default void afterWorkspaceIntoResearchPurpose(
       @MappingTarget ResearchPurpose researchPurpose, DbWorkspace dbWorkspace) {
