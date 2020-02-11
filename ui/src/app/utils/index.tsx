@@ -439,7 +439,7 @@ export const append = fp.curry((value, arr) => fp.concat(arr, [value]));
 
 // Given a value and an array, return a new array that 'toggles' the presence of the value.
 // E.g. remove if it exists, append if it doesn't.
-export const toggleIncludes = fp.curry((value, arr) => {
+export const toggleIncludes = fp.curry(<T extends {}>(value: T, arr: Array<T>) => {
   return fp.includes(value, arr) ? fp.pull(value, arr) : append(value, arr);
 });
 
