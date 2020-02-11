@@ -68,49 +68,37 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private DbInstitution updateDbObject(
       final DbInstitution dbObject, final Institution modelObject) {
-    dbObject.setShortName(modelObject.getShortName());
-    dbObject.setDisplayName(modelObject.getDisplayName());
-    dbObject.setOrganizationTypeEnum(modelObject.getOrganizationTypeEnum());
-    dbObject.setOrganizationTypeOtherText(modelObject.getOrganizationTypeOtherText());
-
-    dbObject.setEmailDomains(
-        Optional.ofNullable(modelObject.getEmailDomains()).orElse(Collections.emptyList()).stream()
-            .map(domain -> new DbInstitutionEmailDomain().setEmailDomain(domain))
-            .collect(Collectors.toSet()));
-
-    dbObject.setEmailAddresses(
-        Optional.ofNullable(modelObject.getEmailAddresses()).orElse(Collections.emptyList())
-            .stream()
-            .map(address -> new DbInstitutionEmailAddress().setEmailAddress(address))
-            .collect(Collectors.toSet()));
-
-    return dbObject;
+    return dbObject
+        .shortName(modelObject.getShortName())
+        .displayName(modelObject.getDisplayName())
+        .organizationTypeEnum(modelObject.getOrganizationTypeEnum())
+        .organizationTypeOtherText(modelObject.getOrganizationTypeOtherText())
+        .emailDomains(
+            Optional.ofNullable(modelObject.getEmailDomains()).orElse(Collections.emptyList())
+                .stream()
+                .map(domain -> new DbInstitutionEmailDomain().setEmailDomain(domain))
+                .collect(Collectors.toSet()))
+        .emailAddresses(
+            Optional.ofNullable(modelObject.getEmailAddresses()).orElse(Collections.emptyList())
+                .stream()
+                .map(address -> new DbInstitutionEmailAddress().setEmailAddress(address))
+                .collect(Collectors.toSet()));
   }
 
   private Institution toModel(final DbInstitution dbObject) {
-    final Institution institution =
-        new Institution()
-            .shortName(dbObject.getShortName())
-            .displayName(dbObject.getDisplayName())
-            .organizationTypeEnum(dbObject.getOrganizationTypeEnum())
-            .organizationTypeOtherText(dbObject.getOrganizationTypeOtherText());
-
-    Optional.ofNullable(dbObject.getEmailDomains())
-        .ifPresent(
-            domains ->
-                institution.emailDomains(
-                    domains.stream()
-                        .map(DbInstitutionEmailDomain::getEmailDomain)
-                        .collect(Collectors.toList())));
-
-    Optional.ofNullable(dbObject.getEmailAddresses())
-        .ifPresent(
-            addresses ->
-                institution.emailAddresses(
-                    addresses.stream()
-                        .map(DbInstitutionEmailAddress::getEmailAddress)
-                        .collect(Collectors.toList())));
-
-    return institution;
+    return new Institution()
+        .shortName(dbObject.getShortName())
+        .displayName(dbObject.getDisplayName())
+        .organizationTypeEnum(dbObject.getOrganizationTypeEnum())
+        .organizationTypeOtherText(dbObject.getOrganizationTypeOtherText())
+        .emailDomains(
+            Optional.ofNullable(dbObject.getEmailDomains()).orElse(Collections.emptySet()).stream()
+                .map(DbInstitutionEmailDomain::getEmailDomain)
+                .collect(Collectors.toList()))
+        .emailAddresses(
+            Optional.ofNullable(dbObject.getEmailAddresses()).orElse(Collections.emptySet())
+                .stream()
+                .map(DbInstitutionEmailAddress::getEmailAddress)
+                .collect(Collectors.toList()));
   }
 }
