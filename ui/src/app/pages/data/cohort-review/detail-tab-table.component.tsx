@@ -753,12 +753,12 @@ export const DetailTabTable = withCurrentWorkspace()(
         : options.reduce((acc, opt, i) => {
           if (!codeResults || codeResults.has(opt.name)) {
             acc.push(<React.Fragment key={i}>
-              {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
+              {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0 0.3rem 0.4rem'}}>
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
                        checked={columnFilters[column].includes(opt.name)}
                        onChange={($event) => this.updateData($event, column, options)}/>
                 {/* TODO Uncomment counts below once decision has been made for server-side implementation */}
-                <label style={{paddingLeft: '0.4rem'}}> {opt.name} {/*({opt.count})*/} </label>
+                <label> {opt.name} {/*({opt.count})*/} </label>
               </div>}
             </React.Fragment>);
           }
@@ -772,7 +772,7 @@ export const DetailTabTable = withCurrentWorkspace()(
              this.filterEvent(column);
              fl.toggle(e);
            }}/>
-        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+        <OverlayPanel style={{left: '359.531px!important', textAlign: 'left'}} className='filterOverlay'
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           {column === `${vocab}Code` && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
@@ -789,7 +789,7 @@ export const DetailTabTable = withCurrentWorkspace()(
                    checked={columnFilters[column].includes('Select All')}
                    onChange={($event) => this.updateData($event, column, options)}/>
             {/* TODO Uncomment total count below once decision has been made for server-side implementation */}
-            <label style={{paddingLeft: '0.4rem'}}> Select All {/*({counts.total})*/} </label>
+            <label> Select All {/*({counts.total})*/} </label>
           </div>
         </OverlayPanel>
       </React.Fragment>;
