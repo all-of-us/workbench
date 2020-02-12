@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -253,12 +254,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
-    final Workspace result =
-        logsBasedMetricService.recordElapsedTime(
-            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createWorkspace"),
-            DistributionMetric.WORKSPACE_OPERATION_TIME,
-            () -> createWorkspaceImpl(workspace));
-    return ResponseEntity.ok(result);
+    return ResponseEntity.ok(
+        recordOperationTime(() -> createWorkspaceImpl(workspace), "createWorkspace"));
   }
 
   // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService &
@@ -285,8 +282,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace dbWorkspace = new DbWorkspace();
     // A little unintuitive but setting this here reflects the current state of the workspace
     // while it was in the billing buffer. Setting this value will inform the update billing
-    // code to
-    // skip an unnecessary GCP API call if the billing account is being kept at the free tier
+    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
+    // tier
     dbWorkspace.setBillingAccountName(
         workbenchConfigProvider.get().billing.freeTierBillingAccountName());
     setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
@@ -318,8 +315,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if the workspace
-      // creation
-      // fails
+      // creation fails
       log.log(
           Level.SEVERE,
           "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
@@ -367,10 +363,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
-    logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteWorkspace"),
-        DistributionMetric.WORKSPACE_OPERATION_TIME,
-        () -> deleteWorkspaceImpl(workspaceNamespace, workspaceId));
+    recordOperationTime(
+        () -> deleteWorkspaceImpl(workspaceNamespace, workspaceId), "deleteWorkspace");
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -391,23 +385,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
-    final WorkspaceResponse workspaceResponse =
-        logsBasedMetricService.recordElapsedTime(
-            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspace"),
-            DistributionMetric.WORKSPACE_OPERATION_TIME,
-            () -> workspaceService.getWorkspace(workspaceNamespace, workspaceId));
-    return ResponseEntity.ok(workspaceResponse);
+    return ResponseEntity.ok(
+        recordOperationTime(
+            () -> workspaceService.getWorkspace(workspaceNamespace, workspaceId), "getWorkspace"));
   }
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    List<WorkspaceResponse> workspaces =
-        logsBasedMetricService.recordElapsedTime(
-            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspaces"),
-            DistributionMetric.WORKSPACE_OPERATION_TIME,
-            workspaceService::getWorkspaces);
-    response.setItems(workspaces);
+    final WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+    response.setItems(recordOperationTime(workspaceService::getWorkspaces, "getWorkspaces"));
     return ResponseEntity.ok(response);
   }
 
@@ -416,10 +402,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
       throws NotFoundException {
     final Workspace result =
-        logsBasedMetricService.recordElapsedTime(
-            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "updateWorkspace"),
-            DistributionMetric.WORKSPACE_OPERATION_TIME,
-            () -> updateWorkspaceImpl(workspaceNamespace, workspaceId, request));
+        recordOperationTime(
+            () -> updateWorkspaceImpl(workspaceNamespace, workspaceId, request), "updateWorkspace");
     return ResponseEntity.ok(result);
   }
 
@@ -470,8 +454,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     } catch (Exception e) {
       // Tell Google Cloud to set the billing account back to the original one since our
-      // update
-      // database call failed
+      // update database call failed
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, originalWorkspace.getBillingAccountName());
       throw e;
@@ -488,10 +471,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
       throws BadRequestException, TooManyRequestsException {
-    return logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "cloneWorkspace"),
-        DistributionMetric.WORKSPACE_OPERATION_TIME,
-        () -> cloneWorkspaceImpl(fromWorkspaceNamespace, fromWorkspaceId, body));
+    return recordOperationTime(
+        () -> cloneWorkspaceImpl(fromWorkspaceNamespace, fromWorkspaceId, body), "cloneWorkspace");
   }
 
   private ResponseEntity<CloneWorkspaceResponse> cloneWorkspaceImpl(
@@ -742,21 +723,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(
       String workspaceNamespace, String workspaceId) {
-    final List<FileDetail> fileList =
-        logsBasedMetricService.recordElapsedTime(
-            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getNoteBookList"),
-            DistributionMetric.WORKSPACE_OPERATION_TIME,
-            () -> notebooksService.getNotebooks(workspaceNamespace, workspaceId));
-    return ResponseEntity.ok(fileList);
+    return ResponseEntity.ok(
+        recordOperationTime(
+            () -> notebooksService.getNotebooks(workspaceNamespace, workspaceId),
+            "getNoteBookList"));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(
       String workspace, String workspaceName, String notebookName) {
-    logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteNotebook"),
-        DistributionMetric.WORKSPACE_OPERATION_TIME,
-        () -> notebooksService.deleteNotebook(workspace, workspaceName, notebookName));
+    recordOperationTime(
+        () -> notebooksService.deleteNotebook(workspace, workspaceName, notebookName),
+        "deleteNotebook");
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -766,14 +744,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceId,
       String fromNotebookName,
       CopyRequest copyRequest) {
-    final FileDetail result =
-        logsBasedMetricService.recordElapsedTime(
-            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "copyNotebook"),
-            DistributionMetric.WORKSPACE_OPERATION_TIME,
+    return ResponseEntity.ok(
+        recordOperationTime(
             () ->
                 copyNotebookImpl(
-                    fromWorkspaceNamespace, fromWorkspaceId, fromNotebookName, copyRequest));
-    return ResponseEntity.ok(result);
+                    fromWorkspaceNamespace, fromWorkspaceId, fromNotebookName, copyRequest),
+            "copyNotebook"));
   }
 
   private FileDetail copyNotebookImpl(
@@ -1012,5 +988,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  private <T> T recordOperationTime(Supplier<T> operation, String operationName) {
+    return logsBasedMetricService.recordElapsedTime(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        operation);
+  }
+
+  private void recordOperationTime(Runnable operation, String operationName) {
+    logsBasedMetricService.recordElapsedTime(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        operation);
   }
 }
