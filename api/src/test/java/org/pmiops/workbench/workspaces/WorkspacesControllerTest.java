@@ -119,6 +119,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
+import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
@@ -536,6 +537,7 @@ public class WorkspacesControllerTest {
         .cdrVersionId(cdrVersionId)
         .googleBucketName(BUCKET_NAME)
         .billingAccountName("billing-account")
+        .billingAccountType(BillingAccountType.FREE_TIER)
         .researchPurpose(
             new ResearchPurpose()
                 .diseaseFocusedResearch(true)
