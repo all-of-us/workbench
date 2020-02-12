@@ -467,6 +467,15 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     async componentDidUpdate({}, prevState: State) {
+      // If any domains were dropped, we want to drop any domain/value pair selections.
+      const droppedDomains = Array.from(prevState.selectedDomains)
+          .filter(d => !this.state.selectedDomains.has(d));
+      if (droppedDomains.length > 0) {
+        this.setState(({selectedDomains, selectedDomainValuePairs}) => ({
+          selectedDomainValuePairs: selectedDomainValuePairs.filter(p => selectedDomains.has(p.domain))
+        }));
+      }
+
       // After a state update, first check whether any new domains have been added.
       const newDomains = Array.from(this.state.selectedDomains)
           .filter(d => !prevState.selectedDomains.has(d));
