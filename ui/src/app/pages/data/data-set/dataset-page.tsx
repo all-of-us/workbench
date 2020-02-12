@@ -661,7 +661,13 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     get valuesCount() {
       let count = 0 ;
-      this.state.domainValueSetLookup.forEach(v => count += v.values.items.length);
+      this.state.selectedDomains.forEach(d => {
+        // Only counted loaded domains.
+        const v = this.state.domainValueSetLookup.get(d);
+        if (v) {
+          count += v.values.items.length;
+        }
+      });
       return count;
     }
 
