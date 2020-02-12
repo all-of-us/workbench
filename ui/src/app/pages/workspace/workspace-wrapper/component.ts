@@ -38,7 +38,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
   helpContent = 'data';
-  sidebarOpen = true;
+  sidebarOpen = false;
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -58,6 +58,12 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (!!localStorage.getItem('sidebarState')) {
+      this.sidebarOpen = localStorage.getItem('sidebarState') === 'open';
+    } else {
+      this.sidebarOpen = true;
+      localStorage.setItem('sidebarState', 'open');
+    }
     this.tabPath = this.getTabPath();
     this.setHelpContent();
     this.subscriptions.push(
@@ -67,6 +73,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
           this.setHelpContent();
           if (this.helpContent !== 'reviewParticipantDetail') {
             this.sidebarOpen = false;
+            localStorage.setItem('sidebarState', 'closed');
           }
         }));
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
@@ -217,5 +224,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   setSidebarState = (sidebarOpen: boolean) => {
     this.sidebarOpen = sidebarOpen;
+    const sidebarState = sidebarOpen ? 'open' : 'closed';
+    localStorage.setItem('sidebarState', sidebarState);
   }
 }
