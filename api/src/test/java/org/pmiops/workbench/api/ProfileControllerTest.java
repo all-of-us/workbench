@@ -16,7 +16,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import javax.mail.MessagingException;
@@ -155,6 +154,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void setUp() throws IOException {
     super.setUp();
 
+    fakeClock.setInstant(NOW);
+
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -278,7 +279,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void testMe_success() throws Exception {
     createUser();
-
     Profile profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -419,7 +419,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void updateContactEmail_forbidden() throws Exception {
     createUser();
-    dbUser.setFirstSignInTime(new Timestamp(new Date().getTime()));
+    dbUser.setFirstSignInTime(TIMESTAMP);
     String originalEmail = dbUser.getContactEmail();
 
     ResponseEntity<Void> response =
@@ -660,7 +660,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(user.getFamilyName()).isEqualTo(familyName);
     assertThat(user.getGivenName()).isEqualTo(givenName);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
-    assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
+    assertThat(user.getFirstSignInTime().getTime()).isEqualTo(firstSignInTime.getTime());
+    // assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
   }
 }
