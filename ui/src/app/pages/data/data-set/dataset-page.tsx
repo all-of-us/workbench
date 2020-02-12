@@ -586,7 +586,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     private getDomainsFromDataSet(d: DataSet) {
       const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(d.prePackagedConceptSet);
-      return this.getDomainsFromConceptSets(d.conceptSets, selectedPrepackagedConceptSets)
+      return this.getDomainsFromConceptSets(d.conceptSets, selectedPrepackagedConceptSets);
     }
 
     private getDomainsFromConceptSets(
