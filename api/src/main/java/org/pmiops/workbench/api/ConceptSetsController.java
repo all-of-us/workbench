@@ -165,7 +165,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     ConceptSetListResponse response = new ConceptSetListResponse();
     response.setItems(
         conceptSets.stream()
-            .map(dbConceptSet -> conceptSetMapper.dbModelToClient(dbConceptSet))
+            .map(conceptSetMapper::dbModelToClient)
             .sorted(Comparator.comparing(c -> c.getName()))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
