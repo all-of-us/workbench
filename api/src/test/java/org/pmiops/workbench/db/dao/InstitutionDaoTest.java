@@ -60,11 +60,14 @@ public class InstitutionDaoTest {
     final DbInstitution savedWithEmailPatterns = institutionDao.save(toSaveWithEmailPatterns);
     assertThat(savedWithEmailPatterns).isEqualTo(toSaveWithEmailPatterns);
     assertThat(savedWithEmailPatterns.getEmailDomains()).containsExactlyElementsIn(emailDomains);
-    assertThat(savedWithEmailPatterns.getEmailAddresses()).containsExactlyElementsIn(emailAddresses);
+    assertThat(savedWithEmailPatterns.getEmailAddresses())
+        .containsExactlyElementsIn(emailAddresses);
 
     // OK to duplicate email patterns between institutions
-    assertThat(savedWithEmailPatterns.getEmailDomains()).containsExactlyElementsIn(institutionWithEmailPatterns.getEmailDomains());
-    assertThat(savedWithEmailPatterns.getEmailAddresses()).containsExactlyElementsIn(institutionWithEmailPatterns.getEmailAddresses());
+    assertThat(savedWithEmailPatterns.getEmailDomains())
+        .containsExactlyElementsIn(institutionWithEmailPatterns.getEmailDomains());
+    assertThat(savedWithEmailPatterns.getEmailAddresses())
+        .containsExactlyElementsIn(institutionWithEmailPatterns.getEmailAddresses());
 
     final DbInstitution toSaveWithoutEmailPatterns =
         new DbInstitution()
@@ -74,7 +77,6 @@ public class InstitutionDaoTest {
     assertThat(savedWithoutEmailPatterns).isEqualTo(toSaveWithoutEmailPatterns);
     assertThat(savedWithoutEmailPatterns.getEmailDomains()).isEmpty();
     assertThat(savedWithoutEmailPatterns.getEmailAddresses()).isEmpty();
-
   }
 
   @Test
@@ -89,8 +91,7 @@ public class InstitutionDaoTest {
   @Test
   public void test_findAll() {
     assertThat(institutionDao.findAll())
-        .containsExactly(
-            institutionWithoutEmailPatterns, institutionWithEmailPatterns);
+        .containsExactly(institutionWithoutEmailPatterns, institutionWithEmailPatterns);
   }
 
   @Test
@@ -101,8 +102,7 @@ public class InstitutionDaoTest {
     assertThat(dbInstitution.getEmailDomains()).isEmpty();
     assertThat(dbInstitution.getEmailAddresses()).isEmpty();
 
-    dbInstitution =
-        institutionDao.findOne(institutionWithEmailPatterns.getInstitutionId());
+    dbInstitution = institutionDao.findOne(institutionWithEmailPatterns.getInstitutionId());
     assertThat(dbInstitution).isEqualTo(institutionWithEmailPatterns);
     assertThat(dbInstitution.getEmailDomains()).isEqualTo(emailDomains);
     assertThat(dbInstitution.getEmailAddresses()).isEqualTo(emailAddresses);
@@ -112,8 +112,7 @@ public class InstitutionDaoTest {
   public void test_findOneByShortName() {
     assertThat(institutionDao.findOneByShortName("Broad"))
         .hasValue(institutionWithoutEmailPatterns);
-    assertThat(institutionDao.findOneByShortName("Broad1"))
-        .hasValue(institutionWithEmailPatterns);
+    assertThat(institutionDao.findOneByShortName("Broad1")).hasValue(institutionWithEmailPatterns);
     assertThat(institutionDao.findOneByShortName("Verily")).isEmpty();
   }
 
