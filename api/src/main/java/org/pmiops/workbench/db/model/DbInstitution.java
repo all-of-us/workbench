@@ -117,7 +117,7 @@ public class DbInstitution {
   public void setEmailDomains(final Set<DbInstitutionEmailDomain> emailDomains) {
     final Set<DbInstitutionEmailDomain> attachedDomains =
         emailDomains.stream()
-            .map(address -> address.setInstitution(this))
+            .map(domain -> domain.setInstitution(this))
             .collect(Collectors.toSet());
     // modifies this set so that its value is the intersection of the two sets
     this.emailDomains.retainAll(attachedDomains);
