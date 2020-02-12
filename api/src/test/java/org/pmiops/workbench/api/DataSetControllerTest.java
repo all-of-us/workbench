@@ -787,7 +787,7 @@ public class DataSetControllerTest {
                 + prefix
                 + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
                 + prefix
-                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")))"
+                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")"
                 + "\n"
                 + "\n"
                 + "head("
