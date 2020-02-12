@@ -133,6 +133,24 @@ describe('DataSetPage', () => {
       expect(checkedValuesList.length).toBe(4);
   });
 
+  fit('should display correct values on rapid selection of multiple domains', async() => {
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Select "Condition" and "Measurement" concept sets.
+    const conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
+    conceptSetEls.at(0).find('input').first().simulate('change');
+    conceptSetEls.at(1).find('input').first().simulate('change');
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    const valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+    const checkedValuesList = valueListItems.filterWhere(value => value.props().checked);
+    expect(valueListItems.length).toBe(5);
+    expect(checkedValuesList.length).toBe(5);
+  });
+
   it('should enable save button and preview button once cohorts, concepts and values are selected',
     async() => {
       const wrapper = mount(<DataSetPage />);
@@ -198,7 +216,6 @@ describe('DataSetPage', () => {
     expect(spy).toHaveBeenCalledTimes(1);
 
   });
-
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
     const wrapper = mount(<DataSetPage />);
