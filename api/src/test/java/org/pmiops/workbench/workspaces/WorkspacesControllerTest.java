@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
@@ -814,13 +813,15 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
-    doReturn(false).when(freeTierBillingService).userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+    doReturn(false)
+        .when(freeTierBillingService)
+        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     request.setWorkspace(ws);
-    Workspace response = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
-
+    Workspace response =
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
 
     assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
   }
@@ -830,25 +831,31 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
-    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-        ws.getNamespace(), ws.getId(), DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
-    );
+    DbWorkspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            ws.getNamespace(),
+            ws.getId(),
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
-    doReturn(true).when(freeTierBillingService).userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+    doReturn(true)
+        .when(freeTierBillingService)
+        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     ws.setEtag("\"2\"");
     request.setWorkspace(ws);
-    Workspace response = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+    Workspace response =
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
 
     assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
   }
 
   @Test
-  public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount() throws Exception {
+  public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount()
+      throws Exception {
     final String closedBillingAccountName = "closed-billing-account";
 
     Workspace ws = createWorkspace();
@@ -857,40 +864,43 @@ public class WorkspacesControllerTest {
     final String firecloudName = ws.getId();
 
     Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
-    doReturn(
-        new BillingAccount()
-            .setName(closedBillingAccountName)
-            .setOpen(false)
-    ).when(getRequest).execute();
-    when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName)).thenReturn(getRequest);
+    doReturn(new BillingAccount().setName(closedBillingAccountName).setOpen(false))
+        .when(getRequest)
+        .execute();
+    when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName))
+        .thenReturn(getRequest);
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName(closedBillingAccountName);
     request.setWorkspace(ws);
 
-    BadRequestException exception = assertThrows(BadRequestException.class, () ->
-          workspacesController.updateWorkspace(namespace, firecloudName, request));
-    assertThat(exception.getErrorResponse().getMessage()).contains("User provided billing account is closed. Please provide an open account.");
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
+    assertThat(exception.getErrorResponse().getMessage())
+        .contains("User provided billing account is closed. Please provide an open account.");
   }
 
   @Test
-  public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount() throws Exception {
+  public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount()
+      throws Exception {
     final String openBillingAccountName = "open-billing-account";
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
-    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-        ws.getNamespace(), ws.getId(), DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
-    );
+    DbWorkspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            ws.getNamespace(),
+            ws.getId(),
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
     Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
-    doReturn(
-        new BillingAccount()
-            .setOpen(true)
-    ).when(getRequest).execute();
-    when(endUserCloudbillingProvider.get().billingAccounts().get(openBillingAccountName)).thenReturn(getRequest);
+    doReturn(new BillingAccount().setOpen(true)).when(getRequest).execute();
+    when(endUserCloudbillingProvider.get().billingAccounts().get(openBillingAccountName))
+        .thenReturn(getRequest);
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName("active-billing-account");
@@ -898,7 +908,8 @@ public class WorkspacesControllerTest {
     request.setWorkspace(ws);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
 
-    assertThat(workspaceDao.findOne(dbWorkspace.getWorkspaceId()).getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    assertThat(workspaceDao.findOne(dbWorkspace.getWorkspaceId()).getBillingStatus())
+        .isEqualTo(BillingStatus.ACTIVE);
   }
 
   @Test
