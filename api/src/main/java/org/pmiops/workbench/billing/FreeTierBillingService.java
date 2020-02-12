@@ -66,6 +66,10 @@ public class FreeTierBillingService {
     this.clock = clock;
   }
 
+  public boolean userHasFreeTierCredits(DbUser user) {
+    return getUserFreeTierDollarLimit(user) > workspaceFreeTierUsageDao.totalCostByUser(user);
+  }
+
   /**
    * Check whether users have incurred sufficient cost or time in their workspaces to trigger alerts
    * due to passing thresholds or exceeding limits

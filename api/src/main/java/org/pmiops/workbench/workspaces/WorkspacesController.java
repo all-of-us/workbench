@@ -292,7 +292,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     try {
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workspace.getBillingAccountName());
-    } catch (Exception e) {
+    } catch (ServerErrorException e) {
       throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
 
@@ -417,7 +417,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       try {
         workspaceService.updateWorkspaceBillingAccount(
             dbWorkspace, request.getWorkspace().getBillingAccountName());
-      } catch (Exception e) {
+      } catch (ServerErrorException e) {
         throw new ServerErrorException("Could not update the workspace's billing account", e);
       }
     }
@@ -549,7 +549,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     try {
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, body.getWorkspace().getBillingAccountName());
-    } catch (Exception e) {
+    } catch (ServerErrorException e) {
       throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
 

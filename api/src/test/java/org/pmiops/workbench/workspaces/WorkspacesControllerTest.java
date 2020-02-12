@@ -69,6 +69,7 @@ import org.pmiops.workbench.api.CohortsController;
 import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -246,6 +247,9 @@ public class WorkspacesControllerTest {
   @Autowired
   private Provider<Cloudbilling> serviceAccountCloudbillingProvider;
 
+  private static Cloudbilling endUserCloudbilling;
+  private static Cloudbilling serviceAccountCloudbilling;
+
   @TestConfiguration
   @Import({
     CdrVersionService.class,
@@ -266,6 +270,7 @@ public class WorkspacesControllerTest {
     ManualWorkspaceMapper.class
   })
   @MockBean({
+    FreeTierBillingService.class,
     BillingProjectBufferService.class,
     CohortMaterializationService.class,
     ConceptBigQueryService.class,
@@ -284,18 +289,15 @@ public class WorkspacesControllerTest {
   static class Configuration {
 
     @Bean(END_USER_CLOUD_BILLING)
+    @Scope("prototype")
     Cloudbilling endUserCloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
+      return endUserCloudbilling;
     }
 
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
+    @Scope("prototype")
     Cloudbilling serviceAccountCloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
-    }
-
-    @Bean
-    Cloudbilling cloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
+      return serviceAccountCloudbilling;
     }
 
     @Bean
@@ -339,6 +341,7 @@ public class WorkspacesControllerTest {
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Autowired Zendesk mockZendesk;
+  @Autowired FreeTierBillingService freeTierBillingService;
 
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
@@ -386,6 +389,9 @@ public class WorkspacesControllerTest {
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     when(mockZendesk.createRequest(any())).thenReturn(new Request());
+
+    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
+    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
   }
 
   private DbUser createUser(String email) {
@@ -790,15 +796,16 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
-    verify(endUserCloudbillingProvider.get()).projects();
-    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
+    // Creating the workspace with a user provided billing account
+    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
+    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     request.setWorkspace(ws);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
 
-    verifyNoMoreInteractions(endUserCloudbillingProvider.get());
+    verifyZeroInteractions(endUserCloudbillingProvider.get());
     verify(serviceAccountCloudbillingProvider.get()).projects();
   }
 
@@ -807,12 +814,13 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
-    currentUser.setFreeTierCreditsLimitDollarsOverride(0.0);
+    doReturn(false).when(freeTierBillingService).userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     request.setWorkspace(ws);
     Workspace response = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+
 
     assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
   }
@@ -822,16 +830,17 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
-    currentUser.setFreeTierCreditsLimitDollarsOverride(Double.MAX_VALUE);
-
     DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
         ws.getNamespace(), ws.getId(), DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
     );
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
+    doReturn(true).when(freeTierBillingService).userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    ws.setEtag("\"2\"");
     request.setWorkspace(ws);
     Workspace response = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
 
@@ -853,7 +862,7 @@ public class WorkspacesControllerTest {
             .setName(closedBillingAccountName)
             .setOpen(false)
     ).when(getRequest).execute();
-    doReturn(getRequest).when(endUserCloudbillingProvider.get().billingAccounts()).get(closedBillingAccountName);
+    when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName)).thenReturn(getRequest);
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName(closedBillingAccountName);
@@ -861,11 +870,12 @@ public class WorkspacesControllerTest {
 
     BadRequestException exception = assertThrows(BadRequestException.class, () ->
           workspacesController.updateWorkspace(namespace, firecloudName, request));
-    assertThat(exception.getErrorResponse().getMessage()).contains("Closed billing account name provided");
+    assertThat(exception.getErrorResponse().getMessage()).contains("User provided billing account is closed. Please provide an open account.");
   }
 
   @Test
-  public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount() {
+  public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount() throws Exception {
+    final String openBillingAccountName = "open-billing-account";
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -875,12 +885,20 @@ public class WorkspacesControllerTest {
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
+    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
+    doReturn(
+        new BillingAccount()
+            .setOpen(true)
+    ).when(getRequest).execute();
+    when(endUserCloudbillingProvider.get().billingAccounts().get(openBillingAccountName)).thenReturn(getRequest);
+
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName("active-billing-account");
+    ws.setEtag("\"2\"");
     request.setWorkspace(ws);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
 
-    assertThat(workspaceDao.findOne(dbWorkspace.getWorkspaceId()).getBillingStatus()).isEqualTo(WorkspaceActiveStatus.ACTIVE);
+    assertThat(workspaceDao.findOne(dbWorkspace.getWorkspaceId()).getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
   }
 
   @Test
@@ -1218,7 +1236,8 @@ public class WorkspacesControllerTest {
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
-    verify(endUserCloudbillingProvider.get()).projects();
+    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
+    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
