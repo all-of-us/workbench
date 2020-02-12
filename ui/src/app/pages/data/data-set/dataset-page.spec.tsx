@@ -308,8 +308,8 @@ describe('DataSetPage', () => {
   });
 
   it('should sort domains for display only', () => {
-    const domains = [Domain.MEASUREMENT, Domain.PERSON, Domain.CONDITION, Domain.SURVEY];
+    const domains = [Domain.MEASUREMENT, Domain.SURVEY, Domain.PERSON, Domain.CONDITION];
     domains.sort(COMPARE_DOMAINS_FOR_DISPLAY);
-    expect(domains).toEqual([Domain.PERSON, Domain.SURVEY, Domain.CONDITION, Domain.MEASUREMENT]);
+    expect(domains).toEqual([Domain.PERSON, Domain.CONDITION, Domain.MEASUREMENT, Domain.SURVEY]);
   });
 });

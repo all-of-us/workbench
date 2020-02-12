@@ -215,8 +215,10 @@ const stylesFunction = {
 };
 
 const DOMAIN_DISPLAY_ORDER = {
-  [Domain.PERSON]: 0,
-  [Domain.SURVEY]: 1
+  // Person domain is always first as the canonical primary table. Everything
+  // else is alphabetized. To add further ordering constraints, add more
+  // entries to this map with sort values.
+  [Domain.PERSON]: 0
 };
 
 // Exported for testing.
