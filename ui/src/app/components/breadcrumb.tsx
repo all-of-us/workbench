@@ -167,10 +167,13 @@ export const Breadcrumb = fp.flow(
       if (!prevProps.workspace && this.props.workspace &&
         this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
         this.setState({showInvalidBillingBanner: true});
-      }
-
-      if (prevProps.workspace && !this.props.workspace) {
+      } else if (prevProps.workspace && !this.props.workspace) {
         this.setState({showInvalidBillingBanner: false});
+      } else if (prevProps.workspace && this.props.workspace && prevProps.workspace != this.props.workspace) {
+        // Workspace was reloaded
+        if (prevProps.workspace.billingStatus !== this.props.workspace.billingStatus) {
+          this.setState({showInvalidBillingBanner: this.props.workspace.billingStatus === BillingStatus.INACTIVE});
+        }
       }
     }
 
