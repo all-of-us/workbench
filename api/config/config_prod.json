@@ -16,7 +16,7 @@
     "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
-    "accountId": "00293C_5DEA2D_6887E7",
+    "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 4,
