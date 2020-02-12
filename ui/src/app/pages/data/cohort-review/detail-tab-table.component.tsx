@@ -295,7 +295,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (prevProps.participantId !== participantId) {
         if (loading) {
           // cancel any pending count or data calls
-          this.abortPendingApiCalls();
+          this.abortPendingApiCalls(true);
         }
         this.setState({
           data: null,
@@ -311,7 +311,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         if (lazyLoad) {
           if (loading) {
             // cancel any pending count or data calls
-            this.abortPendingApiCalls();
+            this.abortPendingApiCalls(true);
           }
           this.setState({
             data: null,
@@ -324,6 +324,10 @@ export const DetailTabTable = withCurrentWorkspace()(
           this.setState({tabFilterState}, () => this.filterData());
         }
       }
+    }
+
+    componentWillUnmount(): void {
+      this.abortPendingApiCalls();
     }
 
     async getParticipantData(getCount: boolean) {
@@ -462,11 +466,13 @@ export const DetailTabTable = withCurrentWorkspace()(
       return count;
     }
 
-    abortPendingApiCalls() {
+    abortPendingApiCalls(reset?: boolean) {
       this.countAborter.abort();
       this.dataAborter.abort();
-      this.countAborter = new AbortController();
-      this.dataAborter = new AbortController();
+      if (reset) {
+        this.countAborter = new AbortController();
+        this.dataAborter = new AbortController();
+      }
     }
 
     getFilters() {
