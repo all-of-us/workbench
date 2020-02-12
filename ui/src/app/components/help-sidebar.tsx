@@ -404,11 +404,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
           {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
             <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
               <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+                   onClick={() => this.onIconClick(icon)}
                    onMouseOver={() => this.setState({tooltipId: i})}
                    onMouseOut={() => this.setState({tooltipId: undefined})}>
                 {icon.faIcon === null
                   ? <img src={proIcons[icon.id]} style={icon.style} />
-                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} onClick={() => this.onIconClick(icon)} />
+                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
                 }
               </div>
             </TooltipTrigger>
