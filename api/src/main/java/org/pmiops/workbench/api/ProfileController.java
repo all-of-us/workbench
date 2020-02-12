@@ -311,7 +311,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-    verifyInvitationKey(request.getInvitationKey());
+    if (workbenchConfigProvider.get().access.requireInvitationKey) {
+      verifyInvitationKey(request.getInvitationKey());
+    }
+
     String userName = request.getProfile().getUsername();
     if (userName == null || userName.length() < 3 || userName.length() > 64)
       throw new BadRequestException(

@@ -87,7 +87,8 @@
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
-    "unsafeAllowSelfBypass": true
+    "unsafeAllowSelfBypass": true,
+    "requireInvitationKey": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

@@ -1,25 +1,41 @@
-package org.pmiops.workbench;
+package org.pmiops.workbench.api;
 
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
+/**
+ * A base class for functionality shared by many controller-level tests in the Workbench.
+ *
+ * <p>This class currently provides a simple way for test cases to use and modify the
+ * WorkbenchConfig, for testing differential controller behavior depending on the environment
+ * configuration.
+ *
+ * <p>Most or all controller tests should eventually extend this class, but adoption may proceed
+ * incrementally to avoid a large one-time refactoring cost.
+ *
+ * <p>This class is heavily inspired by the BaseIntegrationTest class; maybe there is some way for
+ * these two classes to share a common core, since they both care mostly about WorkbenchConfig bean
+ * management for tests.
+ *
+ * <p>TODO(RW-4443): update all controller tests to extend this class.
+ */
 @RunWith(SpringRunner.class)
-@WebAppConfiguration
-@Import({IntegrationTestConfig.class})
-public abstract class BaseIntegrationTest {
+@DataJpaTest
+public abstract class BaseControllerTest {
 
   protected static WorkbenchConfig config;
 
@@ -32,6 +48,11 @@ public abstract class BaseIntegrationTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig getIntegrationTestConfig() throws IOException {
       return config;
+    }
+
+    @Bean
+    Random random() {
+      return new FakeLongRandom(123);
     }
   }
 

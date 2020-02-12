@@ -75,7 +75,7 @@ const styles = reactStyles({
 
 // Tracks each major stage in the sign-in / sign-up flow. Most of the steps are related to new
 // account creation.
-enum SignInStep {
+export enum SignInStep {
   // Landing page. User can choose to sign in or create an account.
   LANDING,
   // Interstitial step, where a user must enter their invitation key.
@@ -127,127 +127,182 @@ interface SignInState {
   termsOfServiceVersion?: number;
 }
 
-export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(
-  class extends React.Component<SignInProps, SignInState> {
+/**
+ * The inner / implementation SignIn component. This class should only be rendered via the
+ * SignInReact method, which wraps this with the expected higher-order components.
+ */
+export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
 
-    constructor(props: SignInProps) {
-      super(props);
-      this.state = {
-        currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
-        invitationKey: null,
-        termsOfServiceVersion: null,
-        // This defines the profile state for a new user flow. This will get passed to each
-        // step component as a prop. When each sub-step completes, it will pass the updated Profile
-        // data in its onComplete callback.
-        profile: this.createEmptyProfile()
-      };
-    }
+  constructor(props: SignInProps) {
+    super(props);
+    this.state = {
+      currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
+      invitationKey: null,
+      termsOfServiceVersion: null,
+      // This defines the profile state for a new user flow. This will get passed to each
+      // step component as a prop. When each sub-step completes, it will pass the updated Profile
+      // data in its onComplete callback.
+      profile: this.createEmptyProfile()
+    };
+  }
 
-    createEmptyProfile(): Profile {
-      return {
-        // Note: We abuse the "username" field here by omitting "@domain.org". After
-        // profile creation, this field is populated with the full email address.
-        username: '',
-        dataAccessLevel: DataAccessLevel.Unregistered,
-        givenName: '',
-        familyName: '',
-        contactEmail: '',
-        currentPosition: '',
-        organization: '',
-        areaOfResearch: '',
-        address: {
-          streetAddress1: '',
-          streetAddress2: '',
-          city: '',
-          state: '',
-          country: '',
-          zipCode: '',
+  private createEmptyProfile(): Profile {
+    return {
+      // Note: We abuse the "username" field here by omitting "@domain.org". After
+      // profile creation, this field is populated with the full email address.
+      username: '',
+      dataAccessLevel: DataAccessLevel.Unregistered,
+      givenName: '',
+      familyName: '',
+      contactEmail: '',
+      currentPosition: '',
+      organization: '',
+      areaOfResearch: '',
+      address: {
+        streetAddress1: '',
+        streetAddress2: '',
+        city: '',
+        state: '',
+        country: '',
+        zipCode: '',
+      },
+      institutionalAffiliations: [
+        // We only allow entering a single institutional affiliation from the create account
+        // page, so we pre-fill a single empty entry which will be bound to the AccountCreation
+        // form.
+        {
+          institution: undefined,
+          nonAcademicAffiliation: undefined,
+          role: undefined,
         },
-        institutionalAffiliations: [
-          // We only allow entering a single institutional affiliation from the create account
-          // page, so we pre-fill a single empty entry which will be bound to the AccountCreation
-          // form.
-          {
-            institution: undefined,
-            nonAcademicAffiliation: undefined,
-            role: undefined,
-          },
-        ],
-        demographicSurvey: {},
-        degrees: [] as Degree[],
-      };
+      ],
+      demographicSurvey: {},
+      degrees: [] as Degree[],
+    };
+  }
+
+  componentDidMount() {
+    document.body.style.backgroundColor = colors.light;
+    this.props.onInit();
+  }
+
+  /**
+   * Creates the appropriate set of steps based on the server-side config.
+   *
+   * Made visible for ease of unit-testing.
+   */
+  public getAccountCreationSteps(): Array<SignInStep> {
+    const {enableNewAccountCreation, requireInvitationKey} = this.props.serverConfig;
+
+    let steps: Array<SignInStep>;
+    if (enableNewAccountCreation) {
+      steps = [
+        SignInStep.LANDING,
+        SignInStep.INVITATION_KEY,
+        SignInStep.TERMS_OF_SERVICE,
+        SignInStep.ACCOUNT_CREATION,
+        SignInStep.DEMOGRAPHIC_SURVEY,
+        SignInStep.SUCCESS_PAGE
+      ];
+    } else {
+      steps = [
+        SignInStep.LANDING,
+        SignInStep.INVITATION_KEY,
+        SignInStep.ACCOUNT_CREATION,
+        SignInStep.SUCCESS_PAGE
+      ];
     }
 
-    componentDidMount() {
-      document.body.style.backgroundColor = colors.light;
-      this.props.onInit();
+    if (!requireInvitationKey) {
+      steps = fp.remove(step => step === SignInStep.INVITATION_KEY, steps);
     }
+    return steps;
+  }
 
-    renderSignInStep(currentStep: SignInStep) {
-      const {enableNewAccountCreation} = this.props.serverConfig;
+  private getNextStep(currentStep: SignInStep) {
+    const steps = this.getAccountCreationSteps();
+    const index = steps.indexOf(currentStep);
+    if (index === -1) {
+      throw new Error('Unexpected sign-in step: ' + currentStep);
+    }
+    if (index === steps.length) {
+      throw new Error('No sign-in steps remaining after step ' + currentStep);
+    }
+    return steps[index + 1];
+  }
 
-      switch (currentStep) {
-        case SignInStep.LANDING:
-          return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
-            this.setState({
-              currentStep: SignInStep.INVITATION_KEY
-            })}/>;
-        case SignInStep.INVITATION_KEY:
-          return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
-            invitationKey: key,
-            // We skip over TERMS_OF_SERVICE if new-style account creation isn't enabled.
-            currentStep: enableNewAccountCreation ? SignInStep.TERMS_OF_SERVICE : SignInStep.ACCOUNT_CREATION
+  private getPreviousStep(currentStep: SignInStep) {
+    const steps = this.getAccountCreationSteps();
+    const index = steps.indexOf(currentStep);
+    if (index === -1) {
+      throw new Error('Unexpected sign-in step: ' + currentStep);
+    }
+    if (index === 0) {
+      throw new Error('No sign-in steps before step ' + currentStep);
+    }
+    return steps[index - 1];
+  }
+
+  private renderSignInStep(currentStep: SignInStep) {
+    switch (currentStep) {
+      case SignInStep.LANDING:
+        return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
+          this.setState({
+            currentStep: this.getNextStep(currentStep)
           })}/>;
-        case SignInStep.TERMS_OF_SERVICE:
-          return <AccountCreationTos
-            pdfPath='/assets/documents/terms of service (draft).pdf'
-            onComplete={() => this.setState({
-              termsOfServiceVersion: 1,
-              currentStep: SignInStep.ACCOUNT_CREATION
-            })}/>;
-        case SignInStep.ACCOUNT_CREATION:
-          return <AccountCreation invitationKey={this.state.invitationKey}
-                                  profile={this.state.profile}
-                                  onComplete={(profile: Profile) => this.setState({
-                                    profile: profile,
-                                    // Skip over the demographic survey if new-style form isn't enabled.
-                                    currentStep: enableNewAccountCreation ? SignInStep.DEMOGRAPHIC_SURVEY :
-                                      SignInStep.SUCCESS_PAGE
-                                  })}/>;
-        case SignInStep.DEMOGRAPHIC_SURVEY:
-          return <AccountCreationSurvey
-            profile={this.state.profile}
-            invitationKey={this.state.invitationKey}
-            termsOfServiceVersion={this.state.termsOfServiceVersion}
-            onComplete={(profile: Profile) => this.setState({
-              profile: profile,
-              currentStep: SignInStep.SUCCESS_PAGE
-            })}
-            onPreviousClick={(profile: Profile) => this.setState({
-              profile: profile,
-              currentStep: SignInStep.ACCOUNT_CREATION
-            })}/>;
-        case SignInStep.SUCCESS_PAGE:
-          return <AccountCreationSuccess profile={this.state.profile}/>;
-        default:
-          return;
-      }
+      case SignInStep.INVITATION_KEY:
+        return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
+          invitationKey: key,
+          currentStep: this.getNextStep(currentStep)
+        })}/>;
+      case SignInStep.TERMS_OF_SERVICE:
+        return <AccountCreationTos
+          pdfPath='/assets/documents/terms of service (draft).pdf'
+          onComplete={() => this.setState({
+            termsOfServiceVersion: 1,
+            currentStep: this.getNextStep(currentStep)
+          })}/>;
+      case SignInStep.ACCOUNT_CREATION:
+        return <AccountCreation invitationKey={this.state.invitationKey}
+                                profile={this.state.profile}
+                                onComplete={(profile: Profile) => this.setState({
+                                  profile: profile,
+                                  currentStep: this.getNextStep(currentStep)
+                                })}/>;
+      case SignInStep.DEMOGRAPHIC_SURVEY:
+        return <AccountCreationSurvey
+          profile={this.state.profile}
+          invitationKey={this.state.invitationKey}
+          termsOfServiceVersion={this.state.termsOfServiceVersion}
+          onComplete={(profile: Profile) => this.setState({
+            profile: profile,
+            currentStep: this.getNextStep(currentStep)
+          })}
+          onPreviousClick={(profile: Profile) => this.setState({
+            profile: profile,
+            currentStep: this.getPreviousStep(currentStep)
+          })}/>;
+      case SignInStep.SUCCESS_PAGE:
+        return <AccountCreationSuccess profile={this.state.profile}/>;
+      default:
+        return;
     }
+  }
 
-    render() {
-      const backgroundImages = StepToImageConfig.get(this.state.currentStep);
-      return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
-        <FlexColumn data-test-id='sign-in-page'
-             style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
-          <div><img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
-                    src={HEADER_IMAGE}/></div>
-          {this.renderSignInStep(this.state.currentStep)}
-        </FlexColumn>
-      </FlexColumn>;
-    }
-  });
+  render() {
+    const backgroundImages = StepToImageConfig.get(this.state.currentStep);
+    return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
+      <FlexColumn data-test-id='sign-in-page'
+                  style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
+        <div><img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
+                  src={HEADER_IMAGE}/></div>
+        {this.renderSignInStep(this.state.currentStep)}
+      </FlexColumn>
+    </FlexColumn>;
+  }
+}
 
-export default SignInReact;
+export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(SignInReactImpl);
 
 @Component({
   template: '<div #root></div>'
