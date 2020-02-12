@@ -229,7 +229,7 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
     return 1;
   }
   return a.toString().localeCompare(b.toString());
-}
+};
 
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
