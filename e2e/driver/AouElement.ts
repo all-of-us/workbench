@@ -8,17 +8,15 @@ export default class AouElement {
   }
 
   public async getProperty(property: string): Promise<unknown> {
-    const prop = await this.eHandle.getProperty(property);
-    console.log("getProperty function: " + await prop.jsonValue());
-    return await prop.jsonValue();
+    return await (await this.eHandle.getProperty(property)).jsonValue();
   }
 
    /**
-    * Get attribute directly from a ElementHandle.
+    * Cannot get attribute directly from a ElementHandle.
     * If the attribute have property counterparts, use getProperty function.
     */
-  public async getAttr(attr: string) {
-    return await this.eHandle.getAttribute(attr);
+  public async getAttribute(page: Page) {
+    return await page.evaluate(link => link.getAttribute('href'), this.eHandle,);
   }
 
   /**
@@ -34,9 +32,8 @@ export default class AouElement {
     return await handle.jsonValue();
   }
 
-  public async click() {
-    // await this.eHandle.asElement().click(options);
-    await this.eHandle.clicking;
+  public async click(options?: ClickOptions) {
+    return (await this.eHandle.click(options));
   }
 
   public async isVisible() {
@@ -52,17 +49,14 @@ export default class AouElement {
   }
 
   public async check() {
-    const pValue = await this.isChecked();
-    if (!pValue) {
-      console.log('going to check the checkbox');
-      await this.click();
+    if (!!this.isChecked()) {
+      this.click();
     }
   }
 
   public async unCheck() {
-    const pValue = await this.isChecked();
-    if (pValue) {
-      await this.click();
+    if (this.isChecked()) {
+      this.click();
     }
   }
 
@@ -71,26 +65,11 @@ export default class AouElement {
   }
 
   public async isChecked() {
-    const checkedProp = await this.getProperty('checked');
-    console.log('isChecked function: ' + checkedProp);
-    return checkedProp;
+    return await this.getProperty('checked');
   }
 
   public async select(aValue: string) {
     return await this.eHandle.select(aValue);
-  }
-
-  public async hasAttribute(attr: string) {
-    if (await this.getAttr(attr)) { return; }
-  }
-
-  public async type(txt: string) {
-    await this.eHandle.focus();
-    await this.eHandle.type(txt);
-  }
-
-  public asElement() {
-    return this.eHandle.asElement();
   }
 
 }

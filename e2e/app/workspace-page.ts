@@ -133,7 +133,10 @@ export default class Workspaces extends authenticatedpage {
     const buttonSelectr = '//*[@role="button" and normalize-space(.)="Create a New Workspace"]';
     const button = await this.puppeteerPage.waitForXPath(buttonSelectr, { visible: true });
     await button.click();
-    await this.createWorkspacePageReady();
+    await waitUntilTitleMatch(this.puppeteerPage, 'Create Workspace');
+    await this.puppeteerPage.waitForXPath('//*[normalize-space(.)="Create a new Workspace"]', {visible: true});
+    await this.select_dataSet();
+    await this.buttonCreateWorkspace.get();
   }
 
 
@@ -161,14 +164,6 @@ export default class Workspaces extends authenticatedpage {
     */
   public async getWorkspaceLink(workspaceName: string) : Promise<ElementHandle> {
     return await this.puppeteerPage.waitForXPath(this.workspaceLink(workspaceName));
-  }
-
-  public async createWorkspacePageReady() {
-    await waitUntilTitleMatch(this.puppeteerPage, 'Create Workspace');
-    await this.puppeteerPage.waitForXPath('//*[normalize-space(.)="Create a new Workspace"]', {visible: true});
-    await this.select_dataSet();
-    await this.buttonCreateWorkspace.get();
-
   }
 
   private workspaceLink(workspaceName: string) {

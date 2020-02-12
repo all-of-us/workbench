@@ -7,7 +7,7 @@ require('../../driver/puppeteer-element-extension');
 const Chrome = require('../../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
 
-describe.skip('Edit Workspace page', () => {
+describe('Edit Workspace page', () => {
 
   let page: Page;
 
@@ -20,7 +20,7 @@ describe.skip('Edit Workspace page', () => {
   });
 
   // Click CreateNewWorkspace link in Home page => Open Create Workspace page
-  test.skip('Home page: Click link Create New Workspace', async () => {
+  test('Home page: Click link Create New Workspace', async () => {
     const home = new Home(page);
     const link = await home.getCreateNewWorkspaceLink();
     expect(link).toBeTruthy();
@@ -46,7 +46,7 @@ describe.skip('Edit Workspace page', () => {
   }, 60 * 1000);
 
   // Click CreateNewWorkspace link in My Workpsaces page => Open Create Workspace page
-  test.skip('My Workspaces page: Click link Create New Workspace', async () => {
+  test('My Workspaces page: Click link Create New Workspace', async () => {
     const workspaces = new Workspaces(page);
     await workspaces.goURL();
     await workspaces.click_button_CreateNewWorkspace();
@@ -62,23 +62,23 @@ describe.skip('Edit Workspace page', () => {
     const workspace = new Workspaces(page);
 
     // Disease-focused research checkbox
-    const diseaseName = workspace.element_diseaseName();
-    let cbox = (await diseaseName.checkbox());
+    const diseaseName = await workspace.element_diseaseName();
+    let cbox = (await diseaseName.checkbox()).asAouElement();
     expect(await cbox.isVisible()).toBe(true);
     expect(await cbox.getProperty('checked')).toBe(false);
     expect(await cbox.getProperty('disabled')).toBe(false);
-    const txtField = (await diseaseName.textfield());
+    const txtField = (await diseaseName.textfield()).asAouElement();
     expect(await txtField.isVisible()).toBe(true);
     expect(await txtField.getProperty('disabled')).toBe(true);
 
     // Set the checkbox checked
-    await page.evaluate(elem => elem.click(), await (await diseaseName.checkbox()).asElement() );
+    await page.evaluate(elem => elem.click(), await diseaseName.checkbox());
     // TODO wait async for checked and disabled checking or test will fail
     await page.waitFor(1000);
-    cbox = (await diseaseName.checkbox());
+    cbox = (await diseaseName.checkbox()).asAouElement();
     expect(await cbox.getProperty('checked')).toBe(true);
     expect(await txtField.getProperty('disabled')).toBe(false);
-    await page.waitFor(30000);
+
     // check all fields in Question #1. What is the primary purpose of your project?
     expect(await workspace.element_question1_populationHealth().checkbox()).toBeTruthy();
     expect(await workspace.element_question1_MethodsDevelopment().checkbox()).toBeTruthy();
@@ -93,7 +93,7 @@ describe.skip('Edit Workspace page', () => {
 
   }, 60 * 1000);
 
-  test.skip('Create Workspace page: Question 2', async () => {
+  test('Create Workspace page: Question 2', async () => {
     const workspaces = new Workspaces(page);
     await workspaces.goURL();
     await workspaces.click_button_CreateNewWorkspace();
@@ -105,7 +105,7 @@ describe.skip('Edit Workspace page', () => {
 
   }, 60 * 1000);
 
-  test.skip('Create Workspace page: Question 3', async () => {
+  test('Create Workspace page: Question 3', async () => {
     const workspaces = new Workspaces(page);
     await workspaces.goURL();
     await workspaces.click_button_CreateNewWorkspace();
@@ -118,7 +118,7 @@ describe.skip('Edit Workspace page', () => {
 
   }, 60 * 1000);
 
-  test.skip('Create Workspace page: Question 4', async () => {
+  test('Create Workspace page: Question 4', async () => {
     const workspaces = new Workspaces(page);
     await workspaces.goURL();
     await workspaces.click_button_CreateNewWorkspace();
@@ -130,7 +130,7 @@ describe.skip('Edit Workspace page', () => {
 
   }, 60 * 1000);
 
-  test.skip('Create Workspace page: Question 5', async () => {
+  test('Create Workspace page: Question 5', async () => {
     const workspaces = new Workspaces(page);
     await workspaces.goURL();
     await workspaces.click_button_CreateNewWorkspace();
@@ -141,7 +141,7 @@ describe.skip('Edit Workspace page', () => {
 
   }, 60 * 1000);
 
-  test.skip('Create Workspace page: Question on Request Review', async () => {
+  test('Create Workspace page: Question on Request Review', async () => {
     const workspaces = new Workspaces(page);
     await workspaces.goURL();
     await workspaces.click_button_CreateNewWorkspace();
