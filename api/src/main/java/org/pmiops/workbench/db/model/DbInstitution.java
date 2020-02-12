@@ -106,6 +106,8 @@ public class DbInstitution {
   }
 
   /**
+   * Effectively: do an in-place this.emailDomains = emailDomains
+   *
    * Hibernate doesn't like it when you reassign collections. Instead, modify in-place. First, call
    * retainAll() to subset DB rows to those we wish to keep: the intersection of old and new. Then,
    * call addAll() to add the diff(new - old) rows.
@@ -136,6 +138,8 @@ public class DbInstitution {
   }
 
   /**
+   * Effectively: do an in-place this.emailAddresses = emailAddresses
+   *
    * Hibernate doesn't like it when you reassign collections. Instead, modify in-place. First, call
    * retainAll() to subset DB rows to those we wish to keep: the intersection of old and new. Then,
    * call addAll() to add the diff(new - old) rows.

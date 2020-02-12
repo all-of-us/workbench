@@ -23,7 +23,7 @@ public class DbInstitutionEmailDomain {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "institution_email_domain_id")
+  @Column(name = "institution_email_domain_id", nullable = false)
   public long getInstitutionEmailDomainId() {
     return institutionEmailDomainId;
   }
