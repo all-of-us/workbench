@@ -554,10 +554,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         newLookup.set(domain, {domain, values});
 
         // Autoselect the newly added domain, except if we're editing an
-        // existing dataset. This avoids having us overwrite the selected pairs
-        // on initial load.
+        // existing dataset which already covers the domain. This avoids having
+        // us overwrite the selected pairs on initial load.
         let morePairs = [];
-        if (!this.getDomainsFromDataSet(dataSet).has(domain)) {
+        if (!this.editing || !this.getDomainsFromDataSet(dataSet).has(domain)) {
           morePairs = values.items.map(v => ({domain, value: v.value}));
         }
 
