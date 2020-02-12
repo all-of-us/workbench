@@ -885,6 +885,35 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount_nullIsOpen()
+      throws Exception {
+    final String closedBillingAccountName = "closed-billing-account";
+
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    final String namespace = ws.getNamespace();
+    final String firecloudName = ws.getId();
+
+    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
+    doReturn(new BillingAccount().setName(closedBillingAccountName).setOpen(null))
+        .when(getRequest)
+        .execute();
+    when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName))
+        .thenReturn(getRequest);
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    ws.setBillingAccountName(closedBillingAccountName);
+    request.setWorkspace(ws);
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
+    assertThat(exception.getErrorResponse().getMessage())
+        .contains("User provided billing account is closed. Please provide an open account.");
+  }
+
+  @Test
   public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount()
       throws Exception {
     final String openBillingAccountName = "open-billing-account";
