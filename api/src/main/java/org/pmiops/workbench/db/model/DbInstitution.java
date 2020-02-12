@@ -101,6 +101,7 @@ public class DbInstitution {
   }
 
   @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @NotNull
   public Set<DbInstitutionEmailDomain> getEmailDomains() {
     return emailDomains;
   }
@@ -108,9 +109,9 @@ public class DbInstitution {
   /**
    * Effectively: do an in-place this.emailDomains = emailDomains
    *
-   * Hibernate doesn't like it when you reassign collections. Instead, modify in-place. First, call
-   * retainAll() to subset DB rows to those we wish to keep: the intersection of old and new. Then,
-   * call addAll() to add the diff(new - old) rows.
+   * <p>Hibernate doesn't like it when you reassign collections. Instead, modify in-place. First,
+   * call retainAll() to subset DB rows to those we wish to keep: the intersection of old and new.
+   * Then, call addAll() to add the diff(new - old) rows.
    *
    * <p>https://stackoverflow.com/questions/5587482/hibernate-a-collection-with-cascade-all-delete-orphan-was-no-longer-referenc
    *
@@ -133,6 +134,7 @@ public class DbInstitution {
   }
 
   @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @NotNull
   public Set<DbInstitutionEmailAddress> getEmailAddresses() {
     return emailAddresses;
   }
@@ -140,9 +142,9 @@ public class DbInstitution {
   /**
    * Effectively: do an in-place this.emailAddresses = emailAddresses
    *
-   * Hibernate doesn't like it when you reassign collections. Instead, modify in-place. First, call
-   * retainAll() to subset DB rows to those we wish to keep: the intersection of old and new. Then,
-   * call addAll() to add the diff(new - old) rows.
+   * <p>Hibernate doesn't like it when you reassign collections. Instead, modify in-place. First,
+   * call retainAll() to subset DB rows to those we wish to keep: the intersection of old and new.
+   * Then, call addAll() to add the diff(new - old) rows.
    *
    * <p>https://stackoverflow.com/questions/5587482/hibernate-a-collection-with-cascade-all-delete-orphan-was-no-longer-referenc
    *

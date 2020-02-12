@@ -92,12 +92,11 @@ public class InstitutionServiceImpl implements InstitutionService {
         .organizationTypeEnum(dbObject.getOrganizationTypeEnum())
         .organizationTypeOtherText(dbObject.getOrganizationTypeOtherText())
         .emailDomains(
-            Optional.ofNullable(dbObject.getEmailDomains()).orElse(Collections.emptySet()).stream()
+            dbObject.getEmailDomains().stream()
                 .map(DbInstitutionEmailDomain::getEmailDomain)
                 .collect(Collectors.toList()))
         .emailAddresses(
-            Optional.ofNullable(dbObject.getEmailAddresses()).orElse(Collections.emptySet())
-                .stream()
+            dbObject.getEmailAddresses().stream()
                 .map(DbInstitutionEmailAddress::getEmailAddress)
                 .collect(Collectors.toList()));
   }
