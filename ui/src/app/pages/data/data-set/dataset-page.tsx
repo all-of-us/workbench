@@ -480,7 +480,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         selectedConceptSetIds: dataSet.conceptSets.map(cs => cs.id),
         selectedCohortIds: dataSet.cohorts.map(c => c.id),
         selectedDomainValuePairs: dataSet.domainValuePairs,
-        selectedDomains: this.getDomainsFromConceptSets(dataSet.conceptSets, selectedPrepackagedConceptSets),
+        selectedDomains: this.getDomainsFromDataSet(dataSet),
         selectedPrepackagedConceptSets,
       });
     }
@@ -546,19 +546,25 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     private async loadValueSetForDomain(domain: Domain) {
       const {namespace, id} = this.props.workspace;
       const values = await dataSetApi().getValuesFromDomain(namespace, id, domain.toString());
-      this.setState(({domainValueSetIsLoading, domainValueSetLookup, selectedDomainValuePairs}) => {
+      this.setState(({dataSet, domainValueSetIsLoading, domainValueSetLookup, selectedDomainValuePairs}) => {
         const newLoading = new Set(domainValueSetIsLoading);
         const newLookup = new Map(domainValueSetLookup);
 
         newLoading.delete(domain);
         newLookup.set(domain, {domain, values});
 
+        // Autoselect the newly added domain, except if we're editing an
+        // existing dataset. This avoids having us overwrite the selected pairs
+        // on initial load.
+        let morePairs = [];
+        if (!this.getDomainsFromDataSet(dataSet).has(domain)) {
+          morePairs = values.items.map(v => ({domain, value: v.value}));
+        }
+
         return {
           domainValueSetIsLoading: newLoading,
           domainValueSetLookup: newLookup,
-          // Autoselect the newly added domain.
-          selectedDomainValuePairs: selectedDomainValuePairs.concat(
-            values.items.map(v => ({domain, value: v.value})))
+          selectedDomainValuePairs: selectedDomainValuePairs.concat(morePairs)
         };
       });
     }
@@ -578,6 +584,11 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       }
     }
 
+    private getDomainsFromDataSet(d: DataSet) {
+      const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(d.prePackagedConceptSet);
+      return this.getDomainsFromConceptSets(d.conceptSets, selectedPrepackagedConceptSets)
+    }
+
     private getDomainsFromConceptSets(
       conceptSets: ConceptSet[], prepackagedConceptSets: Set<PrepackagedConceptSet>): Set<Domain> {
       const domains =
@@ -586,7 +597,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       return new Set(domains);
     }
 
-    private getSelectedConceptSets(ids: number[]): ConceptSet[] {
+    private getConceptSets(ids: number[]): ConceptSet[] {
       const setsById = new Map(this.state.conceptSetList.map(cs => [cs.id, cs] as [any, any]));
       return ids.map(id => setsById.get(id));
     }
@@ -600,7 +611,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           updatedPrepackaged.delete(prepackaged);
         }
         const selectedDomains = this.getDomainsFromConceptSets(
-          this.getSelectedConceptSets(selectedConceptSetIds), updatedPrepackaged);
+          this.getConceptSets(selectedConceptSetIds), updatedPrepackaged);
         return {
           selectedDomains,
           selectedPrepackagedConceptSets: updatedPrepackaged,
@@ -618,7 +629,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           updatedConceptSetIds = fp.pull(conceptSet.id, selectedConceptSetIds);
         }
         const selectedDomains = this.getDomainsFromConceptSets(
-          this.getSelectedConceptSets(updatedConceptSetIds), selectedPrepackagedConceptSets);
+          this.getConceptSets(updatedConceptSetIds), selectedPrepackagedConceptSets);
         return {
           selectedDomains,
           selectedConceptSetIds: updatedConceptSetIds,
