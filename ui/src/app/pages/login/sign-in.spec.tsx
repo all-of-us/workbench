@@ -20,6 +20,8 @@ describe('SignInReact', () => {
 
   const component = () => mount(<SignInReact {...props}/>);
 
+  // To correctly shallow-render this component wrapped by two HOCs, we need to add two extra
+  // .shallow() calls at the end.
   const shallowComponent = () => shallow(<SignInReact {...props}/>).shallow().shallow();
 
   const defaultConfig = {
@@ -78,8 +80,6 @@ describe('SignInReact', () => {
   });
 
   it('should handle sign-up flow for legacy account creation', () => {
-    // To correctly shallow-render this component wrapped by two HOCs, we need to add two extra
-    // .shallow() calls at the end.
     const wrapper = shallowComponent();
 
     // To start, the landing page / login component should be shown.
@@ -101,8 +101,6 @@ describe('SignInReact', () => {
   it('should handle sign-up flow for new account creation', () => {
     props.serverConfig = {...defaultConfig, enableNewAccountCreation: true};
 
-    // To correctly shallow-render this component wrapped by two HOCs, we need to add two extra
-    // .shallow() calls at the end.
     const wrapper = shallowComponent();
 
     // To start, the landing page / login component should be shown.

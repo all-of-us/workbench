@@ -17,6 +17,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
+/**
+ * A base class for functionality shared by many controller-level tests in the Workbench.
+ *
+ * <p>This class currently provides a simple way for test cases to use and modify the
+ * WorkbenchConfig, for testing differential controller behavior depending on the environment
+ * configuration.
+ *
+ * <p>Most or all controller tests should eventually extend this class, but adoption may proceed
+ * incrementally to avoid a large one-time refactoring cost.
+ *
+ * <p>This class is heavily inspired by the BaseIntegrationTest class; maybe there is some way for
+ * these two classes to share a common core, since they both care mostly about WorkbenchConfig bean
+ * management for tests.
+ *
+ * <p>TODO(RW-4443): update all controller tests to extend this class.
+ */
 @RunWith(SpringRunner.class)
 @DataJpaTest
 public abstract class BaseControllerTest {

@@ -660,8 +660,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(user.getFamilyName()).isEqualTo(familyName);
     assertThat(user.getGivenName()).isEqualTo(givenName);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
-    assertThat(user.getFirstSignInTime().getTime()).isEqualTo(firstSignInTime.getTime());
-    // assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
+    assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
   }
 }

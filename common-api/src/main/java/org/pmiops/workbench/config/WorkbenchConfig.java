@@ -196,7 +196,7 @@ public class WorkbenchConfig {
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
     // Controls whether an invitation key is required for user creation. When true, the account
-    // creation UI will show an invitation key form, and the server-side will valide the key before
+    // creation UI will show an invitation key form and the server will validate the key before
     // proceeding.
     public boolean requireInvitationKey;
   }
