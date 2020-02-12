@@ -28,8 +28,9 @@ public class DbInstitutionEmailDomain {
     return institutionEmailDomainId;
   }
 
-  public void setInstitutionEmailDomainId(long institutionEmailDomainId) {
+  public DbInstitutionEmailDomain setInstitutionEmailDomainId(long institutionEmailDomainId) {
     this.institutionEmailDomainId = institutionEmailDomainId;
+    return this;
   }
 
   @ManyToOne(cascade = CascadeType.ALL)

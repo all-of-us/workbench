@@ -37,7 +37,7 @@ public class InstitutionDaoTest {
   public void setUp() {
     institutionNoEmailAddressesOrDomains =
         institutionDao.save(
-            new DbInstitution().shortName("Broad").displayName("The Broad Institute"));
+            new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute"));
 
     emailAddresses =
         Stream.of(new DbInstitutionEmailAddress().setEmailAddress("emailAddress"))
@@ -48,10 +48,10 @@ public class InstitutionDaoTest {
     institutionWithEmailAddressesAndDomains =
         institutionDao.save(
             new DbInstitution()
-                .shortName("Broad1")
-                .displayName("The Broad Institute")
-                .emailAddresses(emailAddresses)
-                .emailDomains(emailDomains));
+                .setShortName("Broad1")
+                .setDisplayName("The Broad Institute")
+                .setEmailAddresses(emailAddresses)
+                .setEmailDomains(emailDomains));
   }
 
   @Test
@@ -184,11 +184,11 @@ public class InstitutionDaoTest {
   @Test(expected = DataIntegrityViolationException.class)
   public void test_uniqueShortNameRequired() {
     final DbInstitution snowflake1 =
-        new DbInstitution().shortName("unique?").displayName("We are all individuals");
+        new DbInstitution().setShortName("unique?").setDisplayName("We are all individuals");
     institutionDao.save(snowflake1);
 
     final DbInstitution snowflake2 =
-        new DbInstitution().shortName("unique?").displayName("I'm not");
+        new DbInstitution().setShortName("unique?").setDisplayName("I'm not");
     institutionDao.save(snowflake2);
   }
 

@@ -36,8 +36,9 @@ public class DbInstitution {
     return institutionId;
   }
 
-  public void setInstitutionId(long institutionId) {
+  public DbInstitution setInstitutionId(long institutionId) {
     this.institutionId = institutionId;
+    return this;
   }
 
   @Column(name = "short_name", nullable = false, unique = true)
@@ -45,12 +46,7 @@ public class DbInstitution {
     return shortName;
   }
 
-  public void setShortName(String shortName) {
-    this.shortName = shortName;
-  }
-
-  /** Builder method to help streamline the building of a DbInstitution. */
-  public DbInstitution shortName(String shortName) {
+  public DbInstitution setShortName(String shortName) {
     this.shortName = shortName;
     return this;
   }
@@ -60,12 +56,7 @@ public class DbInstitution {
     return displayName;
   }
 
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
-  }
-
-  /** Builder method to help streamline the building of a DbInstitution. */
-  public DbInstitution displayName(String displayName) {
+  public DbInstitution setDisplayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -75,12 +66,7 @@ public class DbInstitution {
     return DbStorageEnums.organizationTypeFromStorage(organizationTypeEnum);
   }
 
-  public void setOrganizationTypeEnum(OrganizationType type) {
-    this.organizationTypeEnum = DbStorageEnums.organizationTypeToStorage(type);
-  }
-
-  /** Builder method to help streamline the building of a DbInstitution. */
-  public DbInstitution organizationTypeEnum(OrganizationType type) {
+  public DbInstitution setOrganizationTypeEnum(OrganizationType type) {
     this.organizationTypeEnum = DbStorageEnums.organizationTypeToStorage(type);
     return this;
   }
@@ -90,12 +76,7 @@ public class DbInstitution {
     return organizationTypeOtherText;
   }
 
-  public void setOrganizationTypeOtherText(String organizationTypeOtherText) {
-    this.organizationTypeOtherText = organizationTypeOtherText;
-  }
-
-  /** Builder method to help streamline the building of a DbInstitution. */
-  public DbInstitution organizationTypeOtherText(String organizationTypeOtherText) {
+  public DbInstitution setOrganizationTypeOtherText(String organizationTypeOtherText) {
     this.organizationTypeOtherText = organizationTypeOtherText;
     return this;
   }
@@ -117,7 +98,7 @@ public class DbInstitution {
    *
    * @param emailDomains the new set of domains for this Institution
    */
-  public void setEmailDomains(final Set<DbInstitutionEmailDomain> emailDomains) {
+  public DbInstitution setEmailDomains(final Set<DbInstitutionEmailDomain> emailDomains) {
     final Set<DbInstitutionEmailDomain> attachedDomains =
         emailDomains.stream()
             .map(domain -> domain.setInstitution(this))
@@ -125,11 +106,6 @@ public class DbInstitution {
     // modifies this set so that its value is the intersection of the two sets
     this.emailDomains.retainAll(attachedDomains);
     this.emailDomains.addAll(Sets.difference(attachedDomains, this.emailDomains));
-  }
-
-  /** Builder method to help streamline the building of a DbInstitution. */
-  public DbInstitution emailDomains(Set<DbInstitutionEmailDomain> emailDomains) {
-    setEmailDomains(emailDomains);
     return this;
   }
 
@@ -150,7 +126,7 @@ public class DbInstitution {
    *
    * @param emailAddresses the new set of addresses for this Institution
    */
-  public void setEmailAddresses(final Set<DbInstitutionEmailAddress> emailAddresses) {
+  public DbInstitution setEmailAddresses(final Set<DbInstitutionEmailAddress> emailAddresses) {
     final Set<DbInstitutionEmailAddress> attachedAddresses =
         emailAddresses.stream()
             .map(address -> address.setInstitution(this))
@@ -158,11 +134,6 @@ public class DbInstitution {
     // modifies this set so that its value is the intersection of the two sets
     this.emailAddresses.retainAll(attachedAddresses);
     this.emailAddresses.addAll(Sets.difference(attachedAddresses, this.emailAddresses));
-  }
-
-  /** Builder method to help streamline the building of a DbInstitution. */
-  public DbInstitution emailAddresses(Set<DbInstitutionEmailAddress> emailAddresses) {
-    setEmailAddresses(emailAddresses);
     return this;
   }
 }

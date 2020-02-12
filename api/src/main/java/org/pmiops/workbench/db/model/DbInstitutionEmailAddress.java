@@ -28,8 +28,9 @@ public class DbInstitutionEmailAddress {
     return institutionEmailAddressId;
   }
 
-  public void setInstitutionEmailAddressId(long institutionEmailAddressId) {
+  public DbInstitutionEmailAddress setInstitutionEmailAddressId(long institutionEmailAddressId) {
     this.institutionEmailAddressId = institutionEmailAddressId;
+    return this;
   }
 
   @ManyToOne(cascade = CascadeType.ALL)

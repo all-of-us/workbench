@@ -69,16 +69,16 @@ public class InstitutionServiceImpl implements InstitutionService {
   private DbInstitution updateDbObject(
       final DbInstitution dbObject, final Institution modelObject) {
     return dbObject
-        .shortName(modelObject.getShortName())
-        .displayName(modelObject.getDisplayName())
-        .organizationTypeEnum(modelObject.getOrganizationTypeEnum())
-        .organizationTypeOtherText(modelObject.getOrganizationTypeOtherText())
-        .emailDomains(
+        .setShortName(modelObject.getShortName())
+        .setDisplayName(modelObject.getDisplayName())
+        .setOrganizationTypeEnum(modelObject.getOrganizationTypeEnum())
+        .setOrganizationTypeOtherText(modelObject.getOrganizationTypeOtherText())
+        .setEmailDomains(
             Optional.ofNullable(modelObject.getEmailDomains()).orElse(Collections.emptyList())
                 .stream()
                 .map(domain -> new DbInstitutionEmailDomain().setEmailDomain(domain))
                 .collect(Collectors.toSet()))
-        .emailAddresses(
+        .setEmailAddresses(
             Optional.ofNullable(modelObject.getEmailAddresses()).orElse(Collections.emptyList())
                 .stream()
                 .map(address -> new DbInstitutionEmailAddress().setEmailAddress(address))
