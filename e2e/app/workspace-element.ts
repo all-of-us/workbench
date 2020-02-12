@@ -1,4 +1,5 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import AouElement from "../driver/AouElement";
 import Widget from './elements/widget';
 
 // If element CSS/XPath selectors are used frequently, put it there.
@@ -32,19 +33,24 @@ export default class ProjectPurposeQuestion extends Widget {
     this.label = label;
   }
 
-  public async checkbox(): Promise<ElementHandle> {
+  public async checkbox(): Promise<AouElement> {
     const selectr = this.appendXpath() + '//input[@type=\'checkbox\']';
-    return await this.puppeteerPage.waitForXPath(selectr, {visible: true})
+    return new AouElement(await this.puppeteerPage.waitForXPath(selectr, {visible: true}));
   }
 
-  public async textfield(): Promise<ElementHandle> {
+  public async textfield(): Promise<AouElement> {
     const selectr = this.appendXpath() + '//input[@type=\'text\']';
-    return await this.puppeteerPage.waitForXPath(selectr, {visible: true})
+    return new AouElement(await this.puppeteerPage.waitForXPath(selectr, {visible: true}));
   }
 
-  public async textarea(): Promise<ElementHandle> {
+  public async textarea(): Promise<AouElement> {
     const selectr = this.appendXpath() + '//textarea';
-    return await this.puppeteerPage.waitForXPath(selectr, {visible: true})
+    return new AouElement(await this.puppeteerPage.waitForXPath(selectr, {visible: true}));
+  }
+
+  public async getLabel(): Promise<ElementHandle> {
+    const xpath = `//label[contains(normalize-space(text()),"${this.label}")]`;
+    return await this.puppeteerPage.waitForXPath(xpath, {visible: true});
   }
 
   private appendXpath(): string {
