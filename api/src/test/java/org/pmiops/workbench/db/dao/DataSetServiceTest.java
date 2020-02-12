@@ -125,7 +125,7 @@ public class DataSetServiceTest {
   @Test(expected = BadRequestException.class)
   public void testThrowsForNoCohortOrConcept() {
     final DataSetRequest invalidRequest = buildEmptyRequest();
-    dataSetServiceImpl.generateQueryJobConfigurationsByDomainName(invalidRequest);
+    dataSetServiceImpl.domainToBigQueryConfig(invalidRequest);
   }
 
   @Test
