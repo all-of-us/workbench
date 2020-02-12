@@ -1,6 +1,7 @@
 package org.pmiops.workbench.conceptset;
 
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -31,8 +32,8 @@ public class ConceptSetService {
     conceptSetDao.delete(conceptSetId);
   }
 
-  public DbConceptSet findOne(Long conceptSetId) {
-    return conceptSetDao.findOne(conceptSetId);
+  public Optional<DbConceptSet> findOne(Long conceptSetId, Long workspaceId) {
+    return conceptSetDao.findOneByConceptSetIdAndWorkspaceId(conceptSetId, workspaceId);
   }
 
   public List<DbConceptSet> findByWorkspaceId(long workspaceId) {

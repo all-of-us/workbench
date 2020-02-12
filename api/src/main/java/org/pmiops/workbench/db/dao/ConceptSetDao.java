@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.data.repository.CrudRepository;
@@ -24,6 +25,8 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
           .put(Domain.SURVEY, "observation")
           .put(Domain.PHYSICALMEASUREMENT, "measurement")
           .build();
+
+  Optional<DbConceptSet> findOneByConceptSetIdAndWorkspaceId(long conceptId, long workspaceId);
 
   List<DbConceptSet> findByWorkspaceId(long workspaceId);
 

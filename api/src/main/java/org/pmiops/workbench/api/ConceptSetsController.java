@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -306,13 +307,16 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException(
           "Target workspace does not have the same CDR version as current workspace");
     }
-    DbConceptSet conceptSet = conceptSetService.findOne(Long.valueOf(fromConceptSetId));
-    if (conceptSet == null) {
-      throw new NotFoundException(
-          String.format(
-              "Concept set %s does not exist",
-              createResourcePath(fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
-    }
+    DbConceptSet conceptSet =
+        conceptSetService
+            .findOne(Long.valueOf(fromConceptSetId), Long.valueOf(fromWorkspaceId))
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Concept set %s does not exist",
+                            createResourcePath(
+                                fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId))));
     DbConceptSet newConceptSet = new DbConceptSet(conceptSet);
 
     newConceptSet.setName(copyRequest.getNewName());
@@ -354,13 +358,15 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, workspaceAccessLevel);
 
-    DbConceptSet conceptSet = conceptSetService.findOne(conceptSetId);
-    if (conceptSet == null || workspace.getWorkspaceId() != conceptSet.getWorkspaceId()) {
-      throw new NotFoundException(
-          String.format(
-              "No concept set with ID %s in workspace %s.",
-              conceptSetId, workspace.getFirecloudName()));
-    }
+    DbConceptSet conceptSet =
+        conceptSetService
+            .findOne(conceptSetId, workspace.getWorkspaceId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "No concept set with ID %s in workspace %s.",
+                            conceptSetId, workspace.getFirecloudName())));
     return conceptSet;
   }
 
@@ -376,19 +382,17 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         .participantCount(dbConceptSet.getParticipantCount())
         .survey(dbConceptSet.getSurveysEnum())
         .creator(
-            dbConceptSet.getCreator() != null ? dbConceptSet.getCreator().getUsername() : null);
+            Optional.ofNullable(dbConceptSet.getCreator()).map(DbUser::getUsername).orElse(null));
   }
 
   private ConceptSet toClientConceptSetWithConcepts(DbConceptSet dbConceptSet) {
     ConceptSet conceptSet = toClientConceptSet(dbConceptSet);
-    if (!dbConceptSet.getConceptIds().isEmpty()) {
-      Iterable<DbConcept> concepts = conceptService.findAll(dbConceptSet.getConceptIds());
-      conceptSet.setConcepts(
-          Streams.stream(concepts)
-              .map(ConceptsController::toClientConcept)
-              .sorted(CONCEPT_NAME_ORDERING)
-              .collect(Collectors.toList()));
-    }
+    Iterable<DbConcept> concepts = conceptService.findAll(dbConceptSet.getConceptIds());
+    conceptSet.setConcepts(
+        Streams.stream(concepts)
+            .map(ConceptsController::toClientConcept)
+            .sorted(CONCEPT_NAME_ORDERING)
+            .collect(Collectors.toList()));
     return conceptSet;
   }
 
@@ -404,9 +408,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException(
           "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
     }
-    if (conceptSet.getEtag() != null) {
-      dbConceptSet.setVersion(Etags.toVersion(conceptSet.getEtag()));
-    }
+    Optional.ofNullable(conceptSet.getEtag())
+        .ifPresent(etag -> dbConceptSet.setVersion(Etags.toVersion(etag)));
     dbConceptSet.setDescription(conceptSet.getDescription());
     dbConceptSet.setName(conceptSet.getName());
     dbConceptSet.setCreator(userProvider.get());
