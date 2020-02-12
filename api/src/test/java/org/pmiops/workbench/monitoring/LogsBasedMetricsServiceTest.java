@@ -215,10 +215,14 @@ public class LogsBasedMetricsServiceTest {
   @Test
   public void testRecordElapsedTime_nestedWorks() {
     final Set<Integer> someSet = new HashSet<>();
+    final Duration innerTime = Duration.ofMillis(30);
+    final Duration outerTime = Duration.ofMillis(100);
+
     logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder(),
         DistributionMetric.UNIFORM_RANDOM_SAMPLE,
         () -> {
+          doReturn(innerTime).when(mockStopwatch).elapsed();
           someSet.add(1);
           someSet.add(3);
           Boolean b =
@@ -233,11 +237,31 @@ public class LogsBasedMetricsServiceTest {
           final List<LogEntry> logEntries = getWrittenLogEntries();
           assertThat(logEntries).hasSize(1);
           assertThat(b).isTrue();
-          Mockito.clearInvocations(mockLogging);
+
+          final Map<String, Object> payloadMap =
+              ((JsonPayload) logEntries.get(0).getPayload()).getDataAsMap();
+          assertThat(payloadMap).hasSize(PayloadKey.values().length);
+          assertThat(payloadMap.get(PayloadKey.VALUE.getKeyName()))
+              .isEqualTo((double) innerTime.toMillis());
+
+          // So even though the stopwatch is injected as a prototype,  this test
+          // is using the same object for both invocations (in the same call stack).  Thus,
+          // we need to reset  its state here.
+          Mockito.reset(mockLogging);
+          doReturn(outerTime).when(mockStopwatch).elapsed();
+          doReturn(mockStopwatch).when(mockStopwatch).start();
+          doReturn(mockStopwatch).when(mockStopwatch).stop();
         });
     assertThat(someSet).containsAllIn(ImmutableSet.of(1, 2));
     final List<LogEntry> logEntries = getWrittenLogEntries();
     assertThat(logEntries).hasSize(1);
-    assertThat((JsonPayload) logEntries.get(0).getPayload());
+
+    final Map<String, Object> payloadMap =
+        ((JsonPayload) logEntries.get(0).getPayload()).getDataAsMap();
+    assertThat(payloadMap).hasSize(PayloadKey.values().length);
+    assertThat(payloadMap.get(PayloadKey.VALUE.getKeyName()))
+        .isEqualTo((double) outerTime.toMillis());
+    assertThat(payloadMap.get(PayloadKey.NAME.getKeyName()))
+        .isEqualTo(DistributionMetric.UNIFORM_RANDOM_SAMPLE.getName());
   }
 }
