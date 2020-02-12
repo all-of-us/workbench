@@ -11,7 +11,6 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -104,13 +103,5 @@ public interface WorkspaceMapper {
     } else {
       return WorkspaceAccessLevel.fromValue(firecloudAccessLevel);
     }
-  }
-
-  default String cdrVersionToEtag(int cdrVersion) {
-    return Etags.fromVersion(cdrVersion);
-  }
-
-  default int etagToCdrVersion(String etag) {
-    return Etags.toVersion(etag);
   }
 }

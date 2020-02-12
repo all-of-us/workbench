@@ -19,6 +19,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -58,6 +59,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final UserRecentResourceService userRecentResourceService;
   private final ConceptBigQueryService conceptBigQueryService;
   private final Clock clock;
+  private final ConceptSetMapper conceptSetMapper;
 
   private Provider<DbUser> userProvider;
 
@@ -74,7 +76,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       ConceptBigQueryService conceptBigQueryService,
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider,
-      Clock clock) {
+      Clock clock,
+      ConceptSetMapper conceptSetMapper) {
     this.workspaceService = workspaceService;
     this.conceptSetService = conceptSetService;
     this.conceptService = conceptService;
@@ -82,6 +85,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.clock = clock;
+    this.conceptSetMapper = conceptSetMapper;
     this.maxConceptsPerSet = MAX_CONCEPTS_PER_SET;
   }
 
@@ -142,7 +146,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     // a lot of data... you need to open up a concept set to see what concepts are within it.
     response.setItems(
         conceptSets.stream()
-            .map(ConceptSetsController::toClientConceptSet)
+            .map(conceptSetMapper::dbModelToClient)
             .sorted(Comparator.comparing(c -> c.getName()))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
@@ -161,7 +165,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     ConceptSetListResponse response = new ConceptSetListResponse();
     response.setItems(
         conceptSets.stream()
-            .map(ConceptSetsController::toClientConceptSet)
+            .map(dbConceptSet -> conceptSetMapper.dbModelToClient(dbConceptSet))
             .sorted(Comparator.comparing(c -> c.getName()))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
@@ -386,7 +390,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   }
 
   private ConceptSet toClientConceptSetWithConcepts(DbConceptSet dbConceptSet) {
-    ConceptSet conceptSet = toClientConceptSet(dbConceptSet);
+    ConceptSet conceptSet = conceptSetMapper.dbModelToClient(dbConceptSet);
     Iterable<DbConcept> concepts = conceptService.findAll(dbConceptSet.getConceptIds());
     conceptSet.setConcepts(
         Streams.stream(concepts)
