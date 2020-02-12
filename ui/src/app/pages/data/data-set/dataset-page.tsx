@@ -214,6 +214,22 @@ const stylesFunction = {
   }
 };
 
+const DOMAIN_DISPLAY_ORDER = {
+  [Domain.PERSON]: 0,
+  [Domain.SURVEY]: 1
+};
+
+const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
+  if (a in DOMAIN_DISPLAY_ORDER && b in DOMAIN_DISPLAY_ORDER) {
+    return DOMAIN_DISPLAY_ORDER[a] - DOMAIN_DISPLAY_ORDER[b];
+  } else if (a in DOMAIN_DISPLAY_ORDER) {
+    return -1;
+  } else if (b in DOMAIN_DISPLAY_ORDER) {
+    return 1;
+  }
+  return a.localeCompare(b);
+}
+
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
     return <div style={styles.listItem}>
@@ -532,9 +548,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         const newLookup = new Map(domainValueSetLookup);
 
         newLoading.delete(domain);
-        // TODO: I removed the special survey handling, i.e. providing a
-        // "survey" value here, since it didn't match in cardinality. Determine
-        // whether this was important for some reason.
         newLookup.set(domain, {domain, values});
 
         return {
@@ -946,11 +959,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                   <div style={{height: selectedDomains.size > 0 ? '7.625rem' : '9rem', overflowY: 'auto'}}>
                     {domainValueSetIsLoading.size > 0 && <Spinner style={{position: 'relative',
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}
-                    {Array.from(selectedDomains).map(domain =>
+                    {Array.from(selectedDomains).sort(COMPARE_DOMAINS_FOR_DISPLAY).map(domain =>
                       domainValueSetLookup.has(domain) &&
                       <div key={domain}>
                         <Subheader style={{fontWeight: 'bold'}}>
-                          {/* XXX: check surveys */}
                           {formatDomain(domain)}
                         </Subheader>
                         {domainValueSetLookup.get(domain).values.items.map(domainValue =>
@@ -1033,7 +1045,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                    this.setState({selectedPreviewDomain: Domain[domain]})}
                                  style={stylesFunction.selectDomainForPreviewButton(selectedPreviewDomain === Domain[domain])}>
                         <FlexRow style={{alignItems: 'center'}}>
-                          {Domain[domain] === Domain.OBSERVATION ? 'SURVEY' : domain.toString()}
+                          {domain.toString()}
                           {previewRow.isLoading &&
                           <Spinner style={{marginLeft: '4px', height: '18px', width: '18px'}}/>}
                         </FlexRow>
