@@ -10,6 +10,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
+import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -159,6 +160,8 @@ export const researchPurposeQuestions = [
     description: <div/>
   }
 ];
+
+const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
 
 interface SpecificPopulationItem {
   label: string;
@@ -363,6 +366,7 @@ export interface WorkspaceEditState {
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
   billingAccounts: Array<BillingAccount>;
+  showCreateBillingAccountModal: boolean;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -381,7 +385,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
-        billingAccounts: []
+        billingAccounts: [],
+        showCreateBillingAccountModal: false
       };
     }
 
@@ -797,6 +802,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return this.props.routeConfigData.mode === mode;
     }
 
+    buildBillingAccountOptions() {
+      const options = this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}));
+      options.push({label: 'Create a new billing account', value: CREATE_BILLING_ACCOUNT_OPTION_VALUE});
+      return options;
+    }
+
     render() {
       const {
         workspace: {
@@ -890,8 +901,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </div>
             <Dropdown style={{width: '14rem'}}
                       value={this.state.workspace.billingAccountName}
-                      options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}
-                      onChange={e => this.setState(fp.set(['workspace', 'billingAccountName'], e.value))}
+                      options={this.buildBillingAccountOptions()}
+                      onChange={e => {
+                        if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                          this.setState({
+                            showCreateBillingAccountModal: true
+                          });
+                        } else {
+                          this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
+                        }
+                      }}
             />
           </WorkspaceEditSection>
         }
@@ -1096,6 +1115,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </ModalFooter>
         </Modal>
         }
+        {this.state.showCreateBillingAccountModal &&
+          <CreateBillingAccountModal onClose={() => this.setState({showCreateBillingAccountModal: false})} />}
         {this.state.workspaceCreationConflictError &&
         <Modal>
           <ModalTitle>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
@@ -1133,6 +1154,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </div>
       </FadeBox> ;
     }
+
   });
 
 @Component({

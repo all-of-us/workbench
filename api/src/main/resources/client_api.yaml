@@ -588,10 +588,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Concept"
-      questions:
-        type: "array"
-        items:
-          $ref: "#/definitions/SurveyQuestions"
 
   DomainCountsListResponse:
     type: object

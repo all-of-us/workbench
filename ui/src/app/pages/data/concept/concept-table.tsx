@@ -52,7 +52,18 @@ const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.success, 0.7),
     padding: '0 0.25rem',
     display: 'inline-block'
-  }
+  },
+  error: {
+    background: colors.warning,
+    color: colors.white,
+    fontSize: '12px',
+    fontWeight: 500,
+    textAlign: 'left',
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    marginTop: '0.25rem',
+    padding: '8px',
+  },
 });
 const domainColumns = [
   {
@@ -86,7 +97,7 @@ const domainColumns = [
     bodyStyle: styles.colStyle,
     className: 'divider',
     field: 'countValue',
-    header: 'Count',
+    header: 'Participant Count',
     headerStyle: styles.headerStyle,
     selectionMode: null,
     testId: null
@@ -155,6 +166,7 @@ interface Props {
   reactKey: string;
   searchTerm?: string;
   selectedConcepts: any[];
+  error: boolean;
 }
 
 interface State {
@@ -284,9 +296,16 @@ export class ConceptTable extends React.Component<Props, State> {
     this.setState({showBanner: false});
   }
 
+  errorMessage() {
+    return !this.props.error ? false : <div style={styles.error}>
+      <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+      Sorry, the request cannot be completed. Please try refreshing the page or contact Support in the left hand navigation.
+    </div>;
+  }
+
   renderColumns() {
     const {concepts, domain} = this.props;
-    const surveyColumn = [
+    const surveyColumns = [
       {
         bodyStyle: styles.colStyle,
         className: null,
@@ -295,6 +314,15 @@ export class ConceptTable extends React.Component<Props, State> {
         headerStyle: styles.headerStyle,
         selectionMode: null,
         testId: 'question'
+      },
+      {
+        bodyStyle: styles.colStyle,
+        className: 'divider',
+        field: 'countValue',
+        header: 'Participant Count',
+        headerStyle: {...styles.headerStyle, width: '20%'},
+        selectionMode: null,
+        testId: null
       }
     ];
     const columns = [
@@ -307,7 +335,7 @@ export class ConceptTable extends React.Component<Props, State> {
         selectionMode: 'multiple',
         testId: 'conceptCheckBox'
       },
-      ...(domain === Domain.SURVEY ? surveyColumn : domainColumns)
+      ...(domain === Domain.SURVEY ? surveyColumns : domainColumns)
     ];
     return columns.map((col, c) => <Column
       bodyStyle={col.bodyStyle}
@@ -323,7 +351,7 @@ export class ConceptTable extends React.Component<Props, State> {
 
   render() {
     const {selectedConcepts, tableRef} = this.state;
-    const {concepts, placeholderValue, loading, reactKey} = this.props;
+    const {concepts, error, placeholderValue, loading, reactKey} = this.props;
     return <div data-test-id='conceptTable' key={reactKey} style={{position: 'relative', minHeight: '10rem'}}>
       <style>
         {`
@@ -340,12 +368,16 @@ export class ConceptTable extends React.Component<Props, State> {
             border: 0;
             color: ${colors.primary};
           }
+          body .p-datatable .p-datatable-footer {
+            background: ${colors.white};
+            border: 0;
+          }
         `}
       </style>
-      {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
+      {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading || error ? '' : placeholderValue}
                                                  style={styles.datatable}
                                                  header={this.selectAllHeader()}
-                                                 value={concepts.map(formatCounts)}
+                                                 value={error ? null : concepts.map(formatCounts)}
                                                  scrollable={true}
                                                  selection={selectedConcepts}
                                                  totalRecords={this.state.totalRecords}
@@ -357,7 +389,8 @@ export class ConceptTable extends React.Component<Props, State> {
                                                  paginator={true} rows={ROWS_TO_DISPLAY}
                                                  data-test-id='conceptRow'
                                                  onValueChange={(value) => this.onPageChange()}
-                                                 onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')}>
+                                                 onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')}
+                                                 footer={this.errorMessage()}>
         {this.renderColumns()}
       </DataTable>}
     </div>;

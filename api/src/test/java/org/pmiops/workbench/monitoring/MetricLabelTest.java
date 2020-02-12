@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import org.junit.Test;
-import org.pmiops.workbench.monitoring.attachments.MetricLabelBase;
+import org.pmiops.workbench.monitoring.labels.MetricLabelBase;
 
 public class MetricLabelTest {
 

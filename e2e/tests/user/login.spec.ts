@@ -1,12 +1,14 @@
-import BasePage from '../../pages/basepage';
-import GoogleLoginPage, {selectors} from '../../pages/google-login';
+import GoogleLoginPage, {selectors} from '../../app/google-login';
+import BasePage from '../../app/mixin/basepage';
+import {waitUntilFindTexts} from '../../driver/waitFuncs';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
+require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);
 
 const configs = require('../../config/config');
 
-describe('Login tests:', () => {
+describe.skip('Login tests:', () => {
 
   let browser;
   let incognitoContext;
@@ -55,9 +57,8 @@ describe('Login tests:', () => {
     await button.click();
 
     const passwordPage = new BasePage(page);
-    const err = await passwordPage.waitForTextFound('Wrong password. Try again');
+    const err = await waitUntilFindTexts(page, 'Wrong password. Try again');
     expect(err).toBeTruthy();
   });
-
 
 });

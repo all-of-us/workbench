@@ -772,6 +772,7 @@ public class ConceptsControllerTest {
     result.setVocabularyId(concept.getVocabularyId());
     result.setDomainId(concept.getDomainId());
     result.setCountValue(concept.getCountValue());
+    result.setSourceCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
     result.setSynonymsStr(
         String.valueOf(concept.getConceptId())

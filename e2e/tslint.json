@@ -7,6 +7,24 @@
     ],
     "jsRules": {},
     "rules": {
+        "no-duplicate-imports": {
+            "severity": "error",
+            "options": {
+                "allow-namespace-imports": true
+            }
+        },
+        "no-console": {
+            "severity": "warning",
+            "options": [
+                "log",
+                "error",
+                "debug",
+                "info",
+                "time",
+                "timeEnd",
+                "trace"
+            ]
+        },
         "no-require-imports": false,
         "no-var-requires": false,
         "interface-name": false,
@@ -14,6 +32,7 @@
         "object-literal-sort-keys": false,
         "quotemark": [true, "single", "jsx-double"],
         "ter-indent": [true, 2],
+        "max-classes-per-file": true,
         "max-line-length": [true,
             {
                 "limit": 120,

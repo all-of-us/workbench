@@ -62,10 +62,12 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.setHelpContent();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe(event => {
+        .subscribe(() => {
           this.tabPath = this.getTabPath();
           this.setHelpContent();
-          this.sidebarOpen = false;
+          if (this.helpContent !== 'reviewParticipantDetail') {
+            this.sidebarOpen = false;
+          }
         }));
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.displayNavBar = !minimizeChrome;
