@@ -294,7 +294,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workspace.getBillingAccountName());
     } catch (ServerErrorException e) {
       // Will be addressed with RW-4440
-      throw new ServerErrorException("This message is going to be swallowed due to a bug in ExceptionAdvice. ",
+      throw new ServerErrorException(
+          "This message is going to be swallowed due to a bug in ExceptionAdvice. ",
           new ServerErrorException("Could not update the workspace's billing account", e));
     }
 
@@ -421,7 +422,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             dbWorkspace, request.getWorkspace().getBillingAccountName());
       } catch (ServerErrorException e) {
         // Will be addressed with RW-4440
-        throw new ServerErrorException("This message is going to be swallowed due to a bug in ExceptionAdvice.",
+        throw new ServerErrorException(
+            "This message is going to be swallowed due to a bug in ExceptionAdvice.",
             new ServerErrorException("Could not update the workspace's billing account", e));
       }
     }
@@ -555,7 +557,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, body.getWorkspace().getBillingAccountName());
     } catch (ServerErrorException e) {
       // Will be addressed with RW-4440
-      throw new ServerErrorException("This message is going to be swallowed due to a bug in ExceptionAdvice.",
+      throw new ServerErrorException(
+          "This message is going to be swallowed due to a bug in ExceptionAdvice.",
           new ServerErrorException("Could not update the workspace's billing account", e));
     }
 

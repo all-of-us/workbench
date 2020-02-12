@@ -699,9 +699,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     } else {
       cloudbilling = endUserCloudbillingProvider.get();
       try {
-        if (!Optional.ofNullable(cloudbilling.billingAccounts().get(newBillingAccountName).execute().getOpen()).orElse(false)) {
-            throw new BadRequestException(
-                "Provided billing account is closed. Please provide an open account.");
+        if (!Optional.ofNullable(
+                cloudbilling.billingAccounts().get(newBillingAccountName).execute().getOpen())
+            .orElse(false)) {
+          throw new BadRequestException(
+              "Provided billing account is closed. Please provide an open account.");
         }
       } catch (IOException e) {
         throw new ServerErrorException("Could not fetch user provided billing account.", e);
