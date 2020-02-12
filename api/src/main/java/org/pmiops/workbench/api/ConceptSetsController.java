@@ -374,21 +374,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     return conceptSet;
   }
 
-  public static ConceptSet toClientConceptSet(DbConceptSet dbConceptSet) {
-    return new ConceptSet()
-        .etag(Etags.fromVersion(dbConceptSet.getVersion()))
-        .lastModifiedTime(dbConceptSet.getLastModifiedTime().getTime())
-        .creationTime(dbConceptSet.getCreationTime().getTime())
-        .description(dbConceptSet.getDescription())
-        .id(dbConceptSet.getConceptSetId())
-        .name(dbConceptSet.getName())
-        .domain(dbConceptSet.getDomainEnum())
-        .participantCount(dbConceptSet.getParticipantCount())
-        .survey(dbConceptSet.getSurveysEnum())
-        .creator(
-            Optional.ofNullable(dbConceptSet.getCreator()).map(DbUser::getUsername).orElse(null));
-  }
-
   private ConceptSet toClientConceptSetWithConcepts(DbConceptSet dbConceptSet) {
     ConceptSet conceptSet = conceptSetMapper.dbModelToClient(dbConceptSet);
     Iterable<DbConcept> concepts = conceptService.findAll(dbConceptSet.getConceptIds());
