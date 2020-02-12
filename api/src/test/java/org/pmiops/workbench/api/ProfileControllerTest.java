@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -19,7 +18,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.inject.Provider;
+import java.util.Random;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
@@ -34,7 +33,6 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
@@ -64,11 +62,15 @@ import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -93,8 +95,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
-  @MockBean private Provider<DbUser> userProvider;
-  @MockBean private Provider<UserAuthentication> userAuthenticationProvider;
   @MockBean private FireCloudService fireCloudService;
   @MockBean private LeonardoNotebooksClient leonardoNotebooksClient;
   @MockBean private DirectoryService directoryService;
@@ -118,7 +118,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private com.google.api.services.directory.model.User googleUser;
   private static FakeClock fakeClock = new FakeClock(NOW);
 
-  private DbUser dbUser;
+  private static DbUser dbUser;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
@@ -128,6 +128,24 @@ public class ProfileControllerTest extends BaseControllerTest {
     @Bean
     Clock clock() {
       return fakeClock;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    DbUser dbUser() {
+      return dbUser;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    UserAuthentication userAuthentication() {
+      return new UserAuthentication(dbUser, null, null, UserType.RESEARCHER);
+    }
+
+    @Bean
+    @Primary
+    Random getRandom() {
+      return new FakeLongRandom(NONCE_LONG);
     }
   }
 
@@ -156,23 +174,27 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
+    when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
 
     try {
       doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
     } catch (MessagingException e) {
       e.printStackTrace();
     }
-    when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() throws Exception {
+    createUser();
+
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
 
   @Test
   public void testCreateAccount_noRequireInvitationKey() throws Exception {
+    createUser();
+
     // When invitation key verification is turned off, even a bad invitation key should
     // allow a user to be created.
     config.access.requireInvitationKey = false;
@@ -197,15 +219,15 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void testCreateAccount_withTosVersion() throws Exception {
     createAccountRequest.setTermsOfServiceVersion(1);
-    Profile profile = createUser();
+    createUser();
 
-    verify(userService).submitTermsOfService(any(DbUser.class), eq(1));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
     assertThat(tosRows.get(0).getTosVersion()).isEqualTo(1);
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
     assertThat(tosRows.get(0).getAgreementTime()).isNotNull();
+    Profile profile = profileService.getProfile(dbUser);
     assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
   }
 
@@ -239,7 +261,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
-    DbUser dbUser = userProvider.get();
     String duaInitials = "NIH";
     assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
@@ -481,6 +502,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateCurrentPosition_badRequest() throws Exception {
+    config.featureFlags.enableNewAccountCreation = false;
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setCurrentPosition(RandomStringUtils.random(256));
@@ -489,6 +511,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateOrganization_badRequest() throws Exception {
+    config.featureFlags.enableNewAccountCreation = false;
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setOrganization(RandomStringUtils.random(256));
@@ -576,11 +599,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test
   public void testBypassAccessModule() throws Exception {
     Profile profile = createUser();
-    WorkbenchConfig config = generateConfig();
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
-    verify(userService, times(1)).setDataUseAgreementBypassTime(any(), any());
+
+    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
   }
 
   @Test
@@ -599,9 +623,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     userDao.save(dbUser);
-    when(userProvider.get()).thenReturn(dbUser);
-    when(userAuthenticationProvider.get())
-        .thenReturn(new UserAuthentication(dbUser, null, null, UserType.RESEARCHER));
     return result;
   }
 
@@ -638,22 +659,5 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
-  }
-
-  private WorkbenchConfig generateConfig() {
-    WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billing.projectNamePrefix = BILLING_PROJECT_PREFIX;
-    config.billing.retryCount = 2;
-    config.firecloud.registeredDomainName = "";
-    config.access.enableComplianceTraining = false;
-    config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
-    // All access modules are enabled for these tests. So completing any one module should maintain
-    // UNREGISTERED status.
-    config.access.enableComplianceTraining = true;
-    config.access.enableBetaAccess = true;
-    config.access.enableEraCommons = true;
-    config.access.enableDataUseAgreement = true;
-    config.featureFlags.unsafeAllowDeleteUser = true;
-    return config;
   }
 }
