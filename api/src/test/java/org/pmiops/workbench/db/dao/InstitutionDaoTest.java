@@ -59,8 +59,12 @@ public class InstitutionDaoTest {
             .setEmailAddresses(emailAddresses);
     final DbInstitution savedWithEmailPatterns = institutionDao.save(toSaveWithEmailPatterns);
     assertThat(savedWithEmailPatterns).isEqualTo(toSaveWithEmailPatterns);
-    assertThat(savedWithEmailPatterns.getEmailDomains()).isEqualTo(emailDomains);
-    assertThat(savedWithEmailPatterns.getEmailAddresses()).isEqualTo(emailAddresses);
+    assertThat(savedWithEmailPatterns.getEmailDomains()).containsExactlyElementsIn(emailDomains);
+    assertThat(savedWithEmailPatterns.getEmailAddresses()).containsExactlyElementsIn(emailAddresses);
+
+    // OK to duplicate email patterns between institutions
+    assertThat(savedWithEmailPatterns.getEmailDomains()).containsExactlyElementsIn(institutionWithEmailPatterns.getEmailDomains());
+    assertThat(savedWithEmailPatterns.getEmailAddresses()).containsExactlyElementsIn(institutionWithEmailPatterns.getEmailAddresses());
 
     final DbInstitution toSaveWithoutEmailPatterns =
         new DbInstitution()
@@ -70,6 +74,7 @@ public class InstitutionDaoTest {
     assertThat(savedWithoutEmailPatterns).isEqualTo(toSaveWithoutEmailPatterns);
     assertThat(savedWithoutEmailPatterns.getEmailDomains()).isEmpty();
     assertThat(savedWithoutEmailPatterns.getEmailAddresses()).isEmpty();
+
   }
 
   @Test
@@ -119,7 +124,7 @@ public class InstitutionDaoTest {
             new DbInstitutionEmailAddress().setEmailAddress("broad1@example.com"),
             new DbInstitutionEmailAddress().setEmailAddress("broad2@example.com"));
     institutionWithEmailPatterns.setEmailAddresses(newEmailAddresses);
-    institutionDao.save(institutionWithEmailPatterns);
+    institutionWithEmailPatterns = institutionDao.save(institutionWithEmailPatterns);
 
     DbInstitution dbInstitution =
         institutionDao.findOne(institutionWithEmailPatterns.getInstitutionId());
@@ -134,7 +139,7 @@ public class InstitutionDaoTest {
             new DbInstitutionEmailAddress().setEmailAddress("broad@example.com"),
             new DbInstitutionEmailAddress().setEmailAddress("broad2@example.com"));
     institutionWithEmailPatterns.setEmailAddresses(newEmailAddresses);
-    institutionDao.save(institutionWithEmailPatterns);
+    institutionWithEmailPatterns = institutionDao.save(institutionWithEmailPatterns);
     DbInstitution dbInstitution =
         institutionDao.findOne(institutionWithEmailPatterns.getInstitutionId());
     assertThat(dbInstitution).isEqualTo(institutionWithEmailPatterns);
@@ -145,7 +150,7 @@ public class InstitutionDaoTest {
   public void test_updateRemoveAllEmailAddresses() {
     Set<DbInstitutionEmailAddress> newEmailAddresses = Sets.newHashSet();
     institutionWithEmailPatterns.setEmailAddresses(newEmailAddresses);
-    institutionDao.save(institutionWithEmailPatterns);
+    institutionWithEmailPatterns = institutionDao.save(institutionWithEmailPatterns);
     DbInstitution dbInstitution =
         institutionDao.findOne(institutionWithEmailPatterns.getInstitutionId());
     assertThat(dbInstitution).isEqualTo(institutionWithEmailPatterns);
@@ -159,7 +164,7 @@ public class InstitutionDaoTest {
             new DbInstitutionEmailDomain().setEmailDomain("wpi.edu"),
             new DbInstitutionEmailDomain().setEmailDomain("mit.edu"));
     institutionWithEmailPatterns.setEmailDomains(newEmailDomains);
-    institutionDao.save(institutionWithEmailPatterns);
+    institutionWithEmailPatterns = institutionDao.save(institutionWithEmailPatterns);
     DbInstitution dbInstitution =
         institutionDao.findOne(institutionWithEmailPatterns.getInstitutionId());
     assertThat(dbInstitution).isEqualTo(institutionWithEmailPatterns);
@@ -173,7 +178,7 @@ public class InstitutionDaoTest {
             new DbInstitutionEmailDomain().setEmailDomain("broad.org"),
             new DbInstitutionEmailDomain().setEmailDomain("mit.edu"));
     institutionWithEmailPatterns.setEmailDomains(newEmailDomains);
-    institutionDao.save(institutionWithEmailPatterns);
+    institutionWithEmailPatterns = institutionDao.save(institutionWithEmailPatterns);
     DbInstitution dbInstitution =
         institutionDao.findOne(institutionWithEmailPatterns.getInstitutionId());
     assertThat(dbInstitution).isEqualTo(institutionWithEmailPatterns);
@@ -184,7 +189,7 @@ public class InstitutionDaoTest {
   public void test_updateRemoveAllEmailDomains() {
     Set<DbInstitutionEmailDomain> newEmailDomains = Sets.newHashSet();
     institutionWithEmailPatterns.setEmailDomains(newEmailDomains);
-    institutionDao.save(institutionWithEmailPatterns);
+    institutionWithEmailPatterns = institutionDao.save(institutionWithEmailPatterns);
     DbInstitution dbInstitution =
         institutionDao.findOne(institutionWithEmailPatterns.getInstitutionId());
     assertThat(dbInstitution).isEqualTo(institutionWithEmailPatterns);
