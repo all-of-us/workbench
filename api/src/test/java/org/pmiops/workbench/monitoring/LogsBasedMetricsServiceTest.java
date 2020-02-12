@@ -22,11 +22,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl.PayloadKey;
@@ -36,6 +38,7 @@ import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.UnitOfMeasure;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -80,10 +83,7 @@ public class LogsBasedMetricsServiceTest {
             .addTag(MetricLabel.WORKSPACE_ACTIVE_STATUS, WorkspaceActiveStatus.ACTIVE.toString())
             .build();
     logsBasedMetricService.record(gaugeMeasurement);
-    verify(mockLogging).write(logEntriesCaptor.capture());
-    List<LogEntry> sentEntries =
-        StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
-            .collect(Collectors.toList());
+    List<LogEntry> sentEntries = getWrittenLogEntries();
     assertThat(sentEntries).hasSize(1);
 
     final LogEntry logEntry = sentEntries.get(0);
@@ -92,7 +92,7 @@ public class LogsBasedMetricsServiceTest {
     assertThat(logEntry.getSeverity()).isEqualTo(Severity.INFO);
 
     final Map<String, Object> payloadMap = logEntry.<JsonPayload>getPayload().getDataAsMap();
-    assertThat(payloadMap).hasSize(4);
+    assertThat(payloadMap).hasSize(PayloadKey.values().length);
 
     final String metricName = (String) payloadMap.getOrDefault(PayloadKey.NAME.getKeyName(), "");
     assertThat(metricName).isEqualTo(GaugeMetric.WORKSPACE_COUNT.getName());
@@ -109,6 +109,13 @@ public class LogsBasedMetricsServiceTest {
         .isEqualTo(DataAccessLevel.PROTECTED.toString());
   }
 
+  @NotNull
+  private List<LogEntry> getWrittenLogEntries() {
+    verify(mockLogging).write(logEntriesCaptor.capture());
+    return StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
+        .collect(Collectors.toList());
+  }
+
   @Test
   public void testRecord_handlesMultipleMeasurements() {
     final MeasurementBundle measurements =
@@ -117,10 +124,7 @@ public class LogsBasedMetricsServiceTest {
             .addEvent(EventMetric.NOTEBOOK_DELETE)
             .build();
     logsBasedMetricService.record(measurements);
-    verify(mockLogging).write(logEntriesCaptor.capture());
-    List<LogEntry> sentEntries =
-        StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
-            .collect(Collectors.toList());
+    List<LogEntry> sentEntries = getWrittenLogEntries();
     assertThat(sentEntries).hasSize(2);
 
     final LogEntry logEntry = sentEntries.get(0);
@@ -227,8 +231,14 @@ public class LogsBasedMetricsServiceTest {
                     someSet.remove(3);
                     return true;
                   });
+          final List<LogEntry> logEntries = getWrittenLogEntries();
+          assertThat(logEntries).hasSize(1);
           assertThat(b).isTrue();
+          Mockito.clearInvocations(mockLogging);
         });
     assertThat(someSet).containsAllIn(ImmutableSet.of(1, 2));
+    final List<LogEntry> logEntries = getWrittenLogEntries();
+    assertThat(logEntries).hasSize(1);
+    assertThat((JsonPayload) logEntries.get(0).getPayload());
   }
 }

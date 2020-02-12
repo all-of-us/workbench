@@ -137,7 +137,7 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
    * allowed by the EventMetric and MetricLabel classes, respectively. (Using a MeasurementBundle
    * ensures this).
    *
-   * <p>UNIT: Official unit of measure. It looks like you still have to set this up manuaally when
+   * <p>UNIT: Official unit of measure. It looks like you still have to set this up manually when
    * making a Logs-based metric in the GUI. I.e. it won't honor this field. But it's still good to
    * have as a reminder if you're just surfing the log.
    */
