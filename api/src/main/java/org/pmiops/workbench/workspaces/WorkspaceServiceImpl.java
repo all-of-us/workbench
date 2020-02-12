@@ -207,23 +207,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
 
-    log.info("userDao.findOne(dbWorkspace.getCreator().getUserId()).toString())");
-
-    log.info(userDao.findOne(dbWorkspace.getCreator().getUserId()).toString());
-    log.info(userDao.findOne(dbWorkspace.getCreator().getUserId()).toString());
-
-    log.info("dbWorkspace.getCreator().toString()");
-    log.info(dbWorkspace.getCreator().toString());
-    log.info(dbWorkspace.getCreator().toString());
-
-    log.info("userProvider.get().toString()");
-    log.info(userProvider.get().toString());
-    log.info(userProvider.get().toString());
-
-    log.info("userDao.findOne(userProvider.get().getUserId()).toString())");
-    log.info(userDao.findOne(userProvider.get().getUserId()).toString());
-    log.info(userDao.findOne(userProvider.get().getUserId()).toString());
-
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspace fcWorkspace;
 
