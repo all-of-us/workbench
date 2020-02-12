@@ -2,13 +2,14 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
-import {DataSetPage} from 'app/pages/data/data-set/dataset-page';
+import {DataSetPage, COMPARE_DOMAINS_FOR_DISPLAY} from 'app/pages/data/data-set/dataset-page';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {
   CohortsApi,
   ConceptSetsApi,
   DataSetApi,
+  Domain,
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -304,5 +305,11 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should sort domains for display only', () => {
+    const domains = [Domain.MEASUREMENT, Domain.PERSON, Domain.CONDITION, Domain.SURVEY];
+    domains.sort(COMPARE_DOMAINS_FOR_DISPLAY);
+    expect(domains).toEqual([Domain.PERSON, Domain.SURVEY, Domain.CONDITION, Domain.MEASUREMENT]);
   });
 });

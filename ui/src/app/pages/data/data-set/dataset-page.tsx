@@ -219,7 +219,8 @@ const DOMAIN_DISPLAY_ORDER = {
   [Domain.SURVEY]: 1
 };
 
-const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
+// Exported for testing.
+export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
   if (a in DOMAIN_DISPLAY_ORDER && b in DOMAIN_DISPLAY_ORDER) {
     return DOMAIN_DISPLAY_ORDER[a] - DOMAIN_DISPLAY_ORDER[b];
   } else if (a in DOMAIN_DISPLAY_ORDER) {
@@ -227,7 +228,7 @@ const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
   } else if (b in DOMAIN_DISPLAY_ORDER) {
     return 1;
   }
-  return a.localeCompare(b);
+  return a.toString().localeCompare(b.toString());
 }
 
 const ImmutableListItem: React.FunctionComponent <{
