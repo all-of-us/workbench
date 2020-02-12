@@ -4,10 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 import com.google.common.collect.Sets;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,11 +37,9 @@ public class InstitutionDaoTest {
             new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute"));
 
     emailAddresses =
-        Stream.of(new DbInstitutionEmailAddress().setEmailAddress("emailAddress"))
-            .collect(Collectors.toCollection(HashSet::new));
-    emailDomains =
-        Stream.of(new DbInstitutionEmailDomain().setEmailDomain("emailDomain"))
-            .collect(Collectors.toCollection(HashSet::new));
+        Sets.newHashSet(new DbInstitutionEmailAddress().setEmailAddress("emailAddress"));
+    emailDomains = Sets.newHashSet(new DbInstitutionEmailDomain().setEmailDomain("emailDomain"));
+
     institutionWithEmailAddressesAndDomains =
         institutionDao.save(
             new DbInstitution()
@@ -56,18 +51,25 @@ public class InstitutionDaoTest {
 
   @Test
   public void test_save() {
-    // no need to call save since we have a setup method.
-    DbInstitution dbInstitution =
-        institutionDao.findOne(institutionNoEmailAddressesOrDomains.getInstitutionId());
-    assertThat(dbInstitution).isEqualTo(institutionNoEmailAddressesOrDomains);
-    assertThat(dbInstitution.getEmailDomains()).isEmpty();
-    assertThat(dbInstitution.getEmailAddresses()).isEmpty();
+    final DbInstitution toSaveWith =
+        new DbInstitution()
+            .setShortName("Vanderbilt")
+            .setDisplayName("Vanderbilt University")
+            .setEmailDomains(emailDomains)
+            .setEmailAddresses(emailAddresses);
+    final DbInstitution savedWith = institutionDao.save(toSaveWith);
+    assertThat(savedWith).isEqualTo(toSaveWith);
+    assertThat(savedWith.getEmailDomains()).isEqualTo(emailDomains);
+    assertThat(savedWith.getEmailAddresses()).isEqualTo(emailAddresses);
 
-    dbInstitution =
-        institutionDao.findOne(institutionWithEmailAddressesAndDomains.getInstitutionId());
-    assertThat(dbInstitution).isEqualTo(institutionWithEmailAddressesAndDomains);
-    assertThat(dbInstitution.getEmailDomains()).isEqualTo(emailDomains);
-    assertThat(dbInstitution.getEmailAddresses()).isEqualTo(emailAddresses);
+    final DbInstitution toSaveWithout =
+        new DbInstitution()
+            .setShortName("VUMC")
+            .setDisplayName("Vanderbilt University Medical Center");
+    final DbInstitution savedWithout = institutionDao.save(toSaveWithout);
+    assertThat(savedWithout).isEqualTo(toSaveWithout);
+    assertThat(savedWithout.getEmailDomains()).isEmpty();
+    assertThat(savedWithout.getEmailAddresses()).isEmpty();
   }
 
   @Test
@@ -84,6 +86,21 @@ public class InstitutionDaoTest {
     assertThat(institutionDao.findAll())
         .containsExactly(
             institutionNoEmailAddressesOrDomains, institutionWithEmailAddressesAndDomains);
+  }
+
+  @Test
+  public void test_findOne() {
+    DbInstitution dbInstitution =
+        institutionDao.findOne(institutionNoEmailAddressesOrDomains.getInstitutionId());
+    assertThat(dbInstitution).isEqualTo(institutionNoEmailAddressesOrDomains);
+    assertThat(dbInstitution.getEmailDomains()).isEmpty();
+    assertThat(dbInstitution.getEmailAddresses()).isEmpty();
+
+    dbInstitution =
+        institutionDao.findOne(institutionWithEmailAddressesAndDomains.getInstitutionId());
+    assertThat(dbInstitution).isEqualTo(institutionWithEmailAddressesAndDomains);
+    assertThat(dbInstitution.getEmailDomains()).isEqualTo(emailDomains);
+    assertThat(dbInstitution.getEmailAddresses()).isEqualTo(emailAddresses);
   }
 
   @Test
