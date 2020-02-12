@@ -311,7 +311,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException(
           "Target workspace does not have the same CDR version as current workspace");
     }
-    DbConceptSet existingConceptSet =
+    final DbConceptSet existingConceptSet =
         conceptSetService
             .findOne(Long.valueOf(fromConceptSetId), Long.valueOf(fromWorkspaceId))
             .orElseThrow(
