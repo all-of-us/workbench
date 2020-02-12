@@ -126,6 +126,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Import({UserServiceImpl.class, ProfileService.class, ProfileController.class})
   static class Configuration {
     @Bean
+    @Primary
     Clock clock() {
       return fakeClock;
     }
@@ -502,6 +503,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateCurrentPosition_badRequest() throws Exception {
+    // Server-side verification for this field is only used for old-style account creation.
     config.featureFlags.enableNewAccountCreation = false;
     createUser();
     Profile profile = profileController.getMe().getBody();
@@ -511,6 +513,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateOrganization_badRequest() throws Exception {
+    // Server-side verification for this field is only used for old-style account creation.
     config.featureFlags.enableNewAccountCreation = false;
     createUser();
     Profile profile = profileController.getMe().getBody();
