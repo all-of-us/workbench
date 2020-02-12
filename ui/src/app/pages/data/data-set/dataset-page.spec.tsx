@@ -60,9 +60,9 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // First Concept set in concept set list has domain "Condition"
-    const condition_concept = wrapper.find('[data-test-id="concept-set-list-item"]').first()
+    const conditionConceptSet = wrapper.find('[data-test-id="concept-set-list-item"]').first()
         .find('input').first();
-    condition_concept.simulate('change');
+    conditionConceptSet.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
     expect(valueListItems.length).toBe(2);
@@ -72,9 +72,9 @@ describe('DataSetPage', () => {
     expect(checkedValuesList.length).toBe(2);
 
     // Second Concept set in concept set list has domain "Measurement"
-    const measurement_concept = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
+    const measurementConceptSet = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
         .find('input').first();
-    measurement_concept.simulate('change');
+    measurementConceptSet.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     valueListItems = wrapper.find('[data-test-id="value-list-items"]');
@@ -133,7 +133,7 @@ describe('DataSetPage', () => {
       expect(checkedValuesList.length).toBe(4);
   });
 
-  fit('should display correct values on rapid selection of multiple domains', async() => {
+  it('should display correct values on rapid selection of multiple domains', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -214,7 +214,35 @@ describe('DataSetPage', () => {
     wrapper.find({'data-test-id': 'preview-button'}).first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(spy).toHaveBeenCalledTimes(1);
+  });
 
+  it('should display preview data for current domains only', async() => {
+    const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Select a cohort.
+    wrapper.find('[data-test-id="cohort-list-item"]').first()
+      .find('input').first().simulate('change');
+    wrapper.update();
+
+    // Select "Condition" and "Measurement" concept sets.
+    let conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
+    conceptSetEls.at(0).find('input').first().simulate('change');
+    conceptSetEls.at(1).find('input').first().simulate('change');
+    await waitOneTickAndUpdate(wrapper);
+
+    // Deselect "Condition".
+    conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
+    conceptSetEls.at(0).find('input').first().simulate('change');
+    await waitOneTickAndUpdate(wrapper);
+
+    // Click preview button to load preview
+    wrapper.find({'data-test-id': 'preview-button'}).first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
@@ -234,7 +262,7 @@ describe('DataSetPage', () => {
     expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/concepts');
   });
 
-  it(' dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
+  it('dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
     const wrapper = mount(<DataSetPage />);
@@ -246,7 +274,7 @@ describe('DataSetPage', () => {
     expect(isSaveButtonDisable).toBeTruthy();
   });
 
-  it(' dataSet should disable cohort/concept PLUS ICON if user has READER access', async() => {
+  it('dataSet should disable cohort/concept PLUS ICON if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
     const wrapper = mount(<DataSetPage />);
