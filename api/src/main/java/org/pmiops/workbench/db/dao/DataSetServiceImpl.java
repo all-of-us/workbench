@@ -54,11 +54,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
-  private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}";
+  private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
   private static final String PYTHON_CDR_ENV_VARIABLE =
-      "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"";
-  private static final String R_CDR_ENV_VARIABLE = "\", Sys.getenv(\"WORKSPACE_CDR\"), \"";
-  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP = ImmutableMap.of(KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
+      "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
+  // This is implicitly handled by bigrquery, so we don't need this variable.
+  private static final String R_CDR_ENV_VARIABLE = "";
+  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
+      ImmutableMap.of(
+          KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
@@ -713,9 +716,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @NotNull
   private static String arraySqlFromQueryParameter(QueryParameterValue value) {
-    return String.format("(%s)", nullableListToEmpty(value.getArrayValues()).stream()
-        .map(QueryParameterValue::getValue)
-        .collect(Collectors.joining(", ")));
+    return String.format(
+        "(%s)",
+        nullableListToEmpty(value.getArrayValues()).stream()
+            .map(QueryParameterValue::getValue)
+            .collect(Collectors.joining(", ")));
   }
 
   private static String generateNotebookUserCode(
@@ -775,7 +780,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             namespace
                 + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
                 + namespace
-                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")))";
+                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")";
         displayHeadSection = "head(" + namespace + "df, 5)";
         break;
       default:
