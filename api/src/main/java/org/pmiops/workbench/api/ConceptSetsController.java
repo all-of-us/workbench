@@ -311,7 +311,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException(
           "Target workspace does not have the same CDR version as current workspace");
     }
-    DbConceptSet conceptSet =
+    DbConceptSet existingConceptSet =
         conceptSetService
             .findOne(Long.valueOf(fromConceptSetId), Long.valueOf(fromWorkspaceId))
             .orElseThrow(
@@ -321,7 +321,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
                             "Concept set %s does not exist",
                             createResourcePath(
                                 fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId))));
-    DbConceptSet newConceptSet = new DbConceptSet(conceptSet);
+    DbConceptSet newConceptSet = new DbConceptSet(existingConceptSet);
 
     newConceptSet.setName(copyRequest.getNewName());
     newConceptSet.setCreator(userProvider.get());
