@@ -1,5 +1,5 @@
-import {Page} from 'puppeteer-core';
-import * as elementHandler from '../../services/element-handler';
+import {Page} from 'puppeteer';
+import * as elementHandler from '../../driver/element-handler';
 import Widget from './widget';
 
 export default class Button extends Widget {

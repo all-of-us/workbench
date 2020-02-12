@@ -1,5 +1,5 @@
-import {Page} from 'puppeteer-core';
-import * as elementHandler from '../../services/element-handler';
+import {Page} from 'puppeteer';
+import * as elementHandler from '../../driver/element-handler';
 import Widget from './widget';
 
 export default class Input extends Widget {
@@ -20,8 +20,8 @@ export default class Input extends Widget {
   }
 
   public async type(inputValue: string) {
-    await this.focus();
     const input = await this.get();
+    await input.focus();
     await input.type(inputValue);
   }
 
@@ -31,7 +31,8 @@ export default class Input extends Widget {
   }
 
   public async isDisabled() {
-    // TODO
+    const attrChecked = await elementHandler.getProperty(this.puppeteerPage, await this.get(), 'disabled');
+    return attrChecked !== null && attrChecked === true;
   }
 
 }

@@ -1,4 +1,4 @@
-import AuthenticatedPage from './authenticatedpage';
+import AuthenticatedPage from './mixin/authenticatedpage';
 
 const selectors = {
   pageTitle: 'Profile',

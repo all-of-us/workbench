@@ -1,4 +1,4 @@
-import {ElementHandle, Page} from 'puppeteer-core';
+import {ElementHandle, Page} from 'puppeteer';
 
 /**
  * <pre>

@@ -1,7 +1,7 @@
 const faker = require('faker/locale/en_US');
 
 /**
- * Get fake user information.
+ * Get a fake user information.
  */
 const fakeUser = {
   fname: faker.name.firstName(),
@@ -16,16 +16,8 @@ const fakeUser = {
   country: 'U.S.A'
 };
 
-/**
- * Get a lowercase random alphanumeric string
- */
-const randomString = (len) => {
-  let s = '';
-  while (s.length < len) { s += Math.random().toString(36).substr(2, len - s.length); }
-  return s.toLowerCase();
-};
 
 module.exports = {
   fakeUser,
-  randomString
+
 };

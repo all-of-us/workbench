@@ -1,6 +1,7 @@
-import {Page} from 'puppeteer-core';
+import {Page} from 'puppeteer';
+import {waitUntilTitleMatch} from '../../driver/waitFuncs';
 import BasePage from './basepage';
-import NavigationMenu from './mixin/navigationmenu';
+import NavigationMenu from './navigationmenu';
 
 const selectors = {
   signedInIndicator: 'body#body div',
@@ -24,14 +25,14 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   public async takeScreenshot(fileName: string) {
     const timestamp = new Date().getTime();
-    const screenshotFile = `logs/screenshots/${fileName}_${timestamp}.png`;
+    const screenshotFile = `screenshots/${fileName}_${timestamp}.png`;
     await this.puppeteerPage.screenshot({path: screenshotFile, fullPage: true});
   }
 
   protected async isLoaded(documentTitle: string) {
     await this.puppeteerPage.waitForSelector(selectors.signedInIndicator);
     await this.puppeteerPage.waitForSelector(selectors.logo, {visible: true});
-    await this.waitUntilDocumentTitleMatch(documentTitle);
+    await waitUntilTitleMatch(this.puppeteerPage, documentTitle);
   }
 
   /**
@@ -40,14 +41,14 @@ export default abstract class AuthenticatedPage extends BasePage {
    * </pre>
    */
   protected async waitForSpinner() {
-    // wait maximum 1 second for spinner to show up
+    // wait maximum 1 second for either spinner to show up
     const selectr1 = '.spinner, svg';
     const found = await this.puppeteerPage.waitFor((selector) => {
       return document.querySelectorAll(selector).length > 0
     }, {timeout: 1000}, selectr1);
 
-    // wait maximum 60 seconds for both spinner to stop
-    const selectr2 = 'svg[style*=\'spin\'], .spinner:empty';
+    // wait maximum 60 seconds for spinner disappear if spinner existed
+    const selectr2 = 'svg[style*="spin"], .spinner:empty';
     if (found) {
       await this.puppeteerPage.waitFor((selector) => {
         return document.querySelectorAll(selector).length === 0
