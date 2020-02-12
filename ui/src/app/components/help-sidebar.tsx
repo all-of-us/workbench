@@ -32,7 +32,7 @@ const styles = reactStyles({
     right: 0,
     height: 'calc(100% - 60px)',
     minHeight: 'calc(100vh - 156px)',
-    width: 'calc(14rem + 45px)',
+    width: 'calc(14rem + 55px)',
     overflow: 'hidden',
     color: colors.primary,
     zIndex: -1,
@@ -49,7 +49,8 @@ const styles = reactStyles({
     overflow: 'auto',
     marginRight: 'calc(-14rem - 40px)',
     background: colorWithWhiteness(colors.primary, .87),
-    transition: 'margin-right 0.5s ease-out'
+    transition: 'margin-right 0.5s ease-out',
+    boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
   },
   sidebarOpen: {
     marginRight: 0,
