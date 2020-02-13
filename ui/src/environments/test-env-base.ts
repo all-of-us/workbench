@@ -11,6 +11,7 @@ export const testEnvironmentBase = {
   gaLoggedInDimension: 'dimension3',
   trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskHelpCenterUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
+  createBillingAccountHelpUrl: 'https://aousupporthelp1580753096.zendesk.com/hc/en-us/articles/360039550031-Instructions-to-Create-a-Billing-Account&locale=en-us',
   zendeskWidgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   shouldShowDisplayTag: true,

@@ -16,6 +16,8 @@ import {
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
+const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
+
 @Component({
   styleUrls: ['../../../styles/buttons.css',
     '../../../styles/headers.css'],
@@ -38,7 +40,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
   helpContent = 'data';
-  sidebarOpen = true;
+  sidebarOpen = false;
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -58,14 +60,24 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const sidebarState = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+    if (!!sidebarState) {
+      this.sidebarOpen = sidebarState === 'open';
+    } else {
+      // Default the sidebar to open if no localStorage value is set
+      this.setSidebarState(true);
+    }
     this.tabPath = this.getTabPath();
     this.setHelpContent();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe(event => {
+        .subscribe(() => {
           this.tabPath = this.getTabPath();
           this.setHelpContent();
-          this.sidebarOpen = false;
+          // Close sidebar on route change unless navigating between participants in cohort review
+          if (this.helpContent !== 'reviewParticipantDetail') {
+            this.setSidebarState(false);
+          }
         }));
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.displayNavBar = !minimizeChrome;
@@ -215,5 +227,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   setSidebarState = (sidebarOpen: boolean) => {
     this.sidebarOpen = sidebarOpen;
+    const sidebarState = sidebarOpen ? 'open' : 'closed';
+    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, sidebarState);
   }
 }

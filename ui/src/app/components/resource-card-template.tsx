@@ -99,9 +99,8 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
                 <React.Fragment>
                   {this.props.actions.map((action, i) => {
                     return (
-                      <TooltipTrigger content={action.hoverText}>
+                      <TooltipTrigger key={i} content={action.hoverText}>
                         <MenuItem
-                          key={i}
                           icon={action.icon}
                           onClick={() => action.onClick()}
                           disabled={action.disabled}>

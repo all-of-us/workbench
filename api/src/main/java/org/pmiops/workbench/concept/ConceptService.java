@@ -6,6 +6,7 @@ import static org.pmiops.workbench.model.StandardConceptFilter.STANDARD_CONCEPTS
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -117,6 +118,10 @@ public class ConceptService {
     }
 
     return query2.toString();
+  }
+
+  public Iterable<DbConcept> findAll(Collection<Long> conceptIds) {
+    return conceptDao.findAll(conceptIds);
   }
 
   public List<DbDomainInfo> getDomainInfo() {

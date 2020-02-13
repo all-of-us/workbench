@@ -28,6 +28,7 @@ import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
@@ -182,6 +183,10 @@ public class ConceptSetsControllerTest {
 
   @Autowired ConceptDao conceptDao;
 
+  @Autowired ConceptSetService conceptSetService;
+
+  @Autowired ConceptService conceptService;
+
   @Autowired DataSetService dataSetService;
 
   @Autowired WorkspaceDao workspaceDao;
@@ -215,6 +220,7 @@ public class ConceptSetsControllerTest {
     CohortFactoryImpl.class,
     UserServiceImpl.class,
     ConceptSetsController.class,
+    ConceptService.class,
     WorkspacesController.class,
     ConceptSetService.class,
     WorkspaceMapperImpl.class,
@@ -226,7 +232,6 @@ public class ConceptSetsControllerTest {
     CloudStorageService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    ConceptSetService.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,

@@ -35,6 +35,16 @@
       "namespace": "aou-rw-edae682b",
       "id": "masterdepressionphenotype",
       "category": "PHENOTYPE_LIBRARY"
+    }, {
+      "name": "Dementia Phenotype",
+      "namespace": "aou-rw-76176da6",
+      "id": "featuredworkspacedementia",
+      "category": "PHENOTYPE_LIBRARY"
+    }, {
+      "name": "Ischemic Heart Disease Phenotype",
+      "namespace": "aou-rw-ec93e304",
+      "id": "featuredworkspaceischemicheartdisease",
+      "category": "PHENOTYPE_LIBRARY"
     }
   ]
 }

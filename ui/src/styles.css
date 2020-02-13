@@ -196,3 +196,24 @@ iframe#launcher {
     transform: rotate(359deg);
   }
 }
+
+/*
+ * Hides the unnecessary "select all" header from the multiselect drop-down for the
+ * Degrees multi-select in the Account Creation component.
+ */
+.create-account__degree-select .p-multiselect-header {
+  display: none;
+}
+
+/*
+ * Causes PDF pages to have space between them and be centered within their container.
+ * The react-pdf <Page> component doesn't support inline styles, so we need to use a
+ * CSS class and specify style overrides here.
+ */
+.tos-pdf-page {
+  margin-bottom: 1rem;
+}
+
+.tos-pdf-page > canvas {
+  margin: auto;
+}
