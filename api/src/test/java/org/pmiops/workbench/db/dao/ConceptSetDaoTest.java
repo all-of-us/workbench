@@ -42,7 +42,6 @@ public class ConceptSetDaoTest {
     dbConceptSet =
         conceptSetDao.save(
             DbConceptSet.builder()
-                .addConceptSetId(1)
                 .addCreationTime(now)
                 .addCreator(creator)
                 .addDescription("descr")
