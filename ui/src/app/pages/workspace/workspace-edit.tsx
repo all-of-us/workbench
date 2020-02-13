@@ -562,7 +562,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     renderBillingDescription() {
       return <div>
-        The <i> Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)} in
+        The <i>All of Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)} in
         free credits per user. When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
         At any time, you can update your Workspace billing account.
       </div>;
