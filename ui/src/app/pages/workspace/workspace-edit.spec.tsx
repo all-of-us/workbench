@@ -45,7 +45,7 @@ describe('WorkspaceEdit', () => {
         scientificApproach: 'science',
         drugDevelopment: true,
         disseminateResearchFindingList: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
-        researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLINESSBURDEN]
+        researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN]
       }
     };
 
