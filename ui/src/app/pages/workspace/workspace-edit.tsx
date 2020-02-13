@@ -769,18 +769,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         navigateToWorkspace();
 
       } catch (error) {
+        error = await error.json();
+
         console.log(error);
         this.setState({loading: false});
-        if (error.status === 409) {
+        if (error.statusCode === 409) {
           this.setState({workspaceCreationConflictError: true});
         } else {
           let errorMsg;
-          if (error.status === 429) {
+          if (error.statusCode === 429) {
             errorMsg = 'Server is overloaded. Please try again in a few minutes.';
+          } else if (error.message.includes('billing account is closed')) {
+            errorMsg = error.message;
           } else {
             errorMsg = `Could not
             ${this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
-              ' create ' : ' update '} workspace.`;
+                ' create ' : ' update '} workspace.`;
           }
 
           this.setState({

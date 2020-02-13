@@ -51,6 +51,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -282,7 +283,8 @@ public class DataSetControllerTest {
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    Zendesk.class
+    Zendesk.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
 

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
 import java.util.UUID;
@@ -83,6 +84,18 @@ public class TestMockFactory {
       throw new RuntimeException(e);
     }
     doReturn(projects).when(cloudbilling).projects();
+
+    Cloudbilling.BillingAccounts billingAccounts = mock(Cloudbilling.BillingAccounts.class);
+
+    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
+    try {
+      doReturn(new BillingAccount().setOpen(true)).when(getRequest).execute();
+      doReturn(getRequest).when(billingAccounts).get(anyString());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    doReturn(billingAccounts).when(cloudbilling).billingAccounts();
     return cloudbilling;
   }
 }
