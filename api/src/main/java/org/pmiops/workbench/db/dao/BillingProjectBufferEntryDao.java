@@ -1,8 +1,12 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.SqlResultSetMapping;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -40,6 +44,29 @@ public interface BillingProjectBufferEntryDao
     return DaoUtils.getAttributeToCountMap(findAll(), DbBillingProjectBufferEntry::getStatusEnum);
   }
 
+  @Query(value = "select status, count(billing_project_buffer_entry.billing_project_buffer_entry_id) as num_projects\n"
+      + "    from billing_project_buffer_entry\n"
+      + "group by status\n"
+      + "order by status;", nativeQuery = true)
+//  List<BillingProjectBufferEntryStatusToCountResult> computeProjectCountByStatus();
+   BillingProjectBufferEntryStatusToCountResult[] computeProjectCountByStatus();
+
+  @Query(value = "select status, count(billing_project_buffer_entry.billing_project_buffer_entry_id) as num_projects\n"
+      + "    from billing_project_buffer_entry\n"
+      + "group by status\n"
+      + "order by status;", nativeQuery = true)
+  Object[] computeProjectCountByStatus2();
+
+  default Map<BufferEntryStatus, Long> getStatusToProjectCountMap() {
+//    List<BillingProjectBufferEntryStatusToCountResult> rows = computeProjectCountByStatus();
+    BillingProjectBufferEntryStatusToCountResult[] rows = computeProjectCountByStatus();
+
+    return Arrays.stream(rows)
+        .collect(ImmutableMap.toImmutableMap(
+            BillingProjectBufferEntryStatusToCountResult::getStatusEnum,
+            BillingProjectBufferEntryStatusToCountResult::getNumProjects));
+  }
+
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
   int acquireAssigningLock();
 
@@ -67,4 +94,44 @@ public interface BillingProjectBufferEntryDao
       @Param("billingStatus") short billingStatus,
       @Param("workspaceStatus") short workspaceStatus,
       @Param("migrationStatus") short migrationStatus);
+
+  /**
+   * POJO result class for counting entries by status.
+   *
+   *  TODO(jaycarlton): see if an Immutable will work here.
+   */
+//  todo:  does @SqlResultSetMapping()  go here? or should  this be an  entity (again)?
+  class BillingProjectBufferEntryStatusToCountResult {
+
+    private short billingProjectStatusStorage;
+    private long numProjects;
+
+    public BillingProjectBufferEntryStatusToCountResult() {
+    }
+
+    public BillingProjectBufferEntryStatusToCountResult(short status, long numProjects) {
+      this.billingProjectStatusStorage = status;
+      this.numProjects = numProjects;
+    }
+
+    public void setStatus(short status) {
+      this.billingProjectStatusStorage = status;
+    }
+
+    public Short getStatus() {
+      return billingProjectStatusStorage;
+    }
+
+    public void setNumProjects(long numProjects) {
+      this.numProjects  = numProjects;
+    }
+
+    public long getNumProjects() {
+      return numProjects;
+    }
+
+    public BufferEntryStatus getStatusEnum() {
+      return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(billingProjectStatusStorage);
+    }
+  }
 }

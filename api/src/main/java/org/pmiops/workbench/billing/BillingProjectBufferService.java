@@ -21,6 +21,7 @@ import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
+import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.BillingProjectBufferEntryStatusToCountResult;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -86,6 +87,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
     final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
         ImmutableMap.copyOf(billingProjectBufferEntryDao.getCountByStatusMap());
+//    final List<BillingProjectBufferEntryStatusToCountResult> statusToProjectCount = billingProjectBufferEntryDao.computeProjectCountByStatus();
 
     for (BufferEntryStatus status : BufferEntryStatus.values()) {
       long count = entryStatusToCount.getOrDefault(status, 0L);
