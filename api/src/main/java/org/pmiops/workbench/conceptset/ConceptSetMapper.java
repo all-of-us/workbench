@@ -14,7 +14,7 @@ public interface ConceptSetMapper {
   @Mapping(target = "id", source = "conceptSetId")
   @Mapping(target = "domain", source = "domainEnum")
   @Mapping(target = "survey", source = "surveysEnum")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "etag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   @Mapping(target = "concepts", ignore = true)
   ConceptSet dbModelToClient(DbConceptSet source);
 }

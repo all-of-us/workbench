@@ -3,6 +3,7 @@ package org.pmiops.workbench.utils.mappers;
 import java.sql.Timestamp;
 import java.util.Optional;
 import org.mapstruct.Mapper;
+import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -43,10 +44,12 @@ public class CommonMappers {
     return CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
   }
 
+  @Named("cdrVersionToEtag")
   public static String cdrVersionToEtag(int cdrVersion) {
     return Etags.fromVersion(cdrVersion);
   }
 
+  @Named("etagToCdrVersion")
   public static int etagToCdrVersion(String etag) {
     return Etags.toVersion(etag);
   }
