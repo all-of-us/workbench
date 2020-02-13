@@ -743,6 +743,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               ? BillingStatus.ACTIVE
               : BillingStatus.INACTIVE);
     } else {
+      // At this point, we can assume that a user provided billing account is open since we
+      // throw a BadRequestException if a closed one is provided
       workspace.setBillingStatus(BillingStatus.ACTIVE);
     }
   }
