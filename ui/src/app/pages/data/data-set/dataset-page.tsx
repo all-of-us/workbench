@@ -155,6 +155,8 @@ export const styles = reactStyles({
     flexDirection: 'column',
     alignItems: 'center',
     height: '10rem',
+    width: '40rem',
+    alignSelf: 'center',
     marginTop: '2rem',
     fontSize: 18,
     fontWeight: 600,
@@ -188,6 +190,13 @@ export const styles = reactStyles({
     bottom: '0',
     height: '60px',
     width: '100%'
+  },
+  errorMessage: {
+    backgroundColor: colorWithWhiteness(colors.highlight, .5),
+    color: colors.primary,
+    fontSize: '12px',
+    padding: '0.5rem',
+    borderRadius: '0.5em'
   }
 });
 
@@ -811,9 +820,24 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           return <div>The preview table cannot be loaded because the query took too long to run.
             Please export this Dataset to a Notebook by clicking the Analyze button.</div>;
         default:
-          return <div>An unexpected error has occurred while running your Dataset query.
-            Please <Link style={{display: 'inline-block'}} onClick={() => this.openZendeskWidget()}>
-              create a bug report</Link> for our team.</div>;
+          return <FlexRow style={styles.errorMessage}>
+            <ClrIcon
+              shape={'warning-standard'}
+              class={'is-solid'}
+              size={26}
+              style={{
+                color: colors.warning,
+                flex: '0 0 auto'
+              }}
+            />
+            <div style={{paddingLeft: '0.25rem'}}>
+              The preview table could not be loaded. Please try again by clicking the ‘View Preview Table’ as
+              some queries take longer to load. If the error keeps happening, please <Link style={{
+                display: 'inline-block'}} onClick={() => this.openZendeskWidget()}>contact us</Link>. You can also
+              export your dataset directly for analysis by clicking the ‘Analyze’ button, without viewing the preview
+              table.
+            </div>
+          </FlexRow>;
       }
     }
 
