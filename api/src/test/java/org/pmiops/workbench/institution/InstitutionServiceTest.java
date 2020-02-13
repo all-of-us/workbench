@@ -4,6 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Before;
@@ -24,6 +26,14 @@ public class InstitutionServiceTest {
 
   private final Institution testInst =
       new Institution().shortName("test").displayName("this is a test");
+
+  // the DB converts nulls to empty lists
+  private final Institution testInstAfterRT =
+      new Institution()
+          .shortName(testInst.getShortName())
+          .displayName(testInst.getDisplayName())
+          .emailDomains(Collections.emptyList())
+          .emailAddresses(Collections.emptyList());
 
   @Before
   public void setUp() {
@@ -49,25 +59,32 @@ public class InstitutionServiceTest {
 
   @Test
   public void test_getInstitutions() {
-    assertThat(service.getInstitutions()).containsExactlyElementsIn(ImmutableList.of(testInst));
+    assertThat(service.getInstitutions()).containsExactly(testInstAfterRT);
 
     final Institution otherInst =
-        new Institution().shortName("otherInst").displayName("The Institution of testing");
+        new Institution()
+            .shortName("otherInst")
+            .displayName("The Institution of testing")
+            .emailDomains(new ArrayList<>())
+            .emailAddresses(new ArrayList<>());
     service.createInstitution(otherInst);
-    assertThat(service.getInstitutions())
-        .containsExactlyElementsIn(ImmutableList.of(testInst, otherInst));
+    assertThat(service.getInstitutions()).containsExactly(testInstAfterRT, otherInst);
 
     service.deleteInstitution(testInst.getShortName());
-    assertThat(service.getInstitutions()).containsExactlyElementsIn(ImmutableList.of(otherInst));
+    assertThat(service.getInstitutions()).containsExactly(otherInst);
   }
 
   @Test
   public void test_getInstitution() {
-    assertThat(service.getInstitution(testInst.getShortName())).hasValue(testInst);
+    assertThat(service.getInstitution(testInst.getShortName())).hasValue(testInstAfterRT);
     assertThat(service.getInstitution("otherInst")).isEmpty();
 
     final Institution otherInst =
-        new Institution().shortName("otherInst").displayName("The Institution of testing");
+        new Institution()
+            .shortName("otherInst")
+            .displayName("The Institution of testing")
+            .emailAddresses(new ArrayList<>())
+            .emailDomains(new ArrayList<>());
     service.createInstitution(otherInst);
     assertThat(service.getInstitution("otherInst")).hasValue(otherInst);
   }
