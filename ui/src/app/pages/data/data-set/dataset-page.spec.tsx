@@ -2,13 +2,14 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
-import {DataSetPage} from 'app/pages/data/data-set/dataset-page';
+import {DataSetPage, COMPARE_DOMAINS_FOR_DISPLAY} from 'app/pages/data/data-set/dataset-page';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {
   CohortsApi,
   ConceptSetsApi,
   DataSetApi,
+  Domain,
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -60,9 +61,9 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // First Concept set in concept set list has domain "Condition"
-    const condition_concept = wrapper.find('[data-test-id="concept-set-list-item"]').first()
+    const conditionConceptSet = wrapper.find('[data-test-id="concept-set-list-item"]').first()
         .find('input').first();
-    condition_concept.simulate('change');
+    conditionConceptSet.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
     expect(valueListItems.length).toBe(2);
@@ -72,9 +73,9 @@ describe('DataSetPage', () => {
     expect(checkedValuesList.length).toBe(2);
 
     // Second Concept set in concept set list has domain "Measurement"
-    const measurement_concept = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
+    const measurementConceptSet = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
         .find('input').first();
-    measurement_concept.simulate('change');
+    measurementConceptSet.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     valueListItems = wrapper.find('[data-test-id="value-list-items"]');
@@ -131,6 +132,24 @@ describe('DataSetPage', () => {
 
       // Should be no change in selected values
       expect(checkedValuesList.length).toBe(4);
+  });
+
+  it('should display correct values on rapid selection of multiple domains', async() => {
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Select "Condition" and "Measurement" concept sets.
+    const conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
+    conceptSetEls.at(0).find('input').first().simulate('change');
+    conceptSetEls.at(1).find('input').first().simulate('change');
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    const valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+    const checkedValuesList = valueListItems.filterWhere(value => value.props().checked);
+    expect(valueListItems.length).toBe(5);
+    expect(checkedValuesList.length).toBe(5);
   });
 
   it('should enable save button and preview button once cohorts, concepts and values are selected',
@@ -196,9 +215,36 @@ describe('DataSetPage', () => {
     wrapper.find({'data-test-id': 'preview-button'}).first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(spy).toHaveBeenCalledTimes(1);
-
   });
 
+  it('should display preview data for current domains only', async() => {
+    const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Select a cohort.
+    wrapper.find('[data-test-id="cohort-list-item"]').first()
+      .find('input').first().simulate('change');
+    wrapper.update();
+
+    // Select "Condition" and "Measurement" concept sets.
+    let conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
+    conceptSetEls.at(0).find('input').first().simulate('change');
+    conceptSetEls.at(1).find('input').first().simulate('change');
+    await waitOneTickAndUpdate(wrapper);
+
+    // Deselect "Condition".
+    conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
+    conceptSetEls.at(0).find('input').first().simulate('change');
+    await waitOneTickAndUpdate(wrapper);
+
+    // Click preview button to load preview
+    wrapper.find({'data-test-id': 'preview-button'}).first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
     const wrapper = mount(<DataSetPage />);
@@ -217,7 +263,7 @@ describe('DataSetPage', () => {
     expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/concepts');
   });
 
-  it(' dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
+  it('dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
     const wrapper = mount(<DataSetPage />);
@@ -229,7 +275,7 @@ describe('DataSetPage', () => {
     expect(isSaveButtonDisable).toBeTruthy();
   });
 
-  it(' dataSet should disable cohort/concept PLUS ICON if user has READER access', async() => {
+  it('dataSet should disable cohort/concept PLUS ICON if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
     const wrapper = mount(<DataSetPage />);
@@ -259,5 +305,11 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should sort domains for display only', () => {
+    const domains = [Domain.MEASUREMENT, Domain.SURVEY, Domain.PERSON, Domain.CONDITION];
+    domains.sort(COMPARE_DOMAINS_FOR_DISPLAY);
+    expect(domains).toEqual([Domain.PERSON, Domain.CONDITION, Domain.MEASUREMENT, Domain.SURVEY]);
   });
 });
