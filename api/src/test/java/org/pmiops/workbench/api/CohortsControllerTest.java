@@ -35,6 +35,7 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
@@ -181,6 +182,7 @@ public class CohortsControllerTest {
     WorkspaceServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
+    ConceptSetMapperImpl.class,
     ConceptSetService.class,
     ConceptService.class,
     NotebooksServiceImpl.class,

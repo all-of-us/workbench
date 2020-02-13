@@ -62,6 +62,8 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapper;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -219,6 +221,8 @@ public class DataSetControllerTest {
 
   @Mock DataSetMapper dataSetMapper;
 
+  @Autowired ConceptSetMapper conceptSetMapper;
+
   @Autowired DataSetService dataSetService;
 
   @Autowired FireCloudService fireCloudService;
@@ -255,6 +259,7 @@ public class DataSetControllerTest {
   @Import({
     CohortFactoryImpl.class,
     ConceptService.class,
+    ConceptSetMapperImpl.class,
     ConceptSetService.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
@@ -346,7 +351,7 @@ public class DataSetControllerTest {
                 CLOCK,
                 cdrVersionDao,
                 cohortDao,
-                conceptDao,
+                conceptService,
                 conceptSetDao,
                 dataDictionaryEntryDao,
                 dataSetDao,
@@ -355,7 +360,8 @@ public class DataSetControllerTest {
                 fireCloudService,
                 notebooksService,
                 userProvider,
-                workspaceService));
+                workspaceService,
+                conceptSetMapper));
     WorkspacesController workspacesController =
         new WorkspacesController(
             billingProjectBufferService,
@@ -395,7 +401,8 @@ public class DataSetControllerTest {
             conceptBigQueryService,
             userRecentResourceService,
             userProvider,
-            CLOCK);
+            CLOCK,
+            conceptSetMapper);
     doAnswer(
             invocation -> {
               DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
