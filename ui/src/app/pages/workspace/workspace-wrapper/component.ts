@@ -16,6 +16,8 @@ import {
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
+const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
+
 @Component({
   styleUrls: ['../../../styles/buttons.css',
     '../../../styles/headers.css'],
@@ -58,11 +60,12 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (!!localStorage.getItem('sidebarState')) {
-      this.sidebarOpen = localStorage.getItem('sidebarState') === 'open';
+    const sidebarState = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+    if (!!sidebarState) {
+      this.sidebarOpen = sidebarState === 'open';
     } else {
-      this.sidebarOpen = true;
-      localStorage.setItem('sidebarState', 'open');
+      // Default the sidebar to open if no localStorage value is set
+      this.setSidebarState(true);
     }
     this.tabPath = this.getTabPath();
     this.setHelpContent();
@@ -71,9 +74,9 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         .subscribe(() => {
           this.tabPath = this.getTabPath();
           this.setHelpContent();
+          // Close sidebar on route change unless navigating between participants in cohort review
           if (this.helpContent !== 'reviewParticipantDetail') {
-            this.sidebarOpen = false;
-            localStorage.setItem('sidebarState', 'closed');
+            this.setSidebarState(false);
           }
         }));
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
@@ -225,6 +228,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   setSidebarState = (sidebarOpen: boolean) => {
     this.sidebarOpen = sidebarOpen;
     const sidebarState = sidebarOpen ? 'open' : 'closed';
-    localStorage.setItem('sidebarState', sidebarState);
+    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, sidebarState);
   }
 }
