@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -57,6 +58,7 @@ public class DataDictionaryTest {
     BigQueryService.class,
     CohortDao.class,
     ConceptDao.class,
+    ConceptService.class,
     ConceptSetDao.class,
     ConceptSetMapper.class,
     DataSetDao.class,
