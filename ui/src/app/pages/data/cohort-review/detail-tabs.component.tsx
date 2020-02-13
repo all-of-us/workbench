@@ -134,7 +134,7 @@ const sourceCode = {
 const value = {
   name: 'value',
   displayName: 'Value',
-  filter: FilterColumns.VALASNUMBER
+  filter: FilterColumns.VALUEASNUMBER
 };
 const ageAtEvent = {
   name: 'ageAtEvent',

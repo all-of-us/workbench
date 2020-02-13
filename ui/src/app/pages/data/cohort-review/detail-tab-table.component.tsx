@@ -501,7 +501,7 @@ export const DetailTabTable = withCurrentWorkspace()(
               if (!!filter) {
                 filters.items.push({
                   property: columns.find(c => c.name === col).filter,
-                  operator: Operator.LIKE,
+                  operator: Operator.EQUAL,
                   values: [filter]
                 });
               }

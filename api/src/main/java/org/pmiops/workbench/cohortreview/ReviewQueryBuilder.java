@@ -22,7 +22,7 @@ import static org.pmiops.workbench.model.FilterColumns.START_DATETIME;
 import static org.pmiops.workbench.model.FilterColumns.STRENGTH;
 import static org.pmiops.workbench.model.FilterColumns.SURVEY_NAME;
 import static org.pmiops.workbench.model.FilterColumns.UNIT;
-import static org.pmiops.workbench.model.FilterColumns.VAL_AS_NUMBER;
+import static org.pmiops.workbench.model.FilterColumns.VALUE_AS_NUMBER;
 import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -75,7 +75,7 @@ public class ReviewQueryBuilder {
         NUM_MENTIONS.toString(),
         FIRST_MENTION.toString(),
         LAST_MENTION.toString(),
-        VAL_AS_NUMBER.toString(),
+        VALUE_AS_NUMBER.toString(),
         REVIEW_TABLE,
         PART_ID
       };
@@ -93,9 +93,9 @@ public class ReviewQueryBuilder {
         REVIEW_TABLE, REVIEW_TABLE, PART_ID, DOMAIN_PARAM, LIMIT, PART_ID, DOMAIN_PARAM, LIMIT
       };
   private static final ImmutableList<FilterColumns> LONG_NUMBERS =
-      ImmutableList.of(VAL_AS_NUMBER, AGE_AT_EVENT, NUM_MENTIONS);
+      ImmutableList.of(AGE_AT_EVENT, NUM_MENTIONS);
   private static final ImmutableList<FilterColumns> DOUBLE_NUMBERS =
-      ImmutableList.of(VAL_AS_NUMBER);
+      ImmutableList.of(VALUE_AS_NUMBER);
 
   private static final String DOMAIN_SQL = "and domain = @" + DOMAIN_PARAM + "\n";
   private static final String ORDER_BY = "order by %s %s, dataId\n limit %s offset %s\n";

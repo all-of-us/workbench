@@ -22,7 +22,7 @@ import static org.pmiops.workbench.model.FilterColumns.START_DATETIME;
 import static org.pmiops.workbench.model.FilterColumns.STRENGTH;
 import static org.pmiops.workbench.model.FilterColumns.SURVEY_NAME;
 import static org.pmiops.workbench.model.FilterColumns.UNIT;
-import static org.pmiops.workbench.model.FilterColumns.VAL_AS_NUMBER;
+import static org.pmiops.workbench.model.FilterColumns.VALUE_AS_NUMBER;
 import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
 
 import com.google.cloud.bigquery.BigQueryException;
@@ -902,7 +902,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           .sourceName(bigQueryService.getString(row, rm.get(SOURCE_NAME.toString())))
           .sourceCode(bigQueryService.getString(row, rm.get(SOURCE_CODE.toString())))
           .standardCode(bigQueryService.getString(row, rm.get(STANDARD_CODE.toString())))
-          .value(bigQueryService.getString(row, rm.get(VAL_AS_NUMBER.toString())))
+          .value(bigQueryService.getString(row, rm.get(VALUE_AS_NUMBER.toString())))
           .visitType(bigQueryService.getString(row, rm.get(VISIT_TYPE.toString())))
           .numMentions(bigQueryService.getString(row, rm.get(NUM_MENTIONS.toString())))
           .firstMention(

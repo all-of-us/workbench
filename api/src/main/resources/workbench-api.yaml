@@ -6507,7 +6507,7 @@ definitions:
     - ROUTE
     - DOSE
     - STRENGTH
-    - VAL_AS_NUMBER
+    - VALUE_AS_NUMBER
     - UNIT
     - REF_RANGE
     - SURVEY_NAME
