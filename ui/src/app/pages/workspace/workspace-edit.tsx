@@ -1,6 +1,6 @@
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
-import {Button} from 'app/components/buttons';
+import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -50,7 +50,8 @@ import {
   ResearchPurposeItems,
   researchPurposeQuestions,
   SpecificPopulationItem,
-  SpecificPopulationItems, toolTipText
+  SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
+  toolTipTextStigmatization
 } from './workspace-edit-text';
 
 
@@ -1033,9 +1034,32 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
           {/* Request for review section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.'
-                              description={researchPurposeQuestions[8].description}>
-
+        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.'>
+          <FlexRow style={styles.text}><div>
+            Any research that focuses on certain population characteristics or &nbsp;
+            <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
+              <Link style={{display: 'inline-block'}}> uses
+              demographic variables</Link>
+            </TooltipTrigger>
+            in analyses can result, often unintentionally,
+            in findings that may be misinterpreted or misused by others to foster stigma. While it
+            may not be possible to completely prevent misuse of research for stigmatizing purposes,
+            data users can take important steps to minimize the risk of this happening–
+            <TooltipTrigger content={toolTipTextDataUseAgreement}>
+              <Link style={{display: 'inline-block'}}>taking this step is a condition of your
+                Data Use Agreement.</Link>
+            </TooltipTrigger>
+            &nbsp;If you are concerned that your research could inadvertently stigmatize
+            participants or communities, or if you are unsure, let us know. We encourage you to
+            request a review of your research purpose statement by the All of Us Resource Access
+            Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
+            modifying your research purpose or scope. To learn more, please refer to the&nbsp;
+            <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
+            <Link style={{display: 'inline-block'}}>All of Us Stigmatizing Research Policy</Link>
+            </TooltipTrigger>. If you
+            request a review, you can expect to receive an initial response within five business days.
+            During the RAB’s review, you may begin working in your workspace.</div>
+          </FlexRow>
           <FlexRow style={{paddingTop: '0.3rem', marginLeft: '0.8rem'}}>
             <FlexColumn>
             <label style={{...styles.header, marginBottom: '0.2rem'}}>Would you like to request a
@@ -1082,11 +1106,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.billingAccountName && <div>You must select a billing account</div>}
                 {errors.primaryPurpose && <div>You must choose at least one primary research
                   purpose (Question 1)</div>}
-                {errors.intendedStudy && <div>You must answer <i>What are the anticipated findings
+                {errors.anticipatedFindings && <div>You must answer <i>What are the anticipated findings
                   from the study? (Question # 2.1)</i></div>}
                 {errors.scientificApproach && <div>You must answer <i>What are the scientific
                   approaches you plan to use for your study (Question # 2.2)</i></div>}
-                {errors.anticipatedFindings && <div>You must answer <i>What are the specific
+                {errors.intendedStudy && <div>You must answer <i>What are the specific
                   scientific question(s) you intend to study (Question # 2.3)</i></div>}
                 {errors.specificPopulation && <div>You must specify a population of study</div>}
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}

@@ -1,3 +1,5 @@
+import {TooltipTrigger} from 'app/components/popups';
+import colors from 'app/styles/colors';
 import {
   DisseminateResearchEnum,
   ResearchOutcomeEnum,
@@ -5,6 +7,35 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+
+
+
+export const toolTipTextDemographic = 'For example, by stratifying results based on race/ethnicity, age, ' +
+    'sex, gender identity, sexual orientation, geography disability status, access to care, ' +
+    'education level or income\n';
+
+export const toolTipTextDataUseAgreement = <div>These steps include, but are not limited to:
+  <ul>
+    <li>Giving careful consideration to the sensibilities of the different groups of people you are studying.</li>
+    <li> Ensuring that you understand, and suitably wield, your analytical tools.</li>
+    <li>Being conscientiously expansive in your inclusion of participant populations and your analytical controls. </li>
+    <li>Using precise language to describe your findings including both what your results mean and do not mean.</li>
+  </ul>
+</div>;
+
+
+export const toolTipTextStigmatization = <div>
+  <div style={{fontSize: '13px', fontWeight: 400, lineHeight: '24px'}}>
+    Populations that are historically medically underserved or underrepresented in
+    biomedical research are also more vulnerable to stigmatization. If your population
+    of interest includes the following categories defined as Underrepresented in
+    Biomedical Research (UBR) by the <i>All of Us</i> Research Program, you are
+    encouraged to request a review of your research purpose by the Resource Access
+    Board (RAB).
+  </div>
+</div>;
+
+
 
 export const ResearchPurposeDescription =
     <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -168,12 +199,16 @@ export const researchPurposeQuestions = [
     </div>
   }, {
     header: 'Request for Review of Research Purpose Description',
-    description: <div>Any research that focuses on certain population characteristics or uses
-        demographic variables in analyses can result, often unintentionally, in findings that may be
-      misinterpreted or misused by others to foster stigma. While it may not be possible to
-      completely prevent misuse of research for stigmatizing purposes, data users can take important
-      steps to minimize the risk of this happening–taking this step is a condition of your Data Use
-      Agreement. If you are concerned that your research could inadvertently stigmatize participants
+    description: <div>Any research that focuses on certain population characteristics or
+      <TooltipTrigger content={toolTipTextDemographic}><div style={{color: colors.secondary}}>uses
+        demographic variables</div></TooltipTrigger> in analyses can result, often unintentionally,
+      in findings that may be misinterpreted or misused by others to foster stigma. While it may
+      not be possible to completely prevent misuse of research for stigmatizing purposes, data
+      users can take important steps to minimize the risk of this happening–
+      <TooltipTrigger content={toolTipTextDataUseAgreement}>
+        <div>taking this step is a condition of your Data Use Agreement.</div>
+      </TooltipTrigger>
+      If you are concerned that your research could inadvertently stigmatize participants
       or communities, or if you are unsure, let us know. We encourage you to request a review of
       your
       research purpose statement by the All of Us Resource Access Board (RAB) as a precaution.
@@ -183,6 +218,8 @@ export const researchPurposeQuestions = [
       During the RAB’s review, you may begin working in your workspace.</div>
   }
 ];
+
+
 
 export interface SpecificPopulationItem {
   label: string;
@@ -307,6 +344,7 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
     }]
   }
 ];
+
 
 export const disseminateFindings = [
   {
