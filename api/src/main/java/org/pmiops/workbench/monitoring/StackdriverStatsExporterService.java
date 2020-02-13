@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -38,12 +39,14 @@ public class StackdriverStatsExporterService {
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private ModulesService modulesService;
+  private Optional<String> spoofedNodeId;
 
   public StackdriverStatsExporterService(
       Provider<WorkbenchConfig> workbenchConfigProvider, ModulesService modulesService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.modulesService = modulesService;
     this.initialized = false;
+    this.spoofedNodeId = Optional.empty();
   }
 
   /**
@@ -121,8 +124,16 @@ public class StackdriverStatsExporterService {
     try {
       return modulesService.getCurrentInstanceId();
     } catch (ModulesException e) {
-      logger.log(Level.INFO, "Failed to retrieve instance ID from ModulesService");
-      return makeRandomNodeId();
+      final String newNodeId = getSpoofedNodeId();
+      if (workbenchConfigProvider.get().server.shortName.equals("Local")) {
+        logger.log(Level.INFO, String.format("Spoofed nodeID for local process is %s.", newNodeId));
+      } else {
+        logger.warning(
+            String.format(
+                "Failed to retrieve instance ID from ModulesService. Using %s instead.",
+                newNodeId));
+      }
+      return getSpoofedNodeId();
     }
   }
 
@@ -133,8 +144,11 @@ public class StackdriverStatsExporterService {
    *
    * @return
    */
-  private String makeRandomNodeId() {
-    return UNKNOWN_INSTANCE_PREFIX + UUID.randomUUID().toString();
+  private String getSpoofedNodeId() {
+    if (!spoofedNodeId.isPresent()) {
+      spoofedNodeId = Optional.of(UNKNOWN_INSTANCE_PREFIX + UUID.randomUUID().toString());
+    }
+    return spoofedNodeId.get();
   }
 
   @NotNull

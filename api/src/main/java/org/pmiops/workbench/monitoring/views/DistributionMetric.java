@@ -26,6 +26,12 @@ public enum DistributionMetric implements Metric {
       Collections.singletonList(MetricLabel.OPERATION_NAME),
       DistributionAggregation.OPERATION_TIME,
       MeasureLong.class),
+  GAUGE_COLLECTION_TIME(
+      "gauge_collection_time",
+      "Time to get data from all gauges",
+      Collections.singletonList(MetricLabel.OPERATION_NAME),
+      DistributionAggregation.OPERATION_TIME,
+      MeasureLong.class),
   UNIFORM_RANDOM_SAMPLE(
       "random_sample_2",
       "Random values",

@@ -10,6 +10,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
@@ -22,8 +24,10 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
 
   // We don't need to make this name different for each environment, as the
   // MonitoredResource will take care of that.
+  private static final Logger log = Logger.getLogger(LogsBasedMetricServiceImpl.class.getName());
+
   private static final String METRICS_LOG_NAME = "debug-logs-based-metrics";
-  private Logging logging;
+  private Logging cloudLogging;
   private StackdriverStatsExporterService stackdriverStatsExporterService;
   private Provider<Stopwatch> stopwatchProvider;
 
@@ -32,22 +36,24 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
    * temporrary until we have a Provider of MonitoredResource.
    */
   public LogsBasedMetricServiceImpl(
-      Logging logging,
+      Logging cloudLogging,
       StackdriverStatsExporterService stackdriverStatsExporterService,
       Provider<Stopwatch> stopwatchProvider) {
-    this.logging = logging;
+    this.cloudLogging = cloudLogging;
     this.stackdriverStatsExporterService = stackdriverStatsExporterService;
     this.stopwatchProvider = stopwatchProvider;
   }
 
   @Override
   public void record(MeasurementBundle measurementBundle) {
+    log.log(Level.INFO, String.format("Recording bundle %s", measurementBundle.toString()));
     final ImmutableSet<LogEntry> logEntries =
         measurementBundleToJsonPayloads(measurementBundle).stream()
             .map(this::payloadToLogEntry)
             .collect(ImmutableSet.toImmutableSet());
+
     // This list will never be empty because of the validation in the MeasurementBundle builder
-    logging.write(logEntries);
+    cloudLogging.write(logEntries);
   }
 
   @Override

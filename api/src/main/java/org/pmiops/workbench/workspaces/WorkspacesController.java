@@ -102,12 +102,14 @@ import org.zendesk.client.v2.model.Request;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
+
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_CLONE_FILE_SIZE_MB = 100;
+  private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
 
   private Retryer<Boolean> retryer =
       RetryerBuilder.<Boolean>newBuilder()
@@ -991,6 +993,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private <T> T recordOperationTime(Supplier<T> operation, String operationName) {
+    log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
     return logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
@@ -998,6 +1001,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void recordOperationTime(Runnable operation, String operationName) {
+    log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
     logsBasedMetricService.recordElapsedTime(
         MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
         DistributionMetric.WORKSPACE_OPERATION_TIME,
