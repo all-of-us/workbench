@@ -113,7 +113,7 @@ const styles = reactStyles({
     lineHeight: '24px',
     cursor: 'pointer'
   },
-  longDescription : {
+  longDescription: {
     position: 'relative',
     display: 'inline-block',
     minHeight: '1rem',
@@ -139,6 +139,17 @@ const styles = reactStyles({
     padding: '0.25rem',
     borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
     border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
+  },
+  textArea: {
+    height: '15rem',
+    resize: 'none',
+    width: '50rem',
+    borderRadius: '3px 3px 0 0',
+    borderColor: colorWithWhiteness(colors.dark, 0.5)
+  },
+  flexColumnBy2: {
+    flex: '1 1 0',
+    marginLeft: '1rem'
   }
 });
 
@@ -173,10 +184,10 @@ export const WorkspaceEditSection = (props) => {
       {props.subHeader}
     </div>
     }
-    <div style={{...styles.text, marginLeft: (props.index ? '0.8rem' : '0rem')}}>
+    <div style={{...styles.text, marginLeft: '0.9rem'}}>
       {props.description}
     </div>
-    <div style={{marginTop: '0.5rem', marginLeft: (props.index ? '0.8rem' : '0rem')}}>
+    <div style={{marginTop: '0.5rem', marginLeft: (props.indent ? '0.9rem' : '0rem')}}>
       {props.children}
     </div>
   </div>;
@@ -861,9 +872,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         }
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-              description={<div> {ResearchPurposeDescription} Therefore, please provide
-              sufficiently detailed responses at a 5th grade reading level.  Your responses
-              will not be used to make decisions about data access. <br/> <br/>
+              description={<div style={{marginLeft: '-0.9rem'}}> {ResearchPurposeDescription}
+              Therefore, please provide sufficiently detailed responses at a 5th grade reading
+              level.  Your responses will not be used to make decisions about data access. <br/><br/>
               <i>Note that you are required to create separate Workspaces for each project
                 for which you access All of Us data, hence the responses below are expected
                 to be specific to the project for which you are creating this particular
@@ -872,7 +883,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
         {/*Check box to select primary purpose */}
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
-            description={researchPurposeQuestions[0].description} index='1.'>
+            description={researchPurposeQuestions[0].description} index='1.' indent>
           <FlexRow>
             <FlexColumn>
             <CheckBox
@@ -884,7 +895,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <div style={{marginLeft: '1.1rem'}}>
                 <label style={styles.text}>Choose options below to describe your research purpose</label>
               </div>
-            <FlexColumn style={{flex: '1 1 0', marginLeft: '1rem'}}>
+            <FlexColumn style={styles.flexColumnBy2}>
               {ResearchPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
             </FlexColumn>
             </FlexColumn>
@@ -893,22 +904,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
         {/* TextBox: scientific question(s) researcher intend to study Section*/}
         <WorkspaceEditSection
-          header={researchPurposeQuestions[1].header}
+          header={researchPurposeQuestions[1].header} indent
           description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
           <FlexColumn>
           <WorkspaceEditSection
               header={researchPurposeQuestions[2].header}
-              description={researchPurposeQuestions[2].description} index='2.1'>
-            <TextArea style={{height: '15rem', resize: 'none', width: '50rem', borderRadius: '3px 3px 0 0',
-              borderColor: colorWithWhiteness(colors.dark, 0.5)}}
+              description={researchPurposeQuestions[2].description} index='2.1' indent>
+            <TextArea style={styles.textArea}
                       id='intendedStudy'
                       name='intendedStudy'
                       value={this.state.workspace.researchPurpose.intendedStudy}
                       onChange={v => this.updateResearchPurpose('intendedStudy', v)}/>
-            <FlexRow id='intendedStudyText' style={{justifyContent: 'flex-end', width: '50rem',
-              backgroundColor: colorWithWhiteness(colors.primary, 0.95), fontSize: 12,
-              color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-              border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
+            <FlexRow id='intendedStudyText' style={styles.textBoxCharRemaining}>
               {500 - this.state.workspace.researchPurpose.intendedStudy.length} characters remaining
             </FlexRow>
           </WorkspaceEditSection>
@@ -916,9 +923,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             {/* TextBox: scientific approaches section*/}
             <WorkspaceEditSection
                 header={researchPurposeQuestions[3].header}
-                description={researchPurposeQuestions[3].description} index='2.2'>
-              <TextArea style={{height: '15rem', resize: 'none', width: '50rem', borderRadius: '3px 3px 0 0',
-                borderColor: colorWithWhiteness(colors.dark, 0.5)}}
+                description={researchPurposeQuestions[3].description} index='2.2' indent>
+              <TextArea style={styles.textArea}
                         id='scientificApproach'
                         name='scientificApproach'
                         value={this.state.workspace.researchPurpose.scientificApproach}
@@ -933,10 +939,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </WorkspaceEditSection>
 
             {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceEditSection header={researchPurposeQuestions[4].header}
+            <WorkspaceEditSection header={researchPurposeQuestions[4].header} indent
                                   description={researchPurposeQuestions[4].description} index='2.3'>
-              <TextArea style={{height: '15rem', resize: 'none', width: '50rem', borderRadius: '3px 3px 0 0',
-                borderColor: colorWithWhiteness(colors.dark, 0.5)}}
+              <TextArea style={styles.textArea}
                         id='anticipatedFindings'
                         name='anticipatedFindings'
                         value={this.state.workspace.researchPurpose.anticipatedFindings}
@@ -952,11 +957,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header={researchPurposeQuestions[5].header}
                               description={researchPurposeQuestions[5].description} style={{width: '50rem'}} index='3.'>
           <FlexRow>
-            <FlexColumn style={{flex: '1 1 0', marginLeft: '1rem'}}>
+            <FlexColumn style={styles.flexColumnBy2}>
               {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings) + 1).map(
                 (rp, i) => this.makeDisseminateForm(rp, i))}
             </FlexColumn>
-            <FlexColumn style={{flex: '1 1 0', marginLeft: '1rem'}}>
+            <FlexColumn style={styles.flexColumnBy2}>
               {disseminateFindings.slice(sliceByHalfLength(disseminateFindings)).map(
                 (rp, i) => this.makeDisseminateForm(rp, i))}
             </FlexColumn>
@@ -976,7 +981,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </WorkspaceEditSection>
 
           {/*Underrespresented population section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.'
+        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
                               description={researchPurposeQuestions[7].description}
                               style={{width: '50rem'}}>
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
@@ -1034,7 +1039,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
           {/* Request for review section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.'>
+        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent>
           <FlexRow style={styles.text}><div>
             Any research that focuses on certain population characteristics or &nbsp;
             <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
@@ -1060,7 +1065,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             request a review, you can expect to receive an initial response within five business days.
             During the RAB’s review, you may begin working in your workspace.</div>
           </FlexRow>
-          <FlexRow style={{paddingTop: '0.3rem', marginLeft: '0.8rem'}}>
+          <FlexRow style={{paddingTop: '0.3rem'}}>
             <FlexColumn>
             <label style={{...styles.header, marginBottom: '0.2rem'}}>Would you like to request a
               review of your research purpose

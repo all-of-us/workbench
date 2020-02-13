@@ -2813,7 +2813,7 @@ definitions:
       populationDetails:
         type: array
         items:
-          $ref: "#/definitions/specificPopulationEnum"
+          $ref: "#/definitions/SpecificPopulationEnum"
       populationHealth:
         type: boolean
         default: false
@@ -2836,7 +2836,7 @@ definitions:
       disseminateResearchFindingList:
         type: array
         items:
-          $ref: "#/definitions/disseminateResearchEnum"
+          $ref: "#/definitions/DisseminateResearchEnum"
       otherDisseminateResearchFindings:
         type: string
       researchOutcomeList:
@@ -2844,7 +2844,7 @@ definitions:
         items:
           $ref: "#/definitions/ResearchOutcomeEnum"
 
-  specificPopulationEnum:
+  SpecificPopulationEnum:
     type: string
     description: Short parsable descriptions of specific population categories
     enum: [
@@ -2872,7 +2872,7 @@ definitions:
       AGE_OLDER_MORE_THAN_75
     ]
 
-  disseminateResearchEnum:
+  DisseminateResearchEnum:
     type: string
     description: Represents how researchers plan to to disseminate thier research findings.
     enum: [

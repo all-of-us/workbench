@@ -40,9 +40,8 @@ export const toolTipTextStigmatization = <div>
 export const ResearchPurposeDescription =
     <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
       of <i>All of Us</i> data to provide a meaningful description of the intended purpose of data
-      use
-      for each workspace they create. Your responses will not be used to make decisions about data
-      access.</div>;
+      use for each workspace they create. Your responses will not be used to make decisions about
+      data access.</div>;
 
 export interface ResearchPurposeItem {
   shortName: string;
@@ -121,19 +120,19 @@ ResearchPurposeItems.forEach(item => {
 });
 
 export const toolTipText = {
-  header: <div>A Workspace is your place to store and analyze data for a specific project.Each
+  header: <div>A Workspace is your place to store and analyze data for a specific project. Each
     Workspace is a separate Google bucket that serves as a dedicated space for file storage.
     You can share this Workspace with other users, allowing them to view or edit your work. Your
     Workspace is where you will go to build concept sets and cohorts and launch Notebooks for
-    performing analyses on your cohorts.</div>,
-  cdrSelect: <div>The curated data repository (CDR) is where research data from the <i>All of Us</i>
+    performing analyses on your cohorts. </div>,
+  cdrSelect: <div>The Curated Data Repository (CDR) is where research data from the <i>All of Us</i>
     Research Program is stored. The CDR is periodically updated as new data becomes available for
     use. You can select which version of the CDR you wish to query in this Workspace.</div>,
-  researchPurpose: <div>You  are required to describe your research purpose, or the reason why you
+  researchPurpose: <div>You are required to describe your research purpose, or the reason why you
     are conducting this study. This information, along with your name, will be posted on the
     publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
     participants and other stakeholders about what kind of research their data is being used
-    for.</div>,
+    for. </div>,
 };
 
 export const researchPurposeQuestions = [
@@ -144,12 +143,10 @@ export const researchPurposeQuestions = [
     header: <div> Please provide a summary of your research purpose by responding to the
       questions below.</div>,
     description: <div>Your responses should cover the major components of a research summary:
-      hypothesis, methods and anticipated findings. <strong>Your response will be displayed publicly
-        to
-        inform the <i>All of Us</i> Research participants.</strong> Therefore, please provide
-      sufficiently
-      detailed responses in plain language (without jargon), using as few technical terms as
-      possible.</div>
+      hypothesis, methods and anticipated findings. <strong> Your response will be displayed
+      publicly to inform the <i>All of Us</i> Research participants.</strong> Therefore, please
+      provide sufficiently detailed responses in plain language (without jargon), using as few
+      technical terms as possible. </div>
   }, {
     header: 'What are the specific scientific question(s) you intend to study, and why is the ' +
     'question important (i.e. relevant to science or public health)? \n',
@@ -164,58 +161,57 @@ export const researchPurposeQuestions = [
   }, {
     header: 'What are the anticipated findings from the study? How would your findings ' +
     'contribute to the body of scientific knowledge in the field?',
-    description: <div>This response will be displayed publicly.(Free text; 1000 Character
-      limit)</div>
+    description: <div>This response will be displayed publicly.(Free text; 1000 Character limit)
+    </div>
   }, {
-    header: 'The All of Us Research Program encourages researchers to disseminate their research ' +
-    'findings to both scientific and lay/community audiences, to maximize the value of the resource ' +
-    'and to recognize the contributions of participant partners. Please tell us how you plan to ' +
-    'disseminate your research findings.  Choose as many options below as applicable, and specify ' +
-    'details in the text box, if available. ',
+    header: <div>The <i>All of Us </i> Research Program encourages researchers to disseminate their
+      research findings to both scientific and lay/community audiences, to maximize the value of the
+      resource and to recognize the contributions of participant partners. Please tell us how you
+      plan to disseminate your research findings. Choose as many options below as applicable, and
+      specify details in the text box, if available. </div>,
     description: <div>Answers not publicly displayed</div>
   }, {
-    header: 'The All of Us Research Program would like to understand how (or if)  your research ' +
-    'outcome may fit into the All of Us Research Program Scientific Framework. Please select all ' +
-    'of the statements below that describe the outcomes you anticipate from your research.',
+    header: <div>The <i>All of Us</i> Research Program would like to understand how (or if)  your
+      research outcome may fit into the <i>All of Us</i> Research Program Scientific Framework.
+      Please select all of the statements below that describe the outcomes you anticipate from your
+      research.</div>,
     description: <div>Answers not publicly displayed</div>
   }, {
     header: 'Population of interest',
-    description: <div>A primary aim of All of Us is to engage communities that have been
-      historically
-      underrepresented in biomedical research. The next set of questions is designed to help us
-      assess how well we are serving underrepresented communities—and to protect against potentially
-      stigmatizing research findings, to which these groups are more vulnerable.
+    description: <div>A primary aim of <i>All of Us</i> is to engage communities that have been
+      historically underrepresented in biomedical research. The next set of questions is designed
+      to help us assess how well we are serving underrepresented communities—and to protect against
+      potentially stigmatizing research findings, to which these groups are more vulnerable.
 
-      All of Us supports well-designed and responsible research that addresses questions relevant to
+      <i>All of Us</i> supports well-designed and responsible research that addresses questions relevant to
       underrepresented communities, as well as research that compares different groups and
       populations. At the same time, we recognize that research with underrepresented populations
-      can
-      unintentionally result in harms, including the exacerbation of stigma. We encourage
-      researchers
-      to consider whether their research design, methods, and analyses could potentially cause harm
-      to individuals, groups, and communities. <strong>Reminder: Your answers do not affect your
-        access to the data, but they will be displayed publicly on the Research Hub to inform All of
-        Us research participants. </strong>
-    </div>
+      can unintentionally result in harms, including the exacerbation of stigma. We encourage
+      researchers to consider whether their research design, methods, and analyses could
+      potentially cause harm to individuals, groups, and communities. <strong> Reminder: Your
+      answers do not affect your access to the data, but they will be displayed publicly on the
+      Research Hub to inform <i>All of Us</i> research participants. </strong></div>
   }, {
     header: 'Request for Review of Research Purpose Description',
     description: <div>Any research that focuses on certain population characteristics or
-      <TooltipTrigger content={toolTipTextDemographic}><div style={{color: colors.secondary}}>uses
-        demographic variables</div></TooltipTrigger> in analyses can result, often unintentionally,
-      in findings that may be misinterpreted or misused by others to foster stigma. While it may
-      not be possible to completely prevent misuse of research for stigmatizing purposes, data
-      users can take important steps to minimize the risk of this happening–
+      <TooltipTrigger content={toolTipTextDemographic}>
+        <div style={{color: colors.secondary}}> uses demographic variables </div>
+      </TooltipTrigger>
+      in analyses can result, often unintentionally, in findings that may be misinterpreted or
+      misused by others to foster stigma. While it may not be possible to completely prevent misuse
+      of research for stigmatizing purposes, data users can take important steps to minimize the
+      risk of this happening–
       <TooltipTrigger content={toolTipTextDataUseAgreement}>
         <div>taking this step is a condition of your Data Use Agreement.</div>
       </TooltipTrigger>
       If you are concerned that your research could inadvertently stigmatize participants
       or communities, or if you are unsure, let us know. We encourage you to request a review of
-      your
-      research purpose statement by the All of Us Resource Access Board (RAB) as a precaution.
-      The RAB will provide feedback and, if needed, guidance for modifying your research purpose or
-      scope. To learn more, please refer to the All of Us Stigmatizing Research Policy .If you
-      request a review, you can expect to receive an initial response within five business days.
-      During the RAB’s review, you may begin working in your workspace.</div>
+      your research purpose statement by the <i> All of Us</i> Resource Access Board (RAB) as a
+      precaution. The RAB will provide feedback and, if needed, guidance for modifying your
+      research purpose or scope.To learn more, please refer to the <i> All of Us </i>
+      Stigmatizing Research Policy.If you request a review, you can expect to receive an initial
+      response within five business days. During the RAB’s review, you may begin working in your
+      workspace.</div>
   }
 ];
 
