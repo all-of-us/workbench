@@ -21,7 +21,6 @@ import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
-import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.BillingProjectBufferEntryStatusToCountResult;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;

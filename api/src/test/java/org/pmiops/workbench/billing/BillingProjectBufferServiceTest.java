@@ -39,7 +39,6 @@ import org.pmiops.workbench.CallsRealMethodsWithDelay;
 import org.pmiops.workbench.TestLock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
-import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.BillingProjectBufferEntryStatusToCountResult;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -685,17 +684,12 @@ public class BillingProjectBufferServiceTest {
     DbBillingProjectBufferEntry creatingEntry1 = makeSimpleEntry(BufferEntryStatus.CREATING);
     DbBillingProjectBufferEntry creatingEntry2 = makeSimpleEntry(BufferEntryStatus.CREATING);
     DbBillingProjectBufferEntry errorEntry1 = makeSimpleEntry(BufferEntryStatus.ERROR);
-    Object[] objectRows  = billingProjectBufferEntryDao.computeProjectCountByStatus2();
-    final Map<BufferEntryStatus, Long> statusToCount = billingProjectBufferEntryDao.getStatusToProjectCountMap();
+    final Map<BufferEntryStatus, Long> statusToCount = billingProjectBufferEntryDao.getCountByStatusMap();
+
     assertThat(statusToCount.getOrDefault(BufferEntryStatus.ASSIGNING, 0L)).isEqualTo(0);
     assertThat(statusToCount.getOrDefault(BufferEntryStatus.ERROR, 0L)).isEqualTo(1);
     assertThat(statusToCount.getOrDefault(BufferEntryStatus.CREATING, 0L)).isEqualTo(2);
     assertThat(statusToCount).hasSize(2);
-
-//    final List<BillingProjectBufferEntryStatusToCountResult> statusToProjectCount = billingProjectBufferEntryDao.computeProjectCountByStatus();
-//    assertThat(statusToProjectCount).hasSize(2);
-//    assertThat(statusToProjectCount.get(0).getStatusEnum()).isEqualTo(BufferEntryStatus.CREATING);
-//    assertThat(statusToProjectCount.get(0).getNumProjects()).isEqualTo(1);
   }
 
   private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus  bufferEntryStatus) {
