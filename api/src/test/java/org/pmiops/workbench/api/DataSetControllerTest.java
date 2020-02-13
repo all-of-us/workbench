@@ -160,7 +160,7 @@ public class DataSetControllerTest {
   private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
   private static final String NAMED_PARAMETER_NAME = "p1_1";
   private static final QueryParameterValue NAMED_PARAMETER_VALUE =
-      QueryParameterValue.string("ICD9");
+      QueryParameterValue.string("concept_id");
   private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
   private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
       QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
