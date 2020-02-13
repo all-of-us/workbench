@@ -993,7 +993,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <label style={styles.text}>Yes, my study will focus on one or more specific
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
-          <div style={{...styles.text, marginLeft: '2rem'}}>
+          <div style={{...styles.text, marginLeft: '1.2rem'}}>
             <strong>If "Yes": </strong> please indicate your underrepresented population(s) of
             interest:
             <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
