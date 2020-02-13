@@ -111,7 +111,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
               "Concept set \"/%s/%s/%s\" already exists.",
               workspaceNamespace, workspaceId, dbConceptSet.getName()));
     }
-    return ResponseEntity.ok(toClientConceptSetWithConcepts(dbConceptSet));
+    return ResponseEntity.ok(toHydratedConceptSet(dbConceptSet));
   }
 
   @Override
@@ -128,7 +128,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String workspaceNamespace, String workspaceId, Long conceptSetId) {
     DbConceptSet conceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.READER);
-    return ResponseEntity.ok(toClientConceptSetWithConcepts(conceptSet));
+    return ResponseEntity.ok(toHydratedConceptSet(conceptSet));
   }
 
   @Override
@@ -199,7 +199,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
-    return ResponseEntity.ok(toClientConceptSetWithConcepts(dbConceptSet));
+    return ResponseEntity.ok(toHydratedConceptSet(dbConceptSet));
   }
 
   private void addConceptsToSet(DbConceptSet dbConceptSet, List<Long> addedIds) {
@@ -280,7 +280,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setLastModifiedTime(now);
     try {
       dbConceptSet = conceptSetService.save(dbConceptSet);
-      return ResponseEntity.ok(toClientConceptSetWithConcepts(dbConceptSet));
+      return ResponseEntity.ok(toHydratedConceptSet(dbConceptSet));
       // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
@@ -344,7 +344,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         toWorkspace.getWorkspaceId(),
         userProvider.get().getUserId(),
         newConceptSet.getConceptSetId());
-    return ResponseEntity.ok(toClientConceptSetWithConcepts(newConceptSet));
+    return ResponseEntity.ok(toHydratedConceptSet(newConceptSet));
   }
 
   private String createResourcePath(
@@ -364,7 +364,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     return conceptSetService.findOne(conceptSetId, workspace);
   }
 
-  public ConceptSet toClientConceptSetWithConcepts(DbConceptSet dbConceptSet) {
+  public ConceptSet toHydratedConceptSet(DbConceptSet dbConceptSet) {
     ConceptSet conceptSet = conceptSetMapper.dbModelToClient(dbConceptSet);
     return conceptSet.concepts(
         conceptService.findAll(dbConceptSet.getConceptIds(), CONCEPT_NAME_ORDERING));
