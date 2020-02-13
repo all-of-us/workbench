@@ -881,7 +881,7 @@ public class WorkspacesControllerTest {
             BadRequestException.class,
             () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
     assertThat(exception.getErrorResponse().getMessage())
-        .contains("User provided billing account is closed. Please provide an open account.");
+        .contains("Provided billing account is closed. Please provide an open account.");
   }
 
   @Test
@@ -910,7 +910,7 @@ public class WorkspacesControllerTest {
             BadRequestException.class,
             () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
     assertThat(exception.getErrorResponse().getMessage())
-        .contains("User provided billing account is closed. Please provide an open account.");
+        .contains("Provided billing account is closed. Please provide an open account.");
   }
 
   @Test
