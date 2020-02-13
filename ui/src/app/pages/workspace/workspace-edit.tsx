@@ -782,7 +782,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           } else if (error.message.includes('billing account is closed')) {
             errorMsg = error.message;
           } else {
-              errorMsg = `Could not
+            errorMsg = `Could not
             ${this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
                 ' create ' : ' update '} workspace.`;
           }
