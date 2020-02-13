@@ -42,7 +42,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
     }
 
     getSelectedPopulationsSlice(left: boolean) {
-      const populations = getSelectedPopulations(this.props.workspace);
+      const populations = getSelectedPopulations(this.props.workspace.researchPurpose);
       const populationsHalfLen = sliceByHalfLength(populations);
       if (left) {
         return populations.slice(0, populationsHalfLen);
@@ -54,7 +54,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
     render() {
       const {workspace} = this.props;
       const {workspacePermissions} = this.state;
-      const selectedResearchPurposeItems = getSelectedResearchPurposeItems(this.props.workspace);
+      const selectedResearchPurposeItems = getSelectedResearchPurposeItems(this.props.workspace.researchPurpose);
       const rpItemsHalfLen = sliceByHalfLength(selectedResearchPurposeItems);
       return <FadeBox>
         <div style={styles.mainHeader}>Research Purpose

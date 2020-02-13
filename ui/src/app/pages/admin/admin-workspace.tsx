@@ -21,7 +21,7 @@ import {
 } from 'generated/fetch';
 
 
-const styles = {
+const reactStyles = {
   fixedWidthWithMargin: {
     width: '10rem',
     marginRight: '1rem'
@@ -37,13 +37,13 @@ const styles = {
   }
 };
 
-const FlexColumnWithRightMargin = ({style = {}, children}) => {
-  return <FlexColumn style={{...styles.fixedWidthWithMargin, ...style}}>
+const FlexWithMargin = ({style = {}, children}) => {
+  return <FlexColumn style={{...reactStyles.fixedWidthWithMargin, ...style}}>
     {...children}
   </FlexColumn>;
 };
 
-const LabelWithPrimaryColor = ({style = {}, children}) => {
+const PurpleLabel = ({style = {}, children}) => {
   return <label style={{color: colors.primary, ...style}}>
     {...children}
   </label>;
@@ -65,25 +65,9 @@ export class AdminWorkspace extends React.Component<{}, State> {
       googleProject: '',
       workspace: null,
       collaborators: [],
-      resources: {
-        workspaceObjects: {
-          cohortCount: 0,
-          conceptSetCount: 0,
-          datasetCount: 0
-        },
-        cloudStorage: {
-          notebookFileCount: 0,
-          nonNotebookFileCount: 0,
-          storageBytesUsed: 0
-        },
-        clusters: []
-      },
+      resources: {},
       detailsOpen: false
     };
-  }
-
-  updateProject(newProject: string) {
-    this.setState({googleProject: newProject});
   }
 
   getFederatedWorkspaceInformation() {
@@ -95,15 +79,22 @@ export class AdminWorkspace extends React.Component<{}, State> {
           resources: response.resources
         });
       }
-    ).catch(error => {
-      console.error(error);
-    });
+    );
   }
 
   maybeGetFederatedWorkspaceInformation(event) {
     if (event.key === 'Enter') {
       return this.getFederatedWorkspaceInformation();
     }
+  }
+
+  workspaceInfoField(labelText, divContents, widthMultiplier = 1) {
+    const width = 10 * (widthMultiplier - 1) + 9;
+    const widthString = width + 'rem';
+    return <FlexWithMargin style={{width: widthString}}>
+      <PurpleLabel>{labelText}</PurpleLabel>
+      <div style={{wordWrap: 'break-word'}}>{divContents}</div>
+    </FlexWithMargin>
   }
 
   render() {
@@ -113,8 +104,8 @@ export class AdminWorkspace extends React.Component<{}, State> {
       <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center'}}>
         <label style={{marginRight: '1rem'}}>Google Project ID</label>
         <TextInput
-            style={styles.fixedWidthWithMargin}
-            onChange={value => this.updateProject(value)}
+            style={reactStyles.fixedWidthWithMargin}
+            onChange={value => this.setState({googleProject: value})}
             onKeyDown={event => this.maybeGetFederatedWorkspaceInformation(event)}
         />
         <Button
@@ -141,34 +132,22 @@ export class AdminWorkspace extends React.Component<{}, State> {
         <FlexColumn style={{flex: '1 0 auto'}}>
           <h3>Basic Information</h3>
           <FlexRow>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor>Workspace Name</LabelWithPrimaryColor>
-              <div>{workspace.name}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor>Google Project ID</LabelWithPrimaryColor>
-              <div>{workspace.namespace}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor>Billing Status</LabelWithPrimaryColor>
-              <div>{workspace.billingStatus}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor>Billing Account Type</LabelWithPrimaryColor>
-              <div>{workspace.billingAccountType}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor>Created Time</LabelWithPrimaryColor>
-              <div>{new Date(workspace.creationTime).toDateString()}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor>Last Modified Time</LabelWithPrimaryColor>
-              <div>{new Date(workspace.lastModifiedTime).toDateString()}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor>Workspace Published</LabelWithPrimaryColor>
-              <div>{workspace.published ? 'Yes' : 'No'}</div>
-            </FlexColumnWithRightMargin>
+            {this.workspaceInfoField('Workspace Name', workspace.name)}
+            {this.workspaceInfoField('Google Project Id', workspace.namespace)}
+            {this.workspaceInfoField('Billing Status', workspace.billingStatus)}
+            {this.workspaceInfoField('Billing Account Type', workspace.billingAccountType)}
+            {this.workspaceInfoField(
+                'Creation Time',
+                new Date(workspace.creationTime).toDateString()
+            )}
+            {this.workspaceInfoField(
+                'Last Modified Time',
+                new Date(workspace.lastModifiedTime).toDateString()
+            )}
+            {this.workspaceInfoField(
+                'Workspace Published',
+                workspace.published ? 'Yes' : 'No'
+            )}
           </FlexRow>
         </FlexColumn>
       }
@@ -185,8 +164,8 @@ export class AdminWorkspace extends React.Component<{}, State> {
                 shape='angle'
                 style={
                   this.state.detailsOpen
-                      ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
-                      : styles.dropdownIcon
+                      ? {...reactStyles.dropdownIcon, ...reactStyles.dropdownIconOpen}
+                      : reactStyles.dropdownIcon
                 }
                 size={21}
             />
@@ -196,27 +175,45 @@ export class AdminWorkspace extends React.Component<{}, State> {
       {detailsOpen && <FlexColumn>
           <h3>Research Purpose</h3>
           <FlexRow>
-            <FlexColumnWithRightMargin style={{width: '21rem'}}>
-              <LabelWithPrimaryColor>Primary purpose of project</LabelWithPrimaryColor>
-              {getSelectedResearchPurposeItems(workspace).map((researchPurposeItem, i) => <div key={i}>{researchPurposeItem}</div>)}
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin style={{width: '21rem'}}>
-              <LabelWithPrimaryColor>Reason for choosing <i>All of Us</i></LabelWithPrimaryColor>
-              <div style={{wordWrap: 'break-word'}}>{workspace.researchPurpose.reasonForAllOfUs}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin style={{width: '21rem'}}>
-              <LabelWithPrimaryColor>Area of intended study</LabelWithPrimaryColor>
-              <div style={{wordWrap: 'break-word'}}>{workspace.researchPurpose.intendedStudy}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin style={{width: '21rem'}}>
-              <LabelWithPrimaryColor>Anticipated findings</LabelWithPrimaryColor>
-              <div style={{wordWrap: 'break-word'}}>{workspace.researchPurpose.anticipatedFindings}</div>
-            </FlexColumnWithRightMargin>
             {
-              workspace.researchPurpose.population && <FlexColumnWithRightMargin style={{width: '21rem'}}>
-                <LabelWithPrimaryColor>Population area(s) of focus</LabelWithPrimaryColor>
-                {getSelectedPopulations(workspace).map((selectedPopulation, i) => <div key={i}>{selectedPopulation}</div>)}
-              </FlexColumnWithRightMargin>
+              this.workspaceInfoField(
+                'Primary purpose of project',
+                getSelectedResearchPurposeItems(
+                    workspace.researchPurpose).map(
+                        (
+                            researchPurposeItem, i) =>
+                            <div key={i}>{researchPurposeItem}</div>
+                        ),
+                  2
+                )
+            }
+            {
+              this.workspaceInfoField(
+                'Reason for choosing All of Us',
+                workspace.researchPurpose.reasonForAllOfUs,
+                2
+              )
+            }
+            {
+              this.workspaceInfoField(
+                  'Area of intended study',
+                  workspace.researchPurpose.intendedStudy,
+                  2
+              )
+            }
+            {
+              this.workspaceInfoField(
+                  'Anticipated findings',
+              workspace.researchPurpose.anticipatedFindings,
+                2
+              )
+            }
+            {
+              workspace.researchPurpose.population && this.workspaceInfoField(
+                  'Population area(s) of focus',
+                  getSelectedPopulations(workspace.researchPurpose).map((selectedPopulation, i) => <div key={i}>{selectedPopulation}</div>),
+                  2
+              )
             }
           </FlexRow>
         </FlexColumn>
@@ -224,36 +221,48 @@ export class AdminWorkspace extends React.Component<{}, State> {
       {detailsOpen && resources.workspaceObjects && <FlexColumn>
           <h3>Workspace Objects</h3>
           <FlexRow>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor># of Cohorts</LabelWithPrimaryColor>
-              <div>{resources.workspaceObjects.cohortCount}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor># of Concept Sets</LabelWithPrimaryColor>
-              <div>{resources.workspaceObjects.conceptSetCount}</div>
-            </FlexColumnWithRightMargin>
-            <FlexColumnWithRightMargin>
-              <LabelWithPrimaryColor># of Data Sets</LabelWithPrimaryColor>
-              <div>{resources.workspaceObjects.datasetCount}</div>
-            </FlexColumnWithRightMargin>
+            {
+              this.workspaceInfoField(
+                  '# of Cohorts',
+                  resources.workspaceObjects.cohortCount
+              )
+            }
+            {
+              this.workspaceInfoField(
+                  '# of Concept Sets',
+                  resources.workspaceObjects.conceptSetCount
+              )
+            }
+            {
+              this.workspaceInfoField(
+                  '# of Data Sets',
+                  resources.workspaceObjects.datasetCount
+              )
+            }
           </FlexRow>
         </FlexColumn>
       }
       {detailsOpen && resources.cloudStorage && <FlexColumn>
         <h3>Cloud Storage</h3>
         <FlexRow style={{width: '100%'}}>
-          <FlexColumnWithRightMargin>
-            <LabelWithPrimaryColor># of Notebook Files</LabelWithPrimaryColor>
-            <div>{resources.cloudStorage.notebookFileCount}</div>
-          </FlexColumnWithRightMargin>
-          <FlexColumnWithRightMargin>
-            <LabelWithPrimaryColor># of Non-Notebook Files</LabelWithPrimaryColor>
-            <div>{resources.cloudStorage.nonNotebookFileCount}</div>
-          </FlexColumnWithRightMargin>
-          <FlexColumnWithRightMargin>
-            <LabelWithPrimaryColor>Storage used (bytes)</LabelWithPrimaryColor>
-            <div>{resources.cloudStorage.storageBytesUsed}</div>
-          </FlexColumnWithRightMargin>
+          {
+            this.workspaceInfoField(
+                '# of Notebook Files',
+                resources.cloudStorage.notebookFileCount
+            )
+          }
+          {
+            this.workspaceInfoField(
+                '# of Non-Notebook Files',
+                resources.cloudStorage.nonNotebookFileCount
+            )
+          }
+          {
+            this.workspaceInfoField(
+                'Storage used (bytes)',
+                resources.cloudStorage.storageBytesUsed
+            )
+          }
         </FlexRow>
       </FlexColumn>
       }
@@ -269,19 +278,19 @@ export class AdminWorkspace extends React.Component<{}, State> {
       {detailsOpen && workspace && resources.clusters.length > 0 && <FlexColumn>
           <h3>Clusters</h3>
           <FlexRow>
-            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Cluster Name</LabelWithPrimaryColor>
-            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Google Project</LabelWithPrimaryColor>
-            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Created Time</LabelWithPrimaryColor>
-            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Last Accessed Time</LabelWithPrimaryColor>
-            <LabelWithPrimaryColor style={styles.fixedWidthWithMargin}>Status</LabelWithPrimaryColor>
+            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Cluster Name</PurpleLabel>
+            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Google Project</PurpleLabel>
+            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Created Time</PurpleLabel>
+            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Last Accessed Time</PurpleLabel>
+            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Status</PurpleLabel>
           </FlexRow>
           {resources.clusters.map((cluster, i) =>
               <FlexRow key={i}>
-                <div style={styles.fixedWidthWithMargin}>{cluster.clusterName}</div>
-                <div style={styles.fixedWidthWithMargin}>{cluster.googleProject}</div>
-                <div style={styles.fixedWidthWithMargin}>{new Date(cluster.createdDate).toDateString()}</div>
-                <div style={styles.fixedWidthWithMargin}>{new Date(cluster.dateAccessed).toDateString()}</div>
-                <div style={styles.fixedWidthWithMargin}>{cluster.status}</div>
+                <div style={reactStyles.fixedWidthWithMargin}>{cluster.clusterName}</div>
+                <div style={reactStyles.fixedWidthWithMargin}>{cluster.googleProject}</div>
+                <div style={reactStyles.fixedWidthWithMargin}>{new Date(cluster.createdDate).toDateString()}</div>
+                <div style={reactStyles.fixedWidthWithMargin}>{new Date(cluster.dateAccessed).toDateString()}</div>
+                <div style={reactStyles.fixedWidthWithMargin}>{cluster.status}</div>
                 <Button>Disable</Button>
               </FlexRow>
           )}
