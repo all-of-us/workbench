@@ -44,7 +44,7 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 import {
   disseminateFindings,
-  researchOutcomings,
+  researchOutcomes,
   ResearchPurposeDescription,
   ResearchPurposeItem,
   ResearchPurposeItems,
@@ -469,7 +469,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     updateOtherDisseminateResearch(value) {
-      this.setState(fp.set(['workspace', 'researchPurpose', 'otherdisseminateResearchFindings'], value));
+      this.setState(fp.set(['workspace', 'researchPurpose', 'otherDisseminateResearchFindings'], value));
     }
     /**
      * Creates a form element containing the checkbox, header, and description
@@ -478,7 +478,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     makeDisseminateForm(rp, index): React.ReactNode {
       let children: React.ReactNode;
       if (rp.label === 'Other') {
-        children = <TextArea value={this.state.workspace.researchPurpose.otherdisseminateResearchFindings}
+        children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
                              onChange={v => this.updateOtherDisseminateResearch(v)}
                              placeholder='Specify the name of the forum (journal, scientific
                              conference, blog etc.) through which you will disseminate your
@@ -968,7 +968,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                                 style={{width: '50rem'}}>
             <FlexRow style={{marginLeft: '1rem'}}>
               <FlexColumn style={{flex: '1 1 0'}}>
-                {researchOutcomings.map(
+                {researchOutcomes.map(
                   (rp, i) => this.makeOutcomingResearchForm(rp, i))}
               </FlexColumn>
             </FlexRow>

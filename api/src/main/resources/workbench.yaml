@@ -2837,7 +2837,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/disseminateResearchEnum"
-      otherdisseminateResearchFindings:
+      otherDisseminateResearchFindings:
         type: string
       researchOutcomeList:
         type: array
@@ -2874,7 +2874,7 @@ definitions:
 
   disseminateResearchEnum:
     type: string
-    description: disseminate findings
+    description: Represents how researchers plan to to disseminate thier research findings.
     enum: [
       PUBLICATION_PEER_REVIEWED_JOURNALS,
       PRESENATATION_SCIENTIFIC_CONFERENCES,
@@ -2888,14 +2888,14 @@ definitions:
 
   ResearchOutcomeEnum:
     type: string
-    description: Research Outcomes
+    description: Represents antipicated outcomes from the research
     enum: [
       PROMOTE_HEALTHY_LIVING,
-      UNDERRESP,
+      IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS,
       IMPROVED_RISK_ASSESMENT,
-      DECREASE_ILLINESS_BURDEN,
+      DECREASE_ILLNESS_BURDEN,
       PRECISION_INTERVENTION,
-      NONE
+      NONE_APPLY
     ]
 
   ResearchPurposeReviewRequest:

@@ -247,11 +247,11 @@ public final class DbStorageEnums {
   public static final BiMap<ResearchOutcomeEnum, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
       ImmutableBiMap.<ResearchOutcomeEnum, Short>builder()
           .put(ResearchOutcomeEnum.PROMOTE_HEALTHY_LIVING, (short) 0)
-          .put(ResearchOutcomeEnum.UNDERRESP, (short) 1)
+          .put(ResearchOutcomeEnum.IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS, (short) 1)
           .put(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT, (short) 2)
-          .put(ResearchOutcomeEnum.DECREASE_ILLINESS_BURDEN, (short) 3)
+          .put(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN, (short) 3)
           .put(ResearchOutcomeEnum.PRECISION_INTERVENTION, (short) 4)
-          .put(ResearchOutcomeEnum.NONE, (short) 5)
+          .put(ResearchOutcomeEnum.NONE_APPLY, (short) 5)
           .build();
 
   public static ResearchOutcomeEnum researchOutcomeEnumFromStorage(Short s) {

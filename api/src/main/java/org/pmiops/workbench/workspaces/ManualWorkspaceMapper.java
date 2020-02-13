@@ -175,7 +175,7 @@ public class ManualWorkspaceMapper {
             .orElse(new HashSet<DisseminateResearchEnum>()));
 
     if (dbWorkspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
-      dbWorkspace.setDisseminateResearchOther(purpose.getOtherdisseminateResearchFindings());
+      dbWorkspace.setDisseminateResearchOther(purpose.getOtherDisseminateResearchFindings());
     }
 
     dbWorkspace.setResearchOutcomeEnumSet(
@@ -210,16 +210,24 @@ public class ManualWorkspaceMapper {
             .approved(workspace.getApproved())
             .otherPopulationDetails(workspace.getOtherPopulationDetails())
             .disseminateResearchFindingList(
-                workspace.getDisseminateResearchEnumSet().stream().collect(Collectors.toList()))
+                Optional.ofNullable(workspace.getDisseminateResearchEnumSet())
+                    .map(
+                        disseminateResearchEnums ->
+                            disseminateResearchEnums.stream().collect(Collectors.toList()))
+                    .orElse(new ArrayList<DisseminateResearchEnum>()))
             .researchOutcomeList(
-                workspace.getResearchOutcomeEnumSet().stream().collect(Collectors.toList()))
+                Optional.ofNullable(workspace.getResearchOutcomeEnumSet())
+                    .map(
+                        researchOutcomeEnums ->
+                            researchOutcomeEnums.stream().collect(Collectors.toList()))
+                    .orElse(new ArrayList<ResearchOutcomeEnum>()))
             .populationDetails(
                 workspace.getPopulationDetails().stream()
                     .map(DbStorageEnums::specificPopulationFromStorage)
                     .collect(Collectors.toList()));
 
     if (workspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
-      researchPurpose.setOtherdisseminateResearchFindings(workspace.getDisseminateResearchOther());
+      researchPurpose.setOtherDisseminateResearchFindings(workspace.getDisseminateResearchOther());
     }
 
     if (workspace.getTimeRequested() != null) {

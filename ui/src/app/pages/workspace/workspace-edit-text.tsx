@@ -341,7 +341,7 @@ export const disseminateFindings = [
   {label: 'Other', shortName: DisseminateResearchEnum.OTHER}
 ];
 
-export const researchOutcomings = [
+export const researchOutcomes = [
   {
     label: 'This research project seeks to increase wellness and resilience, and promote ' +
     'healthy living',
@@ -349,7 +349,7 @@ export const researchOutcomings = [
   }, {
     label: 'This research project seeks to reduce health disparities and improve health equity ' +
     'in underrepresented in biomedical research (UBR) populations',
-    shortName: ResearchOutcomeEnum.UNDERRESP
+    shortName: ResearchOutcomeEnum.IMPROVEHEALTHEQUALITYUBRPOPULATIONS
   }, {
     label: 'This research project seeks to develop improved risk assessment and prevention ' +
     'strategies to preempt disease',
@@ -358,7 +358,7 @@ export const researchOutcomings = [
   {
     label: 'This research project seeks to provide earlier and more accurate diagnosis to ' +
     'decrease illness burden',
-    shortName: ResearchOutcomeEnum.DECREASEILLINESSBURDEN
+    shortName: ResearchOutcomeEnum.DECREASEILLNESSBURDEN
   },
   {
     label: 'This research project seeks to improve health outcomes and reduce disease/illness burden' +
@@ -366,6 +366,6 @@ export const researchOutcomings = [
     shortName: ResearchOutcomeEnum.PRECISIONINTERVENTION
   }, {
     label: 'None of these statements apply to this research project',
-    shortName: ResearchOutcomeEnum.NONE
+    shortName: ResearchOutcomeEnum.NONEAPPLY
   }
 ];
