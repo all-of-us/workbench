@@ -5,7 +5,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.Streams;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
@@ -65,7 +64,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @VisibleForTesting int maxConceptsPerSet;
 
-  private static final Ordering<Concept> CONCEPT_NAME_ORDERING =
+  public static final Ordering<Concept> CONCEPT_NAME_ORDERING =
       Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Concept::getConceptName);
 
   @Autowired
@@ -313,7 +312,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     }
     final DbConceptSet existingConceptSet =
         conceptSetService
-            .findOne(Long.valueOf(fromConceptSetId), Long.valueOf(fromWorkspaceId))
+            .findOne(Long.valueOf(fromConceptSetId))
             .orElseThrow(
                 () ->
                     new NotFoundException(
@@ -362,27 +361,13 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, workspaceAccessLevel);
 
-    DbConceptSet conceptSet =
-        conceptSetService
-            .findOne(conceptSetId, workspace.getWorkspaceId())
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "No concept set with ID %s in workspace %s.",
-                            conceptSetId, workspace.getFirecloudName())));
-    return conceptSet;
+    return conceptSetService.findOne(conceptSetId, workspace);
   }
 
-  private ConceptSet toClientConceptSetWithConcepts(DbConceptSet dbConceptSet) {
+  public ConceptSet toClientConceptSetWithConcepts(DbConceptSet dbConceptSet) {
     ConceptSet conceptSet = conceptSetMapper.dbModelToClient(dbConceptSet);
-    Iterable<DbConcept> concepts = conceptService.findAll(dbConceptSet.getConceptIds());
-    conceptSet.setConcepts(
-        Streams.stream(concepts)
-            .map(ConceptsController::toClientConcept)
-            .sorted(CONCEPT_NAME_ORDERING)
-            .collect(Collectors.toList()));
-    return conceptSet;
+    return conceptSet.concepts(
+        conceptService.findAll(dbConceptSet.getConceptIds(), CONCEPT_NAME_ORDERING));
   }
 
   private DbConceptSet fromClientConceptSet(CreateConceptSetRequest request, long workspaceId) {

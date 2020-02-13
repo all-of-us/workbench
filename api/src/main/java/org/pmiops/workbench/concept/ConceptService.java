@@ -5,12 +5,16 @@ import static org.pmiops.workbench.model.StandardConceptFilter.STANDARD_CONCEPTS
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.pmiops.workbench.api.ConceptsController;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
@@ -19,6 +23,7 @@ import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.StandardConceptFilter;
@@ -122,6 +127,14 @@ public class ConceptService {
 
   public Iterable<DbConcept> findAll(Collection<Long> conceptIds) {
     return conceptDao.findAll(conceptIds);
+  }
+
+  public List<Concept> findAll(Collection<Long> conceptIds, Ordering<Concept> ordering) {
+    Iterable<DbConcept> concepts = conceptDao.findAll(conceptIds);
+    return Streams.stream(concepts)
+        .map(ConceptsController::toClientConcept)
+        .sorted(ordering)
+        .collect(Collectors.toList());
   }
 
   public List<DbDomainInfo> getDomainInfo() {

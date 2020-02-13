@@ -343,7 +343,7 @@ public class DataSetControllerTest {
                 CLOCK,
                 cdrVersionDao,
                 cohortDao,
-                conceptDao,
+                conceptService,
                 conceptSetDao,
                 dataDictionaryEntryDao,
                 dataSetDao,
