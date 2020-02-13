@@ -1,4 +1,3 @@
-// Configuration for the all-of-us-workbench-test.
 {
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-dev.broadinstitute.org",
@@ -17,9 +16,9 @@
     "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
-    "accountId": "014D91-FCB792-33D2C0",
+    "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-test-",
-    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
+    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 2,
     "bufferCapacity": 100,
     "bufferRefillProjectsPerTask": 1,
@@ -85,7 +84,8 @@
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
-    "unsafeAllowSelfBypass": true
+    "unsafeAllowSelfBypass": true,
+    "requireInvitationKey": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

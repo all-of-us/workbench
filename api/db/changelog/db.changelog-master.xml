@@ -133,9 +133,10 @@
     <include file="changelog/db.changelog-123-user-terms-of-service.xml"/>
     <include file="changelog/db.changelog-124-add-demographic-gender-identity.xml"/>
     <include file="changelog/db.changelog-125-institution-tables.xml"/>
-    <include file="changelog/db.changelog-126-add-columns-workspace.xml"/>
-    <include file="changelog/db.changelog-127-add-research-outcomes-workspace.xml"/>
-    <include file="changelog/db.changelog-128-add-disseminate-research-workspace.xml"/>
+    <include file="changelog/db.changelog-126-institution-foreign-key.xml"/>
+    <include file="changelog/db.changelog-127-add-columns-workspace.xml"/>
+    <include file="changelog/db.changelog-128-add-research-outcomes-workspace.xml"/>
+    <include file="changelog/db.changelog-129-add-disseminate-research-workspace.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

@@ -18,7 +18,7 @@
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-perf-",
-    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_00293C-5DEA2D-6887E7",
+    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 4,
     "bufferCapacity": 300,
     "bufferRefillProjectsPerTask": 5,
@@ -87,7 +87,8 @@
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
-    "unsafeAllowSelfBypass": true
+    "unsafeAllowSelfBypass": true,
+    "requireInvitationKey": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -97,7 +98,7 @@
     "enableRdrExport": false,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
-    "useKeylessDelegatedCredentials": false,
+    "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false
   },

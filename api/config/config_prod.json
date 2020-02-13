@@ -16,9 +16,9 @@
     "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
-    "accountId": "015EAA-E95687-1F8614",
+    "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-",
-    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
+    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 4,
     "bufferCapacity": 200,
     "bufferRefillProjectsPerTask": 1,
@@ -84,7 +84,8 @@
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
-    "unsafeAllowSelfBypass": false
+    "unsafeAllowSelfBypass": false,
+    "requireInvitationKey": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,

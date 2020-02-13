@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="nsaxena" id="changelog-129-add-disseminate-research-workspace">
+    <createTable tableName="workspace_disseminate_research">
+    	<column name="id" type="bigint" autoIncrement="true">
+            <constraints primaryKey="true" nullable="false"/>
+        </column>
+        <column name="workspace_id" type="bigint">
+        	<constraints nullable="true"/>
+        </column>
+        <column name="disseminate" type="tinyint">
+        	<constraints nullable="false"/>
+        </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="workspace_id"
+           baseTableName="workspace_disseminate_research"
+            constraintName="fk_workspace_disseminate_research"
+            onDelete="CASCADE"
+           referencedColumnNames="workspace_id"
+            referencedTableName="workspace"/>
+  </changeSet>
+</databaseChangeLog>
+

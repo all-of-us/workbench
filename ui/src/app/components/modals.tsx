@@ -3,10 +3,10 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import colors from 'app/styles/colors';
-import {withStyle} from 'app/utils/index';
+import {reactStyles, withStyle} from 'app/utils/index';
 import {SpinnerOverlay} from './spinners';
 
-const styles = {
+const styles = reactStyles({
   modal: {
     borderRadius: 8, position: 'relative',
     padding: '1rem', margin: 'auto', outline: 'none',
@@ -14,7 +14,7 @@ const styles = {
   },
 
   overlay: {
-    backgroundColor: Color(colors.dark).alpha(0.85), padding: '1rem', display: 'flex',
+    backgroundColor: Color(colors.dark).alpha(0.85).toString(), padding: '1rem', display: 'flex',
     position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, overflowY: 'auto'
   },
 
@@ -38,7 +38,7 @@ const styles = {
     justifyContent: 'flex-end' as 'flex-end',
     marginTop: '1rem'
   }
-};
+});
 
 export const Modal = ({width = 450, loading = false, ...props}) => {
   return <ReactModal
