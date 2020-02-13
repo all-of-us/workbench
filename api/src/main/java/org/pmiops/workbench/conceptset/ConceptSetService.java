@@ -39,7 +39,7 @@ public class ConceptSetService {
 
   public DbConceptSet findOne(Long conceptSetId, DbWorkspace workspace) {
     return conceptSetDao
-        .findOneByConceptSetIdAndWorkspaceId(conceptSetId, workspace.getWorkspaceId())
+        .findByConceptSetIdAndWorkspaceId(conceptSetId, workspace.getWorkspaceId())
         .orElseThrow(
             () ->
                 new NotFoundException(

@@ -26,7 +26,7 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
           .put(Domain.PHYSICALMEASUREMENT, "measurement")
           .build();
 
-  Optional<DbConceptSet> findOneByConceptSetIdAndWorkspaceId(long conceptId, long workspaceId);
+  Optional<DbConceptSet> findByConceptSetIdAndWorkspaceId(long conceptId, long workspaceId);
 
   List<DbConceptSet> findByWorkspaceId(long workspaceId);
 
