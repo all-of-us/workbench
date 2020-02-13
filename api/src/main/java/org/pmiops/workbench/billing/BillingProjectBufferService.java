@@ -86,7 +86,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
     final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
         ImmutableMap.copyOf(billingProjectBufferEntryDao.getCountByStatusMap());
-//    final List<BillingProjectBufferEntryStatusToCountResult> statusToProjectCount = billingProjectBufferEntryDao.computeProjectCountByStatus();
+    //    final List<BillingProjectBufferEntryStatusToCountResult> statusToProjectCount =
+    // billingProjectBufferEntryDao.computeProjectCountByStatus();
 
     for (BufferEntryStatus status : BufferEntryStatus.values()) {
       long count = entryStatusToCount.getOrDefault(status, 0L);

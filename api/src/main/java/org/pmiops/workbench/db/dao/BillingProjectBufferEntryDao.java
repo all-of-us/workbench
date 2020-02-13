@@ -36,15 +36,17 @@ public interface BillingProjectBufferEntryDao
 
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
     return computeProjectCountByStatus().stream()
-        .collect(ImmutableMap.toImmutableMap(
-            StatusToCountResult::getStatusEnum,
-            StatusToCountResult::getNumProjects));
+        .collect(
+            ImmutableMap.toImmutableMap(
+                StatusToCountResult::getStatusEnum, StatusToCountResult::getNumProjects));
   }
 
-  @Query(value = "select status, count(billing_project_buffer_entry_id) as numpNrojects\n"
-      + "    from DbBillingProjectBufferEntry \n"
-      + "group by status\n"
-      + "order by status")
+  @Query(
+      value =
+          "select status, count(billing_project_buffer_entry_id) as numpNrojects\n"
+              + "    from DbBillingProjectBufferEntry \n"
+              + "group by status\n"
+              + "order by status")
   List<StatusToCountResult> computeProjectCountByStatus();
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
@@ -77,6 +79,7 @@ public interface BillingProjectBufferEntryDao
 
   interface StatusToCountResult {
     short getStatus();
+
     long getNumProjects();
 
     default BufferEntryStatus getStatusEnum() {
