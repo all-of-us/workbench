@@ -820,7 +820,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       });
 
       return options;
-      
     }
 
     render() {
