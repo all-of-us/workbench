@@ -1,10 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -48,7 +46,21 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
 
-  default Map<Boolean, Long> getDisabledToCountMap() {
-    return DaoUtils.getAttributeToCountMap(findAll(), DbUser::getDisabled);
+  @Query(
+      "SELECT dataAccessLevel, disabled, CASE WHEN betaAccessBypassTime IS NOT NULL THEN TRUE ELSE FALSE END AS betaIsBypassed, COUNT(userId) AS userCount "
+          + "FROM DbUser "
+          + "GROUP BY dataAccessLevel, disabled, CASE WHEN betaAccessBypassTime IS NOT NULL THEN TRUE ELSE FALSE END "
+          + "ORDER BY NULL")
+  List<DataAccessLevelDisabledAndBetaBypassedToCountRow>
+      getDataAccessLevelDisabledAndBetaBypassedToCount();
+
+  interface DataAccessLevelDisabledAndBetaBypassedToCountRow {
+    Short getDataAccessLevel();
+
+    Boolean getDisabled();
+
+    Boolean getBetaIsBypassed();
+
+    Long getUserCount();
   }
 }

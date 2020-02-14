@@ -44,6 +44,8 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusAndDataAccessLevelToCountResult;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -753,19 +755,24 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
 
-    // TODO(jaycarlton): fetch both active status and data access level crossed counts
-    final Map<WorkspaceActiveStatus, Long> activeStatusToCount =
-        workspaceDao.getActiveStatusToCountMap();
-    for (WorkspaceActiveStatus status : WorkspaceActiveStatus.values()) {
-      final long count = activeStatusToCount.getOrDefault(status, 0L);
-      resultBuilder.add(
-          MeasurementBundle.builder()
-              .addMeasurement(GaugeMetric.WORKSPACE_COUNT, count)
-              .addTag(MetricLabel.WORKSPACE_ACTIVE_STATUS, status.toString())
-              .build());
-    }
-    return resultBuilder.build();
+    final List<ActiveStatusAndDataAccessLevelToCountResult> rows =
+        workspaceDao.getActiveStatusAndDataAccessLevelToCount();
+    return rows.stream()
+        .map(
+            row ->
+                MeasurementBundle.builder()
+                    .addTag(
+                        MetricLabel.WORKSPACE_ACTIVE_STATUS,
+                        DbStorageEnums.workspaceActiveStatusFromStorage(
+                                row.getWorkspaceActiveStatus())
+                            .toString())
+                    .addTag(
+                        MetricLabel.DATA_ACCESS_LEVEL,
+                        CommonStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                            .toString())
+                    .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
+                    .build())
+        .collect(ImmutableList.toImmutableList());
   }
 }
