@@ -189,7 +189,8 @@ public class CohortsControllerTest {
     CohortsController.class,
     ConceptSetsController.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -205,8 +206,7 @@ public class CohortsControllerTest {
     MonitoringService.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
-    LogsBasedMetricService.class
+    UserServiceAuditor.class,
     FreeTierBillingService.class
   })
   static class Configuration {

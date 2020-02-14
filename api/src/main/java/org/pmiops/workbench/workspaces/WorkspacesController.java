@@ -134,7 +134,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceMapper workspaceMapper;
   private final ManualWorkspaceMapper manualWorkspaceMapper;
-  private LogsBasedMetricService logsBasedMetricService;
+  private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
   public WorkspacesController(
@@ -442,6 +442,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
+      // Note: this utility does not set the "review requested" bit or time. This is currently
+      // immutable on a workspace, see RW-4132.
       manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     }
 
@@ -456,6 +458,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             new ServerErrorException("Could not update the workspace's billing account", e));
       }
     }
+
     try {
       // The version asserted on save is the same as the one we read via
       // getRequired() above, see RW-215 for details.
