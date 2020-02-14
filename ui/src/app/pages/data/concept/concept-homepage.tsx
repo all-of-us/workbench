@@ -433,6 +433,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         currentInputString: '',
         currentSearchString: '',
         activeDomainTab: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
+        selectedDomain: Domain.SURVEY,
         selectedSurvey: surveyName,
         standardConceptsOnly: false}, () => this.searchConcepts());
     }
@@ -544,12 +545,14 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     render() {
-      const {loadingDomains, browsingSurvey, conceptDomainList, conceptSurveysList, domainInfoError, surveyInfoError,
-        standardConceptsOnly, showSearchError, searching, activeDomainTab, conceptAddModalOpen, currentInputString, currentSearchString,
-        conceptsSavedText, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions, surveyAddModalOpen} = this.state;
+      const {activeDomainTab, browsingSurvey, conceptAddModalOpen, conceptDomainList, conceptsSavedText, conceptSurveysList,
+        currentInputString, currentSearchString, domainInfoError, loadingDomains, surveyInfoError, standardConceptsOnly, showSearchError,
+        searching, selectedDomain, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions, surveyAddModalOpen} = this.state;
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
-          <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>Search Concepts</Header>
+          <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>
+            Search {selectedDomain ? (selectedSurvey ? selectedSurvey : activeDomainTab.name) : 'Concepts'}
+          </Header>
           <div style={{margin: '1rem 0'}}>
             <div style={{display: 'flex', alignItems: 'center'}}>
               <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
