@@ -11,8 +11,7 @@ import org.pmiops.workbench.monitoring.views.Metric;
 
 public interface MonitoringService {
 
-  int DELTA_VALUE = 1;
-  Map<TagKey, TagValue> DEFAULT_TAGS = Collections.emptyMap();
+  int COUNT_INCREMENT = 1;
 
   /**
    * Record an occurrence of a counted (a.k.a. delta or cumulative) time series. These are events
@@ -21,11 +20,7 @@ public interface MonitoringService {
    * @param eventMetric
    */
   default void recordEvent(EventMetric eventMetric) {
-    recordValue(eventMetric, DELTA_VALUE);
-  }
-
-  default void recordEvent(EventMetric eventMetric, Map<TagKey, TagValue> tags) {
-    recordValues(ImmutableMap.of(eventMetric, DELTA_VALUE), tags);
+    recordValue(eventMetric, COUNT_INCREMENT);
   }
 
   default void recordValue(Metric metric, Number value) {
@@ -33,7 +28,7 @@ public interface MonitoringService {
   }
 
   default void recordValues(Map<Metric, Number> metricToValue) {
-    recordValues(metricToValue, DEFAULT_TAGS);
+    recordValues(metricToValue, Collections.emptyMap());
   }
 
   /**

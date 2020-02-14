@@ -77,6 +77,7 @@ public class MonitoringServiceImpl implements MonitoringService {
 
     // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
     measureMap.record(tagContextBuilder.build());
+    logger.fine(String.format("Record measurements: %s, tags: %s", metricToValue, tags));
   }
 
   /**
@@ -98,9 +99,5 @@ public class MonitoringServiceImpl implements MonitoringService {
           Level.WARNING,
           String.format("Unrecognized measure class %s", metric.getMeasureClass().getName()));
     }
-  }
-
-  private void logAndSwallow(RuntimeException e) {
-    logger.log(Level.WARNING, "Exception encountered during monitoring.", e);
   }
 }

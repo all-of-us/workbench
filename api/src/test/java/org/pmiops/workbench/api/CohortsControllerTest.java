@@ -78,7 +78,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -191,7 +191,8 @@ public class CohortsControllerTest {
     CohortsController.class,
     ConceptSetsController.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -208,7 +209,6 @@ public class CohortsControllerTest {
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    LogsBasedMetricService.class,
     FreeTierBillingService.class
   })
   static class Configuration {
