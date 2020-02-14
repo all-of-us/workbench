@@ -112,10 +112,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     final String token = authorizationHeader.substring("Bearer".length()).trim();
     final Userinfoplus OAuth2Userinfo = userInfoService.getUserInfo(token);
 
-    // The Workbench user's userName is the AoU-generated email address, so it's an email from an
-    // OAUth2 perspective
-    // Don't confuse this with the user's Contact Email, which is entirely separate from this
-    // process
+    // The Workbench considers the user's generated GSuite email to be their userName
+    // Don't confuse this with the user's Contact Email, which is unrelated
     String userName = OAuth2Userinfo.getEmail();
 
     // TODO: check Google group membership to ensure user is in registered user group
