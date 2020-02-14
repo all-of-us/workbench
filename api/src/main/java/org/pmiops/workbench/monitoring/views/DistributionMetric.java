@@ -1,5 +1,7 @@
 package org.pmiops.workbench.monitoring.views;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
@@ -20,6 +22,10 @@ import org.pmiops.workbench.monitoring.labels.MetricLabel;
  * custom.googleapis.com/).
  */
 public enum DistributionMetric implements Metric {
+  API_METHOD_TIME("api_method_time", "Elapsed time for API handling.",
+      ImmutableList.of(MetricLabel.OPERATION_NAME, MetricLabel.METHOD_NAME),
+      DistributionAggregation.OPERATION_TIME,
+      MeasureLong.class),
   COHORT_OPERATION_TIME(
       "cohort_operation_time",
       "Time to complete Cohort-related operation.",
