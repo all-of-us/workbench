@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -290,9 +291,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser createUser(String givenName, String familyName, String userName) {
+  public DbUser createUser(final Userinfoplus oAuth2Userinfo) {
     return createUser(
-        givenName, familyName, userName, null, null, null, null, null, null, null, null, null);
+        oAuth2Userinfo.getGivenName(),
+        oAuth2Userinfo.getFamilyName(),
+        oAuth2Userinfo.getEmail(),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   @Override

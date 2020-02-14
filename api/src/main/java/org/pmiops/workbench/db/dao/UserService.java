@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -17,8 +18,8 @@ public interface UserService {
 
   DbUser createServiceAccountUser(String email);
 
-  // minimal version used by AuthInterceptor
-  DbUser createUser(String givenName, String familyName, String userName);
+  // version used by AuthInterceptor
+  DbUser createUser(Userinfoplus oAuth2Userinfo);
 
   DbUser createUser(
       String givenName,
