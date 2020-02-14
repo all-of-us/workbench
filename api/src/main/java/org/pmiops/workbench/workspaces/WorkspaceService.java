@@ -33,6 +33,8 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
 
+  WorkspaceResponse getWorkspace(String workspaceNamespace);
+
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
 
   List<WorkspaceResponse> getWorkspaces();

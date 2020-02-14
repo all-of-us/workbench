@@ -1,5 +1,7 @@
 package org.pmiops.workbench.notebooks;
 
+import static org.pmiops.workbench.exceptions.ExceptionUtils.convertNotebookException;
+
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
@@ -171,7 +173,12 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   @Override
   public Cluster getCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
-    return retryHandler.run((context) -> clusterApi.getCluster(googleProject, clusterName));
+    try {
+      return retryHandler.runAndThrowChecked(
+          (context) -> clusterApi.getCluster(googleProject, clusterName));
+    } catch (ApiException e) {
+      throw convertNotebookException(e);
+    }
   }
 
   @Override

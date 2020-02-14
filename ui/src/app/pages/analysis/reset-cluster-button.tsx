@@ -26,15 +26,15 @@ const styles = {
 };
 
 export interface Props {
-  billingProjectId: string;
-  workspaceFirecloudName: string;
+  workspaceNamespace: string;
 }
 
 interface State {
   cluster: Cluster;
   resetClusterPending: boolean;
   resetClusterModal: boolean;
-  clusterDeletionFailure: boolean;
+  resetClusterFailure: boolean;
+  clusterTransitionStatus?: ClusterStatus;
 }
 
 export class ResetClusterButton extends React.Component<Props, State> {
@@ -48,12 +48,13 @@ export class ResetClusterButton extends React.Component<Props, State> {
       cluster: null,
       resetClusterPending: false,
       resetClusterModal: false,
-      clusterDeletionFailure: true,
+      resetClusterFailure: true,
+      clusterTransitionStatus: null,
     };
   }
 
   componentDidMount() {
-    this.pollCluster(this.props.billingProjectId);
+    this.pollCluster();
   }
 
   componentWillUnmount() {
@@ -63,10 +64,14 @@ export class ResetClusterButton extends React.Component<Props, State> {
   }
 
   render() {
+    const {clusterTransitionStatus} = this.state;
+
     return <React.Fragment>
       <div style={styles.notebookSettings}>
         <TooltipTrigger content={
-            !this.state.cluster ? 'Your notebook server is still being created' : undefined}
+            !this.state.cluster ?
+              <div>Your notebook server is still being created <br/>
+                (Detailed status: {clusterTransitionStatus}) </div> : undefined}
                         side='right'>
           <Button disabled={!this.state.cluster}
                   onClick={() => this.openResetClusterModal()}
@@ -91,7 +96,7 @@ export class ResetClusterButton extends React.Component<Props, State> {
             </div>
         </ModalBody>
         <ModalFooter>
-          {this.state.clusterDeletionFailure ?
+          {this.state.resetClusterFailure ?
             <div className='error'>Could not reset your notebook server.</div> : undefined}
           <Button type='secondary'
                   onClick={() => this.setState({resetClusterModal: false})}
@@ -109,41 +114,52 @@ export class ResetClusterButton extends React.Component<Props, State> {
     this.setState({
       resetClusterPending: false,
       resetClusterModal: true,
-      clusterDeletionFailure: false
+      resetClusterFailure: false
     });
   }
 
-  resetCluster(): void {
-    this.setState({ resetClusterPending: true });
+  async resetCluster(): Promise<void> {
+    const {clusterName, clusterNamespace} = this.state.cluster;
 
-    const clusterBillingProjectId = this.state.cluster.clusterNamespace;
-    clusterApi().deleteCluster(this.state.cluster.clusterNamespace, this.state.cluster.clusterName)
-      .then(() => {
-        this.setState({cluster: null, resetClusterPending: false, resetClusterModal: false});
-        this.pollCluster(clusterBillingProjectId);
-      })
-      .catch(() => {
-        this.setState({resetClusterPending: false, clusterDeletionFailure: true});
-      });
+    try {
+      this.setState({ resetClusterPending: true });
+      await clusterApi().deleteCluster(clusterNamespace);
+      this.setState({resetClusterPending: false});
+      this.pollCluster();
+    } catch {
+      this.setState({resetClusterPending: false, resetClusterFailure: true});
+    }
   }
 
-  private pollCluster(billingProjectId): void {
+  private async pollCluster(): Promise<void> {
+    const {workspaceNamespace} = this.props;
+
     const repoll = () => {
-      this.pollClusterTimer = setTimeout(() => this.pollCluster(billingProjectId), 15000);
+      this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
     };
-    clusterApi().listClusters(billingProjectId, this.props.workspaceFirecloudName)
-      .then((body) => {
-        const cluster = body.defaultCluster;
-        if (TRANSITIONAL_STATUSES.has(cluster.status)) {
-          repoll();
-          return;
-        }
-        this.setState({cluster: cluster});
-      })
-      .catch(() => {
-        // Also retry on errors
+
+    try {
+      const response = await clusterApi().getCluster(workspaceNamespace);
+      let cluster = response.cluster;
+      if (cluster == null) {
+        const createClusterResponse = await clusterApi().createCluster(workspaceNamespace);
+        cluster = createClusterResponse.cluster;
+      }
+
+      if (TRANSITIONAL_STATUSES.has(cluster.status)) {
+        this.setState({clusterTransitionStatus: cluster.status});
+
+        // Keep polling if we're still waiting for the cluster to start up.
         repoll();
-      });
+        return;
+      }
+
+      // Only store the cluster in React state when it's in a ready-state.
+      this.setState({cluster: cluster, clusterTransitionStatus: null});
+    } catch (e) {
+      // Also re-poll on any errors.
+      repoll();
+    }
   }
 }
 
