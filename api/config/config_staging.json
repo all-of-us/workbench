@@ -91,7 +91,7 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false,
+    "enableNewAccountCreation": true,
     "enableRdrExport": false,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
