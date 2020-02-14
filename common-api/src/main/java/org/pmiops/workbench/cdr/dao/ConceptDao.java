@@ -132,6 +132,35 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
 
   @Query(
       value =
+          "select count(*) "
+              + "from "
+              + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
+              + "   id, @curType \\:= concept_name as concept_name, concept_id, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "    from "
+              + "      (select cr.id, c.* "
+              + "        from cb_criteria cr "
+              + "        join concept c on c.concept_id = cr.concept_id "
+              + "        where cr.domain_id = 'SURVEY' "
+              + "          and cr.type = 'PPI' "
+              + "          and cr.subtype = 'ANSWER' "
+              + "          and cr.path like CONCAT( "
+              + "            (select dc.id "
+              + "              from cb_criteria dc "
+              + "              where dc.domain_id = 'SURVEY' "
+              + "                and dc.type = 'PPI' "
+              + "                and dc.name = :surveyName), '.%' "
+              + "          ) "
+              + "          and match(c.concept_name, c.concept_code, c.vocabulary_id, c.synonyms) against (:term in boolean mode)"
+              + "      ) a, "
+              + "      (select @curRow \\:= 0, @curType \\:= '') r "
+              + "    order by concept_name, id "
+              + "  ) as x "
+              + "where rank = 1",
+      nativeQuery = true)
+  long countSurveyByName(@Param("term") String term, @Param("surveyName") String surveyName);
+
+  @Query(
+      value =
           "select concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
               + "from "
               + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
@@ -154,6 +183,41 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
       nativeQuery = true)
   List<DbConcept> findSurveys(
       @Param("term") String term, @Param("limit") int limit, @Param("offset") int offset);
+
+  @Query(
+      value =
+          "select concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "from "
+              + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
+              + "   id, @curType \\:= concept_name as concept_name, concept_id, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "    from "
+              + "      (select cr.id, c.* "
+              + "        from cb_criteria cr "
+              + "        join concept c on c.concept_id = cr.concept_id "
+              + "        where cr.domain_id = 'SURVEY' "
+              + "          and cr.type = 'PPI' "
+              + "          and cr.subtype = 'ANSWER' "
+              + "          and cr.path like CONCAT( "
+              + "            (select dc.id "
+              + "              from cb_criteria dc "
+              + "              where dc.domain_id = 'SURVEY' "
+              + "                and dc.type = 'PPI' "
+              + "                and dc.name = :surveyName), '.%' "
+              + "          ) "
+              + "          and match(c.concept_name, c.concept_code, c.vocabulary_id, c.synonyms) against (:term in boolean mode)"
+              + "      ) a, "
+              + "      (select @curRow \\:= 0, @curType \\:= '') r "
+              + "    order by concept_name, id "
+              + "  ) as x "
+              + "where rank = 1 "
+              + "order by id "
+              + "limit :limit offset :offset",
+      nativeQuery = true)
+  List<DbConcept> findSurveysByName(
+      @Param("term") String term,
+      @Param("surveyName") String surveyName,
+      @Param("limit") int limit,
+      @Param("offset") int offset);
 
   @Query(
       value =
@@ -277,7 +341,9 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
           ? findSurveys(limit, offset)
           : findSurveysByName(surveyName, limit, offset);
     }
-    return findSurveys(keyword, limit, offset);
+    return StringUtils.isBlank(surveyName)
+        ? findSurveys(keyword, limit, offset)
+        : findSurveysByName(keyword, surveyName, limit, offset);
   }
 
   /**
@@ -292,6 +358,8 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
     if (StringUtils.isBlank(keyword)) {
       return StringUtils.isBlank(surveyName) ? countSurveys() : countSurveyByName(surveyName);
     }
-    return countSurveys(keyword);
+    return StringUtils.isBlank(surveyName)
+        ? countSurveys(keyword)
+        : countSurveyByName(keyword, surveyName);
   }
 }
