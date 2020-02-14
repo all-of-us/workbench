@@ -46,18 +46,18 @@ export default abstract class AuthenticatedPage extends BasePage {
     const spinner = await this.puppeteerPage.waitFor((selector) => {
       return document.querySelectorAll(selector).length > 0
     }, {timeout: 1000}, selectr1);
-    const f = await spinner.jsonValue();
+    const jValue = await spinner.jsonValue();
 
     // wait maximum 60 seconds for spinner disappear if spinner existed
     const selectr2 = 'svg[style*="spin"], .spinner:empty';
 
-    if (f) {
+    if (jValue) {
       await this.puppeteerPage.waitFor((selector) => {
         return document.querySelectorAll(selector).length === 0
       }, {timeout: 60000}, selectr2);
     }
     // final 1 second wait for page render to finish
-    if (f){
+    if (jValue) {
       await this.puppeteerPage.waitFor(1000);
     }
   }
