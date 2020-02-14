@@ -2,9 +2,8 @@ import * as React from 'react';
 
 import {Component} from '@angular/core';
 
-import {Button, Clickable} from 'app/components/buttons';
+import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -100,14 +99,14 @@ export class AdminWorkspace extends React.Component<{}, State> {
       >
         {divContents}
       </div>
-    </FlexRow>
+    </FlexRow>;
   }
 
   researchPurposeField(labelText, divContents) {
     return <FlexWithMargin>
       <PurpleLabel>{labelText}</PurpleLabel>
       <div style={{wordWrap: 'break-word'}}>{divContents}</div>
-    </FlexWithMargin>
+    </FlexWithMargin>;
   }
 
   render() {
@@ -153,36 +152,36 @@ export class AdminWorkspace extends React.Component<{}, State> {
             {this.workspaceInfoField('Billing Status', workspace.billingStatus)}
             {this.workspaceInfoField('Billing Account Type', workspace.billingAccountType)}
             {this.workspaceInfoField(
-                'Creation Time',
-                new Date(workspace.creationTime).toDateString()
+              'Creation Time',
+              new Date(workspace.creationTime).toDateString()
             )}
             {this.workspaceInfoField(
-                'Last Modified Time',
-                new Date(workspace.lastModifiedTime).toDateString()
+              'Last Modified Time',
+              new Date(workspace.lastModifiedTime).toDateString()
             )}
             {this.workspaceInfoField(
-                'Workspace Published',
-                workspace.published ? 'Yes' : 'No'
+              'Workspace Published',
+              workspace.published ? 'Yes' : 'No'
             )}
           </FlexColumn>
           <FlexColumn style={styles.wideWithMargin}>
             <h3>Workspace Objects</h3>
             {
               this.workspaceInfoField(
-                  '# of Cohorts',
-                  resources.workspaceObjects.cohortCount
+                '# of Cohorts',
+                resources.workspaceObjects.cohortCount
               )
             }
             {
               this.workspaceInfoField(
-                  '# of Concept Sets',
-                  resources.workspaceObjects.conceptSetCount
+                '# of Concept Sets',
+                resources.workspaceObjects.conceptSetCount
               )
             }
             {
               this.workspaceInfoField(
-                  '# of Data Sets',
-                  resources.workspaceObjects.datasetCount
+                '# of Data Sets',
+                resources.workspaceObjects.datasetCount
               )
             }
           </FlexColumn>
@@ -190,20 +189,20 @@ export class AdminWorkspace extends React.Component<{}, State> {
             <h3>Cloud Storage</h3>
             {
               this.workspaceInfoField(
-                  '# of Notebook Files',
-                  resources.cloudStorage.notebookFileCount
+                '# of Notebook Files',
+                resources.cloudStorage.notebookFileCount
               )
             }
             {
               this.workspaceInfoField(
-                  '# of Non-Notebook Files',
-                  resources.cloudStorage.nonNotebookFileCount
+                '# of Non-Notebook Files',
+                resources.cloudStorage.nonNotebookFileCount
               )
             }
             {
               this.workspaceInfoField(
-                  'Storage used (bytes)',
-                  resources.cloudStorage.storageBytesUsed
+                'Storage used (bytes)',
+                resources.cloudStorage.storageBytesUsed
               )
             }
           </FlexColumn>
