@@ -47,6 +47,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.VerifiedUserInstitutionMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
@@ -110,6 +111,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private ProfileService profileService;
   @Autowired private ProfileController profileController;
   @Autowired private InstitutionService institutionService;
+  @Autowired private VerifiedUserInstitutionMapper verifiedUserInstitutionMapper;
 
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;

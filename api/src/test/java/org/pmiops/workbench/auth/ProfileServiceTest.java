@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.institution.VerifiedUserInstitutionMapper;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -29,6 +30,7 @@ public class ProfileServiceTest {
 
   @Autowired ProfileService profileService;
   @Autowired UserDao userDao;
+  @Autowired VerifiedUserInstitutionMapper verifiedUserInstitutionMapper;
 
   @TestConfiguration
   @MockBean({FreeTierBillingService.class})

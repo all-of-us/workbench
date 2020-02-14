@@ -15,18 +15,20 @@ import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
-import org.pmiops.workbench.db.model.DbVerifiedUserInstitution;
+import org.pmiops.workbench.institution.VerifiedUserInstitutionMapper;
+import org.pmiops.workbench.institution.VerifiedUserInstitutionMapperImpl;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
-import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
 @Service
+@Import({VerifiedUserInstitutionMapperImpl.class})
 public class ProfileService {
   private static final Function<DbInstitutionalAffiliation, InstitutionalAffiliation>
       TO_CLIENT_INSTITUTIONAL_AFFILIATION =
@@ -40,20 +42,6 @@ public class ProfileService {
 
               return result;
             }
-          };
-
-  private static final Function<DbVerifiedUserInstitution, VerifiedInstitutionalAffiliation>
-      TO_CLIENT_VERIFIED_INSTITUTIONAL_AFFILIATION =
-          verifiedInstitutionalAffiliation -> {
-            VerifiedInstitutionalAffiliation result = new VerifiedInstitutionalAffiliation();
-            result.setInstitutionShortName(
-                verifiedInstitutionalAffiliation.getInstitution().getShortName());
-            result.setInstitutionalRoleEnum(
-                verifiedInstitutionalAffiliation.getInstitutionalRoleEnum());
-            result.setInstitutionalRoleOtherText(
-                verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText());
-
-            return result;
           };
 
   private static final Function<DbPageVisit, PageVisit> TO_CLIENT_PAGE_VISIT =
@@ -111,17 +99,20 @@ public class ProfileService {
   private final FreeTierBillingService freeTierBillingService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedUserInstitutionDao verifiedUserInstitutionDao;
+  private final VerifiedUserInstitutionMapper verifiedUserInstitutionMapper;
 
   @Autowired
   public ProfileService(
       UserDao userDao,
       FreeTierBillingService freeTierBillingService,
       UserTermsOfServiceDao userTermsOfServiceDao,
-      VerifiedUserInstitutionDao verifiedUserInstitutionDao) {
+      VerifiedUserInstitutionDao verifiedUserInstitutionDao,
+      VerifiedUserInstitutionMapper verifiedUserInstitutionMapper) {
     this.userDao = userDao;
     this.freeTierBillingService = freeTierBillingService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedUserInstitutionDao = verifiedUserInstitutionDao;
+    this.verifiedUserInstitutionMapper = verifiedUserInstitutionMapper;
   }
 
   public Profile getProfile(DbUser user) {
@@ -237,8 +228,7 @@ public class ProfileService {
         .ifPresent(
             verifiedInstitutionalAffiliation ->
                 profile.setVerifiedInstitutionalAffiliation(
-                    TO_CLIENT_VERIFIED_INSTITUTIONAL_AFFILIATION.apply(
-                        verifiedInstitutionalAffiliation)));
+                    verifiedUserInstitutionMapper.dbToModel(verifiedInstitutionalAffiliation)));
 
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
 
