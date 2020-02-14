@@ -8,9 +8,8 @@ import org.pmiops.workbench.utils.Booleans;
 import org.pmiops.workbench.utils.Enums;
 
 /**
- * Specifies label names and allowed discrete values (if given).
- * Convention is lower_snake_case. Some CamelCase labels have been
- * grandfathered in.
+ * Specifies label names and allowed discrete values (if given). Convention is lower_snake_case.
+ * Some CamelCase labels have been grandfathered in.
  */
 public enum MetricLabel implements MetricLabelBase {
   BUFFER_ENTRY_STATUS("BufferEntryStatus", Enums.getValueStrings(BufferEntryStatus.class)),
