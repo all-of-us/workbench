@@ -807,9 +807,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     buildBillingAccountOptions() {
-      const options = this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}));
-      options.push({label: 'Create a new billing account', value: CREATE_BILLING_ACCOUNT_OPTION_VALUE});
+      const options = this.state.billingAccounts.map(a => ({
+        label: a.displayName,
+        value: a.name,
+        disabled: !a.isOpen
+      }));
+
+      options.push({
+        label: 'Create a new billing account',
+        value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+        disabled: false
+      });
+
       return options;
+      
     }
 
     render() {
