@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedUserInstitution;
 import org.pmiops.workbench.institution.VerifiedUserInstitutionMapper;
 import org.pmiops.workbench.institution.VerifiedUserInstitutionMapperImpl;
 import org.pmiops.workbench.model.Address;
@@ -23,6 +24,7 @@ import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
@@ -223,12 +225,22 @@ public class ProfileService {
             .map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList()));
 
-    verifiedUserInstitutionDao
-        .findFirstByUser(user)
+
+    // BEGIN HAIR PULLING EXERCISE
+
+    Optional<DbVerifiedUserInstitution> tmp1 = verifiedUserInstitutionDao.findFirstByUser(user);
+
+    tmp1
         .ifPresent(
-            verifiedInstitutionalAffiliation ->
-                profile.setVerifiedInstitutionalAffiliation(
-                    verifiedUserInstitutionMapper.dbToModel(verifiedInstitutionalAffiliation)));
+            verifiedInstitutionalAffiliation -> {
+              System.out.println("Why is this full of nulls? " + verifiedInstitutionalAffiliation.toString());    // the toString() tells us nothing; set a breakpoint
+              VerifiedInstitutionalAffiliation tmp2 = verifiedUserInstitutionMapper.dbToModel(verifiedInstitutionalAffiliation);
+              profile.setVerifiedInstitutionalAffiliation(tmp2);
+            });
+//                profile.setVerifiedInstitutionalAffiliation(
+//                    verifiedUserInstitutionMapper.dbToModel(verifiedInstitutionalAffiliation)));
+
+    // END HAIR PULLING EXERCISE
 
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
 
