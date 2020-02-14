@@ -11,6 +11,7 @@ import {LoginReactComponent} from 'app/pages/login/login';
 import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
 import {
+  cookiesEnabled,
   reactStyles,
   ReactWrapperBase, ServerConfigProps,
   WindowSizeProps,
@@ -20,8 +21,10 @@ import {
 
 import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
-import {FlexColumn} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import * as React from 'react';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faTimes} from "@fortawesome/free-solid-svg-icons";
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
@@ -71,6 +74,21 @@ const styles = reactStyles({
     width: 'auto',
     minHeight: '100vh'
   },
+  cookiePolicyMessage: {
+    position: 'absolute',
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    padding: '0.5rem 1rem',
+    borderTop: `7px solid ${colors.secondary}`,
+    bottom: 0,
+    backgroundColor: colors.light
+  },
+  iconStyles: {
+    height: 24,
+    width: 24
+
+  }
 });
 
 // Tracks each major stage in the sign-in / sign-up flow. Most of the steps are related to new
@@ -109,6 +127,8 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
 );
 
 const HEADER_IMAGE = '/assets/images/logo-registration-non-signed-in.svg';
+
+const cookieKey = 'aou-cookie-banner-dismissed';
 
 export interface SignInProps extends ServerConfigProps, WindowSizeProps {
   initialStep?: SignInStep;
@@ -289,6 +309,12 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
     }
   }
 
+  handleCloseCookies() {
+    if (cookiesEnabled()) {
+      localStorage.setItem(cookieKey, 'cookie-banner-dismissed');
+    }
+  }
+
   render() {
     const backgroundImages = StepToImageConfig.get(this.state.currentStep);
     return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
@@ -298,6 +324,14 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
                   src={HEADER_IMAGE}/></div>
         {this.renderSignInStep(this.state.currentStep)}
       </FlexColumn>
+      <div style={styles.cookiePolicyMessage}>
+        <img src='assets/images/cookies.png'/>
+        <div style={{paddingLeft: '1rem', color: colors.primary}}>
+          We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
+          to our Cookie Policy.
+        </div>
+        <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.handleCloseCookies()} />
+      </div>
     </FlexColumn>;
   }
 }
