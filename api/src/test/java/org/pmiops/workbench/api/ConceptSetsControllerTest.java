@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
@@ -217,6 +219,7 @@ public class ConceptSetsControllerTest {
     WorkspaceServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
+    ConceptSetMapperImpl.class,
     UserServiceImpl.class,
     ConceptSetsController.class,
     ConceptService.class,
@@ -236,7 +239,8 @@ public class ConceptSetsControllerTest {
     NotebooksService.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
 

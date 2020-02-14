@@ -94,11 +94,11 @@
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false,
+    "enableNewAccountCreation": true,
     "enableRdrExport": false,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
-    "useKeylessDelegatedCredentials": false,
+    "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false
   },

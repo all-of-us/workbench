@@ -84,7 +84,6 @@ public class DbUser {
   private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
   private Integer moodleId;
-  private Set<DbUserTermsOfService> termsOfServiceRows = new HashSet<>();
 
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
   private String eraCommonsLinkedNihUsername;

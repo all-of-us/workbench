@@ -3,7 +3,6 @@ package org.pmiops.workbench.cdr.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -143,8 +142,14 @@ public class ConceptDaoTest {
   }
 
   @Test
+  public void findAllEmptyResult() {
+    Iterable concepts = conceptDao.findAll(ImmutableList.of(9999L, 8888L));
+    assertThat(concepts).isEmpty();
+  }
+
+  @Test
   public void findAll() {
-    List<DbConcept> concepts = (List<DbConcept>) conceptDao.findAll();
+    Iterable concepts = conceptDao.findAll();
     assertThat(concepts).containsExactly(concept1, concept2, physicalMeasurement, surveyConcept);
   }
 

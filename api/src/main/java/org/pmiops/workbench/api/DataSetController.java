@@ -35,8 +35,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -106,13 +106,14 @@ public class DataSetController implements DataSetApiDelegate {
 
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
-  private final ConceptDao conceptDao;
+  private final ConceptService conceptService;
   private final ConceptSetDao conceptSetDao;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
   private final DataSetDao dataSetDao;
   private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
+  private final ConceptSetMapper conceptSetMapper;
 
   @Autowired
   DataSetController(
@@ -120,7 +121,7 @@ public class DataSetController implements DataSetApiDelegate {
       Clock clock,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
-      ConceptDao conceptDao,
+      ConceptService conceptService,
       ConceptSetDao conceptSetDao,
       DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetDao dataSetDao,
@@ -129,12 +130,13 @@ public class DataSetController implements DataSetApiDelegate {
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      ConceptSetMapper conceptSetMapper) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
-    this.conceptDao = conceptDao;
+    this.conceptService = conceptService;
     this.conceptSetDao = conceptSetDao;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetDao = dataSetDao;
@@ -144,6 +146,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
+    this.conceptSetMapper = conceptSetMapper;
   }
 
   @Override
@@ -240,16 +243,11 @@ public class DataSetController implements DataSetApiDelegate {
         }
       };
 
-  private ConceptSet toClientConceptSet(DbConceptSet conceptSet) {
-    ConceptSet result = ConceptSetsController.toClientConceptSet(conceptSet);
-    if (!conceptSet.getConceptIds().isEmpty()) {
-      Iterable<DbConcept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
-      result.setConcepts(
-          StreamSupport.stream(concepts.spliterator(), false)
-              .map(ConceptsController::toClientConcept)
-              .collect(Collectors.toList()));
-    }
-    return result;
+  private ConceptSet toClientConceptSet(DbConceptSet dbConceptSet) {
+    ConceptSet result = conceptSetMapper.dbModelToClient(dbConceptSet);
+    return result.concepts(
+        conceptService.findAll(
+            dbConceptSet.getConceptIds(), ConceptSetsController.CONCEPT_NAME_ORDERING));
   }
 
   // TODO(jaycarlton): move into helper methods in one or both of these classes

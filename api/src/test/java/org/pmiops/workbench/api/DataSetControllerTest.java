@@ -51,6 +51,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -61,6 +62,8 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapper;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -160,7 +163,7 @@ public class DataSetControllerTest {
   private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
   private static final String NAMED_PARAMETER_NAME = "p1_1";
   private static final QueryParameterValue NAMED_PARAMETER_VALUE =
-      QueryParameterValue.string("ICD9");
+      QueryParameterValue.string("concept_id");
   private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
   private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
       QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
@@ -218,6 +221,8 @@ public class DataSetControllerTest {
 
   @Mock DataSetMapper dataSetMapper;
 
+  @Autowired ConceptSetMapper conceptSetMapper;
+
   @Autowired DataSetService dataSetService;
 
   @Autowired FireCloudService fireCloudService;
@@ -254,6 +259,7 @@ public class DataSetControllerTest {
   @Import({
     CohortFactoryImpl.class,
     ConceptService.class,
+    ConceptSetMapperImpl.class,
     ConceptSetService.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
@@ -282,7 +288,8 @@ public class DataSetControllerTest {
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    Zendesk.class
+    Zendesk.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
 
@@ -344,7 +351,7 @@ public class DataSetControllerTest {
                 CLOCK,
                 cdrVersionDao,
                 cohortDao,
-                conceptDao,
+                conceptService,
                 conceptSetDao,
                 dataDictionaryEntryDao,
                 dataSetDao,
@@ -353,7 +360,8 @@ public class DataSetControllerTest {
                 fireCloudService,
                 notebooksService,
                 userProvider,
-                workspaceService));
+                workspaceService,
+                conceptSetMapper));
     WorkspacesController workspacesController =
         new WorkspacesController(
             billingProjectBufferService,
@@ -393,7 +401,8 @@ public class DataSetControllerTest {
             conceptBigQueryService,
             userRecentResourceService,
             userProvider,
-            CLOCK);
+            CLOCK,
+            conceptSetMapper);
     doAnswer(
             invocation -> {
               DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
