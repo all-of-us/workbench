@@ -8,7 +8,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase} from 'app/utils';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
@@ -21,7 +21,7 @@ import {
 } from 'generated/fetch';
 
 
-const reactStyles = {
+const styles = reactStyles({
   fixedWidthWithMargin: {
     width: '10rem',
     marginRight: '1rem'
@@ -35,10 +35,10 @@ const reactStyles = {
   dropdownIconOpen: {
     transform: 'rotate(0deg)',
   }
-};
+});
 
 const FlexWithMargin = ({style = {}, children}) => {
-  return <FlexColumn style={{...reactStyles.fixedWidthWithMargin, ...style}}>
+  return <FlexColumn style={{...styles.fixedWidthWithMargin, ...style}}>
     {...children}
   </FlexColumn>;
 };
@@ -94,7 +94,7 @@ export class AdminWorkspace extends React.Component<{}, State> {
     return <FlexWithMargin style={{width: widthString}}>
       <PurpleLabel>{labelText}</PurpleLabel>
       <div style={{wordWrap: 'break-word'}}>{divContents}</div>
-    </FlexWithMargin>
+    </FlexWithMargin>;
   }
 
   render() {
@@ -104,7 +104,7 @@ export class AdminWorkspace extends React.Component<{}, State> {
       <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center'}}>
         <label style={{marginRight: '1rem'}}>Google Project ID</label>
         <TextInput
-            style={reactStyles.fixedWidthWithMargin}
+            style={styles.fixedWidthWithMargin}
             onChange={value => this.setState({googleProject: value})}
             onKeyDown={event => this.maybeGetFederatedWorkspaceInformation(event)}
         />
@@ -137,16 +137,16 @@ export class AdminWorkspace extends React.Component<{}, State> {
             {this.workspaceInfoField('Billing Status', workspace.billingStatus)}
             {this.workspaceInfoField('Billing Account Type', workspace.billingAccountType)}
             {this.workspaceInfoField(
-                'Creation Time',
-                new Date(workspace.creationTime).toDateString()
+              'Creation Time',
+              new Date(workspace.creationTime).toDateString()
             )}
             {this.workspaceInfoField(
-                'Last Modified Time',
-                new Date(workspace.lastModifiedTime).toDateString()
+              'Last Modified Time',
+              new Date(workspace.lastModifiedTime).toDateString()
             )}
             {this.workspaceInfoField(
-                'Workspace Published',
-                workspace.published ? 'Yes' : 'No'
+              'Workspace Published',
+              workspace.published ? 'Yes' : 'No'
             )}
           </FlexRow>
         </FlexColumn>
@@ -164,8 +164,8 @@ export class AdminWorkspace extends React.Component<{}, State> {
                 shape='angle'
                 style={
                   this.state.detailsOpen
-                      ? {...reactStyles.dropdownIcon, ...reactStyles.dropdownIconOpen}
-                      : reactStyles.dropdownIcon
+                      ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+                      : styles.dropdownIcon
                 }
                 size={21}
             />
@@ -179,12 +179,12 @@ export class AdminWorkspace extends React.Component<{}, State> {
               this.workspaceInfoField(
                 'Primary purpose of project',
                 getSelectedResearchPurposeItems(
-                    workspace.researchPurpose).map(
-                        (
-                            researchPurposeItem, i) =>
-                            <div key={i}>{researchPurposeItem}</div>
-                        ),
-                  2
+                  workspace.researchPurpose).map(
+                    (
+                      researchPurposeItem, i) =>
+                      <div key={i}>{researchPurposeItem}</div>
+                    ),
+                2
                 )
             }
             {
@@ -196,23 +196,23 @@ export class AdminWorkspace extends React.Component<{}, State> {
             }
             {
               this.workspaceInfoField(
-                  'Area of intended study',
-                  workspace.researchPurpose.intendedStudy,
-                  2
+                'Area of intended study',
+                workspace.researchPurpose.intendedStudy,
+                2
               )
             }
             {
               this.workspaceInfoField(
-                  'Anticipated findings',
-              workspace.researchPurpose.anticipatedFindings,
+                'Anticipated findings',
+                workspace.researchPurpose.anticipatedFindings,
                 2
               )
             }
             {
               workspace.researchPurpose.population && this.workspaceInfoField(
-                  'Population area(s) of focus',
-                  getSelectedPopulations(workspace.researchPurpose).map((selectedPopulation, i) => <div key={i}>{selectedPopulation}</div>),
-                  2
+                'Population area(s) of focus',
+                getSelectedPopulations(workspace.researchPurpose).map((selectedPopulation, i) => <div key={i}>{selectedPopulation}</div>),
+                2
               )
             }
           </FlexRow>
@@ -223,20 +223,20 @@ export class AdminWorkspace extends React.Component<{}, State> {
           <FlexRow>
             {
               this.workspaceInfoField(
-                  '# of Cohorts',
-                  resources.workspaceObjects.cohortCount
+                '# of Cohorts',
+                resources.workspaceObjects.cohortCount
               )
             }
             {
               this.workspaceInfoField(
-                  '# of Concept Sets',
-                  resources.workspaceObjects.conceptSetCount
+                '# of Concept Sets',
+                resources.workspaceObjects.conceptSetCount
               )
             }
             {
               this.workspaceInfoField(
-                  '# of Data Sets',
-                  resources.workspaceObjects.datasetCount
+                '# of Data Sets',
+                resources.workspaceObjects.datasetCount
               )
             }
           </FlexRow>
@@ -247,20 +247,20 @@ export class AdminWorkspace extends React.Component<{}, State> {
         <FlexRow style={{width: '100%'}}>
           {
             this.workspaceInfoField(
-                '# of Notebook Files',
-                resources.cloudStorage.notebookFileCount
+              '# of Notebook Files',
+              resources.cloudStorage.notebookFileCount
             )
           }
           {
             this.workspaceInfoField(
-                '# of Non-Notebook Files',
-                resources.cloudStorage.nonNotebookFileCount
+              '# of Non-Notebook Files',
+              resources.cloudStorage.nonNotebookFileCount
             )
           }
           {
             this.workspaceInfoField(
-                'Storage used (bytes)',
-                resources.cloudStorage.storageBytesUsed
+              'Storage used (bytes)',
+              resources.cloudStorage.storageBytesUsed
             )
           }
         </FlexRow>
@@ -278,19 +278,19 @@ export class AdminWorkspace extends React.Component<{}, State> {
       {detailsOpen && workspace && resources.clusters.length > 0 && <FlexColumn>
           <h3>Clusters</h3>
           <FlexRow>
-            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Cluster Name</PurpleLabel>
-            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Google Project</PurpleLabel>
-            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Created Time</PurpleLabel>
-            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Last Accessed Time</PurpleLabel>
-            <PurpleLabel style={reactStyles.fixedWidthWithMargin}>Status</PurpleLabel>
+            <PurpleLabel style={styles.fixedWidthWithMargin}>Cluster Name</PurpleLabel>
+            <PurpleLabel style={styles.fixedWidthWithMargin}>Google Project</PurpleLabel>
+            <PurpleLabel style={styles.fixedWidthWithMargin}>Created Time</PurpleLabel>
+            <PurpleLabel style={styles.fixedWidthWithMargin}>Last Accessed Time</PurpleLabel>
+            <PurpleLabel style={styles.fixedWidthWithMargin}>Status</PurpleLabel>
           </FlexRow>
           {resources.clusters.map((cluster, i) =>
               <FlexRow key={i}>
-                <div style={reactStyles.fixedWidthWithMargin}>{cluster.clusterName}</div>
-                <div style={reactStyles.fixedWidthWithMargin}>{cluster.googleProject}</div>
-                <div style={reactStyles.fixedWidthWithMargin}>{new Date(cluster.createdDate).toDateString()}</div>
-                <div style={reactStyles.fixedWidthWithMargin}>{new Date(cluster.dateAccessed).toDateString()}</div>
-                <div style={reactStyles.fixedWidthWithMargin}>{cluster.status}</div>
+                <div style={styles.fixedWidthWithMargin}>{cluster.clusterName}</div>
+                <div style={styles.fixedWidthWithMargin}>{cluster.googleProject}</div>
+                <div style={styles.fixedWidthWithMargin}>{new Date(cluster.createdDate).toDateString()}</div>
+                <div style={styles.fixedWidthWithMargin}>{new Date(cluster.dateAccessed).toDateString()}</div>
+                <div style={styles.fixedWidthWithMargin}>{cluster.status}</div>
                 <Button>Disable</Button>
               </FlexRow>
           )}
