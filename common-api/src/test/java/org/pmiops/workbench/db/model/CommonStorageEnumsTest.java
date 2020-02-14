@@ -4,62 +4,45 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.common.collect.BiMap;
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.util.function.Function;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 
-@RunWith(Parameterized.class)
 public class CommonStorageEnumsTest {
-  @Parameters(name = "{0}")
-  public static Object[][] data() {
-    return new Object[][] {
-      {
-        DataAccessLevel.class.getSimpleName(),
-        DataAccessLevel.values(),
-        (Function<Short, DataAccessLevel>) CommonStorageEnums::dataAccessLevelFromStorage,
-        (Function<DataAccessLevel, Short>) CommonStorageEnums::dataAccessLevelToStorage
-      },
-      {
-        Domain.class.getSimpleName(),
-        Domain.values(),
-        (Function<Short, Domain>) CommonStorageEnums::domainFromStorage,
-        (Function<Domain, Short>) CommonStorageEnums::domainToStorage
-      }
-    };
-  }
+  private final Object INDICATES_STATIC_METHOD = null;
 
-  @Parameter() public String description;
+  final Set<Class> enumClasses = getEnumerationClasses();
+  final Collection<Method> methods = Arrays.asList(CommonStorageEnums.class.getDeclaredMethods());
 
-  @Parameter(1)
-  public Enum<?>[] enumValues;
+  // e.g. public static Short reviewStatusToStorage(ReviewStatus s)
+  final Map<Class, Method> enumClassToStorageMethod =
+          methods.stream()
+                  .filter(m -> enumClasses.contains(firstMethodParameterType(m)))
+                  // domainToDomainId is stringly typed - test with test_domainId
+                  .filter(m -> !m.getName().equals("domainToDomainId"))
+                  .collect(Collectors.toMap(this::firstMethodParameterType, m -> m));
 
-  @Parameter(2)
-  public Function<Short, Enum<?>> fromStorage;
-
-  @Parameter(3)
-  public Function<Enum<?>, Short> toStorage;
-
-  @Test
-  public void testBijectiveStorageMapping() {
-    for (Enum<?> v : enumValues) {
-      Short storageValue = toStorage.apply(v);
-      assertWithMessage("unmapped enum value: " + v).that(storageValue).isNotNull();
-      assertThat(v).isEqualTo(fromStorage.apply(storageValue));
-    }
-  }
+  // e.g. public static ReviewStatus reviewStatusFromStorage(Short s)
+  final Map<Type, Method> storageMethodToEnumClass =
+          methods.stream()
+                  .filter(m -> enumClasses.contains(m.getReturnType()))
+                  // domainToDomainId is stringly typed - test with test_domainId
+                  .filter(m -> !m.getName().equals("domainIdToDomain"))
+                  .collect(Collectors.toMap(Method::getReturnType, m -> m));
 
   // domain ID is stringly-typed so special-case this
 
   @Test
-  public void testDomainIdBijectiveStorageMapping() {
+  public void test_domainId() {
     for (Domain v : Domain.values()) {
       String storageValue = CommonStorageEnums.domainToDomainId(v);
       assertWithMessage("unmapped enum value: " + v).that(storageValue).isNotNull();
@@ -67,40 +50,65 @@ public class CommonStorageEnumsTest {
     }
   }
 
-  // copied from api/StorageEnumsTest because the above tests are not comprehensive
+  // this is a copy of StorageEnumsTest.test_noMissingMapEntries()
+
   @Test
-  public void noMissingMapEntries() throws Exception {
-    for (Field f : CommonStorageEnums.class.getDeclaredFields()) {
-      if (f.getType() != BiMap.class) {
-        continue;
-      }
-
-      Class enumClass =
-          (Class) ((ParameterizedType) f.getAnnotatedType().getType()).getActualTypeArguments()[0];
-
-      Method enumToShort = null;
-      Method shortToEnum = null;
-      for (Method m : CommonStorageEnums.class.getDeclaredMethods()) {
-        if (m.getParameterTypes()[0].equals(enumClass)) {
-          enumToShort = m;
-        }
-
-        if (m.getReturnType().equals(enumClass)) {
-          shortToEnum = m;
-        }
-      }
-
-      // stringly typed map - test with testDomainIdBijectiveStorageMapping instead
-      if (enumToShort.getName().equals("domainIdToDomain")) {
-        continue;
-      }
-
-      for (Object e : enumClass.getEnumConstants()) {
-        Short shortVal = (Short) enumToShort.invoke(null, e);
-
-        assertThat(shortVal).named(enumClass.getName() + ":" + e.toString()).isNotNull();
-        assertThat(shortToEnum.invoke(null, shortVal)).isEqualTo(e);
+  public void test_noMissingMapEntries() throws InvocationTargetException, IllegalAccessException {
+    for (final Class enumClass : enumClasses) {
+      for (final Object enumValue : enumClass.getEnumConstants()) {
+        Short shortValue = enumToStorage(enumValue, enumClass);
+        assertThat(shortValue).named(enumClass.getName() + ":" + enumValue.toString()).isNotNull();
+        assertThat(storageToEnum(shortValue, enumClass)).isEqualTo(enumValue);
       }
     }
+  }
+
+  private Short enumToStorage(Object enumValue, Class enumClass)
+      throws InvocationTargetException, IllegalAccessException {
+    final Object returnValue =
+        enumClassToStorageMethod.get(enumClass).invoke(INDICATES_STATIC_METHOD, enumValue);
+    assertThat(returnValue instanceof Short).isTrue();
+    return (Short) returnValue;
+  }
+
+  private Object storageToEnum(Short shortValue, Class enumClass)
+      throws InvocationTargetException, IllegalAccessException {
+    return storageMethodToEnumClass.get(enumClass).invoke(INDICATES_STATIC_METHOD, shortValue);
+  }
+
+  /**
+   * Retrieve all Enum classes in CommonStorageEnums
+   *
+   * <p>our convention for BiMaps in CommonStorageEnums is <Enum, Short> so we retrieve the first
+   * parameterized type
+   *
+   * @return
+   */
+  private Set<Class> getEnumerationClasses() {
+    return Stream.of(CommonStorageEnums.class.getDeclaredFields())
+        .filter(field -> field.getType().equals(BiMap.class))
+        .map(
+            field -> {
+              // gets the specific BiMap type including annotations
+              final Type biMapType = field.getAnnotatedType().getType();
+
+              // need a ParameterizedType to access the type arguments
+              assertThat(biMapType instanceof ParameterizedType).isTrue();
+              final ParameterizedType pType = (ParameterizedType) biMapType;
+
+              // our convention is for the enum type to come first
+              final Type enumType = pType.getActualTypeArguments()[0];
+
+              // needed for the isEnum() check
+              final Class enumClass = (Class) enumType;
+              assertThat(enumClass.isEnum()).isTrue();
+              return enumClass;
+            })
+        .collect(Collectors.toSet());
+  }
+
+  // convenience method describing what is retrieved here
+  private Class firstMethodParameterType(Method method) {
+    return method.getParameterTypes()[0];
   }
 }
