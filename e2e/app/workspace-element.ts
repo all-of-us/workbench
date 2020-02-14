@@ -1,4 +1,5 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import AouElement from '../driver/AouElement';
 import Widget from './elements/widget';
 
 // If element CSS/XPath selectors are used frequently, put it there.
@@ -23,32 +24,3 @@ exports.SELT_XPATH_QUESTION4 = `//*[starts-with(normalize-space(.), "4. What are
 // request a review Yes or No radiobutton
 exports.SELT_XPATH_YES = `//*[label[contains(normalize-space(.),"Would you like to request a review of your research purpose")]]/following-sibling::*/input[@type="radio"][following-sibling::label[1]/text()="Yes"]`;
 exports.SELT_XPATH_NO = `//*[label[contains(normalize-space(.),"Would you like to request a review of your research purpose")]]/following-sibling::*/input[@type="radio"][following-sibling::label[1]/text()="No"]`;
-
-export default class ProjectPurposeQuestion extends Widget {
-  public label: string;
-
-  constructor(page: Page, label: string) {
-    super(page);
-    this.label = label;
-  }
-
-  public async checkbox(): Promise<ElementHandle> {
-    const selectr = this.appendXpath() + '//input[@type=\'checkbox\']';
-    return await this.puppeteerPage.waitForXPath(selectr, {visible: true})
-  }
-
-  public async textfield(): Promise<ElementHandle> {
-    const selectr = this.appendXpath() + '//input[@type=\'text\']';
-    return await this.puppeteerPage.waitForXPath(selectr, {visible: true})
-  }
-
-  public async textarea(): Promise<ElementHandle> {
-    const selectr = this.appendXpath() + '//textarea';
-    return await this.puppeteerPage.waitForXPath(selectr, {visible: true})
-  }
-
-  private appendXpath(): string {
-    return `//*[child::*/label[contains(normalize-space(text()),"${this.label}")]]`;
-  }
-
-}

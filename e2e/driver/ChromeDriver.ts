@@ -1,7 +1,7 @@
 import * as Puppeteer from 'puppeteer';
 import GoogleLoginPage from '../app/google-login';
 
-const configs = require('../config/config');
+const configs = require('../resources/config.js');
 
 export default class ChromeDriver {
 

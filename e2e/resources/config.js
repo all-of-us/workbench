@@ -1,4 +1,4 @@
-require('dotenv').config(); // loads variables from .env
+require('dotenv').config();
 const _ = require('lodash');
 
 const env = process.env.WORKBENCH_ENV || 'test';
