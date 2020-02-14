@@ -93,10 +93,11 @@ public class LogsBasedMetricsServiceTest {
     final Map<String, Object> payloadMap = logEntry.<JsonPayload>getPayload().getDataAsMap();
     assertThat(payloadMap).hasSize(PayloadKey.values().length);
 
-    final String metricName = (String) payloadMap.getOrDefault(PayloadKey.NAME.getKeyName(), "");
+    final String metricName = (String) payloadMap.get(PayloadKey.NAME.getKeyName());
     assertThat(metricName).isEqualTo(GaugeMetric.WORKSPACE_COUNT.getName());
 
-    final Double metricValue = (Double) payloadMap.getOrDefault(PayloadKey.VALUE.getKeyName(), "");
+    final Double metricValue = (Double) payloadMap.get(PayloadKey.VALUE.getKeyName());
+
     assertThat(metricValue).isEqualTo(3.0);
 
     @SuppressWarnings("unchecked")
