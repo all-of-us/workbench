@@ -756,6 +756,60 @@ Generates databases in bigquery with data from a de-identified cdr that will be 
   :fn => ->(*args) { generate_private_cdr_counts(*args) }
 })
 
+def copy_bq_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--source-project [source-project]",
+      ->(opts, v) { opts.source_project = v},
+      "Source Project. Required."
+    )
+  op.add_option(
+    "--source-dataset [source-dataset]",
+    ->(opts, v) { opts.source_dataset = v},
+    "Source dataset. Required."
+  )
+  op.add_option(
+    "--destination-project [destination-project]",
+    ->(opts, v) { opts.destination_project = v},
+    "Destination Project. Required."
+  )
+  op.add_option(
+      "--destination-dataset [destination-dataset]",
+      ->(opts, v) { opts.destination_dataset = v},
+      "Destination Dataset. Required."
+    )
+  op.add_option(
+    "--table-prefixes [prefix1,prefix2,...]",
+    ->(opts, v) { opts.table_prefixes = v},
+    "Comma-delimited table prefixes to filter the publish by, e.g. cb_,ds_. " +
+    "This should only be used in special situations e.g. when the auxilliary " +
+    "cb_ or ds_ tables need to be updated, or if there was an issue with the " +
+    "publish. In general, CDRs should be treated as immutable after the " +
+    "initial publish."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.source_project and opts.source_dataset and opts.destination_project and opts.destination_dataset }
+  op.parse.validate
+
+  # This is a grep filter. It matches all tables, by default.
+  table_filter = ""
+  if op.opts.table_prefixes
+    prefixes = op.opts.table_prefixes.split(",")
+    table_filter = "^\\(#{prefixes.join("\\|")}\\)"
+  end
+
+  common = Common.new
+  source_dataset = "#{op.opts.source_project}:#{op.opts.source_dataset}"
+  dest_dataset = "#{op.opts.destination_project}:#{op.opts.destination_dataset}"
+  common.status "Copying from '#{source_dataset}' -> '#{dest_dataset}'"
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{source_dataset} #{dest_dataset} #{op.opts.source_project} #{table_filter}}
+end
+
+Common.register_command({
+  :invocation => "copy-bq-tables",
+  :description => "Copies tables or filters from source to destination",
+  :fn => ->(*args) { copy_bq_tables("copy-bq-tables", *args) }
+})
+
 def generate_cloudsql_db(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
