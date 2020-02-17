@@ -622,6 +622,9 @@ definitions:
       id:
         description: Unique within the cohort definition
         type: string
+      name:
+        description: optional custom name set by user
+        type: string
       type:
         description: type of criteria
         type: string

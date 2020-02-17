@@ -122,20 +122,20 @@ export class SearchGroupComponent implements OnInit {
     }
   }
 
-  update = () => {
+  update = (recalculate: boolean) => {
     // timeout prevents Angular 'value changed after checked' error
     setTimeout(() => {
       // prevent multiple total count calls when initializing multiple groups simultaneously
       // (on cohort edit or clone)
       const init = initExisting.getValue();
       if (!init || (init && this.index === 0)) {
-        this.updateRequest();
+        this.updateRequest(recalculate);
         if (init) {
           this.preventInputCalculate = true;
           initExisting.next(false);
         }
       }
-      if (this.activeItems && (!this.temporal || !this.temporalError)) {
+      if (recalculate && this.activeItems && (!this.temporal || !this.temporalError)) {
         this.loading = true;
         this.error = false;
         this.getGroupCount();

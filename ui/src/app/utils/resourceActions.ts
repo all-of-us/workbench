@@ -15,6 +15,8 @@ export function toDisplay(resourceType: ResourceType): string {
       return 'Notebook';
     case ResourceType.COHORT:
       return 'Cohort';
+    case ResourceType.COHORTSEARCHITEM:
+      return 'Item';
     case ResourceType.COHORTREVIEW:
       return 'Cohort Review';
     case ResourceType.CONCEPTSET:
