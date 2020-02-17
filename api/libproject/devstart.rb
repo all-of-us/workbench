@@ -796,13 +796,11 @@ def copy_bq_tables(cmd_name, *args)
     table_filter = "^\\(#{prefixes.join("\\|")}\\)"
   end
 
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    source_dataset = "#{op.opts.source_project}:#{op.opts.source_dataset}"
-    dest_dataset = "#{op.opts.destination_project}:#{op.opts.destination_dataset}"
-    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh
-          --source_dataset #{source_dataset} --dest_dataset #{dest_dataset} --job_project #{op.opts.source_project} --table_filter #{table_filter}}
-  end
+  common = Common.new
+  source_dataset = "#{op.opts.source_project}:#{op.opts.source_dataset}"
+  dest_dataset = "#{op.opts.destination_project}:#{op.opts.destination_dataset}"
+  common.status "Copying from '#{source_dataset}' -> '#{dest_dataset}'"
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{source_dataset} #{dest_dataset} #{op.opts.source_project} #{table_filter}}
 end
 
 Common.register_command({
