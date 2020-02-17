@@ -482,13 +482,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         = this.state;
       const domainError = domainErrors.includes(activeDomainTab.domain);
       return <React.Fragment>
-        <button style={styles.backBtn} type='button'
-          onClick={() => this.setState({
-            activeDomainTab: conceptDomainCounts[0],
-            searching: false,
-            selectedDomain: undefined,
-            selectedSurvey: ''
-          })}>
+        <button style={styles.backBtn} type='button' onClick={() => this.clearSearch()}>
           &lt; Back to Concept Set Homepage
         </button>
         <FadeBox>
