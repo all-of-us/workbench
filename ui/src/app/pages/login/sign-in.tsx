@@ -343,7 +343,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
           <img src='assets/images/cookies.png'/>
           <div style={{paddingLeft: '1rem', color: colors.primary}}>
             We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
-            to our <a href='cookie-policy' target='_blank'
+            to our <a href='/cookie-policy' target='_blank'
                          style={{display: 'inline-block'}}>Cookie Policy</a>.
           </div>
         </FlexRow>

@@ -2,8 +2,8 @@ import {Component} from '@angular/core';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SmallHeader} from 'app/components/headers';
+import {AouTitle} from 'app/components/text-wrappers';
 import {SIGNED_OUT_HEADER_IMAGE} from 'app/pages/login/sign-in';
-import {AoUTitle} from 'app/pages/profile/data-use-agreement-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
@@ -59,9 +59,9 @@ export class CookiePolicy extends React.Component<{}, {}> {
              src={SIGNED_OUT_HEADER_IMAGE}/>
       </div>
       <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%', color: colors.primary}}>
-        <Header style={styles.header}><AoUTitle/> Cookie Policy</Header>
+        <Header style={styles.header}><AouTitle/> Cookie Policy</Header>
         <div style={styles.textSection}>
-          The <AoUTitle/> platform uses cookies to help provide you with the best experience we can.
+          The <AouTitle/> platform uses cookies to help provide you with the best experience we can.
           Cookies are small text files that are placed on your computer or mobile phone when you browse websites.
         </div>
         <div style={styles.textSection}>
@@ -85,9 +85,10 @@ export class CookiePolicy extends React.Component<{}, {}> {
           You can learn more about all the cookies we use below.
         </div>
         <SmallHeader style={styles.smallHeader}>Granting us permission to use cookies</SmallHeader>
-        <div style={styles.textSection}>If the settings on your software that you are using to view the <AoUTitle/> are
-          adjusted to accept cookies, we take this, and your continued use of our platform, to mean that you accept
-          this. Should you wish to not accept cookies, you can learn how to do this below.</div>
+        <div style={styles.textSection}>If the settings on your software that you are using to view
+          the <AouTitle/> platform are adjusted to accept cookies, we take this, and your continued use of
+          our platform, to mean that you accept this. Should you wish to not accept cookies, you can learn how to do
+          this below.</div>
         <SmallHeader style={styles.smallHeader}>Anonymous visitor statistics cookies</SmallHeader>
         <div style={styles.textSection}>
           We use cookies to compile visitor statistics including the number of visitors to our platform, technology used

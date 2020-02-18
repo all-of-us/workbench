@@ -28,6 +28,7 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
+import {CookiePolicyComponent} from './pages/cookie-policy';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {CreateReviewModalComponent} from './pages/data/cohort-review/create-review-modal';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -39,7 +40,6 @@ import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actio
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
 import {HomepageComponent} from './pages/homepage/homepage';
 import {InitialErrorComponent} from './pages/initial-error/component';
-import {CookiePolicyComponent} from './pages/login/cookie-policy';
 import {SignInComponent} from './pages/login/sign-in';
 import {DataUseAgreementComponent} from './pages/profile/data-use-agreement';
 import {ProfilePageComponent} from './pages/profile/profile-page';

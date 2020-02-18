@@ -3,11 +3,11 @@ import {FlexColumn} from 'app/components/flex';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {
-  AoUTitle,
   IndentedListItem,
   IndentedUnorderedList,
   SecondHeader
@@ -59,7 +59,7 @@ export function getDataUseAgreementWidget(submitting, initialWork,
     </InitialsAgreement>
     <InitialsAgreement onChange={(v) => this.setState({initialName: v})} value={initialName}>
       My name, affiliation, profile information, and research description will be made public.
-      My research description will be used by the <AoUTitle/> to provide
+      My research description will be used by the <AouTitle/> to provide
       participants with meaningful information about the research being conducted.
     </InitialsAgreement>
     <InitialsAgreement onChange={(v) => this.setState({initialSanctions: v})}
@@ -70,7 +70,7 @@ export function getDataUseAgreementWidget(submitting, initialWork,
       resources will be revoked and/or subject to customary access policies and procedures.
     </InitialsAgreement>
     <div style={{marginTop: '0.5rem'}}><strong>I acknowledge that failure to comply with the terms of this agreement
-      may result in termination of my <AoUTitle/> account and/or other sanctions, including
+      may result in termination of my <AouTitle/> account and/or other sanctions, including
       but not limited to:</strong>
       <IndentedUnorderedList>
         <IndentedListItem>
