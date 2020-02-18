@@ -1,0 +1,22 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "dob",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "age_at_consent",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "age_at_cdr",
+    "type": "INTEGER"
+  }
+]

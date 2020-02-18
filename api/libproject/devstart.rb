@@ -743,9 +743,37 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
   :fn => ->(*args) { generate_cb_criteria_tables(*args) }
 })
 
-def generate_private_cdr_counts(*args)
+def generate_private_cdr_counts(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--workbench-project [workbench-project]",
+    ->(opts, v) { opts.workbench_project = v},
+    "Workbench Project. Required."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version. Required."
+  )
+  op.add_option(
+    "--bucket [bucket]",
+    ->(opts, v) { opts.bucket = v},
+    "GCS bucket. Required."
+  )
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
 end
 
 Common.register_command({
@@ -753,31 +781,26 @@ Common.register_command({
   :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
  --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
 Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
-  :fn => ->(*args) { generate_private_cdr_counts(*args) }
+  :fn => ->(*args) { generate_private_cdr_counts("generate-private-cdr-counts", *args) }
 })
 
 def copy_bq_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-      "--source-project [source-project]",
-      ->(opts, v) { opts.source_project = v},
-      "Source Project. Required."
-    )
+    "--sa-project [sa-project]",
+    ->(opts, v) { opts.sa_project = v},
+    "Service Account Project. Required."
+  )
   op.add_option(
     "--source-dataset [source-dataset]",
     ->(opts, v) { opts.source_dataset = v},
     "Source dataset. Required."
   )
   op.add_option(
-    "--destination-project [destination-project]",
-    ->(opts, v) { opts.destination_project = v},
-    "Destination Project. Required."
+    "--destination-dataset [destination-dataset]",
+    ->(opts, v) { opts.destination_dataset = v},
+    "Destination Dataset. Required."
   )
-  op.add_option(
-      "--destination-dataset [destination-dataset]",
-      ->(opts, v) { opts.destination_dataset = v},
-      "Destination Dataset. Required."
-    )
   op.add_option(
     "--table-prefixes [prefix1,prefix2,...]",
     ->(opts, v) { opts.table_prefixes = v},
@@ -787,7 +810,7 @@ def copy_bq_tables(cmd_name, *args)
     "publish. In general, CDRs should be treated as immutable after the " +
     "initial publish."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.source_project and opts.source_dataset and opts.destination_project and opts.destination_dataset }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.sa_project and opts.source_dataset and opts.destination_dataset }
   op.parse.validate
 
   # This is a grep filter. It matches all tables, by default.
@@ -797,11 +820,12 @@ def copy_bq_tables(cmd_name, *args)
     table_filter = "^\\(#{prefixes.join("\\|")}\\)"
   end
 
-  common = Common.new
-  source_dataset = "#{op.opts.source_project}:#{op.opts.source_dataset}"
-  dest_dataset = "#{op.opts.destination_project}:#{op.opts.destination_dataset}"
-  common.status "Copying from '#{source_dataset}' -> '#{dest_dataset}'"
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{source_dataset} #{dest_dataset} #{op.opts.source_project} #{table_filter}}
+  source_project = "#{op.opts.source_dataset}".split(':').first
+  ServiceAccountContext.new(op.opts.sa_project).run do
+    common = Common.new
+    common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
+    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
+  end
 end
 
 Common.register_command({
