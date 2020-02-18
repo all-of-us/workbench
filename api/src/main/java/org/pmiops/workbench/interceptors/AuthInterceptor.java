@@ -161,7 +161,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       if (user.getDisabled()) {
         throw new ForbiddenException(
             WorkbenchException.errorResponse(
-                "This user account has been disabled.", ErrorCode.USER_DISABLED));
+                "Rejecting request for disabled user account: " + user.getUsername(),
+                ErrorCode.USER_DISABLED));
       }
     }
 
