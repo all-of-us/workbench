@@ -39,6 +39,7 @@ import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actio
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
 import {HomepageComponent} from './pages/homepage/homepage';
 import {InitialErrorComponent} from './pages/initial-error/component';
+import {CookiePolicyComponent} from './pages/login/cookie-policy';
 import {SignInComponent} from './pages/login/sign-in';
 import {DataUseAgreementComponent} from './pages/profile/data-use-agreement';
 import {ProfilePageComponent} from './pages/profile/profile-page';
@@ -136,6 +137,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
+    CookiePolicyComponent,
     CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,
