@@ -18,4 +18,6 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   default Map<Boolean, Long> getInvalidToCountMap() {
     return DaoUtils.getAttributeToCountMap(findAll(), DbDataset::getInvalid);
   }
+
+  int countByWorkspaceId(long workspaceId);
 }
