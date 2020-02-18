@@ -8,7 +8,7 @@
     "---",
     {
       "name": "(1) Setup",
-      "snippet": "!pip3 install --user pandas_profiling\n\nimport os\nimport numpy as np\nimport pandas as pd\nimport pandas_profiling\nimport plotnine\nfrom plotnine import *  # Provides a ggplot-like interface to matplotlib.\n\n## Plot setup.\ntheme_set(theme_bw(base_size = 11)) # Default theme for plots.\n\ndef get_boxplot_fun_data(df):\n  \"\"\"Returns a data frame with a y position and a label, for use annotating ggplot boxplots.\n\n  Args:\n    d: A data frame.\n  Returns:\n    A data frame with column y as max and column label as length.\n  \"\"\"\n  d = {'y': max(df), 'label': f'N = {len(df)}'}\n  return(pd.DataFrame(data=d, index=[0]))\n\n# NOTE: if you get any errors from this cell, restart your kernel and run it again.\n"
+      "snippet": "import os\nimport numpy as np\nimport pandas as pd\nimport pandas_profiling\nimport plotnine\nfrom plotnine import *  # Provides a ggplot-like interface to matplotlib.\n\n## Plot setup.\ntheme_set(theme_bw(base_size = 11)) # Default theme for plots.\n\ndef get_boxplot_fun_data(df):\n  \"\"\"Returns a data frame with a y position and a label, for use annotating ggplot boxplots.\n\n  Args:\n    d: A data frame.\n  Returns:\n    A data frame with column y as max and column label as length.\n  \"\"\"\n  d = {'y': max(df), 'label': f'N = {len(df)}'}\n  return(pd.DataFrame(data=d, index=[0]))\n\n# NOTE: if you get any errors from this cell, restart your kernel and run it again.\n"
     },
     {
       "name": "(2) Basic operations",
