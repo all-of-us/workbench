@@ -1,5 +1,4 @@
 import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
@@ -13,8 +12,9 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {toggleIncludes} from 'app/utils';
+import {serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
-import {Section, TextInputWithLabel} from './account-creation';
+import {DropDownSection, Section, TextInputWithLabel} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
 
 const styles = {
@@ -34,14 +34,6 @@ const styles = {
     height: '9rem',
     width: '26rem'
   }
-};
-
-export const DropDownSection = (props) => {
-  return <Section header={props.header}>
-    <Dropdown placeholder='Select' options={props.options} style={{width: '50%'}}
-              value={props.value}
-              onChange={(e) => props.onChange(e.value)}/>
-  </Section>;
 };
 
 export interface AccountCreationSurveyProps {
@@ -121,10 +113,11 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       },
     };
     const errors = validate(demographicSurvey, validationCheck);
+    const {requireInstitutionalVerification} = serverConfigStore.getValue();
 
     return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '26rem'}}>
       <label style={{color: colors.primary, fontSize: 16}}>
-        Please complete Step 2 of 2
+        Please complete Step {requireInstitutionalVerification ? '3 of 3' : '2 of 2'}
       </label>
       <ListPageHeader>
         Demographics Survey <label style={{fontSize: '12px', fontWeight: 400}}>

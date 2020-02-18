@@ -2,11 +2,11 @@ import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {serverConfigStore} from 'app/utils/navigation';
+import {Profile} from 'generated/fetch';
+import {createEmptyProfile} from '../sign-in';
 import {AccountCreation, AccountCreationProps, AccountCreationState} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
-import {serverConfigStore} from 'app/utils/navigation';
-import {getEmptyProfile} from 'app/pages/login/test-utils';
-import {Profile} from 'generated/fetch';
 
 let props: AccountCreationProps;
 const component = () => {
@@ -14,11 +14,12 @@ const component = () => {
 };
 
 const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: false};
+const requireInstitutionalVerification = false;
 
 beforeEach(() => {
   serverConfigStore.next(defaultConfig);
   props = {
-    profile: getEmptyProfile(),
+    profile: createEmptyProfile(requireInstitutionalVerification),
     invitationKey: '',
     onComplete: (profile: Profile) => {},
   };
@@ -124,7 +125,7 @@ it('should handle invalid Email', () => {
 });
 
 it('should display Institution name and role option by default', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true});
+  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionName = wrapper.find('[data-test-id="institutionname"]');
   expect(institutionName).toBeTruthy();
@@ -135,7 +136,7 @@ it('should display Institution name and role option by default', () => {
 });
 
 it('should display Affiliation information if No is selected', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true});
+  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
     .find('input');
@@ -149,7 +150,7 @@ it('should display Affiliation information if No is selected', () => {
 });
 
 it('should display Affiliation Roles should change as per affiliation', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true});
+  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
     .find('input');

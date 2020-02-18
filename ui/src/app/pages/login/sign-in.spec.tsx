@@ -9,9 +9,8 @@ import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-cr
 import AccountCreationTos from 'app/pages/login/account-creation/account-creation-tos';
 import InvitationKey from 'app/pages/login/invitation-key';
 import LoginReactComponent from 'app/pages/login/login';
-import {getEmptyProfile} from 'app/pages/login/test-utils';
 import {serverConfigStore} from 'app/utils/navigation';
-import {SignInProps, SignInReact, SignInReactImpl, SignInStep} from './sign-in';
+import {createEmptyProfile, SignInProps, SignInReact, SignInReactImpl, SignInStep} from './sign-in';
 
 describe('SignInReact', () => {
   let props: SignInProps;
@@ -81,6 +80,7 @@ describe('SignInReact', () => {
 
   it('should handle sign-up flow for legacy account creation', () => {
     const wrapper = shallowComponent();
+    const requireInstitutionalVerification = false;
 
     // To start, the landing page / login component should be shown.
     expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
@@ -92,14 +92,15 @@ describe('SignInReact', () => {
     wrapper.find(InvitationKey).props().onInvitationKeyVerified('asdf');
 
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(getEmptyProfile());
+    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
 
     // Success!
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
   });
 
-  it('should handle sign-up flow for new account creation', () => {
+  it('should handle sign-up flow for new account creation without institutional verification', () => {
     props.serverConfig = {...defaultConfig, enableNewAccountCreation: true};
+    const requireInstitutionalVerification = false;
 
     const wrapper = shallowComponent();
 
@@ -117,11 +118,40 @@ describe('SignInReact', () => {
     wrapper.find(AccountCreationTos).props().onComplete();
 
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(getEmptyProfile());
+    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
 
     // Account Creation Survey (e.g. demographics) is part of the new-style flow.
     expect(wrapper.exists(AccountCreationSurvey)).toBeTruthy();
-    wrapper.find(AccountCreationSurvey).props().onComplete(getEmptyProfile());
+    wrapper.find(AccountCreationSurvey).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
+
+    expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
+  });
+
+  it('should handle sign-up flow for new account creation with institutional verification', () => {
+    props.serverConfig = {...defaultConfig, enableNewAccountCreation: true};
+    const requireInstitutionalVerification = true;
+
+    const wrapper = shallowComponent();
+
+    // To start, the landing page / login component should be shown.
+    expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
+    // Simulate the "create account" button being clicked by firing the callback method.
+    wrapper.find(LoginReactComponent).props().onCreateAccount();
+
+    // Invitation key step is next.
+    expect(wrapper.exists(InvitationKey)).toBeTruthy();
+    wrapper.find(InvitationKey).props().onInvitationKeyVerified('asdf');
+
+    // Terms of Service is part of the new-style flow.
+    expect(wrapper.exists(AccountCreationTos)).toBeTruthy();
+    wrapper.find(AccountCreationTos).props().onComplete();
+
+    expect(wrapper.exists(AccountCreation)).toBeTruthy();
+    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
+
+    // Account Creation Survey (e.g. demographics) is part of the new-style flow.
+    expect(wrapper.exists(AccountCreationSurvey)).toBeTruthy();
+    wrapper.find(AccountCreationSurvey).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
 
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
   });
