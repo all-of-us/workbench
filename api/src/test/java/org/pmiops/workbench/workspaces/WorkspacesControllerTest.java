@@ -119,7 +119,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
@@ -525,41 +524,7 @@ public class WorkspacesControllerTest {
   }
 
   private Workspace createWorkspace() {
-    return createWorkspace("namespace", "name");
-  }
-
-  private Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
-    return new Workspace()
-        .id(workspaceName)
-        .name(workspaceName)
-        .namespace(workspaceNameSpace)
-        .dataAccessLevel(DataAccessLevel.PROTECTED)
-        .cdrVersionId(cdrVersionId)
-        .googleBucketName(BUCKET_NAME)
-        .billingAccountName("billing-account")
-        .billingAccountType(BillingAccountType.FREE_TIER)
-        .researchPurpose(
-            new ResearchPurpose()
-                .diseaseFocusedResearch(true)
-                .diseaseOfFocus("cancer")
-                .methodsDevelopment(true)
-                .controlSet(true)
-                .ancestry(true)
-                .commercialPurpose(true)
-                .socialBehavioral(true)
-                .populationHealth(true)
-                .educational(true)
-                .drugDevelopment(true)
-                .population(false)
-                .populationDetails(Collections.emptyList())
-                .additionalNotes("additional notes")
-                .reasonForAllOfUs("reason for aou")
-                .intendedStudy("intended study")
-                .anticipatedFindings("anticipated findings")
-                .timeRequested(1000L)
-                .timeReviewed(1500L)
-                .reviewRequested(true)
-                .approved(false));
+    return testMockFactory.createWorkspace("namespace", "name");
   }
 
   public Cohort createDefaultCohort(String name) {
@@ -2442,7 +2407,7 @@ public class WorkspacesControllerTest {
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
     String expectedNotebookName = newNotebookName + NotebooksService.NOTEBOOK_EXTENSION;
@@ -2476,7 +2441,7 @@ public class WorkspacesControllerTest {
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 
@@ -2506,7 +2471,7 @@ public class WorkspacesControllerTest {
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     stubGetWorkspace(
         toWorkspace.getNamespace(),
@@ -2530,7 +2495,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void copyNotebook_noAccessOnSource() {
-    Workspace fromWorkspace = createWorkspace("fromWorkspaceNs", "fromworkspace");
+    Workspace fromWorkspace = testMockFactory.createWorkspace("fromWorkspaceNs", "fromworkspace");
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     stubGetWorkspace(
         fromWorkspace.getNamespace(),
@@ -2539,7 +2504,7 @@ public class WorkspacesControllerTest {
         WorkspaceAccessLevel.NO_ACCESS);
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     stubGetWorkspace(
         toWorkspace.getNamespace(),
@@ -2567,7 +2532,7 @@ public class WorkspacesControllerTest {
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 

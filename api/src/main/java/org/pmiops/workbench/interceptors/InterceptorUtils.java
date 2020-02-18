@@ -17,7 +17,7 @@ public class InterceptorUtils {
           "org.pmiops.workbench.api.StatusAlertApiController",
               "org.pmiops.workbench.statusalerts.StatusAlertController",
           "org.pmiops.workbench.api.WorkspaceAdminApiController",
-              "org.pmiops.workbench.workspaceadmin.WorkspaceAdminController");
+              "org.pmiops.workbench.org.pmiops.workbench.workspaceadmin.WorkspaceAdminController");
 
   private InterceptorUtils() {}
 
