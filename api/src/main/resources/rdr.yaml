@@ -233,7 +233,7 @@ definitions:
     properties:
       institutionShortName:
         type: string
-        description: The unique Short Name of the Institution where the user has a Verified Affiliation
+        description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'VUMC'
       institutionalRole:
         type: string
         description: The user's Institutional Role at this Institution, as text

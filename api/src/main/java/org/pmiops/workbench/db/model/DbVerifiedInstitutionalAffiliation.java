@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import org.pmiops.workbench.model.InstitutionalRole;
 
 @Entity
-@Table(name = "verified_institutional_affiliation")
+@Table(name = "user_verified_institutional_affiliation")
 public class DbVerifiedInstitutionalAffiliation {
 
   private long verifiedInstitutionalAffiliationId;
@@ -26,7 +26,7 @@ public class DbVerifiedInstitutionalAffiliation {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "verified_institutional_affiliation_id")
+  @Column(name = "user_verified_institutional_affiliation_id")
   public long getVerifiedInstitutionalAffiliationId() {
     return verifiedInstitutionalAffiliationId;
   }

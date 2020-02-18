@@ -4,25 +4,24 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="thibault" id="changelog-131-verified-institutional-affiliation">
-
-    <createTable tableName="verified_institutional_affiliation">
-      <column name="verified_institutional_affiliation_id" type="bigint" autoIncrement="true">
+  <changeSet author="thibault" id="changelog-131-user-verified-institutional-affiliation">
+    <createTable tableName="user_verified_institutional_affiliation">
+      <column name="user_verified_institutional_affiliation_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="user_id" type="bigint">
         <constraints
           unique="true"
           nullable="false"
-          foreignKeyName="fk_verified_institutional_affiliation_user"
+          foreignKeyName="fk_user_verified_institutional_affiliation_user"
           references="user(user_id)"
           deleteCascade="true"
-          />
+        />
       </column>
       <column name="institution_id" type="bigint">
         <constraints
           nullable="false"
-          foreignKeyName="fk_verified_institutional_affiliation_institution"
+          foreignKeyName="fk_user_verified_institutional_affiliation_institution"
           references="institution(institution_id)"
           deleteCascade="true"
         />

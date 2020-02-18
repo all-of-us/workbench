@@ -12,11 +12,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.institution.InstitutionService.DeletionResult;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,60 +32,67 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class InstitutionServiceTest {
   @Autowired private InstitutionService service;
   @Autowired private UserDao userDao;
-  @Autowired private VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
-  private final Institution TEST_INST =
+  private final Institution testInst =
       new Institution().shortName("test").displayName("this is a test");
 
   // the mapper converts nulls to empty sets
-  private final Institution TEST_INST_AFTER_RT =
+  private final Institution roundTrippedTestInst =
       new Institution()
-          .shortName(TEST_INST.getShortName())
-          .displayName(TEST_INST.getDisplayName())
+          .shortName(testInst.getShortName())
+          .displayName(testInst.getDisplayName())
           .emailDomains(Collections.emptyList())
           .emailAddresses(Collections.emptyList());
 
   @Before
   public void setUp() {
     // will be retrieved as TEST_INST_AFTER_RT
-    service.createInstitution(TEST_INST);
+    service.createInstitution(testInst);
   }
 
   @Test
-  public void test_createInstitution() {
-    assertThat(service.getInstitutions()).containsExactly(TEST_INST_AFTER_RT);
+  public void test_createAnotherInstitution() {
+    assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst);
 
-    final Institution otherInst =
+    final Institution anotherInst =
         new Institution()
             .shortName("otherInst")
             .displayName("The Institution of testing")
             .emailDomains(Collections.emptyList())
             .emailAddresses(Collections.emptyList());
-    assertThat(service.createInstitution(otherInst)).isEqualTo(otherInst);
+    assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
 
-    assertThat(service.getInstitutions()).containsExactly(TEST_INST_AFTER_RT, otherInst);
+    assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
   }
 
   @Test
   public void test_deleteInstitution() {
-    assertThat(service.getInstitutions()).containsExactly(TEST_INST_AFTER_RT);
-
-    assertThat(service.deleteInstitution(TEST_INST.getShortName()))
-        .isEqualTo(DeletionResult.SUCCESS);
+    service.deleteInstitution(testInst.getShortName());
     assertThat(service.getInstitutions()).isEmpty();
+  }
 
-    service.createInstitution(TEST_INST);
-    assertThat(service.getInstitutions()).containsExactly(TEST_INST_AFTER_RT);
+  @Test
+  public void test_deleteAndRecreateInstitution() {
+    service.deleteInstitution(testInst.getShortName());
+    service.createInstitution(testInst);
+    assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst);
+  }
 
-    createAffiliation(createUser("any email"), TEST_INST.getShortName());
-    assertThat(service.deleteInstitution(TEST_INST.getShortName()))
-        .isEqualTo(DeletionResult.HAS_VERIFIED_AFFILIATIONS);
-    assertThat(service.getInstitutions()).containsExactly(TEST_INST_AFTER_RT);
+  @Test(expected = NotFoundException.class)
+  public void test_deleteInstitutionMissing() {
+    service.deleteInstitution("missing");
+  }
+
+  @Test(expected = ConflictException.class)
+  public void test_deleteInstitutionWithAffiliation() {
+    createAffiliation(createUser("any email"), testInst.getShortName());
+    service.deleteInstitution(testInst.getShortName());
   }
 
   @Test
   public void test_getInstitutions() {
-    assertThat(service.getInstitutions()).containsExactly(TEST_INST_AFTER_RT);
+    assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst);
 
     final Institution otherInst =
         new Institution()
@@ -93,15 +101,15 @@ public class InstitutionServiceTest {
             .emailDomains(Collections.emptyList())
             .emailAddresses(Collections.emptyList());
     service.createInstitution(otherInst);
-    assertThat(service.getInstitutions()).containsExactly(TEST_INST_AFTER_RT, otherInst);
+    assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, otherInst);
 
-    service.deleteInstitution(TEST_INST.getShortName());
+    service.deleteInstitution(testInst.getShortName());
     assertThat(service.getInstitutions()).containsExactly(otherInst);
   }
 
   @Test
   public void test_getInstitution() {
-    assertThat(service.getInstitution(TEST_INST.getShortName())).hasValue(TEST_INST_AFTER_RT);
+    assertThat(service.getInstitution(testInst.getShortName())).hasValue(roundTrippedTestInst);
     assertThat(service.getInstitution("otherInst")).isEmpty();
 
     final Institution otherInst =
@@ -112,6 +120,59 @@ public class InstitutionServiceTest {
             .emailDomains(Collections.emptyList());
     service.createInstitution(otherInst);
     assertThat(service.getInstitution("otherInst")).hasValue(otherInst);
+  }
+
+  @Test
+  public void test_updateInstitution_shortName() {
+    final String oldShortName = testInst.getShortName();
+    final String newShortName = "NewShortName";
+    final Institution newInst = roundTrippedTestInst.shortName(newShortName);
+    assertThat(service.updateInstitution(oldShortName, newInst)).hasValue(newInst);
+
+    assertThat(service.getInstitution(oldShortName)).isEmpty();
+    assertThat(service.getInstitution(newShortName)).hasValue(newInst);
+  }
+
+  @Test
+  public void test_updateInstitution_displayName() {
+    final Institution newInst = roundTrippedTestInst.displayName("a different display name");
+
+    assertThat(service.updateInstitution(testInst.getShortName(), newInst)).hasValue(newInst);
+    assertThat(service.getInstitution(testInst.getShortName())).hasValue(newInst);
+    assertThat(service.getInstitution(testInst.getShortName()).get().getDisplayName())
+        .isNotEqualTo(testInst.getDisplayName());
+  }
+
+  @Test
+  public void test_updateInstitution_emails() {
+    final Institution instWithEmails =
+        new Institution()
+            .shortName("hasEmails")
+            .displayName("another test")
+            .emailDomains(ImmutableList.of("broad.org", "google.com"))
+            .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com"));
+    final Institution instWithEmailsRoundTrip = service.createInstitution(instWithEmails);
+    assertEqualInstitutions(instWithEmailsRoundTrip, instWithEmails);
+
+    // keep one and change one of each
+
+    final Institution instWithNewEmails =
+        instWithEmails
+            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+            .emailAddresses(ImmutableList.of("joel@broad.org", "joel@verily.com"));
+    final Institution instWithNewEmailsRoundTrip =
+        service.updateInstitution(instWithEmails.getShortName(), instWithNewEmails).get();
+    assertEqualInstitutions(instWithNewEmailsRoundTrip, instWithNewEmails);
+
+    // clear both
+    final Institution instWithoutEmails =
+        instWithEmails
+            .emailDomains(Collections.emptyList())
+            .emailAddresses(Collections.emptyList());
+    final Institution instWithoutEmailsRoundTrip =
+        service.updateInstitution(instWithEmails.getShortName(), instWithoutEmails).get();
+    assertThat(instWithoutEmailsRoundTrip.getEmailDomains()).isEmpty();
+    assertThat(instWithoutEmailsRoundTrip.getEmailAddresses()).isEmpty();
   }
 
   // we uniquify Email Addresses and Domains in the DB per-institution
@@ -130,8 +191,11 @@ public class InstitutionServiceTest {
 
     final Institution uniquifiedInst = service.createInstitution(instWithDupes);
 
-    assertThat(uniquifiedInst).isNotEqualTo(instWithDupes);
+    assertThat(instWithDupes.getEmailDomains().size()).isNotEqualTo(uniquifiedEmailDomains.size());
     assertThat(uniquifiedInst.getEmailDomains()).containsExactlyElementsIn(uniquifiedEmailDomains);
+
+    assertThat(instWithDupes.getEmailAddresses().size())
+        .isNotEqualTo(uniquifiedEmailAddresses.size());
     assertThat(uniquifiedInst.getEmailAddresses())
         .containsExactlyElementsIn(uniquifiedEmailAddresses);
   }
@@ -169,7 +233,6 @@ public class InstitutionServiceTest {
   public void test_InstitutionNotFound() {
     assertThat(service.getInstitution("missing")).isEmpty();
     assertThat(service.updateInstitution("missing", new Institution())).isEmpty();
-    assertThat(service.deleteInstitution("missing")).isEqualTo(DeletionResult.NOT_FOUND);
   }
 
   @Test(expected = DataIntegrityViolationException.class)
@@ -192,7 +255,7 @@ public class InstitutionServiceTest {
     final DbVerifiedInstitutionalAffiliation affiliation =
         createAffiliation(user, inst.getShortName());
 
-    assertThat(service.validate(affiliation, user.getContactEmail())).isTrue();
+    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isTrue();
   }
 
   @Test
@@ -210,7 +273,7 @@ public class InstitutionServiceTest {
     final DbVerifiedInstitutionalAffiliation affiliation =
         createAffiliation(user, inst.getShortName());
 
-    assertThat(service.validate(affiliation, user.getContactEmail())).isTrue();
+    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isTrue();
   }
 
   @Test
@@ -223,7 +286,22 @@ public class InstitutionServiceTest {
     final DbVerifiedInstitutionalAffiliation affiliation =
         createAffiliation(user, inst.getShortName());
 
-    assertThat(service.validate(affiliation, user.getContactEmail())).isFalse();
+    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isFalse();
+  }
+
+  @Test
+  public void test_emailValidation_mismatch() {
+    final Institution inst =
+        service
+            .createInstitution(
+                new Institution().shortName("Broad").displayName("The Broad Institute"))
+            .emailDomains(Lists.newArrayList("broad.org", "mit.edu"));
+
+    final DbUser user = createUser("external-researcher@sanger.uk");
+    final DbVerifiedInstitutionalAffiliation affiliation =
+        createAffiliation(user, inst.getShortName());
+
+    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isFalse();
   }
 
   public void test_emailValidation_malformed() {
@@ -238,7 +316,44 @@ public class InstitutionServiceTest {
     final DbVerifiedInstitutionalAffiliation affiliation =
         createAffiliation(user, inst.getShortName());
 
-    assertThat(service.validate(affiliation, user.getContactEmail())).isFalse();
+    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isFalse();
+  }
+
+  @Test
+  public void test_emailValidation_changedShortName() {
+    final String oldShortName = "Broad";
+    final String newShortName = "TheBroad";
+
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName(oldShortName)
+                .displayName("The Broad Institute")
+                .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org")));
+
+    final DbUser user = createUser("user@broad.org");
+    final DbVerifiedInstitutionalAffiliation affiliation =
+        createAffiliation(user, inst.getShortName());
+
+    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isTrue();
+
+    final Institution renamed = inst.shortName(newShortName);
+    service.updateInstitution(oldShortName, renamed);
+
+    final DbVerifiedInstitutionalAffiliation updatedAffiliation =
+        verifiedInstitutionalAffiliationDao.findFirstByUser(user).get();
+
+    assertThat(updatedAffiliation.getInstitution().getShortName()).isEqualTo(newShortName);
+    assertThat(service.validateAffiliation(updatedAffiliation, user.getContactEmail())).isTrue();
+  }
+
+  // Institutions' email domains and addresses are Lists but have no inherent order,
+  // so they can't be directly compared for equality
+  private void assertEqualInstitutions(Institution actual, final Institution expected) {
+    assertThat(actual.getShortName()).isEqualTo(expected.getShortName());
+    assertThat(actual.getDisplayName()).isEqualTo(expected.getDisplayName());
+    assertThat(actual.getEmailDomains()).containsExactlyElementsIn(expected.getEmailDomains());
+    assertThat(actual.getEmailAddresses()).containsExactlyElementsIn(expected.getEmailAddresses());
   }
 
   private DbUser createUser(String contactEmail) {
@@ -256,6 +371,6 @@ public class InstitutionServiceTest {
             .setUser(user)
             .setInstitution(inst)
             .setInstitutionalRoleEnum(InstitutionalRole.FELLOW);
-    return verifiedInstitutionalAffiliation.save(affiliation);
+    return verifiedInstitutionalAffiliationDao.save(affiliation);
   }
 }

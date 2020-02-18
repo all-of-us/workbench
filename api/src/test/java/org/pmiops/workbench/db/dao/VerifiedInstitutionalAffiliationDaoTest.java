@@ -19,8 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class VerifiedInstitutionalAffiliationTest {
-  @Autowired VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
+public class VerifiedInstitutionalAffiliationDaoTest {
+  @Autowired VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   @Autowired InstitutionDao institutionDao;
   @Autowired UserDao userDao;
 
@@ -36,44 +36,44 @@ public class VerifiedInstitutionalAffiliationTest {
 
   @Test
   public void test_findAllByInstitution() {
-    assertThat(verifiedInstitutionalAffiliation.findAll()).isEmpty();
-    assertThat(verifiedInstitutionalAffiliation.findAllByInstitution(testInst)).isEmpty();
+    assertThat(verifiedInstitutionalAffiliationDao.findAll()).isEmpty();
+    assertThat(verifiedInstitutionalAffiliationDao.findAllByInstitution(testInst)).isEmpty();
 
     final DbVerifiedInstitutionalAffiliation testAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             new DbVerifiedInstitutionalAffiliation()
                 .setUser(testUser)
                 .setInstitution(testInst)
                 .setInstitutionalRoleEnum(InstitutionalRole.STUDENT));
 
-    assertThat(verifiedInstitutionalAffiliation.findAll()).containsExactly(testAffiliation);
-    assertThat(verifiedInstitutionalAffiliation.findAllByInstitution(testInst))
+    assertThat(verifiedInstitutionalAffiliationDao.findAll()).containsExactly(testAffiliation);
+    assertThat(verifiedInstitutionalAffiliationDao.findAllByInstitution(testInst))
         .containsExactly(testAffiliation);
 
     DbInstitution otherInst =
         new DbInstitution().setShortName("Other").setDisplayName("Some Other Institute");
     otherInst = institutionDao.save(otherInst);
-    assertThat(verifiedInstitutionalAffiliation.findAllByInstitution(otherInst)).isEmpty();
+    assertThat(verifiedInstitutionalAffiliationDao.findAllByInstitution(otherInst)).isEmpty();
   }
 
   @Test
   public void test_findAllByInstitution_oneAffiliationPerUser() {
     final DbVerifiedInstitutionalAffiliation testAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             new DbVerifiedInstitutionalAffiliation()
                 .setUser(testUser)
                 .setInstitution(testInst)
                 .setInstitutionalRoleEnum(InstitutionalRole.STUDENT));
 
-    assertThat(verifiedInstitutionalAffiliation.findAll()).containsExactly(testAffiliation);
-    assertThat(verifiedInstitutionalAffiliation.findAllByInstitution(testInst))
+    assertThat(verifiedInstitutionalAffiliationDao.findAll()).containsExactly(testAffiliation);
+    assertThat(verifiedInstitutionalAffiliationDao.findAllByInstitution(testInst))
         .containsExactly(testAffiliation);
 
     final DbInstitution newInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
 
     final DbVerifiedInstitutionalAffiliation replacementAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             testAffiliation
                 .setUser(testUser)
                 .setInstitution(newInst)
@@ -81,10 +81,11 @@ public class VerifiedInstitutionalAffiliationTest {
                 .setInstitutionalRoleOtherText(
                     "Arbitrary and does not actually require enum to be OTHER"));
 
-    assertThat(verifiedInstitutionalAffiliation.findAll()).containsExactly(replacementAffiliation);
-    assertThat(verifiedInstitutionalAffiliation.findAllByInstitution(newInst))
+    assertThat(verifiedInstitutionalAffiliationDao.findAll())
         .containsExactly(replacementAffiliation);
-    assertThat(verifiedInstitutionalAffiliation.findAllByInstitution(testInst)).isEmpty();
+    assertThat(verifiedInstitutionalAffiliationDao.findAllByInstitution(newInst))
+        .containsExactly(replacementAffiliation);
+    assertThat(verifiedInstitutionalAffiliationDao.findAllByInstitution(testInst)).isEmpty();
   }
 
   @Test
@@ -93,7 +94,7 @@ public class VerifiedInstitutionalAffiliationTest {
     testUser = userDao.save(testUser);
 
     final DbVerifiedInstitutionalAffiliation testAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             new DbVerifiedInstitutionalAffiliation()
                 .setUser(testUser)
                 .setInstitution(testInst)
@@ -104,7 +105,7 @@ public class VerifiedInstitutionalAffiliationTest {
     newUser = userDao.save(newUser);
 
     final DbVerifiedInstitutionalAffiliation newAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             new DbVerifiedInstitutionalAffiliation()
                 .setUser(newUser)
                 .setInstitution(testInst)
@@ -112,55 +113,55 @@ public class VerifiedInstitutionalAffiliationTest {
                 .setInstitutionalRoleOtherText(
                     "Arbitrary and does not actually require enum to be OTHER"));
 
-    assertThat(verifiedInstitutionalAffiliation.findAll())
+    assertThat(verifiedInstitutionalAffiliationDao.findAll())
         .containsExactly(testAffiliation, newAffiliation);
-    assertThat(verifiedInstitutionalAffiliation.findAllByInstitution(testInst))
+    assertThat(verifiedInstitutionalAffiliationDao.findAllByInstitution(testInst))
         .containsExactly(testAffiliation, newAffiliation);
   }
 
   @Test
   public void test_findFirstByUser() {
-    assertThat(verifiedInstitutionalAffiliation.findFirstByUser(userDao.save(new DbUser())))
+    assertThat(verifiedInstitutionalAffiliationDao.findFirstByUser(userDao.save(new DbUser())))
         .isEmpty();
 
     final DbVerifiedInstitutionalAffiliation testAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             new DbVerifiedInstitutionalAffiliation()
                 .setUser(testUser)
                 .setInstitution(testInst)
                 .setInstitutionalRoleEnum(InstitutionalRole.STUDENT));
 
-    assertThat(verifiedInstitutionalAffiliation.findFirstByUser(testUser))
+    assertThat(verifiedInstitutionalAffiliationDao.findFirstByUser(testUser))
         .hasValue(testAffiliation);
   }
 
   @Test
   public void test_findFirstByUser_oneAffiliationPerUser() {
-    assertThat(verifiedInstitutionalAffiliation.findFirstByUser(userDao.save(new DbUser())))
+    assertThat(verifiedInstitutionalAffiliationDao.findFirstByUser(userDao.save(new DbUser())))
         .isEmpty();
 
     final DbVerifiedInstitutionalAffiliation testAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             new DbVerifiedInstitutionalAffiliation()
                 .setUser(testUser)
                 .setInstitution(testInst)
                 .setInstitutionalRoleEnum(InstitutionalRole.STUDENT));
 
-    assertThat(verifiedInstitutionalAffiliation.findFirstByUser(testUser))
+    assertThat(verifiedInstitutionalAffiliationDao.findFirstByUser(testUser))
         .hasValue(testAffiliation);
 
     final DbInstitution newInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
 
     final DbVerifiedInstitutionalAffiliation replacementAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             testAffiliation
                 .setInstitution(newInst)
                 .setInstitutionalRoleEnum(InstitutionalRole.OTHER)
                 .setInstitutionalRoleOtherText(
                     "Arbitrary and does not actually require enum to be OTHER"));
 
-    assertThat(verifiedInstitutionalAffiliation.findFirstByUser(testUser))
+    assertThat(verifiedInstitutionalAffiliationDao.findFirstByUser(testUser))
         .hasValue(replacementAffiliation);
   }
 
@@ -170,7 +171,7 @@ public class VerifiedInstitutionalAffiliationTest {
     testUser = userDao.save(testUser);
 
     final DbVerifiedInstitutionalAffiliation testAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             new DbVerifiedInstitutionalAffiliation()
                 .setUser(testUser)
                 .setInstitution(testInst)
@@ -181,7 +182,7 @@ public class VerifiedInstitutionalAffiliationTest {
     newUser = userDao.save(newUser);
 
     final DbVerifiedInstitutionalAffiliation newAffiliation =
-        verifiedInstitutionalAffiliation.save(
+        verifiedInstitutionalAffiliationDao.save(
             new DbVerifiedInstitutionalAffiliation()
                 .setUser(newUser)
                 .setInstitution(testInst)
@@ -189,17 +190,18 @@ public class VerifiedInstitutionalAffiliationTest {
                 .setInstitutionalRoleOtherText(
                     "Arbitrary and does not actually require enum to be OTHER"));
 
-    assertThat(verifiedInstitutionalAffiliation.findFirstByUser(testUser))
+    assertThat(verifiedInstitutionalAffiliationDao.findFirstByUser(testUser))
         .hasValue(testAffiliation);
     assertThat(
-            verifiedInstitutionalAffiliation
+            verifiedInstitutionalAffiliationDao
                 .findFirstByUser(testUser)
                 .map(DbVerifiedInstitutionalAffiliation::getInstitution))
         .hasValue(testInst);
 
-    assertThat(verifiedInstitutionalAffiliation.findFirstByUser(newUser)).hasValue(newAffiliation);
+    assertThat(verifiedInstitutionalAffiliationDao.findFirstByUser(newUser))
+        .hasValue(newAffiliation);
     assertThat(
-            verifiedInstitutionalAffiliation
+            verifiedInstitutionalAffiliationDao
                 .findFirstByUser(newUser)
                 .map(DbVerifiedInstitutionalAffiliation::getInstitution))
         .hasValue(testInst);
@@ -207,7 +209,7 @@ public class VerifiedInstitutionalAffiliationTest {
 
   @Test(expected = DataIntegrityViolationException.class)
   public void test_twoAffiliationsForUser() {
-    verifiedInstitutionalAffiliation.save(
+    verifiedInstitutionalAffiliationDao.save(
         new DbVerifiedInstitutionalAffiliation()
             .setUser(testUser)
             .setInstitution(testInst)
@@ -216,7 +218,7 @@ public class VerifiedInstitutionalAffiliationTest {
     final DbInstitution newInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
 
-    verifiedInstitutionalAffiliation.save(
+    verifiedInstitutionalAffiliationDao.save(
         new DbVerifiedInstitutionalAffiliation()
             .setUser(testUser)
             .setInstitution(newInst)

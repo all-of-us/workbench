@@ -32,10 +32,10 @@ public interface UserService {
       String areaOfResearch,
       String professionalUrl,
       List<Degree> degrees,
-      DbAddress address,
-      DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations,
-      DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation);
+      DbAddress dbAddress,
+      DbDemographicSurvey dbDemographicSurvey,
+      List<DbInstitutionalAffiliation> dbAffiliations,
+      DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);

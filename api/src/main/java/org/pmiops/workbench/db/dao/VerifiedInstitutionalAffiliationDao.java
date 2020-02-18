@@ -7,7 +7,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.springframework.data.repository.CrudRepository;
 
-public interface VerifiedInstitutionalAffiliation
+public interface VerifiedInstitutionalAffiliationDao
     extends CrudRepository<DbVerifiedInstitutionalAffiliation, Long> {
   Collection<DbVerifiedInstitutionalAffiliation> findAllByInstitution(DbInstitution institution);
 

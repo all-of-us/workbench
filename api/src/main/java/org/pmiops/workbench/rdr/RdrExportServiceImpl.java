@@ -15,7 +15,7 @@ import javax.inject.Provider;
 import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbRdrExport;
@@ -46,7 +46,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   private WorkspaceDao workspaceDao;
   private UserDao userDao;
   private WorkspaceService workspaceService;
-  private final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
@@ -60,7 +60,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       UserDao userDao,
-      VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.rdrExportDao = rdrExportDao;
@@ -68,7 +68,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
-    this.verifiedInstitutionalAffiliation = verifiedInstitutionalAffiliation;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
   /**
@@ -235,7 +235,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                 })
             .collect(Collectors.toList()));
 
-    verifiedInstitutionalAffiliation
+    verifiedInstitutionalAffiliationDao
         .findFirstByUser(dbUser)
         .ifPresent(
             verifiedInstitutionalAffiliation -> {

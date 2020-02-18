@@ -33,6 +33,8 @@ public class ConfigController implements ConfigApiDelegate {
             .firecloudURL(config.firecloud.baseUrl)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
             .enableNewAccountCreation(config.featureFlags.enableNewAccountCreation)
-            .requireInvitationKey(config.access.requireInvitationKey));
+            .requireInvitationKey(config.access.requireInvitationKey)
+            .requireInstitutionalVerification(
+                config.featureFlags.requireInstitutionalVerification));
   }
 }

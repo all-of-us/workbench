@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 
 @Mapper(componentModel = "spring")
@@ -17,15 +18,32 @@ public interface VerifiedInstitutionalAffiliationMapper {
   DbVerifiedInstitutionalAffiliation modelToDbWithoutUser(
       VerifiedInstitutionalAffiliation modelObject, @Context InstitutionService institutionService);
 
+  /**
+   * After the primary @Mappings have been executed for modelToDbWithoutUser(), use the
+   * InstitutionService to retrieve a DbInstitution object to attach to the
+   * DbVerifiedInstitutionalAffiliation object as its Institution field. If there is no DB object
+   * matching the InstitutionShortName, the target does not receive a DbInstitution association.
+   *
+   * @param target the DbVerifiedInstitutionalAffiliation we are mapping to
+   * @param modelObject the VerifiedInstitutionalAffiliation we are mapping from
+   * @param institutionService the InstitutionService we are using to enable the mapping from an
+   *     institutionShortName to a DbInstitution object which is present in the DB
+   */
   @AfterMapping
   default void setDbInstitution(
       @MappingTarget DbVerifiedInstitutionalAffiliation target,
       VerifiedInstitutionalAffiliation modelObject,
       @Context InstitutionService institutionService) {
 
-    institutionService
-        .getDbInstitution(modelObject.getInstitutionShortName())
-        .ifPresent(target::setInstitution);
+    target.setInstitution(
+        institutionService
+            .getDbInstitution(modelObject.getInstitutionShortName())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Could not find Institution '%s'",
+                            modelObject.getInstitutionShortName()))));
   }
 
   @Mapping(target = "institutionShortName", source = "institution")

@@ -35,13 +35,14 @@ public interface InstitutionMapper {
   }
 
   // Swagger-generated Lists are null by default, so we should handle that
-  default Set<DbInstitutionEmailDomain> toDbDomains(@Nullable Collection<String> modelDomains) {
+  default Set<DbInstitutionEmailDomain> toDbDomainsWithoutInstitution(
+      @Nullable Collection<String> modelDomains) {
     return Optional.ofNullable(modelDomains).orElse(Collections.emptySet()).stream()
         .map(domain -> new DbInstitutionEmailDomain().setEmailDomain(domain))
         .collect(Collectors.toSet());
   }
 
-  default Set<DbInstitutionEmailAddress> toDbAddresses(
+  default Set<DbInstitutionEmailAddress> toDbAddressesWithoutInstitution(
       @Nullable Collection<String> modelAddresses) {
     return Optional.ofNullable(modelAddresses).orElse(Collections.emptySet()).stream()
         .map(address -> new DbInstitutionEmailAddress().setEmailAddress(address))

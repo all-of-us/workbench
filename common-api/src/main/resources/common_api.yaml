@@ -109,7 +109,7 @@ definitions:
     enum: &Industry_Role [PRE_DOCTORAL, POST_DOCTORAL, EARLY, PI, FREE_TEXT]
     description: >
       This enum is used by the older Institutional Affiliation flow associated with the Demographic Survey.
-      The corresponding Verified Institutional Affiliation (newer flow) enum is InstitutionalRole_IND_HCNP.
+      The corresponding Verified Institutional Affiliation (newer flow) enum is the UI-only InstitutionalRole_IND_HCNP.
       The two have slightly different values and are therefore NOT COMPATIBLE.
       This enum may be deleted in the future.
 
@@ -118,7 +118,7 @@ definitions:
     enum: &Educational_Role [TEACHER, STUDENT, ADMIN, FREE_TEXT]
     description: >
       This enum is used by the older Institutional Affiliation flow associated with the Demographic Survey.
-      The corresponding Verified Institutional Affiliation (newer flow) enum is InstitutionalRole_EDU.
+      The corresponding Verified Institutional Affiliation (newer flow) enum is the UI-only InstitutionalRole_EDU.
       The two have slightly different values and are therefore NOT COMPATIBLE.
       This enum may be deleted in the future.
 
@@ -127,7 +127,7 @@ definitions:
     enum: &Role [UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, NON_TENURE, MID_CAREER, LATE_CAREER, PROJECT_PERSONNEL]
     description: >
       This enum is used by the older Institutional Affiliation flow associated with the Demographic Survey.
-      The corresponding Verified Institutional Affiliation (newer flow) enum is InstitutionalRole_ARI.
+      The corresponding Verified Institutional Affiliation (newer flow) enum is the UI-only InstitutionalRole_ARI.
       The two have slightly different values and are therefore NOT COMPATIBLE.
       This enum may be deleted in the future.
 

@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -34,7 +35,7 @@ public class ProfileServiceTest {
 
   @TestConfiguration
   @MockBean({FreeTierBillingService.class})
-  @Import(ProfileService.class)
+  @Import({ProfileService.class, VerifiedInstitutionalAffiliationMapperImpl.class})
   static class Configuration {}
 
   @Test

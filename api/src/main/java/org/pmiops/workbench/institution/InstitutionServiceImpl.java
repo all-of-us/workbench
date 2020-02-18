@@ -6,31 +6,32 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.InstitutionDao;
-import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
 @Service
-@Import({InstitutionMapperImpl.class})
 public class InstitutionServiceImpl implements InstitutionService {
 
   private final InstitutionDao institutionDao;
   private final InstitutionMapper institutionMapper;
-  private final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Autowired
   InstitutionServiceImpl(
       InstitutionDao institutionDao,
       InstitutionMapper institutionMapper,
-      VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.institutionDao = institutionDao;
     this.institutionMapper = institutionMapper;
-    this.verifiedInstitutionalAffiliation = verifiedInstitutionalAffiliation;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
   @Override
@@ -57,19 +58,25 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public DeletionResult deleteInstitution(final String shortName) {
-    return getDbInstitution(shortName)
-        .map(
-            dbInst -> {
-              if (verifiedInstitutionalAffiliation.findAllByInstitution(dbInst).isEmpty()) {
-                // no verified user affiliations: safe to delete
-                institutionDao.delete(dbInst);
-                return DeletionResult.SUCCESS;
-              } else {
-                return DeletionResult.HAS_VERIFIED_AFFILIATIONS;
-              }
-            })
-        .orElse(DeletionResult.NOT_FOUND);
+  public void deleteInstitution(final String shortName) {
+    final DbInstitution institution =
+        getDbInstitution(shortName)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Could not delete Institution '%s' because it was not found",
+                            shortName)));
+
+    if (verifiedInstitutionalAffiliationDao.findAllByInstitution(institution).isEmpty()) {
+      // no verified user affiliations: safe to delete
+      institutionDao.delete(institution);
+    } else {
+      throw new ConflictException(
+          String.format(
+              "Could not delete Institution '%s' because it has verified user affiliations",
+              shortName));
+    }
   }
 
   @Override
@@ -81,23 +88,23 @@ public class InstitutionServiceImpl implements InstitutionService {
             dbId -> {
               // create new DB object, but mark it with the original's ID to indicate that this is
               // an update
-              final DbInstitution newDbObj =
+              final DbInstitution dbObjectToUpdate =
                   institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId);
-              return institutionMapper.dbToModel(institutionDao.save(newDbObj));
+              return institutionMapper.dbToModel(institutionDao.save(dbObjectToUpdate));
             });
   }
 
   @Override
-  public boolean validate(
-      DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation, String contactEmail) {
-    if (verifiedInstitutionalAffiliation == null) {
+  public boolean validateAffiliation(
+      @Nullable DbVerifiedInstitutionalAffiliation dbAffiliation, String contactEmail) {
+    if (dbAffiliation == null) {
       return false;
     }
 
-    final Institution inst =
-        institutionMapper.dbToModel(verifiedInstitutionalAffiliation.getInstitution());
+    final Institution inst = institutionMapper.dbToModel(dbAffiliation.getInstitution());
 
     try {
+      // TODO RW-4489: UserService should handle initial email validation
       new InternetAddress(contactEmail).validate();
     } catch (AddressException | NullPointerException e) {
       return false;

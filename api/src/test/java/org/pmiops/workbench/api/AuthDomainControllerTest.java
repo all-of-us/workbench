@@ -21,7 +21,7 @@ import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
-import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -63,7 +63,7 @@ public class AuthDomainControllerTest {
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
   @Mock private UserTermsOfServiceDao userTermsOfServiceDao;
   @Mock private InstitutionService institutionService;
-  @Mock private VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
+  @Mock private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private AuthDomainController authDomainController;
 
@@ -94,7 +94,7 @@ public class AuthDomainControllerTest {
             directoryService,
             mockUserServiceAuditAdapter,
             institutionService,
-            verifiedInstitutionalAffiliation);
+            verifiedInstitutionalAffiliationDao);
     this.authDomainController =
         new AuthDomainController(
             fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);
