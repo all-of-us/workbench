@@ -319,7 +319,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
-    workspaceService.getWorkspaceEnforceAccessLesvelAndSetCdrVersion(
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
