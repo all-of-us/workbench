@@ -13,6 +13,7 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
+import {CookiePolicyComponent} from './pages/cookie-policy';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -44,6 +45,10 @@ const routes: Routes = [
     path: 'login',
     component: SignInComponent,
     data: {title: 'Sign In'}
+  }, {
+    path: 'cookie-policy',
+    component: CookiePolicyComponent,
+    data: {title: 'Cookie Policy'}
   }, {
     path: '',
     component: SignedInComponent,
