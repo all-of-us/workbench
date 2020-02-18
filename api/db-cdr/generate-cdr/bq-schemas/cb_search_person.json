@@ -22,6 +22,16 @@
   {
     "mode": "NULLABLE",
     "name": "dob",
-    "type": "timestamp"
+    "type": "date"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "age_at_consent",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "age_at_cdr",
+    "type": "INTEGER"
   }
 ]
