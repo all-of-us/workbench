@@ -93,17 +93,6 @@ export const AccountCreationTos = withWindowSize()(
       observer.observe(this.lastPage);
     }
 
-    /**
-     * Attempts to scroll the last page of the PDF document into view.
-     */
-    private scrollToBottom() {
-      if (this.lastPage) {
-        this.lastPage.scrollIntoView({block: 'end'});
-      } else {
-        throw new Error('Last page has not yet loaded.');
-      }
-    }
-
     render() {
       const {numPages, loadingPdf, hasReadEntireTos, hasAckedTermsOfService, hasAckedPrivacyStatement} = this.state;
 
