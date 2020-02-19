@@ -24,7 +24,6 @@ import {
 } from 'app/services/swagger-fetch-clients';
 
 import {FlexColumn, FlexRow, flexStyle} from 'app/components/flex';
-import {AoUTitle} from 'app/pages/profile/data-use-agreement-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   EducationalRole,
@@ -39,6 +38,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {AouTitle} from 'app/components/text-wrappers';
 import {reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {AccountCreationOptions} from './account-creation-options';
@@ -688,10 +688,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             <div style={styles.asideText}>We create a 'username'@{serverConfigStore.getValue().gsuiteDomain} Google
                 account which you will use to login to the Workbench.</div>
             <div style={{...styles.asideHeader, marginTop: '1rem'}}>Why will some information be public?</div>
-            <div style={styles.asideText}>The <AoUTitle/> is committed to transparency with the Research
+            <div style={styles.asideText}>The <AouTitle/> is committed to transparency with the Research
                 participants on who can access their data, and the purpose of such access. Therefore, your name,
                 institution and role, as well as your research background/interests and link to your professional
-                profile will be displayed publicly on the Research Projects Directory on the <AoUTitle/> website to
+                profile will be displayed publicly on the Research Projects Directory on the <AouTitle/> website to
                 inform the <i>All of Us</i> Research participants, and to comply with the 21st Century Cures Act. Some of the
                 fields noted above may not be visible currently, but will be added in the future.</div>
           </FlexColumn>

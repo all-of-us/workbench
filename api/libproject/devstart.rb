@@ -505,7 +505,8 @@ Common.register_command({
 
 def connect_to_db()
   common = Common.new
-
+  common.status "Starting database if necessary..."
+  common.run_inline %W{docker-compose up -d db}
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
   common.run_inline %W{docker-compose exec db sh -c #{cmd}}
 end
@@ -742,9 +743,37 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
   :fn => ->(*args) { generate_cb_criteria_tables(*args) }
 })
 
-def generate_private_cdr_counts(*args)
+def generate_private_cdr_counts(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--workbench-project [workbench-project]",
+    ->(opts, v) { opts.workbench_project = v},
+    "Workbench Project. Required."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version. Required."
+  )
+  op.add_option(
+    "--bucket [bucket]",
+    ->(opts, v) { opts.bucket = v},
+    "GCS bucket. Required."
+  )
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
 end
 
 Common.register_command({
@@ -752,46 +781,57 @@ Common.register_command({
   :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
  --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
 Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
-  :fn => ->(*args) { generate_private_cdr_counts(*args) }
+  :fn => ->(*args) { generate_private_cdr_counts("generate-private-cdr-counts", *args) }
 })
 
-def generate_cloudsql_db(cmd_name, *args)
+def copy_bq_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-    "--project [project]",
-    ->(opts, v) { opts.project = v},
-    "Project the Cloud Sql instance is in"
+    "--sa-project [sa-project]",
+    ->(opts, v) { opts.sa_project = v},
+    "Service Account Project. Required."
   )
   op.add_option(
-    "--instance [instance]",
-    ->(opts, v) { opts.instance = v},
-    "Cloud SQL instance"
+    "--source-dataset [source-dataset]",
+    ->(opts, v) { opts.source_dataset = v},
+    "Source dataset. Required."
   )
   op.add_option(
-      "--database [database]",
-      ->(opts, v) { opts.database = v},
-      "Database name"
+    "--destination-dataset [destination-dataset]",
+    ->(opts, v) { opts.destination_dataset = v},
+    "Destination Dataset. Required."
   )
   op.add_option(
-    "--bucket [bucket]",
-    ->(opts, v) { opts.bucket = v},
-    "Name of the GCS bucket containing the SQL dump"
+    "--table-prefixes [prefix1,prefix2,...]",
+    ->(opts, v) { opts.table_prefixes = v},
+    "Comma-delimited table prefixes to filter the publish by, e.g. cb_,ds_. " +
+    "This should only be used in special situations e.g. when the auxilliary " +
+    "cb_ or ds_ tables need to be updated, or if there was an issue with the " +
+    "publish. In general, CDRs should be treated as immutable after the " +
+    "initial publish."
   )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.sa_project and opts.source_dataset and opts.destination_dataset }
   op.parse.validate
 
-  ServiceAccountContext.new(op.opts.project).run do
+  # This is a grep filter. It matches all tables, by default.
+  table_filter = ""
+  if op.opts.table_prefixes
+    prefixes = op.opts.table_prefixes.split(",")
+    table_filter = "^\\(#{prefixes.join("\\|")}\\)"
+  end
+
+  source_project = "#{op.opts.source_dataset}".split(':').first
+  ServiceAccountContext.new(op.opts.sa_project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cloudsql-db.sh
-          --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
-          --bucket #{op.opts.bucket}}
+    common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
+    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
   end
 end
+
 Common.register_command({
-  :invocation => "generate-cloudsql-db",
-  :description => "generate-cloudsql-db  --project <PROJECT> --instance <workbenchmaindb> \
---database <synth_r_20XXqX_X> --bucket <BUCKET>
-Generates a cloudsql database from data in a bucket. Used to make cdr count databases.",
-  :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
+  :invocation => "copy-bq-tables",
+  :description => "Copies tables or filters from source to destination",
+  :fn => ->(*args) { copy_bq_tables("copy-bq-tables", *args) }
 })
 
 def cloudsql_import(cmd_name, *args)

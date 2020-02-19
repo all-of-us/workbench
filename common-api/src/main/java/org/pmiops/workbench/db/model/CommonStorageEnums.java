@@ -108,14 +108,6 @@ public class CommonStorageEnums {
     return CLIENT_TO_STORAGE_SURVEY.get(survey);
   }
 
-  public static String surveyToSurveyId(Surveys survey) {
-    return SURVEY_ID_MAP.get(survey);
-  }
-
-  public static Surveys surveyIdToSurvey(String survey) {
-    return SURVEY_ID_MAP.inverse().get(survey);
-  }
-
   private static final BiMap<PrePackagedConceptSetEnum, Short>
       CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =
           ImmutableBiMap.<PrePackagedConceptSetEnum, Short>builder()

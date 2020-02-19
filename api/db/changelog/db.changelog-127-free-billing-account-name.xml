@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="calbach" id="db.changelog-127-free-billing-account-name">
+    <sql>update workspace set billing_account_name=(SELECT CONCAT('billingAccounts/', JSON_UNQUOTE(JSON_EXTRACT(configuration, '$.billing.accountId'))) from config where config_id='main') where billing_account_type=0;</sql>
+  </changeSet>
+</databaseChangeLog>
