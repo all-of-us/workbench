@@ -39,11 +39,6 @@ public class BillingProjectBufferEntryDaoTest {
   }
 
   @Test
-  public void test_emptyDao() {
-    assertThat(billingProjectBufferEntryDao.getCountByStatusMap().isEmpty()).isTrue();
-  }
-
-  @Test
   public void testGetCountByStatusMap() {
     final Map<BufferEntryStatus, Long> result = billingProjectBufferEntryDao.getCountByStatusMap();
     assertThat(result).hasSize(STATUS_TO_COUNT_INPUT.size());
