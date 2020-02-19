@@ -872,8 +872,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
 
-    final List<UserCountGaugeLabelsAndValue> rows =
-        userDao.getDataAccessLevelDisabledAndBetaBypassedToCount();
+    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     return rows.stream()
         .map(
             row ->
