@@ -252,12 +252,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       return this.props.queryParams.playgroundMode === 'true';
     }
 
-    private async getDefaultCluster(billingProjectId) {
-      const resp = await this.clusterRetry(() => clusterApi().getCluster(
-        billingProjectId, {signal: this.aborter.signal}));
-      return resp.cluster;
-    }
-
     private async clusterRetry<T>(f: () => Promise<T>): Promise<T> {
       return await fetchAbortableRetry(f, clusterApiRetryTimeoutMillis, clusterApiRetryAttempts);
     }

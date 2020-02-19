@@ -612,7 +612,7 @@ paths:
         200:
           description: The cluster for this user and workspace.
           schema:
-            $ref: '#/definitions/GetClusterResponse'
+            $ref: '#/definitions/Cluster'
         404:
           description: No cluster exists for this user and workspace.
           schema:
@@ -633,7 +633,7 @@ paths:
         200:
           description: Returns the cluster that was created for this user and workspace.
           schema:
-            $ref: '#/definitions/CreateClusterResponse'
+            $ref: '#/definitions/Cluster'
         409:
           description: A cluster for this user and workspace already exists.
           schema:

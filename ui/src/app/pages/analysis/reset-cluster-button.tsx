@@ -139,11 +139,9 @@ export class ResetClusterButton extends React.Component<Props, State> {
     };
 
     try {
-      const response = await clusterApi().getCluster(workspaceNamespace);
-      let cluster = response.cluster;
+      let cluster = await clusterApi().getCluster(workspaceNamespace);
       if (cluster == null) {
-        const createClusterResponse = await clusterApi().createCluster(workspaceNamespace);
-        cluster = createClusterResponse.cluster;
+        cluster = await clusterApi().createCluster(workspaceNamespace);
       }
 
       if (TRANSITIONAL_STATUSES.has(cluster.status)) {

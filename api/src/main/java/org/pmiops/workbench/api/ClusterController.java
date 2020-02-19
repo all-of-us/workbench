@@ -194,7 +194,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Override
-  public ResponseEntity<GetClusterResponse> getCluster(String workspaceNamespace) {
+  public ResponseEntity<Cluster> getCluster(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
@@ -205,11 +205,11 @@ public class ClusterController implements ClusterApiDelegate {
             workspaceNamespace, clusterNameForUser(userProvider.get()));
 
     return ResponseEntity.ok(
-        new GetClusterResponse().cluster(TO_ALL_OF_US_CLUSTER.apply(firecloudCluster)));
+        TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
   }
 
   @Override
-  public ResponseEntity<CreateClusterResponse> createCluster(String workspaceNamespace) {
+  public ResponseEntity<Cluster> createCluster(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
@@ -219,9 +219,7 @@ public class ClusterController implements ClusterApiDelegate {
         leonardoNotebooksClient.createCluster(
             workspaceNamespace, clusterNameForUser(userProvider.get()), firecloudWorkspaceName);
 
-    CreateClusterResponse response = new CreateClusterResponse();
-    response.setCluster(TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
   }
 
   @Override

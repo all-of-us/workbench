@@ -21,15 +21,15 @@ export class ClusterApiStub extends ClusterApi {
     };
   }
 
-  getCluster(extraHttpRequestParams?: any): Promise<GetClusterResponse> {
-    return new Promise<GetClusterResponse>(resolve => {
-      resolve({cluster: this.cluster});
+  getCluster(extraHttpRequestParams?: any): Promise<Cluster> {
+    return new Promise<Cluster>(resolve => {
+      resolve(this.cluster);
     });
   }
 
-  createCluster(extraHttpRequestParams?: any): Promise<CreateClusterResponse> {
-    return new Promise<CreateClusterResponse>(resolve => {
-      resolve({cluster: this.cluster});
+  createCluster(extraHttpRequestParams?: any): Promise<Cluster> {
+    return new Promise<Cluster>(resolve => {
+      resolve(this.cluster);
     });
   }
 
