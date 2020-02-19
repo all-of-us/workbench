@@ -1,4 +1,4 @@
-import DataPage from "../../app/data-page";
+import DataPage from '../../app/data-page';
 import Home from '../../app/home';
 import WorkspacePage from '../../app/workspace-page';
 const Chrome = require('../../driver/ChromeDriver');
@@ -7,7 +7,7 @@ require('../../driver/puppeteerExtension');
 import { getCursorValue } from '../../driver/elementHandle-util'
 
 jest.setTimeout(300000);
-describe('Workspace create:', () => {
+describe.skip('Workspace create:', () => {
 
   let page;
 
@@ -91,7 +91,7 @@ describe('Workspace create:', () => {
     await createButton.click();
     await (new DataPage(page)).waitUntilPageReady();
 
-    console.log("done");
+    console.log('done');
     await page.waitFor(1);
 
   }, 2 * 60 * 1000);
