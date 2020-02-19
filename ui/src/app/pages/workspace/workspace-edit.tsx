@@ -43,7 +43,8 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {
-  disseminateFindings, PrimaryPurposeItems,
+  disseminateFindings,
+  PrimaryPurposeItems,
   researchOutcomes,
   ResearchPurposeDescription,
   ResearchPurposeItem,
@@ -245,7 +246,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         cdrVersionItems: this.createInitialCdrVersionsList(),
         workspace: this.createInitialWorkspaceState(),
         selectResearchPurpose: this.updateSelectedResearch(),
-        showResearchPurpose: false,
+        showResearchPurpose: this.updateSelectedResearch(),
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
@@ -408,8 +409,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
       const rp = this.props.workspace.researchPurpose;
       return rp.ancestry || rp.commercialPurpose || rp.controlSet ||
-          rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment || rp.educational ||
-          rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
+          rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment ||
+          rp.methodsDevelopment || rp.populationHealth || rp.socialBehavioral;
     }
 
     getLiveCdrVersions(): Array<CdrVersion> {
@@ -913,6 +914,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <FlexColumn>
               <FlexRow  style={styles.researchPurposeRow}>
               <CheckBox
+                data-test-id='researchPurpose-checkbox'
                 style={{...styles.checkboxStyle}}
                 checked={this.primaryPurposeIsSelected}
                 onChange={v => this.setState({

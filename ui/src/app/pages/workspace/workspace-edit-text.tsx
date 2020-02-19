@@ -108,14 +108,16 @@ ResearchPurposeItems.forEach(item => {
   item.uniqueId = fp.uniqueId('research-purpose');
 });
 
-export const PrimaryPurposeItems = [ {
+export const PrimaryPurposeItems: Array<ResearchPurposeItem> = [ {
   shortName: 'educational',
   shortDescription: 'Educational Purpose',
+  uniqueId: 'education-purpose',
   longDescription: <div>The data will be used for education purposes (e.g. for a college research
     methods course, to educate students on population-based research approaches).</div>
 }, {
   shortName: 'otherPurpose',
   shortDescription: 'Other Purpose',
+  uniqueId: 'other-purpose',
   longDescription: <div>If your Purpose of Use is different from the options listed above, please
     select "Other Purpose" and provide details regarding your purpose of data use here
     (500 character limit).</div>

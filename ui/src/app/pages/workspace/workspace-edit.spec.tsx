@@ -67,7 +67,7 @@ describe('WorkspaceEdit', () => {
     expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Create a new Workspace');
 
     // Ensure the 'drug development' checkbox is not checked when creating.
-    expect(wrapper.find('[data-test-id="drugDevelopment-checkbox"]').first().prop('checked'))
+    expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked'))
       .toEqual(false);
   });
 
