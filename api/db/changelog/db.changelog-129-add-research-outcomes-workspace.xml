@@ -4,21 +4,21 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="nsaxena" id="changelog-129-add-disseminate-research-workspace">
-    <createTable tableName="workspace_disseminate_research">
+  <changeSet author="nsaxena" id="changelog-129-add-research-outcomes-workspace">
+    <createTable tableName="workspace_research_outcomes">
     	<column name="id" type="bigint" autoIncrement="true">
             <constraints primaryKey="true" nullable="false"/>
         </column>
         <column name="workspace_id" type="bigint">
-        	<constraints nullable="true"/>
+        	<constraints nullable="false"/>
         </column>
-        <column name="disseminate" type="tinyint">
+        <column name="research_outcome" type="tinyint">
         	<constraints nullable="false"/>
         </column>
     </createTable>
     <addForeignKeyConstraint baseColumnNames="workspace_id"
-           baseTableName="workspace_disseminate_research"
-            constraintName="fk_workspace_disseminate_research"
+           baseTableName="workspace_research_outcomes"
+            constraintName="fk_workspace_research_outcomes"
             onDelete="CASCADE"
            referencedColumnNames="workspace_id"
             referencedTableName="workspace"/>

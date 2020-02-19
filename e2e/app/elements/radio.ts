@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
-import {getAttribute, getProperty} from '../../driver/element-handler';
-import * as elementHandler from '../../driver/element-handler';
+import {getAttribute, getProperty} from '../../driver/elementHandle-util';
+import * as elementHandler from '../../driver/elementHandle-util';
 import Widget from './widget';
 
 export default class Radio extends Widget {

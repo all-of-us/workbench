@@ -200,6 +200,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
 export interface SideNavProps {
   profile: Profile;
   bannerAdminActive: boolean;
+  workspaceAdminActive: boolean;
   homeActive: boolean;
   libraryActive: boolean;
   onToggleSideNav: Function;
@@ -316,7 +317,8 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       />
       {
         (profile.authorities.includes(Authority.ACCESSCONTROLADMIN)
-          || profile.authorities.includes(Authority.COMMUNICATIONSADMIN)) && <SideNavItem
+          || profile.authorities.includes(Authority.COMMUNICATIONSADMIN)
+          || profile.authorities.includes(Authority.WORKSPACESVIEW)) && <SideNavItem
                 icon='user'
                 content='Admin'
                 parentOnClick={() => this.onToggleAdmin()}
@@ -328,7 +330,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
           content={'User Admin'}
-          onToggleSideNav={() => this.props.onToggleSideNav}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
           href={'/admin/user'}
           active={this.props.userAdminActive}
         />
@@ -336,9 +338,17 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         profile.authorities.includes(Authority.COMMUNICATIONSADMIN) && this.state.showAdminOptions && <SideNavItem
             content={'Service Banners'}
-            onToggleSideNav={() => this.props.onToggleSideNav}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/banner'}
             active={this.props.bannerAdminActive}
+        />
+      }
+      {
+        profile.authorities.includes(Authority.WORKSPACESVIEW) && this.state.showAdminOptions && <SideNavItem
+            content={'Manage Workspaces'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href={'admin/workspace'}
+            active={this.props.workspaceAdminActive}
         />
       }
     </div>;

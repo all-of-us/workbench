@@ -1,7 +1,7 @@
-import {ElementHandle, Page} from 'puppeteer';
-import {waitForNavigation} from '../services/page-wait';
+import { ElementHandle, Page } from 'puppeteer';
+import { waitForNavigation } from '../services/page-wait';
 
-const configs = require('../config/config');
+const configs = require('../resources/config');
 
 export const selectors = {
   loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In with Google")]',
@@ -97,6 +97,10 @@ export default class GoogleLoginPage {
     const googleButton = await this.loginButton;
     await googleButton.click();
     await naviPromise;
+
+    if (!user || user.trim().length === 0) {
+      console.warn('Login user email: value is empty!!!')
+    }
 
     await this.enterEmail(user);
     await this.enterPassword(pwd);

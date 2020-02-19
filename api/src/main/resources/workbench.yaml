@@ -1073,6 +1073,26 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  /v1/admin/workspaces/{workspaceNamespace}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+    get:
+      tags:
+        - workspaceAdmin
+      description: >
+        Given a workspace namespace (Google Cloud Platform  Project ID), returns workspace details.
+        Only accessible to privileged admin users.
+      operationId: getFederatedWorkspaceDetails
+      responses:
+        200:
+          description: Federated details about the workspace.
+          schema:
+            $ref: "#/definitions/AdminFederatedWorkspaceDetailsResponse"
+        404:
+          description: Workspace not found for namespace
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/admin/clusters/updateConfig:
     post:
       summary: Sets default cluster creation request parameters for a user.
@@ -2559,7 +2579,8 @@ definitions:
       FEATURED_WORKSPACE_ADMIN,
       COMMUNICATIONS_ADMIN,
       SECURITY_ADMIN,
-      INSTITUTION_ADMIN
+      INSTITUTION_ADMIN,
+      WORKSPACES_VIEW
     ]
 
   PageVisit:
@@ -2617,6 +2638,8 @@ definitions:
         type: string
       billingAccountName:
         type: string
+      billingAccountType:
+        $ref: "#/definitions/BillingAccountType"
       googleBucketName:
         type: string
       dataAccessLevel:
@@ -4324,3 +4347,52 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Institution"
+
+  AdminFederatedWorkspaceDetailsResponse:
+    description: Admin-visible metadata about a workspace.
+    type: object
+    properties:
+      workspace:
+        $ref: "#/definitions/Workspace"
+      collaborators:
+        type: array
+        items:
+          $ref: "#/definitions/UserRole"
+      resources:
+        $ref: "#/definitions/AdminWorkspaceResources"
+
+  AdminWorkspaceResources:
+    description: >
+      A summary of application-level resources associated with a workspace. Includes data about
+      Cohort Builder objects, analysis clusters, and cloud-storage contents.
+    type: object
+    properties:
+      workspaceObjects:
+        $ref: "#/definitions/AdminWorkspaceObjectsCounts"
+      cloudStorage:
+        $ref: "#/definitions/AdminWorkspaceCloudStorageCounts"
+      clusters:
+        type: array
+        items:
+          $ref: "#/definitions/ListClusterResponse"
+
+  AdminWorkspaceObjectsCounts:
+    type: object
+    properties:
+      cohortCount:
+        type: integer
+      conceptSetCount:
+        type: integer
+      datasetCount:
+        type: integer
+
+  AdminWorkspaceCloudStorageCounts:
+    type: object
+    properties:
+      notebookFileCount:
+        type: integer
+      nonNotebookFileCount:
+        type: integer
+      storageBytesUsed:
+        type: integer
+        format: int64

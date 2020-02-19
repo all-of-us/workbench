@@ -4,7 +4,7 @@ import {JSHandle, Page} from 'puppeteer';
  * Wait until page URL to match a regular expression.
  * @param {string} text - URL regular expression
  */
-export async function waitUntilURLMatch(page: Page, text: string): Promise<JSHandle> {
+export async function waitUntilURLMatch(page: Page, text: string) {
   return await page.waitForFunction(includesText => {
     const href = window.location.href;
     return href.includes(includesText);

@@ -13,18 +13,7 @@
                 "allow-namespace-imports": true
             }
         },
-        "no-console": {
-            "severity": "warning",
-            "options": [
-                "log",
-                "error",
-                "debug",
-                "info",
-                "time",
-                "timeEnd",
-                "trace"
-            ]
-        },
+        "no-console": false,
         "no-require-imports": false,
         "no-var-requires": false,
         "interface-name": false,

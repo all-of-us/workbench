@@ -70,7 +70,7 @@ public class GaugeRecorderServiceTest {
   @Autowired private GaugeRecorderService gaugeRecorderService;
 
   @TestConfiguration
-  @Import({GaugeRecorderService.class})
+  @Import({GaugeRecorderService.class, LogsBasedMetricServiceFakeImpl.class})
   @MockBean({
     BillingProjectBufferService.class,
     CohortReviewService.class,
