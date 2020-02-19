@@ -96,12 +96,6 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     longDescription: <div>Primary focus of the research is drug/therapeutics development. The data
       will be used to understand treatment-gene interactions or treatment outcomes relevant
       to the therapeutic(s) of interest.</div>
-  },  {
-    shortName: 'commercialPurpose',
-    shortDescription: 'For-Profit Purpose',
-    longDescription: <div>The data will be used by a for-profit entity for research or product
-      or service development (e.g. for understanding drug responses as part of a
-      pharmaceutical company's drug development or market research efforts).</div>
   }
 ];
 ResearchPurposeItems.forEach(item => {
@@ -114,6 +108,12 @@ export const PrimaryPurposeItems: Array<ResearchPurposeItem> = [ {
   uniqueId: 'education-purpose',
   longDescription: <div>The data will be used for education purposes (e.g. for a college research
     methods course, to educate students on population-based research approaches).</div>
+}, {
+  shortName: 'commercialPurpose',
+  shortDescription: 'For-Profit Purpose',
+  longDescription: <div>The data will be used by a for-profit entity for research or product
+    or service development (e.g. for understanding drug responses as part of a
+    pharmaceutical company's drug development or market research efforts).</div>
 }, {
   shortName: 'otherPurpose',
   shortDescription: 'Other Purpose',

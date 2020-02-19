@@ -155,7 +155,10 @@ const styles = reactStyles({
   researchPurposeRow: {
     backgroundColor: colors.white,
     borderColor: colors.white,
-    borderRadius: '2px'
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
+    marginLeft: '-1rem',
+    paddingTop: '0.3rem',
+    paddingBottom: '0.3rem'
   }
 });
 
@@ -408,7 +411,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         return false;
       }
       const rp = this.props.workspace.researchPurpose;
-      return rp.ancestry || rp.commercialPurpose || rp.controlSet ||
+      return rp.ancestry || rp.controlSet ||
           rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment ||
           rp.methodsDevelopment || rp.populationHealth || rp.socialBehavioral;
     }
@@ -579,12 +582,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     get researchPurposeLabel() {
-      return  <Link style={styles.shortDescription}
-                    onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
-        <div style={{display: 'inherit'}}>
+      return <div style={{display: 'inherit'}}>
         Research purpose
-          <i className='pi pi-angle-right' style={{verticalAlign: 'middle'}}></i>
-      </div></Link>;
+        {!this.state.showResearchPurpose && <i className='pi pi-angle-right' style={{verticalAlign: 'middle'}}></i>}
+        {this.state.showResearchPurpose && <i className='pi pi-angle-down' style={{verticalAlign: 'middle'}}></i>}
+      </div>;
     }
 
     get isSpecificPopulationValid() {
@@ -912,18 +914,21 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             description={researchPurposeQuestions[0].description} index='1.' indent>
           <FlexRow>
             <FlexColumn>
-              <FlexRow  style={styles.researchPurposeRow}>
-              <CheckBox
-                data-test-id='researchPurpose-checkbox'
-                style={{...styles.checkboxStyle}}
-                checked={this.primaryPurposeIsSelected}
-                onChange={v => this.setState({
-                  selectResearchPurpose: v})}/>
-                <div style={styles.shortDescription}> {this.researchPurposeLabel}</div>
-              </FlexRow>
-                {this.state.showResearchPurpose && <FlexColumn style={{...styles.flexColumnBy2, ...styles.researchPurposeRow}}>
-                {ResearchPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i, !this.state.selectResearchPurpose))}
-                </FlexColumn>}
+              <FlexColumn  style={styles.researchPurposeRow}>
+                <CheckBox
+                  data-test-id='researchPurpose-checkbox'
+                  style={{...styles.checkboxStyle, marginLeft: '0.6rem'}}
+                  label={this.researchPurposeLabel}
+                  labelStyle={styles.shortDescription}
+                  checked={this.primaryPurposeIsSelected}
+                  onChange={v => this.setState({
+                    selectResearchPurpose: v,
+                    showResearchPurpose: !this.state.showResearchPurpose})}/>
+                  {this.state.showResearchPurpose && <FlexColumn style={{...styles.flexColumnBy2, marginLeft: '2rem'}}>
+                  {ResearchPurposeItems.map(
+                    (rp, i) => this.makePrimaryPurposeForm(rp, i, !this.state.selectResearchPurpose))}
+                  </FlexColumn>}
+              </FlexColumn>
 
               {PrimaryPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i, false))}
             </FlexColumn>
