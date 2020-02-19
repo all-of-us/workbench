@@ -742,13 +742,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .append(domainAsString)
             .append("\"")
             .toString();
-    String sqlLimitSection =
-        new StringBuilder(
-                "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n")
-            .append(
-                "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n")
-            .append("max_number_of_rows = '1000000'")
-            .toString();
     String sqlSection;
     String dataFrameSection;
     String displayHeadSection;
@@ -762,7 +755,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                     generateSqlWithEnvironmentVariables(
                         queryJobConfiguration.getQuery(), kernelTypeEnum),
                     queryJobConfiguration.getNamedParameters())
-                + " \nLIMIT \"\"\" + max_number_of_rows";
+                + "\"\"\"";
         dataFrameSection =
             namespace + "df = pandas.read_gbq(" + namespace + "sql, dialect=\"standard\")";
         displayHeadSection = namespace + "df.head(5)";
@@ -775,7 +768,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                     generateSqlWithEnvironmentVariables(
                         queryJobConfiguration.getQuery(), kernelTypeEnum),
                     queryJobConfiguration.getNamedParameters())
-                + " \nLIMIT \", max_number_of_rows, sep=\"\")";
+                + "\", sep=\"\")";
         dataFrameSection =
             namespace
                 + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
@@ -787,9 +780,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
     }
 
-    return sqlLimitSection
-        + "\n\n"
-        + descriptiveComment
+    return descriptiveComment
         + "\n"
         + sqlSection
         + "\n\n"
