@@ -732,9 +732,6 @@ public class DataSetControllerTest {
     assertThat(response.getCode())
         .isEqualTo(
             "import pandas\nimport os\n\n"
-                + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
-                + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
-                + "max_number_of_rows = '1000000'\n\n"
                 + "# This query represents dataset \"blah\" for domain \"condition\"\n"
                 + prefix
                 + "sql = \"\"\"SELECT PERSON_ID FROM `"
@@ -746,9 +743,8 @@ public class DataSetControllerTest {
                 + TEST_CDR_TABLE
                 + ".person` person WHERE "
                 + NAMED_PARAMETER_VALUE.getValue()
-                + " IN (2, 5))) "
-                + "\n"
-                + "LIMIT \"\"\" + max_number_of_rows\n"
+                + " IN (2, 5)))"
+                + "\"\"\"\n"
                 + "\n"
                 + prefix
                 + "df = pandas.read_gbq("
@@ -783,9 +779,6 @@ public class DataSetControllerTest {
     assertThat(response.getCode())
         .isEqualTo(
             "library(bigrquery)\n\n"
-                + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
-                + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
-                + "max_number_of_rows = '1000000'\n\n"
                 + "# This query represents dataset \"blah\" for domain \"condition\"\n"
                 + prefix
                 + "sql <- paste(\"SELECT PERSON_ID FROM `"
@@ -797,8 +790,8 @@ public class DataSetControllerTest {
                 + TEST_CDR_TABLE
                 + ".person` person WHERE "
                 + NAMED_PARAMETER_VALUE.getValue()
-                + " IN (2, 5))) \n"
-                + "LIMIT \", max_number_of_rows, sep=\"\")\n"
+                + " IN (2, 5)))"
+                + "\", sep=\"\")\n"
                 + "\n"
                 + prefix
                 + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
