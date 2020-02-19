@@ -505,7 +505,8 @@ Common.register_command({
 
 def connect_to_db()
   common = Common.new
-
+  common.status "Starting database if necessary..."
+  common.run_inline %W{docker-compose up -d db}
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
   common.run_inline %W{docker-compose exec db sh -c #{cmd}}
 end

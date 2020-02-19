@@ -1,12 +1,15 @@
 package org.pmiops.workbench.monitoring;
 
+import java.util.function.Supplier;
+import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 
+/**
+ * We are temporarily using the Stackdriver Logs-based metric facility to record and chart count
+ * (event), cumulative, and distribution metrics
+ */
 public interface LogsBasedMetricService {
-
-  String METRIC_VALUE_KEY = "data_point_value";
-  String METRIC_NAME_KEY = "metric_name";
-  String METRIC_LABELS_KEY = "labels";
 
   /**
    * This method of metric recording is essentially one LogEntry per Timeseries per sample; Reusing
@@ -28,4 +31,30 @@ public interface LogsBasedMetricService {
   default void recordEvent(EventMetric eventMetric) {
     record(MeasurementBundle.builder().addEvent(eventMetric).build());
   }
+  /**
+   * Use a Stopwatch to time the supplied operation, then add a measurement to the supplied
+   * measurementBundleBuilder and record the associated DistributionMetric.
+   *
+   * @param measurementBundleBuilder - Builder for a MeasurementBundle to be recorded. Typically
+   *     only has tags.
+   * @param distributionMetric - Metric to be recorded. Always a distribution, as gauge and count
+   *     don't make sense for timings
+   * @param operation - Code to be run, e.g. () -> myService.computeThings()
+   */
+  void recordElapsedTime(
+      Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation);
+
+  /**
+   * Same as above, but returns the result of the operation
+   *
+   * @param measurementBundleBuilder - Builder for a MeasurementBundle to be recorded. Typically
+   *     only has tags.
+   * @param distributionMetric - Metric to be recorded. Always a distribution, as gauge and count
+   *     don't make sense for timings
+   * @param operation - Code to be run, e.g. myService::getFooList
+   */
+  <T> T recordElapsedTime(
+      Builder measurementBundleBuilder,
+      DistributionMetric distributionMetric,
+      Supplier<T> operation);
 }

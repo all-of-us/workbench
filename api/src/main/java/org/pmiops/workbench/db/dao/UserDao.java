@@ -51,10 +51,10 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + "FROM DbUser "
           + "GROUP BY dataAccessLevel, disabled, CASE WHEN betaAccessBypassTime IS NOT NULL THEN TRUE ELSE FALSE END "
           + "ORDER BY NULL")
-  List<DataAccessLevelDisabledAndBetaBypassedToCountRow>
+  List<UserCountGaugeLabelsAndValue>
       getDataAccessLevelDisabledAndBetaBypassedToCount();
 
-  interface DataAccessLevelDisabledAndBetaBypassedToCountRow {
+  interface UserCountGaugeLabelsAndValue {
     Short getDataAccessLevel();
 
     Boolean getDisabled();

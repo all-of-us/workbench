@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -84,6 +85,10 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.WorkspaceMapper;
@@ -97,12 +102,14 @@ import org.zendesk.client.v2.model.Request;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
+
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_CLONE_FILE_SIZE_MB = 100;
+  private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
 
   private Retryer<Boolean> retryer =
       RetryerBuilder.<Boolean>newBuilder()
@@ -127,6 +134,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceMapper workspaceMapper;
   private final ManualWorkspaceMapper manualWorkspaceMapper;
+  private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
   public WorkspacesController(
@@ -145,7 +153,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
-      ManualWorkspaceMapper manualWorkspaceMapper) {
+      ManualWorkspaceMapper manualWorkspaceMapper,
+      LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -162,6 +171,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
     this.manualWorkspaceMapper = manualWorkspaceMapper;
+    this.logsBasedMetricService = logsBasedMetricService;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -246,6 +256,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
+    return ResponseEntity.ok(
+        recordOperationTime(() -> createWorkspaceImpl(workspace), "createWorkspace"));
+  }
+
+  // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService &
+  // WorkspaceServiceImpl
+  private Workspace createWorkspaceImpl(Workspace workspace) {
     validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
@@ -266,8 +283,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspace dbWorkspace = new DbWorkspace();
     // A little unintuitive but setting this here reflects the current state of the workspace
-    // while it was in the billing buffer. Setting this value will inform the update billing code to
-    // skip an unnecessary GCP API call if the billing account is being kept at the free tier
+    // while it was in the billing buffer. Setting this value will inform the update billing
+    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
+    // tier
     dbWorkspace.setBillingAccountName(
         workbenchConfigProvider.get().billing.freeTierBillingAccountName());
     setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
@@ -298,12 +316,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           "This message is going to be swallowed due to a bug in ExceptionAdvice. ",
           new ServerErrorException("Could not update the workspace's billing account", e));
     }
-
     try {
       dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     } catch (Exception e) {
-      // Tell Google to set the billing account back to the free tier if the workspace creation
-      // fails
+      // Tell Google to set the billing account back to the free tier if the workspace
+      // creation fails
       log.log(
           Level.SEVERE,
           "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
@@ -317,7 +334,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     maybeFileZendeskReviewRequest(createdWorkspace);
-    return ResponseEntity.ok(createdWorkspace);
+    return createdWorkspace;
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -351,6 +368,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
+    recordOperationTime(
+        () -> deleteWorkspaceImpl(workspaceNamespace, workspaceId), "deleteWorkspace");
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private void deleteWorkspaceImpl(String workspaceNamespace, String workspaceId) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
@@ -362,19 +385,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
     workspaceAuditor.fireDeleteAction(dbWorkspace);
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceId));
+    return ResponseEntity.ok(
+        recordOperationTime(
+            () -> workspaceService.getWorkspace(workspaceNamespace, workspaceId), "getWorkspace"));
   }
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    response.setItems(workspaceService.getWorkspaces());
+    final WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+    response.setItems(recordOperationTime(workspaceService::getWorkspaces, "getWorkspaces"));
     return ResponseEntity.ok(response);
   }
 
@@ -382,7 +406,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
       throws NotFoundException {
+    final Workspace result =
+        recordOperationTime(
+            () -> updateWorkspaceImpl(workspaceNamespace, workspaceId, request), "updateWorkspace");
+    return ResponseEntity.ok(result);
+  }
 
+  private Workspace updateWorkspaceImpl(
+      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
@@ -433,8 +464,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // getRequired() above, see RW-215 for details.
       dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     } catch (Exception e) {
-      // Tell Google Cloud to set the billing account back to the original one since our update
-      // database call failed
+      // Tell Google Cloud to set the billing account back to the original one since our
+      // update database call failed
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, originalWorkspace.getBillingAccountName());
       throw e;
@@ -444,13 +475,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
   }
 
   @Override
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
       throws BadRequestException, TooManyRequestsException {
+    return recordOperationTime(
+        () -> cloneWorkspaceImpl(fromWorkspaceNamespace, fromWorkspaceId, body), "cloneWorkspace");
+  }
+
+  private ResponseEntity<CloneWorkspaceResponse> cloneWorkspaceImpl(
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
     Workspace toWorkspace = body.getWorkspace();
     if (Strings.isNullOrEmpty(toWorkspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");
@@ -700,19 +737,36 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(
       String workspaceNamespace, String workspaceId) {
-    List<FileDetail> fileList = notebooksService.getNotebooks(workspaceNamespace, workspaceId);
-    return ResponseEntity.ok(fileList);
+    return ResponseEntity.ok(
+        recordOperationTime(
+            () -> notebooksService.getNotebooks(workspaceNamespace, workspaceId),
+            "getNoteBookList"));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(
       String workspace, String workspaceName, String notebookName) {
-    notebooksService.deleteNotebook(workspace, workspaceName, notebookName);
+    recordOperationTime(
+        () -> notebooksService.deleteNotebook(workspace, workspaceName, notebookName),
+        "deleteNotebook");
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<FileDetail> copyNotebook(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      String fromNotebookName,
+      CopyRequest copyRequest) {
+    return ResponseEntity.ok(
+        recordOperationTime(
+            () ->
+                copyNotebookImpl(
+                    fromWorkspaceNamespace, fromWorkspaceId, fromNotebookName, copyRequest),
+            "copyNotebook"));
+  }
+
+  private FileDetail copyNotebookImpl(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
       String fromNotebookName,
@@ -730,8 +784,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
-
-    return ResponseEntity.ok(fileDetail);
+    return fileDetail;
   }
 
   @Override
@@ -949,5 +1002,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  private <T> T recordOperationTime(Supplier<T> operation, String operationName) {
+    log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
+    return logsBasedMetricService.recordElapsedTime(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        operation);
+  }
+
+  private void recordOperationTime(Runnable operation, String operationName) {
+    log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
+    logsBasedMetricService.recordElapsedTime(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        operation);
   }
 }

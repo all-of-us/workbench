@@ -1,6 +1,7 @@
 {
   "extends": "../ui/tsconfig.json",
   "compilerOptions": {
+    "moduleResolution": "node",
     "module": "commonjs",
     "forceConsistentCasingInFileNames": true,
     "noUnusedParameters": true,

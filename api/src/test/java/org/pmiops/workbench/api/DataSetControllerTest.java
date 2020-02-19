@@ -117,6 +117,9 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
+import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -252,8 +255,10 @@ public class DataSetControllerTest {
   @Autowired WorkspaceMapper workspaceMapper;
 
   @Autowired ManualWorkspaceMapper manualWorkspaceMapper;
+  @Autowired LogsBasedMetricService logsBasedMetricService;
 
   @Autowired Provider<Zendesk> mockZendeskProvider;
+  @MockBean MonitoringService mockMonitoringService;
 
   @TestConfiguration
   @Import({
@@ -267,7 +272,8 @@ public class DataSetControllerTest {
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -379,7 +385,8 @@ public class DataSetControllerTest {
             workbenchConfigProvider,
             workspaceAuditor,
             workspaceMapper,
-            manualWorkspaceMapper);
+            manualWorkspaceMapper,
+            logsBasedMetricService);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,

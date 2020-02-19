@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -23,7 +24,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao.DataAccessLevelDisabledAndBetaBypassedToCountRow;
+import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -290,22 +291,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser createUser(
-      String givenName,
-      String familyName,
-      String userName,
-      String contactEmail,
-      String currentPosition,
-      String organization,
-      String areaOfResearch) {
+  public DbUser createUser(final Userinfoplus oAuth2Userinfo) {
     return createUser(
-        givenName,
-        familyName,
-        userName,
-        contactEmail,
-        currentPosition,
-        organization,
-        areaOfResearch,
+        oAuth2Userinfo.getGivenName(),
+        oAuth2Userinfo.getFamilyName(),
+        oAuth2Userinfo.getEmail(),
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -878,7 +872,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
 
-    final List<DataAccessLevelDisabledAndBetaBypassedToCountRow> rows =
+    final List<UserCountGaugeLabelsAndValue> rows =
         userDao.getDataAccessLevelDisabledAndBetaBypassedToCount();
     return rows.stream()
         .map(

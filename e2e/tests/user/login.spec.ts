@@ -6,7 +6,7 @@ require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);
 
-const configs = require('../../config/config');
+const configs = require('../../resources/config');
 
 describe.skip('Login tests:', () => {
 

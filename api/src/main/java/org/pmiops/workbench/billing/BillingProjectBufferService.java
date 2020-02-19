@@ -104,7 +104,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
    */
   private void bufferBillingProject() {
     if (getUnfilledBufferSpace() <= 0) {
-      log.info(
+      log.fine(
           String.format(
               "Billing buffer is at capacity: size = %d, capacity = %d",
               getCurrentBufferSize(), getBufferMaxCapacity()));
