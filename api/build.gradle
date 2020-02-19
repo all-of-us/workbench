@@ -293,6 +293,10 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   test {
+    // Allow unit tests to directly load config files.
+    resources {
+      srcDir "config/"
+    }
     compileClasspath += generated.output
     runtimeClasspath += generated.output
   }

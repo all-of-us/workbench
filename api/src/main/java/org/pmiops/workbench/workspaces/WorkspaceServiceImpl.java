@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -102,6 +103,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
   private final ManualWorkspaceMapper manualWorkspaceMapper;
+  private final FreeTierBillingService freeTierBillingService;
 
   private FireCloudService fireCloudService;
   private Clock clock;
@@ -121,7 +123,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
-      ManualWorkspaceMapper manualWorkspaceMapper) {
+      ManualWorkspaceMapper manualWorkspaceMapper,
+      FreeTierBillingService freeTierBillingService) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
@@ -135,6 +138,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.manualWorkspaceMapper = manualWorkspaceMapper;
+    this.freeTierBillingService = freeTierBillingService;
   }
 
   /**
@@ -694,6 +698,18 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       cloudbilling = serviceAccountCloudbillingProvider.get();
     } else {
       cloudbilling = endUserCloudbillingProvider.get();
+      try {
+        Optional<Boolean> isOpenMaybe =
+            Optional.ofNullable(
+                cloudbilling.billingAccounts().get(newBillingAccountName).execute().getOpen());
+        boolean isOpen = isOpenMaybe.orElse(false);
+        if (!isOpen) {
+          throw new BadRequestException(
+              "Provided billing account is closed. Please provide an open account.");
+        }
+      } catch (IOException e) {
+        throw new ServerErrorException("Could not fetch user provided billing account.", e);
+      }
     }
 
     UpdateBillingInfo request;
@@ -705,22 +721,34 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                   "projects/" + workspace.getWorkspaceNamespace(),
                   new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
     } catch (IOException e) {
-      throw new RuntimeException("Could not create Google Cloud updateBillingInfo request", e);
+      throw new ServerErrorException("Could not create Google Cloud updateBillingInfo request", e);
     }
 
     ProjectBillingInfo response;
     try {
       response = cloudBillingRetryer.call(request::execute);
     } catch (RetryException | ExecutionException e) {
-      throw new RuntimeException("Google Cloud updateBillingInfo call failed", e);
+      throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
     }
 
     if (!newBillingAccountName.equals(response.getBillingAccountName())) {
-      throw new RuntimeException(
+      throw new ServerErrorException(
           "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
     }
 
     workspace.setBillingAccountName(response.getBillingAccountName());
+
+    if (newBillingAccountName.equals(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
+      workspace.setBillingStatus(
+          freeTierBillingService.userHasFreeTierCredits(workspace.getCreator())
+              ? BillingStatus.ACTIVE
+              : BillingStatus.INACTIVE);
+    } else {
+      // At this point, we can assume that a user provided billing account is open since we
+      // throw a BadRequestException if a closed one is provided
+      workspace.setBillingStatus(BillingStatus.ACTIVE);
+    }
   }
 
   @Override

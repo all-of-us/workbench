@@ -12,9 +12,12 @@ import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
+import {
+  getSelectedPopulations,
+  getSelectedResearchPurposeItems
+} from 'app/utils/research-purpose';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {SpecificPopulationEnum} from 'generated/fetch';
 
 const styles = reactStyles({
   mainHeader: {
@@ -41,33 +44,8 @@ export const ResearchPurpose = withCurrentWorkspace()(
       };
     }
 
-    getSelectedResearchPurposeItems() {
-      return ResearchPurposeItems.filter((item) =>
-        this.props.workspace.researchPurpose[item.shortName]).map((item) => {
-          let content = item.shortDescription;
-          if (item.shortName === 'otherPurpose') {
-            content += ': ' + this.props.workspace.researchPurpose.otherPurposeDetails;
-          }
-          if (item.shortName === 'diseaseFocusedResearch') {
-            content += ': ' + this.props.workspace.researchPurpose.diseaseOfFocus;
-          }
-          return content;
-        });
-    }
-
-    getSelectedPopulations() {
-      const populations = SpecificPopulationItems.filter(sp =>
-        this.props.workspace.researchPurpose.populationDetails.includes(sp.shortName))
-        .map(sp => sp.ubrLabel);
-      if (this.props.workspace.researchPurpose.populationDetails
-        .includes(SpecificPopulationEnum.OTHER)) {
-        populations.push('Other: ' + this.props.workspace.researchPurpose.otherPopulationDetails);
-      }
-      return populations;
-    }
-
     getSelectedPopulationsSlice(left: boolean) {
-      const populations = this.getSelectedPopulations();
+      const populations = getSelectedPopulations(this.props.workspace.researchPurpose);
       const populationsHalfLen = sliceByHalfLength(populations);
       if (left) {
         return populations.slice(0, populationsHalfLen);
@@ -79,7 +57,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
     render() {
       const {workspace} = this.props;
       const {workspacePermissions} = this.state;
-      const selectedResearchPurposeItems = this.getSelectedResearchPurposeItems();
+      const selectedResearchPurposeItems = getSelectedResearchPurposeItems(this.props.workspace.researchPurpose);
       const rpItemsHalfLen = sliceByHalfLength(selectedResearchPurposeItems);
       return <FadeBox>
         <div style={styles.mainHeader}>Research Purpose

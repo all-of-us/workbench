@@ -77,7 +77,7 @@ public class MeasurementBundle {
     }
 
     public Builder addEvent(Metric metric) {
-      measurementsBuilder.put(metric, MonitoringService.DELTA_VALUE);
+      measurementsBuilder.put(metric, MonitoringService.COUNT_INCREMENT);
       return this;
     }
 

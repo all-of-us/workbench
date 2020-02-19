@@ -94,7 +94,8 @@ public class ManualWorkspaceMapper {
             .published(workspace.getPublished())
             .googleBucketName(fcWorkspace.getBucketName())
             .billingStatus(workspace.getBillingStatus())
-            .billingAccountName(workspace.getBillingAccountName());
+            .billingAccountName(workspace.getBillingAccountName())
+            .billingAccountType(workspace.getBillingAccountType());
 
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       result.billingStatus(BillingStatus.ACTIVE);

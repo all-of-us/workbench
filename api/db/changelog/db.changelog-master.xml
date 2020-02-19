@@ -133,6 +133,8 @@
     <include file="changelog/db.changelog-123-user-terms-of-service.xml"/>
     <include file="changelog/db.changelog-124-add-demographic-gender-identity.xml"/>
     <include file="changelog/db.changelog-125-institution-tables.xml"/>
+    <include file="changelog/db.changelog-126-institution-foreign-key.xml"/>
+    <include file="changelog/db.changelog-127-free-billing-account-name.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

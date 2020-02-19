@@ -346,6 +346,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
       const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
+      if (!!selectedSurvey) {
+        request['surveyName'] = selectedSurvey;
+      }
       conceptsApi().domainCounts(namespace, id, request).then(counts => {
         // Filter Physical Measurements if feature flag disabled
         const conceptDomainCounts = !environment.enableNewConceptTabs
@@ -362,9 +365,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
         selectedConceptDomainMap[cacheItem.domain] = [];
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         if (cacheItem.domain === Domain.SURVEY) {
-          if (!!selectedSurvey) {
-            request['surveyName'] = selectedSurvey;
-          }
           await conceptsApi().searchSurveys(namespace, id, request)
             .then(resp => cacheItem.items = resp)
             .catch(error => {

@@ -1,17 +1,18 @@
 {
   "extends": "../ui/tsconfig.json",
   "compilerOptions": {
+    "moduleResolution": "node",
     "module": "commonjs",
     "forceConsistentCasingInFileNames": true,
     "noUnusedParameters": true,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
+    //"noUnusedLocals": true,
     "outDir": "./tsc-out",
     "baseUrl": "./",
     "typeRoots": [
       "./node_modules/@types"
     ]
   },
-  "exclude": [ "tsc-out", "node_modules" ]
+  "exclude": [ "tsc-out", "**/node_modules", "node_modules" ]
 }

@@ -21,6 +21,8 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -49,6 +51,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -59,6 +62,8 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapper;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -112,6 +117,9 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
+import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -156,12 +164,16 @@ public class DataSetControllerTest {
   private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
   private static final String TEST_CDR_DATA_SET_ID = "synthetic_cdr20180606";
   private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
-  private static final String NAMED_PARAMETER_NAME = "p1_706";
-  private static final String NAMED_PARAMETER_VALUE = "ICD9";
+  private static final String NAMED_PARAMETER_NAME = "p1_1";
+  private static final QueryParameterValue NAMED_PARAMETER_VALUE =
+      QueryParameterValue.string("concept_id");
+  private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
+  private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
+      QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
 
   private Long COHORT_ONE_ID;
-  private Long CONCEPT_SET_ONE_ID;
   private Long COHORT_TWO_ID;
+  private Long CONCEPT_SET_ONE_ID;
   private Long CONCEPT_SET_TWO_ID;
   private Long CONCEPT_SET_SURVEY_ID;
 
@@ -212,6 +224,8 @@ public class DataSetControllerTest {
 
   @Mock DataSetMapper dataSetMapper;
 
+  @Autowired ConceptSetMapper conceptSetMapper;
+
   @Autowired DataSetService dataSetService;
 
   @Autowired FireCloudService fireCloudService;
@@ -241,13 +255,16 @@ public class DataSetControllerTest {
   @Autowired WorkspaceMapper workspaceMapper;
 
   @Autowired ManualWorkspaceMapper manualWorkspaceMapper;
+  @Autowired LogsBasedMetricService logsBasedMetricService;
 
   @Autowired Provider<Zendesk> mockZendeskProvider;
+  @MockBean MonitoringService mockMonitoringService;
 
   @TestConfiguration
   @Import({
     CohortFactoryImpl.class,
     ConceptService.class,
+    ConceptSetMapperImpl.class,
     ConceptSetService.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
@@ -255,7 +272,8 @@ public class DataSetControllerTest {
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -276,7 +294,8 @@ public class DataSetControllerTest {
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    Zendesk.class
+    Zendesk.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
 
@@ -338,7 +357,7 @@ public class DataSetControllerTest {
                 CLOCK,
                 cdrVersionDao,
                 cohortDao,
-                conceptDao,
+                conceptService,
                 conceptSetDao,
                 dataDictionaryEntryDao,
                 dataSetDao,
@@ -347,7 +366,8 @@ public class DataSetControllerTest {
                 fireCloudService,
                 notebooksService,
                 userProvider,
-                workspaceService));
+                workspaceService,
+                conceptSetMapper));
     WorkspacesController workspacesController =
         new WorkspacesController(
             billingProjectBufferService,
@@ -365,7 +385,8 @@ public class DataSetControllerTest {
             workbenchConfigProvider,
             workspaceAuditor,
             workspaceMapper,
-            manualWorkspaceMapper);
+            manualWorkspaceMapper,
+            logsBasedMetricService);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,
@@ -387,7 +408,8 @@ public class DataSetControllerTest {
             conceptBigQueryService,
             userRecentResourceService,
             userProvider,
-            CLOCK);
+            CLOCK,
+            conceptSetMapper);
     doAnswer(
             invocation -> {
               DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
@@ -542,7 +564,13 @@ public class DataSetControllerTest {
     when(cohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
             QueryJobConfiguration.newBuilder(
-                    "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
+                    "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person WHERE @"
+                        + NAMED_PARAMETER_NAME
+                        + " IN unnest(@"
+                        + NAMED_PARAMETER_ARRAY_NAME
+                        + ")")
+                .addNamedParameter(NAMED_PARAMETER_NAME, NAMED_PARAMETER_VALUE)
+                .addNamedParameter(NAMED_PARAMETER_ARRAY_NAME, NAMED_PARAMETER_ARRAY_VALUE)
                 .build());
     // This is not great, but due to the interaction of mocks and bigquery, it is
     // exceptionally hard to fix it so that it calls the real filterBitQueryConfig
@@ -703,7 +731,7 @@ public class DataSetControllerTest {
     String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
-            "import pandas\n\n"
+            "import pandas\nimport os\n\n"
                 + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
                 + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
                 + "max_number_of_rows = '1000000'\n\n"
@@ -716,27 +744,16 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person)) "
+                + ".person` person WHERE "
+                + NAMED_PARAMETER_VALUE.getValue()
+                + " IN (2, 5))) "
                 + "\n"
                 + "LIMIT \"\"\" + max_number_of_rows\n"
                 + "\n"
                 + prefix
-                + "query_config = {\n"
-                + "  'query': {\n"
-                + "  'parameterMode': 'NAMED',\n"
-                + "  'queryParameters': [\n\n"
-                + "    ]\n"
-                + "  }\n"
-                + "}\n"
-                + "\n"
-                + "\n"
-                + "\n"
-                + prefix
                 + "df = pandas.read_gbq("
                 + prefix
-                + "sql, dialect=\"standard\", configuration="
-                + prefix
-                + "query_config)"
+                + "sql, dialect=\"standard\")"
                 + "\n"
                 + "\n"
                 + prefix
@@ -765,10 +782,7 @@ public class DataSetControllerTest {
     String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
-            "require(devtools)\n"
-                + "devtools::install_github(\"rstudio/reticulate\", ref=\"00172079\")\n"
-                + "library(reticulate)\n"
-                + "pd <- reticulate::import(\"pandas\")\n\n"
+            "library(bigrquery)\n\n"
                 + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
                 + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
                 + "max_number_of_rows = '1000000'\n\n"
@@ -781,24 +795,15 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person)) \n"
-                + "LIMIT \", max_number_of_rows)\n"
+                + ".person` person WHERE "
+                + NAMED_PARAMETER_VALUE.getValue()
+                + " IN (2, 5))) \n"
+                + "LIMIT \", max_number_of_rows, sep=\"\")\n"
                 + "\n"
                 + prefix
-                + "query_config <- list(\n"
-                + "  query = list(\n"
-                + "    parameterMode = 'NAMED',\n"
-                + "    queryParameters = list(\n\n"
-                + "    )\n"
-                + "  )\n"
-                + ")\n"
-                + "\n"
+                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
                 + prefix
-                + "df <- pd$read_gbq("
-                + prefix
-                + "sql, dialect=\"standard\", configuration="
-                + prefix
-                + "query_config)"
+                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")"
                 + "\n"
                 + "\n"
                 + "head("
@@ -1070,7 +1075,7 @@ public class DataSetControllerTest {
     mockLinkingTableQuery(tables);
 
     final Map<String, QueryJobConfiguration> result =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+        dataSetService.domainToBigQueryConfig(dataSetRequest);
     assertThat(result).isNotEmpty();
   }
 
@@ -1092,5 +1097,12 @@ public class DataSetControllerTest {
     assertThat(domainValues)
         .containsExactly(
             new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
+  }
+
+  private JSONObject createDemoCriteria() {
+    JSONObject criteria = new JSONObject();
+    criteria.append("includes", new JSONArray());
+    criteria.append("excludes", new JSONArray());
+    return criteria;
   }
 }

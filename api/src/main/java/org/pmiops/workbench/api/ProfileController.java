@@ -311,7 +311,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-    verifyInvitationKey(request.getInvitationKey());
+    if (workbenchConfigProvider.get().access.requireInvitationKey) {
+      verifyInvitationKey(request.getInvitationKey());
+    }
+
     String userName = request.getProfile().getUsername();
     if (userName == null || userName.length() < 3 || userName.length() > 64)
       throw new BadRequestException(
@@ -577,6 +580,18 @@ public class ProfileController implements ProfileApiDelegate {
       // See RW-1488.
       throw new BadRequestException("Changing email is not currently supported");
     }
+    updateInstitutionalAffiliations(updatedProfile, user);
+
+    // This does not update the name in Google.
+    saveUserWithConflictHandling(user);
+
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
     List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()
             .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
@@ -611,14 +626,6 @@ public class ProfileController implements ProfileApiDelegate {
         user.addInstitutionalAffiliation(affiliation);
       }
     }
-
-    // This does not update the name in Google.
-    saveUserWithConflictHandling(user);
-
-    final Profile appliedUpdatedProfile = profileService.getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
-
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

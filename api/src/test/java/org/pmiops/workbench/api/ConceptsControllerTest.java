@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -266,7 +267,8 @@ public class ConceptsControllerTest {
     ConceptSetService.class,
     ConceptBigQueryService.class,
     Clock.class,
-    DataSetService.class
+    DataSetService.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
     @Bean

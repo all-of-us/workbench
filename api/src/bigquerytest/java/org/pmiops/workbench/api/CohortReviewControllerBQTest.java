@@ -21,6 +21,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -99,7 +100,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     UserRecentResourceService.class,
     CohortFactory.class,
     ConceptSetService.class,
-    DataSetService.class
+    DataSetService.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
 

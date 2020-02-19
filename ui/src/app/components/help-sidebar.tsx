@@ -32,7 +32,7 @@ const styles = reactStyles({
     right: 0,
     height: 'calc(100% - 60px)',
     minHeight: 'calc(100vh - 156px)',
-    width: 'calc(14rem + 45px)',
+    width: 'calc(14rem + 55px)',
     overflow: 'hidden',
     color: colors.primary,
     zIndex: -1,
@@ -49,7 +49,8 @@ const styles = reactStyles({
     overflow: 'auto',
     marginRight: 'calc(-14rem - 40px)',
     background: colorWithWhiteness(colors.primary, .87),
-    transition: 'margin-right 0.5s ease-out'
+    transition: 'margin-right 0.5s ease-out',
+    boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
   },
   sidebarOpen: {
     marginRight: 0,
@@ -403,11 +404,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
           {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
             <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
               <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+                   onClick={() => this.onIconClick(icon)}
                    onMouseOver={() => this.setState({tooltipId: i})}
                    onMouseOut={() => this.setState({tooltipId: undefined})}>
                 {icon.faIcon === null
                   ? <img src={proIcons[icon.id]} style={icon.style} />
-                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} onClick={() => this.onIconClick(icon)} />
+                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
                 }
               </div>
             </TooltipTrigger>

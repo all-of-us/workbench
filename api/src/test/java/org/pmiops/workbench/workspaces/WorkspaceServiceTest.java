@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -73,6 +74,7 @@ public class WorkspaceServiceTest {
   @Mock private FireCloudService mockFireCloudService;
   @Mock private Provider<Cloudbilling> mockCloudbillingProvider;
   @Mock private Clock mockClock;
+  @Mock private FreeTierBillingService freeTierBillingService;
 
   private WorkspaceService workspaceService;
 
@@ -101,7 +103,8 @@ public class WorkspaceServiceTest {
             userRecentWorkspaceDao,
             mockWorkbenchConfigProvider,
             workspaceDao,
-            manualWorkspaceMapper);
+            manualWorkspaceMapper,
+            freeTierBillingService);
 
     mockWorkspaceResponses.clear();
     mockWorkspaces.clear();

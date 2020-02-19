@@ -4,29 +4,26 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import javax.inject.Provider;
+import java.util.Random;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -35,7 +32,6 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
@@ -66,19 +62,21 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ProfileControllerTest {
+public class ProfileControllerTest extends BaseControllerTest {
 
   private static final Instant NOW = Instant.now();
   private static final Timestamp TIMESTAMP = new Timestamp(NOW.toEpochMilli());
@@ -96,38 +94,68 @@ public class ProfileControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
-  @Mock private Provider<DbUser> userProvider;
-  @Mock private Provider<UserAuthentication> userAuthenticationProvider;
+  @MockBean private FireCloudService fireCloudService;
+  @MockBean private LeonardoNotebooksClient leonardoNotebooksClient;
+  @MockBean private DirectoryService directoryService;
+  @MockBean private CloudStorageService cloudStorageService;
+  @MockBean private FreeTierBillingService freeTierBillingService;
+  @MockBean private ComplianceService complianceTrainingService;
+  @MockBean private MailService mailService;
+  @MockBean private ProfileAuditor mockProfileAuditor;
+  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+
   @Autowired private UserDao userDao;
   @Autowired private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
-  @Mock private FireCloudService fireCloudService;
-  @Mock private LeonardoNotebooksClient leonardoNotebooksClient;
-  @Mock private DirectoryService directoryService;
-  @Mock private CloudStorageService cloudStorageService;
-  @Mock private FreeTierBillingService freeTierBillingService;
-  @Mock private ComplianceService complianceTrainingService;
-  @Mock private MailService mailService;
-  private UserService userService;
-  @Mock private ProfileAuditor mockProfileAuditor;
-  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
+  @Autowired private UserService userService;
+  @Autowired private ProfileService profileService;
+  @Autowired private ProfileController profileController;
 
-  private ProfileController profileController;
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
-  private FakeClock clock;
-  private DbUser dbUser;
+  private static FakeClock fakeClock = new FakeClock(NOW);
+
+  private static DbUser dbUser;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
-  @Before
-  public void setUp() throws MessagingException {
-    WorkbenchConfig config = generateConfig();
+  @TestConfiguration
+  @Import({UserServiceImpl.class, ProfileService.class, ProfileController.class})
+  static class Configuration {
+    @Bean
+    @Primary
+    Clock clock() {
+      return fakeClock;
+    }
 
-    createAccountRequest = new CreateAccountRequest();
-    invitationVerificationRequest = new InvitationVerificationRequest();
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    DbUser dbUser() {
+      return dbUser;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    UserAuthentication userAuthentication() {
+      return new UserAuthentication(dbUser, null, null, UserType.RESEARCHER);
+    }
+
+    @Bean
+    @Primary
+    Random getRandom() {
+      return new FakeLongRandom(NONCE_LONG);
+    }
+  }
+
+  @Before
+  @Override
+  public void setUp() throws IOException {
+    super.setUp();
+
+    fakeClock.setInstant(NOW);
+
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -136,54 +164,42 @@ public class ProfileControllerTest {
     profile.setCurrentPosition(CURRENT_POSITION);
     profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
+    createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
+
+    invitationVerificationRequest = new InvitationVerificationRequest();
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
+
     googleUser = new com.google.api.services.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
-
-    clock = new FakeClock(NOW);
-
-    doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
-    userService =
-        spy(
-            new UserServiceImpl(
-                userProvider,
-                userDao,
-                adminActionHistoryDao,
-                userTermsOfServiceDao,
-                userDataUseAgreementDao,
-                clock,
-                new FakeLongRandom(NONCE_LONG),
-                fireCloudService,
-                Providers.of(config),
-                complianceTrainingService,
-                directoryService,
-                mockUserServiceAuditAdapter));
-    ProfileService profileService =
-        new ProfileService(userDao, freeTierBillingService, userTermsOfServiceDao);
-    this.profileController =
-        new ProfileController(
-            profileService,
-            userProvider,
-            userAuthenticationProvider,
-            userDao,
-            clock,
-            userService,
-            fireCloudService,
-            directoryService,
-            cloudStorageService,
-            Providers.of(config),
-            Providers.of(mailService),
-            mockProfileAuditor);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+
+    try {
+      doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
+    } catch (MessagingException e) {
+      e.printStackTrace();
+    }
   }
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() throws Exception {
+    createUser();
+
+    when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test
+  public void testCreateAccount_noRequireInvitationKey() throws Exception {
+    createUser();
+
+    // When invitation key verification is turned off, even a bad invitation key should
+    // allow a user to be created.
+    config.access.requireInvitationKey = false;
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
@@ -205,15 +221,15 @@ public class ProfileControllerTest {
   @Test
   public void testCreateAccount_withTosVersion() throws Exception {
     createAccountRequest.setTermsOfServiceVersion(1);
-    Profile profile = createUser();
+    createUser();
 
-    verify(userService).submitTermsOfService(any(DbUser.class), eq(1));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
     assertThat(tosRows.get(0).getTosVersion()).isEqualTo(1);
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
     assertThat(tosRows.get(0).getAgreementTime()).isNotNull();
+    Profile profile = profileService.getProfile(dbUser);
     assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
   }
 
@@ -247,7 +263,6 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
-    DbUser dbUser = userProvider.get();
     String duaInitials = "NIH";
     assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
@@ -264,7 +279,6 @@ public class ProfileControllerTest {
   @Test
   public void testMe_success() throws Exception {
     createUser();
-
     Profile profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -295,7 +309,7 @@ public class ProfileControllerTest {
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
-    clock.increment(1);
+    fakeClock.increment(1);
     profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -405,7 +419,7 @@ public class ProfileControllerTest {
   @Test
   public void updateContactEmail_forbidden() throws Exception {
     createUser();
-    dbUser.setFirstSignInTime(new Timestamp(new Date().getTime()));
+    dbUser.setFirstSignInTime(TIMESTAMP);
     String originalEmail = dbUser.getContactEmail();
 
     ResponseEntity<Void> response =
@@ -489,6 +503,8 @@ public class ProfileControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateCurrentPosition_badRequest() throws Exception {
+    // Server-side verification for this field is only used for old-style account creation.
+    config.featureFlags.enableNewAccountCreation = false;
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setCurrentPosition(RandomStringUtils.random(256));
@@ -497,6 +513,8 @@ public class ProfileControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateOrganization_badRequest() throws Exception {
+    // Server-side verification for this field is only used for old-style account creation.
+    config.featureFlags.enableNewAccountCreation = false;
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setOrganization(RandomStringUtils.random(256));
@@ -584,11 +602,12 @@ public class ProfileControllerTest {
   @Test
   public void testBypassAccessModule() throws Exception {
     Profile profile = createUser();
-    WorkbenchConfig config = generateConfig();
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
-    verify(userService, times(1)).setDataUseAgreementBypassTime(any(), any());
+
+    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
   }
 
   @Test
@@ -607,9 +626,6 @@ public class ProfileControllerTest {
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     userDao.save(dbUser);
-    when(userProvider.get()).thenReturn(dbUser);
-    when(userAuthenticationProvider.get())
-        .thenReturn(new UserAuthentication(dbUser, null, null, UserType.RESEARCHER));
     return result;
   }
 
@@ -646,22 +662,5 @@ public class ProfileControllerTest {
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
-  }
-
-  private WorkbenchConfig generateConfig() {
-    WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billing.projectNamePrefix = BILLING_PROJECT_PREFIX;
-    config.billing.retryCount = 2;
-    config.firecloud.registeredDomainName = "";
-    config.access.enableComplianceTraining = false;
-    config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
-    // All access modules are enabled for these tests. So completing any one module should maintain
-    // UNREGISTERED status.
-    config.access.enableComplianceTraining = true;
-    config.access.enableBetaAccess = true;
-    config.access.enableEraCommons = true;
-    config.access.enableDataUseAgreement = true;
-    config.featureFlags.unsafeAllowDeleteUser = true;
-    return config;
   }
 }
