@@ -834,45 +834,6 @@ Common.register_command({
   :fn => ->(*args) { copy_bq_tables("copy-bq-tables", *args) }
 })
 
-def generate_cloudsql_db(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-    "--project [project]",
-    ->(opts, v) { opts.project = v},
-    "Project the Cloud Sql instance is in"
-  )
-  op.add_option(
-    "--instance [instance]",
-    ->(opts, v) { opts.instance = v},
-    "Cloud SQL instance"
-  )
-  op.add_option(
-      "--database [database]",
-      ->(opts, v) { opts.database = v},
-      "Database name"
-  )
-  op.add_option(
-    "--bucket [bucket]",
-    ->(opts, v) { opts.bucket = v},
-    "Name of the GCS bucket containing the SQL dump"
-  )
-  op.parse.validate
-
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cloudsql-db.sh
-          --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
-          --bucket #{op.opts.bucket}}
-  end
-end
-Common.register_command({
-  :invocation => "generate-cloudsql-db",
-  :description => "generate-cloudsql-db  --project <PROJECT> --instance <workbenchmaindb> \
---database <synth_r_20XXqX_X> --bucket <BUCKET>
-Generates a cloudsql database from data in a bucket. Used to make cdr count databases.",
-  :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
-})
-
 def cloudsql_import(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
