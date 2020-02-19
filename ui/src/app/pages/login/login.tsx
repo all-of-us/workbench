@@ -1,6 +1,7 @@
 import {Button} from 'app/components/buttons';
 import {CookieBanner} from 'app/components/cookie-banner';
 import {Header, SmallHeader} from 'app/components/headers';
+import {AouTitle} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 
@@ -78,9 +79,8 @@ export const LoginReactComponent: React.FunctionComponent<{
         <div style={{width: '400px'}}>
           <h4 style={{...styles.fismaCommon, ...styles.fismaHeader}}>Warning Notice</h4>
           <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
-            You are accessing a US Government web site which may contain information that must be
-            protected under the US Privacy Act or other sensitive information and is intended for
-            Government authorized use only.
+            You are accessing a web site created by the <AouTitle/>, funded by the National Institutes
+            of Health.
           </div>
           <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
             Unauthorized attempts to upload information, change information, or use of this web site
