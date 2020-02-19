@@ -248,7 +248,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
             <FlexRow>
               <FlexColumn>
                 <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
-                  Welcome to</Header>
+                  Welcome to the</Header>
                 <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
                   Researcher Workbench</Header>
               </FlexColumn>
@@ -259,7 +259,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
               </FlexRow>
             </FlexRow>
             <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
-              The secure analysis platform to analyze <i>All of Us</i> data</SmallHeader>
+              The secure platform to analyze <i>All of Us</i> data</SmallHeader>
           </FlexColumn>
           <div></div>
         </FlexRow>
