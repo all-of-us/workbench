@@ -120,10 +120,10 @@ const styles = reactStyles({
     minHeight: '1rem',
     cursor: 'text',
     lineHeight: '1rem',
-    width: '95%'
+    width: '100%'
   },
   categoryRow: {
-    display: 'flex', flexDirection: 'row', padding: '0.6rem 0',
+    display: 'flex', flexDirection: 'row', padding: '0.6rem 0', width: '95%'
   },
   checkboxStyle: {
     marginRight: '.31667rem', zoom: '1.5'
@@ -461,6 +461,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      */
     makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number, disabled: boolean): React.ReactNode {
       let children: React.ReactNode;
+      // If its a sub category of Research purpose and not Education/Other
+      const isResearchPurpose = ResearchPurposeItems.indexOf(rp) > -1;
       if (rp.shortName === 'diseaseFocusedResearch') {
         children = this.makeDiseaseInput();
       } else if (rp.shortName === 'otherPurpose') {
@@ -478,7 +480,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   checked={!!this.state.workspace.researchPurpose[rp.shortName]}
                   onChange={e => this.updateResearchPurpose(rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
-          <label style={styles.shortDescription} htmlFor={rp.uniqueId}>
+          <label style={{...styles.shortDescription, fontSize: isResearchPurpose ? 14 : 16}} htmlFor={rp.uniqueId}>
             {rp.shortDescription}
           </label>
           <div>
@@ -900,7 +902,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         }
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-              description={<div style={{marginLeft: '-0.9rem'}}> {ResearchPurposeDescription}
+              description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
               Therefore, please provide sufficiently detailed responses at a 5th grade reading
               level.  Your responses will not be used to make decisions about data access. <br/><br/>
               <i>Note that you are required to create separate Workspaces for each project
@@ -924,10 +926,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   onChange={v => this.setState({
                     selectResearchPurpose: v,
                     showResearchPurpose: !this.state.showResearchPurpose})}/>
-                  {this.state.showResearchPurpose && <FlexColumn style={{...styles.flexColumnBy2, marginLeft: '2rem'}}>
+                  {this.state.showResearchPurpose && <FlexColumn>
+                    <div style={{...styles.text, marginLeft: '1.9rem'}}>
+                      Choose options below to describe your research purpose
+                    </div>
+                    <div style={{marginLeft: '2rem'}}>
                   {ResearchPurposeItems.map(
                     (rp, i) => this.makePrimaryPurposeForm(rp, i, !this.state.selectResearchPurpose))}
-                  </FlexColumn>}
+                  </div></FlexColumn>}
               </FlexColumn>
 
               {PrimaryPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i, false))}

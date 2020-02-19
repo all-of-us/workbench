@@ -142,7 +142,8 @@ export const toolTipText = {
 export const researchPurposeQuestions = [
   {
     header: ' What is the primary purpose of your project?',
-    description: <div>All fields required unless indicated as optional.</div>
+    description: <div>All fields required unless indicated as optional.Your response will be
+      displayed publicly</div>
   }, {
     header: <div> Please provide a summary of your research purpose by responding to the
       questions below.</div>,
