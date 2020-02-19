@@ -264,15 +264,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
               </FlexRow>
               {
                 workspace.researchPurpose.reviewRequested === true &&
-                workspace.researchPurpose.approved === null &&
-                <div style={{color: colors.warning}}>
-                  <ClrIcon shape='exclamation-triangle' className='is-solid'
-                           style={{fill: colors.warning}}/>
-                  Pending Approval
-                </div>
-              }
-              {
-                workspace.researchPurpose.reviewRequested === true &&
                 workspace.researchPurpose.approved === false &&
                 <div style={{color: colors.danger}}>
                   <ClrIcon shape='exclamation-triangle' className='is-solid'
