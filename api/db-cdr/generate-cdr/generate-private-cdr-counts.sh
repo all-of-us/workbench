@@ -64,5 +64,5 @@ fi
 
 stopDate=$(date)
 echo "Start $startDate Stop: $stopDate"
-echo $(date) " Finished generate-private-cdr-counts "
+echo $(date) " Finished generate-private-cdr-counts"
 
