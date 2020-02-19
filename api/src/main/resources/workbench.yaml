@@ -3285,6 +3285,7 @@ definitions:
     enum:
       - NOTEBOOK
       - COHORT
+      - COHORT_SEARCH_ITEM
       - COHORT_REVIEW
       - CONCEPT_SET
       - DATASET

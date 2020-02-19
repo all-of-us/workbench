@@ -100,7 +100,7 @@ const styles = reactStyles({
 
 interface Props {
   searchRequest: any;
-  updateCount: number;
+  updateCriteria: any;
   updateSaving: Function;
 }
 
@@ -153,7 +153,8 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
+      const {updateCriteria: {update, recalculate}} = this.props;
+      if (update > prevProps.updateCriteria.update && recalculate && !this.definitionErrors) {
         this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
@@ -441,10 +442,10 @@ export const ListOverview = withCurrentWorkspace()(
 })
 export class OverviewComponent extends ReactWrapperBase {
   @Input('searchRequest') searchRequest: Props['searchRequest'];
-  @Input('updateCount') updateCount: Props['updateCount'];
+  @Input('updateCriteria') updateCriteria: Props['updateCriteria'];
   @Input('updateSaving') updateSaving: Props['updateSaving'];
 
   constructor() {
-    super(ListOverview, ['searchRequest', 'updateCount', 'updateSaving']);
+    super(ListOverview, ['searchRequest', 'updateCriteria', 'updateSaving']);
   }
 }
