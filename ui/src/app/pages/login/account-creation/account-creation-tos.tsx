@@ -148,10 +148,8 @@ export const AccountCreationTos = withWindowSize()(
             <div style={{...styles.noticeText, marginBottom: '.5rem', height: '3rem'}}>
               By clicking here and moving to the Registration step, you acknowledge that you
               understand the terms of this agreement and agree to abide by them.
-              {!hasReadEntireTos && <span><br/>
-              <a data-test-id='scroll-to-bottom'
-                 onClick={() => this.scrollToBottom()}
-              >Scroll to bottom</a></span>}
+              <br/>
+              Please read through the entire agreement to continue.
             </div>
             <div style={{marginBottom: '.25rem'}}>
               <CheckBox data-test-id='privacy-statement-check'
