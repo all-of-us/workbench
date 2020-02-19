@@ -11,7 +11,6 @@ import {LoginReactComponent} from 'app/pages/login/login';
 import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
 import {
-  cookiesEnabled,
   reactStyles,
   ReactWrapperBase, ServerConfigProps,
   WindowSizeProps,
@@ -21,9 +20,7 @@ import {
 
 import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
-import {faTimes} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {FlexColumn, FlexRow} from 'app/components/flex';
+import {FlexColumn} from 'app/components/flex';
 import * as React from 'react';
 
 // A template function which returns the appropriate style config based on window size and
@@ -73,23 +70,6 @@ const styles = reactStyles({
     alignItems: 'flex-start',
     width: 'auto',
     minHeight: '100vh'
-  },
-  cookiePolicyMessage: {
-    position: 'fixed',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    padding: '0.5rem 1rem',
-    borderTop: `7px solid ${colors.secondary}`,
-    bottom: 0,
-    backgroundColor: colors.light
-  },
-  iconStyles: {
-    height: 24,
-    width: 24,
-    color: colors.accent,
-    cursor: 'pointer'
   }
 });
 
@@ -130,7 +110,6 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
 
 export const SIGNED_OUT_HEADER_IMAGE = '/assets/images/logo-registration-non-signed-in.svg';
 
-const cookieKey = 'aou-cookie-banner-dismissed';
 
 export interface SignInProps extends ServerConfigProps, WindowSizeProps {
   initialStep?: SignInStep;
@@ -139,7 +118,6 @@ export interface SignInProps extends ServerConfigProps, WindowSizeProps {
 }
 
 interface SignInState {
-  cookieBannerClosed: boolean;
   currentStep: SignInStep;
   // Tracks the invitation key provided by the user. This is a required parameter in the createUser
   // API call.
@@ -159,8 +137,6 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
   constructor(props: SignInProps) {
     super(props);
     this.state = {
-      // This is only used to handle the removal of the cookie banner after x is clicked, without a refresh.
-      cookieBannerClosed: false,
       currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
       invitationKey: null,
       termsOfServiceVersion: null,
@@ -314,20 +290,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
     }
   }
 
-  handleCloseCookies() {
-    if (cookiesEnabled()) {
-      this.setState({cookieBannerClosed: true});
-      localStorage.setItem(cookieKey, 'cookie-banner-dismissed');
-    }
-  }
 
-  cookieBannerVisible() {
-    if (cookiesEnabled()) {
-      return !localStorage.getItem(cookieKey) && !this.state.cookieBannerClosed;
-    } else {
-      return true;
-    }
-  }
 
   render() {
     const backgroundImages = StepToImageConfig.get(this.state.currentStep);
@@ -338,17 +301,6 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
                   src={SIGNED_OUT_HEADER_IMAGE}/></div>
         {this.renderSignInStep(this.state.currentStep)}
       </FlexColumn>
-      {this.cookieBannerVisible() && <div style={styles.cookiePolicyMessage}>
-        <FlexRow style={{alignItems: 'center'}}>
-          <img src='assets/images/cookies.png'/>
-          <div style={{paddingLeft: '1rem', color: colors.primary}}>
-            We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
-            to our <a href='/cookie-policy' target='_blank'
-                         style={{display: 'inline-block'}}>Cookie Policy</a>.
-          </div>
-        </FlexRow>
-        <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.handleCloseCookies()} />
-      </div>}
     </FlexColumn>;
   }
 }
