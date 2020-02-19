@@ -3789,9 +3789,17 @@ definitions:
       areaOfResearch:
         type: string
       institutionalAffiliations:
+        description: >
+          A list of institutions the user is affiliated with.
+          DEPRECATED in favor of the newer verifiedInstitutionalAffiliation
         type: "array"
         items:
           $ref: "#/definitions/InstitutionalAffiliation"
+      verifiedInstitutionalAffiliation:
+        description: >
+          The institution the user is verified to be affiliated with, based on their email.
+          Will be required for new users when this feature is enabled in all environments.
+        $ref: "#/definitions/VerifiedInstitutionalAffiliation"
       demographicSurvey:
         $ref: "#/definitions/DemographicSurvey"
       idVerificationCompletionTime:
@@ -4354,11 +4362,6 @@ definitions:
       type: integer
       format: int64
 
-  OrganizationType:
-    type: string
-    description: A categorization of institutions derived from CAPS requirements
-    enum: [ACADEMIC_RESEARCH_INSTITUTION, INDUSTRY, EDUCATIONAL_INSTITUTION, HEALTH_CENTER_NON_PROFIT, OTHER]
-
   Institution:
     type: object
     description: Represents an institution which has been approved to validate researchers who wish to use the system
@@ -4401,6 +4404,78 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Institution"
+
+  OrganizationType:
+    type: string
+    description: A categorization of institutions, derived from CAPS requirements
+    enum: [ACADEMIC_RESEARCH_INSTITUTION, INDUSTRY, EDUCATIONAL_INSTITUTION, HEALTH_CENTER_NON_PROFIT, OTHER]
+
+  InstitutionalRole:
+    type: string
+    description: >
+      The union of the roles researchers can have at Institutions of all OrganizationTypes,
+      derived from CAPS requirements.
+      InstitutionalRole_ARI, InstitutionalRole_IND_HCNP, and InstitutionalRole_EDU are
+      subsets of this enum, implemented using the same short-int values.
+    enum: [
+      UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, MID_CAREER, LATE_CAREER,
+      PRE_DOCTORAL, POST_DOCTORAL, PI,
+      TEACHER, STUDENT, ADMIN,
+      PROJECT_PERSONNEL, OTHER
+    ]
+
+  InstitutionalRole_ARI:
+    type: string
+    description: >
+      A categorization of the roles researchers can have at the OrganizationType
+      ACADEMIC_RESEARCH_INSTITUTION, derived from CAPS requirements.
+      A subset of InstitutionalRole, implemented using the same short-int values.
+    enum: [
+      UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, MID_CAREER, LATE_CAREER,
+      PROJECT_PERSONNEL, OTHER
+    ]
+
+  InstitutionalRole_IND_HCNP:
+    type: string
+    description: >
+      A categorization of the roles researchers can have at the OrganizationTypes
+      INDUSTRY and HEALTH_CENTER_NON_PROFIT, derived from CAPS requirements.
+      A subset of InstitutionalRole, implemented using the same short-int values.
+    enum: [
+      PRE_DOCTORAL, POST_DOCTORAL, PI,
+      PROJECT_PERSONNEL, OTHER
+    ]
+
+  InstitutionalRole_EDU:
+    type: string
+    description: >
+      A categorization of the roles researchers can have at the OrganizationType
+      EDUCATIONAL_INSTITUTION, derived from CAPS requirements.
+      A subset of InstitutionalRole, implemented using the same short-int values.
+    enum: [
+      TEACHER, STUDENT, ADMIN,
+      PROJECT_PERSONNEL, OTHER
+    ]
+
+  VerifiedInstitutionalAffiliation:
+    type: object
+    required:
+      - institutionShortName
+      - institutionalRoleEnum
+    properties:
+      institutionShortName:
+        type: string
+        description: The unique Short Name of the Institution where the user has a Verified Affiliation
+      institutionalRoleEnum:
+        $ref: '#/definitions/InstitutionalRole'
+        description: >
+          The user's Institutional Role at this Institution if it is one of the enumerated
+          InstitutionalRoles, or InstitutionalRole.OTHER if it is not
+      institutionalRoleOtherText:
+        type: string
+        description: >
+          The user's detailed Institutional Role at this Institution, as text,
+          if its enumerated type is OTHER
 
   AdminFederatedWorkspaceDetailsResponse:
     description: Admin-visible metadata about a workspace.

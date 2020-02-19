@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Authority;
@@ -29,10 +30,22 @@ public class InstitutionController implements InstitutionApiDelegate {
   @Override
   @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Void> deleteInstitution(final String shortName) {
-    if (institutionService.deleteInstitution(shortName)) {
-      return ResponseEntity.noContent().build();
-    } else {
-      throw new NotFoundException(String.format("Could not delete Institution %s", shortName));
+    switch (institutionService.deleteInstitution(shortName)) {
+      case HAS_VERIFIED_AFFILIATIONS:
+        // TODO: 405 or 409?
+        // https://stackoverflow.com/questions/25122472/rest-http-status-code-if-delete-impossible
+        // https://stackoverflow.com/questions/45899743/proper-http-error-for-deleting-non-empty-resource
+        throw new ConflictException(
+            String.format(
+                "Could not delete Institution '%s' because it has verified user affiliations",
+                shortName));
+
+      case NOT_FOUND:
+        throw new NotFoundException(
+            String.format("Could not delete Institution '%s' because it was not found", shortName));
+      case SUCCESS:
+      default:
+        return ResponseEntity.noContent().build();
     }
   }
 
@@ -44,7 +57,7 @@ public class InstitutionController implements InstitutionApiDelegate {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format("Could not find Institution %s", shortName)));
+                        String.format("Could not find Institution '%s", shortName)));
 
     return ResponseEntity.ok(institution);
   }
@@ -66,7 +79,7 @@ public class InstitutionController implements InstitutionApiDelegate {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format("Could not update Institution %s", shortName)));
+                        String.format("Could not update Institution '%s", shortName)));
 
     return ResponseEntity.ok(institution);
   }

@@ -33,6 +33,7 @@ import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -41,6 +42,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -51,6 +54,7 @@ import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -69,6 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
  */
 @Service
+@Import(InstitutionServiceImpl.class)
 public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
@@ -87,6 +92,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
   private final UserServiceAuditor userServiceAuditor;
+  private final InstitutionService institutionService;
+  private final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
+
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
@@ -102,7 +110,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditor) {
+      UserServiceAuditor userServiceAuditor,
+      InstitutionService institutionService,
+      VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -115,6 +125,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.complianceService = complianceService;
     this.directoryService = directoryService;
     this.userServiceAuditor = userServiceAuditor;
+    this.institutionService = institutionService;
+    this.verifiedInstitutionalAffiliation = verifiedInstitutionalAffiliation;
   }
 
   /**
@@ -304,6 +316,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null,
         null,
         null,
+        null,
         null);
   }
 
@@ -320,7 +333,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations) {
+      List<DbInstitutionalAffiliation> institutionalAffiliations,
+      DbVerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -350,6 +364,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       address.setUser(dbUser);
     }
     if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
+    // set via the older Institutional Affiliation flow, from the Demographic Survey
     if (institutionalAffiliations != null) {
       // We need an "effectively final" variable to be captured in the lambda
       // to pass to forEach.
@@ -360,8 +375,23 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             finalDbUserReference.addInstitutionalAffiliation(affiliation);
           });
     }
+    // set via the newer Verified Institutional Affiliation flow
+    boolean requireInstitutionalVerification =
+        configProvider.get().featureFlags.requireInstitutionalVerification;
+    if (requireInstitutionalVerification
+        && !institutionService.validate(verifiedInstitutionalAffiliation, contactEmail)) {
+      final String msg =
+          String.format(
+              "Cannot create user %s: invalid Verified Institutional Affiliation", contactEmail);
+      throw new BadRequestException(msg);
+    }
+
     try {
       dbUser = userDao.save(dbUser);
+      if (requireInstitutionalVerification) {
+        verifiedInstitutionalAffiliation.setUser(dbUser);
+        this.verifiedInstitutionalAffiliation.save(verifiedInstitutionalAffiliation);
+      }
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(userName);
       if (dbUser == null) {

@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.mail.MessagingException;
@@ -32,10 +33,8 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -47,19 +46,24 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
+import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,14 +92,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String INVITATION_KEY = "secretpassword";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
-  private static final String BILLING_PROJECT_PREFIX = "all-of-us-free-";
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
   @MockBean private FireCloudService fireCloudService;
-  @MockBean private LeonardoNotebooksClient leonardoNotebooksClient;
   @MockBean private DirectoryService directoryService;
   @MockBean private CloudStorageService cloudStorageService;
   @MockBean private FreeTierBillingService freeTierBillingService;
@@ -105,12 +107,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
 
   @Autowired private UserDao userDao;
-  @Autowired private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
-  @Autowired private UserService userService;
   @Autowired private ProfileService profileService;
   @Autowired private ProfileController profileController;
+  @Autowired private InstitutionService institutionService;
+  @Autowired private VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;
@@ -118,11 +120,17 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static FakeClock fakeClock = new FakeClock(NOW);
 
   private static DbUser dbUser;
+  private VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
   @TestConfiguration
-  @Import({UserServiceImpl.class, ProfileService.class, ProfileController.class})
+  @Import({
+    UserServiceImpl.class,
+    ProfileService.class,
+    ProfileController.class,
+    InstitutionServiceImpl.class
+  })
   static class Configuration {
     @Bean
     @Primary
@@ -156,6 +164,18 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     fakeClock.setInstant(NOW);
 
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+    institutionService.createInstitution(broad);
+
+    verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(broad.getShortName())
+            .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
+
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -164,6 +184,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setCurrentPosition(CURRENT_POSITION);
     profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
+    profile.setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
@@ -278,6 +300,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testMe_success() throws Exception {
+    config.featureFlags.requireInstitutionalVerification = false;
+
     createUser();
     Profile profile = profileController.getMe().getBody();
     assertProfile(
@@ -291,6 +315,9 @@ public class ProfileControllerTest extends BaseControllerTest {
         false);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(mockProfileAuditor).fireLoginAction(dbUser);
+
+    // feature flag is off: Verified InstitutionalAffiliation is not saved
+    assertThat(profile.getVerifiedInstitutionalAffiliation()).isNull();
   }
 
   @Test
@@ -414,6 +441,29 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateProfile(profile);
     Profile result = profileController.getMe().getBody();
     assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(0);
+  }
+
+  @Test
+  public void testMe_verifiedInstitutionalAffiliation() throws Exception {
+    // set feature flag
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    assertProfile(
+        profile,
+        PRIMARY_EMAIL,
+        CONTACT_EMAIL,
+        FAMILY_NAME,
+        GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED,
+        TIMESTAMP,
+        false);
+    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockProfileAuditor).fireLoginAction(dbUser);
+
+    assertThat(profile.getVerifiedInstitutionalAffiliation())
+        .isEqualTo(verifiedInstitutionalAffiliation);
   }
 
   @Test
