@@ -102,22 +102,24 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     longDescription: <div>The data will be used by a for-profit entity for research or product
       or service development (e.g. for understanding drug responses as part of a
       pharmaceutical company's drug development or market research efforts).</div>
-  }, {
-    shortName: 'educational',
-    shortDescription: 'Educational Purpose',
-    longDescription: <div>The data will be used for education purposes (e.g. for a college research
-      methods course, to educate students on population-based research approaches).</div>
-  }, {
-    shortName: 'otherPurpose',
-    shortDescription: 'Other Purpose',
-    longDescription: <div>If your Purpose of Use is different from the options listed above, please
-      select "Other Purpose" and provide details regarding your purpose of data use here
-      (500 character limit).</div>
   }
 ];
 ResearchPurposeItems.forEach(item => {
   item.uniqueId = fp.uniqueId('research-purpose');
 });
+
+export const PrimaryPurposeItems = [ {
+  shortName: 'educational',
+  shortDescription: 'Educational Purpose',
+  longDescription: <div>The data will be used for education purposes (e.g. for a college research
+    methods course, to educate students on population-based research approaches).</div>
+}, {
+  shortName: 'otherPurpose',
+  shortDescription: 'Other Purpose',
+  longDescription: <div>If your Purpose of Use is different from the options listed above, please
+    select "Other Purpose" and provide details regarding your purpose of data use here
+    (500 character limit).</div>
+}];
 
 export const toolTipText = {
   header: <div>A Workspace is your place to store and analyze data for a specific project. Each

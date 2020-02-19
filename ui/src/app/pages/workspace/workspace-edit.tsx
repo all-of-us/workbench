@@ -43,7 +43,7 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {
-  disseminateFindings,
+  disseminateFindings, PrimaryPurposeItems,
   researchOutcomes,
   ResearchPurposeDescription,
   ResearchPurposeItem,
@@ -150,6 +150,11 @@ const styles = reactStyles({
   flexColumnBy2: {
     flex: '1 1 0',
     marginLeft: '1rem'
+  },
+  researchPurposeRow: {
+    backgroundColor: colors.white,
+    borderColor: colors.white,
+    borderRadius: '2px'
   }
 });
 
@@ -227,6 +232,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
+  showResearchPurpose: boolean;
   billingAccounts: Array<BillingAccount>;
   showCreateBillingAccountModal: boolean;
 }
@@ -239,6 +245,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         cdrVersionItems: this.createInitialCdrVersionsList(),
         workspace: this.createInitialWorkspaceState(),
         selectResearchPurpose: this.updateSelectedResearch(),
+        showResearchPurpose: false,
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
@@ -448,7 +455,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * (plus optional child elements) for each of the "primary purpose of your
      * project" options.
      */
-    makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
+    makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number, disabled: boolean): React.ReactNode {
       let children: React.ReactNode;
       if (rp.shortName === 'diseaseFocusedResearch') {
         children = this.makeDiseaseInput();
@@ -463,7 +470,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <CheckBox id={rp.uniqueId}
                   data-test-id={rp.shortName + '-checkbox'}
                   style={styles.checkboxStyle}
-                  disabled={!this.state.selectResearchPurpose}
+                  disabled={disabled}
                   checked={!!this.state.workspace.researchPurpose[rp.shortName]}
                   onChange={e => this.updateResearchPurpose(rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
@@ -563,10 +570,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
     }
 
-    get categoryIsSelected() {
-      return this.state.selectResearchPurpose &&  this.primaryPurposeIsSelected;
-    }
-
     get primaryPurposeIsSelected() {
       const rp = this.state.workspace.researchPurpose;
       return rp.ancestry || rp.commercialPurpose || rp.controlSet ||
@@ -574,6 +577,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
     }
 
+    get researchPurposeLabel() {
+      return  <Link style={styles.shortDescription}
+                    onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
+        <div style={{display: 'inherit'}}>
+        Research purpose
+          <i className='pi pi-angle-right' style={{verticalAlign: 'middle'}}></i>
+      </div></Link>;
+    }
 
     get isSpecificPopulationValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
@@ -777,7 +788,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         anticipatedFindings,
         intendedStudy,
         scientificApproach,
-        'primaryPurpose': this.categoryIsSelected,
+        'primaryPurpose': this.primaryPurposeIsSelected,
         'specificPopulation': this.isSpecificPopulationValid,
         'diseaseOfFocus': this.isDiseaseOfFocusValid,
         'researchOutcoming': this.isResearchOutcome,
@@ -881,23 +892,24 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 Workspace.</i></div>
             }/>
 
-        {/*Check box to select primary purpose */}
+        {/*Primary purpose */}
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
             description={researchPurposeQuestions[0].description} index='1.' indent>
           <FlexRow>
             <FlexColumn>
-            <CheckBox
-                style={styles.checkboxStyle}
-                label='Research Purpose'
-                labelStyle={styles.shortDescription}
+              <FlexRow  style={styles.researchPurposeRow}>
+              <CheckBox
+                style={{...styles.checkboxStyle}}
                 checked={this.primaryPurposeIsSelected}
-                onChange={v => this.setState({selectResearchPurpose: v})}/>
-              <div style={{marginLeft: '1.1rem'}}>
-                <label style={styles.text}>Choose options below to describe your research purpose</label>
-              </div>
-            <FlexColumn style={styles.flexColumnBy2}>
-              {ResearchPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
-            </FlexColumn>
+                onChange={v => this.setState({
+                  selectResearchPurpose: v})}/>
+                <div style={styles.shortDescription}> {this.researchPurposeLabel}</div>
+              </FlexRow>
+                {this.state.showResearchPurpose && <FlexColumn style={{...styles.flexColumnBy2, ...styles.researchPurposeRow}}>
+                {ResearchPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i, !this.state.selectResearchPurpose))}
+                </FlexColumn>}
+
+              {PrimaryPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i, false))}
             </FlexColumn>
           </FlexRow>
         </WorkspaceEditSection>
