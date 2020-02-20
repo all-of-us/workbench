@@ -31,12 +31,14 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -77,6 +79,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private CdrVersionService cdrVersionService;
   private ElasticSearchService elasticSearchService;
   private Provider<WorkbenchConfig> configProvider;
+  private CohortBuilderService cohortBuilderService;
 
   /**
    * Converter function from backend representation (used with Hibernate) to client representation
@@ -146,7 +149,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CdrVersionService cdrVersionService,
       ElasticSearchService elasticSearchService,
-      Provider<WorkbenchConfig> configProvider) {
+      Provider<WorkbenchConfig> configProvider,
+      CohortBuilderService cohortBuilderService) {
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaDao = cbCriteriaDao;
@@ -154,6 +158,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.cdrVersionService = cdrVersionService;
     this.elasticSearchService = elasticSearchService;
     this.configProvider = configProvider;
+    this.cohortBuilderService = cohortBuilderService;
   }
 
   @Override
@@ -198,6 +203,21 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList())));
+  }
+
+  @Override
+  public ResponseEntity<Long> countAgesByType(
+      Long cdrVersionId, String ageType, Integer startAge, Integer endAge) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    AgeType type =
+        Optional.ofNullable(AgeType.fromValue(ageType))
+            .orElseThrow(
+                () -> new BadRequestException("Please provide a valid ageType: " + ageType));
+    if (startAge > endAge) {
+      throw new BadRequestException(
+          "Start age must less than or equal to end age: " + startAge + " - " + endAge);
+    }
+    return ResponseEntity.ok(cohortBuilderService.countAgesByType(type, startAge, endAge));
   }
 
   /**
