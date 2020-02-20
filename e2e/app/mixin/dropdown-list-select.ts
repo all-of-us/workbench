@@ -3,22 +3,25 @@ import {ElementHandle, Page} from 'puppeteer';
 export default class DropdownSelect {
 
   private page: Page;
+  private label: string;
 
-  constructor(page: Page) {
+  constructor(page: Page, label?: string) {
     this.page = page;
+    this.label = label || undefined;
   }
 
   public async select(textValue: string) {
     await this.toOpen();
-    const selector = this.componentXpath() + `//li[@class='p-dropdown-item'][normalize-space(.)='${textValue}']`;
-    const selectValue = await this.page.waitForXPath(selector);
+    const selector = this.componentXpath() + `//li[@class='p-dropdown-item'][normalize-space(.)="${textValue}"]`;
+    const selectValue = await this.page.waitForXPath(selector, { visible: true });
     await selectValue.click();
   }
 
   public async displayedValue() {
     const selector = this.componentXpath() + '/label';
     const displayedValue = await this.page.waitForXPath(selector, { visible: true });
-    return await (await displayedValue.getProperty('innerText')).jsonValue();
+    const jValue = await (await displayedValue.getProperty('innerText')).jsonValue();
+    return jValue;
   }
 
   private async toggleOpenClose() {
@@ -37,10 +40,8 @@ export default class DropdownSelect {
 
   private async toOpen() {
     if (!!this.isOpen()) {
-      console.log('isOpen true');
       return await this.toggleOpenClose();
     }
-    console.log('isOpen false');
   }
 
   private async getComponent(): Promise<ElementHandle> {
@@ -48,7 +49,10 @@ export default class DropdownSelect {
   }
 
   private componentXpath(): string {
-    return '//*[@class=\'p-dropdown p-component\']';
+    if (this.label === undefined) {
+      return '//*[contains(@class,"p-dropdown p-component")]';
+    }
+    return `//*[child::*[normalize-space(text())="${this.label}"]]/*[contains(@class,"p-dropdown p-component")]`;
   }
 
 }

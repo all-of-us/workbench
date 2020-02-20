@@ -10,7 +10,6 @@ export default class AouElement {
 
   public async getProp(property: string): Promise<unknown> {
     const prop = await this.eHandle.getProperty(property);
-    console.log(`getProp(${property}) function: ${await prop.jsonValue()}`);
     return await prop.jsonValue();
   }
 
@@ -20,7 +19,6 @@ export default class AouElement {
    */
   public async getAttr(attr: string): Promise<unknown> {
     const atr = await this.eHandle.getAttribute(attr);
-    console.log(`getAttr(${attr}) function: ${atr}`);
     return atr;
   }
 
@@ -54,7 +52,6 @@ export default class AouElement {
   public async check() {
     const cValue = await this.isChecked();
     if (!cValue) {
-      console.log('going to check the checkbox');
       await this.click();
     }
   }
@@ -62,7 +59,6 @@ export default class AouElement {
   public async unCheck() {
     const cValue = await this.isChecked();
     if (cValue) {
-      console.log('going to uncheck the checkbox');
       await this.click();
     }
   }
@@ -82,7 +78,6 @@ export default class AouElement {
 
   public async isChecked(): Promise<boolean> {
     const checkedProp = await this.getProp('checked');
-    console.log('isChecked function returned: ' + checkedProp);
     return checkedProp === true;
   }
 

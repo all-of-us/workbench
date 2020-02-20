@@ -1,11 +1,10 @@
+import {ElementHandle} from 'puppeteer';
 import CreateAccountPage from '../../app/create-account-page';
-import GoogleLoginPage, {selectors} from '../../app/google-login';
-import {getCursorValue} from '../../driver/elementHandle-util';
+import GoogleLoginPage from '../../app/google-login';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
-import { inputFieldsValues, institutionAffiliationValues } from './user-registration-fields.js';
 require('../../driver/waitFuncs');
 require('../../driver/puppeteerExtension');
-const faker = require('faker/locale/en_US');
+import {waitForText, waitUntilFindTexts} from '../../driver/waitFuncs';
 
 jest.setTimeout(60 * 1000);
 
@@ -17,7 +16,7 @@ describe('User registration tests:', () => {
   let incognitoContext;
   let page;
 
-  beforeAll(async () =>  {
+  beforeAll(async () => {
     browser = await PuppeteerLaunch();
   });
 
@@ -36,7 +35,7 @@ describe('User registration tests:', () => {
     await browser.close();
   });
 
-  // TODO add verification
+
   test('Can register new user', async () => {
     // Load the landing page for login.
     const url = configs.uiBaseUrl + configs.workspacesUrlPath;
@@ -45,93 +44,78 @@ describe('User registration tests:', () => {
     await loginPage.goto();
 
     // Click the create account button to start new-user-registration flow.
-
-
     const createAccountButton = await loginPage.createAccountButton();
     expect(createAccountButton).toBeTruthy();
     await createAccountButton.click();
 
-    // Step 1: invitation key.
+    // Step 1: Enter invitation key.
     const createAccountPage = new CreateAccountPage(page);
-    await createAccountPage.getInvitationKeyInput()
-       .then(invitationKeyInput => invitationKeyInput.type(process.env.INVITATION_KEY))
-       .then(() => createAccountPage.getSubmitButton())
-       .then(submitButton => submitButton.click());
+    const header = 'Enter your Invitation Key:';
+    const headerDisplayed = await waitForText(page, 'h2', header);
+    expect(headerDisplayed).toBeTruthy();
 
-    // add
-
-    // Step 2: terms of service.
-    // await page.waitFor(5000);
-    const privacyStatementCheckbox = await createAccountPage.getPrivacyStatementCheckbox();
-    expect(privacyStatementCheckbox.asElement()).toBeTruthy();
-    expect(await privacyStatementCheckbox.getAttribute('disabled')).toBeDefined();
-
-    const termOfUseCheckbox = await createAccountPage.getTermOfUseCheckbox();
-    expect(termOfUseCheckbox).toBeTruthy();
-    expect(await termOfUseCheckbox.getAttribute('disabled')).toBeDefined();
-
-    expect(await (privacyStatementCheckbox.asAouElement()).getProp('checked')).toBe(false);
-    expect(await (termOfUseCheckbox.asAouElement()).getProp('checked')).toBe(false);
-
-    let nextButton = await createAccountPage.getNextButton();
-    // Next button should be disabled
-    let cursor = await getCursorValue(page, nextButton);
-    expect(cursor).toEqual('not-allowed');
-
-    // scroll to last PDF page
-    await createAccountPage.scrollToLastPdfPage();
-    expect(await privacyStatementCheckbox.getAttribute('disabled')).toBeNull();
-    expect(await termOfUseCheckbox.getAttribute('disabled')).toBeNull();
-
-    // check by click on label works
-    await page.evaluate(e => e.click(), await createAccountPage.getPrivacyStatementLabel());
-    await page.evaluate(e => e.click(), await createAccountPage.getTermOfUseLabel());
-
-    expect(await privacyStatementCheckbox.asAouElement().getProp('checked')).toBe(true);
-    expect(await termOfUseCheckbox.asAouElement().getProp('checked')).toBe(true);
-
-    // TODO uncomment after bug fixed https://precisionmedicineinitiative.atlassian.net/browse/RW-4487
-    // uncheck
-    // await page.evaluate(e => e.click(), await createAccountPage.getTermOfUseLabel());
-    // cursor = await getCursorValue(page, nextButton);
-    // expect(cursor).toEqual('not-allowed');
-    // check on
-   // await page.evaluate(e => e.click(), await createAccountPage.getTermOfUseLabel());
-
-    // NEXT button should be enabled
-    cursor = await getCursorValue(page, nextButton);
-    expect(cursor).toEqual('pointer');
-    // await nextButton.click();
-    await page.evaluate(e => e.click(), nextButton);
-
-    await page.waitFor(5000);
-
-    const newUserName = await createAccountPage.fillInFormFields(inputFieldsValues);
-
-    nextButton = await createAccountPage.getNextButton();
-    // NEXT button should be disabled
-    cursor = await getCursorValue(page, nextButton);
-    expect(cursor).toEqual('not-allowed');
-
-    await (await createAccountPage.getResearchBackgroundTextarea()).type(faker.lorem.word());
-    await (await createAccountPage.getInstitutionNameInput()).type(faker.company.companyName());
-    await createAccountPage.selectInstitution(institutionAffiliationValues.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
-
+    await createAccountPage.fillOutInvitationKey();
     await page.waitFor(1000);
 
-    console.log(createAccountPage.getInstitutionDisplayedValue());
+    // Step 2: Accepting Terms of Service.
+    const pdfPageCount =  await page.waitForFunction(() => {
+      return document.querySelectorAll('.tos-pdf-page[data-page-number]').length === 9
+    }, {timeout: 30000});
+    // expecting 9 pages in pdf document
+    expect(await pdfPageCount.jsonValue()).toBe(true);
 
+    await createAccountPage.acceptTermsOfUseAgreement();
+    let nextButton = await createAccountPage.getNextButton();
+    await nextButton.click();
+    await page.waitFor(1000);
 
-    // NEXT button should be enabled
-    cursor = await getCursorValue(page, nextButton);
-    expect(cursor).toEqual('pointer');
+    // Step 3: Enter user information
+    // Should be on Create your account: Step 1 of 2 page
+    expect(await waitUntilFindTexts(page, 'Create your account')).toBeTruthy();
+    await createAccountPage.fillOutUserInformation();
+    nextButton = await createAccountPage.getNextButton();
+    await nextButton.click();
+    await page.waitFor(1000);
 
-    // await nextButton.click();
+    // Step 4: Enter demographic survey (All Survey Fields are optional)
+    // Should be on Demongraphic Survey page
+    const demograpicsPageHeader = 'Demographics Survey (All Survey Fields are optional)';
+    expect(await waitForText(page, 'h3', demograpicsPageHeader)).toBeTruthy();
+    await createAccountPage.fillOutDemographicSurvey();
+    const submitButton = await createAccountPage.getSubmitButton();
+    await submitButton.click();
+    await page.waitFor(1000);
 
-    await page.waitFor(15000);
-    // Step 4: Demographic survey.
+    // Step 5: New account created successfully page.
+    const congratHeader = 'Congratulations!';
+    await page.waitForSelector('h1', { visible: true });
 
-    // Step 5: landing page.
+    const h4List = [];
+    const h4Headers: ElementHandle[] = await page.$$('h4');
+    for (const h4Header of h4Headers) {
+      const txt = await (await h4Header.getProperty('innerText')).jsonValue();
+      h4List.push(txt);
+    }
+    const expectedH4Headers = [
+      'Your All of Us research account has been created!',
+      'Check your contact email for instructions on getting started.',
+      `Your contact email is: ${process.env.CONTACT_EMAIL}`
+    ];
+    expect(h4List).toEqual(expectedH4Headers);
+
+    const resendButton = await page.waitForXPath('//button[.="Resend Instructions"]');
+    expect(resendButton).toBeTruthy();
+
+    const changeEmailButton = await page.waitForXPath('//button[.="Change contact email"]');
+    expect(changeEmailButton).toBeTruthy();
+
+    const h3List = [];
+    const h3Headers: ElementHandle[] = await page.$$('h3');
+    for (const h3Header of h3Headers) {
+      const txt = await (await h3Header.getProperty('innerText')).jsonValue();
+      h3List.push(txt);
+    }
+    console.log(h3List);
 
   });
 

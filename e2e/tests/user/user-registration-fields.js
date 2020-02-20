@@ -1,4 +1,5 @@
 const faker = require('faker/locale/en_US');
+const configs = require('../../resources/config');
 
 const newUserName = `aoutestuser${Math.floor(Math.random() * 1000)}${Math.floor(Date.now() / 1000)}`;
 
@@ -13,7 +14,7 @@ const inputFieldsValues = [{
   value: 'Puppeteerdriver'
 }, {
   label: 'Email Address',
-  value: process.env.CONTACT_EMAIL
+  value: configs.registerationContactEmail
 }, {
   label: 'Street Address 1',
   value: faker.address.streetName()
@@ -29,10 +30,7 @@ const inputFieldsValues = [{
 }, {
   label: 'Country',
   value: 'U.S.A'
-}, {
-  label: 'Paste Professional URL here',
-  value: faker.internet.url()
-}
+},
 ];
 
 const institutionAffiliationValues = {
