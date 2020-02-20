@@ -135,10 +135,13 @@ export const AccountCreationTos = withWindowSize()(
           style={{display: 'inline-flex', padding: '1rem', maxWidth: '1000px', margin: 'auto'}}>
           <div style={{flex: 3}}>
             <div style={{...styles.noticeText, marginBottom: '.5rem', height: '3rem'}}>
-              By clicking here and moving to the Registration step, you acknowledge that you
-              understand the terms of this agreement and agree to abide by them.
-              <br/>
-              Please read through the entire agreement to continue.
+              <div style={{fontWeight: 400}}>
+                By clicking here and moving to the Registration step, you acknowledge that you
+                understand the terms of this agreement and agree to abide by them.
+              </div>
+              <div>
+                Please read through the entire agreement to continue.
+              </div>
             </div>
             <div style={{marginBottom: '.25rem'}}>
               <CheckBox data-test-id='privacy-statement-check'
