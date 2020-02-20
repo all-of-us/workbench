@@ -142,10 +142,10 @@ definitions:
       focusOnUnderrepresentedPopulations:
         type: boolean
       workspaceDemographic:
-        $ref: '#/definitions/WorkspaceDemographic'
+        $ref: '#/definitions/RdrWorkspaceDemographic'
 
 
-  WorkspaceDemographic:
+  RdrWorkspaceDemographic:
     type: object
     properties:
       raceEthnicity:

@@ -26,7 +26,14 @@ import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.rdr.api.RdrApi;
-import org.pmiops.workbench.rdr.model.*;
+import org.pmiops.workbench.rdr.model.Gender;
+import org.pmiops.workbench.rdr.model.Race;
+import org.pmiops.workbench.rdr.model.RdrResearcher;
+import org.pmiops.workbench.rdr.model.RdrWorkspace;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
+import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
+import org.pmiops.workbench.rdr.model.SexAtBirth;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -268,7 +275,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
 
     rdrWorkspace.setWorkspaceDemographic(
-        toWorkspaceDemographics(dbWorkspace.getSpecificPopulationsEnum()));
+        toRdrWorkspaceDemographics(dbWorkspace.getSpecificPopulationsEnum()));
 
     if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
       rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
@@ -303,70 +310,72 @@ public class RdrExportServiceImpl implements RdrExportService {
     return rdrWorkspace;
   }
 
-  WorkspaceDemographic toWorkspaceDemographics(Set<SpecificPopulationEnum> dbPopulationEnumSet) {
-    WorkspaceDemographic demographic = new WorkspaceDemographic();
+  RdrWorkspaceDemographic toRdrWorkspaceDemographics(
+      Set<SpecificPopulationEnum> dbPopulationEnumSet) {
+    RdrWorkspaceDemographic rdrDemographic = new RdrWorkspaceDemographic();
 
-    demographic.setAccessToCare(
+    rdrDemographic.setAccessToCare(
         dbPopulationEnumSet.contains(SpecificPopulationEnum.ACCESS_TO_CARE)
-            ? WorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
-            : WorkspaceDemographic.AccessToCareEnum.UNSET);
+            ? RdrWorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
+            : RdrWorkspaceDemographic.AccessToCareEnum.UNSET);
 
-    demographic.setDisabilityStatus(
+    rdrDemographic.setDisabilityStatus(
         dbPopulationEnumSet.contains(SpecificPopulationEnum.DISABILITY_STATUS)
-            ? WorkspaceDemographic.DisabilityStatusEnum.DISABILITY
-            : WorkspaceDemographic.DisabilityStatusEnum.UNSET);
+            ? RdrWorkspaceDemographic.DisabilityStatusEnum.DISABILITY
+            : RdrWorkspaceDemographic.DisabilityStatusEnum.UNSET);
 
-    demographic.setEducationLevel(
+    rdrDemographic.setEducationLevel(
         dbPopulationEnumSet.contains(SpecificPopulationEnum.EDUCATION_LEVEL)
-            ? WorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
-            : WorkspaceDemographic.EducationLevelEnum.UNSET);
+            ? RdrWorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
+            : RdrWorkspaceDemographic.EducationLevelEnum.UNSET);
 
-    demographic.setIncomeLevel(
+    rdrDemographic.setIncomeLevel(
         dbPopulationEnumSet.contains(SpecificPopulationEnum.INCOME_LEVEL)
-            ? WorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
-            : WorkspaceDemographic.IncomeLevelEnum.UNSET);
+            ? RdrWorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
+            : RdrWorkspaceDemographic.IncomeLevelEnum.UNSET);
 
-    demographic.setGeography(
+    rdrDemographic.setGeography(
         dbPopulationEnumSet.contains(SpecificPopulationEnum.GEOGRAPHY)
-            ? WorkspaceDemographic.GeographyEnum.RURAL
-            : WorkspaceDemographic.GeographyEnum.UNSET);
+            ? RdrWorkspaceDemographic.GeographyEnum.RURAL
+            : RdrWorkspaceDemographic.GeographyEnum.UNSET);
 
-    demographic.setSexualOrientation(
+    rdrDemographic.setSexualOrientation(
         dbPopulationEnumSet.contains(SpecificPopulationEnum.SEXUAL_ORIENTATION)
-            ? WorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
-            : WorkspaceDemographic.SexualOrientationEnum.UNSET);
+            ? RdrWorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
+            : RdrWorkspaceDemographic.SexualOrientationEnum.UNSET);
 
-    demographic.setGenderIdentity(
+    rdrDemographic.setGenderIdentity(
         dbPopulationEnumSet.contains(SpecificPopulationEnum.GENDER_IDENTITY)
-            ? WorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
-            : WorkspaceDemographic.GenderIdentityEnum.UNSET);
+            ? RdrWorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
+            : RdrWorkspaceDemographic.GenderIdentityEnum.UNSET);
 
-    demographic.setSexAtBirth(
+    rdrDemographic.setSexAtBirth(
         dbPopulationEnumSet.contains(SpecificPopulationEnum.SEX)
-            ? WorkspaceDemographic.SexAtBirthEnum.INTERSEX
-            : WorkspaceDemographic.SexAtBirthEnum.UNSET);
+            ? RdrWorkspaceDemographic.SexAtBirthEnum.INTERSEX
+            : RdrWorkspaceDemographic.SexAtBirthEnum.UNSET);
 
-    demographic.setRaceEthnicity(
+    rdrDemographic.setRaceEthnicity(
         dbPopulationEnumSet.stream()
             .map(RdrExportEnums::specificPopulationToRaceEthnicity)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
 
-    if (demographic.getRaceEthnicity().isEmpty()) {
-      demographic.setRaceEthnicity(Arrays.asList(WorkspaceDemographic.RaceEthnicityEnum.UNSET));
+    if (rdrDemographic.getRaceEthnicity().isEmpty()) {
+      rdrDemographic.setRaceEthnicity(
+          Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.UNSET));
     }
 
-    demographic.setAge(
+    rdrDemographic.setAge(
         dbPopulationEnumSet.stream()
             .map(RdrExportEnums::specificPopulationToAge)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
 
-    if (demographic.getAge().isEmpty()) {
-      demographic.setAge(Arrays.asList(WorkspaceDemographic.AgeEnum.UNSET));
+    if (rdrDemographic.getAge().isEmpty()) {
+      rdrDemographic.setAge(Arrays.asList(RdrWorkspaceDemographic.AgeEnum.UNSET));
     }
 
-    return demographic;
+    return rdrDemographic;
   }
 
   /**
