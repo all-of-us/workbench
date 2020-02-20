@@ -35,6 +35,7 @@ import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
 import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
+import org.pmiops.workbench.rdr.model.ResearcherVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.rdr.model.SexAtBirth;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
