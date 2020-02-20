@@ -70,6 +70,9 @@ public abstract class BaseControllerTest {
   }
 
   private static WorkbenchConfig loadConfig(String filename) throws IOException {
+    // For some reason Resources.getResource(filename) works when running test from cmd line but
+    // fails to find the resource when running from Intellij. This is a work around that finds the
+    // config using a file path. This works for both cases.
     ObjectMapper jackson = new ObjectMapper();
     String rawJson =
         new String(Files.readAllBytes(Paths.get(BASE_PATH + filename)), Charset.defaultCharset());
