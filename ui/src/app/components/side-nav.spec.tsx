@@ -34,9 +34,8 @@ describe('SideNav', () => {
     sideNavItems.forEach(sideNavItem => {
       const disabled = sideNavItem.props().disabled;
       const sideNavItemText = sideNavItem.text();
-      disabledItems = disabledItems.filterWhere(disabledItem => disabledItem.text() !== sideNavItem.text()
-        || !disabled);
       if (disabledItemText.includes(sideNavItemText)) {
+        disabledItems = disabledItems.filterWhere(disabledItem => disabledItem.text() !== sideNavItem.text());
         disabledItemText = disabledItemText.filter(textItem => textItem !== sideNavItemText);
         expect(disabled).toBeTruthy();
       }
