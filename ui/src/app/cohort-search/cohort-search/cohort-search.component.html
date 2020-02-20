@@ -27,7 +27,7 @@
       <app-list-overview
         *ngIf="overview"
         [searchRequest]="criteria"
-        [updateCount]="triggerUpdate"
+        [updateCriteria]="updateCriteria"
         [updateSaving]="updateSaving"></app-list-overview>
     </div>
     <div *ngIf="loading" class="spinner root-spinner">

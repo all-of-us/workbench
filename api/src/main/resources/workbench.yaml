@@ -2782,9 +2782,10 @@ definitions:
       - reviewRequested
       - socialBehavioral
       - populationHealth
+      - ethics
       - educational
       - otherPurpose
-      - reasonForAllOfUs
+      - scientificApproach
       - intendedStudy
       - anticipatedFindings
       - drugDevelopment
@@ -2818,6 +2819,8 @@ definitions:
         default: false
       intendedStudy:
         type: string
+      scientificApproach:
+        type: string
       methodsDevelopment:
         type: boolean
         default: false
@@ -2831,10 +2834,13 @@ definitions:
       population:
         type: boolean
         default: false
+      ethics:
+        type: boolean
+        default: false
       populationDetails:
         type: array
         items:
-          $ref: "#/definitions/specificPopulationEnum"
+          $ref: "#/definitions/SpecificPopulationEnum"
       populationHealth:
         type: boolean
         default: false
@@ -2854,8 +2860,18 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      disseminateResearchFindingList:
+        type: array
+        items:
+          $ref: "#/definitions/DisseminateResearchEnum"
+      otherDisseminateResearchFindings:
+        type: string
+      researchOutcomeList:
+        type: array
+        items:
+          $ref: "#/definitions/ResearchOutcomeEnum"
 
-  specificPopulationEnum:
+  SpecificPopulationEnum:
     type: string
     description: Short parsable descriptions of specific population categories
     enum: [
@@ -2869,7 +2885,44 @@ definitions:
       ACCESS_TO_CARE,
       EDUCATION_LEVEL,
       INCOME_LEVEL,
+      OTHER,
+      RACE_ASIAN,
+      RACE_AA,
+      RACE_HISPANIC,
+      RACE_AIAN,
+      RACE_MENA,
+      RACE_NHPI,
+      RACE_MORE_THAN_ONE,
+      AGE_CHILDREN,
+      AGE_ADOLESCENTS,
+      AGE_OLDER,
+      AGE_OLDER_MORE_THAN_75
+    ]
+
+  DisseminateResearchEnum:
+    type: string
+    description: Represents how researchers plan to to disseminate thier research findings.
+    enum: [
+      PUBLICATION_PEER_REVIEWED_JOURNALS,
+      PRESENATATION_SCIENTIFIC_CONFERENCES,
+      PRESS_RELEASE,
+      PUBLICATION_COMMUNITY_BASED_BLOG,
+      PUBLICATION_PERSONAL_BLOG,
+      SOCIAL_MEDIA,
+      PRESENTATION_ADVISORY_GROUPS,
       OTHER
+    ]
+
+  ResearchOutcomeEnum:
+    type: string
+    description: Represents antipicated outcomes from the research
+    enum: [
+      PROMOTE_HEALTHY_LIVING,
+      IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS,
+      IMPROVED_RISK_ASSESMENT,
+      DECREASE_ILLNESS_BURDEN,
+      PRECISION_INTERVENTION,
+      NONE_APPLY
     ]
 
   ResearchPurposeReviewRequest:
@@ -3285,6 +3338,7 @@ definitions:
     enum:
       - NOTEBOOK
       - COHORT
+      - COHORT_SEARCH_ITEM
       - COHORT_REVIEW
       - CONCEPT_SET
       - DATASET

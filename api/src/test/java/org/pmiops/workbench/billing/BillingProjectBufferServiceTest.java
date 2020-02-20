@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -676,6 +677,26 @@ public class BillingProjectBufferServiceTest {
             .findFirst();
     assertThat(entryStatusBundle.isPresent()).isTrue();
     assertThat(entryStatusBundle.get().getTags()).isNotEmpty();
+  }
+
+  @Test
+  public void testGetProjectCountByStatus() {
+    DbBillingProjectBufferEntry creatingEntry1 = makeSimpleEntry(BufferEntryStatus.CREATING);
+    DbBillingProjectBufferEntry creatingEntry2 = makeSimpleEntry(BufferEntryStatus.CREATING);
+    DbBillingProjectBufferEntry errorEntry1 = makeSimpleEntry(BufferEntryStatus.ERROR);
+    final Map<BufferEntryStatus, Long> statusToCount =
+        billingProjectBufferEntryDao.getCountByStatusMap();
+
+    assertThat(statusToCount.getOrDefault(BufferEntryStatus.ASSIGNING, 0L)).isEqualTo(0);
+    assertThat(statusToCount.getOrDefault(BufferEntryStatus.ERROR, 0L)).isEqualTo(1);
+    assertThat(statusToCount.getOrDefault(BufferEntryStatus.CREATING, 0L)).isEqualTo(2);
+    assertThat(statusToCount).hasSize(2);
+  }
+
+  private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus bufferEntryStatus) {
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setStatusEnum(bufferEntryStatus, () -> Timestamp.from(CLOCK.instant()));
+    return billingProjectBufferEntryDao.save(entry);
   }
 
   private Timestamp getCurrentTimestamp() {

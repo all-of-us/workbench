@@ -1,7 +1,6 @@
 package org.pmiops.workbench.billing;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
@@ -9,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -82,21 +82,19 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
-
     final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
         ImmutableMap.copyOf(billingProjectBufferEntryDao.getCountByStatusMap());
 
-    for (BufferEntryStatus status : BufferEntryStatus.values()) {
-      long count = entryStatusToCount.getOrDefault(status, 0L);
-      resultBuilder.add(
-          MeasurementBundle.builder()
-              .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, count)
-              .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
-              .build());
-    }
-
-    return resultBuilder.build();
+    return Arrays.stream(BufferEntryStatus.values())
+        .map(
+            status ->
+                MeasurementBundle.builder()
+                    .addMeasurement(
+                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT,
+                        entryStatusToCount.getOrDefault(status, 0L))
+                    .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
+                    .build())
+        .collect(Collectors.toList());
   }
 
   /**

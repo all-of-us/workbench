@@ -133,6 +133,7 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
@@ -142,6 +143,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -1142,6 +1144,10 @@ public class WorkspacesControllerTest {
     modPurpose.setPopulationDetails(
         ImmutableList.of(
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
+    modPurpose.setDisseminateResearchFindingList(
+        ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
+    modPurpose.setResearchOutcomeList(
+        ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -1190,7 +1196,6 @@ public class WorkspacesControllerTest {
     sortPopulationDetails(clonedWorkspace.getResearchPurpose());
     sortPopulationDetails(retrievedWorkspace.getResearchPurpose());
     sortPopulationDetails(modPurpose);
-
     assertWithMessage("get and clone responses are inconsistent")
         .that(clonedWorkspace)
         .isEqualTo(retrievedWorkspace);

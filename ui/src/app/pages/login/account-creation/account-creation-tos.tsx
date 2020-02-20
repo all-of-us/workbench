@@ -93,17 +93,6 @@ export const AccountCreationTos = withWindowSize()(
       observer.observe(this.lastPage);
     }
 
-    /**
-     * Attempts to scroll the last page of the PDF document into view.
-     */
-    private scrollToBottom() {
-      if (this.lastPage) {
-        this.lastPage.scrollIntoView({block: 'end'});
-      } else {
-        throw new Error('Last page has not yet loaded.');
-      }
-    }
-
     render() {
       const {numPages, loadingPdf, hasReadEntireTos, hasAckedTermsOfService, hasAckedPrivacyStatement} = this.state;
 
@@ -146,12 +135,13 @@ export const AccountCreationTos = withWindowSize()(
           style={{display: 'inline-flex', padding: '1rem', maxWidth: '1000px', margin: 'auto'}}>
           <div style={{flex: 3}}>
             <div style={{...styles.noticeText, marginBottom: '.5rem', height: '3rem'}}>
-              By clicking here and moving to the Registration step, you acknowledge that you
-              understand the terms of this agreement and agree to abide by them.
-              {!hasReadEntireTos && <span><br/>
-              <a data-test-id='scroll-to-bottom'
-                 onClick={() => this.scrollToBottom()}
-              >Scroll to bottom</a></span>}
+              <div style={{fontWeight: 400}}>
+                By clicking here and moving to the Registration step, you acknowledge that you
+                understand the terms of this agreement and agree to abide by them.
+              </div>
+              <div>
+                Please read through the entire agreement to continue.
+              </div>
             </div>
             <div style={{marginBottom: '.25rem'}}>
               <CheckBox data-test-id='privacy-statement-check'

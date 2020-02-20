@@ -10,8 +10,10 @@ import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -202,6 +204,17 @@ public final class DbStorageEnums {
           .put(SpecificPopulationEnum.EDUCATION_LEVEL, (short) 8)
           .put(SpecificPopulationEnum.INCOME_LEVEL, (short) 9)
           .put(SpecificPopulationEnum.OTHER, (short) 10)
+          .put(SpecificPopulationEnum.RACE_ASIAN, (short) 11)
+          .put(SpecificPopulationEnum.RACE_AA, (short) 12)
+          .put(SpecificPopulationEnum.RACE_HISPANIC, (short) 13)
+          .put(SpecificPopulationEnum.RACE_AIAN, (short) 14)
+          .put(SpecificPopulationEnum.RACE_MENA, (short) 15)
+          .put(SpecificPopulationEnum.RACE_NHPI, (short) 16)
+          .put(SpecificPopulationEnum.RACE_MORE_THAN_ONE, (short) 17)
+          .put(SpecificPopulationEnum.AGE_CHILDREN, (short) 18)
+          .put(SpecificPopulationEnum.AGE_ADOLESCENTS, (short) 19)
+          .put(SpecificPopulationEnum.AGE_OLDER, (short) 20)
+          .put(SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75, (short) 21)
           .build();
 
   public static SpecificPopulationEnum specificPopulationFromStorage(Short s) {
@@ -210,6 +223,44 @@ public final class DbStorageEnums {
 
   public static Short specificPopulationToStorage(SpecificPopulationEnum s) {
     return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.get(s);
+  }
+
+  public static final BiMap<DisseminateResearchEnum, Short> CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
+      ImmutableBiMap.<DisseminateResearchEnum, Short>builder()
+          .put(DisseminateResearchEnum.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
+          .put(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
+          .put(DisseminateResearchEnum.PRESS_RELEASE, (short) 2)
+          .put(DisseminateResearchEnum.PUBLICATION_COMMUNITY_BASED_BLOG, (short) 3)
+          .put(DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG, (short) 4)
+          .put(DisseminateResearchEnum.SOCIAL_MEDIA, (short) 5)
+          .put(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS, (short) 6)
+          .put(DisseminateResearchEnum.OTHER, (short) 7)
+          .build();
+
+  public static DisseminateResearchEnum disseminateResearchEnumFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.inverse().get(s);
+  }
+
+  public static Short disseminateResearchToStorage(DisseminateResearchEnum s) {
+    return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.get(s);
+  }
+
+  public static final BiMap<ResearchOutcomeEnum, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
+      ImmutableBiMap.<ResearchOutcomeEnum, Short>builder()
+          .put(ResearchOutcomeEnum.PROMOTE_HEALTHY_LIVING, (short) 0)
+          .put(ResearchOutcomeEnum.IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS, (short) 1)
+          .put(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT, (short) 2)
+          .put(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN, (short) 3)
+          .put(ResearchOutcomeEnum.PRECISION_INTERVENTION, (short) 4)
+          .put(ResearchOutcomeEnum.NONE_APPLY, (short) 5)
+          .build();
+
+  public static ResearchOutcomeEnum researchOutcomeEnumFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_RESEARCH_OUTCOME.inverse().get(s);
+  }
+
+  public static Short researchOutcomeToStorage(ResearchOutcomeEnum s) {
+    return CLIENT_TO_STORAGE_RESEARCH_OUTCOME.get(s);
   }
 
   public static final BiMap<BillingStatus, Short> CLIENT_TO_STORAGE_BILLING_STATUS =

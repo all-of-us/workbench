@@ -6,13 +6,14 @@ import {encountersStore, initExisting, searchRequestStore, selectionsStore, wiza
 import {domainToTitle, getTypeAndStandard, mapGroupItem, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {RenameModal} from 'app/components/rename-modal';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CriteriaType, DomainType, Modifier, ModifierType, SearchRequest} from 'generated/fetch';
+import {CriteriaType, DomainType, Modifier, ModifierType, ResourceType, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
@@ -135,6 +136,7 @@ interface State {
   error: boolean;
   loading: boolean;
   paramListOpen: boolean;
+  renaming: boolean;
   status: string;
   timeout: Timeout;
 }
@@ -147,9 +149,10 @@ export const SearchGroupItem = withCurrentWorkspace()(
       this.state = {
         count: null,
         encounters: encountersStore.getValue(),
-        paramListOpen: false,
         error: false,
         loading: true,
+        paramListOpen: false,
+        renaming: false,
         status: props.item.status,
         timeout: null
       };
@@ -172,7 +175,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       // prevent multiple group count calls when initializing multiple items simultaneously (on cohort edit or clone)
       const init = initExisting.getValue();
       if (!init || (init && index === 0)) {
-        updateGroup();
+        updateGroup(true);
       }
       try {
         const {cdrVersionId} = currentWorkspaceStore.getValue();
@@ -195,21 +198,21 @@ export const SearchGroupItem = withCurrentWorkspace()(
       triggerEvent('Enable', 'Click', 'Enable - Suppress Criteria - Cohort Builder');
       this.setState({status: 'active'});
       this.props.item.status = 'active';
-      this.updateSearchRequest();
+      this.updateSearchRequest(true);
     }
 
     suppress() {
       triggerEvent('Suppress', 'Click', 'Snowman - Suppress Criteria - Cohort Builder');
       this.setState({status: 'hidden'});
       this.props.item.status = 'hidden';
-      this.updateSearchRequest();
+      this.updateSearchRequest(true);
     }
 
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
       this.setState({status: 'pending'});
       this.props.item.status = 'pending';
-      this.updateSearchRequest();
+      this.updateSearchRequest(false, true);
       const timeout = setTimeout(() => {
         this.updateSearchRequest(true);
       }, 10000);
@@ -221,10 +224,16 @@ export const SearchGroupItem = withCurrentWorkspace()(
       clearTimeout(this.state.timeout);
       this.setState({status: 'active'});
       this.props.item.status = 'active';
-      this.updateSearchRequest();
+      this.updateSearchRequest(true);
     }
 
-    updateSearchRequest(remove?: boolean) {
+    rename(newName: string) {
+      this.props.item.name = newName;
+      this.updateSearchRequest(false);
+      this.setState({renaming: false});
+    }
+
+    updateSearchRequest(recalculate: boolean, remove?: boolean) {
       const sr = searchRequestStore.getValue();
       const {item, groupId, role, updateGroup} = this.props;
       const groupIndex = sr[role].findIndex(grp => grp.id === groupId);
@@ -237,7 +246,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
           } else {
             sr[role][groupIndex].items[itemIndex] = item;
             searchRequestStore.next(sr);
-            updateGroup();
+            updateGroup(recalculate);
           }
         }
       }
@@ -272,12 +281,14 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     render() {
-      const {item: {modifiers, searchParameters, type}} = this.props;
-      const {count, paramListOpen, error, loading, status} = this.state;
+      const {item: {modifiers, name, searchParameters, type}} = this.props;
+      const {count, paramListOpen, error, loading, renaming, status} = this.state;
       const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
       const titleDisplay = type === DomainType.PERSON ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
+      const itemName = !!name ? name : `Contains ${titleDisplay} ${codeDisplay}`;
       const showCount = !loading && status !== 'hidden' && count !== null;
       const actionItems = [
+        {label: 'Edit criteria name', command: () => this.setState({renaming: true})},
         {label: 'Edit criteria', command: () => this.launchWizard()},
         {label: 'Suppress criteria from total count', command: () => this.suppress()},
         {label: 'Delete criteria', command: () => this.remove()},
@@ -291,7 +302,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
               <ClrIcon shape='ellipsis-vertical' />
             </Clickable>
             <span className='item-title' style={{...styles.codeText, paddingRight: '10px'}} onClick={() => this.launchWizard()}>
-              Contains {titleDisplay} {codeDisplay}
+              {itemName}
             </span>
             {status !== 'hidden' && <span style={{...styles.codeText, paddingRight: '10px'}}>|</span>}
             {loading && <span className='spinner spinner-inline'>Loading...</span>}
@@ -328,6 +339,9 @@ export const SearchGroupItem = withCurrentWorkspace()(
             {modifiers.map((mod, m) => <div key={m} style={styles.parameter}>{this.modifierDisplay(mod)}</div>)}
           </React.Fragment>}
         </div>
+        {renaming && <RenameModal existingNames={[]} oldName={name || 'this item'} hideDescription={true}
+          onCancel={() => this.setState({renaming: false})}
+          onRename={(v) => this.rename(v)} resourceType={ResourceType.COHORTSEARCHITEM} />}
       </React.Fragment>;
     }
   }
