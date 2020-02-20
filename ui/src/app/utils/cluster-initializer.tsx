@@ -21,6 +21,16 @@ const DEFAULT_MAX_POLLING_DELAY = 15000;
 const MAX_CREATE_COUNT = 1;
 const MAX_DELETE_COUNT = 1;
 
+class AbortPollingLoopError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'AbortPollingLoopError';
+    // See https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    // for details on why this is necessary.
+    Object.setPrototypeOf(this, AbortPollingLoopError.prototype);
+  }
+}
+
 export class ClusterInitializer {
   private workspaceNamespace: string;
   private onStatusUpdate: (ClusterStatus) => void;
@@ -50,7 +60,7 @@ export class ClusterInitializer {
 
   private async createCluster(): Promise<Cluster> {
     if (this.createCount >= MAX_CREATE_COUNT) {
-      throw new Error('Reached max cluster create count');
+      throw new AbortPollingLoopError('Reached max cluster create count');
     }
     const cluster = await clusterApi().createCluster(this.workspaceNamespace, {signal: this.abortSignal});
     this.createCount++;
@@ -64,7 +74,7 @@ export class ClusterInitializer {
 
   private async deleteCluster(): Promise<void> {
     if (this.deleteCount >= MAX_DELETE_COUNT) {
-      throw new Error('Reached max cluster delete count');
+      throw new AbortPollingLoopError('Reached max cluster delete count');
     }
     await clusterApi().deleteCluster(this.workspaceNamespace, {signal: this.abortSignal});
     this.deleteCount++;
@@ -90,7 +100,7 @@ export class ClusterInitializer {
   public async initialize(): Promise<Cluster> {
     console.log('Initializing cluster', this.workspaceNamespace);
     if (this.isInitializing) {
-      return Promise.reject('Initialization is already in progress');
+      throw new Error('Initialization is already in progress');
     }
     this.initializeStartTime = new Date().getTime();
 
@@ -103,11 +113,11 @@ export class ClusterInitializer {
     while (!this.isClusterRunning()) {
       if (this.abortSignal && this.abortSignal.aborted) {
         console.log('abortSignal received!');
-        return Promise.reject('Request was aborted.');
+        throw new Error('Request was aborted.');
       }
       if (new Date().getTime() - this.initializeStartTime > this.overallTimeout) {
         console.log('Took longer than max init timeout');
-        return Promise.reject('Initialization attempt took longer than the max time allowed.');
+        throw new Error('Initialization attempt took longer than the max time allowed.');
       }
 
       // Attempt to take the appropriate next action given the current cluster status.
@@ -138,6 +148,8 @@ export class ClusterInitializer {
         } else if (this.isNotFoundError(e)) {
           // If we received a NOT_FOUND error, we need to create a cluster for this workspace.
           this.currentCluster = await this.createCluster();
+        } else if (e instanceof AbortPollingLoopError) {
+          throw e;
         } else {
           // Report an unknown error and continue polling.
           reportError(e);

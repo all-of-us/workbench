@@ -3,16 +3,15 @@ import * as React from 'react';
 import {notebooksClusterApi, registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ClusterInitializer} from 'app/utils/cluster-initializer';
+import {ClusterInitializerOptions} from 'app/utils/cluster-initializer';
 import {Cluster} from 'generated/fetch';
-import {ClusterApi} from 'generated/fetch/api';
-import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 import {ClusterStatus} from 'generated/fetch';
+import {ClusterApi} from 'generated/fetch/api';
 import SpyInstance = jest.SpyInstance;
 import expect = jest.Expect;
-import {NotebooksApi, ClusterApi as NotebooksClusterApi} from 'notebooks-generated/fetch';
-import {NotebooksApiStub} from 'testing/stubs/notebooks-api-stub';
+import {ClusterApi as NotebooksClusterApi} from 'notebooks-generated/fetch';
+import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 import {NotebooksClusterApiStub} from 'testing/stubs/notebooks-cluster-api-stub';
-import {ClusterInitializerOptions} from 'app/utils/cluster-initializer';
 
 let mockGetCluster: SpyInstance;
 let mockCreateCluster: SpyInstance;
@@ -28,11 +27,10 @@ const baseCluster: Cluster = {
 describe('ClusterInitializer', () => {
 
   beforeEach(() => {
-    jest.resetAllMocks();
     registerApiClient(ClusterApi, new ClusterApiStub());
-    // registerApiClientNotebooks(NotebooksApi, new NotebooksApiStub());
     registerApiClientNotebooks(NotebooksClusterApi, new NotebooksClusterApiStub());
 
+    jest.resetAllMocks();
     mockGetCluster = jest.spyOn(clusterApi(), 'getCluster');
     mockCreateCluster = jest.spyOn(clusterApi(), 'createCluster');
     mockDeleteCluster = jest.spyOn(clusterApi(), 'deleteCluster');
@@ -48,10 +46,9 @@ describe('ClusterInitializer', () => {
   };
 
   const createInitializer = (options?: Partial<ClusterInitializerOptions>): ClusterInitializer => {
-    // We configure the test initializer to have an extremely-short polling delay. Unfortunately,
-    // it's not possible to use jest.useFakeTimers() to control timing of async functions and
-    // promises (see https://github.com/facebook/jest/issues/7151), so our simplest workaround is
-    // to just set very short delays.
+    // It's not possible to use jest.useFakeTimers() to control timing of async functions and
+    // promises (see https://github.com/facebook/jest/issues/7151), so we configure the initializer
+    // to have an extremely-short polling delay.
     return new ClusterInitializer({
       workspaceNamespace: 'aou-rw-12345',
       initialPollingDelay: 10,
@@ -62,8 +59,7 @@ describe('ClusterInitializer', () => {
   };
 
   it('should resolve promise if cluster is in ready state', async() => {
-    // This tests the simplest case of the initializer: a single get call retrieves a cluster
-    // in a running state. The Promise should
+    // This tests the simplest case of the initializer. No polling necessary.
     mockGetClusterCalls([baseCluster]);
     const initializer = createInitializer();
     const cluster = await initializer.initialize();
@@ -73,6 +69,8 @@ describe('ClusterInitializer', () => {
   it('should resume cluster if it is initially stopped', async() => {
     mockGetClusterCalls([
       {...baseCluster, status: ClusterStatus.Stopped},
+      // Here is where we expect, chronologically, a call to startCluster. The next two
+      // cluster statuses mock out what we might expect to see after that call.
       {...baseCluster, status: ClusterStatus.Starting},
       {...baseCluster, status: ClusterStatus.Running}
     ]);
@@ -191,7 +189,7 @@ describe('ClusterInitializer', () => {
     // pass if the promise fails.
     expect.assertions(1);
     return initializer.initialize().catch(error => {
-      expect(error).toMatch(/max time allowed/i);
+      expect(error.message).toMatch(/max time allowed/i);
     });
   });
 
@@ -211,7 +209,32 @@ describe('ClusterInitializer', () => {
 
     expect.assertions(1);
     return initializePromise.catch(error => {
-      expect(error).toMatch(/aborted/i);
+      expect(error.message).toMatch(/aborted/i);
+      return Promise.resolve();
+    });
+  });
+
+  it('Should reject promise before starting another restart cycle', async() => {
+    // A cluster in an error state should trigger a deletion request.
+    mockGetClusterCalls([
+      {...baseCluster, status: ClusterStatus.Error},
+      {...baseCluster, status: ClusterStatus.Deleting},
+      {...baseCluster, status: ClusterStatus.Creating},
+      {...baseCluster, status: ClusterStatus.Error},
+    ]);
+    mockDeleteCluster.mockImplementation(async(workspaceNamespace) => {
+      return {};
+    });
+    mockCreateCluster.mockImplementation(async(workspaceNamespace) => {
+      return {...baseCluster, status: ClusterStatus.Creating};
+    });
+
+    const initializer = createInitializer();
+    const initializePromise = initializer.initialize();
+
+    expect.assertions(1);
+    return initializePromise.catch(error => {
+      expect(error.message).toMatch(/max cluster delete count/i);
       return Promise.resolve();
     });
   });
