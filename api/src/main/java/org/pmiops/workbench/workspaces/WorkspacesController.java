@@ -373,7 +373,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
           workspaceService.deleteWorkspace(dbWorkspace);
           workspaceAuditor.fireDeleteAction(dbWorkspace);
-        }, "deleteWorkspace");
+        },
+        "deleteWorkspace");
     return ResponseEntity.ok(new EmptyResponse());
   }
 

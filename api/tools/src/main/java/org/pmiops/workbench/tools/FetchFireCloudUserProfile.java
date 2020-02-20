@@ -14,7 +14,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -26,10 +25,7 @@ import org.springframework.context.annotation.Import;
  * domain-wide delegation to make FireCloud API calls impersonating other users.
  */
 @Configuration
-@Import({
-    FireCloudServiceImpl.class,
-    FireCloudConfig.class
-})
+@Import({FireCloudServiceImpl.class, FireCloudConfig.class})
 public class FetchFireCloudUserProfile {
   private static final Logger log =
       Logger.getLogger(org.pmiops.workbench.tools.FetchFireCloudUserProfile.class.getName());

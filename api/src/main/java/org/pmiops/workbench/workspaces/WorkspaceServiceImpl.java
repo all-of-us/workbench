@@ -57,7 +57,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -291,7 +290,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     // TODO: do we want to delete workspace resource references and save only metadata?
 
     // This automatically handles access control to the workspace.
-    fireCloudService.deleteWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    fireCloudService.deleteWorkspace(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = saveWithLastModified(dbWorkspace);
     maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
