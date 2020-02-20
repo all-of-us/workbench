@@ -236,15 +236,4 @@ public class ConceptDaoTest {
     PageRequest page = new PageRequest(0, 10);
     assertThat(conceptDao.findSurveys(null, "The Basics", page)).containsExactly(surveyConcept);
   }
-
-  @Test
-  public void findSurveysNoSurveyName() {
-    PageRequest page = new PageRequest(0, 10);
-    assertThat(conceptDao.findSurveys(null, null, page)).containsExactly(surveyConcept);
-  }
-
-  @Test
-  public void countSurveys() {
-    assertThat(conceptDao.countSurveys()).isEqualTo(1);
-  }
 }
