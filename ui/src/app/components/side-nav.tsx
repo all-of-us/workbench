@@ -92,7 +92,7 @@ interface SideNavItemState {
   subItemsOpen: boolean;
 }
 
-class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
+export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -144,7 +144,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
       style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
       onClick={() => {
-        if (this.props.parentOnClick) {
+        if (this.props.parentOnClick && !this.props.disabled) {
           this.props.parentOnClick();
         }
         this.onClick();
@@ -232,8 +232,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
   }
 
   onToggleAdmin() {
-    this.setState({showAdminOptions: false});
-    this.state.adminRef.current.closeSubItems();
     this.setState(previousState => ({showAdminOptions: !previousState.showAdminOptions}));
   }
 
@@ -302,12 +300,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={'/library'}
         active={this.props.libraryActive}
+        disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
       />
       <SideNavItem
         icon='help'
         content={'User Support'}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         parentOnClick={() => this.redirectToZendesk()}
+        disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
       />
       <SideNavItem
         icon='envelope'
