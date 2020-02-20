@@ -108,7 +108,7 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
   }]]
 );
 
-export const SIGNED_OUT_HEADER_IMAGE = '/assets/images/logo-registration-non-signed-in.svg';
+export const SIGNED_OUT_HEADER_IMAGE = '/assets/images/all-of-us-logo.svg';
 
 
 export interface SignInProps extends ServerConfigProps, WindowSizeProps {
