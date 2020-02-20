@@ -3,6 +3,7 @@ package org.pmiops.workbench.rdr;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.rdr.model.WorkspaceDemographic;
 
 public class RdrExportEnums {
 
@@ -76,6 +77,50 @@ public class RdrExportEnums {
               .put(Disability.FALSE, org.pmiops.workbench.rdr.model.Disability.NO)
               .build();
 
+  private static final BiMap<SpecificPopulationEnum, WorkspaceDemographic.RaceEthnicityEnum>
+      CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY =
+          ImmutableBiMap.<SpecificPopulationEnum, WorkspaceDemographic.RaceEthnicityEnum>builder()
+              .put(SpecificPopulationEnum.RACE_AA, WorkspaceDemographic.RaceEthnicityEnum.AA)
+              .put(SpecificPopulationEnum.RACE_AIAN, WorkspaceDemographic.RaceEthnicityEnum.AIAN)
+              .put(SpecificPopulationEnum.RACE_ASIAN, WorkspaceDemographic.RaceEthnicityEnum.ASIAN)
+              .put(SpecificPopulationEnum.RACE_NHPI, WorkspaceDemographic.RaceEthnicityEnum.NHPI)
+              .put(SpecificPopulationEnum.RACE_MENA, WorkspaceDemographic.RaceEthnicityEnum.MENA)
+              .put(
+                  SpecificPopulationEnum.RACE_HISPANIC,
+                  WorkspaceDemographic.RaceEthnicityEnum.HISPANIC)
+              .put(
+                  SpecificPopulationEnum.RACE_MORE_THAN_ONE,
+                  WorkspaceDemographic.RaceEthnicityEnum.MULTI)
+              .build();
+
+  private static final BiMap<SpecificPopulationEnum, WorkspaceDemographic.AgeEnum>
+      CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE =
+          ImmutableBiMap.<SpecificPopulationEnum, WorkspaceDemographic.AgeEnum>builder()
+              .put(SpecificPopulationEnum.AGE_CHILDREN, WorkspaceDemographic.AgeEnum.AGE_0_11)
+              .put(SpecificPopulationEnum.AGE_ADOLESCENTS, WorkspaceDemographic.AgeEnum.AGE_12_17)
+              .put(SpecificPopulationEnum.AGE_OLDER, WorkspaceDemographic.AgeEnum.AGE_65_74)
+              .put(
+                  SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75,
+                  WorkspaceDemographic.AgeEnum.AGE_75_AND_MORE)
+              .build();
+
+  private static final BiMap<Degree, org.pmiops.workbench.rdr.model.Degree> CLIENT_TO_RDR_DEGREE =
+      ImmutableBiMap.<Degree, org.pmiops.workbench.rdr.model.Degree>builder()
+          .put(Degree.PHD, org.pmiops.workbench.rdr.model.Degree.PHD)
+          .put(Degree.MD, org.pmiops.workbench.rdr.model.Degree.MD)
+          .put(Degree.JD, org.pmiops.workbench.rdr.model.Degree.JD)
+          .put(Degree.EDD, org.pmiops.workbench.rdr.model.Degree.EDD)
+          .put(Degree.MSN, org.pmiops.workbench.rdr.model.Degree.MSN)
+          .put(Degree.MS, org.pmiops.workbench.rdr.model.Degree.MS)
+          .put(Degree.MA, org.pmiops.workbench.rdr.model.Degree.MA)
+          .put(Degree.MBA, org.pmiops.workbench.rdr.model.Degree.MBA)
+          .put(Degree.ME, org.pmiops.workbench.rdr.model.Degree.ME)
+          .put(Degree.BA, org.pmiops.workbench.rdr.model.Degree.BA)
+          .put(Degree.BS, org.pmiops.workbench.rdr.model.Degree.BS)
+          .put(Degree.BSN, org.pmiops.workbench.rdr.model.Degree.BSN)
+          .put(Degree.NONE, org.pmiops.workbench.rdr.model.Degree.UNSET)
+          .build();
+
   public static org.pmiops.workbench.rdr.model.Race raceToRdrRace(Race race) {
     if (race == null) return null;
     return CLIENT_TO_RDR_RACE.get(race);
@@ -109,5 +154,28 @@ public class RdrExportEnums {
       Disability disability) {
     if (disability == null) return org.pmiops.workbench.rdr.model.Disability.PREFER_NOT_TO_ANSWER;
     return CLIENT_TO_RDR_DISABILITY.get(disability);
+  }
+
+  public static org.pmiops.workbench.rdr.model.WorkspaceDemographic.RaceEthnicityEnum
+      specificPopulationToRaceEthnicity(SpecificPopulationEnum specificPopulationEnum) {
+    if (CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY.containsKey(specificPopulationEnum)) {
+      return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY.get(specificPopulationEnum);
+    } else {
+      return null;
+    }
+  }
+
+  public static org.pmiops.workbench.rdr.model.WorkspaceDemographic.AgeEnum specificPopulationToAge(
+      SpecificPopulationEnum specificPopulationEnum) {
+    if (CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE.containsKey(specificPopulationEnum)) {
+      return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE.get(specificPopulationEnum);
+    } else {
+      return null;
+    }
+  }
+
+  public static org.pmiops.workbench.rdr.model.Degree degreeToRdrDegree(Degree degree) {
+    if (degree == null) return null;
+    return CLIENT_TO_RDR_DEGREE.get(degree);
   }
 }
