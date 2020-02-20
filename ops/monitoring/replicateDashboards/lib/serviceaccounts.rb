@@ -1,6 +1,8 @@
 require "json"
-require_relative "workbench"
+# require_relative "workbench"
 require_relative "utils/common"
+require 'tmpdir'
+require 'fileutils'
 
 # Entering a service account context ensures that a keyfile exists at the given
 # path for the given service account, and that GOOGLE_APPLICATION_CREDENTIALS is
@@ -12,14 +14,21 @@ class ServiceAccountContext
 
   SERVICE_ACCOUNT_KEY_PATH = "sa-key.json"
 
-  def initialize(project, service_account = nil, path = nil)
+  def initialize(project, service_account, credentials_path = nil)
+    @common = Common.new
     @project = project
     @service_account = service_account
-    @credentials_path = path
-    if not @credentials_path
-      @credentials_path = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
+    @credentials_path = credentials_path
+    unless @credentials_path
+      creds_dir_path = File.join(Dir.tmpdir, 'service_account_keys')
+      Dir.mkdir(creds_dir_path) unless File.exists?(creds_dir_path)
+      @credentials_path = File.join(creds_dir_path, SERVICE_ACCOUNT_KEY_PATH)
     end
   end
+
+  attr_reader :project
+  attr_reader :service_account
+  attr_reader :credentials_path
 
   def existing_file_account(path)
     if File.exists?(path)
@@ -33,45 +42,42 @@ class ServiceAccountContext
   end
 
   def run()
-    common = Common.new
-    common.status("Setting environment variable GOOGLE_APPLICATION_CREDENTIALS to #{@credentials_path}")
+    @common.status("Setting environment variable GOOGLE_APPLICATION_CREDENTIALS to #{@credentials_path}")
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = @credentials_path
-    service_account = @service_account
-    common.status("service_account = #{@service_account}")
+    @common.status("service_account = #{@service_account}")
 
-    if not service_account
-      service_account = "#{@project}@appspot.gserviceaccount.com"
-      common.status("service_account didn't exist and was reset to #{service_account}")
-    end
-    if service_account == existing_file_account(@credentials_path)
+    if @service_account == existing_file_account(@credentials_path)
       # Don't generate another key if this account is already active. This can
       # happen for nested service account contexts, for example.
-      common.status "Attaching to existing keyfile @ #{@credentials_path}"
-      yield
+      @common.status "Attaching to existing keyfile @ #{@credentials_path}"
+      yield self
       return
     end
 
-    if service_account == "all-of-us-workbench-test@appspot.gserviceaccount.com"
-      common.status("Using the tets env service account")
-      unless File.exists?(@credentials_path)
-        common.status("Fetching credentials from project bucket.")
-        common.run_inline %W[gsutil cp gs://#{@project}-credentials/app-engine-default-sa.json
-            #{@credentials_path}]
-      end
-      yield
-    else
-      common.status("Making a new service account from file at #{@credentials_path}")
-      common.run_inline %W[gcloud iam service-accounts keys create #{@credentials_path}
-          --iam-account=#{service_account} --project=#{@project}]
-      begin
-        yield
-      ensure
-        common.status("Deleting private key file")
-        tmp_private_key = `grep private_key_id #{@credentials_path} | cut -d\\\" -f4`.strip()
-        common.run_inline %W[gcloud iam service-accounts keys delete #{tmp_private_key} -q
-           --iam-account=#{service_account} --project=#{@project}]
-        common.run_inline %W[rm #{@credentials_path}]
-      end
+    create_credentials_file
+
+    begin
+      yield self
+    ensure
+      cleanup_key
     end
+  end
+
+  private
+
+  def create_credentials_file
+    @common.status("Making a new service account private key for #{@service_account} at #{@credentials_path}")
+    @common.run_inline %W[gcloud iam service-accounts keys create #{@credentials_path}
+        --iam-account=#{@service_account} --project=#{@project}]
+  end
+
+  def cleanup_key
+    @common.status("Deleting private key file")
+    tmp_private_key = `grep private_key_id #{@credentials_path} | cut -d\\\" -f4`.strip()
+    @common.status("Deleting SA key for #{tmp_private_key}")
+    @common.run_inline %W[gcloud iam service-accounts keys delete #{tmp_private_key} -q
+         --iam-account=#{service_account} --project=#{@project}]
+    # File.delete(@credentials_path)
+    FileUtils.remove_dir(File.dirname(@credentials_path))
   end
 end

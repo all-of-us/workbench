@@ -7,16 +7,18 @@ class AouEnvironmentVisitor
 
   attr_reader :environments
   # environments is an array of AouEnvironmentInfo objects
-  def initialize(environments = [], service_account = nil, credentials_path = nil)
-    @environments = environments
-    @service_account = service_account
-    @credentials_path = credentials_path
+  def initialize(service_account_prefix, environments_json_path = './environments.json')
+    @service_account_prefix = service_account_prefix
+    load_json_map(environments_json_path)
+    # @service_account = service_account
+    # @credentials_path = credentials_path
     @common = Common.new
   end
 
   attr_reader :environments
   attr_reader :service_account
-  attr_reader :credentials_path
+  attr_reader :service_account_prefix
+  # attr_reader :credentials_path
 
   def load_json_map(json_path = './environments.json')
     environment_to_project = JSON.load(IO.read(json_path))
@@ -29,18 +31,24 @@ class AouEnvironmentVisitor
 
   def visit
     @environments.each do |environment|
+      @service_account = service_account_name(@service_account_prefix, environment.project_id)
+
       @common.status("Visiting environment #{environment.short_name} in project #{environment.project_id}.")
-      #ServiceAccountContext.new(environment.project_id, @service_account, @credentials_path).run do
+      ServiceAccountContext.new(environment.project_id, @service_account).run do
         yield environment
-      #end
+      end
       @common.status("Leaving environment #{environment.short_name} in project #{environment.project_id}.\n")
     end
   end
 
   def visit_single(short_name)
     environment = @environments.find { |env| env.short_name == short_name }
-    #ServiceAccountContext.new(environment.project_id, @service_account, @credentials_path).run do
+    ServiceAccountContext.new(environment.project_id, @service_account, @credentials_path).run do
       yield environment
-    #end
+    end
+  end
+
+  def service_account_name(prefix, project)
+    "#{prefix}@#{project}.iam.gserviceaccount.com"
   end
 end
