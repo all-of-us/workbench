@@ -2,7 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -19,12 +19,12 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -871,38 +871,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    // TODO(jaycarlton): replace this findAll/MultiKeyMap implementation
-    //   wtih JdbcTemplate method. I'm told we can't currently do things like this
-    //   with our JPA/Spring/MySQL versions.
 
-    List<DbUser> allUsers = userDao.findUsers();
-    MultiKeyMap<String, Long> keysToCount = new MultiKeyMap<>();
-    // keys will be { accessLevel, disabled }
-    for (DbUser user : allUsers) {
-      // get keys
-      final String dataAccessLevel = user.getDataAccessLevelEnum().toString();
-      final String isDisabled = Boolean.valueOf(user.getDisabled()).toString();
-      final String isBetaBypassed =
-          Boolean.valueOf(user.getBetaAccessBypassTime() != null).toString();
-
-      // find count
-      final long count =
-          Optional.ofNullable(keysToCount.get(dataAccessLevel, isDisabled, isBetaBypassed))
-              .orElse(0L);
-      // increment count
-      keysToCount.put(dataAccessLevel, isDisabled, isBetaBypassed, count + 1);
-    }
-
-    // build bundles for each entry in the map
-    return keysToCount.entrySet().stream()
+    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    return rows.stream()
         .map(
-            e ->
+            row ->
                 MeasurementBundle.builder()
-                    .addMeasurement(GaugeMetric.USER_COUNT, e.getValue())
-                    .addTag(MetricLabel.DATA_ACCESS_LEVEL, e.getKey().getKey(0))
-                    .addTag(MetricLabel.USER_DISABLED, e.getKey().getKey(1))
-                    .addTag(MetricLabel.USER_BYPASSED_BETA, e.getKey().getKey(2))
+                    .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
+                    .addTag(
+                        MetricLabel.DATA_ACCESS_LEVEL,
+                        CommonStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                            .toString())
+                    .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
+                    .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())
                     .build())
-        .collect(ImmutableSet.toImmutableSet());
+        .collect(ImmutableList.toImmutableList());
   }
 }

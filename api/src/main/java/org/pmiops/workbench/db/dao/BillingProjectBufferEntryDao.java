@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStat
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -28,8 +28,6 @@ public interface BillingProjectBufferEntryDao
   List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
-  DbBillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
-
   List<DbBillingProjectBufferEntry> findTop5ByStatusOrderByLastSyncRequestTimeAsc(short status);
 
   DbBillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
@@ -37,8 +35,19 @@ public interface BillingProjectBufferEntryDao
   Long countByStatus(short status);
 
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
-    return DaoUtils.getAttributeToCountMap(findAll(), DbBillingProjectBufferEntry::getStatusEnum);
+    return computeProjectCountByStatus().stream()
+        .collect(
+            ImmutableMap.toImmutableMap(
+                StatusToCountResult::getStatusEnum, StatusToCountResult::getNumProjects));
   }
+
+  @Query(
+      value =
+          "select status, count(billing_project_buffer_entry_id) as numpNrojects\n"
+              + "    from DbBillingProjectBufferEntry \n"
+              + "group by status\n"
+              + "order by status")
+  List<StatusToCountResult> computeProjectCountByStatus();
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
   int acquireAssigningLock();
@@ -67,4 +76,14 @@ public interface BillingProjectBufferEntryDao
       @Param("billingStatus") short billingStatus,
       @Param("workspaceStatus") short workspaceStatus,
       @Param("migrationStatus") short migrationStatus);
+
+  interface StatusToCountResult {
+    short getStatus();
+
+    long getNumProjects();
+
+    default BufferEntryStatus getStatusEnum() {
+      return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(getStatus());
+    }
+  }
 }
