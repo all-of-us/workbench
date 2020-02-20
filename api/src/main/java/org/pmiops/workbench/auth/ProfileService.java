@@ -8,12 +8,14 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
@@ -93,15 +95,21 @@ public class ProfileService {
   private final UserDao userDao;
   private final FreeTierBillingService freeTierBillingService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   @Autowired
   public ProfileService(
       UserDao userDao,
       FreeTierBillingService freeTierBillingService,
-      UserTermsOfServiceDao userTermsOfServiceDao) {
+      UserTermsOfServiceDao userTermsOfServiceDao,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.userDao = userDao;
     this.freeTierBillingService = freeTierBillingService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
+    this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
   }
 
   public Profile getProfile(DbUser user) {
@@ -211,6 +219,15 @@ public class ProfileService {
         user.getInstitutionalAffiliations().stream()
             .map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList()));
+
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(user)
+        .ifPresent(
+            verifiedInstitutionalAffiliation ->
+                profile.setVerifiedInstitutionalAffiliation(
+                    verifiedInstitutionalAffiliationMapper.dbToModel(
+                        verifiedInstitutionalAffiliation)));
+
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
 
     profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));

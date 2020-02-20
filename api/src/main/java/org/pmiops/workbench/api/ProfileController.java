@@ -43,6 +43,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.Cr
 import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Address;
@@ -182,6 +184,8 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<MailService> mailServiceProvider;
   private final ProfileAuditor profileAuditor;
+  private final InstitutionService institutionService;
+  private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   @Autowired
   ProfileController(
@@ -196,7 +200,9 @@ public class ProfileController implements ProfileApiDelegate {
       CloudStorageService cloudStorageService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<MailService> mailServiceProvider,
-      ProfileAuditor profileAuditor) {
+      ProfileAuditor profileAuditor,
+      InstitutionService institutionService,
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -209,6 +215,8 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
+    this.institutionService = institutionService;
+    this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
   }
 
   @Override
@@ -329,7 +337,7 @@ public class ProfileController implements ProfileApiDelegate {
       request.getProfile().setDemographicSurvey(new DemographicSurvey());
     }
     if (request.getProfile().getInstitutionalAffiliations() == null) {
-      request.getProfile().setInstitutionalAffiliations(new ArrayList<InstitutionalAffiliation>());
+      request.getProfile().setInstitutionalAffiliations(new ArrayList<>());
     }
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
@@ -365,7 +373,9 @@ public class ProfileController implements ProfileApiDelegate {
             FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
             request.getProfile().getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()),
+            verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+                request.getProfile().getVerifiedInstitutionalAffiliation(), institutionService));
 
     if (request.getTermsOfServiceVersion() != null) {
       userService.submitTermsOfService(user, request.getTermsOfServiceVersion());

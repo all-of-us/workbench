@@ -138,6 +138,7 @@
     <include file="changelog/db.changelog-128-add-columns-workspace.xml"/>
     <include file="changelog/db.changelog-129-add-research-outcomes-workspace.xml"/>
     <include file="changelog/db.changelog-130-add-disseminate-research-workspace.xml"/>
+    <include file="changelog/db.changelog-131-user-verified-institutional-affiliation.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

@@ -96,6 +96,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionMapperImpl;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
@@ -273,7 +275,9 @@ public class DataSetControllerTest {
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
     ManualWorkspaceMapper.class,
-    LogsBasedMetricServiceFakeImpl.class
+    LogsBasedMetricServiceFakeImpl.class,
+    InstitutionServiceImpl.class,
+    InstitutionMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
