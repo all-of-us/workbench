@@ -49,7 +49,7 @@ const styles = reactStyles({
   displayTag: {
     marginLeft: '1rem',
     height: '12px',
-    width: '126px',
+    width: '155px',
     borderRadius: '2px',
     backgroundColor: colors.primary,
     color: colors.white,
