@@ -7,7 +7,10 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.utils.Booleans;
 import org.pmiops.workbench.utils.Enums;
 
-/** Specifies label names and allowed discrete values (if given) */
+/**
+ * Specifies label names and allowed discrete values (if given). Convention is lower_snake_case.
+ * Some CamelCase labels have been grandfathered in.
+ */
 public enum MetricLabel implements MetricLabelBase {
   BUFFER_ENTRY_STATUS("BufferEntryStatus", Enums.getValueStrings(BufferEntryStatus.class)),
   CRON_JOB_NAME("cron_job_name"),
@@ -15,6 +18,7 @@ public enum MetricLabel implements MetricLabelBase {
   DATASET_INVALID("Invalid", Booleans.VALUE_STRINGS),
   DATA_ACCESS_LEVEL("DataAccessLevel", Enums.getValueStrings(DataAccessLevel.class)),
   GSUITE_DOMAIN("gsuite_domain"),
+  METHOD_NAME("method_name"),
   OPERATION_NAME("OperationName"),
   USER_BYPASSED_BETA("BypassedBeta", Booleans.VALUE_STRINGS),
   USER_DISABLED("Disabled", Booleans.VALUE_STRINGS),
