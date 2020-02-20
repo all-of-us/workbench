@@ -6,9 +6,9 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "WORKBENCH_ENV=test jest --detectOpenHandles /tests",
-    "test:debug": "WORKBENCH_ENV=test HEADLESS=false jest --detectOpenHandles --runInBand /tests",
-    "test-local": "WORKBENCH_ENV=local jest --runInBand /tests",
+    "test": "WORKBENCH_ENV=test jest --detectOpenHandles",
+    "test:debug": "WORKBENCH_ENV=test PUPPETEER_HEADLESS=false jest --detectOpenHandles --runInBand",
+    "test-local": "WORKBENCH_ENV=local jest --runInBand",
     "build": "tsc --build --clean",
     "lint": "tslint --project tsconfig.json",
     "lint:err": "yarn run lint --quiet",
@@ -17,7 +17,6 @@
   },
   "jest": {
     "verbose": true,
-    "preset": "jest-puppeteer",
     "roots": [
       "<rootDir>/tests"
     ],
@@ -30,11 +29,8 @@
       }
     },
     "testPathIgnorePatterns": [
-      "/node_modules/",
-      "dist",
-      "tsc-out"
+      "/node_modules/"
     ],
-
     "testRegex": "(tests/.*|\\.(test|spec))\\.(ts|tsx|js)$",
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/(?!tests)"
@@ -69,7 +65,6 @@
     "faker": "^4.1.0",
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
-    "jest-puppeteer": "^4.4.0",
     "lodash": "^4.17.15",
     "puppeteer": "^2.1.1",
     "rimraf": "^3.0.0",

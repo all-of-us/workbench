@@ -220,7 +220,7 @@ export class ComponentWebElement extends Widget {
   }
 
   private appendXpath(): string {
-    return `//*[child::*/label[contains(normalize-space(text()),"${this.labelStr}")]]`;
+    return `//*[child::*/*[contains(normalize-space(text()),"${this.labelStr}")]]`;
   }
 
 }

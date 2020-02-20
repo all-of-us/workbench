@@ -19,7 +19,7 @@ const urlPath = {
   };
 
 const puppeteer = {
-  isHeadless: process.env.PUPPETEER_HEADLESS || true,
+  isHeadless: process.env.PUPPETEER_HEADLESS === true,
   slowMotion: parseInt(process.env.PUPPETEER_SLOWMO) || 10, // milliseconds
   isDevTools: process.env.PUPPETEER_DEVTOOLS || false,
   puppeteerUserAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36'
