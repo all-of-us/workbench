@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -74,9 +75,9 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
         DbUser updatedUser;
         if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
-          updatedUser = userService.syncComplianceTrainingStatusV2(user);
+          updatedUser = userService.syncComplianceTrainingStatusV2(user, AgentType.SYSTEM);
         } else {
-          updatedUser = userService.syncComplianceTrainingStatusV1(user);
+          updatedUser = userService.syncComplianceTrainingStatusV1(user, AgentType.SYSTEM);
         }
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
@@ -98,10 +99,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         }
       } catch (org.pmiops.workbench.moodle.ApiException | NotFoundException e) {
         errorCount++;
-        log.severe(
+        log.log(
+            Level.SEVERE,
             String.format(
-                "Error syncing compliance training status for user %s: %s",
-                user.getUsername(), e.getMessage()));
+                "Error syncing compliance training status for user %s", user.getUsername()),
+            e);
       }
     }
 
@@ -136,7 +138,8 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp oldTime = user.getEraCommonsCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        DbUser updatedUser = userService.syncEraCommonsStatusUsingImpersonation(user);
+        DbUser updatedUser =
+            userService.syncEraCommonsStatusUsingImpersonation(user, AgentType.SYSTEM);
 
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
@@ -200,7 +203,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        DbUser updatedUser = userService.syncTwoFactorAuthStatus(user);
+        DbUser updatedUser = userService.syncTwoFactorAuthStatus(user, AgentType.SYSTEM);
 
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();

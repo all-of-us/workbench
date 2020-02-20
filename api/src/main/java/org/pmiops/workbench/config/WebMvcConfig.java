@@ -18,6 +18,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -51,18 +52,28 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public UserAuthentication userAuthentication() {
-    return (UserAuthentication) SecurityContextHolder.getContext().getAuthentication();
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null) {
+      return null;
+    }
+    return (UserAuthentication) auth;
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public Userinfoplus userInfo(UserAuthentication userAuthentication) {
+    if (userAuthentication == null) {
+      return null;
+    }
     return userAuthentication.getPrincipal();
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public DbUser user(UserAuthentication userAuthentication) {
+    if (userAuthentication == null) {
+      return null;
+    }
     return userAuthentication.getUser();
   }
 
