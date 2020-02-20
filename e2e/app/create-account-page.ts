@@ -1,6 +1,6 @@
 import {ElementHandle} from 'puppeteer';
 import {getCursorValue} from '../driver/elementHandle-util';
-import {inputFieldsValues, institutionAffiliationValues} from '../tests/user/user-registration-fields';
+import {inputFieldsValues, institutionAffiliationValues} from '../resources/user-registration-fields';
 import * as widgetXpath from './elements/widgetxpath';
 import BasePage from './mixin/basepage';
 import DropdownSelect from './mixin/dropdown-list-select';
