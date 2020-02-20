@@ -7,11 +7,15 @@ import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
 import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Span;
 import io.opencensus.trace.SpanBuilder;
+import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracer;
+import io.opencensus.trace.Tracestate;
+import io.opencensus.trace.Tracestate.Entry;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -29,7 +33,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class TracingInterceptor extends HandlerInterceptorAdapter {
   private static final Tracer tracer = Tracing.getTracer();
   private static final Logger log = Logger.getLogger(TracingInterceptor.class.getName());
-  private static final String TRACE_ATTRIBUTE_KEY = "Tracing Span";
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 

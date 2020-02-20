@@ -6,6 +6,7 @@ import io.opencensus.tags.TagValue;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.Metric;
@@ -32,6 +33,11 @@ public class MeasurementBundle {
     return tags.entrySet().stream()
         .collect(
             ImmutableMap.toImmutableMap(e -> TagKey.create(e.getKey().getName()), Entry::getValue));
+  }
+
+  public Optional<String> getTagValue(MetricLabel metricLabel) {
+    return Optional.ofNullable(tags.get(metricLabel))
+        .map(TagValue::asString);
   }
 
   public static Builder builder() {

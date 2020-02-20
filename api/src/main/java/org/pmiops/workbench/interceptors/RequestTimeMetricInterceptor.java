@@ -17,12 +17,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 @Service
-public class ElapsedTimeDistributionInterceptor extends HandlerInterceptorAdapter {
+public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
 
   private final LogsBasedMetricService logsBasedMetricService;
   private Clock clock;
 
-  public ElapsedTimeDistributionInterceptor(
+  public RequestTimeMetricInterceptor(
       LogsBasedMetricService logsBasedMetricService, Clock clock) {
     this.logsBasedMetricService = logsBasedMetricService;
     this.clock = clock;
