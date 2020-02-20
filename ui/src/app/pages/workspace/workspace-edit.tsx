@@ -3,16 +3,17 @@ import {Component} from '@angular/core';
 import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon, InfoIcon} from 'app/components/icons';
+import {InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {TwoColPaddedTable} from 'app/components/tables';
+
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
@@ -32,200 +33,30 @@ import {
   CdrVersion,
   CdrVersionListResponse,
   DataAccessLevel,
+  DisseminateResearchEnum,
+  ResearchOutcomeEnum,
   SpecificPopulationEnum,
-  Workspace,
-  WorkspaceAccessLevel
+  Workspace, WorkspaceAccessLevel
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {
+  disseminateFindings,
+  PrimaryPurposeItems,
+  researchOutcomes,
+  ResearchPurposeDescription,
+  ResearchPurposeItem,
+  ResearchPurposeItems,
+  researchPurposeQuestions,
+  SpecificPopulationItem,
+  SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
+  toolTipTextStigmatization
+} from './workspace-edit-text';
 
-export const ResearchPurposeDescription =
-  <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
-   of <i>All of Us</i> data to provide a meaningful description of the intended purpose of data use
-   for each workspace they create. The responses provided below will be posted publicly in
-   the <i>All of Us</i> Research Hub website to inform research participants.</div>;
-
-interface ResearchPurposeItem {
-  shortName: string;
-  shortDescription: string;
-  longDescription: React.ReactNode;
-  uniqueId?: string;
-}
-
-export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
-  {
-    shortName: 'diseaseFocusedResearch',
-    shortDescription: 'Disease-focused research',
-    longDescription: <div>The primary purpose of the research is to learn more about a particular
-    disease or disorder (for example, type 2 diabetes), a trait (for example, blood pressure),
-    or a set of related conditions (for example, autoimmune diseases, psychiatric disorders).</div>
-  }, {
-    shortName: 'methodsDevelopment',
-    shortDescription: 'Methods development/validation study',
-    longDescription: <div>The primary purpose of the use of <i>All of Us</i> data is to develop
-    and/or validate specific methods/tools for analyzing or interpreting data (e.g. statistical
-    methods for describing data trends, developing more powerful methods to detect
-    gene-environment or other types of interactions in genome-wide association studies).</div>
-  }, {
-    shortName: 'controlSet',
-    shortDescription: 'Research Control',
-    longDescription: <div><i>All of Us</i> data will be used as a reference or control dataset
-      for comparison with another dataset from a different resource (e.g. Case-control
-      studies).</div>
-  }, {
-    shortName: 'ancestry',
-    shortDescription: 'Genetic Research',
-    longDescription: <div>Research concerning genetics (i.e. the study of genes, genetic variations
-      and heredity) in the context of diseases or ancestry.</div>
-  }, {
-    shortName: 'socialBehavioral',
-    shortDescription: 'Social/Behavioral Research',
-    longDescription: <div>The research focuses on the social or behavioral phenomena or determinants
-      of health.</div>
-  }, {
-    shortName: 'populationHealth',
-    shortDescription: 'Population Health/Public Health Research',
-    longDescription: <div>The primary purpose of using <i>All of Us</i> data is to investigate
-      health behaviors, outcomes, access and disparities in populations.</div>
-  }, {
-    shortName: 'drugDevelopment',
-    shortDescription: 'Drug/Therapeutics Development Research',
-    longDescription: <div>Primary focus of the research is drug/therapeutics development. The data
-      will be used to understand treatment-gene interactions or treatment outcomes relevant
-      to the therapeutic(s) of interest.</div>
-  },  {
-    shortName: 'commercialPurpose',
-    shortDescription: 'For-Profit Purpose',
-    longDescription: <div>The data will be used by a for-profit entity for research or product
-      or service development (e.g. for understanding drug responses as part of a
-      pharmaceutical company's drug development or market research efforts).</div>
-  }, {
-    shortName: 'educational',
-    shortDescription: 'Educational Purpose',
-    longDescription: <div>The data will be used for education purposes (e.g. for a college research
-      methods course, to educate students on population-based research approaches).</div>
-  }, {
-    shortName: 'otherPurpose',
-    shortDescription: 'Other Purpose',
-    longDescription: <div>If your Purpose of Use is different from the options listed above, please
-      select "Other Purpose" and provide details regarding your purpose of data use here
-      (500 character limit).</div>
-  }
-];
-ResearchPurposeItems.forEach(item => {
-  item.uniqueId = fp.uniqueId('research-purpose');
-});
-
-export const toolTipText = {
-  header: <div>A Workspace is your place to store and analyze data for a specific project.Each
-    Workspace is a separate Google bucket that serves as a dedicated space for file storage.
-    You can share this Workspace with other users, allowing them to view or edit your work. Your
-    Workspace is where you will go to build concept sets and cohorts and launch Notebooks for
-    performing analyses on your cohorts.</div>,
-  cdrSelect: <div>The curated data repository (CDR) is where research data from the <i>All of Us</i>
-    Research Program is stored. The CDR is periodically updated as new data becomes available for
-    use. You can select which version of the CDR you wish to query in this Workspace.</div>,
-  researchPurpose: <div>You  are required to describe your research purpose, or the reason why you
-    are conducting this study. This information, along with your name, will be posted on the
-    publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
-    participants and other stakeholders about what kind of research their data is being used
-    for.</div>,
-};
-
-export const researchPurposeQuestions = [
-  {
-    header: '1. What is the primary purpose of your project?',
-    description: <div>(Please select as many options below as describe your
-      research purpose)</div>
-  }, {
-    header: <div>2. Provide the reason for choosing <i>All of Us</i> data
-      for your investigation</div>,
-    description: <div>(Free text; 500 Character limit)</div>
-  }, {
-    header: '3. What are the specific scientific question(s) you intend to study?',
-    description: <div>If you are exploring the data at this stage to formalize a specific research
-      question, please describe the reason for exploring the data, and the scientific
-      question you hope to be able to answer using the data. <br/>
-      (Free text; 500 Character limit)</div>
-  }, {
-    header: '4. What are your anticipated findings from this study?',
-    description: <div>(Layperson language; 2000 Character limit)</div>
-  }, {
-    header: '5. Will your study or data analysis focus on specific population(s)? \
-      Or do you intend to study your phenotype, disease, or condition of interest with \
-      a focus on comparative analysis of a specific demographic group (for example \
-      a group based on race/ethnicity, gender, or age)?',
-    description: <div/>
-  }
-];
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
-
-interface SpecificPopulationItem {
-  label: string;
-  shortName: SpecificPopulationEnum;
-  ubrLabel: string;
-  ubrDescription: string;
-}
-
-export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
-  {
-    label: 'Race/Ethnicity',
-    shortName: SpecificPopulationEnum.RACEETHNICITY,
-    ubrLabel: 'Ancestry (Race/Ethnicity)',
-    ubrDescription: 'American Indian and Alaska Native (AIAN); Black, African American, or ' +
-       'African; Middle Eastern or North African (MENA); Native Hawaiian or Other Pacific ' +
-       'Islander (NHPI); Hispanic, Latino, or Spanish (H/L/S); Multi-Ancestry (2+ Races)'
-  }, {
-    label: 'Age Groups',
-    shortName: SpecificPopulationEnum.AGEGROUPS,
-    ubrLabel: 'Age',
-    ubrDescription: 'Children (0-11); Adolescents (12-17); Older Adults (65-74); Older ' +
-      'Adults (75+)'
-  }, {
-    label: 'Sex',
-    shortName: SpecificPopulationEnum.SEX,
-    ubrLabel: 'Sex',
-    ubrDescription: 'Intersex'
-  }, {
-    label: 'Gender Identity',
-    shortName: SpecificPopulationEnum.GENDERIDENTITY,
-    ubrLabel: 'Gender Identity (GI)',
-    ubrDescription: 'Nonbinary; Transgender; or Other Gender Identity Choices'
-  }, {
-    label: 'Sexual Orientation',
-    shortName: SpecificPopulationEnum.SEXUALORIENTATION,
-    ubrLabel: 'Sexual Orientation (SO)',
-    ubrDescription: 'Gay; Lesbian; Bisexual; Queer; Other Sexual Orientation Choices'
-  }, {
-    label: 'Geography (e.g. Rural, urban, suburban, etc.)',
-    shortName: SpecificPopulationEnum.GEOGRAPHY,
-    ubrLabel: 'Geography',
-    ubrDescription: 'Rural and Non-Metropolitan Zip codes'
-  }, {
-    label: 'Disability status',
-    shortName: SpecificPopulationEnum.DISABILITYSTATUS,
-    ubrLabel: 'Disability Status',
-    ubrDescription: 'Physical and Cognitive Disabilities'
-  }, {
-    label: 'Access to care',
-    shortName: SpecificPopulationEnum.ACCESSTOCARE,
-    ubrLabel: 'Access to Care',
-    ubrDescription: 'Limited access to care; Cannot easily obtain or access medical care'
-  }, {
-    label: 'Education level',
-    shortName: SpecificPopulationEnum.EDUCATIONLEVEL,
-    ubrLabel: 'Educational Attainment',
-    ubrDescription: 'Less than high school graduate or General Education Development (GED)'
-  }, {
-    label: 'Income level',
-    shortName: SpecificPopulationEnum.INCOMELEVEL,
-    ubrLabel: 'Income Level',
-    ubrDescription: 'Less than USD 25,000 [for a family of four]'
-  }
-];
 
 // Poll parameters to check Workspace ACLs after creation of a new workspace. See
 // SATURN-104 for details, eventually the root cause should be resolved by fixes
@@ -283,16 +114,16 @@ const styles = reactStyles({
     lineHeight: '24px',
     cursor: 'pointer'
   },
-  longDescription : {
+  longDescription: {
     position: 'relative',
     display: 'inline-block',
     minHeight: '1rem',
     cursor: 'text',
     lineHeight: '1rem',
-    width: '95%'
+    width: '100%'
   },
   categoryRow: {
-    display: 'flex', flexDirection: 'row', padding: '0.6rem 0',
+    display: 'flex', flexDirection: 'row', padding: '0.6rem 0', width: '95%'
   },
   checkboxStyle: {
     marginRight: '.31667rem', zoom: '1.5'
@@ -300,16 +131,55 @@ const styles = reactStyles({
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
   },
+  textBoxCharRemaining: {
+    justifyContent: 'flex-end',
+    width: '50rem',
+    backgroundColor: colorWithWhiteness(colors.primary, 0.95),
+    fontSize: 12,
+    colors: colors.primary,
+    padding: '0.25rem',
+    borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
+  },
+  textArea: {
+    height: '15rem',
+    resize: 'none',
+    width: '50rem',
+    borderRadius: '3px 3px 0 0',
+    borderColor: colorWithWhiteness(colors.dark, 0.5)
+  },
+  flexColumnBy2: {
+    flex: '1 1 0',
+    marginLeft: '1rem'
+  },
+  researchPurposeRow: {
+    backgroundColor: colors.white,
+    borderColor: colors.white,
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
+    marginLeft: '-1rem',
+    paddingTop: '0.3rem',
+    paddingBottom: '0.3rem'
+  }
 });
 
 export const WorkspaceEditSection = (props) => {
-  return <div key={props.header} style={{marginBottom: '0.5rem'}}>
+  return <div key={props.header} style={{...props.style, marginBottom: '0.5rem'}}>
     <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),
       marginTop: (props.largeHeader ? 12 : 24)}}>
+      {props.index && <FlexRow style={{...styles.header,
+        fontSize: (props.largeHeader ? 20 : 16)}}>
+        <div style={{marginRight: '0.4rem'}}>{props.index}</div>
+        <div style={{...styles.header,
+          fontSize: (props.largeHeader ? 20 : 16)}}>
+          {props.header}
+        </div>
+      </FlexRow>}
+      {!props.index &&
       <div style={{...styles.header,
         fontSize: (props.largeHeader ? 20 : 16)}}>
         {props.header}
       </div>
+      }
       {props.required && <div style={styles.requiredText}>
         (Required)
       </div>
@@ -323,10 +193,10 @@ export const WorkspaceEditSection = (props) => {
       {props.subHeader}
     </div>
     }
-    <div style={styles.text}>
+    <div style={{...styles.text, marginLeft: '0.9rem'}}>
       {props.description}
     </div>
-    <div style={{marginTop: '0.5rem'}}>
+    <div style={{marginTop: '0.5rem', marginLeft: (props.indent ? '0.9rem' : '0rem')}}>
       {props.children}
     </div>
   </div>;
@@ -355,6 +225,7 @@ export interface WorkspaceEditProps {
 
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
+  selectResearchPurpose: boolean;
   workspace: Workspace;
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
@@ -365,6 +236,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
+  showResearchPurpose: boolean;
   billingAccounts: Array<BillingAccount>;
   showCreateBillingAccountModal: boolean;
 }
@@ -376,6 +248,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       this.state = {
         cdrVersionItems: this.createInitialCdrVersionsList(),
         workspace: this.createInitialWorkspaceState(),
+        selectResearchPurpose: this.updateSelectedResearch(),
+        showResearchPurpose: this.updateSelectedResearch(),
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
@@ -431,12 +305,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             });
           }
         } else {
-          // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
+          // Otherwise, use this as an opportunity to sync the fetched billing account name from
+          // the source of truth, Google
           this.setState(prevState => fp.set(
             ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
         }
       }
-
       this.setState({billingAccounts});
     }
 
@@ -476,10 +350,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             drugDevelopment: false,
             educational: false,
             intendedStudy: '',
+            scientificApproach: '',
             methodsDevelopment: false,
             otherPopulationDetails: '',
             otherPurpose: false,
             otherPurposeDetails: '',
+            ethics: false,
             population: false,
             populationDetails: [],
             populationHealth: false,
@@ -530,6 +406,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
     }
 
+    updateSelectedResearch(): boolean {
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        return false;
+      }
+      const rp = this.props.workspace.researchPurpose;
+      return rp.ancestry || rp.controlSet ||
+          rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment ||
+          rp.methodsDevelopment || rp.populationHealth || rp.socialBehavioral;
+    }
+
     getLiveCdrVersions(): Array<CdrVersion> {
       const cdrResp = this.props.cdrVersionListResponse;
       const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
@@ -573,8 +459,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * (plus optional child elements) for each of the "primary purpose of your
      * project" options.
      */
-    makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
+    makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number, disabled: boolean): React.ReactNode {
       let children: React.ReactNode;
+      // If its a sub category of Research purpose and not Education/Other
+      const isResearchPurpose = ResearchPurposeItems.indexOf(rp) > -1;
       if (rp.shortName === 'diseaseFocusedResearch') {
         children = this.makeDiseaseInput();
       } else if (rp.shortName === 'otherPurpose') {
@@ -588,10 +476,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <CheckBox id={rp.uniqueId}
                   data-test-id={rp.shortName + '-checkbox'}
                   style={styles.checkboxStyle}
+                  disabled={disabled}
                   checked={!!this.state.workspace.researchPurpose[rp.shortName]}
                   onChange={e => this.updateResearchPurpose(rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
-          <label style={styles.shortDescription} htmlFor={rp.uniqueId}>
+          <label style={{...styles.shortDescription, fontSize: isResearchPurpose ? 14 : 16}} htmlFor={rp.uniqueId}>
             {rp.shortDescription}
           </label>
           <div>
@@ -604,24 +493,68 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       </div>;
     }
 
+    updateOtherDisseminateResearch(value) {
+      this.setState(fp.set(['workspace', 'researchPurpose', 'otherDisseminateResearchFindings'], value));
+    }
+    /**
+     * Creates a form element containing the checkbox, header, and description
+     * (plus optional child elements) for each of the "Disseminate Research" options.
+     */
+    makeDisseminateForm(rp, index): React.ReactNode {
+      let children: React.ReactNode;
+      if (rp.label === 'Other') {
+        children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
+                             onChange={v => this.updateOtherDisseminateResearch(v)}
+                             placeholder='Specify the name of the forum (journal, scientific
+                             conference, blog etc.) through which you will disseminate your
+                             findings, if available.'
+                             disabled={!this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)}
+                             style={{marginTop: '0.5rem', width: '16rem'}}/>;
+      }
+
+      return <div key={index} style={styles.categoryRow}>
+        <CheckBox style={styles.checkboxStyle}
+                  checked={this.disseminateCheckboxSelected(rp.shortName)}
+                  onChange={e => this.updateAttribute('disseminateResearchFindingList', rp.shortName, e)}/>
+        <FlexColumn style={{marginTop: '-0.2rem'}}>
+          <label style={styles.text}>
+            {rp.label}
+          </label>
+          {children}
+        </FlexColumn>
+      </div>;
+    }
     /**
      * Creates the form element for each of the "focus on specific populations"
      * options.
      */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-      return <CheckBox
-        wrapperStyle={styles.checkboxRow}
-        style={styles.checkboxStyle}
-        label={item.label}
-        labelStyle={styles.text}
-        key={item.label}
-        data-test-id={item.shortName + '-checkbox'}
-        checked={this.specificPopulationCheckboxSelected(item.shortName)}
-        onChange={v => this.updateSpecificPopulation(item.shortName, v)}
-        disabled={!this.state.workspace.researchPurpose.population}
-        />;
+      return <div><strong>{item.label} *</strong>
+        {item.subCategory.map((sub, index) => <FlexRow>
+          <CheckBox
+              wrapperStyle={styles.checkboxRow}
+              data-test-id={sub.shortName + '-checkbox'}
+              style={styles.checkboxStyle}
+              label={sub.label}
+              labelStyle={styles.text}
+              key={sub.label}
+              checked={this.specificPopulationCheckboxSelected(sub.shortName)}
+              onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
+              disabled={!this.state.workspace.researchPurpose.population}/></FlexRow>)}
+      </div>;
     }
 
+    makeOutcomingResearchForm(item, I): React.ReactNode {
+      return <CheckBox
+          wrapperStyle={styles.checkboxRow}
+          style={styles.checkboxStyle}
+          label={item.label}
+          labelStyle={styles.text}
+          key={item.label}
+          checked={this.researchOutcomeCheckboxSelected(item.shortName)}
+          onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
+      />;
+    }
     renderHeader() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create:
@@ -643,11 +576,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
     }
 
-    get categoryIsSelected() {
+    get primaryPurposeIsSelected() {
       const rp = this.state.workspace.researchPurpose;
-      return rp.ancestry || rp.commercialPurpose || rp.controlSet || rp.diseaseFocusedResearch ||
-        rp.drugDevelopment || rp.educational || rp.methodsDevelopment || rp.otherPurpose ||
-        rp.populationHealth || rp.socialBehavioral;
+      return rp.ancestry || rp.commercialPurpose || rp.controlSet ||
+          rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment || rp.educational ||
+          rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
+    }
+
+    get researchPurposeLabel() {
+      return <div style={{display: 'inherit'}}>
+        Research purpose
+        {!this.state.showResearchPurpose && <i className='pi pi-angle-right' style={{verticalAlign: 'middle'}}></i>}
+        {this.state.showResearchPurpose && <i className='pi pi-angle-down' style={{verticalAlign: 'middle'}}></i>}
+      </div>;
     }
 
     get isSpecificPopulationValid() {
@@ -667,28 +608,54 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         researchPurpose.diseaseOfFocus;
     }
 
+    get isDisseminateResearchValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      return researchPurpose.disseminateResearchFindingList &&
+          researchPurpose.disseminateResearchFindingList.length !== 0;
+    }
+
+    get isResearchOutcome() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      return researchPurpose.researchOutcomeList && researchPurpose.researchOutcomeList.length !== 0 ;
+    }
+
     updateResearchPurpose(category, value) {
+      if (category === 'population' && !value) {
+        this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'], []));
+      }
       this.setState(fp.set(['workspace', 'researchPurpose', category], value));
     }
 
-    updateSpecificPopulation(populationDetails, value) {
-      const selectedPopulations = this.state.workspace.researchPurpose.populationDetails;
+    updateAttribute(attribute, populationDetails, value) {
+      const selectedPopulations = fp.get(['workspace', 'researchPurpose' , attribute], this.state);
       if (value) {
         if (!!selectedPopulations) {
-          this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
+          this.setState(fp.set(['workspace', 'researchPurpose', attribute],
             selectedPopulations.concat([populationDetails])));
         } else {
-          this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
-            [populationDetails]));
+          this.setState(fp.set(['workspace', 'researchPurpose', attribute],
+              [populationDetails]));
         }
       } else {
-        this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
+        this.setState(fp.set(['workspace', 'researchPurpose', attribute],
           selectedPopulations.filter(v => v !== populationDetails)));
       }
     }
 
+    updateSpecificPopulation(populationDetails, value) {
+      this.updateAttribute('populationDetails', populationDetails, value);
+    }
+
     specificPopulationCheckboxSelected(populationEnum: SpecificPopulationEnum): boolean {
       return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
+    }
+
+    disseminateCheckboxSelected(disseminateEnum: DisseminateResearchEnum): boolean {
+      return fp.includes(disseminateEnum, this.state.workspace.researchPurpose.disseminateResearchFindingList);
+    }
+
+    researchOutcomeCheckboxSelected(researchOutcomeEnum: ResearchOutcomeEnum): boolean {
+      return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcomeList);
     }
 
     onSaveClick() {
@@ -830,7 +797,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           researchPurpose: {
             anticipatedFindings,
             intendedStudy,
-            reasonForAllOfUs
+            scientificApproach
           }
         },
       } = this.state;
@@ -839,21 +806,26 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         billingAccountName,
         anticipatedFindings,
         intendedStudy,
-        reasonForAllOfUs,
-        'primaryPurpose': this.categoryIsSelected,
+        scientificApproach,
+        'primaryPurpose': this.primaryPurposeIsSelected,
         'specificPopulation': this.isSpecificPopulationValid,
-        'diseaseOfFocus': this.isDiseaseOfFocusValid
+        'diseaseOfFocus': this.isDiseaseOfFocusValid,
+        'researchOutcoming': this.isResearchOutcome,
+        'disseminate': this.isDisseminateResearchValid
       }, {
         name: {
           length: { minimum: 1, maximum: 80 }
         },
         billingAccountName: { presence: true },
-        intendedStudy: { presence: true },
-        anticipatedFindings: {presence: true },
-        reasonForAllOfUs: { presence: true },
+        intendedStudy: { length: { minimum: 1, maximum: 500 } },
+        anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
+        scientificApproach: { length: { minimum: 1, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
         specificPopulation: { truthiness: true },
-        diseaseOfFocus: { truthiness: true }
+        diseaseOfFocus: { truthiness: true },
+        researchOutcoming: {truthiness: true},
+        disseminate: {truthiness: true}
+
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
@@ -928,80 +900,141 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             />
           </WorkspaceEditSection>
         }
+        <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-            description={<div> {ResearchPurposeDescription} Therefore, please provide
-              sufficiently detailed responses at a 5th grade reading level.  Your responses
-              will not be used to make decisions about data access. <br/> <br/>
+              description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
+              Therefore, please provide sufficiently detailed responses at a 5th grade reading
+              level.  Your responses will not be used to make decisions about data access. <br/><br/>
               <i>Note that you are required to create separate Workspaces for each project
                 for which you access All of Us data, hence the responses below are expected
                 to be specific to the project for which you are creating this particular
                 Workspace.</i></div>
             }/>
+
+        {/*Primary purpose */}
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
-            description={researchPurposeQuestions[0].description} required>
+            description={researchPurposeQuestions[0].description} index='1.' indent>
           <FlexRow>
-            <FlexColumn style={{flex: '1 1 0'}}>
-              {ResearchPurposeItems.slice(0, sliceByHalfLength(ResearchPurposeItems))
-                .map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
-            </FlexColumn>
-            <FlexColumn style={{flex: '1 1 0'}}>
-              {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
-                .map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
+            <FlexColumn>
+              <FlexColumn  style={styles.researchPurposeRow}>
+                <CheckBox
+                  data-test-id='researchPurpose-checkbox'
+                  style={{...styles.checkboxStyle, marginLeft: '0.6rem'}}
+                  label={this.researchPurposeLabel}
+                  labelStyle={styles.shortDescription}
+                  checked={this.primaryPurposeIsSelected}
+                  onChange={v => this.setState({
+                    selectResearchPurpose: v,
+                    showResearchPurpose: !this.state.showResearchPurpose})}/>
+                  {this.state.showResearchPurpose && <FlexColumn>
+                    <div style={{...styles.text, marginLeft: '1.9rem'}}>
+                      Choose options below to describe your research purpose
+                    </div>
+                    <div style={{marginLeft: '2rem'}}>
+                  {ResearchPurposeItems.map(
+                    (rp, i) => this.makePrimaryPurposeForm(rp, i, !this.state.selectResearchPurpose))}
+                  </div></FlexColumn>}
+              </FlexColumn>
+
+              {PrimaryPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i, false))}
             </FlexColumn>
           </FlexRow>
         </WorkspaceEditSection>
+
+        {/* TextBox: scientific question(s) researcher intend to study Section*/}
         <WorkspaceEditSection
-          header={researchPurposeQuestions[1].header}
-          description={researchPurposeQuestions[1].description} required>
-          <TextArea value={this.state.workspace.researchPurpose.reasonForAllOfUs}
-                    onChange={v => this.updateResearchPurpose('reasonForAllOfUs', v)}/>
+          header={researchPurposeQuestions[1].header} indent
+          description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
+          <FlexColumn>
+          <WorkspaceEditSection
+              header={researchPurposeQuestions[2].header}
+              description={researchPurposeQuestions[2].description} index='2.1' indent>
+            <TextArea style={styles.textArea}
+                      id='intendedStudy'
+                      name='intendedStudy'
+                      value={this.state.workspace.researchPurpose.intendedStudy}
+                      onChange={v => this.updateResearchPurpose('intendedStudy', v)}/>
+            <FlexRow id='intendedStudyText' style={styles.textBoxCharRemaining}>
+              {500 - this.state.workspace.researchPurpose.intendedStudy.length} characters remaining
+            </FlexRow>
+          </WorkspaceEditSection>
+
+            {/* TextBox: scientific approaches section*/}
+            <WorkspaceEditSection
+                header={researchPurposeQuestions[3].header}
+                description={researchPurposeQuestions[3].description} index='2.2' indent>
+              <TextArea style={styles.textArea}
+                        id='scientificApproach'
+                        name='scientificApproach'
+                        value={this.state.workspace.researchPurpose.scientificApproach}
+                        onChange={v => this.updateResearchPurpose('scientificApproach', v)}/>
+              <FlexRow style={styles.textBoxCharRemaining}>
+                {this.state.workspace.researchPurpose.scientificApproach &&
+                <div>{1000 - this.state.workspace.researchPurpose.scientificApproach.length}
+                characters remaining</div>}
+                {!this.state.workspace.researchPurpose.scientificApproach &&
+                <div>1000 characters remaining</div>}
+              </FlexRow>
+            </WorkspaceEditSection>
+
+            {/*TextBox: anticipated findings from the study section*/}
+            <WorkspaceEditSection header={researchPurposeQuestions[4].header} indent
+                                  description={researchPurposeQuestions[4].description} index='2.3'>
+              <TextArea style={styles.textArea}
+                        id='anticipatedFindings'
+                        name='anticipatedFindings'
+                        value={this.state.workspace.researchPurpose.anticipatedFindings}
+                        onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}/>
+              <FlexRow style={styles.textBoxCharRemaining}>
+                {1000 - this.state.workspace.researchPurpose.anticipatedFindings.length} characters remaining
+              </FlexRow>
+            </WorkspaceEditSection>
+          </FlexColumn>
         </WorkspaceEditSection>
-        <WorkspaceEditSection
-          header={researchPurposeQuestions[2].header}
-          description={researchPurposeQuestions[2].description} required>
-          <TextArea value={this.state.workspace.researchPurpose.intendedStudy}
-                    onChange={v => this.updateResearchPurpose('intendedStudy', v)}/>
+
+          {/*disseminate  research Section */}
+        <WorkspaceEditSection header={researchPurposeQuestions[5].header}
+                              description={researchPurposeQuestions[5].description} style={{width: '50rem'}} index='3.'>
+          <FlexRow>
+            <FlexColumn style={styles.flexColumnBy2}>
+              {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings) + 1).map(
+                (rp, i) => this.makeDisseminateForm(rp, i))}
+            </FlexColumn>
+            <FlexColumn style={styles.flexColumnBy2}>
+              {disseminateFindings.slice(sliceByHalfLength(disseminateFindings)).map(
+                (rp, i) => this.makeDisseminateForm(rp, i))}
+            </FlexColumn>
+          </FlexRow>
         </WorkspaceEditSection>
-        <WorkspaceEditSection header={researchPurposeQuestions[3].header}
-                              description={researchPurposeQuestions[3].description} required>
-          <TextArea value={this.state.workspace.researchPurpose.anticipatedFindings}
-                    onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}/>
-        </WorkspaceEditSection>
-        <WorkspaceEditSection required header={researchPurposeQuestions[4].header}>
-          <Link onClick={() => this.setState({showUnderservedPopulationDetails:
-              !this.state.showUnderservedPopulationDetails})}>
-            More info on underserved populations
-            {this.state.showUnderservedPopulationDetails ? <ClrIcon shape='caret' dir='up'/> :
-              <ClrIcon shape='caret' dir='down'/>}
-          </Link>
-          {this.state.showUnderservedPopulationDetails && <div style={styles.text}>
-            A primary mission of the <i>All of Us</i> Research Program is to include research
-            participants who are medically underserved or are historically underrepresented in
-            Biomedical Research, or who, because of systematic social disadvantage, experience
-            health disparities.  As a way to assess the research being conducted with a focus on
-            these populations, <i>All of Us</i> requires that you indicate the demographic
-            categories you intend to focus your analysis on.
-          </div>}
-          <div style={{marginTop: '0.5rem'}}>
-            <RadioButton name='population' style={{marginRight: '0.5rem'}}
-                         data-test-id='specific-population-no'
-                         onChange={v => this.updateResearchPurpose('population', false)}
-                         checked={!this.state.workspace.researchPurpose.population}/>
-            <label style={styles.text}>No, I am not interested in focusing on
-              specific population(s) in my research.</label>
-          </div>
+
+          {/*Research outcome section*/}
+          <WorkspaceEditSection header={researchPurposeQuestions[6].header} index='4.'
+                                description={researchPurposeQuestions[6].description}
+                                style={{width: '50rem'}}>
+            <FlexRow style={{marginLeft: '1rem'}}>
+              <FlexColumn style={{flex: '1 1 0'}}>
+                {researchOutcomes.map(
+                  (rp, i) => this.makeOutcomingResearchForm(rp, i))}
+              </FlexColumn>
+            </FlexRow>
+          </WorkspaceEditSection>
+
+          {/*Underrespresented population section*/}
+        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
+                              description={researchPurposeQuestions[7].description}
+                              style={{width: '50rem'}}>
+          <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
                          onChange={v => this.updateResearchPurpose('population', true)}
                          checked={this.state.workspace.researchPurpose.population}/>
-            <label style={styles.text}>Yes, I am interested in the focused study of specific
-              population(s), either on their own or in comparison to other groups.</label>
+            <label style={styles.text}>Yes, my study will focus on one or more specific
+              underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
-          <div style={{...styles.text, marginLeft: '2rem'}}>
-            <strong>If "Yes": </strong> Please specify the demographic category or categories of the
-            population(s) that you are interested in exploring in your study.
-            Select as many as applicable.
+          <div style={{...styles.text, marginLeft: '1.2rem'}}>
+            <strong>If "Yes": </strong> please indicate your underrepresented population(s) of
+            interest:
             <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
               <FlexColumn>
                 {SpecificPopulationItems.slice(0, sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
@@ -1015,7 +1048,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     style={styles.checkboxStyle}
                     label='Other'
                     labelStyle={styles.text}
-                    checked={this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
+                    checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                     disabled={!this.state.workspace.researchPurpose.population}
                 />
@@ -1027,63 +1060,83 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
               </FlexColumn>
             </FlexRow>
+            <hr/>
+            <div>* Demographic variables for which data elements have been altered, partially
+              suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
+              the Data Dictionary for details.</div>
+            <hr/>
+          </div>
+          <div style={{marginTop: '0.5rem'}}>
+            <RadioButton name='population' style={{marginRight: '0.5rem'}}
+                         data-test-id='specific-population-no'
+                         onChange={v => this.updateResearchPurpose('population', false)}
+                         checked={!this.state.workspace.researchPurpose.population}/>
+            <label style={styles.text}>No, my study will not center on underrepresented populations.
+              I am interested in a diverse sample in general, or I am focused on populations that
+              have been well represented in prior research.</label>
           </div>
         </WorkspaceEditSection>
-        <WorkspaceEditSection header='Request a review of your research purpose for potential
-                                      stigmatization of research participants'>
-          <Link onClick={() => this.setState({showStigmatizationDetails:
-              !this.state.showStigmatizationDetails})}>
-            More info on stigmatization
-            {this.state.showStigmatizationDetails ? <ClrIcon shape='caret' dir='up'/> :
-              <ClrIcon shape='caret' dir='down'/>}
-          </Link>
-          {this.state.showStigmatizationDetails &&
-            <div>
-              <div style={styles.text}>
-                Populations that are historically medically underserved or underrepresented in
-                biomedical research are also more vulnerable to stigmatization. If your population
-                of interest includes the following categories defined as Underrepresented in
-                Biomedical Research (UBR) by the <i>All of Us</i> Research Program, you are
-                encouraged to request a review of your research purpose by the Resource Access
-                Board (RAB).
-              </div>
-              <TwoColPaddedTable header={true} headerLeft='Diversity Categories'
-                 headerRight='Groups that are Underrepresented in Biomedical Research (UBR)*'
-                 cellWidth={{left: '30%', right: '70%'}}
-                 contentLeft={SpecificPopulationItems.map(sp => sp.ubrLabel)}
-                 contentRight={SpecificPopulationItems.map(sp => sp.ubrDescription)}/>
-            </div>
-          }
-          <FlexRow style={{paddingTop: '0.3rem'}}>
-            <label style={styles.text}>
-              <div>
-              If you are concerned that your research may result in <a href='/definitions/stigmatization' target='_blank'>
-              stigmatization of research participants</a>,
-              please request review of your research purpose by the <i>All of Us</i>  Resource Access Board (RAB). The RAB
-              will provide feedback regarding the potential for stigmatizing specific groups of participants, and if
-              needed, guidance for modifying your research purpose/scope. Even if you request a review, you will be
-              able to continue creating the Workspace and proceed with your research, while RAB reviews your research
-              purpose.
-              </div>
-              <div style={{marginTop: '0.5rem'}}>Would you like to request a review of your research purpose?</div>
-            </label>
+
+          {/* Request for review section*/}
+        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent>
+          <FlexRow style={styles.text}><div>
+            Any research that focuses on certain population characteristics or &nbsp;
+            <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
+              <Link style={{display: 'inline-block'}}> uses
+              demographic variables</Link>
+            </TooltipTrigger>
+            in analyses can result, often unintentionally,
+            in findings that may be misinterpreted or misused by others to foster stigma. While it
+            may not be possible to completely prevent misuse of research for stigmatizing purposes,
+            data users can take important steps to minimize the risk of this happening–
+            <TooltipTrigger content={toolTipTextDataUseAgreement}>
+              <Link style={{display: 'inline-block'}}>taking this step is a condition of your
+                Data Use Agreement.</Link>
+            </TooltipTrigger>
+            &nbsp;If you are concerned that your research could inadvertently stigmatize
+            participants or communities, or if you are unsure, let us know. We encourage you to
+            request a review of your research purpose statement by the All of Us Resource Access
+            Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
+            modifying your research purpose or scope. To learn more, please refer to the&nbsp;
+            <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
+            <Link style={{display: 'inline-block'}}>All of Us Stigmatizing Research Policy</Link>
+            </TooltipTrigger>. If you
+            request a review, you can expect to receive an initial response within five business days.
+            During the RAB’s review, you may begin working in your workspace.</div>
           </FlexRow>
-          <div>
-            <RadioButton name='reviewRequested'
-                         disabled={this.isMode(WorkspaceEditMode.Edit)}
-                         onChange={() => {
-                           this.updateResearchPurpose('reviewRequested', true);
-                         }}
-                         checked={this.state.workspace.researchPurpose.reviewRequested}/>
-            <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>Yes</label>
-            <RadioButton name='reviewRequested'
-                         disabled={this.isMode(WorkspaceEditMode.Edit)}
-                         onChange={() => {
-                           this.updateResearchPurpose('reviewRequested', false);
-                         }}
-                         checked={!this.state.workspace.researchPurpose.reviewRequested}/>
-            <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No</label>
-          </div>
+          <FlexRow style={{paddingTop: '0.3rem'}}>
+            <FlexColumn>
+            <label style={{...styles.header, marginBottom: '0.2rem'}}>Would you like to request a
+              review of your research purpose
+              statement by the Resource Access Board?</label>
+            <label style={styles.text}>
+                Note: Your response to this question is private and will not be displayed on the
+              Research Hub.
+            </label>
+              <FlexColumn>
+                <FlexRow>
+                <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
+                             disabled={this.isMode(WorkspaceEditMode.Edit)}
+                             onChange={() => {
+                               this.updateResearchPurpose('reviewRequested', true);
+                             }}
+                             checked={this.state.workspace.researchPurpose.reviewRequested}/>
+                <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
+                  a review of my research purpose.</label>
+                </FlexRow>
+                <FlexRow>
+                <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
+                             disabled={this.isMode(WorkspaceEditMode.Edit)}
+                             onChange={() => {
+                               this.updateResearchPurpose('reviewRequested', false);
+                             }}
+                             checked={!this.state.workspace.researchPurpose.reviewRequested}/>
+                <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
+                  have no concerns at this time about potential stigmatization based on my study.</label>
+                </FlexRow>
+              </FlexColumn>
+            </FlexColumn>
+          </FlexRow>
         </WorkspaceEditSection>
         <div>
           <FlexRow style={{marginTop: '1rem', marginBottom: '1rem'}}>
@@ -1095,12 +1148,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               errors && <ul>
                 {errors.name && <div>{errors.name}</div>}
                 {errors.billingAccountName && <div>You must select a billing account</div>}
-                {errors.primaryPurpose && <div>You must choose at least one primary research purpose</div>}
-                {errors.reasonForAllOfUs && <div>You must specify a reason for using <i>All of Us</i> data</div>}
-                {errors.intendedStudy && <div>You must specify a field of intended study</div>}
-                {errors.anticipatedFindings && <div>You must specify anticipated findings</div>}
+                {errors.primaryPurpose && <div>You must choose at least one primary research
+                  purpose (Question 1)</div>}
+                {errors.anticipatedFindings && <div>You must answer <i>What are the anticipated findings
+                  from the study? (Question # 2.1)</i></div>}
+                {errors.scientificApproach && <div>You must answer <i>What are the scientific
+                  approaches you plan to use for your study (Question # 2.2)</i></div>}
+                {errors.intendedStudy && <div>You must answer <i>What are the specific
+                  scientific question(s) you intend to study (Question # 2.3)</i></div>}
                 {errors.specificPopulation && <div>You must specify a population of study</div>}
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
+                {errors.researchOutcoming && <div>You must specify the outcome of the research</div>}
+                {errors.disseminate && <div>You must specific how you plan to disseminate your research findings</div>}
               </ul>
             } disabled={!errors}>
               <Button type='primary'

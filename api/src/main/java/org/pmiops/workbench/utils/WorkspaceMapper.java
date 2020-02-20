@@ -2,7 +2,9 @@ package org.pmiops.workbench.utils;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +18,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.CdrVersion;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
@@ -57,6 +61,8 @@ public interface WorkspaceMapper {
   @Mapping(target = "timeReviewed", ignore = true)
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
+  // This method (defined by AfterMapping annotation) handles the scenario in which the name of the
+  // parameters are different
   @AfterMapping
   default void afterWorkspaceIntoResearchPurpose(
       @MappingTarget ResearchPurpose researchPurpose, DbWorkspace dbWorkspace) {
@@ -64,6 +70,15 @@ public interface WorkspaceMapper {
       researchPurpose.setPopulationDetails(
           ImmutableList.copyOf(dbWorkspace.getSpecificPopulationsEnum()));
     }
+    researchPurpose.setResearchOutcomeList(
+        Optional.ofNullable(dbWorkspace.getResearchOutcomeEnumSet())
+            .map(researchOutcome -> researchOutcome.stream().collect(Collectors.toList()))
+            .orElse(new ArrayList<ResearchOutcomeEnum>()));
+
+    researchPurpose.setDisseminateResearchFindingList(
+        Optional.ofNullable(dbWorkspace.getDisseminateResearchEnumSet())
+            .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toList()))
+            .orElse(new ArrayList<DisseminateResearchEnum>()));
   }
 
   @AfterMapping

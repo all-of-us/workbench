@@ -1,4 +1,4 @@
-import {ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit';
+import {ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
 import {ResearchPurpose, SpecificPopulationEnum} from 'generated/fetch';
 
 export function getSelectedResearchPurposeItems(researchPurpose: ResearchPurpose) {

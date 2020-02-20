@@ -1,15 +1,15 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
-import {UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {DisseminateResearchEnum, ResearchOutcomeEnum,
+  SpecificPopulationEnum,UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditSection} from './workspace-edit';
-import {WorkspaceData} from '../../utils/workspace-data';
-import {SpecificPopulationEnum} from '../../../generated/fetch';
 
 jest.mock('app/utils/navigation', () => ({
   ...(require.requireActual('app/utils/navigation')),
@@ -42,8 +42,10 @@ describe('WorkspaceEdit', () => {
         ...workspaceStubs[0].researchPurpose,
         intendedStudy: 'greyscale',
         anticipatedFindings: 'everything',
-        reasonForAllOfUs: 'science',
-        drugDevelopment: true
+        scientificApproach: 'science',
+        drugDevelopment: true,
+        disseminateResearchFindingList: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
+        researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN]
       }
     };
 
@@ -65,8 +67,8 @@ describe('WorkspaceEdit', () => {
     expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Create a new Workspace');
 
     // Ensure the 'drug development' checkbox is not checked when creating.
-    expect(wrapper.find('[data-test-id="drugDevelopment-checkbox"]').first().prop('checked'))
-    .toEqual(false);
+    expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked'))
+      .toEqual(false);
   });
 
   it('displays workspaces duplicate page', async () => {
@@ -77,7 +79,7 @@ describe('WorkspaceEdit', () => {
 
     // Ensure the 'drug development' checkbox is checked when duplicating.
     expect(wrapper.find('[data-test-id="drugDevelopment-checkbox"]').first().prop('checked'))
-    .toEqual(true);
+      .toEqual(true);
   });
 
   it('displays workspaces edit page', async () => {
@@ -95,7 +97,7 @@ describe('WorkspaceEdit', () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
     workspace.researchPurpose.population = true;
-    workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGEGROUPS];
+    workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN];
 
     routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
     const wrapper = component();
@@ -105,11 +107,24 @@ describe('WorkspaceEdit', () => {
     // populations" section.
     expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
       .first().prop('checked')).toEqual(true);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGEGROUPS}-checkbox"]`)
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
       .first().prop('checked')).toEqual(true);
   });
 
-  it('supports successful duplication', async () => {
+  it('supports disable save button if Research Outcome is not answered', async () => {
+    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspace.researchPurpose.researchOutcomeList = []
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+
+    const saveButton = wrapper.find('[data-test-id="workspace-save-btn"]')
+        .first().prop('disabled');
+    expect(saveButton).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+  });
+
+  it('supports successful duplication', async() => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -117,7 +132,6 @@ describe('WorkspaceEdit', () => {
     const numBefore = workspacesApi.workspaces.length;
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
     expect(navigate).toHaveBeenCalledTimes(1);
   });
@@ -150,7 +164,7 @@ describe('WorkspaceEdit', () => {
     jest.useRealTimers();
   });
 
-  it('shows confirmation on extended access delays', async () => {
+  it('shows confirmation on extended access delays', async() => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

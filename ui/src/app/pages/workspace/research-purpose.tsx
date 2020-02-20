@@ -4,7 +4,7 @@ import {Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {EditComponentReact} from 'app/icons/edit';
-import {ResearchPurposeDescription} from 'app/pages/workspace/workspace-edit';
+import {ResearchPurposeDescription} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {sliceByHalfLength} from 'app/utils/index';

@@ -10,7 +10,9 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -19,6 +21,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -29,6 +33,14 @@ public class TestMockFactory {
   public static final String BUCKET_NAME = "workspace-bucket";
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
+    List<DisseminateResearchEnum> disseminateResearchEnumsList =
+        new ArrayList<DisseminateResearchEnum>();
+    disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
+    disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
+
+    List<ResearchOutcomeEnum> ResearchOutcomeEnumsList = new ArrayList<ResearchOutcomeEnum>();
+    ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
+
     return new Workspace()
         .id("1")
         .name(workspaceName)
@@ -59,6 +71,8 @@ public class TestMockFactory {
                 .timeRequested(1000L)
                 .timeReviewed(1500L)
                 .reviewRequested(true)
+                .disseminateResearchFindingList(disseminateResearchEnumsList)
+                .researchOutcomeList(ResearchOutcomeEnumsList)
                 .approved(false));
   }
 
