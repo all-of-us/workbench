@@ -1,9 +1,11 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.io.Resources;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
@@ -38,6 +40,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public abstract class BaseControllerTest {
 
   protected static WorkbenchConfig config;
+  public static final String BASE_PATH = "config/";
 
   @TestConfiguration
   static class Configuration {
@@ -67,9 +70,11 @@ public abstract class BaseControllerTest {
   }
 
   private static WorkbenchConfig loadConfig(String filename) throws IOException {
-    String testConfig =
-        Resources.toString(Resources.getResource(filename), Charset.defaultCharset());
-    WorkbenchConfig workbenchConfig = new Gson().fromJson(testConfig, WorkbenchConfig.class);
+    ObjectMapper jackson = new ObjectMapper();
+    String rawJson =
+        new String(Files.readAllBytes(Paths.get(BASE_PATH + filename)), Charset.defaultCharset());
+    WorkbenchConfig workbenchConfig =
+        new Gson().fromJson(jackson.readTree(rawJson).toString(), WorkbenchConfig.class);
     workbenchConfig.firecloud.debugEndpoints = true;
     return workbenchConfig;
   }
