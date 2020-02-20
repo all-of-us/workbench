@@ -3,6 +3,7 @@ package org.pmiops.workbench.actionaudit.auditors;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
+import java.time.Clock;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,12 +12,13 @@ import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -25,13 +27,23 @@ public class UserServiceAuditorTest {
   static DbUser USER = null;
 
   @TestConfiguration
-  @Import({UserServiceAuditAdapterImpl.class, ActionAuditTestConfig.class})
+  @Import({UserServiceAuditAdapterImpl.class})
   @MockBean(ActionAuditService.class)
   static class Configuration {
-    @Primary
+    @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public DbUser getUser() {
       return USER;
+    }
+
+    @Bean(name = "ACTION_ID")
+    public String getActionId() {
+      return ActionAuditTestConfig.ACTION_ID;
+    }
+
+    @Bean
+    public Clock getClock() {
+      return new FakeClock(ActionAuditTestConfig.INSTANT);
     }
   }
 
@@ -73,7 +85,7 @@ public class UserServiceAuditorTest {
             argThat(
                 (ActionAuditEvent a) ->
                     a.getAgentId() == 0
-                        && USER.getUsername() == null
+                        && a.getAgentEmailMaybe() == null
                         && a.getAgentType() == AgentType.SYSTEM));
   }
 }

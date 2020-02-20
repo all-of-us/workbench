@@ -1,6 +1,7 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.util.Optional;
 import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
@@ -61,20 +62,14 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public Userinfoplus userInfo(UserAuthentication userAuthentication) {
-    if (userAuthentication == null) {
-      return null;
-    }
-    return userAuthentication.getPrincipal();
+  public Userinfoplus userInfo(Optional<UserAuthentication> userAuthentication) {
+    return userAuthentication.map(UserAuthentication::getPrincipal).orElse(null);
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public DbUser user(UserAuthentication userAuthentication) {
-    if (userAuthentication == null) {
-      return null;
-    }
-    return userAuthentication.getUser();
+  public DbUser user(Optional<UserAuthentication> userAuthentication) {
+    return userAuthentication.map(UserAuthentication::getUser).orElse(null);
   }
 
   @Override

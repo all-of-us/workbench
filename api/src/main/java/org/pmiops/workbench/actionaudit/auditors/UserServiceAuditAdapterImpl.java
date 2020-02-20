@@ -25,19 +25,19 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
 
   private final ActionAuditService actionAuditService;
   private final Clock clock;
-  private Provider<DbUser> dbUserProvider;
   private Provider<String> actionIdProvider;
+  private Provider<Optional<DbUser>> dbUserOptionalProvider;
 
   @Autowired
   public UserServiceAuditAdapterImpl(
       ActionAuditService actionAuditService,
       Clock clock,
-      Provider<DbUser> dbUserProvider,
-      @Qualifier("ACTION_ID") Provider<String> actionIdProvider) {
+      @Qualifier("ACTION_ID") Provider<String> actionIdProvider,
+      Provider<Optional<DbUser>> dbUserOptionalProvider) {
     this.actionAuditService = actionAuditService;
     this.clock = clock;
-    this.dbUserProvider = dbUserProvider;
     this.actionIdProvider = actionIdProvider;
+    this.dbUserOptionalProvider = dbUserOptionalProvider;
   }
 
   @Override
@@ -48,7 +48,7 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
       AgentType agentType) {
     // In the event of an offline cronjob, the request may have been made anonymously and there is
     // no user identity. This should only happen for system agent driven audit events.
-    Optional<DbUser> agent = Optional.ofNullable(dbUserProvider.get());
+    Optional<DbUser> agent = dbUserOptionalProvider.get();
     if (agent.isPresent() && AgentType.SYSTEM == agentType) {
       log.warning(
           String.format(
@@ -80,7 +80,7 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
       long userId,
       BypassTimeTargetProperty bypassTimeTargetProperty,
       Optional<Instant> bypassTime) {
-    DbUser adminUser = dbUserProvider.get();
+    DbUser adminUser = dbUserOptionalProvider.get().get();
     ActionAuditEvent.Builder eventBuilder =
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
