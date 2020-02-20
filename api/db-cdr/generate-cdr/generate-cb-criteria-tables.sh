@@ -2095,25 +2095,24 @@ from
 # if loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENTS - labs - add data into ancestor table"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\`
     (ancestor_id, descendant_id)
-select distinct a.ID as ancestor_id,
-    coalesce(n.ID, m.ID, k.ID, j.ID, i.ID, h.ID, g.ID, f.ID, e.ID, d.ID, c.ID, b.ID) as descendant_id
-from (select id, parent_id, concept_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') a
-    join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') b on a.ID = b.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') c on b.ID = c.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') d on c.ID = d.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') e on d.ID = e.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') f on e.ID = f.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') g on f.ID = g.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') h on g.ID = h.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') i on h.ID = i.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') j on i.ID = j.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') k on j.ID = k.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') m on k.ID = m.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where type = 'LOINC' and subtype = 'LAB') n on m.ID = n.PARENT_ID
-where a.is_selectable = 0
-    and a.parent_id != 0"
+SELECT DISTINCT a.id as ancestor_id,
+    COALESCE(n.id, m.id, k.id, j.id, i.id, h.id, g.id, f.id, e.id, d.id, c.id, b.id) as descendant_id
+FROM
+    (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB' and parent_id != 0 and is_group = 1) a
+    JOIN (SELECT id, parent_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') e on d.id = e.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') f on e.id = f.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') g on f.id = g.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') h on g.id = h.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') i on h.id = i.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') j on i.id = j.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') k on j.id = k.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') m on k.id = m.parent_id
+    LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'LAB') n on m.id = n.parent_id"
 
 echo "MEASUREMENTS - labs - generate parent counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -2710,17 +2709,15 @@ FROM
 
 echo "DRUGS - add data into prep_criteria_ancestor table"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\`
     (ancestor_id, descendant_id)
-select distinct a.ID as ancestor_id,
-    coalesce(e.ID, d.ID, c.ID, b.ID) as descendant_id
-from (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'DRUG' and type in ('ATC','RXNORM')) a
-join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'DRUG' and type in ('ATC','RXNORM')) b on a.ID = b.PARENT_ID
-left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'DRUG' and type in ('ATC','RXNORM')) c on b.ID = c.PARENT_ID
-left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'DRUG' and type in ('ATC','RXNORM')) d on c.ID = d.PARENT_ID
-left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'DRUG' and type in ('ATC','RXNORM')) e on d.ID = e.PARENT_ID
-where a.is_group = 1
-    and a.is_selectable = 1"
+SELECT DISTINCT a.id as ancestor_id,
+    COALESCE(e.id, d.id, c.id, b.id) as descendant_id
+FROM (select id, parent_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'DRUG' and type in ('ATC','RXNORM') and is_group = 1 and is_selectable = 1) a
+JOIN (select id, parent_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'DRUG' and type in ('ATC','RXNORM')) b on a.id = b.parent_id
+LEFT JOIN (select id, parent_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'DRUG' and type in ('ATC','RXNORM')) c on b.id = c.parent_id
+LEFT JOIN (select id, parent_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'DRUG' and type in ('ATC','RXNORM')) d on c.id = d.parent_id
+LEFT JOIN (select id, parent_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'DRUG' and type in ('ATC','RXNORM')) e on d.id = e.parent_id"
 
 echo "DRUGS - generate parent counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -3690,6 +3687,35 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET name = REGEXP_REPLACE(name, r'[\"]', '')
 WHERE REGEXP_CONTAINS(name, r'[\"]')"
+
+echo "remove lab items from prep_criteria_ancestor that were added during the run"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"DELETE
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\`
+WHERE ancestor_id IN
+    (
+        SELECT id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE domain_id = 'MEASUREMENT'
+            and type = 'LOINC'
+            and subtype = 'LAB'
+            and parent_id != 0
+            and is_group = 1
+    )"
+
+echo "remove drug items from prep_criteria_ancestor that were added during the run"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"DELETE
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\`
+WHERE ancestor_id IN
+    (
+        SELECT id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE domain_id = 'DRUG'
+            and type = 'ATC'
+            and is_group = 1
+            and is_selectable = 1
+    )"
 
 
 ################################################
