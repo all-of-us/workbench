@@ -286,7 +286,8 @@ public class RdrExportServiceImpl implements RdrExportService {
       List<UserRole> collaboratorsMap =
           workspaceService.getFirecloudUserRoles(
               dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-
+      // Initializing it to empty array if for any reason firecloud sends an empty array
+      rdrWorkspace.setWorkspaceUsers(new ArrayList<RdrWorkspaceUser>());
       // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
       // COLLABORATOR as ACTIVE
       collaboratorsMap.forEach(
