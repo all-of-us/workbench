@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -22,9 +23,17 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.RdrEntity;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.rdr.api.RdrApi;
-import org.pmiops.workbench.rdr.model.*;
+import org.pmiops.workbench.rdr.model.Gender;
+import org.pmiops.workbench.rdr.model.Race;
+import org.pmiops.workbench.rdr.model.RdrResearcher;
+import org.pmiops.workbench.rdr.model.RdrWorkspace;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
+import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
+import org.pmiops.workbench.rdr.model.SexAtBirth;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -174,6 +183,11 @@ public class RdrExportServiceImpl implements RdrExportService {
 
     researcher.setGivenName(dbUser.getGivenName());
     researcher.setFamilyName(dbUser.getFamilyName());
+    researcher.setDegrees(
+        dbUser.getDegreesEnum().stream()
+            .map(RdrExportEnums::degreeToRdrDegree)
+            .collect(Collectors.toList()));
+
     if (dbUser.getAddress() != null) {
       researcher.setStreetAddress1(dbUser.getAddress().getStreetAddress1());
       researcher.setStreetAddress2(dbUser.getAddress().getStreetAddress2());
@@ -188,13 +202,11 @@ public class RdrExportServiceImpl implements RdrExportService {
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
       researcher.setEducation(
           RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
-      if (dbDemographicSurvey.getEthnicityEnum() != null) {
-        researcher.setEthnicity(
-            new ArrayList<Ethnicity>(
-                Arrays.asList(
-                    RdrExportEnums.ethnicityToRdrEthnicity(
-                        dbDemographicSurvey.getEthnicityEnum()))));
-      }
+      researcher.setEthnicity(
+          Optional.ofNullable(dbDemographicSurvey.getEthnicityEnum())
+              .map(RdrExportEnums::ethnicityToRdrEthnicity)
+              .orElse(null));
+
       researcher.setSexAtBirth(
           Optional.ofNullable(
                   dbDemographicSurvey.getSexAtBirthEnum().stream()
@@ -207,6 +219,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                       .map(RdrExportEnums::genderToRdrGender)
                       .collect(Collectors.toList()))
               .orElse(new ArrayList<Gender>()));
+
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
 
@@ -256,9 +269,17 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setDrugDevelopment(dbWorkspace.getDrugDevelopment());
     rdrWorkspace.setCommercialPurpose(dbWorkspace.getCommercialPurpose());
     rdrWorkspace.setEducational(dbWorkspace.getEducational());
-    rdrWorkspace.setScientificApproaches(dbWorkspace.getReasonForAllOfUs());
+    rdrWorkspace.setEthicalLegalSocialImplications(dbWorkspace.getEthics());
+    rdrWorkspace.setScientificApproaches(dbWorkspace.getScientificApproach());
     rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
+
+    rdrWorkspace.setWorkspaceDemographic(
+        toRdrWorkspaceDemographics(dbWorkspace.getSpecificPopulationsEnum()));
+
+    if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
+      rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
+    }
 
     try {
       // Call Firecloud to get a list of Collaborators
@@ -287,6 +308,74 @@ public class RdrExportServiceImpl implements RdrExportService {
     }
 
     return rdrWorkspace;
+  }
+
+  RdrWorkspaceDemographic toRdrWorkspaceDemographics(
+      Set<SpecificPopulationEnum> dbPopulationEnumSet) {
+    RdrWorkspaceDemographic rdrDemographic = new RdrWorkspaceDemographic();
+
+    rdrDemographic.setAccessToCare(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.ACCESS_TO_CARE)
+            ? RdrWorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
+            : RdrWorkspaceDemographic.AccessToCareEnum.UNSET);
+
+    rdrDemographic.setDisabilityStatus(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.DISABILITY_STATUS)
+            ? RdrWorkspaceDemographic.DisabilityStatusEnum.DISABILITY
+            : RdrWorkspaceDemographic.DisabilityStatusEnum.UNSET);
+
+    rdrDemographic.setEducationLevel(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.EDUCATION_LEVEL)
+            ? RdrWorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
+            : RdrWorkspaceDemographic.EducationLevelEnum.UNSET);
+
+    rdrDemographic.setIncomeLevel(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.INCOME_LEVEL)
+            ? RdrWorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
+            : RdrWorkspaceDemographic.IncomeLevelEnum.UNSET);
+
+    rdrDemographic.setGeography(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.GEOGRAPHY)
+            ? RdrWorkspaceDemographic.GeographyEnum.RURAL
+            : RdrWorkspaceDemographic.GeographyEnum.UNSET);
+
+    rdrDemographic.setSexualOrientation(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.SEXUAL_ORIENTATION)
+            ? RdrWorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
+            : RdrWorkspaceDemographic.SexualOrientationEnum.UNSET);
+
+    rdrDemographic.setGenderIdentity(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.GENDER_IDENTITY)
+            ? RdrWorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
+            : RdrWorkspaceDemographic.GenderIdentityEnum.UNSET);
+
+    rdrDemographic.setSexAtBirth(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.SEX)
+            ? RdrWorkspaceDemographic.SexAtBirthEnum.INTERSEX
+            : RdrWorkspaceDemographic.SexAtBirthEnum.UNSET);
+
+    rdrDemographic.setRaceEthnicity(
+        dbPopulationEnumSet.stream()
+            .map(RdrExportEnums::specificPopulationToRaceEthnicity)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()));
+
+    if (rdrDemographic.getRaceEthnicity().isEmpty()) {
+      rdrDemographic.setRaceEthnicity(
+          Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.UNSET));
+    }
+
+    rdrDemographic.setAge(
+        dbPopulationEnumSet.stream()
+            .map(RdrExportEnums::specificPopulationToAge)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()));
+
+    if (rdrDemographic.getAge().isEmpty()) {
+      rdrDemographic.setAge(Arrays.asList(RdrWorkspaceDemographic.AgeEnum.UNSET));
+    }
+
+    return rdrDemographic;
   }
 
   /**
