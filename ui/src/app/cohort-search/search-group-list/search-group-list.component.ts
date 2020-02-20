@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {SearchRequest} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -11,17 +11,25 @@ import {searchRequestStore} from 'app/cohort-search/search-state.service';
     './search-group-list.component.css',
   ]
 })
-export class SearchGroupListComponent implements OnInit {
+export class SearchGroupListComponent implements OnChanges, OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groups: Array<any>;
   @Input() updateRequest: Function;
 
   index = 0;
   subscription: Subscription;
+  updateGroups = 0;
 
   ngOnInit(): void {
     if (this.role === 'excludes') {
       searchRequestStore.subscribe(sr => this.index = sr.includes.length + 1);
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Trigger child search-groups to update props
+    if (changes.groups) {
+      this.updateGroups++;
     }
   }
 
