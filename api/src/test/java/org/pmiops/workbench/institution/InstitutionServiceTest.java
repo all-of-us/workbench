@@ -75,6 +75,7 @@ public class InstitutionServiceTest {
   @Test
   public void test_deleteAndRecreateInstitution() {
     service.deleteInstitution(testInst.getShortName());
+    assertThat(service.getInstitutions()).isEmpty();
     service.createInstitution(testInst);
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst);
   }
