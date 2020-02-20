@@ -150,6 +150,8 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
+                      helpContent: 'preview',
+                      notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
                   }
