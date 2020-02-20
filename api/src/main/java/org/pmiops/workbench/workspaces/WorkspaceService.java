@@ -9,6 +9,7 @@ import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
@@ -44,6 +45,8 @@ public interface WorkspaceService {
   DbWorkspace getRequiredWithCohorts(String ns, String firecloudName);
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
+
+  void deleteWorkspace(DbWorkspace dbWorkspace);
 
   /*
    * This function will call the Google Cloud Billing API to set the given billing

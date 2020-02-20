@@ -698,6 +698,16 @@ task exportWorkspaceData(type: JavaExec) {
   }
 }
 
+// See project.rb command: delete-workspaces
+task deleteWorkspaces(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.DeleteWorkspaces"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 // This task is called from a few different places:
 // - devstart.rb > load_config (used by "deploy" and "update_cloud_config" commands)
 // - directly via gradlew (used by "run-local-migrations" command)

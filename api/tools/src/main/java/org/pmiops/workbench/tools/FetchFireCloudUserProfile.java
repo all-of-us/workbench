@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Import;
  * domain-wide delegation to make FireCloud API calls impersonating other users.
  */
 @Configuration
-//@ComponentScan("org.pmiops.workbench.firecloud")
 @Import({
     FireCloudServiceImpl.class,
     FireCloudConfig.class
