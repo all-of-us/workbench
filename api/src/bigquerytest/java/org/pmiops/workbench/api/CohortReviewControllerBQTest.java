@@ -21,6 +21,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -69,6 +70,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -90,14 +92,16 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ReviewQueryBuilder.class,
     CohortCloningService.class,
     CohortQueryBuilder.class,
-    SearchGroupItemQueryBuilder.class
+    SearchGroupItemQueryBuilder.class,
+    ManualWorkspaceMapper.class
   })
   @MockBean({
     FireCloudService.class,
     UserRecentResourceService.class,
     CohortFactory.class,
     ConceptSetService.class,
-    DataSetService.class
+    DataSetService.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
 

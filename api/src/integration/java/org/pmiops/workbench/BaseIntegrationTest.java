@@ -25,13 +25,12 @@ public abstract class BaseIntegrationTest {
 
   @TestConfiguration
   static class Configuration {
-    // This prototype-scoped bean override will cause all autowired services to call
-    // this method for their Provider<WorkbenchConfig>. Concrete tests should assign
-    // a value to `config` from within setUp and null it out from within tearDown. Further
-    // modifications may be made from within each test case.
+    // This prototype-scoped bean override will cause all autowired services to call this method
+    // for their Provider<WorkbenchConfig>. Further modifications may be made from within each test
+    // case.
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    WorkbenchConfig getTestConfig() throws IOException {
+    WorkbenchConfig getIntegrationTestConfig() throws IOException {
       return config;
     }
   }

@@ -1,4 +1,3 @@
-// Configuration for the local development environment.
 {
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-dev.broadinstitute.org",
@@ -13,13 +12,13 @@
     "xAppIdValue": "local-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.8",
-    "welderDockerImage": "broadinstitute/welder-server:60e28bc"
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.11",
+    "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
-    "accountId": "014D91-FCB792-33D2C0",
+    "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-local1-",
-    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
+    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 2,
     "bufferCapacity": 2,
     "bufferRefillProjectsPerTask": 1,
@@ -66,6 +65,9 @@
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
   },
+  "zendesk": {
+    "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
+  },
   "elasticsearch": {
     "baseUrl": "http:\/\/elastic:9200",
     "enableBasicAuth": false,
@@ -73,14 +75,17 @@
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true
+    "enableMoodleBackend": true,
+    "credentialsKeyV1": "moodle-key.txt",
+    "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
-    "enableComplianceTraining": false,
+    "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
-    "unsafeAllowSelfBypass": true
+    "unsafeAllowSelfBypass": true,
+    "requireInvitationKey": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -88,7 +93,11 @@
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
     "enableRdrExport": true,
-    "enableBillingLockout": true
+    "enableBillingLockout": true,
+    "enableSumoLogicEventHandling": true,
+    "useKeylessDelegatedCredentials": true,
+    "sendFreeTierAlertEmails": false,
+    "enableMoodleV2Api": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-local"

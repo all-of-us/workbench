@@ -2,6 +2,8 @@
 
 [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
 
+[Documentation on API Structure](https://github.com/all-of-us/workbench/blob/master/api/doc/code-structure.md)
+
 ## Setup for Development
 
 System requirements:
@@ -19,13 +21,14 @@ See https://docs.docker.com/docker-for-mac/#advanced for screenshots and instruc
 For local development, also install:
 
   * [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
-  * [Node.js](https://nodejs.org/en/)
+  * [Node.js](https://nodejs.org/en/) >= 8.  Currently known to work up to 12.16.
   * [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 After you've installed `gcloud`, login using your `pmi-ops` account:
 
 ```shell
 gcloud auth login
+gsutil config (choose all-of-us-workbench-test as your default project)
 ```
 
 To initialize the project, run the following:
@@ -36,7 +39,7 @@ cd workbench
 git submodule update --init --recursive
 ```
 
-Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers). Optionally, you can [set up your Intellij](https://docs.google.com/document/d/1DtESBapEzvuti7xODTFPHorwmLM7LybF-6D5lhbIkLU/edit) for UI or API work.
+Then set up [git secrets](#git-secrets) and [git lfs](#git-lfs) and fire up the [development servers](#running-the-dev-servers). Optionally, you can [set up your Intellij](https://docs.google.com/document/d/1DtESBapEzvuti7xODTFPHorwmLM7LybF-6D5lhbIkLU/edit) for UI or API work.
 
 Before doing any development, you must run the following from `/api`:
 ```Shell
@@ -257,6 +260,23 @@ Example:
 When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJECT.appspot.com. If you specify --promote, you can access it at https://PROJECT.appspot.com. Note that either way, it will be pointing at the live test API
 service (https://api-dot-PROJECT.appspot.com). (This can be overridden locally
 in the Chrome console).
+
+__NOTE:__ In order to test out a custom UI version in the browser, you must whitelist the base URL with the OAuth 2.0 client ID for the test Workbech environment. A common pattern is to use your GitHub username as the App Engine version name, so this setup only needs to be done once. See [this doc](https://docs.google.com/document/d/15-ktzL3Hdt5rpdFAS3z-v5vSNfk_LtjtPHCvbshjeZo/edit) for instructions.
+
+## git-lfs
+
+### Setup
+
+Download the git-lfs tool.
+If you are on a mac, run:
+```Shell
+  brew install git-lfs
+```
+
+Enable git lfs in the top level directory.
+```Shell
+  git lfs install
+```
 
 ## git-secrets
 
@@ -603,14 +623,14 @@ workbench test service account against Firecloud dev. It retrieves required auth
 scopes of `email`, `profile`, and `cloud-billing`.
 
 ```Shell
-# From the "api" directory, use `oauth2l` to retrieve an authorization header: 
+# From the "api" directory, use `oauth2l` to retrieve an authorization header:
 `~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`
 ```
 
 Now we'll demonstrate calling Firecloud's [profile/billing API](https://api.firecloud.org/#!/Profile/billing)
 with the service account credentials.
 ```Shell
-# call Firecloud Billing API, format the JSON output and view in less 
+# call Firecloud Billing API, format the JSON output and view in less
 
 curl -X GET -H "`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`" \
     -H "Content-Type: application/json" \

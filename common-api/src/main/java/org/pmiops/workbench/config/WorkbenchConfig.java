@@ -19,6 +19,7 @@ public class WorkbenchConfig {
   public MandrillConfig mandrill;
   public ElasticsearchConfig elasticsearch;
   public MoodleConfig moodle;
+  public ZendeskConfig zendesk;
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
@@ -42,6 +43,7 @@ public class WorkbenchConfig {
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
     config.moodle = new MoodleConfig();
+    config.zendesk = new ZendeskConfig();
     config.server = new ServerConfig();
     config.billing = new BillingConfig();
     config.actionAudit = new ActionAuditConfig();
@@ -72,6 +74,11 @@ public class WorkbenchConfig {
     public String projectNamePrefix;
     // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
+
+    public String freeTierBillingAccountName() {
+      return "billingAccounts/" + accountId;
+    }
+
     // The full table name for the BigQuery billing export, which is read from by the free-tier
     // usage tracking cron endpoint.
     public String exportBigQueryTable;
@@ -169,18 +176,29 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public boolean enableMoodleBackend;
+    public String credentialsKeyV1;
+    public String credentialsKeyV2;
   }
 
-  // The access object specifies whether each of the following access requirements block access
-  // to the workbench.
+  public static class ZendeskConfig {
+    public String host;
+  }
+
+  // Config related to user sign-up and registration, including access modules and controls around
+  // the sign-up flow.
   public static class AccessConfig {
     // Allows a user to bypass their own access modules. This is used for testing purposes so that
     // We can give control over 3rd party access modules
     public boolean unsafeAllowSelfBypass;
+    // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
+    // Controls whether an invitation key is required for user creation. When true, the account
+    // creation UI will show an invitation key form and the server will validate the key before
+    // proceeding.
+    public boolean requireInvitationKey;
   }
 
   public static class CohortBuilderConfig {
@@ -198,14 +216,27 @@ public class WorkbenchConfig {
     // security perimeter.
     public boolean enableVpcServicePerimeter;
     // Flag to indicate whether to enable the new Create Account flow
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
+    // See RW-3284.
     public boolean enableNewAccountCreation;
     // Flag to indicate if USER/WORKSPACE data is exported to RDR
     public boolean enableRdrExport;
     // Setting this to true will prevent users from making compute increasing operations on
     // inactive billing workspaces
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3209
+    // See RW-3209.
     public boolean enableBillingLockout;
+    // Whether or not AoU should handle inbound SumoLogic high-egress event requests.
+    // See RW-2253.
+    public boolean enableSumoLogicEventHandling;
+    // Causes the server to use an API-based method for generating delegated user credentials,
+    // as opposed to reading service account private keys from GCS.
+    // See RW-2840.
+    public boolean useKeylessDelegatedCredentials;
+    // Whether we send emails to users after they pass Free Tier usage thresholds
+    // Blocked by RW-4135: do not enable in an environment where contact_email can be NULL
+    public boolean sendFreeTierAlertEmails;
+    // Flag to indicate whether to use the new Moodle badges API
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-2957
+    public boolean enableMoodleV2Api;
   }
 
   public static class ActionAuditConfig {

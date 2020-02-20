@@ -1,4 +1,4 @@
-import {Page} from 'puppeteer-core';
+import {Page} from 'puppeteer';
 
 export async function waitForNavigation(page: Page) {
   return Promise.all([

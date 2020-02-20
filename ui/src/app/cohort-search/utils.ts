@@ -286,9 +286,12 @@ export function mapGroup(group: any) {
 }
 
 export function mapGroupItem(item: any, temporal: boolean) {
-  const {id, type, modifiers, temporalGroup} = item;
+  const {id, type, modifiers, name, temporalGroup} = item;
   const searchParameters = item.searchParameters.map(mapParameter);
   const searchGroupItem = <SearchGroupItem>{id, type, searchParameters, modifiers};
+  if (name) {
+    searchGroupItem.name = name;
+  }
   if (temporal) {
     searchGroupItem.temporalGroup = temporalGroup;
   }

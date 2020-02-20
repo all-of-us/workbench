@@ -6,15 +6,14 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "jest --runInBand /tests",
-    "test:debug": "yarn run test",
-    "test-dev": "WORKBENCH_ENV=dev jest /tests",
-    "test-dev:debug": "PUPPETEER_HEADLESS=true yarn run test-dev",
-    "compile": "tsc",
+    "test": "WORKBENCH_ENV=test jest --detectOpenHandles /tests",
+    "test:debug": "WORKBENCH_ENV=test PUPPETEER_HEADLESS=false jest --detectOpenHandles --runInBand /tests",
+    "test-local": "WORKBENCH_ENV=local jest --runInBand /tests",
+    "build": "tsc --build --clean",
     "lint": "tslint --project tsconfig.json",
     "lint:err": "yarn run lint --quiet",
     "lint:fix": "yarn run lint --fix",
-    "build": "rimraf tsc-out/ && yarn run lint && yarn run compile"
+    "compile": "rimraf tsc-out/ && yarn run lint && yarn run build"
   },
   "jest": {
     "verbose": true,
@@ -37,7 +36,13 @@
       "<rootDir>/node_modules/(?!tests)"
     ],
     "moduleFileExtensions": [
-      "ts", "spec.ts", "tsx", "js", "jsx", "json", "node"
+      "ts",
+      "spec.ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
     ]
   },
   "keywords": [
@@ -52,16 +57,16 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/faker": "^4.1.9",
     "@types/jest": "^24.0.21",
     "@types/node": "^12.12.5",
-    "@types/puppeteer-core": "^1.9.0",
-    "chrome-paths": "^1.0.1",
+    "@types/puppeteer": "^2.0.0",
     "dotenv": "^8.1.0",
     "faker": "^4.1.0",
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
     "lodash": "^4.17.15",
-    "puppeteer-core": "^2.0.0",
+    "puppeteer": "^2.1.1",
     "rimraf": "^3.0.0",
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",

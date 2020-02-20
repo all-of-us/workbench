@@ -536,6 +536,18 @@ paths:
           type: string
           required: false
 
+  /v1/user/billingAccounts:
+    get:
+      tags:
+        - user
+      description: Returns a list of billing accounts the caller can set a workspace's billing account to
+      operationId: listBillingAccounts
+      responses:
+        200:
+          description: List of billing accounts
+          schema:
+            $ref: "#/definitions/WorkbenchListBillingAccountsResponse"
+
   # Notebook clusters ####################################################################
 
   /v1/admin/security/clusters/{billingProjectId}/delete-clusters:
@@ -1061,6 +1073,26 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  /v1/admin/workspaces/{workspaceNamespace}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+    get:
+      tags:
+        - workspaceAdmin
+      description: >
+        Given a workspace namespace (Google Cloud Platform  Project ID), returns workspace details.
+        Only accessible to privileged admin users.
+      operationId: getFederatedWorkspaceDetails
+      responses:
+        200:
+          description: Federated details about the workspace.
+          schema:
+            $ref: "#/definitions/AdminFederatedWorkspaceDetailsResponse"
+        404:
+          description: Workspace not found for namespace
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/admin/clusters/updateConfig:
     post:
       summary: Sets default cluster creation request parameters for a user.
@@ -1084,6 +1116,32 @@ paths:
           description: success
           schema:
             $ref: "#/definitions/EmptyResponse"
+
+  /v1/admin/sumo/egressEvent:
+    post:
+      tags:
+        - sumoLogic
+      description: >
+        Registers an egress event detected by SumoLogic with the Workbench. Forwards the event
+        to Stackdriver for recording and potential alerting.
+      operationId: logEgressEvent
+      security: []
+      parameters:
+        - in: body
+          name: request
+          description: Egress event request
+          schema:
+            $ref: "#/definitions/EgressEventRequest"
+        - in: header
+          name: X-API-KEY
+          description: >
+            Semi-secret API key sent by SumoLogic. This will be checked against the set of valid
+            API keys stored in the per-environment credentials bucket.
+          required: true
+          type: string
+      responses:
+        204:
+          description: The egress event was successfully handled.
 
   # Cron ############################################################################
 
@@ -1929,50 +1987,28 @@ paths:
           schema:
             $ref: "#/definitions/SurveysResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/{surveyName}/surveyQuestions:
-    get:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/searchSurveys:
+    post:
       tags:
         - concepts
       description: >
-        Returns survey questions and answers in the workspace's CDR version
-      operationId: "getSurveyQuestions"
+        Searches for surveys in criteria table by synonyms or survey name
+      operationId: "searchSurveys"
       parameters:
         - $ref: '#/parameters/workspaceNamespace'
         - $ref: '#/parameters/workspaceId'
-        - in: path
-          name: surveyName
-          required: true
-          type: string
+        - in: body
+          name: request
+          description: survey search request
+          schema:
+            $ref: "#/definitions/SearchSurveysRequest"
       responses:
         200:
-          description: information about the surveys
+          description: collection of survey questions
           schema:
             type: "array"
             items:
               $ref: "#/definitions/SurveyQuestions"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyAnswer:
-    get:
-      tags:
-        - concepts
-      description: >
-        Returns with all the answer for survey Question
-      operationId: "getSurveyAnswers"
-      parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: query
-          name: questionConceptId
-          required: true
-          type: integer
-          format: int64
-      responses:
-        200:
-          description: List of Survey Details with Answer
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/SurveyAnswerResponse"
 
   ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
@@ -2227,47 +2263,146 @@ paths:
             $ref: "#/definitions/DomainValuesResponse"
 
 
-##########################################################################################
-## Endpoints for task in cloud task queue
-#########################################################################################
-  /v1/queueTask/exportResearcherData:
+  ##########################################################################################
+  # Endpoints for task in cloud task queue
+  # Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
+  # to the queue name, which app engine itself only sets (and overrides internally) when invoking
+  # cloud task. See
+  # https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
+  # and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
+  #########################################################################################
+
+  # Using body parameter ref ArrayOfLong instead of defining array of type long here because of
+  # bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
+  /v1/cloudTask/exportResearcherData:
     post:
       tags:
         - cloudTaskRdrExport
+        - cloudTask
+      security: []
       description: >
-        Send Researcher data
+        Task handler which handle request from cloud task queue rdrQueueTest to send Researcher data
       operationId: "exportResearcherData"
+      consumes:
+        - application/json
       parameters:
         - in: body
           name: researcherIds
           required: true
-          description: The IDs of concepts to be added to the concept set.
+          description: The IDs of Users to be exported to Rdr.
           schema:
-            type: object
+            $ref: "#/definitions/ArrayOfLong"
       responses:
         200:
           description: >
             A SQL query for each domain in the Data Set
 
-  /v1/queueTask/exportWorkspaceData:
+  /v1/cloudTask/exportWorkspaceData:
     post:
       tags:
         - cloudTaskRdrExport
+        - cloudTask
+      security: []
       description: >
-        Send Researcher data
+        Task handler which handle request from cloud task queue rdrQueueTest to send Workspace data
       operationId: "exportWorkspaceData"
       parameters:
         - in: body
           name: researchIds
           required: true
-          description: The IDs of concepts to be added to the concept set.
+          description: The IDs of workspace to be exported to Rdr.
           schema:
-            type: object
+            $ref: "#/definitions/ArrayOfLong"
       responses:
         200:
           description: >
             A SQL query for each domain in the Data Set
 
+# Institution endpoints, for Verified Institutional Affiliation
+
+  /v1/institutions:
+    get:
+      tags:
+        - institution
+      description: >
+        Gets a list of all Institutions.
+      operationId: "getInstitutions"
+      responses:
+        200:
+          description: >
+            A list of all Institutions
+          schema:
+            $ref: "#/definitions/GetInstitutionsResponse"
+    post:
+      tags:
+        - institution
+      description: >
+        Create an Institution.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: "createInstitution"
+      parameters:
+        - in: body
+          name: institutionToCreate
+          required: true
+          description: The Institution to be created by this operation.
+          schema:
+            $ref: "#/definitions/Institution"
+      responses:
+        200:
+          description: >
+            The Institution created by this operation.
+          schema:
+            $ref: "#/definitions/Institution"
+
+  /v1/institutions/{shortName}:
+    parameters:
+      - in: path
+        name: shortName
+        required: true
+        type: string
+    get:
+      tags:
+        - institution
+      description: >
+        Gets the Institution corresponding to the shortName ID.
+      operationId: "getInstitution"
+      responses:
+        200:
+          description: >
+            The Institution corresponding to the shortName ID.
+          schema:
+            $ref: "#/definitions/Institution"
+    delete:
+      tags:
+        - institution
+      description: >
+        Deletes the Institution corresponding to the shortName ID.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: "deleteInstitution"
+      responses:
+        204:
+          description: >
+            Successful deletion of the Institution corresponding to the shortName ID.
+    patch:
+      tags:
+        - institution
+      description: >
+        Updates an Institution.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: "updateInstitution"
+      parameters:
+        - in: body
+          name: institutionToUpdate
+          required: true
+          description: The Institution to update.
+          schema:
+            $ref: "#/definitions/Institution"
+      responses:
+        200:
+          description: >
+            The updated Institution.
+          schema:
+            $ref: "#/definitions/Institution"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -2299,6 +2434,9 @@ definitions:
       projectId:
         type: string
         description: The cloud project in which this app is running.
+      firecloudURL:
+        type: string
+        description: The Firecloud URL to use for REST requests.
       publicApiKeyForErrorReports:
         type: string
         description: |
@@ -2307,22 +2445,35 @@ definitions:
       enableComplianceTraining:
         type: boolean
         default: false
-        description: Feature flag for enabling compliance training in registration steps
+        description: Whether the compliance training access module is enabled.
       enableDataUseAgreement:
         type: boolean
         default: false
-        description: Feature flag for enabling data use agreement
-      unsafeAllowSelfBypass:
-        type: boolean
-        default: false
-        description: Enable a user to bypass themself
+        description: Whether the data use agreement access module is enabled.
       enableEraCommons:
         type: boolean
         default: false
-        description: Feature flag for enabling eRA commons
-      firecloudURL:
-        type: string
-        description: The Firecloud URL to use for REST requests.
+        description: Whether the eRA Commons access module is enabled.
+      unsafeAllowSelfBypass:
+        type: boolean
+        default: false
+        description: Whether a user is allowed to self-bypass. Only enabled in test environments.
+      defaultFreeCreditsDollarLimit:
+        type: number
+        format: double
+        description: The default dollar amount of free credits alloted to each user
+      enableBillingLockout:
+        type: boolean
+        default: false
+        description: Feature flag for billing lockout and upgrade
+      enableNewAccountCreation:
+        type: boolean
+        default: false
+        description: Feature flag for collecting new demographics & TOS acknowledgement on user creation.
+      requireInvitationKey:
+        type: boolean
+        default: false
+        description: Whether the current environment requires an invitation key for signup.
 
   FeaturedWorkspacesConfigResponse:
     type: object
@@ -2412,6 +2563,9 @@ definitions:
   #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
   #   4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
+  #   5) COMMUNICATIONS_ADMIN: Allows a user to post a Status Alert banner
+  #   6) SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all clusters in a project
+  #   7) INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -2424,7 +2578,9 @@ definitions:
       ACCESS_CONTROL_ADMIN,
       FEATURED_WORKSPACE_ADMIN,
       COMMUNICATIONS_ADMIN,
-      SECURITY_ADMIN
+      SECURITY_ADMIN,
+      INSTITUTION_ADMIN,
+      WORKSPACES_VIEW
     ]
 
   PageVisit:
@@ -2480,12 +2636,18 @@ definitions:
         type: string
       creator:
         type: string
+      billingAccountName:
+        type: string
+      billingAccountType:
+        $ref: "#/definitions/BillingAccountType"
       googleBucketName:
         type: string
       dataAccessLevel:
         $ref: "#/definitions/DataAccessLevel"
       researchPurpose:
         $ref: "#/definitions/ResearchPurpose"
+      billingStatus:
+        $ref: "#/definitions/BillingStatus"
       creationTime:
         type: integer
         format: int64
@@ -2620,9 +2782,10 @@ definitions:
       - reviewRequested
       - socialBehavioral
       - populationHealth
+      - ethics
       - educational
       - otherPurpose
-      - reasonForAllOfUs
+      - scientificApproach
       - intendedStudy
       - anticipatedFindings
       - drugDevelopment
@@ -2656,6 +2819,8 @@ definitions:
         default: false
       intendedStudy:
         type: string
+      scientificApproach:
+        type: string
       methodsDevelopment:
         type: boolean
         default: false
@@ -2669,10 +2834,13 @@ definitions:
       population:
         type: boolean
         default: false
+      ethics:
+        type: boolean
+        default: false
       populationDetails:
         type: array
         items:
-          $ref: "#/definitions/specificPopulationEnum"
+          $ref: "#/definitions/SpecificPopulationEnum"
       populationHealth:
         type: boolean
         default: false
@@ -2692,8 +2860,18 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      disseminateResearchFindingList:
+        type: array
+        items:
+          $ref: "#/definitions/DisseminateResearchEnum"
+      otherDisseminateResearchFindings:
+        type: string
+      researchOutcomeList:
+        type: array
+        items:
+          $ref: "#/definitions/ResearchOutcomeEnum"
 
-  specificPopulationEnum:
+  SpecificPopulationEnum:
     type: string
     description: Short parsable descriptions of specific population categories
     enum: [
@@ -2707,7 +2885,44 @@ definitions:
       ACCESS_TO_CARE,
       EDUCATION_LEVEL,
       INCOME_LEVEL,
+      OTHER,
+      RACE_ASIAN,
+      RACE_AA,
+      RACE_HISPANIC,
+      RACE_AIAN,
+      RACE_MENA,
+      RACE_NHPI,
+      RACE_MORE_THAN_ONE,
+      AGE_CHILDREN,
+      AGE_ADOLESCENTS,
+      AGE_OLDER,
+      AGE_OLDER_MORE_THAN_75
+    ]
+
+  DisseminateResearchEnum:
+    type: string
+    description: Represents how researchers plan to to disseminate thier research findings.
+    enum: [
+      PUBLICATION_PEER_REVIEWED_JOURNALS,
+      PRESENATATION_SCIENTIFIC_CONFERENCES,
+      PRESS_RELEASE,
+      PUBLICATION_COMMUNITY_BASED_BLOG,
+      PUBLICATION_PERSONAL_BLOG,
+      SOCIAL_MEDIA,
+      PRESENTATION_ADVISORY_GROUPS,
       OTHER
+    ]
+
+  ResearchOutcomeEnum:
+    type: string
+    description: Represents antipicated outcomes from the research
+    enum: [
+      PROMOTE_HEALTHY_LIVING,
+      IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS,
+      IMPROVED_RISK_ASSESMENT,
+      DECREASE_ILLNESS_BURDEN,
+      PRECISION_INTERVENTION,
+      NONE_APPLY
     ]
 
   ResearchPurposeReviewRequest:
@@ -2774,6 +2989,37 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/CohortReview"
+
+  WorkbenchListBillingAccountsResponse:
+    type: object
+    required:
+      - billingAccounts
+    properties:
+      billingAccounts:
+        type: "array"
+        items:
+          $ref: "#/definitions/BillingAccount"
+
+  BillingAccount:
+    description: >
+      See https://cloud.google.com/billing/reference/rest/v1/billingAccounts#BillingAccount
+      for documentation on name, displayName, and isOpen.
+    type: object
+    required:
+      - isFreeTier
+      - name
+      - displayName
+      - isOpen
+    properties:
+      isFreeTier:
+        description: Returns true if this is the billing account used for free tier
+        type: boolean
+      name:
+        type: string
+      displayName:
+        type: string
+      isOpen:
+        type: boolean
 
   CohortListResponse:
     type: object
@@ -3092,6 +3338,7 @@ definitions:
     enum:
       - NOTEBOOK
       - COHORT
+      - COHORT_SEARCH_ITEM
       - COHORT_REVIEW
       - CONCEPT_SET
       - DATASET
@@ -3351,6 +3598,36 @@ definitions:
         items:
           $ref: "#/definitions/SurveyModule"
 
+  SearchSurveysRequest:
+    type: object
+    required:
+      - standardConceptFilter
+    properties:
+      query:
+        type: string
+        description: >
+          A query string that can be used to match a subset of the name (case-insensitively),
+          the entire code value (case-insensitively), or the concept ID. If not specified, all
+          concepts are returned.
+      standardConceptFilter:
+        description: >
+          STANDARD_CONCEPTS if only standard concepts should be returned,
+          NON_STANDARD_CONCEPTS if only non-standard
+          concepts should be returned; defaults to ALL_CONCEPTS, meaning both
+          standard and non-standard concepts will be returned.
+        $ref: "#/definitions/StandardConceptFilter"
+      surveyName:
+        description: The name of the survey clicked
+        type: string
+      maxResults:
+        type: integer
+        format: int32
+        description: The maximum number of results returned. Defaults to 20.
+      pageNumber:
+        type: integer
+        default: 0
+        description: By default it returns the first page and then its next pages from that on.
+
   SurveyQuestions:
     type: object
     properties:
@@ -3359,21 +3636,10 @@ definitions:
       conceptId:
         type: integer
         format: int64
-
-  SurveyAnswerResponse:
-    type: object
-    properties:
-      answer:
-        type: string
-      conceptId:
+      countValue:
+        description: Count of participants matching this concept in the CDR
         type: integer
         format: int64
-      participationCount:
-        type: integer
-        format: int64
-      percentAnswered:
-        type: number
-        format: double
 
   CreateAccountRequest:
     type: object
@@ -3382,6 +3648,12 @@ definitions:
         $ref: '#/definitions/Profile'
       invitationKey:
         type: string
+      termsOfServiceVersion:
+        type: integer
+        format: int32
+        description: >
+          Optional version of the TOS that the user has acknowledged during the sign-up flow. If null, the system
+          assumes that the user has not acknowledged any TOS during sign-up.
 
   DuplicateCohortRequest:
     type: object
@@ -3483,6 +3755,9 @@ definitions:
         type: string
       phoneNumber:
         description: the user's phone number
+        type: string
+      professionalUrl:
+        description: the link to the user's professional url
         type: string
       currentPosition:
         description: the user's curent position (job title)
@@ -3595,6 +3870,18 @@ definitions:
       freeTierDollarQuota:
         type: number
         format: double
+      latestTermsOfServiceVersion:
+        type: integer
+        format: int32
+        description: >
+          Version of the terms of service that the user last acknowledged. May be null if the user has never
+          acknowledged the Terms of Service.
+      latestTermsOfServiceTime:
+        type: integer
+        format: int64
+        description: >
+          Timestamp when the user last acknowledged the terms of service. May be null if the user has never
+          acknowledged the Terms of Service.
 
   InstitutionalAffiliation:
     type: object
@@ -3618,18 +3905,18 @@ definitions:
           $ref: '#/definitions/Race'
       ethnicity:
         $ref: '#/definitions/Ethnicity'
-      gender:
+      identifiesAsLgbtq:
+        type: boolean
+      lgbtqIdentity:
+        type: string
+      genderIdentityList:
         type: array
         items:
-          $ref: '#/definitions/Gender'
+          $ref: '#/definitions/GenderIdentity'
       sexAtBirth:
         type: array
         items:
           $ref: '#/definitions/SexAtBirth'
-      sexualOrientation:
-        type: array
-        items:
-          $ref: '#/definitions/SexualOrientation'
       yearOfBirth:
         type: number
       education:
@@ -3921,6 +4208,8 @@ definitions:
         type: string
       workspaceFirecloudName:
         type: string
+      workspaceBillingStatus:
+        $ref: '#/definitions/BillingStatus'
       permission:
         type: string
       cohort:
@@ -4011,3 +4300,153 @@ definitions:
         description: >
           A URL linking to an incident report where users can read more
         type: string
+
+  EgressEventRequest:
+    type: object
+    properties:
+      eventsJsonArray:
+        type: string
+        description: >
+          A JSON string containing an array of JSON-encoded egress events. See the EgressEvent
+          definition for the expected schema of each event.
+
+  EgressEvent:
+    type: object
+    properties:
+      environment:
+        description: The AoU environment in which the high-egress event occurred.
+        type: string
+        enum:
+          - test
+          - perf
+          - staging
+          - stable
+          - preprod
+          - prod
+      time_window_duration:
+        description: >
+          The duration of the time window during which the high-egress event occurred, in seconds.
+        type: integer
+        format: int64
+      time_window_start:
+        description: Beginning of the time window, in milliseconds since Epoch.
+        type: integer
+        format: int64
+      egress_mib:
+        description: The amount of egress detected during the window, in mebibytes (MiB).
+        type: number
+        format: double
+      egress_mib_threshold:
+        description: The threshold value for which this egress triggered an alert, in mebibytes (MiB).
+        type: number
+        format: double
+      project_name:
+        description: >
+          The Google Cloud project name associated with the workspace, e.g. aou-rw-6b66533d. Always present.
+        type: string
+      vm_name:
+        description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
+        type: string
+
+  ArrayOfLong:
+    type: array
+    items:
+      type: integer
+      format: int64
+
+  OrganizationType:
+    type: string
+    description: A categorization of institutions derived from CAPS requirements
+    enum: [ACADEMIC_RESEARCH_INSTITUTION, INDUSTRY, EDUCATIONAL_INSTITUTION, HEALTH_CENTER_NON_PROFIT, OTHER]
+
+  Institution:
+    type: object
+    description: Represents an institution which has been approved to validate researchers who wish to use the system
+    required:
+      - shortName
+      - displayName
+      - organizationTypeEnum
+    properties:
+      shortName:
+        type: string
+      displayName:
+        type: string
+      organizationTypeEnum:
+        $ref: '#/definitions/OrganizationType'
+        description: >
+          The Organization Type of this institution if it is one of the enumerated
+          OrganizationTypes, or OrganizationType.OTHER if it is not
+      organizationTypeOtherText:
+        type: string
+        description: >
+          The detailed Organization Type of this institution, as text,
+          if its enumerated type is OTHER
+      emailAddresses:
+        type: array
+        description: A list of email addresses which can be validated as members of this Institution
+        items:
+          type: string
+      emailDomains:
+        type: array
+        description: A list of email domains which can be validated as members of this Institution
+        items:
+          type: string
+
+  GetInstitutionsResponse:
+    type: object
+    required:
+      - institutions
+    properties:
+      institutions:
+        type: "array"
+        items:
+          $ref: "#/definitions/Institution"
+
+  AdminFederatedWorkspaceDetailsResponse:
+    description: Admin-visible metadata about a workspace.
+    type: object
+    properties:
+      workspace:
+        $ref: "#/definitions/Workspace"
+      collaborators:
+        type: array
+        items:
+          $ref: "#/definitions/UserRole"
+      resources:
+        $ref: "#/definitions/AdminWorkspaceResources"
+
+  AdminWorkspaceResources:
+    description: >
+      A summary of application-level resources associated with a workspace. Includes data about
+      Cohort Builder objects, analysis clusters, and cloud-storage contents.
+    type: object
+    properties:
+      workspaceObjects:
+        $ref: "#/definitions/AdminWorkspaceObjectsCounts"
+      cloudStorage:
+        $ref: "#/definitions/AdminWorkspaceCloudStorageCounts"
+      clusters:
+        type: array
+        items:
+          $ref: "#/definitions/ListClusterResponse"
+
+  AdminWorkspaceObjectsCounts:
+    type: object
+    properties:
+      cohortCount:
+        type: integer
+      conceptSetCount:
+        type: integer
+      datasetCount:
+        type: integer
+
+  AdminWorkspaceCloudStorageCounts:
+    type: object
+    properties:
+      notebookFileCount:
+        type: integer
+      nonNotebookFileCount:
+        type: integer
+      storageBytesUsed:
+        type: integer
+        format: int64

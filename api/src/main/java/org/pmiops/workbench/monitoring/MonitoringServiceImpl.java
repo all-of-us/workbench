@@ -16,7 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,13 +50,14 @@ public class MonitoringServiceImpl implements MonitoringService {
     stackdriverStatsExporterService.createAndRegister();
   }
 
+  /**
+   * We don't want to register LogsBasedMetric enum values with OpenCensus. It makes it confusing ot
+   * see custom.googleapis.com/metric_name in addition to logging/user/metric_name.
+   * TODO(jaycarlton): restore event metrics here once OpenCensus is working
+   */
   private void registerMetricViews() {
     StreamSupport.stream(
-            Iterables.concat(
-                    Arrays.<Metric>asList(GaugeMetric.values()),
-                    Arrays.<Metric>asList(EventMetric.values()))
-                .spliterator(),
-            false)
+            Iterables.concat(Arrays.<Metric>asList(GaugeMetric.values())).spliterator(), false)
         .map(Metric::toView)
         .forEach(viewManager::registerView);
   }
@@ -77,6 +77,7 @@ public class MonitoringServiceImpl implements MonitoringService {
 
     // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
     measureMap.record(tagContextBuilder.build());
+    logger.fine(String.format("Record measurements: %s, tags: %s", metricToValue, tags));
   }
 
   /**
@@ -98,9 +99,5 @@ public class MonitoringServiceImpl implements MonitoringService {
           Level.WARNING,
           String.format("Unrecognized measure class %s", metric.getMeasureClass().getName()));
     }
-  }
-
-  private void logAndSwallow(RuntimeException e) {
-    logger.log(Level.WARNING, "Exception encountered during monitoring.", e);
   }
 }

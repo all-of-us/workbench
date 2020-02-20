@@ -13,15 +13,14 @@ import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
 describe('InvitationKeyComponent', () => {
   let props: InvitationKeyProps;
-  const onInvitationKeyVerify = jest.fn();
-
+  const onInvitationKeyVerified = jest.fn();
 
   const component = () => mount(<InvitationKeyReact {...props}/>);
 
   beforeEach(() => {
-    props = {onInvitationKeyVerify};
+    props = {onInvitationKeyVerified};
     registerApiClient(ProfileApi, new ProfileApiStub());
-    onInvitationKeyVerify.mockClear();
+    onInvitationKeyVerified.mockClear();
   });
 
   it('should display required error message if Invitation key is blank', () => {
@@ -54,6 +53,6 @@ describe('InvitationKeyComponent', () => {
 
       await nextButton.simulate('click');
       wrapper.update();
-      expect(onInvitationKeyVerify).toHaveBeenCalled();
+      expect(onInvitationKeyVerified).toHaveBeenCalled();
     });
 });

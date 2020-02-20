@@ -1,29 +1,27 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import static org.pmiops.workbench.concept.ConceptService.STANDARD_CONCEPT_CODES;
+import static org.pmiops.workbench.model.StandardConceptFilter.STANDARD_CONCEPTS;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.concept.ConceptService;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
+import org.pmiops.workbench.model.DomainCountsListResponse;
+import org.pmiops.workbench.model.DomainCountsRequest;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
-import org.pmiops.workbench.model.StandardConceptFilter;
-import org.pmiops.workbench.model.SurveyAnswerResponse;
+import org.pmiops.workbench.model.SearchSurveysRequest;
+import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyQuestions;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -40,31 +38,11 @@ public class ConceptsController implements ConceptsApiDelegate {
   private static final int MAX_MAX_RESULTS = 1000;
 
   private final ConceptService conceptService;
-  private final ConceptBigQueryService conceptBigQueryService;
   private final WorkspaceService workspaceService;
 
-  static final Function<DbConcept, Concept> TO_CLIENT_CONCEPT =
-      (concept) ->
-          new Concept()
-              .conceptClassId(concept.getConceptClassId())
-              .conceptCode(concept.getConceptCode())
-              .conceptName(concept.getConceptName())
-              .conceptId(concept.getConceptId())
-              .countValue(concept.getCountValue())
-              .domainId(concept.getDomainId())
-              .prevalence(concept.getPrevalence())
-              .standardConcept(
-                  ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
-              .vocabularyId(concept.getVocabularyId())
-              .conceptSynonyms(concept.getSynonyms());
-
   @Autowired
-  public ConceptsController(
-      ConceptService conceptService,
-      ConceptBigQueryService conceptBigQueryService,
-      WorkspaceService workspaceService) {
+  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService) {
     this.conceptService = conceptService;
-    this.conceptBigQueryService = conceptBigQueryService;
     this.workspaceService = workspaceService;
   }
 
@@ -73,31 +51,31 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DomainInfoResponse response =
+    return ResponseEntity.ok(
         new DomainInfoResponse()
             .items(
                 conceptService.getDomainInfo().stream()
-                    .map(DbDomainInfo.TO_CLIENT_DOMAIN_INFO)
-                    .collect(Collectors.toList()));
-    return ResponseEntity.ok(response);
+                    .map(this::toClientDomainInfo)
+                    .collect(Collectors.toList())));
   }
 
   @Override
-  public ResponseEntity<List<SurveyAnswerResponse>> getSurveyAnswers(
-      String workspaceNamespace, String workspaceId, Long questionConceptId) {
+  public ResponseEntity<List<SurveyQuestions>> searchSurveys(
+      String workspaceNamespace, String workspaceId, SearchSurveysRequest request) {
+    if (STANDARD_CONCEPTS.equals(request.getStandardConceptFilter())) {
+      return ResponseEntity.ok(new ArrayList<>());
+    }
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<SurveyAnswerResponse> answer = conceptBigQueryService.getSurveyAnswer(questionConceptId);
-    return ResponseEntity.ok(answer);
-  }
 
-  public ResponseEntity<List<SurveyQuestions>> getSurveyQuestions(
-      String workspaceNamespace, String workspaceId, String surveyName) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<SurveyQuestions> surveyQuestionAnswerList =
-        conceptBigQueryService.getSurveyQuestions(surveyName);
-    return ResponseEntity.ok(surveyQuestionAnswerList);
+    List<DbConcept> questionList =
+        conceptService.searchSurveys(
+            request.getQuery(),
+            request.getSurveyName(),
+            calculateResultLimit(request.getMaxResults()),
+            Optional.ofNullable(request.getPageNumber()).orElse(0));
+    return ResponseEntity.ok(
+        questionList.stream().map(this::toClientSurveyQuestions).collect(Collectors.toList()));
   }
 
   @Override
@@ -105,68 +83,23 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    SurveysResponse response =
+    return ResponseEntity.ok(
         new SurveysResponse()
             .items(
                 conceptService.getSurveyInfo().stream()
-                    .map(DbSurveyModule.TO_CLIENT_SURVEY_MODULE)
-                    .collect(Collectors.toList()));
-    return ResponseEntity.ok(response);
+                    .map(this::toClientSurveyModule)
+                    .collect(Collectors.toList())));
   }
 
-  private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response) {
-    if (request.getIncludeDomainCounts()) {
-      StandardConceptFilter standardConceptFilter = request.getStandardConceptFilter();
-      boolean allConcepts = standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS;
-      DbDomainInfo pmDomainInfo = null;
-      String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
-      List<DbDomainInfo> allDbDomainInfos = conceptService.getAllDomainsOrderByDomainId();
-      List<DbDomainInfo> matchingDbDomainInfos =
-          matchExp == null ? allDbDomainInfos : new ArrayList<>();
-      if (matchingDbDomainInfos.isEmpty()) {
-        matchingDbDomainInfos =
-            allConcepts
-                ? conceptService.getAllConceptCounts(matchExp)
-                : conceptService.getStandardConceptCounts(matchExp);
-        if (allConcepts) {
-          pmDomainInfo = conceptService.findPhysicalMeasurementConceptCounts(matchExp);
-        }
-      }
-      Map<Domain, DbDomainInfo> domainCountMap =
-          Maps.uniqueIndex(matchingDbDomainInfos, DbDomainInfo::getDomainEnum);
-      // Loop through all domains to populate the results (so we get zeros for domains with no
-      // matches.)
-      for (DbDomainInfo allDbDomainInfo : allDbDomainInfos) {
-        Domain domain = allDbDomainInfo.getDomainEnum();
-        DbDomainInfo matchingDbDomainInfo = domainCountMap.get(domain);
-        if (domain.equals(Domain.PHYSICALMEASUREMENT) && pmDomainInfo != null) {
-          matchingDbDomainInfo = pmDomainInfo;
-        }
-        response.addDomainCountsItem(
-            new DomainCount()
-                .domain(domain)
-                .conceptCount(
-                    matchingDbDomainInfo == null
-                        ? 0L
-                        : (allConcepts
-                            ? matchingDbDomainInfo.getAllConceptCount()
-                            : matchingDbDomainInfo.getStandardConceptCount()))
-                .name(allDbDomainInfo.getName()));
-      }
-      long conceptCount = 0;
-      if (allConcepts) {
-        conceptCount =
-            matchExp == null
-                ? conceptService.findSurveyCountBySurveyName(request.getSurveyName())
-                : conceptService.findSurveyCountByTerm(matchExp);
-      }
-      response.addDomainCountsItem(
-          new DomainCount()
-              .domain(Domain.SURVEY)
-              .conceptCount(conceptCount)
-              .name(StringUtils.capitalize(Domain.SURVEY.toString().toLowerCase()).concat("s")));
-    }
+  @Override
+  public ResponseEntity<DomainCountsListResponse> domainCounts(
+      String workspaceNamespace, String workspaceId, DomainCountsRequest request) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    List<DomainCount> counts =
+        conceptService.countDomains(
+            request.getQuery(), request.getSurveyName(), request.getStandardConceptFilter());
+    return ResponseEntity.ok(new DomainCountsListResponse().domainCounts(counts));
   }
 
   @Override
@@ -174,33 +107,72 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId, SearchConceptsRequest request) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    int maxResults = Optional.ofNullable(request.getMaxResults()).orElse(DEFAULT_MAX_RESULTS);
-    maxResults = Math.min(maxResults, MAX_MAX_RESULTS);
+
+    Slice<DbConcept> concepts =
+        conceptService.searchConcepts(
+            request.getQuery(),
+            request.getStandardConceptFilter(),
+            request.getDomain(),
+            calculateResultLimit(request.getMaxResults()),
+            Optional.ofNullable(request.getPageNumber()).orElse(0));
+
+    return ResponseEntity.ok(
+        new ConceptListResponse()
+            .items(
+                concepts.getContent().stream()
+                    .map(ConceptsController::toClientConcept)
+                    .collect(Collectors.toList())));
+  }
+
+  private int calculateResultLimit(Integer limit) {
+    int maxResults =
+        Math.min(Optional.ofNullable(limit).orElse(DEFAULT_MAX_RESULTS), MAX_MAX_RESULTS);
     if (maxResults < 1) {
       throw new BadRequestException("Invalid value for maxResults: " + maxResults);
     }
+    return maxResults;
+  }
 
-    ConceptListResponse response = new ConceptListResponse();
-    if (request.getDomain().equals(Domain.SURVEY)) {
-      List<SurveyQuestions> surveyQuestionList =
-          conceptBigQueryService.getSurveyQuestions(request.getSurveyName());
-      response.setQuestions(surveyQuestionList);
-    } else {
-      Slice<DbConcept> concepts =
-          conceptService.searchConcepts(
-              request.getQuery(),
-              request.getStandardConceptFilter().name(),
-              ImmutableList.of(CommonStorageEnums.domainToDomainId(request.getDomain())),
-              maxResults,
-              (request.getPageNumber() == null) ? 0 : request.getPageNumber());
-      if (concepts != null) {
-        response.setItems(
-            concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-      }
-    }
+  public static Concept toClientConcept(DbConcept dbConcept) {
+    boolean standard = STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept());
+    return new Concept()
+        .conceptClassId(dbConcept.getConceptClassId())
+        .conceptCode(dbConcept.getConceptCode())
+        .conceptName(dbConcept.getConceptName())
+        .conceptId(dbConcept.getConceptId())
+        .countValue(standard ? dbConcept.getCountValue() : dbConcept.getSourceCountValue())
+        .domainId(dbConcept.getDomainId())
+        .prevalence(dbConcept.getPrevalence())
+        .standardConcept(standard)
+        .vocabularyId(dbConcept.getVocabularyId())
+        .conceptSynonyms(dbConcept.getSynonyms());
+  }
 
-    // TODO: consider doing these queries in parallel
-    addDomainCounts(request, response);
-    return ResponseEntity.ok(response);
+  private SurveyQuestions toClientSurveyQuestions(DbConcept dbConcept) {
+    boolean standard = STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept());
+    return new SurveyQuestions()
+        .conceptId(dbConcept.getConceptId())
+        .question(dbConcept.getConceptName())
+        .countValue(standard ? dbConcept.getCountValue() : dbConcept.getSourceCountValue());
+  }
+
+  private DomainInfo toClientDomainInfo(DbDomainInfo dbDomainInfo) {
+    return new DomainInfo()
+        .domain(dbDomainInfo.getDomainEnum())
+        .name(dbDomainInfo.getName())
+        .description(dbDomainInfo.getDescription())
+        .allConceptCount(dbDomainInfo.getAllConceptCount())
+        .standardConceptCount(dbDomainInfo.getStandardConceptCount())
+        .participantCount(dbDomainInfo.getParticipantCount());
+  }
+
+  private SurveyModule toClientSurveyModule(DbSurveyModule dbSurveyModule) {
+    return new SurveyModule()
+        .conceptId(dbSurveyModule.getConceptId())
+        .name(dbSurveyModule.getName())
+        .description(dbSurveyModule.getDescription())
+        .questionCount(dbSurveyModule.getQuestionCount())
+        .participantCount(dbSurveyModule.getParticipantCount())
+        .orderNumber(dbSurveyModule.getOrderNumber());
   }
 }

@@ -1,4 +1,4 @@
-import {User, UserApi, UserResponse, UserRole} from 'generated/fetch';
+import {User, UserApi, UserResponse, UserRole, WorkbenchListBillingAccountsResponse} from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
 
@@ -29,6 +29,18 @@ export class UserApiStub extends UserApi {
         users: usersToReturn
       };
       resolve(userResponse);
+    });
+  }
+
+  listBillingAccounts(): Promise<WorkbenchListBillingAccountsResponse> {
+    return new Promise<WorkbenchListBillingAccountsResponse>(resolve => {
+      resolve({
+        billingAccounts: [{
+          displayName: 'Free Tier',
+          name: 'free-tier',
+          isFreeTier: true,
+          isOpen: true}]
+      });
     });
   }
 

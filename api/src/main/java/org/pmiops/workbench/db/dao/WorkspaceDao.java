@@ -2,16 +2,13 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -50,6 +47,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);
 
+  Optional<DbWorkspace> findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(
+      String workspaceNamespace);
+
+  Optional<DbWorkspace> findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
+      String workspaceNamespace, short activeStatus);
+
   List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 
   DbWorkspace findDbWorkspaceByWorkspaceId(long workspaceId);
@@ -69,11 +72,16 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 
-  default Map<WorkspaceActiveStatus, Long> getActiveStatusToCountMap() {
-    return DaoUtils.getAttributeToCountMap(findAll(), DbWorkspace::getWorkspaceActiveStatusEnum);
-  }
+  @Query(
+      "SELECT activeStatus, dataAccessLevel, COUNT(workspaceId) FROM DbWorkspace "
+          + "GROUP BY activeStatus, dataAccessLevel ORDER BY activeStatus, dataAccessLevel")
+  List<ActiveStatusAndDataAccessLevelToCountResult> getActiveStatusAndDataAccessLevelToCount();
 
-  default Map<DataAccessLevel, Long> getDataAccessLevelToCountMap() {
-    return DaoUtils.getAttributeToCountMap(findAll(), DbWorkspace::getDataAccessLevelEnum);
+  interface ActiveStatusAndDataAccessLevelToCountResult {
+    Short getWorkspaceActiveStatus();
+
+    Short getDataAccessLevel();
+
+    Long getWorkspaceCount();
   }
 }

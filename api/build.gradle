@@ -293,6 +293,10 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   test {
+    // Allow unit tests to directly load config files.
+    resources {
+      srcDir "config/"
+    }
     compileClasspath += generated.output
     runtimeClasspath += generated.output
   }
@@ -301,8 +305,8 @@ sourceSets {
       srcDir "config/"
     }
     java {
-      compileClasspath += main.output + test.output + generated.output
-      runtimeClasspath += main.output + test.output + generated.output
+      compileClasspath += main.output + generated.output
+      runtimeClasspath += main.output + generated.output
       srcDir file('src/integration/java')
     }
   }
@@ -375,6 +379,7 @@ dependencies {
 
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
+  compile 'com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0'
   compile 'com.google.http-client:google-http-client-apache:1.29.2'
   compile 'org.apache.commons:commons-collections4:4.4'
   compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0'
@@ -415,6 +420,7 @@ dependencies {
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
   compile 'com.google.cloud:google-cloud-bigquery:1.51.0'
+  compile 'com.google.cloud:google-cloud-iamcredentials:0.43.0-alpha'
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'com.google.cloud:google-cloud-tasks:1.27.0'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.30.3'
@@ -433,9 +439,16 @@ dependencies {
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
   compile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
 
+  // Force these dependencies to safe versions, Zendesk client depends on this.
+  compile 'io.netty:netty-codec-http:4.1.44.Final'
+  compile 'com.typesafe.netty:netty-reactive-streams:2.0.4'
+  compile 'com.beust:jcommander:1.78'
+  compile 'com.cloudbees.thirdparty:zendesk-java-client:0.12.0'
+
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.6'
+  compile 'org.apache.commons:commons-text:1.8'
   compile 'com.google.guava:guava:26.0-jre'
   compile 'com.github.rholder:guava-retrying:2.0.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
@@ -461,6 +474,7 @@ dependencies {
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
+  testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
   testCompile "org.springframework.boot:spring-boot-starter-test:${SPRING_BOOT_VERSION}"
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.5.3'
@@ -734,6 +748,16 @@ task updateCdrVersions(type: JavaExec) {
 task loadDataDictionary(type: JavaExec) {
   classpath sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.LoadDataDictionary"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See project.rb command: backfill-billing-project-owners
+task backfillBillingProjectOwners(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.BackfillBillingProjectOwners"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)

@@ -6,7 +6,7 @@ import io.opencensus.stats.Aggregation.LastValue;
 import io.opencensus.stats.Measure.MeasureLong;
 import java.util.Collections;
 import java.util.List;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 
 public enum GaugeMetric implements Metric {
   BILLING_BUFFER_PROJECT_COUNT(
@@ -19,6 +19,10 @@ public enum GaugeMetric implements Metric {
       "dataset_count_2",
       "Count of all datasets in existence",
       ImmutableList.of(MetricLabel.DATASET_INVALID)),
+  GSUITE_USER_COUNT(
+      "gsuite_user_count",
+      "Number of users in GSuite Directory.",
+      ImmutableList.of(MetricLabel.GSUITE_DOMAIN)),
   USER_COUNT(
       "user_count_2",
       "total number of users",
@@ -30,26 +34,30 @@ public enum GaugeMetric implements Metric {
       "workspace_count_3",
       "Count of all workspaces",
       ImmutableList.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.DATA_ACCESS_LEVEL),
-      Metric.UNITLESS_UNIT,
+      UnitOfMeasure.COUNT,
       MeasureLong.class);
 
   public static final LastValue AGGREGATION = LastValue.create();
   private final String name;
   private final String description;
-  private final String unit;
+  private final UnitOfMeasure unit;
   private final Class measureClass;
   private final List<MetricLabel> allowedAttachments;
 
   GaugeMetric(String name, String description) {
-    this(name, description, Collections.emptyList(), Metric.UNITLESS_UNIT, MeasureLong.class);
+    this(name, description, Collections.emptyList(), UnitOfMeasure.COUNT, MeasureLong.class);
   }
 
   GaugeMetric(String name, String description, List<MetricLabel> labels) {
-    this(name, description, labels, Metric.UNITLESS_UNIT, MeasureLong.class);
+    this(name, description, labels, UnitOfMeasure.COUNT, MeasureLong.class);
   }
 
   GaugeMetric(
-      String name, String description, List<MetricLabel> labels, String unit, Class measureClass) {
+      String name,
+      String description,
+      List<MetricLabel> labels,
+      UnitOfMeasure unit,
+      Class measureClass) {
     this.name = name;
     this.description = description;
     this.allowedAttachments = labels;
@@ -69,7 +77,7 @@ public enum GaugeMetric implements Metric {
 
   @Override
   public String getUnit() {
-    return unit;
+    return unit.getUcmSymbol();
   }
 
   @Override

@@ -1,10 +1,8 @@
 package org.pmiops.workbench.api;
 
-import com.google.protobuf.ByteString;
-import java.util.Arrays;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +13,6 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
   private RdrExportService rdrExportService;
 
   private static final Logger log = Logger.getLogger(CloudTaskRdrExportController.class.getName());
-  private final String IDS_STRING_SPLIT = ", ";
 
   CloudTaskRdrExportController(RdrExportService rdrExportService) {
     this.rdrExportService = rdrExportService;
@@ -26,20 +23,16 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * workbench config) or less comma separated User Ids whose information needs to be send to
    * RdrExportService
    *
-   * @param researcherIds: Type: ByteString will contain comma separated User ids
+   * @param researcherIds: Type: ArrayList containing user IDs to be exported
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportResearcherData(Object researcherIds) {
-    if (researcherIds == null || ((ByteString) researcherIds).isEmpty()) {
+  public ResponseEntity<Void> exportResearcherData(ArrayOfLong researcherIds) {
+    if (researcherIds == null || researcherIds.isEmpty()) {
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList =
-        Arrays.asList(((ByteString) researcherIds).toStringUtf8().split(IDS_STRING_SPLIT)).stream()
-            .map(strUserId -> Long.parseLong(strUserId))
-            .collect(Collectors.toList());
-    rdrExportService.exportUsers(requestUserIdList);
+    rdrExportService.exportUsers(researcherIds);
 
     return ResponseEntity.noContent().build();
   }
@@ -47,21 +40,16 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
   /**
    * Send all the IDS passed in request body to RDRService
    *
-   * @param researchIds: Type: ByteString will contain comma separated Workspace ids
+   * @param workspaceIds: Type: ArrayList containing Workspace ids to be exported
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportWorkspaceData(Object researchIds) {
-    if (researchIds == null || ((ByteString) researchIds).isEmpty()) {
+  public ResponseEntity<Void> exportWorkspaceData(ArrayOfLong workspaceIds) {
+    if (workspaceIds == null || ((ArrayList) workspaceIds).isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList =
-        Arrays.asList(((ByteString) researchIds).toStringUtf8().split(IDS_STRING_SPLIT)).stream()
-            .map(strUserId -> Long.parseLong(strUserId))
-            .collect(Collectors.toList());
-    rdrExportService.exportWorkspaces(requestUserIdList);
-
+    rdrExportService.exportWorkspaces(workspaceIds);
     return ResponseEntity.noContent().build();
   }
 }

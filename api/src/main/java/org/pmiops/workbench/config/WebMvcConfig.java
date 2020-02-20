@@ -6,8 +6,10 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
+import org.pmiops.workbench.interceptors.CloudTaskInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
+import org.pmiops.workbench.interceptors.ElapsedTimeDistributionInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.pmiops.workbench.interceptors.TracingInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
 
+  @Autowired private CloudTaskInterceptor cloudTaskInterceptor;
+
   @Autowired private CronInterceptor cronInterceptor;
+
+  @Autowired private ElapsedTimeDistributionInterceptor elapsedTimeDistributionInterceptor;
 
   @Autowired private SecurityHeadersInterceptor securityHeadersInterceptor;
 
@@ -64,8 +70,10 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
+    registry.addInterceptor(elapsedTimeDistributionInterceptor);
     registry.addInterceptor(tracingInterceptor);
     registry.addInterceptor(cronInterceptor);
+    registry.addInterceptor(cloudTaskInterceptor);
     registry.addInterceptor(clearCdrVersionInterceptor);
     registry.addInterceptor(securityHeadersInterceptor);
   }

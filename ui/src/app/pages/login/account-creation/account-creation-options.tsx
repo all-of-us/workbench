@@ -4,12 +4,11 @@ import {
   Education,
   EducationalRole,
   Ethnicity,
-  Gender,
+  GenderIdentity,
   IndustryRole,
   NonAcademicAffiliation,
   Race,
-  SexAtBirth,
-  SexualOrientation
+  SexAtBirth
 } from 'generated/fetch';
 
 export const AccountCreationOptions = {
@@ -26,9 +25,6 @@ export const AccountCreationOptions = {
     {label: 'B.A.', value: Degree.BA},
     {label: 'B.S.', value: Degree.BS},
     {label: 'B.S.N.', value: Degree.BSN},
-    // This label can have a space in it when the following issue is resolved:
-    // https://github.com/primefaces/primereact/issues/1137
-    {label: 'None(blank)', value: Degree.NONE},
   ],
   roles: [
     {label: `Undergraduate (Bachelor level) student`, value: AcademicRole.UNDERGRADUATE},
@@ -47,7 +43,7 @@ export const AccountCreationOptions = {
     {label: 'Industry', value: NonAcademicAffiliation.INDUSTRY },
     {label: `Educational institution (High school, Community college, 4-year college, trade
         school)`, value: NonAcademicAffiliation.EDUCATIONALINSTITUTION},
-    {label: `Community Scientist (i.e. I am accessing AoU for independent research, unrelated to my
+    {label: `Community Scientist (i.e. I am accessing All of Us for independent research, unrelated to my
         professional affiliation)`, value: NonAcademicAffiliation.COMMUNITYSCIENTIST},
     {label: `Other (free text)`, value: NonAcademicAffiliation.FREETEXT}
   ],
@@ -77,14 +73,13 @@ export const AccountCreationOptions = {
     {label: `Not Hispanic or Latino`, value: Ethnicity.NOTHISPANIC},
     {label: ` Prefer not to answer`, value: Ethnicity.PREFERNOANSWER}
   ],
-  gender: [
-    {label: 'Male', value: Gender.MALE},
-    {label: 'Female', value: Gender.FEMALE},
-    {label: 'Non-binary', value: Gender.NONBINARY},
-    {label: 'Transgender', value: Gender.TRANSGENDER},
-    {label: 'Intersex', value: Gender.INTERSEX},
-    {label: `Prefer not to answer`, value: Gender.PREFERNOANSWER},
-    {label: `None of these describe me`, value: Gender.NONE}
+  genderIdentity: [
+    {label: 'Man', value: GenderIdentity.MAN},
+    {label: 'Non-Binary', value: GenderIdentity.NONBINARY},
+    {label: 'Transgender', value: GenderIdentity.TRANSGENDER},
+    {label: 'Woman', value: GenderIdentity.WOMAN},
+    {label: 'None of these describe me', value: GenderIdentity.NONEDESCRIBEME},
+    {label: 'Prefer not to answer', value: GenderIdentity.PREFERNOANSWER}
   ],
   sexAtBirth: [
     {label: 'Female', value: SexAtBirth.FEMALE},
@@ -92,14 +87,6 @@ export const AccountCreationOptions = {
     {label: 'Male', value: SexAtBirth.MALE},
     {label: 'None of these describe me', value: SexAtBirth.NONEOFTHESEDESCRIBEME},
     {label: 'Prefer not to answer', value: SexAtBirth.PREFERNOANSWER}
-  ],
-  sexualOrientation: [
-    {label: 'Lesbian', value: SexualOrientation.LESBIAN},
-    {label: 'Gay', value: SexualOrientation.GAY},
-    {label: 'Straight', value: SexualOrientation.STRAIGHT},
-    {label: 'Bisexual', value: SexualOrientation.BISEXUAL},
-    {label: 'None of these describe me', value: SexualOrientation.NONEOFTHESEDESCRIBEME},
-    {label: 'Prefer not to answer', value: SexualOrientation.PREFERNOANSWER}
   ],
   levelOfEducation: [
     {label: 'Never attended school/no formal education', value: Education.NOEDUCATION},

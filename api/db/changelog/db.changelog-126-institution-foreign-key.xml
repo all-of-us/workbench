@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="brianfreeman" id="changelog-126-institution-foreign-key">
+
+    <dropForeignKeyConstraint
+      baseTableName="institution_email_domain"
+      constraintName="fk_institution_email_domain"/>
+
+    <addForeignKeyConstraint baseColumnNames="institution_id"
+      baseTableName="institution_email_domain"
+      constraintName="fk_institution_email_domain"
+      onDelete="CASCADE"
+      referencedColumnNames="institution_id"
+      referencedTableName="institution"/>
+
+    <dropForeignKeyConstraint
+      baseTableName="institution_email_address"
+      constraintName="fk_institution_email_address"/>
+
+    <addForeignKeyConstraint baseColumnNames="institution_id"
+      baseTableName="institution_email_address"
+      constraintName="fk_institution_email_address"
+      onDelete="CASCADE"
+      referencedColumnNames="institution_id"
+      referencedTableName="institution"/>
+
+  </changeSet>
+</databaseChangeLog>

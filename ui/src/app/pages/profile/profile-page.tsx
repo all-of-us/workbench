@@ -199,8 +199,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               Current Research Work
               <TooltipTrigger
                 side='right'
-                content='You are required to describe your current research in order to help
-                  All of Us improve the Researcher Workbench.'
+                content={<span>You are required to describe your current research in order to help
+                  <i>All of Us</i> improve the Researcher Workbench.</span>}
               >
                 <ClrIcon
                   shape='info-standard'
@@ -290,8 +290,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             color: colors.primary, paddingRight: '0.5rem', justifyContent: 'flex-end'
           }}>
             <FlexColumn style={{alignItems: 'flex-end'}}>
-              <div>All of Us FREE credits used:</div>
-              <div>Remaining All of Us FREE credits:</div>
+              <div><i>All of Us</i> FREE credits used:</div>
+              <div>Remaining <i>All of Us</i> FREE credits:</div>
             </FlexColumn>
             <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
               {usdElement(profile.freeTierUsage)}

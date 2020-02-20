@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,7 +20,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -35,7 +33,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -50,42 +48,33 @@ public class WorkspaceAuditorTest {
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
   private static final long REMOVED_USER_ID = 301L;
   private static final long ADDED_USER_ID = 401L;
-  private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
 
-  private WorkspaceAuditor workspaceAuditor;
   private Workspace workspace1;
   private Workspace workspace2;
   private DbUser user1;
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
 
+  @Autowired private WorkspaceAuditor workspaceAuditor;
   @Autowired private WorkspaceMapper workspaceMapper;
-
-  @Mock private Provider<DbUser> mockUserProvider;
-  @Mock private Clock mockClock;
-  @Mock private ActionAuditService mockActionAuditService;
-  @Mock private Provider<String> mockActionIdProvider;
+  @Autowired private ManualWorkspaceMapper manualWorkspaceMapper;
+  @MockBean private Provider<DbUser> mockUserProvider;
+  @MockBean private ActionAuditService mockActionAuditService;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventCollectionCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
   @TestConfiguration
-  @Import(value = {WorkspaceMapperImpl.class})
-  @MockBean(value = {ActionAuditService.class})
-  static class Configuration {}
+  @Import({
+    WorkspaceAuditorImpl.class,
+    WorkspaceMapperImpl.class,
+    ManualWorkspaceMapper.class,
+    ActionAuditTestConfig.class
+  })
+  static class Config {}
 
   @Before
   public void setUp() {
-    user1 = new DbUser();
-    user1.setUserId(101L);
-    user1.setUsername("fflinstone@slate.com");
-    user1.setGivenName("Fred");
-    user1.setFamilyName("Flintstone");
-    doReturn(user1).when(mockUserProvider).get();
-    workspaceAuditor =
-        new WorkspaceAuditorImpl(
-            mockUserProvider, mockActionAuditService, mockClock, mockActionIdProvider);
-
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
     researchPurpose1.setIntendedStudy("stubbed toes");
     researchPurpose1.setAdditionalNotes("I really like the cloud.");
@@ -104,7 +93,7 @@ public class WorkspaceAuditorTest {
     workspace1.setDataAccessLevel(DataAccessLevel.REGISTERED);
     workspace1.setPublished(false);
 
-    dbWorkspace1 = WorkspaceConversionUtils.toDbWorkspace(workspace1);
+    dbWorkspace1 = manualWorkspaceMapper.toDbWorkspace(workspace1);
     dbWorkspace1.setWorkspaceId(WORKSPACE_1_DB_ID);
     dbWorkspace1.setLastAccessedTime(new Timestamp(now));
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));
@@ -118,8 +107,9 @@ public class WorkspaceAuditorTest {
     dbWorkspace2.setCreator(user1);
 
     workspace2 = workspaceMapper.toApiWorkspace(dbWorkspace2, null);
-    doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
-    doReturn(ACTION_ID).when(mockActionIdProvider).get();
+
+    // By default, have the mock user provider return the test-config default user.
+    doReturn(ActionAuditTestConfig.getUser()).when(mockUserProvider).get();
   }
 
   @Test
@@ -146,7 +136,7 @@ public class WorkspaceAuditorTest {
     verify(mockActionAuditService).send(eventCaptor.capture());
     final ActionAuditEvent eventSent = eventCaptor.getValue();
     assertThat(eventSent.getActionType()).isEqualTo(ActionType.DELETE);
-    assertThat(eventSent.getTimestamp()).isEqualTo(Y2K_EPOCH_MILLIS);
+    assertThat(eventSent.getTimestamp()).isEqualTo(ActionAuditTestConfig.INSTANT.toEpochMilli());
   }
 
   @Test
@@ -180,7 +170,7 @@ public class WorkspaceAuditorTest {
   public void testFiresCollaborateAction() {
     final ImmutableMap<Long, String> aclsByUserId =
         ImmutableMap.of(
-            user1.getUserId(),
+            ActionAuditTestConfig.ADMINISTRATOR_USER_ID,
             WorkspaceAccessLevel.OWNER.toString(),
             REMOVED_USER_ID,
             WorkspaceAccessLevel.NO_ACCESS.toString(),

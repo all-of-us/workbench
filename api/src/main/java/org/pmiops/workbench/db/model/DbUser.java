@@ -61,6 +61,7 @@ public class DbUser {
   private String givenName;
   private String familyName;
   private String phoneNumber;
+  private String professionalUrl;
   private String currentPosition;
   private String organization;
   private Double freeTierCreditsLimitDollarsOverride = null;
@@ -567,6 +568,10 @@ public class DbUser {
     this.complianceTrainingCompletionTime = complianceTrainingCompletionTime;
   }
 
+  public void clearComplianceTrainingCompletionTime() {
+    this.complianceTrainingCompletionTime = null;
+  }
+
   @Column(name = "compliance_training_bypass_time")
   public Timestamp getComplianceTrainingBypassTime() {
     return complianceTrainingBypassTime;
@@ -583,6 +588,10 @@ public class DbUser {
 
   public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
     this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
+  }
+
+  public void clearComplianceTrainingExpirationTime() {
+    this.complianceTrainingExpirationTime = null;
   }
 
   @Column(name = "beta_access_bypass_time")
@@ -686,6 +695,15 @@ public class DbUser {
 
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+  }
+
+  @Column(name = "professional_url")
+  public String getProfessionalUrl() {
+    return professionalUrl;
+  }
+
+  public void setProfessionalUrl(String professionalUrl) {
+    this.professionalUrl = professionalUrl;
   }
 
   @OneToOne(

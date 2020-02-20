@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.Metric;
 
 /**
@@ -77,7 +77,7 @@ public class MeasurementBundle {
     }
 
     public Builder addEvent(Metric metric) {
-      measurementsBuilder.put(metric, MonitoringService.DELTA_VALUE);
+      measurementsBuilder.put(metric, MonitoringService.COUNT_INCREMENT);
       return this;
     }
 

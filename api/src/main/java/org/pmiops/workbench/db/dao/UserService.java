@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -17,23 +18,18 @@ public interface UserService {
 
   DbUser createServiceAccountUser(String email);
 
-  DbUser createUser(
-      String givenName,
-      String familyName,
-      String email,
-      String contactEmail,
-      String currentPosition,
-      String organization,
-      String areaOfResearch);
+  // version used by AuthInterceptor
+  DbUser createUser(Userinfoplus oAuth2Userinfo);
 
   DbUser createUser(
       String givenName,
       String familyName,
-      String email,
+      String userName,
       String contactEmail,
       String currentPosition,
       String organization,
       String areaOfResearch,
+      String professionalUrl,
       List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
@@ -41,6 +37,9 @@ public interface UserService {
 
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);
+
+  // Registers that a user has agreed to a given version of the Terms of Service.
+  void submitTermsOfService(DbUser dbUser, Integer tosVersion);
 
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
 
@@ -67,10 +66,18 @@ public interface UserService {
 
   List<DbUser> findUsersBySearchString(String term, Sort sort);
 
-  DbUser syncComplianceTrainingStatus()
+  @Deprecated
+  DbUser syncComplianceTrainingStatusV1()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
-  DbUser syncComplianceTrainingStatus(DbUser user)
+  @Deprecated
+  DbUser syncComplianceTrainingStatusV1(DbUser user)
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
+
+  DbUser syncComplianceTrainingStatusV2()
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
+
+  DbUser syncComplianceTrainingStatusV2(DbUser user)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   DbUser syncEraCommonsStatus();

@@ -1,13 +1,15 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
-import com.google.common.collect.ImmutableSet;
+import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
@@ -17,12 +19,12 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -30,6 +32,7 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -43,9 +46,10 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.moodle.model.BadgeDetails;
+import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
+import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
@@ -69,18 +73,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<DbUser> userProvider;
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
+  private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final Clock clock;
   private final Random random;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final UserServiceAuditor userServiceAuditAdapter;
+  private final UserServiceAuditor userServiceAuditor;
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
@@ -88,6 +94,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<DbUser> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
+      UserTermsOfServiceDao userTermsOfServiceDao,
       UserDataUseAgreementDao userDataUseAgreementDao,
       Clock clock,
       Random random,
@@ -95,10 +102,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditAdapter) {
+      UserServiceAuditor userServiceAuditor) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
+    this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.clock = clock;
     this.random = random;
@@ -106,7 +114,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.userServiceAuditAdapter = userServiceAuditAdapter;
+    this.userServiceAuditor = userServiceAuditor;
   }
 
   /**
@@ -133,6 +141,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     while (true) {
       dbUser = userModifier.apply(dbUser);
       updateDataAccessLevel(dbUser);
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      dbUser.setLastModifiedTime(now);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -185,7 +195,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-      userServiceAuditAdapter.fireUpdateDataAccessAction(
+      userServiceAuditor.fireUpdateDataAccessAction(
           dbUser, newDataAccessLevel, previousDataAccessLevel);
     }
   }
@@ -281,22 +291,16 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser createUser(
-      String givenName,
-      String familyName,
-      String userName,
-      String contactEmail,
-      String currentPosition,
-      String organization,
-      String areaOfResearch) {
+  public DbUser createUser(final Userinfoplus oAuth2Userinfo) {
     return createUser(
-        givenName,
-        familyName,
-        userName,
-        contactEmail,
-        currentPosition,
-        organization,
-        areaOfResearch,
+        oAuth2Userinfo.getGivenName(),
+        oAuth2Userinfo.getFamilyName(),
+        oAuth2Userinfo.getEmail(),
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -312,6 +316,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       String currentPosition,
       String organization,
       String areaOfResearch,
+      String professionalUrl,
       List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
@@ -326,6 +331,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setAreaOfResearch(areaOfResearch);
     dbUser.setFamilyName(familyName);
     dbUser.setGivenName(givenName);
+    dbUser.setProfessionalUrl(professionalUrl);
     dbUser.setDisabled(false);
     dbUser.setAboutYou(null);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
@@ -383,10 +389,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dataUseAgreement.setUserInitials(initials);
     dataUseAgreement.setCompletionTime(timestamp);
     userDataUseAgreementDao.save(dataUseAgreement);
-    // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
-    dbUser.setDataUseAgreementCompletionTime(timestamp);
-    dbUser.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    return userDao.save(dbUser);
+    return updateUserWithRetries(
+        (user) -> {
+          // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
+          user.setDataUseAgreementCompletionTime(timestamp);
+          user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+          return user;
+        },
+        dbUser);
   }
 
   @Override
@@ -401,6 +411,21 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
     userDataUseAgreementDao.save(dataUseAgreements);
+  }
+
+  @Override
+  @Transactional
+  public void submitTermsOfService(DbUser dbUser, Integer tosVersion) {
+    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
+      throw new BadRequestException("Terms of Service version is not up to date");
+    }
+
+    DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
+    userTermsOfService.setTosVersion(tosVersion);
+    userTermsOfService.setUserId(dbUser.getUserId());
+    userTermsOfServiceDao.save(userTermsOfService);
+
+    userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
   }
 
   @Override
@@ -476,7 +501,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           return u;
         },
         dbUser);
-    userServiceAuditAdapter.fireAdministrativeBypassTime(
+    userServiceAuditor.fireAdministrativeBypassTime(
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
@@ -548,9 +573,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   /** Syncs the current user's training status from Moodle. */
   @Override
-  public DbUser syncComplianceTrainingStatus()
+  @Deprecated
+  public DbUser syncComplianceTrainingStatusV1()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    return syncComplianceTrainingStatus(userProvider.get());
+    return syncComplianceTrainingStatusV1(userProvider.get());
   }
 
   /**
@@ -566,7 +592,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * as null
    */
   @Override
-  public DbUser syncComplianceTrainingStatus(DbUser dbUser)
+  @Deprecated
+  public DbUser syncComplianceTrainingStatusV1(DbUser dbUser)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     if (isServiceAccount(dbUser)) {
       // Skip sync for service account user rows.
@@ -585,10 +612,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser.setMoodleId(moodleId);
       }
 
-      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
+      List<BadgeDetailsV1> badgeResponse = complianceService.getUserBadgeV1(moodleId);
       // The assumption here is that the User will always get 1 badge which will be AoU
       if (badgeResponse != null && badgeResponse.size() > 0) {
-        BadgeDetails badge = badgeResponse.get(0);
+        BadgeDetailsV1 badge = badgeResponse.get(0);
         Timestamp badgeExpiration =
             badge.getDateexpire() == null
                 ? null
@@ -632,6 +659,91 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 "Error while retrieving Badge for user %s: %s ",
                 dbUser.getUserId(), ex.getMessage()));
         throw new NotFoundException(ex.getMessage());
+      }
+      throw ex;
+    }
+  }
+
+  /** Syncs the current user's training status from Moodle. */
+  public DbUser syncComplianceTrainingStatusV2()
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    return syncComplianceTrainingStatusV2(userProvider.get());
+  }
+
+  /**
+   * Updates the given user's training status from Moodle.
+   *
+   * <p>We can fetch Moodle data for arbitrary users since we use an API key to access Moodle,
+   * rather than user-specific OAuth tokens.
+   *
+   * <p>Using the user's email, we can get their badges from Moodle's APIs. If the badges are marked
+   * valid, we store their completion/expiration dates in the database. If they are marked invalid,
+   * we clear the completion/expiration dates from the database as the user will need to complete a
+   * new training.
+   */
+  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser)
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    // Skip sync for service account user rows.
+    if (isServiceAccount(dbUser)) {
+      return dbUser;
+    }
+
+    try {
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      final Timestamp newComplianceTrainingCompletionTime;
+      final Timestamp newComplianceTrainingExpirationTime;
+      Map<String, BadgeDetailsV2> userBadgesByName =
+          complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
+      if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
+        BadgeDetailsV2 complianceBadge =
+            userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
+        if (complianceBadge.getValid()) {
+          if (dbUser.getComplianceTrainingCompletionTime() == null) {
+            // The badge was previously invalid and is now valid.
+            newComplianceTrainingCompletionTime = now;
+          } else if (!dbUser
+              .getComplianceTrainingExpirationTime()
+              .equals(Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire())))) {
+            // The badge was previously valid, but has a new expiration date (and so is a new
+            // training)
+            newComplianceTrainingCompletionTime = now;
+          } else {
+            // The badge status has not changed since the last time the status was synced.
+            newComplianceTrainingCompletionTime = dbUser.getComplianceTrainingCompletionTime();
+          }
+          // Always update the expiration time if the training badge is valid
+          newComplianceTrainingExpirationTime =
+              Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire()));
+        } else {
+          // The current badge is invalid or expired, the training must be completed or retaken.
+          newComplianceTrainingCompletionTime = null;
+          newComplianceTrainingExpirationTime = null;
+        }
+      } else {
+        // There is no record of this person having taken the training.
+        newComplianceTrainingCompletionTime = null;
+        newComplianceTrainingExpirationTime = null;
+      }
+
+      return updateUserWithRetries(
+          u -> {
+            u.setComplianceTrainingCompletionTime(newComplianceTrainingCompletionTime);
+            u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
+            return u;
+          },
+          dbUser);
+    } catch (NumberFormatException e) {
+      log.severe("Incorrect date expire format from Moodle");
+      throw e;
+    } catch (org.pmiops.workbench.moodle.ApiException ex) {
+      if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
+        log.severe(
+            String.format(
+                "Error while querying Moodle for badges for %s: %s ",
+                dbUser.getUsername(), ex.getMessage()));
+        throw new NotFoundException(ex.getMessage());
+      } else {
+        log.severe(String.format("Error while syncing compliance training: %s", ex.getMessage()));
       }
       throw ex;
     }
@@ -759,38 +871,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    // TODO(jaycarlton): replace this findAll/MultiKeyMap implementation
-    //   wtih JdbcTemplate method. I'm told we can't currently do things like this
-    //   with our JPA/Spring/MySQL versions.
 
-    List<DbUser> allUsers = userDao.findUsers();
-    MultiKeyMap<String, Long> keysToCount = new MultiKeyMap<>();
-    // keys will be { accessLevel, disabled }
-    for (DbUser user : allUsers) {
-      // get keys
-      final String dataAccessLevel = user.getDataAccessLevelEnum().toString();
-      final String isDisabled = Boolean.valueOf(user.getDisabled()).toString();
-      final String isBetaBypassed =
-          Boolean.valueOf(user.getBetaAccessBypassTime() != null).toString();
-
-      // find count
-      final long count =
-          Optional.ofNullable(keysToCount.get(dataAccessLevel, isDisabled, isBetaBypassed))
-              .orElse(0L);
-      // increment count
-      keysToCount.put(dataAccessLevel, isDisabled, isBetaBypassed, count + 1);
-    }
-
-    // build bundles for each entry in the map
-    return keysToCount.entrySet().stream()
+    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    return rows.stream()
         .map(
-            e ->
+            row ->
                 MeasurementBundle.builder()
-                    .addMeasurement(GaugeMetric.USER_COUNT, e.getValue())
-                    .addTag(MetricLabel.DATA_ACCESS_LEVEL, e.getKey().getKey(0))
-                    .addTag(MetricLabel.USER_DISABLED, e.getKey().getKey(1))
-                    .addTag(MetricLabel.USER_BYPASSED_BETA, e.getKey().getKey(2))
+                    .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
+                    .addTag(
+                        MetricLabel.DATA_ACCESS_LEVEL,
+                        CommonStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                            .toString())
+                    .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
+                    .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())
                     .build())
-        .collect(ImmutableSet.toImmutableSet());
+        .collect(ImmutableList.toImmutableList());
   }
 }

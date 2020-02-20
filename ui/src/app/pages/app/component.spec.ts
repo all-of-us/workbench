@@ -6,7 +6,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {AppComponent} from 'app/pages/app/component';
-import {PageTemplateSignedOutComponent} from 'app/pages/login/page-template-signed-out/component';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 
@@ -24,8 +23,7 @@ describe('AppComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AppComponent,
-        PageTemplateSignedOutComponent
+        AppComponent
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [

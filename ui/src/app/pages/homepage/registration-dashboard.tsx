@@ -77,7 +77,7 @@ interface RegistrationTask {
   key: string;
   completionPropsKey: string;
   title: string;
-  description: string;
+  description: React.ReactNode;
   buttonText: string;
   completedText: string;
   isRefreshable?: boolean;
@@ -94,8 +94,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'twoFactorAuth',
     completionPropsKey: 'twoFactorAuthCompleted',
     title: 'Turn on Google 2-Step Verification',
-    description: 'Add an extra layer of security to your account by providing your ' +
-      'phone number in addition to your password to verify your identity upon login.',
+    description: 'Add an extra layer of security to your account by providing your phone number in addition to your password to verify your identity upon login.',
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
@@ -107,8 +106,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
     title: 'Complete Online Training',
-    description: 'Complete mandatory compliance training courses on how data should be used ' +
-      'and handled.',
+    description: 'Complete mandatory compliance training courses on how data should be used and handled.',
     buttonText: 'Complete training',
     featureFlag: serverConfigStore.getValue().enableComplianceTraining,
     completedText: 'Completed',
@@ -120,8 +118,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
     title: 'Login to eRA Commons',
-    description: 'Link to your eRA Commons account to the workbench to gain full access to data ' +
-      'and tools.',
+    description: 'Link to your eRA Commons account to the workbench to gain full access to data and tools.',
     buttonText: 'Login',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
@@ -132,7 +129,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'dataUseAgreement',
     completionPropsKey: 'dataUseAgreementCompleted',
     title: 'Data Use Agreement',
-    description: 'Sign our data use agreement consenting to the All of Us data use policy.',
+    description: <span>Sign our data use agreement consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
@@ -256,9 +253,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     // it within the registration box.
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
-      {environment.enableHomepageRestyle && <div style={styles.mainHeader}>Getting Started</div>}
-      {!environment.enableHomepageRestyle &&
-        <div style={{...styles.mainHeader, color: colors.white}}>Getting Started</div>}
+      <div style={styles.mainHeader}>Getting Started</div>
       {canUnsafeSelfBypass &&
         <div data-test-id='self-bypass'
              style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>

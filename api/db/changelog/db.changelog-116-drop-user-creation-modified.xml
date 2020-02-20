@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="nsaxena" id="db.changelog-116-drop-user-creation-modified">
+    <preConditions onFail="MARK_RAN" >       
+      <columnExists tableName="user" columnName="creation_time" />
+    </preConditions>
+    <dropColumn columnName="creation_time" tableName="user"/>
+    <dropColumn columnName="last_modified_time" tableName="user"/>
+  </changeSet>
+</databaseChangeLog>    

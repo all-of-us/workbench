@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -21,14 +22,18 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
@@ -60,11 +65,13 @@ import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -178,6 +185,10 @@ public class ConceptSetsControllerTest {
 
   @Autowired ConceptDao conceptDao;
 
+  @Autowired ConceptSetService conceptSetService;
+
+  @Autowired ConceptService conceptService;
+
   @Autowired DataSetService dataSetService;
 
   @Autowired WorkspaceDao workspaceDao;
@@ -209,27 +220,37 @@ public class ConceptSetsControllerTest {
     WorkspaceServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
+    ConceptSetMapperImpl.class,
     UserServiceImpl.class,
     ConceptSetsController.class,
+    ConceptService.class,
     WorkspacesController.class,
     ConceptSetService.class,
-    WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class,
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
     CloudStorageService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    ConceptSetService.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
+
+    @Bean
+    Cloudbilling cloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
+
     @Bean
     Clock clock() {
       return CLOCK;
@@ -250,6 +271,8 @@ public class ConceptSetsControllerTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.billing = new BillingConfig();
+      workbenchConfig.billing.accountId = "free-tier";
       return workbenchConfig;
     }
   }
@@ -282,6 +305,7 @@ public class ConceptSetsControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace.setBillingAccountName("billing-account");
 
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
@@ -289,6 +313,7 @@ public class ConceptSetsControllerTest {
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace2.setBillingAccountName("billing-account");
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspace2 = workspacesController.createWorkspace(workspace2).getBody();
@@ -509,9 +534,12 @@ public class ConceptSetsControllerTest {
   public void testUpdateConceptSetConceptsAddAndRemove() {
     saveConcepts();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            "condition_occurrence", ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
+            Domain.CONDITION,
+            "condition_occurrence",
+            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
         .thenReturn(123);
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId())))
         .thenReturn(246);
@@ -546,6 +574,7 @@ public class ConceptSetsControllerTest {
   public void testUpdateConceptSetConceptsAddMany() {
     saveConcepts();
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(
                 CLIENT_CONCEPT_1.getConceptId(),
@@ -571,7 +600,9 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getParticipantCount()).isEqualTo(456);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            "condition_occurrence", ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
+            Domain.CONDITION,
+            "condition_occurrence",
+            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
         .thenReturn(123);
     ConceptSet removed =
         conceptSetsController
@@ -594,6 +625,7 @@ public class ConceptSetsControllerTest {
   public void testUpdateConceptSetConceptsAddManyOnCreate() {
     saveConcepts();
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(
                 CLIENT_CONCEPT_1.getConceptId(),

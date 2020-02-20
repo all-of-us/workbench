@@ -150,15 +150,16 @@ public class ProfileController implements ProfileApiDelegate {
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
               if (demographicSurvey.getEducation() != null)
                 result.setEducationEnum(demographicSurvey.getEducation());
-              if (demographicSurvey.getGender() != null)
-                result.setGenderEnum(demographicSurvey.getGender());
+              result.setIdentifiesAsLgbtq(demographicSurvey.getIdentifiesAsLgbtq());
+              result.setLgbtqIdentity(demographicSurvey.getLgbtqIdentity());
               if (demographicSurvey.getDisability() != null)
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getGenderIdentityList() != null) {
+                result.setGenderIdentityEnumList(demographicSurvey.getGenderIdentityList());
+              }
               if (demographicSurvey.getSexAtBirth() != null)
                 result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
-              if (demographicSurvey.getSexualOrientation() != null)
-                result.setSexualOrientationEnum(demographicSurvey.getSexualOrientation());
               if (demographicSurvey.getYearOfBirth() != null)
                 result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
               return result;
@@ -310,7 +311,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-    verifyInvitationKey(request.getInvitationKey());
+    if (workbenchConfigProvider.get().access.requireInvitationKey) {
+      verifyInvitationKey(request.getInvitationKey());
+    }
+
     String userName = request.getProfile().getUsername();
     if (userName == null || userName.length() < 3 || userName.length() > 64)
       throw new BadRequestException(
@@ -355,12 +359,17 @@ public class ProfileController implements ProfileApiDelegate {
             request.getProfile().getCurrentPosition(),
             request.getProfile().getOrganization(),
             request.getProfile().getAreaOfResearch(),
+            request.getProfile().getProfessionalUrl(),
             request.getProfile().getDegrees(),
             FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
             FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
             request.getProfile().getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
                 .collect(Collectors.toList()));
+
+    if (request.getTermsOfServiceVersion() != null) {
+      userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
+    }
 
     try {
       mailServiceProvider
@@ -415,7 +424,11 @@ public class ProfileController implements ProfileApiDelegate {
    */
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
-      userService.syncComplianceTrainingStatus();
+      if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
+        userService.syncComplianceTrainingStatusV2();
+      } else {
+        userService.syncComplianceTrainingStatusV1();
+      }
     } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
@@ -561,11 +574,24 @@ public class ProfileController implements ProfileApiDelegate {
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
     user.setLastModifiedTime(now);
+    user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.
       throw new BadRequestException("Changing email is not currently supported");
     }
+    updateInstitutionalAffiliations(updatedProfile, user);
+
+    // This does not update the name in Google.
+    saveUserWithConflictHandling(user);
+
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
     List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()
             .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
@@ -600,14 +626,6 @@ public class ProfileController implements ProfileApiDelegate {
         user.addInstitutionalAffiliation(affiliation);
       }
     }
-
-    // This does not update the name in Google.
-    saveUserWithConflictHandling(user);
-
-    final Profile appliedUpdatedProfile = profileService.getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
-
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

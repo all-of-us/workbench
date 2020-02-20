@@ -11,7 +11,7 @@ import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {ResourceCard} from 'app/components/resource-card';
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
-import {RecentResource} from 'generated/fetch';
+import {BillingStatus, RecentResource} from 'generated/fetch';
 
 export const RecentResources = (fp.flow as any)(
   withContentRect('client'),
@@ -70,7 +70,9 @@ export const RecentResources = (fp.flow as any)(
     if (resource.notebook) {
       return <NotebookResourceCard resource={resource}
                                    existingNameList={this.getExistingNameList(resource)}
-                                   onUpdate={() => this.loadResources()}/>;
+                                   onUpdate={() => this.loadResources()}
+                                   disableDuplicate={resource.workspaceBillingStatus === BillingStatus.INACTIVE}
+      />;
     } else if (resource.cohort) {
       return <CohortResourceCard resource={resource}
                                  existingNameList={this.getExistingNameList(resource)}

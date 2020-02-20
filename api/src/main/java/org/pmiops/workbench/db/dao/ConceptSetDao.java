@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.data.repository.CrudRepository;
@@ -22,7 +23,10 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
           .put(Domain.PERSON, "person")
           .put(Domain.VISIT, "visit_occurrence")
           .put(Domain.SURVEY, "observation")
+          .put(Domain.PHYSICALMEASUREMENT, "measurement")
           .build();
+
+  Optional<DbConceptSet> findByConceptSetIdAndWorkspaceId(long conceptId, long workspaceId);
 
   List<DbConceptSet> findByWorkspaceId(long workspaceId);
 
@@ -32,4 +36,6 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
   DbConceptSet findConceptSetByNameAndWorkspaceId(String name, long workspaceId);
 
   List<DbConceptSet> findAllByConceptSetIdIn(Collection<Long> conceptSetIds);
+
+  int countByWorkspaceId(long workspaceId);
 }

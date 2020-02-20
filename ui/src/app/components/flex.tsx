@@ -14,17 +14,20 @@ export const flexStyle = reactStyles({
 
 
 export const FlexRow = (props) => {
-  return <div style={{...flexStyle.row, ...props.style}}>
+  const {style, ...other} = props;
+  return <div {...other} style={{...flexStyle.row, ...style}}>
     {props.children}
   </div>;
 };
-
+FlexRow.displayName = 'FlexRow';
 
 export const FlexColumn = (props) => {
-  return <div style={{...flexStyle.column, ...props.style}}>
+  const {style, ...other} = props;
+  return <div {...other} style={{...flexStyle.column, ...style}}>
     {props.children}
   </div>;
 };
+FlexColumn.displayName = 'FlexColumn';
 
 export const FlexRowWrap = (props) => {
   return <FlexRow style={{flexWrap: 'wrap', ...props.style}}>

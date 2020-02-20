@@ -350,7 +350,13 @@ public class ClusterController implements ClusterApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  private static String clusterNameForUser(DbUser user) {
+  /**
+   * Returns a name for the VM / cluster to be created for a given user in the workspace.
+   *
+   * @param user
+   * @return
+   */
+  public static String clusterNameForUser(DbUser user) {
     return "all-of-us-" + user.getUserId();
   }
 

@@ -335,7 +335,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
           <div>
           <label>Share {this.props.workspace.name}</label>
           <TooltipTrigger content={<div style={styles.tooltipLabel}>
-            Search for a collaborator that has an All of Us research account. Collaborators can
+            Search for a collaborator that has an <i>All of Us</i> research account. Collaborators can
             be assigned different permissions within your Workspace.
             <ul>
               <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>

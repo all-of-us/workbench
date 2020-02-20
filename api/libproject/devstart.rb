@@ -300,8 +300,10 @@ Common.register_command({
 def start_local_api()
   setup_local_environment
   common = Common.new
-  common.status "Starting API server..."
-  common.run_inline %W{gradle appengineStart}
+  ServiceAccountContext.new(TEST_PROJECT).run do
+    common.status "Starting API server..."
+    common.run_inline %W{gradle appengineStart}
+  end
 end
 
 Common.register_command({
@@ -503,7 +505,8 @@ Common.register_command({
 
 def connect_to_db()
   common = Common.new
-
+  common.status "Starting database if necessary..."
+  common.run_inline %W{docker-compose up -d db}
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
   common.run_inline %W{docker-compose exec db sh -c #{cmd}}
 end
@@ -575,32 +578,6 @@ end
 def get_auth_login_account()
   return `gcloud config get-value account`.strip()
 end
-
-def register_service_account(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-        "--project [project]",
-        ->(opts, v) { opts.project = v},
-        "Project to register the service account for"
-  )
-  op.parse.validate
-  firecloud_base_url = get_firecloud_base_url(op.opts.project)
-  ServiceAccountContext.new(op.opts.project).run do
-    Dir.chdir("../firecloud-tools") do
-      common = Common.new
-      common.run_inline %W{./run.sh scripts/register_service_account/register_service_account.py
-           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com
-           -u #{firecloud_base_url}}
-    end
-  end
-end
-
-Common.register_command({
-  :invocation => "register-service-account",
-  :description => "Registers a service account with Firecloud; do this once per account we use.",
-  :fn => ->(*args) { register_service_account("register-service-account", *args) }
-})
-
 
 def drop_cloud_db(cmd_name, *args)
   ensure_docker cmd_name, args
@@ -766,9 +743,37 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
   :fn => ->(*args) { generate_cb_criteria_tables(*args) }
 })
 
-def generate_private_cdr_counts(*args)
+def generate_private_cdr_counts(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--workbench-project [workbench-project]",
+    ->(opts, v) { opts.workbench_project = v},
+    "Workbench Project. Required."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version. Required."
+  )
+  op.add_option(
+    "--bucket [bucket]",
+    ->(opts, v) { opts.bucket = v},
+    "GCS bucket. Required."
+  )
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
 end
 
 Common.register_command({
@@ -776,46 +781,57 @@ Common.register_command({
   :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
  --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
 Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
-  :fn => ->(*args) { generate_private_cdr_counts(*args) }
+  :fn => ->(*args) { generate_private_cdr_counts("generate-private-cdr-counts", *args) }
 })
 
-def generate_cloudsql_db(cmd_name, *args)
+def copy_bq_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-    "--project [project]",
-    ->(opts, v) { opts.project = v},
-    "Project the Cloud Sql instance is in"
+    "--sa-project [sa-project]",
+    ->(opts, v) { opts.sa_project = v},
+    "Service Account Project. Required."
   )
   op.add_option(
-    "--instance [instance]",
-    ->(opts, v) { opts.instance = v},
-    "Cloud SQL instance"
+    "--source-dataset [source-dataset]",
+    ->(opts, v) { opts.source_dataset = v},
+    "Source dataset. Required."
   )
   op.add_option(
-      "--database [database]",
-      ->(opts, v) { opts.database = v},
-      "Database name"
+    "--destination-dataset [destination-dataset]",
+    ->(opts, v) { opts.destination_dataset = v},
+    "Destination Dataset. Required."
   )
   op.add_option(
-    "--bucket [bucket]",
-    ->(opts, v) { opts.bucket = v},
-    "Name of the GCS bucket containing the SQL dump"
+    "--table-prefixes [prefix1,prefix2,...]",
+    ->(opts, v) { opts.table_prefixes = v},
+    "Comma-delimited table prefixes to filter the publish by, e.g. cb_,ds_. " +
+    "This should only be used in special situations e.g. when the auxilliary " +
+    "cb_ or ds_ tables need to be updated, or if there was an issue with the " +
+    "publish. In general, CDRs should be treated as immutable after the " +
+    "initial publish."
   )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.sa_project and opts.source_dataset and opts.destination_dataset }
   op.parse.validate
 
-  ServiceAccountContext.new(op.opts.project).run do
+  # This is a grep filter. It matches all tables, by default.
+  table_filter = ""
+  if op.opts.table_prefixes
+    prefixes = op.opts.table_prefixes.split(",")
+    table_filter = "^\\(#{prefixes.join("\\|")}\\)"
+  end
+
+  source_project = "#{op.opts.source_dataset}".split(':').first
+  ServiceAccountContext.new(op.opts.sa_project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cloudsql-db.sh
-          --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
-          --bucket #{op.opts.bucket}}
+    common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
+    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
   end
 end
+
 Common.register_command({
-  :invocation => "generate-cloudsql-db",
-  :description => "generate-cloudsql-db  --project <PROJECT> --instance <workbenchmaindb> \
---database <synth_r_20XXqX_X> --bucket <BUCKET>
-Generates a cloudsql database from data in a bucket. Used to make cdr count databases.",
-  :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
+  :invocation => "copy-bq-tables",
+  :description => "Copies tables or filters from source to destination",
+  :fn => ->(*args) { copy_bq_tables("copy-bq-tables", *args) }
 })
 
 def cloudsql_import(cmd_name, *args)
@@ -1001,6 +1017,51 @@ Common.register_command({
   :invocation => "create-auth-domain",
   :description => "Creates an authorization domain in Firecloud for registered users",
     :fn => ->(*args) { create_auth_domain("create-auth-domain", args) }
+})
+
+def backfill_billing_project_owners(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  fc_config = get_fc_config(op.opts.project)
+  flags = ([
+      ["--fc-base-url", fc_config["baseUrl"]],
+      ["--billing-project-prefix", get_billing_project_prefix(op.opts.project)]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        gradle backfillBillingProjectOwners
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+    :invocation => "backfill-billing-project-owners",
+    :description => "Backfills billing project owner role for owners",
+    :fn => ->(*args) {backfill_billing_project_owners("backfill-billing-project-owners", *args)}
 })
 
 def update_user_registered_status(cmd_name, args)
@@ -1255,6 +1316,66 @@ Common.register_command({
   :description => "Delete all clusters in this environment",
   :fn => ->(*args) { delete_clusters("delete-clusters", *args) }
 })
+
+def describe_cluster(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--id [CLUSTER_ID]",
+      ->(opts, v) { opts.cluster_id = v},
+      "Required cluster ID to describe, e.g. 'aou-test-f1-1/all-of-us'")
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Optional project ID; by default will infer the project form the cluster ID")
+  op.add_validator ->(opts) { raise ArgumentError unless opts.cluster_id }
+  op.parse.validate
+
+  # Infer the project from the cluster ID project ID. If for some reason, the
+  # target cluster ID does not conform to the current billing prefix (e.g. if we
+  # changed the prefix), --project can be used to override this.
+  common = Common.new
+  matching_prefix = ""
+  project_from_cluster = nil
+  ENVIRONMENTS.each_key do |env|
+    env_prefix = get_billing_project_prefix(env)
+    if op.opts.cluster_id.start_with?(env_prefix)
+      # Take the most specific prefix match, since prod is a substring of the others.
+      if matching_prefix.length < env_prefix.length
+        project_from_cluster = env
+        matching_prefix = env_prefix
+      end
+    end
+  end
+  if project_from_cluster == "local"
+    project_from_cluster = TEST_PROJECT
+  end
+  common.warning "unable to determine project by cluster ID" unless project_from_cluster
+  unless op.opts.project
+    op.opts.project = project_from_cluster
+  end
+
+  # Add the GcloudContext after setting up the project parameter to avoid
+  # earlier validation failures.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  api_url = get_leo_api_url(gcc.project)
+  ServiceAccountContext.new(gcc.project).run do |ctx|
+    common = Common.new
+    common.run_inline %W{
+       gradle manageClusters
+      -PappArgs=['describe','#{api_url}','#{gcc.project}','#{ctx.service_account}','#{op.opts.cluster_id}']}
+  end
+end
+
+Common.register_command({
+  :invocation => "describe-cluster",
+  :description => "Describe all cluster in this environment",
+  :fn => ->(*args) { describe_cluster("describe-cluster", *args) }
+})
+
 
 def list_clusters(cmd_name, *args)
   ensure_docker cmd_name, args
@@ -1627,6 +1748,15 @@ end
 def get_fc_config(project)
   config_json = must_get_env_value(project, :config_json)
   return JSON.parse(File.read("config/#{config_json}"))["firecloud"]
+end
+
+def get_billing_config(project)
+  config_json = must_get_env_value(project, :config_json)
+  return JSON.parse(File.read("config/#{config_json}"))["billing"]
+end
+
+def get_billing_project_prefix(project)
+  return get_billing_config(project)["projectNamePrefix"]
 end
 
 def get_leo_api_url(project)

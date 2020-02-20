@@ -47,18 +47,21 @@ function buildWorkspaceStub(suffix): Workspace {
       drugDevelopment: false,
       educational: false,
       intendedStudy: '',
+      scientificApproach: '',
       methodsDevelopment: false,
       otherPurpose: false,
       otherPurposeDetails: '',
       population: false,
       populationDetails: [],
       populationHealth: false,
+      ethics: false,
       reviewRequested: false,
       socialBehavioral: false,
       reasonForAllOfUs: '',
     },
     published: false,
-    dataAccessLevel: DataAccessLevel.Registered
+    dataAccessLevel: DataAccessLevel.Registered,
+    billingAccountName: 'billing-account'
   };
 }
 

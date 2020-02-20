@@ -27,6 +27,10 @@ public interface WorkspaceService {
 
   DbWorkspace get(String ns, String firecloudName);
 
+  // Returns the requested workspace looked up by workspace namespace (aka billing project name).
+  // Only active workspaces are searched. Returns null if no active workspace is found.
+  Optional<DbWorkspace> getByNamespace(String workspaceNamespace);
+
   List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
@@ -40,6 +44,13 @@ public interface WorkspaceService {
   DbWorkspace getRequiredWithCohorts(String ns, String firecloudName);
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
+
+  /*
+   * This function will call the Google Cloud Billing API to set the given billing
+   * account name to the given workspace. It will also update the billingAccountName
+   * field on the workspace model.
+   */
+  void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
 
   /*
    * This function will check the workspace's billing status and throw a ForbiddenException
@@ -75,8 +86,7 @@ public interface WorkspaceService {
   Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName);
 
-  List<UserRole> convertWorkspaceAclsToUserRoles(
-      Map<String, FirecloudWorkspaceAccessEntry> rolesMap);
+  List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
 
   FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate);

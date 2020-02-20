@@ -126,6 +126,31 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainCounts:
+    post:
+      tags:
+        - concepts
+      consumes:
+        - application/json
+      description: >
+        Searches for concepts in concept table by name, and optionally filter on
+        domain, vocabulary IDs, or standard concept status. Uses the CDR version affiliated
+        with the workspace specified in the path.
+      operationId: "domainCounts"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: request
+          description: domain counts search request
+          schema:
+            $ref: "#/definitions/DomainCountsRequest"
+      responses:
+        200:
+          description: A collection of concepts
+          schema:
+            $ref: "#/definitions/DomainCountsListResponse"
+
 definitions:
 
   DataTableSpecification:
@@ -501,7 +526,6 @@ definitions:
     required:
       - standardConceptFilter
       - domain
-      - includeDomainCounts
     properties:
       query:
         type: string
@@ -528,14 +552,32 @@ definitions:
         type: integer
         format: int32
         description: The maximum number of results returned. Defaults to 20.
-      includeDomainCounts:
-        type: boolean
-        default: false
-        description: True if per-domain counts of concepts matching the criteria should be included in the response
       pageNumber:
         type: integer
         default: 0
         description: By default it returns the first page and then its next pages from that on.
+
+  DomainCountsRequest:
+    type: object
+    required:
+      - standardConceptFilter
+    properties:
+      query:
+        type: string
+        description: >
+          A query string that can be used to match a subset of the name (case-insensitively),
+          the entire code value (case-insensitively), or the concept ID. If not specified, all
+          concepts are returned.
+      standardConceptFilter:
+        description: >
+          STANDARD_CONCEPTS if only standard concepts should be returned,
+          NON_STANDARD_CONCEPTS if only non-standard
+          concepts should be returned; defaults to ALL_CONCEPTS, meaning both
+          standard and non-standard concepts will be returned.
+        $ref: "#/definitions/StandardConceptFilter"
+      surveyName:
+        description: The name of the survey clicked
+        type: string
 
   ConceptListResponse:
     type: object
@@ -546,10 +588,12 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Concept"
-      questions:
-        type: "array"
-        items:
-          $ref: "#/definitions/SurveyQuestions"
+
+  DomainCountsListResponse:
+    type: object
+    required:
+      - domainCounts
+    properties:
       domainCounts:
         type: "array"
         items:
