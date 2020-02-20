@@ -3,6 +3,7 @@ package org.pmiops.workbench.monitoring;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Optional;
 import org.junit.Test;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -58,5 +59,22 @@ public class MeasurementBundleTest {
     MeasurementBundle.builder()
         .addTag(MetricLabel.BUFFER_ENTRY_STATUS, "lost and gone forever")
         .build();
+  }
+
+  @Test
+  public void testGetTagValue() {
+    final MeasurementBundle measurementBundle =
+        MeasurementBundle.builder()
+            .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 101L)
+            .addTag(MetricLabel.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
+            .build();
+
+    final Optional<String> labelValue =
+        measurementBundle.getTagValue(MetricLabel.BUFFER_ENTRY_STATUS);
+    assertThat(labelValue.isPresent()).isTrue();
+    assertThat(labelValue.orElse("wrong")).isEqualTo(BufferEntryStatus.AVAILABLE.toString());
+
+    final Optional<String> missingValue = measurementBundle.getTagValue(MetricLabel.METHOD_NAME);
+    assertThat(missingValue.isPresent()).isFalse();
   }
 }

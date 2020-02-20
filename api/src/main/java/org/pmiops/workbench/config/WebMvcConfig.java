@@ -42,7 +42,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired private CronInterceptor cronInterceptor;
 
-  @Autowired private RequestTimeMetricInterceptor elapsedTimeDistributionInterceptor;
+  @Autowired private RequestTimeMetricInterceptor requestTimeMetricInterceptor;
 
   @Autowired private SecurityHeadersInterceptor securityHeadersInterceptor;
 
@@ -70,7 +70,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
-    registry.addInterceptor(elapsedTimeDistributionInterceptor);
+    registry.addInterceptor(requestTimeMetricInterceptor);
     registry.addInterceptor(tracingInterceptor);
     registry.addInterceptor(cronInterceptor);
     registry.addInterceptor(cloudTaskInterceptor);

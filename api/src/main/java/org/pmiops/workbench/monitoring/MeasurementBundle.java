@@ -36,8 +36,7 @@ public class MeasurementBundle {
   }
 
   public Optional<String> getTagValue(MetricLabel metricLabel) {
-    return Optional.ofNullable(tags.get(metricLabel))
-        .map(TagValue::asString);
+    return Optional.ofNullable(tags.get(metricLabel)).map(TagValue::asString);
   }
 
   public static Builder builder() {

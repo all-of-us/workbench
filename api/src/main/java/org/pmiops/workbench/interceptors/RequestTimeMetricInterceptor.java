@@ -22,8 +22,7 @@ public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
   private final LogsBasedMetricService logsBasedMetricService;
   private Clock clock;
 
-  public RequestTimeMetricInterceptor(
-      LogsBasedMetricService logsBasedMetricService, Clock clock) {
+  public RequestTimeMetricInterceptor(LogsBasedMetricService logsBasedMetricService, Clock clock) {
     this.logsBasedMetricService = logsBasedMetricService;
     this.clock = clock;
   }

@@ -3,20 +3,15 @@ package org.pmiops.workbench.interceptors;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.floatThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.api.client.http.HttpMethods;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import java.lang.reflect.Method;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
@@ -43,7 +38,7 @@ public class RequestTimeMetricInterceptorTest {
   private static final Instant START_INSTANT = Instant.parse("2007-01-03T00:00:00.00Z");
   private static final long DURATION_MILLIS = 1500L;
   private static final Instant END_INSTANT = START_INSTANT.plusMillis(DURATION_MILLIS);
-  public static final String METHOD_NAME = "frobnicate";
+  private static final String METHOD_NAME = "frobnicate";
 
   @Mock private HttpServletRequest mockHttpServletRequest;
   @Mock private HttpServletResponse mockHttpServletResponse;
@@ -67,18 +62,21 @@ public class RequestTimeMetricInterceptorTest {
   @Before
   public void setup() {
     doReturn(START_INSTANT).when(mockClock).instant();
-    doReturn(HttpMethods.GET)
-        .when(mockHttpServletRequest).getMethod();
+    doReturn(HttpMethods.GET).when(mockHttpServletRequest).getMethod();
     doReturn(METHOD_NAME).when(mockMethod).getName();
     doReturn(mockMethod).when(mockHandlerMethod).getMethod();
   }
 
   @Test
   public void testPreHandle_getRequest() {
-    boolean result = requestTimeMetricInterceptor.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod);
+    boolean result =
+        requestTimeMetricInterceptor.preHandle(
+            mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod);
     assertThat(result).isTrue();
-    verify(mockHttpServletRequest).setAttribute(attributeKeyCaptor.capture(), attributeValueCaptor.capture());
-    assertThat(attributeKeyCaptor.getValue()).isEqualTo(RequestAttribute.START_INSTANT.getKeyName());
+    verify(mockHttpServletRequest)
+        .setAttribute(attributeKeyCaptor.capture(), attributeValueCaptor.capture());
+    assertThat(attributeKeyCaptor.getValue())
+        .isEqualTo(RequestAttribute.START_INSTANT.getKeyName());
     Object attrValueObj = attributeValueCaptor.getValue();
     assertThat(attrValueObj instanceof Instant).isTrue();
     //noinspection ConstantConditions
@@ -87,17 +85,19 @@ public class RequestTimeMetricInterceptorTest {
 
   @Test
   public void testPreHandle_skipsOptionsRequest() {
-    doReturn(HttpMethods.OPTIONS)
-        .when(mockHttpServletRequest).getMethod();
-    boolean result = requestTimeMetricInterceptor.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod);
+    doReturn(HttpMethods.OPTIONS).when(mockHttpServletRequest).getMethod();
+    boolean result =
+        requestTimeMetricInterceptor.preHandle(
+            mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod);
     assertThat(result).isTrue();
     verify(mockHttpServletRequest, never()).setAttribute(anyString(), any());
   }
 
   @Test
   public void testPreHandle_skipsUnsupportedHandler() {
-    boolean result = requestTimeMetricInterceptor
-        .preHandle(mockHttpServletRequest, mockHttpServletResponse, new Object());
+    boolean result =
+        requestTimeMetricInterceptor.preHandle(
+            mockHttpServletRequest, mockHttpServletResponse, new Object());
     assertThat(result).isTrue();
     verify(mockHttpServletRequest, never()).setAttribute(anyString(), any());
   }
@@ -105,33 +105,40 @@ public class RequestTimeMetricInterceptorTest {
   @Test
   public void testPostHandle() {
     doReturn(END_INSTANT).when(mockClock).instant();
-    doReturn(START_INSTANT).when(mockHttpServletRequest).getAttribute(RequestAttribute.START_INSTANT.getKeyName());
-    requestTimeMetricInterceptor
-        .postHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod, mockModelAndView);
+    doReturn(START_INSTANT)
+        .when(mockHttpServletRequest)
+        .getAttribute(RequestAttribute.START_INSTANT.getKeyName());
+    requestTimeMetricInterceptor.postHandle(
+        mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod, mockModelAndView);
     verify(mockHttpServletRequest).getAttribute(RequestAttribute.START_INSTANT.getKeyName());
 
     verify(mockLogsBasedMetricService).record(measurementBundleCaptor.capture());
-    assertThat(measurementBundleCaptor.getValue().getMeasurements().get(DistributionMetric.API_METHOD_TIME))
+    assertThat(
+            measurementBundleCaptor
+                .getValue()
+                .getMeasurements()
+                .get(DistributionMetric.API_METHOD_TIME))
         .isEqualTo(DURATION_MILLIS);
 
     assertThat(measurementBundleCaptor.getValue().getTags()).hasSize(1);
     assertThat(measurementBundleCaptor.getValue().getTagValue(MetricLabel.METHOD_NAME).get())
-      .isEqualTo(METHOD_NAME);
+        .isEqualTo(METHOD_NAME);
   }
+
   @Test
   public void testPostHandle_skipsOptionsRequest() {
-    doReturn(HttpMethods.OPTIONS)
-        .when(mockHttpServletRequest).getMethod();
-    requestTimeMetricInterceptor.postHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod, mockModelAndView);
+    doReturn(HttpMethods.OPTIONS).when(mockHttpServletRequest).getMethod();
+    requestTimeMetricInterceptor.postHandle(
+        mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod, mockModelAndView);
     verify(mockHttpServletRequest, never()).setAttribute(anyString(), any());
     verifyZeroInteractions(mockLogsBasedMetricService);
   }
 
   @Test
   public void testPostHandle_skipsUnsupportedHandler() {
-    requestTimeMetricInterceptor.postHandle(mockHttpServletRequest, mockHttpServletResponse, new Object(), mockModelAndView);
+    requestTimeMetricInterceptor.postHandle(
+        mockHttpServletRequest, mockHttpServletResponse, new Object(), mockModelAndView);
     verify(mockHttpServletRequest, never()).setAttribute(anyString(), any());
     verifyZeroInteractions(mockLogsBasedMetricService);
   }
-
 }
