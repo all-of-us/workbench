@@ -47,7 +47,7 @@ public class InstitutionServiceTest {
 
   @Before
   public void setUp() {
-    // will be retrieved as TEST_INST_AFTER_RT
+    // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
   }
 
