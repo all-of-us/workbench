@@ -336,18 +336,15 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     sidebarContainerStyles(activeIcon, notebookStyles) {
       if (notebookStyles) {
         if (activeIcon) {
-          return {...styles.sidebarContainer, ...styles.notebookOverrides, ...styles.sidebarContainerActive}
+          return {...styles.sidebarContainer, ...styles.notebookOverrides, ...styles.sidebarContainerActive};
+        } else {
+          return {...styles.sidebarContainer, ...styles.notebookOverrides};
         }
-        else {
-          return {...styles.sidebarContainer, ...styles.notebookOverrides}
-        }
-      }
-      else {
+      } else {
         if (activeIcon) {
-          return {...styles.sidebarContainer, ...styles.sidebarContainerActive}
-        }
-        else {
-          return {...styles.sidebarContainer}
+          return {...styles.sidebarContainer, ...styles.sidebarContainerActive};
+        } else {
+          return {...styles.sidebarContainer};
         }
       }
     }
@@ -501,7 +498,7 @@ export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
   @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
-  @Input('notebookStyles') notebookStyles: Props['notebookStyles']
+  @Input('notebookStyles') notebookStyles: Props['notebookStyles'];
   constructor() {
     super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
   }
