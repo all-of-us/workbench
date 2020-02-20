@@ -3,9 +3,7 @@ import {
   ClusterApi,
   ClusterLocalizeRequest,
   ClusterLocalizeResponse,
-  ClusterStatus,
-  CreateClusterResponse,
-  GetClusterResponse,
+  ClusterStatus
 } from 'generated/fetch';
 
 export class ClusterApiStub extends ClusterApi {
@@ -21,19 +19,19 @@ export class ClusterApiStub extends ClusterApi {
     };
   }
 
-  getCluster(extraHttpRequestParams?: any): Promise<Cluster> {
+  getCluster(workspaceNamespace: string, options?: any): Promise<Cluster> {
     return new Promise<Cluster>(resolve => {
       resolve(this.cluster);
     });
   }
 
-  createCluster(extraHttpRequestParams?: any): Promise<Cluster> {
+  createCluster(workspaceNamespace: string, options?: any): Promise<Cluster> {
     return new Promise<Cluster>(resolve => {
       resolve(this.cluster);
     });
   }
 
-  deleteCluster(projectName: string, extraHttpRequestParams?: any): Promise<{}> {
+  deleteCluster(workspaceNamespace: string, options?: any): Promise<{}> {
     return new Promise<{}>(resolve => {
       this.cluster.status = ClusterStatus.Deleting;
       resolve({});

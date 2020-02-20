@@ -37,13 +37,10 @@ import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
-import org.pmiops.workbench.model.CreateClusterResponse;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.GetClusterResponse;
 import org.pmiops.workbench.model.ListClusterDeleteRequest;
 import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.StorageLink;
@@ -204,8 +201,7 @@ public class ClusterController implements ClusterApiDelegate {
         leonardoNotebooksClient.getCluster(
             workspaceNamespace, clusterNameForUser(userProvider.get()));
 
-    return ResponseEntity.ok(
-        TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
+    return ResponseEntity.ok(TO_ALL_OF_US_CLUSTER.apply(firecloudCluster));
   }
 
   @Override
@@ -236,25 +232,25 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterLocalizeResponse> localize(
       String workspaceNamespace, ClusterLocalizeRequest body) {
-    Workspace workspace = workspaceService.getWorkspace(workspaceNamespace).getWorkspace();
-    DbWorkspace dbWorkspace =
-        workspaceService
-            .getByNamespace(workspaceNamespace)
-            .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
-
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     workspaceService.enforceWorkspaceAccessLevel(
-        workspace.getNamespace(), workspace.getId(), WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspace.getNamespace(), workspace.getId());
+        dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName(),
+        WorkspaceAccessLevel.WRITER);
+    workspaceService.validateActiveBilling(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     FirecloudWorkspace firecloudWorkspace;
     try {
       firecloudWorkspace =
-          fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getId()).getWorkspace();
+          fireCloudService
+              .getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+              .getWorkspace();
     } catch (NotFoundException e) {
       throw new NotFoundException(
           String.format(
               "workspace %s/%s not found or not accessible",
-              workspace.getNamespace(), workspace.getId()));
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()));
     }
     DbCdrVersion cdrVersion = dbWorkspace.getCdrVersion();
 
@@ -271,7 +267,7 @@ public class ClusterController implements ClusterApiDelegate {
                 userRecentResourceService.updateNotebookEntry(
                     workspaceId, userProvider.get().getUserId(), gcsNotebooksDir + "/" + notebook));
 
-    String workspacePath = workspace.getId();
+    String workspacePath = dbWorkspace.getFirecloudName();
     String editDir = "workspaces/" + workspacePath;
     String playgroundDir = "workspaces_playground/" + workspacePath;
     String targetDir = body.getPlaygroundMode() ? playgroundDir : editDir;

@@ -20,6 +20,7 @@ import java.time.ZoneId;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
@@ -32,7 +33,6 @@ import org.pmiops.workbench.actionaudit.auditors.ClusterAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -63,6 +63,8 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -84,12 +86,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ClusterControllerTest {
 
-  private static final String BILLING_PROJECT_ID = "proj";
-  private static final String BILLING_PROJECT_ID_2 = "proj2";
+  private static final String BILLING_PROJECT_ID = "aou-rw-1234";
+  private static final String BILLING_PROJECT_ID_2 = "aou-rw-5678";
   // a workspace's namespace is always its billing project ID
   private static final String WORKSPACE_NS = BILLING_PROJECT_ID;
-  private static final String WORKSPACE_ID = "wsid";
-  private static final String WORKSPACE_NAME = "wsn";
+  // Workspace ID is also known as firecloud_name.
+  private static final String WORKSPACE_ID = "myfirstworkspace";
+  private static final String WORKSPACE_NAME = "My First Workspace";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String OTHER_USER_EMAIL = "alice@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
@@ -110,18 +113,8 @@ public class ClusterControllerTest {
     UserServiceImpl.class,
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
+    WorkspaceMapperImpl.class,
     PublicInstitutionDetailsMapperImpl.class
-  })
-  @MockBean({
-    ClusterAuditor.class,
-    FireCloudService.class,
-    LeonardoNotebooksClient.class,
-    WorkspaceService.class,
-    UserRecentResourceService.class,
-    ComplianceService.class,
-    DirectoryService.class,
-    AdminActionHistoryDao.class,
-    UserServiceAuditor.class
   })
   static class Configuration {
 
@@ -150,14 +143,19 @@ public class ClusterControllerTest {
 
   @Captor private ArgumentCaptor<Map<String, String>> mapCaptor;
 
-  @Autowired ClusterAuditor clusterAuditor;
-  @Autowired LeonardoNotebooksClient notebookService;
-  @Autowired FireCloudService fireCloudService;
+  @MockBean AdminActionHistoryDao adminActionHistoryDao;
+  @MockBean ClusterAuditor clusterAuditor;
+  @MockBean ComplianceService complianceService;
+  @MockBean DirectoryService directoryService;
+  @MockBean FireCloudService fireCloudService;
+  @MockBean LeonardoNotebooksClient notebookService;
+  @MockBean UserRecentResourceService userRecentResourceService;
+  @MockBean UserServiceAuditor userServiceAuditor;
+  @MockBean WorkspaceService workspaceService;
+
   @Autowired UserDao userDao;
-  @Autowired WorkspaceService workspaceService;
+  @Autowired WorkspaceMapper workspaceMapper;
   @Autowired ClusterController clusterController;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired Clock clock;
 
   private DbCdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
@@ -173,16 +171,12 @@ public class ClusterControllerTest {
 
   @Before
   public void setUp() {
-    config = new WorkbenchConfig();
-    config.server = new WorkbenchConfig.ServerConfig();
+    config = WorkbenchConfig.createEmptyConfig();
     config.server.apiBaseUrl = API_BASE_URL;
-    config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.registeredDomainName = "";
     config.firecloud.clusterDefaultMachineType = "n1-standard-4";
     config.firecloud.clusterDefaultDiskSizeGb = 50;
-    config.access = new WorkbenchConfig.AccessConfig();
     config.access.enableComplianceTraining = true;
-    config.featureFlags = new FeatureFlagsConfig();
 
     user = new DbUser();
     user.setUsername(LOGGED_IN_USER_EMAIL);
@@ -252,6 +246,7 @@ public class ClusterControllerTest {
     testWorkspace.setFirecloudName(WORKSPACE_ID);
     testWorkspace.setCdrVersion(cdrVersion);
     doReturn(testWorkspace).when(workspaceService).get(WORKSPACE_NS, WORKSPACE_ID);
+    doReturn(Optional.of(testWorkspace)).when(workspaceService).getByNamespace(WORKSPACE_NS);
   }
 
   private FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
@@ -262,13 +257,13 @@ public class ClusterControllerTest {
         .bucketName(BUCKET_NAME);
   }
 
-  private void stubGetWorkspace(String ns, String name, String creator) {
+  private void stubGetWorkspace(String workspaceNamespace, String firecloudName, String creator) {
     DbWorkspace w = new DbWorkspace();
-    w.setWorkspaceNamespace(ns);
-    w.setFirecloudName(name);
+    w.setWorkspaceNamespace(workspaceNamespace);
+    w.setFirecloudName(firecloudName);
     w.setCdrVersion(cdrVersion);
-    when(workspaceService.getRequired(ns, name)).thenReturn(w);
-    stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
+    when(workspaceService.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
+    stubGetFcWorkspace(createFcWorkspace(workspaceNamespace, firecloudName, creator));
   }
 
   private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) {
@@ -290,16 +285,25 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testListClusters() {
+  public void testGetCluster() {
     when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenReturn(testFcCluster);
 
-    assertThat(
-            clusterController
-                .listClusters(BILLING_PROJECT_ID, WORKSPACE_NAME)
-                .getBody()
-                .getDefaultCluster())
-        .isEqualTo(testCluster);
+    assertThat(clusterController.getCluster(BILLING_PROJECT_ID).getBody()).isEqualTo(testCluster);
+  }
+
+  @Test
+  public void testGetCluster_UnknownStatus() {
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster.status(null));
+
+    assertThat(clusterController.getCluster(BILLING_PROJECT_ID).getBody().getStatus())
+        .isEqualTo(ClusterStatus.UNKNOWN);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testGetCluster_NullBillingProject() {
+    clusterController.getCluster(null);
   }
 
   @Test
@@ -323,7 +327,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testDeleteClustersInProjectDeleteSome() {
+  public void testDeleteClustersInProject_DeleteSome() {
     List<ListClusterResponse> listClusterResponseList =
         ImmutableList.of(testFcClusterListResponse, testFcClusterListResponse2);
     List<String> clustersToDelete = ImmutableList.of(testFcCluster.getClusterName());
@@ -339,7 +343,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testDeleteClustersInProjectDeleteDoesNotAffectOtherProjects() {
+  public void testDeleteClustersInProject_DeleteDoesNotAffectOtherProjects() {
     List<ListClusterResponse> listClusterResponseList =
         ImmutableList.of(testFcClusterListResponse, testFcClusterListResponse2);
     List<String> clustersToDelete =
@@ -356,7 +360,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testDeleteClustersInProjectNoClusters() {
+  public void testDeleteClustersInProject_NoClusters() {
     List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
     when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
         .thenReturn(listClusterResponseList);
@@ -374,7 +378,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testDeleteClustersInProjectNullClustersList() {
+  public void testDeleteClustersInProject_NullClustersList() {
     List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
     when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
         .thenReturn(listClusterResponseList);
@@ -392,45 +396,22 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testListClustersUnknownStatus() {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
-        .thenReturn(testFcCluster.status(null));
-
-    assertThat(
-            clusterController
-                .listClusters(BILLING_PROJECT_ID, WORKSPACE_NAME)
-                .getBody()
-                .getDefaultCluster()
-                .getStatus())
-        .isEqualTo(ClusterStatus.UNKNOWN);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void testListClustersNullBillingProject() {
-    clusterController.listClusters(null, WORKSPACE_NAME);
-  }
-
-  @Test
-  public void testListClustersLazyCreate() {
+  public void testCreateCluster() {
     when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenThrow(new NotFoundException());
     when(notebookService.createCluster(
-            eq(BILLING_PROJECT_ID), eq(getClusterName()), eq(WORKSPACE_NAME)))
+            eq(BILLING_PROJECT_ID), eq(getClusterName()), eq(WORKSPACE_ID)))
         .thenReturn(testFcCluster);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NAME, "test");
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
-    assertThat(
-            clusterController
-                .listClusters(BILLING_PROJECT_ID, WORKSPACE_NAME)
-                .getBody()
-                .getDefaultCluster())
+    assertThat(clusterController.createCluster(BILLING_PROJECT_ID).getBody())
         .isEqualTo(testCluster);
   }
 
   @Test
   public void testDeleteCluster() {
-    clusterController.deleteCluster(BILLING_PROJECT_ID, "cluster");
-    verify(notebookService).deleteCluster(BILLING_PROJECT_ID, "cluster");
+    clusterController.deleteCluster(BILLING_PROJECT_ID);
+    verify(notebookService).deleteCluster(BILLING_PROJECT_ID, getClusterName());
   }
 
   @Test
@@ -477,13 +458,10 @@ public class ClusterControllerTest {
   public void testLocalize() {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest()
-            .workspaceNamespace(WORKSPACE_NS)
-            .workspaceId(WORKSPACE_ID)
             .notebookNames(ImmutableList.of("foo.ipynb"))
             .playgroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
+    ClusterLocalizeResponse resp = clusterController.localize(BILLING_PROJECT_ID, req).getBody();
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
 
     verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
@@ -507,13 +485,10 @@ public class ClusterControllerTest {
   public void testLocalize_playgroundMode() {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest()
-            .workspaceNamespace(WORKSPACE_NS)
-            .workspaceId(WORKSPACE_ID)
             .notebookNames(ImmutableList.of("foo.ipynb"))
             .playgroundMode(true);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
+    ClusterLocalizeResponse resp = clusterController.localize(BILLING_PROJECT_ID, req).getBody();
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces_playground/wsid");
     verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
@@ -531,13 +506,10 @@ public class ClusterControllerTest {
   public void testLocalize_differentNamespace() {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest()
-            .workspaceNamespace(WORKSPACE_NS)
-            .workspaceId(WORKSPACE_ID)
             .notebookNames(ImmutableList.of("foo.ipynb"))
             .playgroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        clusterController.localize("other-proj", "cluster", req).getBody();
+    ClusterLocalizeResponse resp = clusterController.localize("other-proj", req).getBody();
     verify(notebookService).localize(eq("other-proj"), eq("cluster"), mapCaptor.capture());
 
     Map<String, String> localizeMap = mapCaptor.getValue();
@@ -558,12 +530,9 @@ public class ClusterControllerTest {
   @Test
   public void testLocalize_noNotebooks() {
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
-    req.setWorkspaceNamespace(WORKSPACE_NS);
-    req.setWorkspaceId(WORKSPACE_ID);
     req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
+    ClusterLocalizeResponse resp = clusterController.localize(BILLING_PROJECT_ID, req).getBody();
     verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
 
     // Config files only.
@@ -576,17 +545,16 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void listCluster_validateActiveBilling() {
+  public void GetCluster_validateActiveBilling() {
     doThrow(ForbiddenException.class)
         .when(workspaceService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
-    assertThrows(
-        ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
+    assertThrows(ForbiddenException.class, () -> clusterController.getCluster(WORKSPACE_NS));
   }
 
   @Test
-  public void listCluster_validateActiveBilling_checkAccessFirst() {
+  public void getCluster_validateActiveBilling_checkAccessFirst() {
     doThrow(ForbiddenException.class)
         .when(workspaceService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
@@ -595,8 +563,7 @@ public class ClusterControllerTest {
         .when(workspaceService)
         .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.READER);
 
-    assertThrows(
-        ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
+    assertThrows(ForbiddenException.class, () -> clusterController.getCluster(WORKSPACE_NS));
     verify(workspaceService, never()).validateActiveBilling(anyString(), anyString());
   }
 
@@ -606,10 +573,8 @@ public class ClusterControllerTest {
         .when(workspaceService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
-    ClusterLocalizeRequest req =
-        new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
-
-    assertThrows(ForbiddenException.class, () -> clusterController.localize("y", "z", req));
+    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
+    assertThrows(ForbiddenException.class, () -> clusterController.localize(WORKSPACE_NS, req));
   }
 
   @Test
@@ -620,12 +585,11 @@ public class ClusterControllerTest {
 
     doThrow(ForbiddenException.class)
         .when(workspaceService)
-        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.READER);
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
-    ClusterLocalizeRequest req =
-        new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
+    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
 
-    assertThrows(ForbiddenException.class, () -> clusterController.localize("y", "z", req));
+    assertThrows(ForbiddenException.class, () -> clusterController.localize(WORKSPACE_NS, req));
     verify(workspaceService, never()).validateActiveBilling(anyString(), anyString());
   }
 

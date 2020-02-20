@@ -119,11 +119,9 @@ export class ResetClusterButton extends React.Component<Props, State> {
   }
 
   async resetCluster(): Promise<void> {
-    const {clusterName, clusterNamespace} = this.state.cluster;
-
     try {
       this.setState({ resetClusterPending: true });
-      await clusterApi().deleteCluster(clusterNamespace);
+      await clusterApi().deleteCluster(this.state.cluster.clusterNamespace);
       this.setState({resetClusterPending: false});
       this.pollCluster();
     } catch {
