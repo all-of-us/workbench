@@ -29,11 +29,8 @@ public class InstitutionController implements InstitutionApiDelegate {
   @Override
   @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Void> deleteInstitution(final String shortName) {
-    if (institutionService.deleteInstitution(shortName)) {
-      return ResponseEntity.noContent().build();
-    } else {
-      throw new NotFoundException(String.format("Could not delete Institution %s", shortName));
-    }
+    institutionService.deleteInstitution(shortName);
+    return ResponseEntity.noContent().build();
   }
 
   @Override
@@ -44,7 +41,7 @@ public class InstitutionController implements InstitutionApiDelegate {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format("Could not find Institution %s", shortName)));
+                        String.format("Could not find Institution '%s'", shortName)));
 
     return ResponseEntity.ok(institution);
   }
@@ -66,7 +63,7 @@ public class InstitutionController implements InstitutionApiDelegate {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format("Could not update Institution %s", shortName)));
+                        String.format("Could not update Institution '%s'", shortName)));
 
     return ResponseEntity.ok(institution);
   }

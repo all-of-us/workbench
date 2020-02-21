@@ -33,6 +33,7 @@ import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -41,6 +42,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -87,6 +89,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
   private final UserServiceAuditor userServiceAuditor;
+  private final InstitutionService institutionService;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
@@ -102,7 +107,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditor) {
+      UserServiceAuditor userServiceAuditor,
+      InstitutionService institutionService,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -115,6 +122,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.complianceService = complianceService;
     this.directoryService = directoryService;
     this.userServiceAuditor = userServiceAuditor;
+    this.institutionService = institutionService;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
   /**
@@ -304,6 +313,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null,
         null,
         null,
+        null,
         null);
   }
 
@@ -318,9 +328,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       String areaOfResearch,
       String professionalUrl,
       List<Degree> degrees,
-      DbAddress address,
-      DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations) {
+      DbAddress dbAddress,
+      DbDemographicSurvey dbDemographicSurvey,
+      List<DbInstitutionalAffiliation> dbAffiliations,
+      DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -335,33 +346,56 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setDisabled(false);
     dbUser.setAboutYou(null);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    dbUser.setAddress(address);
+    dbUser.setAddress(dbAddress);
     if (degrees != null) {
       dbUser.setDegreesEnum(degrees);
     }
-    dbUser.setDemographicSurvey(demographicSurvey);
+    dbUser.setDemographicSurvey(dbDemographicSurvey);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbUser.setCreationTime(now);
     dbUser.setLastModifiedTime(now);
 
-    DbUser user = new DbUser();
     // For existing user that do not have address
-    if (address != null) {
-      address.setUser(dbUser);
+    if (dbAddress != null) {
+      dbAddress.setUser(dbUser);
     }
-    if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
-    if (institutionalAffiliations != null) {
+    if (dbDemographicSurvey != null) dbDemographicSurvey.setUser(dbUser);
+    // set via the older Institutional Affiliation flow, from the Demographic Survey
+    if (dbAffiliations != null) {
       // We need an "effectively final" variable to be captured in the lambda
       // to pass to forEach.
       final DbUser finalDbUserReference = dbUser;
-      institutionalAffiliations.forEach(
+      dbAffiliations.forEach(
           affiliation -> {
             affiliation.setUser(finalDbUserReference);
             finalDbUserReference.addInstitutionalAffiliation(affiliation);
           });
     }
+    // set via the newer Verified Institutional Affiliation flow
+    boolean requireInstitutionalVerification =
+        configProvider.get().featureFlags.requireInstitutionalVerification;
+    if (requireInstitutionalVerification
+        && !institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
+      final String msg =
+          Optional.ofNullable(dbVerifiedAffiliation)
+              .map(
+                  affiliation ->
+                      String.format(
+                          "Cannot create user %s: contact email %s is not a valid member of institution '%s'",
+                          userName, contactEmail, affiliation.getInstitution().getShortName()))
+              .orElse(
+                  String.format(
+                      "Cannot create user %s: contact email %s does not have a valid institutional affiliation",
+                      userName, contactEmail));
+      throw new BadRequestException(msg);
+    }
+
     try {
       dbUser = userDao.save(dbUser);
+      if (requireInstitutionalVerification) {
+        dbVerifiedAffiliation.setUser(dbUser);
+        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
+      }
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(userName);
       if (dbUser == null) {

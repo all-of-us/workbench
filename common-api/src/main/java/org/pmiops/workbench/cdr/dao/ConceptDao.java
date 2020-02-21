@@ -132,6 +132,35 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
 
   @Query(
       value =
+          "select count(*) "
+              + "from "
+              + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
+              + "   id, @curType \\:= concept_name as concept_name, concept_id, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "    from "
+              + "      (select cr.id, c.* "
+              + "        from cb_criteria cr "
+              + "        join concept c on c.concept_id = cr.concept_id "
+              + "        where cr.domain_id = 'SURVEY' "
+              + "          and cr.type = 'PPI' "
+              + "          and cr.subtype = 'ANSWER' "
+              + "          and cr.path like CONCAT( "
+              + "            (select dc.id "
+              + "              from cb_criteria dc "
+              + "              where dc.domain_id = 'SURVEY' "
+              + "                and dc.type = 'PPI' "
+              + "                and dc.name = :surveyName), '.%' "
+              + "          ) "
+              + "          and match(c.concept_name, c.concept_code, c.vocabulary_id, c.synonyms) against (:term in boolean mode)"
+              + "      ) a, "
+              + "      (select @curRow \\:= 0, @curType \\:= '') r "
+              + "    order by concept_name, id "
+              + "  ) as x "
+              + "where rank = 1",
+      nativeQuery = true)
+  long countSurveyByTermAndName(@Param("term") String term, @Param("surveyName") String surveyName);
+
+  @Query(
+      value =
           "select concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
               + "from "
               + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
@@ -154,6 +183,41 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
       nativeQuery = true)
   List<DbConcept> findSurveys(
       @Param("term") String term, @Param("limit") int limit, @Param("offset") int offset);
+
+  @Query(
+      value =
+          "select concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "from "
+              + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
+              + "   id, @curType \\:= concept_name as concept_name, concept_id, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "    from "
+              + "      (select cr.id, c.* "
+              + "        from cb_criteria cr "
+              + "        join concept c on c.concept_id = cr.concept_id "
+              + "        where cr.domain_id = 'SURVEY' "
+              + "          and cr.type = 'PPI' "
+              + "          and cr.subtype = 'ANSWER' "
+              + "          and cr.path like CONCAT( "
+              + "            (select dc.id "
+              + "              from cb_criteria dc "
+              + "              where dc.domain_id = 'SURVEY' "
+              + "                and dc.type = 'PPI' "
+              + "                and dc.name = :surveyName), '.%' "
+              + "          ) "
+              + "          and match(c.concept_name, c.concept_code, c.vocabulary_id, c.synonyms) against (:term in boolean mode)"
+              + "      ) a, "
+              + "      (select @curRow \\:= 0, @curType \\:= '') r "
+              + "    order by concept_name, id "
+              + "  ) as x "
+              + "where rank = 1 "
+              + "order by id "
+              + "limit :limit offset :offset",
+      nativeQuery = true)
+  List<DbConcept> findSurveysByTermAndName(
+      @Param("term") String term,
+      @Param("surveyName") String surveyName,
+      @Param("limit") int limit,
+      @Param("offset") int offset);
 
   @Query(
       value =
@@ -216,82 +280,42 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
       @Param("limit") int limit,
       @Param("offset") int offset);
 
-  @Query(
-      value =
-          "select concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
-              + "from "
-              + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
-              + "   id, @curType \\:= concept_name as concept_name, concept_id, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
-              + "    from "
-              + "      (select cr.id, c.* "
-              + "        from cb_criteria cr "
-              + "        join concept c on c.concept_id = cr.concept_id "
-              + "        where cr.domain_id = 'SURVEY' "
-              + "          and cr.type = 'PPI' "
-              + "          and cr.subtype = 'ANSWER' "
-              + "      ) a, "
-              + "      (select @curRow \\:= 0, @curType \\:= '') r "
-              + "    order by concept_name, id "
-              + "  ) as x "
-              + "where rank = 1 "
-              + "order by id "
-              + "limit :limit offset :offset",
-      nativeQuery = true)
-  List<DbConcept> findSurveys(@Param("limit") int limit, @Param("offset") int offset);
-
-  @Query(
-      value =
-          "select count(*) "
-              + "from "
-              + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
-              + "   id, @curType \\:= concept_name as concept_name, concept_id, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
-              + "    from "
-              + "      (select cr.id, c.* "
-              + "        from cb_criteria cr "
-              + "        join concept c on c.concept_id = cr.concept_id "
-              + "        where cr.domain_id = 'SURVEY' "
-              + "          and cr.type = 'PPI' "
-              + "          and cr.subtype = 'ANSWER' "
-              + "      ) a, "
-              + "      (select @curRow \\:= 0, @curType \\:= '') r "
-              + "    order by concept_name, id "
-              + "  ) as x "
-              + "where rank = 1",
-      nativeQuery = true)
-  long countSurveys();
-
   /**
-   * Find surveys by specified keyword or surveyName. If both keyword and surveyName are blank
-   * return all surveys.
+   * Find surveys by specified term or surveyName. If both term and surveyName are blank return all
+   * surveys.
    *
-   * @param keyword
+   * @param term
    * @param surveyName
    * @param pageable
    * @return
    */
-  default List<DbConcept> findSurveys(String keyword, String surveyName, Pageable pageable) {
+  default List<DbConcept> findSurveys(String term, String surveyName, Pageable pageable) {
     int limit = pageable.getPageSize();
     int offset = pageable.getPageNumber() * limit;
-    if (StringUtils.isBlank(keyword)) {
-      return StringUtils.isBlank(surveyName)
-          ? findSurveys(limit, offset)
-          : findSurveysByName(surveyName, limit, offset);
+    if (StringUtils.isBlank(term)) {
+      return findSurveysByName(surveyName, limit, offset);
     }
-    return findSurveys(keyword, limit, offset);
+    if (StringUtils.isBlank(surveyName)) {
+      return findSurveys(term, limit, offset);
+    }
+    return findSurveysByTermAndName(term, surveyName, limit, offset);
   }
 
   /**
-   * Count surveys by specified keyword or surveyName. If both keyword and surveyName are blank
-   * count all surveys.
+   * Count surveys by specified term or surveyName. If both term and surveyName are blank count all
+   * surveys.
    *
-   * @param keyword
+   * @param term
    * @param surveyName
    * @return
    */
-  default long countSurveys(String keyword, String surveyName) {
-    if (StringUtils.isBlank(keyword)) {
-      return StringUtils.isBlank(surveyName) ? countSurveys() : countSurveyByName(surveyName);
+  default long countSurveys(String term, String surveyName) {
+    if (StringUtils.isBlank(term)) {
+      return countSurveyByName(surveyName);
     }
-    return countSurveys(keyword);
+    if (StringUtils.isBlank(surveyName)) {
+      return countSurveys(term);
+    }
+    return countSurveyByTermAndName(term, surveyName);
   }
 }
