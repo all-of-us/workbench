@@ -305,7 +305,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       if (this.isClusterInProgress(status)) {
         this.incrementProgress(Progress.Resuming);
       } else {
-        this.incrementProgress(Progress.Creating);
+        this.incrementProgress(Progress.Initializing);
       }
     }
 
@@ -319,7 +319,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         onStatusUpdate: (status) => this.onClusterStatusUpdate(status),
         abortSignal: this.aborter.signal
       });
-      const cluster = await initializer.initialize();
+      const cluster = await initializer.run();
       await this.connectToRunningCluster(cluster);
     }
 

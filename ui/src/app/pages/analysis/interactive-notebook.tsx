@@ -175,7 +175,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         onStatusUpdate: (status) => this.setState({clusterStatus: status}),
         abortSignal: this.aborter.signal
       });
-      await initializer.initialize();
+      await initializer.run();
       onClusterReady();
     }
 

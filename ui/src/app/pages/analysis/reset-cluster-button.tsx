@@ -4,20 +4,13 @@ import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {clusterApi} from 'app/services/swagger-fetch-clients';
-
+import {ClusterInitializationFailedError, ClusterInitializer} from 'app/utils/cluster-initializer';
 import {
-  Cluster,
   ClusterStatus,
 } from 'generated/fetch/api';
 
-
-
-export const TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
-  ClusterStatus.Creating,
-  ClusterStatus.Starting,
-  ClusterStatus.Stopping,
-  ClusterStatus.Deleting,
-]);
+const RESTART_LABEL = 'Reset server';
+const CREATE_LABEL = 'Create server';
 
 const styles = {
   notebookSettings: {
@@ -30,56 +23,124 @@ export interface Props {
 }
 
 interface State {
-  cluster: Cluster;
+  clusterStatus?: ClusterStatus;
+  isPollingCluster: boolean;
   resetClusterPending: boolean;
   resetClusterModal: boolean;
   resetClusterFailure: boolean;
-  clusterTransitionStatus?: ClusterStatus;
 }
 
 export class ResetClusterButton extends React.Component<Props, State> {
-
-  private pollClusterTimer: NodeJS.Timer;
+  private aborter = new AbortController();
+  private initializer?: ClusterInitializer;
 
   constructor(props) {
     super(props);
 
     this.state = {
-      cluster: null,
+      clusterStatus: null,
+      isPollingCluster: true,
       resetClusterPending: false,
       resetClusterModal: false,
       resetClusterFailure: true,
-      clusterTransitionStatus: null,
     };
   }
 
   componentDidMount() {
-    this.pollCluster();
+    this.createClusterInitializer(false);
+  }
+
+  async createClusterInitializer(allowClusterActions: boolean) {
+    const maxActionCount = allowClusterActions ? 1 : 0;
+
+    // Kick off an initializer which will poll for cluster status.
+    this.initializer = new ClusterInitializer({
+      workspaceNamespace: this.props.workspaceNamespace,
+      onStatusUpdate: (clusterStatus: ClusterStatus) => {
+        if (this.aborter.signal.aborted) {
+          // IF we've been unmounted, don't try to update state.
+          return;
+        }
+        this.setState({
+          clusterStatus: clusterStatus,
+        });
+      },
+      abortSignal: this.aborter.signal,
+      // For the reset button, we never want to affect the cluster state. With the maxFooCount set
+      // to zero, the initializer will reject the promise when it reaches a non-transitional state.
+      maxDeleteCount: maxActionCount,
+      maxCreateCount: maxActionCount,
+      maxResumeCount: maxActionCount,
+    });
+
+    try {
+      this.setState({isPollingCluster: true, clusterStatus: null});
+      await this.initializer.run();
+      this.setState({isPollingCluster: false});
+    } catch (e) {
+      if (this.aborter.signal.aborted) {
+        return;
+      }
+      if (e instanceof ClusterInitializationFailedError) {
+        this.setState({clusterStatus: e.cluster ? e.cluster.status : null});
+      }
+      this.setState({
+        isPollingCluster: false
+      });
+    }
   }
 
   componentWillUnmount() {
-    if (this.pollClusterTimer) {
-      clearTimeout(this.pollClusterTimer);
+    this.aborter.abort();
+  }
+
+  private createTooltip(content: React.ReactFragment, children: React.ReactFragment): React.ReactFragment {
+    return <TooltipTrigger content={content} side='right'>
+      {children}
+    </TooltipTrigger>;
+  }
+
+  private createButton(label: string, enabled: boolean, callback: () => void): React.ReactFragment {
+    return <Button disabled={!enabled}
+                 onClick={callback}
+                 data-test-id='reset-notebook-button'
+                 type='secondary'>
+    {label}
+    </Button>;
+  }
+
+  createButtonAndLabel(): (React.ReactFragment) {
+    if (this.state.isPollingCluster) {
+      const tooltipContent = <div>
+        Your notebook server is still being provisioned. <br/>
+        (detailed status: {this.state.clusterStatus})
+      </div>;
+      return this.createTooltip(
+        tooltipContent,
+        this.createButton(RESTART_LABEL, false, null));
+    } else if (this.state.clusterStatus === null) {
+      // If the initializer has completed and the status is null, it means that
+      // a cluster doesn't exist for this workspace.
+      return this.createTooltip(
+        'You have not yet created a notebook server for this workspace.',
+        this.createButton(CREATE_LABEL, true, () => this.createOrResetCluster()));
+    } else {
+      // We usually reach this state if the cluster is at a "terminal" status and the initializer has
+      // completed. This may be ClusterStatus.Stopped, ClusterStatus.Running, ClusterStatus.Error,
+      // etc.
+      const tooltipContent = <div>
+        Your notebook server is in the following state: {this.state.clusterStatus}.
+      </div>;
+      return this.createTooltip(
+        tooltipContent,
+        this.createButton(RESTART_LABEL, true, () => this.openResetClusterModal()));
     }
   }
 
   render() {
-    const {clusterTransitionStatus} = this.state;
-
     return <React.Fragment>
       <div style={styles.notebookSettings}>
-        <TooltipTrigger content={
-            !this.state.cluster ?
-              <div>Your notebook server is still being created <br/>
-                (Detailed status: {clusterTransitionStatus}) </div> : undefined}
-                        side='right'>
-          <Button disabled={!this.state.cluster}
-                  onClick={() => this.openResetClusterModal()}
-                  data-test-id='reset-notebook-button'
-                  type='secondary'>
-            Reset Notebook Server
-          </Button>
-        </TooltipTrigger>
+        {this.createButtonAndLabel()}
       </div>
       {this.state.resetClusterModal &&
       <Modal data-test-id='reset-notebook-modal'
@@ -102,7 +163,7 @@ export class ResetClusterButton extends React.Component<Props, State> {
                   onClick={() => this.setState({resetClusterModal: false})}
                   data-test-id='cancel-button'>Cancel</Button>
           <Button disabled={this.state.resetClusterPending}
-                  onClick={() => this.resetCluster()}
+                  onClick={() => this.createOrResetCluster()}
                   style={{marginLeft: '0.5rem'}}
                   data-test-id='reset-cluster-send'>Reset</Button>
         </ModalFooter>
@@ -118,44 +179,20 @@ export class ResetClusterButton extends React.Component<Props, State> {
     });
   }
 
-  async resetCluster(): Promise<void> {
+  async createOrResetCluster(): Promise<void> {
     try {
-      this.setState({ resetClusterPending: true });
-      await clusterApi().deleteCluster(this.state.cluster.clusterNamespace);
-      this.setState({resetClusterPending: false});
-      this.pollCluster();
+      this.setState({resetClusterPending: true});
+      if (this.state.clusterStatus === null) {
+        await clusterApi().createCluster(this.props.workspaceNamespace);
+      } else {
+        await clusterApi().deleteCluster(this.props.workspaceNamespace);
+      }
+      this.setState({resetClusterPending: false, resetClusterModal: false});
+
+      this.createClusterInitializer(true);
+
     } catch {
       this.setState({resetClusterPending: false, resetClusterFailure: true});
     }
   }
-
-  private async pollCluster(): Promise<void> {
-    const {workspaceNamespace} = this.props;
-
-    const repoll = () => {
-      this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
-    };
-
-    try {
-      let cluster = await clusterApi().getCluster(workspaceNamespace);
-      if (cluster == null) {
-        cluster = await clusterApi().createCluster(workspaceNamespace);
-      }
-
-      if (TRANSITIONAL_STATUSES.has(cluster.status)) {
-        this.setState({clusterTransitionStatus: cluster.status});
-
-        // Keep polling if we're still waiting for the cluster to start up.
-        repoll();
-        return;
-      }
-
-      // Only store the cluster in React state when it's in a ready-state.
-      this.setState({cluster: cluster, clusterTransitionStatus: null});
-    } catch (e) {
-      // Also re-poll on any errors.
-      repoll();
-    }
-  }
 }
-

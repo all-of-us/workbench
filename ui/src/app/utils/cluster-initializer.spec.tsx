@@ -27,14 +27,20 @@ const baseCluster: Cluster = {
 describe('ClusterInitializer', () => {
 
   beforeEach(() => {
+    jest.useFakeTimers();
+
     registerApiClient(ClusterApi, new ClusterApiStub());
     registerApiClientNotebooks(NotebooksClusterApi, new NotebooksClusterApiStub());
 
-    jest.resetAllMocks();
     mockGetCluster = jest.spyOn(clusterApi(), 'getCluster');
     mockCreateCluster = jest.spyOn(clusterApi(), 'createCluster');
     mockDeleteCluster = jest.spyOn(clusterApi(), 'deleteCluster');
     mockStartCluster = jest.spyOn(notebooksClusterApi(), 'startCluster');
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
   const mockGetClusterCalls = (responses: Array<Cluster>) => {
@@ -46,23 +52,36 @@ describe('ClusterInitializer', () => {
   };
 
   const createInitializer = (options?: Partial<ClusterInitializerOptions>): ClusterInitializer => {
-    // It's not possible to use jest.useFakeTimers() to control timing of async functions and
-    // promises (see https://github.com/facebook/jest/issues/7151), so we configure the initializer
-    // to have an extremely-short polling delay.
     return new ClusterInitializer({
       workspaceNamespace: 'aou-rw-12345',
-      initialPollingDelay: 10,
-      maxPollingDelay: 20,
-      overallTimeout: 300,
       ...options,
     });
+  };
+
+  const runTimersUntilSettled = async(p: Promise<any>) => {
+    let isSettled = false;
+    p.then(() => isSettled = true).catch((e) => {
+      isSettled = true;
+      // Re-throw the error.
+      // throw e;
+    });
+    while (!isSettled) {
+      await new Promise(setImmediate);
+      jest.runAllTimers();
+    }
+  };
+
+  const runInitializerAndTimers = async(initializer: ClusterInitializer): Promise<Cluster> => {
+    const clusterPromise = initializer.run();
+    await runTimersUntilSettled(clusterPromise);
+    return await clusterPromise;
   };
 
   it('should resolve promise if cluster is in ready state', async() => {
     // This tests the simplest case of the initializer. No polling necessary.
     mockGetClusterCalls([baseCluster]);
     const initializer = createInitializer();
-    const cluster = await initializer.initialize();
+    const cluster = await initializer.run();
     expect(cluster.status).toEqual(ClusterStatus.Running);
   });
 
@@ -75,8 +94,7 @@ describe('ClusterInitializer', () => {
       {...baseCluster, status: ClusterStatus.Running}
     ]);
     const initializer = createInitializer();
-    const cluster = await initializer.initialize();
-
+    const cluster = await runInitializerAndTimers(initializer);
     expect(mockStartCluster).toHaveBeenCalled();
     expect(cluster.status).toEqual(ClusterStatus.Running);
   });
@@ -92,8 +110,7 @@ describe('ClusterInitializer', () => {
       onStatusUpdate: mockFn
     });
 
-    const cluster = await initializer.initialize();
-
+    const cluster = await runInitializerAndTimers(initializer);
     expect(mockFn.mock.calls.length).toEqual(3);
     expect(mockFn.mock.calls).toEqual([
       [ClusterStatus.Stopped],
@@ -114,7 +131,7 @@ describe('ClusterInitializer', () => {
       {...baseCluster, status: ClusterStatus.Running}
     ]);
     const initializer = createInitializer();
-    const cluster = await initializer.initialize();
+    const cluster = await runInitializerAndTimers(initializer);
 
     expect(mockCreateCluster).toHaveBeenCalled();
     expect(cluster.status).toEqual(ClusterStatus.Running);
@@ -148,7 +165,7 @@ describe('ClusterInitializer', () => {
     ]);
 
     const initializer = createInitializer();
-    const cluster = await initializer.initialize();
+    const cluster = await runInitializerAndTimers(initializer);
 
     expect(mockDeleteCluster).toHaveBeenCalled();
     expect(mockCreateCluster).toHaveBeenCalled();
@@ -171,24 +188,44 @@ describe('ClusterInitializer', () => {
     ]);
 
     const initializer = createInitializer();
-    const cluster = await initializer.initialize();
+    const cluster = await runInitializerAndTimers(initializer);
 
     expect(cluster.status).toEqual(ClusterStatus.Running);
   });
 
-  it('Should timeout after max delay', async() => {
+  it('Should give up after too many server errors', async() => {
+    mockGetClusterCalls([
+      {...baseCluster, status: ClusterStatus.Creating},
+    ]);
+    for (let i = 0; i < 10; i++) {
+      mockGetCluster.mockImplementationOnce(async(workspaceNamespace) => {
+        throw new Response(null, {status: 503});
+      });
+    }
+
+    const initializer = createInitializer();
+
+    expect.assertions(1);
+    return runInitializerAndTimers(initializer).catch(error => {
+      expect(error.message).toMatch(/max server error count/i);
+    });
+  });
+
+    it('Should timeout after max delay', async() => {
     mockGetCluster.mockImplementation(async(workspaceNamespace) => {
       return {...baseCluster, status: ClusterStatus.Starting};
     });
 
-    const initializer = createInitializer({
-      overallTimeout: 100
-    });
+    // There's some nuance / awkwardness to this test: the ClusterInitializer uses Date.now() to get
+    // the current timestamp, but Jest doesn't support fake clock functionality (see
+    // https://github.com/facebook/jest/issues/2684). So we just set a very quick timeout here to
+    // ensure the threshold is reached after a couple polling loops.
+    const initializer = createInitializer({overallTimeout: 30});
 
     // Tell Jest that we plan to have 1 assertion. This ensures that the test won't
     // pass if the promise fails.
     expect.assertions(1);
-    return initializer.initialize().catch(error => {
+    return runInitializerAndTimers(initializer).catch(error => {
       expect(error.message).toMatch(/max time allowed/i);
     });
   });
@@ -202,20 +239,23 @@ describe('ClusterInitializer', () => {
       abortSignal: aborter.signal
     });
 
-    const initializePromise = initializer.initialize();
+    const initializePromise = runInitializerAndTimers(initializer);
 
+    // Wait a reasonably-short amount of time, at least one polling delay period, before sending
+    // an abort signal.
     await new Promise(resolve => setTimeout(resolve, 20));
     aborter.abort();
 
     expect.assertions(1);
     return initializePromise.catch(error => {
       expect(error.message).toMatch(/aborted/i);
-      return Promise.resolve();
     });
   });
 
-  it('Should reject promise before starting another restart cycle', async() => {
-    // A cluster in an error state should trigger a deletion request.
+  it('Should respect the maxDeleteCount option', async() => {
+    // Mock out getCluster API responses which simulate a cluster in an error state, which is then
+    // reset, but ends up in an error state again. This scenario should warrant two deleteCluster
+    // calls, but the initializer is configured to max out at 1 and should return an error.
     mockGetClusterCalls([
       {...baseCluster, status: ClusterStatus.Error},
       {...baseCluster, status: ClusterStatus.Deleting},
@@ -229,13 +269,37 @@ describe('ClusterInitializer', () => {
       return {...baseCluster, status: ClusterStatus.Creating};
     });
 
-    const initializer = createInitializer();
-    const initializePromise = initializer.initialize();
+    const initializer = createInitializer({maxDeleteCount: 1});
 
-    expect.assertions(1);
-    return initializePromise.catch(error => {
+    expect.assertions(2);
+    return runInitializerAndTimers(initializer).catch(error => {
+      expect(mockDeleteCluster).toHaveBeenCalledTimes(1);
       expect(error.message).toMatch(/max cluster delete count/i);
-      return Promise.resolve();
     });
   });
+
+  it('Should respect the maxCreateCount option', async() => {
+    // Ensure that the initializer won't take action on a NOT_FOUND cluster if the maxCreateCount
+    // is set to disallow create requests.
+    mockGetCluster.mockImplementationOnce(async(workspaceNamespace) => {
+      throw new Response(null, {status: 404});
+    });
+    const initializer = createInitializer({maxCreateCount: 0});
+    return runInitializerAndTimers(initializer).catch(error => {
+      expect(mockCreateCluster).not.toHaveBeenCalled();
+      expect(error.message).toMatch(/max cluster create count/i);
+    });
+  });
+
+  it('Should respect the maxResumeCount option', async() => {
+    mockGetClusterCalls([
+      {...baseCluster, status: ClusterStatus.Stopped},
+    ]);
+    const initializer = createInitializer({maxResumeCount: 0});
+    return runInitializerAndTimers(initializer).catch(error => {
+      expect(mockCreateCluster).not.toHaveBeenCalled();
+      expect(error.message).toMatch(/max cluster resume count/i);
+    });
+  });
+
 });
