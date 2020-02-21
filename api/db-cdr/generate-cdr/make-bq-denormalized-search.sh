@@ -84,7 +84,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.conc
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)"
 
-# add age_at_consent and age_at_cdr to each subject
+################################################
+# set age_at_consent and age_at_cdr to each subject
+################################################
 # To get date_of_consent, we first try to find a consent date, if none, we fall back to Street Address: PII State
 # If that does not exist, we fall back to the MINIMUM date of The Basics Survey
 echo "adding age data to cb_search_person"
@@ -134,8 +136,117 @@ FROM
             ) d on a.person_id = d.person_id
         )
     ) y
-WHERE x.person_id = y.person_id
-"
+WHERE x.person_id = y.person_id"
+
+################################################
+# set has physical measurement data flag
+################################################
+echo "set has physical measurement data flag in cb_search_person"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+SET x.has_physical_measurement_data = y.has_data
+FROM
+    (
+        SELECT a.person_id, CASE WHEN b.person_id is not null THEN 1 ELSE 0 END AS has_data
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
+        LEFT JOIN
+            (
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
+                WHERE measurement_source_concept_id in
+                    (
+                        SELECT concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+                        WHERE vocabulary_id = 'PPI'
+                            and concept_class_id = 'Clinical Observation'
+                            and domain_id = 'Measurement'
+                    )
+            ) b on a.person_id = b.person_id
+    ) y
+WHERE x.person_id = y.person_id"
+
+################################################
+# set has ppi survey data flag
+################################################
+echo "set has ppi survey data flag in cb_search_person"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+SET x.has_ppi_survey_data = y.has_data
+FROM
+    (
+        SELECT a.person_id, CASE WHEN b.person_id is not null THEN 1 ELSE 0 END AS has_data
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
+        LEFT JOIN
+            (
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+                WHERE observation_source_concept_id in
+                    (
+                        SELECT descendant_concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                        WHERE ancestor_concept_id in
+                            (
+                                SELECT concept_id
+                                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                                WHERE domain_id = 'SURVEY'
+                                    and parent_id = 0
+                            )
+                    )
+            ) b on a.person_id = b.person_id
+    ) y
+WHERE x.person_id = y.person_id"
+
+################################################
+# set has EHR data flag
+################################################
+echo "set has EHR data flag in cb_search_person"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+SET x.has_ehr_data = y.has_data
+FROM
+    (
+        SELECT a.person_id, CASE WHEN b.person_id is not null THEN 1 ELSE 0 END AS has_data
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
+        LEFT JOIN
+            (
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` as a
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` as b on a.measurement_id = b.measurement_id
+                WHERE lower(b.src_id) like 'ehr site%'
+                UNION DISTINCT
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` as a
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` as b on a.condition_occurrence_id = b.condition_occurrence_id
+                WHERE lower(b.src_id) like 'ehr site%'
+                UNION DISTINCT
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.device_exposure\` as a
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.device_exposure_ext\` as b on a.device_exposure_id = b.device_exposure_id
+                WHERE lower(b.src_id) like 'ehr site%'
+                UNION DISTINCT
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` as a
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` as b on a.drug_exposure_id = b.drug_exposure_id
+                WHERE lower(b.src_id) like 'ehr site%'
+                UNION DISTINCT
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` as a
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` as b on a.observation_id = b.observation_id
+                WHERE lower(b.src_id) like 'ehr site%'
+                UNION DISTINCT
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` as a
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` as b on a.procedure_occurrence_id = b.procedure_occurrence_id
+                WHERE lower(b.src_id) like 'ehr site%'
+                UNION DISTINCT
+                SELECT DISTINCT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` as a
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence_ext\` as b on a.visit_occurrence_id = b.visit_occurrence_id
+                WHERE lower(b.src_id) like 'ehr site%'
+            ) b on a.person_id = b.person_id
+    ) y
+WHERE x.person_id = y.person_id"
+
 
 ############################################################
 # insert source condition data into cb_search_all_events
