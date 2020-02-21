@@ -25,19 +25,19 @@ public class CommonStorageEnumsTest {
 
   // e.g. public static Short reviewStatusToStorage(ReviewStatus s)
   final Map<Class, Method> enumClassToStorageMethod =
-          methods.stream()
-                  .filter(m -> enumClasses.contains(firstMethodParameterType(m)))
-                  // domainToDomainId is stringly typed - test with test_domainId
-                  .filter(m -> !m.getName().equals("domainToDomainId"))
-                  .collect(Collectors.toMap(this::firstMethodParameterType, m -> m));
+      methods.stream()
+          .filter(m -> enumClasses.contains(firstMethodParameterType(m)))
+          // domainToDomainId is stringly typed - test with test_domainId
+          .filter(m -> !m.getName().equals("domainToDomainId"))
+          .collect(Collectors.toMap(this::firstMethodParameterType, m -> m));
 
   // e.g. public static ReviewStatus reviewStatusFromStorage(Short s)
   final Map<Type, Method> storageMethodToEnumClass =
-          methods.stream()
-                  .filter(m -> enumClasses.contains(m.getReturnType()))
-                  // domainToDomainId is stringly typed - test with test_domainId
-                  .filter(m -> !m.getName().equals("domainIdToDomain"))
-                  .collect(Collectors.toMap(Method::getReturnType, m -> m));
+      methods.stream()
+          .filter(m -> enumClasses.contains(m.getReturnType()))
+          // domainToDomainId is stringly typed - test with test_domainId
+          .filter(m -> !m.getName().equals("domainIdToDomain"))
+          .collect(Collectors.toMap(Method::getReturnType, m -> m));
 
   // domain ID is stringly-typed so special-case this
 
