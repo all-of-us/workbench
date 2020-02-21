@@ -3,7 +3,6 @@ package org.pmiops.workbench.db.model;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import com.google.common.collect.BiMap;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -20,11 +19,8 @@ public class StorageEnumsTest {
 
   final Set<Class> enumClasses = getEnumerationClasses();
   final Set<Method> methods =
-      Stream.of(
-              DbStorageEnums.class.getDeclaredMethods(),
-              CommonStorageEnums.class.getDeclaredMethods())
-          .flatMap(Stream::of)
-          .collect(Collectors.toSet());
+      arraysToSet(
+          DbStorageEnums.class.getDeclaredMethods(), CommonStorageEnums.class.getDeclaredMethods());
 
   // e.g. public static Short reviewStatusToStorage(ReviewStatus s)
   final Map<Class, Method> enumClassToStorageMethod =
@@ -86,10 +82,9 @@ public class StorageEnumsTest {
    * @return
    */
   private Set<Class> getEnumerationClasses() {
-    return Stream.of(
+    return arraysToSet(
             DbStorageEnums.class.getDeclaredFields(), CommonStorageEnums.class.getDeclaredFields())
-        .flatMap(Stream::of)
-        .filter(field -> field.getType().equals(BiMap.class))
+        .stream()
         .map(
             field -> {
               // gets the specific BiMap type including annotations
@@ -113,5 +108,9 @@ public class StorageEnumsTest {
   // convenience method describing what is retrieved here
   private Class firstMethodParameterType(Method method) {
     return method.getParameterTypes()[0];
+  }
+
+  private <T> Set<T> arraysToSet(T[]... arrays) {
+    return Stream.of(arrays).flatMap(Stream::of).collect(Collectors.toSet());
   }
 }
