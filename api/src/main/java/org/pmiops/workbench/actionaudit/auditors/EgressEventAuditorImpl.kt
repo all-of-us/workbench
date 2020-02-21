@@ -154,7 +154,7 @@ constructor(
                 actionId = actionIdProvider.get(),
                 actionType = ActionType.DETECT_HIGH_EGRESS_EVENT,
                 agentType = AgentType.SYSTEM,
-                agentIdMaybe = 0,
+                agentIdMaybe = null,
                 agentEmailMaybe = null,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = null

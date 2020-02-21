@@ -26,19 +26,19 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
 
   private final ActionAuditService actionAuditService;
   private final Clock clock;
-  private Provider<String> actionIdProvider;
   private Provider<DbUser> dbUserProvider;
+  private Provider<String> actionIdProvider;
 
   @Autowired
   public UserServiceAuditAdapterImpl(
       ActionAuditService actionAuditService,
       Clock clock,
-      @Qualifier("ACTION_ID") Provider<String> actionIdProvider,
-      Provider<DbUser> dbUserProvider) {
+      Provider<DbUser> dbUserProvider,
+      @Qualifier("ACTION_ID") Provider<String> actionIdProvider) {
     this.actionAuditService = actionAuditService;
     this.clock = clock;
-    this.actionIdProvider = actionIdProvider;
     this.dbUserProvider = dbUserProvider;
+    this.actionIdProvider = actionIdProvider;
   }
 
   @Override
