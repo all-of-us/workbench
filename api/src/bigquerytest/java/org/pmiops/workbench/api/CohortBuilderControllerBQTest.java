@@ -143,6 +143,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private DbCriteria surveyNode;
   private DbCriteria questionNode;
   private DbCriteria answerNode;
+  private DbPerson dbPerson1;
+  private DbPerson dbPerson2;
+  private DbPerson dbPerson3;
 
   @Override
   public List<String> getTableNames() {
@@ -328,9 +331,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId("5");
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
 
-    personDao.save(DbPerson.builder().addAgeAtConsent(55).addAgeAtCdr(56).build());
-    personDao.save(DbPerson.builder().addAgeAtConsent(22).addAgeAtCdr(22).build());
-    personDao.save(DbPerson.builder().addAgeAtConsent(34).addAgeAtCdr(35).build());
+    dbPerson1 = personDao.save(DbPerson.builder().addAgeAtConsent(55).addAgeAtCdr(56).build());
+    dbPerson2 = personDao.save(DbPerson.builder().addAgeAtConsent(22).addAgeAtCdr(22).build());
+    dbPerson3 = personDao.save(DbPerson.builder().addAgeAtConsent(34).addAgeAtCdr(35).build());
   }
 
   @After
@@ -353,6 +356,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         surveyNode,
         questionNode,
         answerNode);
+    personDao.delete(dbPerson1.getPersonId());
+    personDao.delete(dbPerson2.getPersonId());
+    personDao.delete(dbPerson3.getPersonId());
   }
 
   private static SearchParameter icd9() {
