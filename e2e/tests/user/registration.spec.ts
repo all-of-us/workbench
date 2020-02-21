@@ -45,24 +45,21 @@ describe('User registration tests:', () => {
 
     // Click the create account button to start new-user-registration flow.
     const createAccountButton = await loginPage.createAccountButton();
-    expect(createAccountButton).toBeTruthy();
     await createAccountButton.click();
 
     // Step 1: Enter invitation key.
     const createAccountPage = new CreateAccountPage(page);
+
     const header = 'Enter your Invitation Key:';
     const headerDisplayed = await waitForText(page, 'h2', header);
-    expect(headerDisplayed).toBeTruthy();
 
-    await createAccountPage.fillOutInvitationKey();
+    await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
     await page.waitFor(1000);
 
     // Step 2: Accepting Terms of Service.
-    const pdfPageCount =  await page.waitForFunction(() => {
+    await page.waitForFunction(() => {
       return document.querySelectorAll('.tos-pdf-page[data-page-number]').length === 9
     }, {timeout: 30000});
-    // expecting 9 pages in pdf document
-    expect(await pdfPageCount.jsonValue()).toBe(true);
 
     await createAccountPage.acceptTermsOfUseAgreement();
     let nextButton = await createAccountPage.getNextButton();
@@ -71,7 +68,6 @@ describe('User registration tests:', () => {
 
     // Step 3: Enter user information
     // Should be on Create your account: Step 1 of 2 page
-    expect(await waitUntilFindTexts(page, 'Create your account')).toBeTruthy();
     await createAccountPage.fillOutUserInformation();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.click();
@@ -81,6 +77,7 @@ describe('User registration tests:', () => {
     // Should be on Demongraphic Survey page
     const demograpicsPageHeader = 'Demographics Survey (All Survey Fields are optional)';
     expect(await waitForText(page, 'h3', demograpicsPageHeader)).toBeTruthy();
+
     await createAccountPage.fillOutDemographicSurvey();
     const submitButton = await createAccountPage.getSubmitButton();
     await submitButton.click();

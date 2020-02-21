@@ -16,7 +16,7 @@ export default class ChromeDriver {
   ];
 
   public launchOpts = {
-    headless: !!process.env.PUPPETEER_HEADLESS,
+    headless: !process.env.PUPPETEER_HEADLESS,
     devtools: false,
     slowMo: 10,
     defaultViewport: null,

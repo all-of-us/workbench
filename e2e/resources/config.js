@@ -4,7 +4,7 @@ const _ = require('lodash');
 const env = process.env.WORKBENCH_ENV || 'test';
 
 const userCredential = {
-  registerationContactEmail: process.env.CONTACT_EMAIL,
+  registrationContactEmail: process.env.CONTACT_EMAIL,
   userEmail: process.env.USER_NAME,
   userPassword: process.env.PASSWORD,
   userInvitationkey: process.env.INVITATION_KEY,
@@ -66,9 +66,5 @@ const environment = {
 };
 
 const configs = _.merge(environment[env], userCredential, urlPath, puppeteer);
-
-// uncomment for configs inspection
-// console.log(`env: ${env}`);
-// console.log(`${JSON.stringify(configs)}`);
 
 module.exports = configs;

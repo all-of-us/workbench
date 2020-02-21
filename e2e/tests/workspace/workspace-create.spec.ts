@@ -7,7 +7,7 @@ require('../../driver/puppeteerExtension');
 import { getCursorValue } from '../../driver/elementHandle-util'
 
 jest.setTimeout(300000);
-describe.skip('Workspace create:', () => {
+describe('Workspace create:', () => {
 
   let page;
 

@@ -109,3 +109,7 @@ export async function getCursorValue(page: Page, element: ElementHandle) {
   return cursorValue;
 
 }
+
+export async function findText(page: Page, txt: string) {
+  return (await page.content()).match(txt);
+}

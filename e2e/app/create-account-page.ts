@@ -25,11 +25,6 @@ export default class CreateAccountPage extends BasePage {
   public async scrollToLastPdfPage(): Promise<ElementHandle> {
     const selectr = '.react-pdf__Document :last-child.react-pdf__Page.tos-pdf-page';
     const pdfPage = await this.puppeteerPage.waitForSelector('.react-pdf__Document :last-child.react-pdf__Page.tos-pdf-page');
-    /*
-    const [response] = await Promise.all([
-       this.puppeteerPage.waitForNavigation({waitUntil: 'domcontentloaded'}),
-       this.puppeteerPage.click(selectr, {delay: 20}),
-     ]); */
     await this.puppeteerPage.evaluate(el => el.scrollIntoView(), pdfPage);
     await this.puppeteerPage.waitFor(1000);
     return pdfPage;
@@ -49,14 +44,14 @@ export default class CreateAccountPage extends BasePage {
   }
 
   // find the second checkbox
-  public async getTermOfUseCheckbox(): Promise<ElementHandle> {
+  public async getTermsOfUseCheckbox(): Promise<ElementHandle> {
     const label = 'I have read and understand the All of Us Research Program Terms of Use described above.';
     const selector = '[type="checkbox"]';
     const element = await this.puppeteerPage.waitForSelector(selector, {visible: true});
     return element;
   }
 
-  public async getTermOfUseLabel(): Promise<ElementHandle> {
+  public async getTermsOfUseLabel(): Promise<ElementHandle> {
     const label = 'I have read and understand the All of Us Research Program Terms of Use described above.';
     return this.getCheckboxLabel(label);
   }
@@ -72,7 +67,6 @@ export default class CreateAccountPage extends BasePage {
         return element;
       }
     }
-
   }
 
   public async getInstitutionNameInput(): Promise<ElementHandle> {
@@ -82,6 +76,11 @@ export default class CreateAccountPage extends BasePage {
   public async getResearchBackgroundTextarea(): Promise<ElementHandle> {
     const label = 'Please describe your research background, experience and research interests';
     return await this.puppeteerPage.waitForXPath(`//label[contains(normalize-space(.),'${label}')]/parent::*//textarea`)
+  }
+
+  public async getUsernameDomain(): Promise<unknown> {
+    const elem = await this.puppeteerPage.waitForXPath('//*[input[@id="username"]]/i');
+    return await (await elem.getProperty("innerText")).jsonValue();
   }
 
   public async fillInFormFields(fields: Array<{ label: string; value: string; }>): Promise<string> {
@@ -131,9 +130,9 @@ export default class CreateAccountPage extends BasePage {
   // Combined steps to make test code cleaner and shorter
 
   // Step 1: Enter Invitation key
-  public async fillOutInvitationKey() {
+  public async fillOutInvitationKey(invitationKey: string) {
     await this.getInvitationKeyInput()
-    .then(invitationKeyInput => invitationKeyInput.type(process.env.INVITATION_KEY))
+    .then(invitationKeyInput => invitationKeyInput.type(invitationKey))
     .then(() => this.getNextButton())
     .then(submitButton => submitButton.click());
   }
@@ -141,73 +140,36 @@ export default class CreateAccountPage extends BasePage {
   // Step 2: Accepting Terms of Use and Privacy statement.
   public async acceptTermsOfUseAgreement() {
     const privacyStatementCheckbox = await this.getPrivacyStatementCheckbox();
-    expect(privacyStatementCheckbox.asElement()).toBeTruthy();
-    expect(await privacyStatementCheckbox.getAttribute('disabled')).toBeDefined();
-
-    const termOfUseCheckbox = await this.getTermOfUseCheckbox();
-    expect(termOfUseCheckbox).toBeTruthy();
-    expect(await termOfUseCheckbox.getAttribute('disabled')).toBeDefined();
-
-    expect(await (privacyStatementCheckbox.asAouElement()).getProp('checked')).toBe(false);
-    expect(await (termOfUseCheckbox.asAouElement()).getProp('checked')).toBe(false);
-
+    const termsOfUseCheckbox = await this.getTermsOfUseCheckbox();
     const nextButton = await this.getNextButton();
-    // Next button should be disabled
-    let cursor = await getCursorValue(this.puppeteerPage, nextButton);
-    expect(cursor).toEqual('not-allowed');
 
     await this.scrollToLastPdfPage();
-    expect(await privacyStatementCheckbox.getAttribute('disabled')).toBeNull();
-    expect(await termOfUseCheckbox.getAttribute('disabled')).toBeNull();
 
     // check by click on label works
     await (await this.getPrivacyStatementLabel()).click();
-    await (await this.getTermOfUseLabel()).click();
-    // await this.puppeteerPage.evaluate(e => e.click(), await this.getPrivacyStatementLabel());
-    // await this.puppeteerPage.evaluate(e => e.click(), await this.getTermOfUseLabel());
-
-    expect(await privacyStatementCheckbox.asAouElement().getProp('checked')).toBe(true);
-    expect(await termOfUseCheckbox.asAouElement().getProp('checked')).toBe(true);
+    await (await this.getTermsOfUseLabel()).click();
 
     // TODO uncomment after bug fixed https://precisionmedicineinitiative.atlassian.net/browse/RW-4487
     // uncheck a checkbox to ensure NEXT button becomes disabled
-    // await page.evaluate(e => e.click(), await createAccountPage.getTermOfUseLabel());
-    // cursor = await getCursorValue(page, nextButton);
-    // expect(cursor).toEqual('not-allowed');
+    // await page.evaluate(e => e.click(), await createAccountPage.getTermsOfUseLabel());
     // back to check on
-    // await page.evaluate(e => e.click(), await createAccountPage.getTermOfUseLabel());
-
-    // NEXT button should be enabled with all required fields filled out
-    cursor = await getCursorValue(this.puppeteerPage, nextButton);
-    expect(cursor).toEqual('pointer');
+    // await page.evaluate(e => e.click(), await createAccountPage.getTermsOfUseLabel());
   }
 
   // Step 3: Enter user default information
   public async fillOutUserInformation() {
     const newUserName = await this.fillInFormFields(inputFieldsValues);
-
-    // NEXT button should be disabled until all required fields are filled
-    const nextButton = await this.getNextButton();
-    let cursor = await getCursorValue(this.puppeteerPage, nextButton);
-    expect(cursor).toEqual('not-allowed');
-
     await (await this.getResearchBackgroundTextarea()).type(faker.lorem.word());
     await (await this.getInstitutionNameInput()).type(faker.company.companyName());
     await this.selectInstitution(institutionAffiliationValues.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
     await this.puppeteerPage.waitFor(1000);
-    expect(await this.getInstitutionValue()).toEqual(institutionAffiliationValues.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
-
-    // NEXT button should be enabled. Click it.
-    cursor = await getCursorValue(this.puppeteerPage, nextButton);
-    expect(cursor).toEqual('pointer');
+    return newUserName;
   }
 
   // Step 4: Enter demographic survey default information (All Survey Fields are optional)
   public async fillOutDemographicSurvey() {
     // SUBMIT button should be enabled and clickable
     const submitButton = await this.getSubmitButton();
-    const cursor = await getCursorValue(this.puppeteerPage, submitButton);
-    expect(cursor).toEqual('pointer');
 
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath = '//*[contains(normalize-space(.),"Prefer not to answer")]/ancestor::*/input[@type="checkbox"]';
