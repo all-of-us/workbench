@@ -3,19 +3,6 @@ import {clusterApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {Cluster, ClusterStatus} from 'generated/fetch';
 
-export interface ClusterInitializerOptions {
-  workspaceNamespace: string;
-  onStatusUpdate?: (ClusterStatus) => void;
-  abortSignal?: AbortSignal;
-  initialPollingDelay?: number;
-  maxPollingDelay?: number;
-  overallTimeout?: number;
-  maxCreateCount?: number;
-  maxDeleteCount?: number;
-  maxResumeCount?: number;
-  maxServerErrorCount?: number;
-}
-
 // We're only willing to wait 20 minutes total for a cluster to initialize. After that we return
 // a rejected promise no matter what.
 const DEFAULT_OVERALL_TIMEOUT = 1000 * 60 * 20;
@@ -28,41 +15,54 @@ const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 5;
 
-export class ClusterInitializationFailedError extends Error {
-  public readonly cluster: Cluster;
 
-  constructor(message: string, cluster?: Cluster) {
-    super(message);
-    Object.setPrototypeOf(this, ClusterInitializationFailedError.prototype);
+export interface ClusterInitializerOptions {
+  // Core options. Most callers should provide these.
+  //
+  // The workspace namespace to initialize a cluster for.
+  workspaceNamespace: string;
+  // Callback which is called every time the cluster updates its status. This callback is *not*
+  // called when no cluster is found.
+  onStatusUpdate?: (ClusterStatus) => void;
+  // An optional abort signal which allows the caller to abort the initialization process, including
+  // cancelling any outstanding Ajax requests.
+  abortSignal?: AbortSignal;
 
-    this.name = 'ClusterInitializationFailedError';
-    this.cluster = cluster;
-  }
+  // Override options. These options all have sensible defaults, but may be overridden for testing
+  // or special scenarios (such as an initialization flow which should not take any actions).
+  initialPollingDelay?: number;
+  maxPollingDelay?: number;
+  overallTimeout?: number;
+  maxCreateCount?: number;
+  maxDeleteCount?: number;
+  maxResumeCount?: number;
+  maxServerErrorCount?: number;
 }
 
-export class ExceededActionCountError extends ClusterInitializationFailedError {
-  constructor(message, cluster?: Cluster) {
-    super(message, cluster);
-    Object.setPrototypeOf(this, ExceededActionCountError.prototype);
-
-    this.name = 'ExceededActionCountError';
-  }
-}
-
-export class ExceededErrorCountError extends ClusterInitializationFailedError {
-  constructor(message, cluster?: Cluster) {
-    super(message, cluster);
-    Object.setPrototypeOf(this, ExceededErrorCountError.prototype);
-
-    this.name = 'ExceededErrorCountError';
-  }
-}
-
+/**
+ * A controller class implementing client-side logic to initialize a Leonardo cluster. This class
+ * will continue to poll the getCluster endpoint, taking certain actions as required to nudge the
+ * cluster towards a running state, and will eventually resolve the Promise with a running cluster,
+ * or otherwise reject it with information about the failure mode.
+ *
+ * This is an unusually heavyweight controller class on the client side. It's worth noting a couple
+ * reasons why we ended up with this design:
+ *  - Cluster initialization can take up to 10 minutes, which is beyond the scope of a single
+ *    App Engine server-side request timeout. To reliably implement this control on the server side
+ *    would likely require new database persistence, tasks queues, and additional APIs in order to
+ *    provide the client with status updates.
+ *  - Ultimately, we might expect this type of functionality ("Get me a cluster for workspace X and
+ *    bring it to a running state") to exist as part of the Leonardo application. So rather than
+ *    build our own server-side equivalent, we adopted a client-side solution as a holdover.
+ */
 export class ClusterInitializer {
+  // Core properties for interacting with the caller and the cluster APIs.
   private workspaceNamespace: string;
   private onStatusUpdate: (ClusterStatus) => void;
   private abortSignal?: AbortSignal;
 
+  // Properties to track & control the polling loop. We use a capped exponential backoff strategy
+  // and a series of "maxFoo" limits to ensure the initialization flow doesn't get out of control.
   private currentDelay: number;
   private maxDelay: number;
   private overallTimeout: number;
@@ -71,14 +71,24 @@ export class ClusterInitializer {
   private maxResumeCount: number;
   private maxServerErrorCount: number;
 
+  // Properties to track progress, actions taken, and errors encountered.
   private createCount = 0;
   private deleteCount = 0;
   private resumeCount = 0;
   private serverErrorCount = 0;
-  private isInitializing = false;
   private initializeStartTime?: number;
+  // The latest cluster retrieved from getCluster. If the last getCluster call returned a NOT_FOUND
+  // response, this will be null.
   private currentCluster?: Cluster;
 
+  // Properties to control the initialization and promise resolution flow.
+  //
+  // Tracks whether the .run() method has been called yet on this class. Each instance is only
+  // allowed to be used for one initialization flow.
+  private isInitializing = false;
+  // The resolve and reject function from the promise returned from the call to .run(). We use a
+  // deferred-style approach in this class, which allows us to provide a Promise-based API on the
+  // .run() method, but to call the resolve() or reject() method from anywhere in this class.
   private resolve: (cluster?: Cluster | PromiseLike<Cluster>) => void;
   private reject: (error: Error) => void;
 
@@ -165,10 +175,6 @@ export class ClusterInitializer {
    * @return A Promise which resolves with a Cluster or rejects with a
    * ClusterInitializationFailedError, which holds a message and the current Cluster object (if one
    * existed at the time of failure).
-   *
-   * The Promise will reject in the following scenarios:
-   *   - An abort signal is received.
-   *   -
    */
   public async run(): Promise<Cluster> {
     if (this.isInitializing) {
@@ -262,5 +268,35 @@ export class ClusterInitializer {
     setTimeout(() => this.poll(), this.currentDelay);
     // Increment capped exponential backoff for the next poll loop.
     this.currentDelay = Math.min(this.currentDelay * 1.3, this.maxDelay);
+  }
+}
+
+export class ClusterInitializationFailedError extends Error {
+  public readonly cluster: Cluster;
+
+  constructor(message: string, cluster?: Cluster) {
+    super(message);
+    Object.setPrototypeOf(this, ClusterInitializationFailedError.prototype);
+
+    this.name = 'ClusterInitializationFailedError';
+    this.cluster = cluster;
+  }
+}
+
+export class ExceededActionCountError extends ClusterInitializationFailedError {
+  constructor(message, cluster?: Cluster) {
+    super(message, cluster);
+    Object.setPrototypeOf(this, ExceededActionCountError.prototype);
+
+    this.name = 'ExceededActionCountError';
+  }
+}
+
+export class ExceededErrorCountError extends ClusterInitializationFailedError {
+  constructor(message, cluster?: Cluster) {
+    super(message, cluster);
+    Object.setPrototypeOf(this, ExceededErrorCountError.prototype);
+
+    this.name = 'ExceededErrorCountError';
   }
 }
