@@ -1,10 +1,9 @@
 import {ElementHandle} from 'puppeteer';
-import {getCursorValue} from '../driver/elementHandle-util';
-import {inputFieldsValues, institutionAffiliationValues} from '../resources/user-registration-fields';
 import * as widgetXpath from './elements/widgetxpath';
 import BasePage from './mixin/basepage';
 import DropdownSelect from './mixin/dropdown-list-select';
 
+const registrationFields = require('../resources/data/user-registration-fields');
 const faker = require('faker/locale/en_US');
 
 export default class CreateAccountPage extends BasePage {
@@ -70,7 +69,7 @@ export default class CreateAccountPage extends BasePage {
   }
 
   public async getInstitutionNameInput(): Promise<ElementHandle> {
-    return await this.puppeteerPage.waitForXPath('//input[@placeholder=\'Institution Name\']');
+    return await this.puppeteerPage.waitForXPath('//input[@placeholder="Institution Name"]');
   }
 
   public async getResearchBackgroundTextarea(): Promise<ElementHandle> {
@@ -80,7 +79,7 @@ export default class CreateAccountPage extends BasePage {
 
   public async getUsernameDomain(): Promise<unknown> {
     const elem = await this.puppeteerPage.waitForXPath('//*[input[@id="username"]]/i');
-    return await (await elem.getProperty("innerText")).jsonValue();
+    return await (await elem.getProperty('innerText')).jsonValue();
   }
 
   public async fillInFormFields(fields: Array<{ label: string; value: string; }>): Promise<string> {
@@ -91,6 +90,8 @@ export default class CreateAccountPage extends BasePage {
     }
 
     for (const field of fields) {
+      console.log(field.label);
+      console.log(field.value);
       const selector = formFieldXpathHelper(field.label);
       const e = await this.puppeteerPage.waitForXPath(selector, {visible: true});
       await e.focus();
@@ -158,10 +159,10 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 3: Enter user default information
   public async fillOutUserInformation() {
-    const newUserName = await this.fillInFormFields(inputFieldsValues);
+    const newUserName = await this.fillInFormFields(registrationFields.inputFieldsValues);
     await (await this.getResearchBackgroundTextarea()).type(faker.lorem.word());
     await (await this.getInstitutionNameInput()).type(faker.company.companyName());
-    await this.selectInstitution(institutionAffiliationValues.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
+    await this.selectInstitution(registrationFields.institutionAffiliation.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
     await this.puppeteerPage.waitFor(1000);
     return newUserName;
   }

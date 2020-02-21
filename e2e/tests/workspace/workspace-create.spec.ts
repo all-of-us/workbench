@@ -90,10 +90,6 @@ describe('Workspace create:', () => {
 
     await createButton.click();
     await (new DataPage(page)).waitUntilPageReady();
-
-    console.log('done');
-    await page.waitFor(1);
-
   }, 2 * 60 * 1000);
 
   // unfinished

@@ -4,7 +4,7 @@ import GoogleLoginPage from '../../app/google-login';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
 require('../../driver/waitFuncs');
 require('../../driver/puppeteerExtension');
-import {waitForText, waitUntilFindTexts} from '../../driver/waitFuncs';
+import {waitForText} from '../../driver/waitFuncs';
 
 jest.setTimeout(60 * 1000);
 

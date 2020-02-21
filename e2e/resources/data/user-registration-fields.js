@@ -1,5 +1,5 @@
 const faker = require('faker/locale/en_US');
-const configs = require('./config');
+const configs = require('../config');
 
 const newUserName = `aoutestuser${Math.floor(Math.random() * 1000)}${Math.floor(Date.now() / 1000)}`;
 
@@ -14,7 +14,7 @@ const inputFieldsValues = [{
   value: 'Puppeteerdriver'
 }, {
   label: 'Email Address',
-  value: configs.registerationContactEmail
+  value: configs.registrationContactEmail
 }, {
   label: 'Street Address 1',
   value: faker.address.streetName()
@@ -33,12 +33,12 @@ const inputFieldsValues = [{
 },
 ];
 
-const institutionAffiliationValues = {
+const institutionAffiliation = {
   EARLY_CAREER_TENURE_TRACK_RESEARCHER: "Early career tenure-track researcher",
   UNDERGRADUATE_STUDENT: "Undergraduate (Bachelor level) student",
 };
 
 module.exports = {
-  institutionAffiliationValues,
-  inputFieldsValues
+  institutionAffiliation,
+  inputFieldsValues,
 };

@@ -1,9 +1,9 @@
 import CreateAccountPage from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
-import AouElement from "../../driver/AouElement";
-import PuppeteerLaunch from '../../services/puppeteer-launch';
+import AouElement from '../../driver/AouElement';
+import {findText, getCursorValue} from '../../driver/elementHandle-util';
 import {waitForText, waitUntilFindTexts} from '../../driver/waitFuncs';
-import {findText, getCursorValue} from "../../driver/elementHandle-util";
+import PuppeteerLaunch from '../../services/puppeteer-launch';
 require('../../driver/waitFuncs');
 require('../../driver/puppeteerExtension');
 
@@ -43,7 +43,7 @@ describe('User registration tests:', () => {
 
     const createAccountPage = new CreateAccountPage(page);
 
-    const keyIsNotValidError = "Invitation Key is not Valid.";
+    const keyIsNotValidError = 'Invitation Key is not Valid.';
     const header = 'Enter your Invitation Key:';
 
     const headerDisplayed = await waitForText(page, 'h2', header);
@@ -52,7 +52,7 @@ describe('User registration tests:', () => {
     const errDisplayed = await findText(page, keyIsNotValidError);
     expect(errDisplayed).toBeFalsy();
 
-    const badInvitationKey = process.env.INVITATION_KEY + "1"; // append a number to turn good key to invalid key
+    const badInvitationKey = process.env.INVITATION_KEY + '1'; // append a number to turn good key to invalid key
     await createAccountPage.fillOutInvitationKey(badInvitationKey);
 
     const found = await waitUntilFindTexts(page, keyIsNotValidError);
@@ -95,7 +95,7 @@ describe('User registration tests:', () => {
 
     const nextButton = await createAccountPage.getNextButton();
     // Next button should be disabled
-    let cursor = await getCursorValue(page, nextButton);
+    const cursor = await getCursorValue(page, nextButton);
     expect(cursor).toEqual('not-allowed');
 
     // scroll to last pdf file will enables checkboxes
@@ -145,7 +145,7 @@ describe('User registration tests:', () => {
 
     // the NEXT button on User Information page should be disabled until all required fields are filled
     const userInforPageButton = await createAccountPage.getNextButton();
-    let cursor = await getCursorValue(page, userInforPageButton);
+    const cursor = await getCursorValue(page, userInforPageButton);
     expect(cursor).toEqual('not-allowed');
 
     // verify username domain
