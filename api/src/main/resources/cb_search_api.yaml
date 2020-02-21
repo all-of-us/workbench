@@ -259,6 +259,37 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaAttributeListResponse"
 
+  /v1/cohortbuilder/{cdrVersionId}/age/{ageType}/range/{startAge}/{endAge}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Return count for age type and range
+      operationId: "countAgesByType"
+      parameters:
+        - in: path
+          name: ageType
+          type: string
+          required: true
+          description: the specific age type
+        - in: path
+          name: startAge
+          type: integer
+          required: true
+          description: the start age
+        - in: path
+          name: endAge
+          type: integer
+          required: true
+          description: the end age
+      responses:
+        200:
+          description: A count of subjects for age range
+          schema:
+            type: integer
+            format: int64
+
   /v1/cohortbuilder/{cdrVersionId}/search:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -324,6 +355,11 @@ paths:
 ## DEFINITIONS
 ##########################################################################################
 definitions:
+
+  AgeType:
+    type: string
+    description: possible types of ages
+    enum: [AGE, CONSENT, CDR]
 
   CriteriaListResponse:
     type: object
