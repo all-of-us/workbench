@@ -4,8 +4,8 @@ import * as React from 'react';
 
 import {serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
-import {createEmptyProfile} from '../sign-in';
-import {AccountCreation, AccountCreationProps, AccountCreationState} from './account-creation';
+import {createEmptyProfile} from 'app/pages/login/sign-in';
+import {AccountCreation, AccountCreationProps} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
 
 let props: AccountCreationProps;
@@ -13,13 +13,16 @@ const component = () => {
   return mount(<AccountCreation {...props}/>);
 };
 
-const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: false};
-const requireInstitutionalVerification = false;
+const defaultConfig = {
+  gsuiteDomain: 'researchallofus.org',
+  enableNewAccountCreation: false,
+  requireInstitutionalVerification: false
+};
 
 beforeEach(() => {
   serverConfigStore.next(defaultConfig);
   props = {
-    profile: createEmptyProfile(requireInstitutionalVerification),
+    profile: createEmptyProfile(defaultConfig.requireInstitutionalVerification),
     invitationKey: '',
     onComplete: (profile: Profile) => {},
   };
@@ -124,6 +127,9 @@ it('should handle invalid Email', () => {
   expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
 });
 
+// TODO update these tests like so:
+// serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: true});
+
 it('should display Institution name and role option by default', () => {
   serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
@@ -186,3 +192,5 @@ it('should display Affiliation Roles should change as per affiliation', () => {
   affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
   expect(affilationRoleDropDowns.length).toBe(0);
 });
+
+// TODO end
