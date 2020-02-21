@@ -42,10 +42,10 @@ public class StorageEnumsTest {
 
   @Test
   public void test_domainId() {
-    for (Domain v : Domain.values()) {
-      String storageValue = CommonStorageEnums.domainToDomainId(v);
-      assertWithMessage("unmapped enum value: " + v).that(storageValue).isNotNull();
-      assertThat(v).isEqualTo(CommonStorageEnums.domainIdToDomain(storageValue));
+    for (Domain domainValue : Domain.values()) {
+      String storageValue = CommonStorageEnums.domainToDomainId(domainValue);
+      assertWithMessage("unmapped enum value: " + domainValue).that(storageValue).isNotNull();
+      assertThat(CommonStorageEnums.domainIdToDomain(storageValue)).isEqualTo(domainValue);
     }
   }
 
@@ -62,15 +62,16 @@ public class StorageEnumsTest {
 
   private Short enumToStorage(Object enumValue, Class enumClass)
       throws InvocationTargetException, IllegalAccessException {
-    final Object returnValue =
-        enumClassToStorageMethod.get(enumClass).invoke(INDICATES_STATIC_METHOD, enumValue);
+    final Method enumToStorageMethod = enumClassToStorageMethod.get(enumClass);
+    final Object returnValue = enumToStorageMethod.invoke(INDICATES_STATIC_METHOD, enumValue);
     assertThat(returnValue instanceof Short).isTrue();
     return (Short) returnValue;
   }
 
   private Object storageToEnum(Short shortValue, Class enumClass)
       throws InvocationTargetException, IllegalAccessException {
-    return storageMethodToEnumClass.get(enumClass).invoke(INDICATES_STATIC_METHOD, shortValue);
+    final Method storageToEnumMethod = storageMethodToEnumClass.get(enumClass);
+    return storageToEnumMethod.invoke(INDICATES_STATIC_METHOD, shortValue);
   }
 
   /**
