@@ -15,6 +15,35 @@ const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 5;
 
+export class ClusterInitializationFailedError extends Error {
+  public readonly cluster: Cluster;
+
+  constructor(message: string, cluster?: Cluster) {
+    super(message);
+    Object.setPrototypeOf(this, ClusterInitializationFailedError.prototype);
+
+    this.name = 'ClusterInitializationFailedError';
+    this.cluster = cluster;
+  }
+}
+
+export class ExceededActionCountError extends ClusterInitializationFailedError {
+  constructor(message, cluster?: Cluster) {
+    super(message, cluster);
+    Object.setPrototypeOf(this, ExceededActionCountError.prototype);
+
+    this.name = 'ExceededActionCountError';
+  }
+}
+
+export class ExceededErrorCountError extends ClusterInitializationFailedError {
+  constructor(message, cluster?: Cluster) {
+    super(message, cluster);
+    Object.setPrototypeOf(this, ExceededErrorCountError.prototype);
+
+    this.name = 'ExceededErrorCountError';
+  }
+}
 
 export interface ClusterInitializerOptions {
   // Core options. Most callers should provide these.
@@ -268,35 +297,5 @@ export class ClusterInitializer {
     setTimeout(() => this.poll(), this.currentDelay);
     // Increment capped exponential backoff for the next poll loop.
     this.currentDelay = Math.min(this.currentDelay * 1.3, this.maxDelay);
-  }
-}
-
-export class ClusterInitializationFailedError extends Error {
-  public readonly cluster: Cluster;
-
-  constructor(message: string, cluster?: Cluster) {
-    super(message);
-    Object.setPrototypeOf(this, ClusterInitializationFailedError.prototype);
-
-    this.name = 'ClusterInitializationFailedError';
-    this.cluster = cluster;
-  }
-}
-
-export class ExceededActionCountError extends ClusterInitializationFailedError {
-  constructor(message, cluster?: Cluster) {
-    super(message, cluster);
-    Object.setPrototypeOf(this, ExceededActionCountError.prototype);
-
-    this.name = 'ExceededActionCountError';
-  }
-}
-
-export class ExceededErrorCountError extends ClusterInitializationFailedError {
-  constructor(message, cluster?: Cluster) {
-    super(message, cluster);
-    Object.setPrototypeOf(this, ExceededErrorCountError.prototype);
-
-    this.name = 'ExceededErrorCountError';
   }
 }
