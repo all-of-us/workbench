@@ -13,6 +13,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {isAbortError} from 'app/utils/errors';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
 import {InputSwitch} from 'primereact/inputswitch';
@@ -102,6 +103,12 @@ const styles = reactStyles({
   }
 });
 
+// const overlayStyle = 'background: rgba(255, 255, 255, 0.9)',
+//   display: 'table',
+//   position: 'relative',
+//   textAlign: 'center',
+//   verticalAlign: 'middle',
+
 const temporalMentions = [
   TemporalMention.ANYMENTION,
   TemporalMention.FIRSTMENTION,
@@ -144,13 +151,13 @@ interface Props {
 }
 
 interface State {
-  apiCallCheck: number;
   count: number;
   criteriaMenuOptions: any;
   demoOpen: boolean;
   demoMenuHover: boolean;
   error: boolean;
   loading: boolean;
+  overlayStyle: any;
   position: string;
   preventInputCalculate: boolean;
   status: string;
@@ -158,26 +165,22 @@ interface State {
 
 export const SearchGroup = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
-    criteriaMenu: any;
-    groupMenu: any;
-    mentionMenu: any;
-    timeMenu: any;
-    name = temporalMentions[0];
-    timeForm = new FormGroup({
-      inputTimeValue: new FormControl([Validators.required],
-        [integerAndRangeValidator('Form', 0, 9999)]),
-    });
+    private aborter = new AbortController();
+    private criteriaMenu: any;
+    private groupMenu: any;
+    private mentionMenu: any;
+    private timeMenu: any;
 
     constructor(props: any) {
       super(props);
       this.state = {
-        apiCallCheck: 0,
         count: undefined,
         criteriaMenuOptions: {programTypes: [], domainTypes: []},
         demoOpen: false,
         demoMenuHover: false,
         error: false,
         loading: false,
+        overlayStyle: {},
         position: 'bottom-left',
         preventInputCalculate: false,
         status: undefined
@@ -185,28 +188,18 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
-      this.timeForm.valueChanges
-        .debounceTime(500)
-        .distinctUntilChanged((p: any, n: any) => JSON.stringify(p) === JSON.stringify(n))
-        .map(({inputTimeValue}) => inputTimeValue)
-        .subscribe(this.getTimeValue);
-
-      const {workspace: {cdrVersionId}} = this.props;
+      const {group: {id}, workspace: {cdrVersionId}} = this.props;
       criteriaMenuOptionsStore.filter(options => !!options[cdrVersionId]).subscribe(options => {
         this.setState({criteriaMenuOptions: options[cdrVersionId]});
         setTimeout(() => this.setDemoMenuHover());
       });
-    }
-
-    setDemoMenuHover() {
-      const {group, index} = this.props;
-      const {status} = this.state;
       if (typeof ResizeObserver === 'function') {
-        const groupDiv = document.getElementById(group.id);
+        const groupDiv = document.getElementById(id);
         // check that groupDiv is of type Element
         if (groupDiv && groupDiv.tagName) {
           // create observer to reposition overlays on div resize
           const ro = new ResizeObserver(() => {
+            const {status} = this.props.group;
             if (status === 'hidden' || status === 'pending') {
               this.setOverlayPosition();
             }
@@ -214,6 +207,15 @@ export const SearchGroup = withCurrentWorkspace()(
           ro.observe(groupDiv);
         }
       }
+    }
+
+    componentWillUnmount(): void {
+      this.aborter.abort();
+    }
+
+    setDemoMenuHover() {
+      const {group, index} = this.props;
+      const {status} = this.state;
       const demoItem = document.getElementById('DEMO-' + index);
       if (demoItem) {
         demoItem.addEventListener('mouseenter', () => {
@@ -231,30 +233,31 @@ export const SearchGroup = withCurrentWorkspace()(
     getGroupCount() {
       try {
         const {group, role, workspace: {cdrVersionId}} = this.props;
-        this.setState({apiCallCheck: this.state.apiCallCheck + 1});
-        const localCheck = this.state.apiCallCheck;
         const mappedGroup = mapGroup(group);
         const request = {
           includes: [],
           excludes: [],
           [role]: [mappedGroup]
         };
-        cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
-          if (localCheck === this.state.apiCallCheck) {
-            this.setState({count, loading: false});
-          }
-        }, (err) => {
-          console.error(err);
-          this.setState({error: true, loading: false});
-        });
+        cohortBuilderApi().countParticipants(+cdrVersionId, request, {signal: this.aborter.signal})
+          .then(count => this.setState({count, loading: false}));
       } catch (error) {
-        console.error(error);
-        this.setState({error: true, loading: false});
+        if (!isAbortError(error)) {
+          console.error(error);
+          this.setState({error: true, loading: false});
+        }
       }
     }
 
-    update = (recalculate: boolean) => {
-      const {index, updateRequest} = this.props;
+    checkPendingCalls() {
+      if (this.state.loading) {
+        this.aborter.abort();
+        this.aborter = new AbortController();
+      }
+    }
+
+    update(recalculate: boolean) {
+      const {index, group: {temporal}, updateRequest} = this.props;
       // timeout prevents Angular 'value changed after checked' error
       setTimeout(() => {
         // prevent multiple total count calls when initializing multiple groups simultaneously
@@ -267,14 +270,15 @@ export const SearchGroup = withCurrentWorkspace()(
             initExisting.next(false);
           }
         }
-        if (recalculate && this.activeItems && (!this.temporal || !this.temporalError)) {
+        if (recalculate && this.hasActiveItems && (!temporal || !this.temporalError)) {
+          this.checkPendingCalls();
           this.setState({error: false, loading: true});
           this.getGroupCount();
         }
       });
     }
 
-    get activeItems() {
+    get hasActiveItems() {
       return this.props.group.items.some(it => it.status === 'active');
     }
 
@@ -292,18 +296,6 @@ export const SearchGroup = withCurrentWorkspace()(
       return this.items.some(it => [DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(it.type));
     }
 
-    get temporal() {
-      return this.props.group.temporal;
-    }
-
-    get groupId() {
-      return this.props.group.id;
-    }
-
-    get status() {
-      return this.props.group.status;
-    }
-
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Group - Cohort Builder');
       this.hide('pending');
@@ -315,8 +307,8 @@ export const SearchGroup = withCurrentWorkspace()(
 
     hide(status: string) {
       triggerEvent('Suppress', 'Click', 'Snowman - Suppress Group - Cohort Builder');
-      setTimeout(() => this.setOverlayPosition());
       this.setGroupProperty('status', status);
+      setTimeout(() => this.setOverlayPosition());
     }
 
     enable() {
@@ -330,7 +322,7 @@ export const SearchGroup = withCurrentWorkspace()(
       this.enable();
     }
 
-    removeGroup(): void {
+    removeGroup() {
       const {group, role} = this.props;
       const searchRequest = searchRequestStore.getValue();
       searchRequest[role] = searchRequest[role].filter(grp => grp.id !== group.id);
@@ -342,23 +334,9 @@ export const SearchGroup = withCurrentWorkspace()(
       const groupCard = document.getElementById(group.id);
       if (groupCard) {
         const {marginBottom, width, height} = window.getComputedStyle(groupCard);
-        const overlay = document.getElementById('overlay_' + group.id);
-        const style = 'width:' + width + '; height:' + height + '; margin: -'
-          + (parseFloat(height) + parseFloat(marginBottom)) + 'px 0 ' + marginBottom + ';';
-        overlay.setAttribute('style', style);
+        const margin = `-${(parseFloat(height) + parseFloat(marginBottom))}px 0 ${marginBottom}`;
+        this.setState({overlayStyle: {height, margin, width}});
       }
-    }
-
-    get mention() {
-      return this.props.group.mention;
-    }
-
-    get time() {
-      return this.props.group.time;
-    }
-
-    get timeValue() {
-      return this.props.group.timeValue;
     }
 
     launchWizard(criteria: any, tempGroup?: number) {
@@ -369,9 +347,7 @@ export const SearchGroup = withCurrentWorkspace()(
       } else {
         const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
         // If domain is PERSON, list the type as well as the domain in the label
-        const label = domainToTitle(domain) +
-          (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
-          ' - Cohort Builder';
+        const label = `${domainToTitle(domain)} ${(domain === DomainType.PERSON ? `- ${typeToTitle(type)}` : '')} - Cohort Builder`;
         triggerEvent(category, 'Click', `${category} - ${label}`);
       }
       const itemId = generateId('items');
@@ -398,58 +374,48 @@ export const SearchGroup = withCurrentWorkspace()(
     setGroupProperty(property: string, value: any) {
       const {group, role, updateRequest} = this.props;
       const searchRequest = searchRequestStore.getValue();
-      searchRequest[role] = searchRequest[role].map(grp => {
-        if (grp.id === group.id) {
-          grp[property] = value;
-        }
-        return grp;
-      });
-      searchRequestStore.next(searchRequest);
-      this.props.group[property] = value;
-      updateRequest();
+      const groupIndex = searchRequest[role].findIndex(grp => grp.id === group.id);
+      if (groupIndex > -1) {
+        searchRequest[role][groupIndex][property] = value;
+        searchRequestStore.next(searchRequest);
+        updateRequest(true);
+      }
     }
 
-    getTemporal(e) {
+    handleTemporalChange(e: any) {
       const {value} = e.target;
       triggerEvent('Temporal', 'Click', 'Turn On Off - Temporal - Cohort Builder');
       this.setGroupProperty('temporal', value);
-      if ((!value && this.activeItems) || (value && !this.temporalError)) {
+      if ((!value && this.hasActiveItems) || (value && !this.temporalError)) {
+        this.checkPendingCalls();
         this.setState({error: false, loading: true});
         this.getGroupCount();
       }
     }
 
-    getMentionTitle(mentionName) {
-      if (mentionName !== this.props.group.mention) {
-        triggerEvent(
-          'Temporal',
-          'Click',
-          `${formatOption(mentionName)} - Temporal - Cohort Builder`
-        );
-        this.setGroupProperty('mention', mentionName);
+    setMention(mention: TemporalMention) {
+      if (mention !== this.props.group.mention) {
+        triggerEvent('Temporal', 'Click', `${formatOption(mention)} - Temporal - Cohort Builder`);
+        this.setGroupProperty('mention', mention);
         this.calculateTemporal();
       }
     }
 
-    getTimeTitle(timeName) {
+    setTime(time: TemporalTime) {
       const {group} = this.props;
-      if (timeName !== this.props.group.time) {
-        triggerEvent(
-          'Temporal',
-          'Click',
-          `${formatOption(timeName)} - Temporal - Cohort Builder`
-        );
+      if (time !== this.props.group.time) {
+        triggerEvent('Temporal', 'Click', `${formatOption(time)} - Temporal - Cohort Builder`);
         // prevents duplicate group count calls if switching from TemporalTime.DURINGSAMEENCOUNTERAS
         this.setState({preventInputCalculate: group.time === TemporalTime.DURINGSAMEENCOUNTERAS});
-        this.setGroupProperty('time', timeName);
+        this.setGroupProperty('time', time);
         this.calculateTemporal();
       }
     }
 
-    getTimeValue = (value: number) => {
+    setTimeValue(timeValue: number) {
       // prevents duplicate group count calls if changes is triggered by rendering of input
       if (!this.state.preventInputCalculate) {
-        this.setGroupProperty('timeValue', value);
+        this.setGroupProperty('timeValue', timeValue);
         this.calculateTemporal();
       } else {
         this.setState({preventInputCalculate: false});
@@ -458,13 +424,10 @@ export const SearchGroup = withCurrentWorkspace()(
 
     calculateTemporal() {
       if (!this.temporalError) {
+        this.checkPendingCalls();
         this.setState({error: false, loading: true});
         this.getGroupCount();
       }
-    }
-
-    get groupDisableFlag() {
-      return !this.temporal && !this.props.group.items.length;
     }
 
     get temporalError() {
@@ -494,15 +457,15 @@ export const SearchGroup = withCurrentWorkspace()(
 
     render() {
       const {group: {id, mention, status, temporal, time, timeValue}, index, role} = this.props;
-      const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, loading} = this.state;
+      const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, loading, overlayStyle} = this.state;
       const domainMap = (domain) => ({label: domain.name, command: () => this.launchWizard(domain)});
       const criteriaMenuItems = temporal ? domainTypes.map(domainMap) : [...programTypes.map(domainMap), ...domainTypes.map(domainMap)];
       const groupMenuItems = [
         {label: 'Suppress group from total count', command: () => this.hide('hidden')},
         {label: 'Delete group', command: () => this.remove()},
       ];
-      const mentionMenuItems = temporalMentions.map(tm => ({label: formatOption(tm), command: () => this.getMentionTitle(tm)}));
-      const timeMenuItems = temporalTimes.map(tt => ({label: formatOption(tt), command: () => this.getTimeTitle(tt)}));
+      const mentionMenuItems = temporalMentions.map(tm => ({label: formatOption(tm), command: () => this.setMention(tm)}));
+      const timeMenuItems = temporalTimes.map(tt => ({label: formatOption(tt), command: () => this.setTime(tt)}));
       return <React.Fragment>
         <style>
           {`
@@ -517,7 +480,7 @@ export const SearchGroup = withCurrentWorkspace()(
             <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(event) => this.groupMenu.toggle(event)}>
               <ClrIcon style={{color: colors.accent}} shape='ellipsis-vertical'/>
             </Clickable>
-            Group {index + 1}
+            Group {index + 1} {status}
           </div>
           {temporal && <div className='card-block'>
             <Menu style={styles.menu} appendTo={document.body} model={mentionMenuItems} popup ref={el => this.mentionMenu = el} />
@@ -527,7 +490,7 @@ export const SearchGroup = withCurrentWorkspace()(
             <span style={styles.ofText}> of </span>
           </div>}
           {this.items.map((item, i) => <div key={i} className='card-block' style={styles.searchItem}>
-            <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={() => this.update()}/>
+            <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
           <div className='card-block'>
@@ -544,11 +507,11 @@ export const SearchGroup = withCurrentWorkspace()(
               </button>
               {time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
                 <input style={styles.timeInput} type='number' value={timeValue}
-                  onChange={(v) => this.getTimeValue(parseInt(v.target.value, 10))}/>
+                  onChange={(v) => this.setTimeValue(parseInt(v.target.value, 10))}/>
               }
             </div>
             {this.temporalItems.map((item, i) => <div key={i} className='card-block' style={styles.searchItem}>
-              <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={() => this.update()}/>
+              <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
             <div style={styles.temporalSubCardHeader}>
@@ -558,10 +521,10 @@ export const SearchGroup = withCurrentWorkspace()(
               </button>
             </div>
           </React.Fragment>}
-          {!!this.activeItems && !this.groupDisableFlag && <div className='container' style={styles.cardHeader}>
+          {!!this.hasActiveItems && <div className='container' style={styles.cardHeader}>
             <div className='row' style={this.disableTemporal ? {cursor: 'not-allowed'} : {}}>
               <div className='col-sm-6' style={{display: 'flex'}}>
-                <InputSwitch checked={temporal} disabled={this.disableTemporal} onChange={(e) => this.getTemporal(e)}/>
+                <InputSwitch checked={temporal} disabled={this.disableTemporal} onChange={(e) => this.handleTemporalChange(e)}/>
                 <div style={{paddingLeft: '0.5rem'}}>Temporal</div>
               </div>
               <div className='col-sm-6' style={{textAlign: 'right'}}>
@@ -569,8 +532,8 @@ export const SearchGroup = withCurrentWorkspace()(
                   Group Count:&nbsp;
                   {loading && (!temporal || !this.temporalError) && <Spinner size={16}/>}
                   {!loading && <span>
-                    {(!temporal || !this.temporalError) && this.activeItems && !!count && count.toLocaleString()}
-                    {(count === null || !this.activeItems) && !temporal && <span>
+                    {(!temporal || !this.temporalError) && this.hasActiveItems && !!count && count.toLocaleString()}
+                    {(count === null || !this.hasActiveItems) && !temporal && <span>
                       -- <ClrIcon style={{color: colors.warning}} shape='warning-standard' size={21}/>
                     </span>}
                   </span>}
@@ -585,7 +548,7 @@ export const SearchGroup = withCurrentWorkspace()(
             </div>
           </div>}
         </div>
-        {status !== 'active' && <div id={`overlay_${id}`} style={styles.overlay}>
+        {status !== 'active' && <div style={{...styles.overlay, ...overlayStyle}}>
           <div style={styles.overlayInner}>
             {status === 'pending' && <React.Fragment>
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={56}/>

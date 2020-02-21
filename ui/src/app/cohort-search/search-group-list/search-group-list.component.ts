@@ -14,6 +14,7 @@ import {searchRequestStore} from 'app/cohort-search/search-state.service';
 export class SearchGroupListComponent implements OnChanges, OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groups: Array<any>;
+  @Input() updated: number;
   @Input() updateRequest: Function;
 
   index = 0;
@@ -27,8 +28,8 @@ export class SearchGroupListComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Trigger child search-groups to update props
-    if (changes.groups) {
+    if (changes.updated) {
+      // Trigger child search-groups to update props
       this.updateGroups++;
     }
   }

@@ -31,6 +31,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   modalPromise: Promise<boolean> | null = null;
   modalOpen = false;
   saving = false;
+  updateGroupLists = 0;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -59,6 +60,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     searchRequestStore.subscribe(sr => {
       this.criteria = sr;
       this.overview = sr.includes.length || sr.excludes.length;
+      this.updateGroupLists++;
     });
     this.updateWrapperDimensions();
   }
