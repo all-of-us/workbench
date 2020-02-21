@@ -6,17 +6,16 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {ListPageHeader} from 'app/components/headers';
 import {CheckBox, RadioButton} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {TextColumn} from 'app/components/text-column';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {toggleIncludes} from 'app/utils';
 import {Profile} from 'generated/fetch';
 import {Section, TextInputWithLabel} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
-import {TextColumn} from "app/components/text-column";
 
 const styles = {
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
@@ -126,8 +125,9 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           Please complete Step 2 of 2
         </div>
         <div>
-          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> The <i>All of Us</i> Research Program will use this information
-          to measure our success at reaching diverse researchers. We will not share your individual answers.
+          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> The <i>All of Us</i>
+          Research Program will use this information to measure our success at reaching diverse researchers.
+          We will not share your individual answers.
         </div>
       </TextColumn>
       {/*Race section*/}

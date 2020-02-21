@@ -116,7 +116,7 @@ export class AccountCreationSuccess
       <div style={{paddingTop: '1.5rem'}}>
         <div style={styles.borderStyle}>
           Please note: For full access to the Research Workbench data and tools, you'll be required
-          to complete the necessary registration steps
+          to complete the necessary registration steps.
         </div>
       </div>
     </React.Fragment>;
