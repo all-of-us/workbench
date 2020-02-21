@@ -674,7 +674,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
               </ul>
             </React.Fragment>} disabled={!errors}>
-              <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError || errors}
+              <Button disabled={false}
                       style={{'height': '2rem', 'width': '10rem'}}
                       onClick={() => this.props.onComplete(this.state.profile)}>
                 Next

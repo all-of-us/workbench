@@ -18,7 +18,7 @@ import {
   withWindowSize,
 } from 'app/utils';
 
-import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
+import {DataAccessLevel, Degree, Profile, Race} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
 import * as React from 'react';
@@ -137,7 +137,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
   constructor(props: SignInProps) {
     super(props);
     this.state = {
-      currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
+      currentStep: props.initialStep ? props.initialStep : SignInStep.DEMOGRAPHIC_SURVEY,
       invitationKey: null,
       termsOfServiceVersion: null,
       // This defines the profile state for a new user flow. This will get passed to each
@@ -177,7 +177,10 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
           role: undefined,
         },
       ],
-      demographicSurvey: {},
+      demographicSurvey: {
+        race: [Race.AA, Race.AIAN],
+
+      },
       degrees: [] as Degree[],
     };
   }
@@ -185,6 +188,12 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
   componentDidMount() {
     document.body.style.backgroundColor = colors.light;
     this.props.onInit();
+  }
+
+  componentDidUpdate(prevProps: SignInProps, prevState: SignInState, snapshot) {
+    if (prevState.currentStep !== this.state.currentStep) {
+      window.scrollTo(0, 0);
+    }
   }
 
   /**
