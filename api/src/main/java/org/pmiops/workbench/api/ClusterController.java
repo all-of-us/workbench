@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ClusterAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -344,7 +345,8 @@ public class ClusterController implements ClusterApiDelegate {
           u.setClusterConfigDefault(override);
           return u;
         },
-        user);
+        user,
+        Agent.asAdmin(userProvider.get()));
     userService.logAdminUserAction(
         user.getUserId(), "cluster config override", oldOverride, new Gson().toJson(override));
     return ResponseEntity.ok(new EmptyResponse());

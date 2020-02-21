@@ -44,7 +44,7 @@ public class ClusterAuditorImpl implements ClusterAuditor {
                         .timestamp(clock.millis())
                         .actionId(actionId)
                         .agentType(AgentType.ADMINISTRATOR)
-                        .agentId(userProvider.get().getUserId())
+                        .agentIdMaybe(userProvider.get().getUserId())
                         .agentEmailMaybe(userProvider.get().getUsername())
                         .actionType(ActionType.DELETE)
                         .newValueMaybe(clusterName)

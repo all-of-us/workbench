@@ -41,7 +41,7 @@ public class AuthDomainAuditorImpl implements AuthDomainAuditor {
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
-            .agentId(adminDbUserProvider.get().getUserId())
+            .agentIdMaybe(adminDbUserProvider.get().getUserId())
             .agentEmailMaybe(adminDbUserProvider.get().getUsername())
             .actionId(actionIdProvider.get())
             .actionType(ActionType.EDIT)

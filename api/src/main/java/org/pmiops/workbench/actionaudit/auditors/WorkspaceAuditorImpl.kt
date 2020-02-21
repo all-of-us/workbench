@@ -1,8 +1,5 @@
 package org.pmiops.workbench.actionaudit.auditors
 
-import java.time.Clock
-import java.util.logging.Logger
-import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
@@ -17,7 +14,10 @@ import org.pmiops.workbench.model.Workspace
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.util.logging.Level
+import java.util.logging.Logger
+import javax.inject.Provider
 
 @Service
 class WorkspaceAuditorImpl @Autowired
@@ -33,18 +33,19 @@ constructor(
         val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
                 WorkspaceTargetProperty.values(), createdWorkspace)
         val events = propertyValues.entries
-                .map { ActionAuditEvent(
-                        actionId = info.actionId,
-                        agentEmailMaybe = info.userEmail,
-                        actionType = ActionType.CREATE,
-                        agentType = AgentType.USER,
-                        agentId = info.userId,
-                        targetType = TargetType.WORKSPACE,
-                        targetPropertyMaybe = it.key,
-                        targetIdMaybe = dbWorkspaceId,
-                        previousValueMaybe = null,
-                        newValueMaybe = it.value,
-                        timestamp = info.timestamp)
+                .map {
+                    ActionAuditEvent(
+                            actionId = info.actionId,
+                            agentEmailMaybe = info.userEmail,
+                            actionType = ActionType.CREATE,
+                            agentType = AgentType.USER,
+                            agentIdMaybe = info.userId,
+                            targetType = TargetType.WORKSPACE,
+                            targetPropertyMaybe = it.key,
+                            targetIdMaybe = dbWorkspaceId,
+                            previousValueMaybe = null,
+                            newValueMaybe = it.value,
+                            timestamp = info.timestamp)
                 }
         actionAuditService.send(events)
     }
@@ -65,19 +66,21 @@ constructor(
                 editedWorkspace)
 
         val actionAuditEvents = propertyToChangedValue.entries
-                .map { ActionAuditEvent(
-                        actionId = info.actionId,
-                        agentEmailMaybe = info.userEmail,
-                        actionType = ActionType.EDIT,
-                        agentType = AgentType.USER,
-                        agentId = info.userId,
-                        targetType = TargetType.WORKSPACE,
-                        targetPropertyMaybe = it.key,
-                        targetIdMaybe = workspaceId,
-                        previousValueMaybe = it.value.previousValue,
-                        newValueMaybe = it.value.newValue,
-                        timestamp = info.timestamp
-                ) }
+                .map {
+                    ActionAuditEvent(
+                            actionId = info.actionId,
+                            agentEmailMaybe = info.userEmail,
+                            actionType = ActionType.EDIT,
+                            agentType = AgentType.USER,
+                            agentIdMaybe = info.userId,
+                            targetType = TargetType.WORKSPACE,
+                            targetPropertyMaybe = it.key,
+                            targetIdMaybe = workspaceId,
+                            previousValueMaybe = it.value.previousValue,
+                            newValueMaybe = it.value.newValue,
+                            timestamp = info.timestamp
+                    )
+                }
         actionAuditService.send(actionAuditEvents)
     }
 
@@ -91,7 +94,7 @@ constructor(
                 agentEmailMaybe = info.userEmail,
                 actionType = ActionType.DELETE,
                 agentType = AgentType.USER,
-                agentId = info.userId,
+                agentIdMaybe = info.userId,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = dbWorkspace.workspaceId,
                 timestamp = info.timestamp)
@@ -115,7 +118,7 @@ constructor(
                 agentEmailMaybe = info.userEmail,
                 actionType = ActionType.DUPLICATE_FROM,
                 agentType = AgentType.USER,
-                agentId = info.userId,
+                agentIdMaybe = info.userId,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = sourceWorkspaceId,
                 timestamp = info.timestamp
@@ -124,18 +127,20 @@ constructor(
                 WorkspaceTargetProperty.values(), destinationWorkspace)
 
         val destinationEvents: List<ActionAuditEvent> = destinationPropertyValues.entries
-                .map { ActionAuditEvent(
-                        actionId = info.actionId,
-                        agentEmailMaybe = info.userEmail,
-                        actionType = ActionType.DUPLICATE_TO,
-                        agentType = AgentType.USER,
-                        agentId = info.userId,
-                        targetType = TargetType.WORKSPACE,
-                        targetPropertyMaybe = it.key,
-                        targetIdMaybe = destinationWorkspaceId,
-                        newValueMaybe = it.value,
-                        timestamp = info.timestamp
-                        ) }
+                .map {
+                    ActionAuditEvent(
+                            actionId = info.actionId,
+                            agentEmailMaybe = info.userEmail,
+                            actionType = ActionType.DUPLICATE_TO,
+                            agentType = AgentType.USER,
+                            agentIdMaybe = info.userId,
+                            targetType = TargetType.WORKSPACE,
+                            targetPropertyMaybe = it.key,
+                            targetIdMaybe = destinationWorkspaceId,
+                            newValueMaybe = it.value,
+                            timestamp = info.timestamp
+                    )
+                }
 
         val allEvents = listOf(listOf(sourceEvent), destinationEvents).flatten()
         actionAuditService.send(allEvents)
@@ -155,7 +160,7 @@ constructor(
                 actionType = ActionType.COLLABORATE,
                 agentType = AgentType.USER,
                 agentEmailMaybe = info.userEmail,
-                agentId = info.userId,
+                agentIdMaybe = info.userId,
                 timestamp = info.timestamp,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = sourceWorkspaceId,
@@ -165,18 +170,20 @@ constructor(
         )
 
         val inviteeEvents = aclStringsByUserId.entries
-                .map { ActionAuditEvent(
-                        actionId = info.actionId,
-                        actionType = ActionType.COLLABORATE,
-                        agentType = AgentType.USER,
-                        agentEmailMaybe = info.userEmail,
-                        agentId = info.userId,
-                        timestamp = info.timestamp,
-                        targetType = TargetType.USER,
-                        targetIdMaybe = it.key,
-                        targetPropertyMaybe = AclTargetProperty.ACCESS_LEVEL.name,
-                        newValueMaybe = it.value
-                ) }
+                .map {
+                    ActionAuditEvent(
+                            actionId = info.actionId,
+                            actionType = ActionType.COLLABORATE,
+                            agentType = AgentType.USER,
+                            agentEmailMaybe = info.userEmail,
+                            agentIdMaybe = info.userId,
+                            timestamp = info.timestamp,
+                            targetType = TargetType.USER,
+                            targetIdMaybe = it.key,
+                            targetPropertyMaybe = AclTargetProperty.ACCESS_LEVEL.name,
+                            newValueMaybe = it.value
+                    )
+                }
         val allEvents = listOf(listOf(workspaceTargetEvent), inviteeEvents).flatten()
         actionAuditService.send(allEvents)
     }
