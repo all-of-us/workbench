@@ -93,7 +93,7 @@ constructor(
                 actionId = actionId,
                 actionType = ActionType.DETECT_HIGH_EGRESS_EVENT,
                 agentType = AgentType.USER,
-                agentId = agentId,
+                agentIdMaybe = agentId,
                 agentEmailMaybe = agentEmail,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = dbWorkspace.workspaceId
@@ -154,7 +154,7 @@ constructor(
                 actionId = actionIdProvider.get(),
                 actionType = ActionType.DETECT_HIGH_EGRESS_EVENT,
                 agentType = AgentType.SYSTEM,
-                agentId = 0,
+                agentIdMaybe = 0,
                 agentEmailMaybe = null,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = null

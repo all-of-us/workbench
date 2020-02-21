@@ -8,6 +8,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
@@ -26,18 +27,18 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
   private final ActionAuditService actionAuditService;
   private final Clock clock;
   private Provider<String> actionIdProvider;
-  private Provider<Optional<DbUser>> dbUserOptionalProvider;
+  private Provider<DbUser> dbUserProvider;
 
   @Autowired
   public UserServiceAuditAdapterImpl(
       ActionAuditService actionAuditService,
       Clock clock,
       @Qualifier("ACTION_ID") Provider<String> actionIdProvider,
-      Provider<Optional<DbUser>> dbUserOptionalProvider) {
+      Provider<DbUser> dbUserProvider) {
     this.actionAuditService = actionAuditService;
     this.clock = clock;
     this.actionIdProvider = actionIdProvider;
-    this.dbUserOptionalProvider = dbUserOptionalProvider;
+    this.dbUserProvider = dbUserProvider;
   }
 
   @Override
@@ -45,26 +46,13 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
       DbUser targetUser,
       DataAccessLevel dataAccessLevel,
       DataAccessLevel previousDataAccessLevel,
-      AgentType agentType) {
-    // In the event of an offline cronjob, the request may have been made anonymously and there is
-    // no user identity. This should only happen for system agent driven audit events.
-    Optional<DbUser> agent = dbUserOptionalProvider.get();
-    if (agent.isPresent() && AgentType.SYSTEM == agentType) {
-      log.warning(
-          String.format(
-              "found unexpected request scope user '%s' for SYSTEM agent audit action",
-              agent.get().getUsername()));
-    } else if (!agent.isPresent() && AgentType.SYSTEM != agentType) {
-      log.warning(
-          String.format("missing request scope user for audit action agent type of %s", agentType));
-    }
-
+      Agent agent) {
     actionAuditService.send(
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
-            .agentType(agentType)
-            .agentId(agent.map(DbUser::getUserId).orElse(0L))
-            .agentEmailMaybe(agent.map(DbUser::getUsername).orElse(null))
+            .agentType(agent.getAgentType())
+            .agentIdMaybe(agent.getIdMaybe())
+            .agentEmailMaybe(agent.getEmailMaybe())
             .actionId(actionIdProvider.get())
             .actionType(ActionType.EDIT)
             .targetType(TargetType.ACCOUNT)
@@ -80,12 +68,12 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
       long userId,
       BypassTimeTargetProperty bypassTimeTargetProperty,
       Optional<Instant> bypassTime) {
-    DbUser adminUser = dbUserOptionalProvider.get().get();
+    DbUser adminUser = dbUserProvider.get();
     ActionAuditEvent.Builder eventBuilder =
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
-            .agentId(adminUser.getUserId())
+            .agentIdMaybe(adminUser.getUserId())
             .agentEmailMaybe(adminUser.getUsername())
             .actionId(actionIdProvider.get())
             .actionType(ActionType.BYPASS)
@@ -103,7 +91,7 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(AgentType.USER)
-            .agentId(targetUser.getUserId())
+            .agentIdMaybe(targetUser.getUserId())
             .agentEmailMaybe(targetUser.getUsername())
             .actionId(actionIdProvider.get())
             .actionType(ActionType.EDIT)
