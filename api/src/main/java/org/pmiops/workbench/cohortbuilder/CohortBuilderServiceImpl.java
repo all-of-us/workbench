@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CohortBuilderStorageManager {
+public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private PersonDao personDao;
 
   @Autowired
-  public CohortBuilderStorageManager(PersonDao personDao) {
+  public CohortBuilderServiceImpl(PersonDao personDao) {
     this.personDao = personDao;
   }
 

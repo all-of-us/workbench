@@ -52,13 +52,13 @@ public class CohortBuilderControllerTest {
 
   @Mock private CdrVersionService cdrVersionService;
 
+  @Mock private CohortBuilderService cohortBuilderService;
+
   @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
   @Autowired private JdbcTemplate jdbcTemplate;
-
-  @Autowired private CohortBuilderService cohortBuilderService;
 
   @Mock private Provider<WorkbenchConfig> configProvider;
 

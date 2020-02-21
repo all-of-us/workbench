@@ -25,7 +25,11 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cdr.model.DbPerson;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -37,6 +41,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
+import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CriteriaMenuOption;
@@ -78,6 +83,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     BigQueryTestService.class,
     CloudStorageServiceImpl.class,
     CohortQueryBuilder.class,
+    CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
     CdrVersionService.class
   })
@@ -101,6 +107,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
 
+  @Autowired private CohortBuilderService cohortBuilderService;
+
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -110,6 +118,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
   @Autowired private FireCloudService firecloudService;
+
+  @Autowired private PersonDao personDao;
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
@@ -164,7 +174,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             cbCriteriaAttributeDao,
             cdrVersionService,
             elasticSearchService,
-            configProvider);
+            configProvider,
+            cohortBuilderService);
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
@@ -316,6 +327,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .name("USA")
             .conceptId("5");
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
+
+    personDao.save(DbPerson.builder().addAgeAtConsent(55).addAgeAtCdr(56).build());
+    personDao.save(DbPerson.builder().addAgeAtConsent(22).addAgeAtCdr(22).build());
+    personDao.save(DbPerson.builder().addAgeAtConsent(34).addAgeAtCdr(35).build());
   }
 
   @After
@@ -1861,6 +1876,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
     assertThat(expectedResult)
         .isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
+  }
+
+  @Test
+  public void countAgesByType() {
+    assertThat(3)
+        .isEqualTo(
+            controller
+                .countAgesByType(cdrVersion.getCdrVersionId(), AgeType.CONSENT.toString(), 20, 120)
+                .getBody());
   }
 
   protected String getTablePrefix() {
