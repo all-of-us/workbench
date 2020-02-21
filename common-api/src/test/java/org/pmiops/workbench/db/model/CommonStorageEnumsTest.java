@@ -35,7 +35,7 @@ public class CommonStorageEnumsTest {
   final Map<Type, Method> storageMethodToEnumClass =
       methods.stream()
           .filter(m -> enumClasses.contains(m.getReturnType()))
-          // domainToDomainId is stringly typed - test with test_domainId
+          // domainIdToDomain is stringly typed - test with test_domainId
           .filter(m -> !m.getName().equals("domainIdToDomain"))
           .collect(Collectors.toMap(Method::getReturnType, m -> m));
 
