@@ -16,6 +16,7 @@ import {toggleIncludes} from 'app/utils';
 import {Profile} from 'generated/fetch';
 import {Section, TextInputWithLabel} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
+import {TextColumn} from "app/components/text-column";
 
 const styles = {
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
@@ -119,14 +120,16 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     const errors = validate(demographicSurvey, validationCheck);
 
     return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '26rem'}}>
-      <label style={{color: colors.primary, fontSize: 16}}>
-        Please complete Step 2 of 2
-      </label>
-      <ListPageHeader>
-        Demographics Survey <label style={{fontSize: '12px', fontWeight: 400}}>
-        (All Survey Fields are optional)</label>
-      </ListPageHeader>
-
+      <TextColumn>
+        <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Optional Demographics Survey</div>
+        <div style={{fontSize: 16, marginBottom: '.5rem'}}>
+          Please complete Step 2 of 2
+        </div>
+        <div>
+          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> The <i>All of Us</i> Research Program will use this information
+          to measure our success at reaching diverse researchers. We will not share your individual answers.
+        </div>
+      </TextColumn>
       {/*Race section*/}
       <Section header='Race'>
         <FlexColumn style={styles.checkboxAreaContainer}>
@@ -140,6 +143,17 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <DropDownSection header='Ethnicity' options={AccountCreationOptions.ethnicity}
                        value={demographicSurvey.ethnicity}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
+
+      {/*Gender identity section*/}
+      <Section header='Gender identity'>
+        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
+          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
+            return this.createOptionCheckbox(genderIdentity.label, 'genderIdentityList',
+              genderIdentity.value, genderIdentity.value.toString());
+          })}
+        </FlexColumn>
+      </Section>
+
       <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
 or another sexual and/or gender minority?'>
         <FlexColumn>
@@ -165,16 +179,6 @@ or another sexual and/or gender minority?'>
                             disabled={!demographicSurvey.identifiesAsLgbtq}/>
       </Section>
 
-      {/*Gender Identity section*/}
-      <Section header='Gender Identity'>
-        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
-            return this.createOptionCheckbox(genderIdentity.label, 'genderIdentityList',
-              genderIdentity.value, genderIdentity.value.toString());
-          })}
-        </FlexColumn>
-      </Section>
-
       {/*Sex at birth section*/}
       <Section header='Sex at birth'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
@@ -191,7 +195,7 @@ or another sexual and/or gender minority?'>
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
       {/*Disability section*/}
-      <Section header='Do you have a Physical or Cognitive disability?'>
+      <Section header='Do you have a physical or cognitive disability?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton onChange={
