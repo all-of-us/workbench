@@ -44,87 +44,96 @@ public class CBCriteriaDaoTest {
   public void setUp() {
     surveyCriteria =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.SURVEY.toString())
-                .type(CriteriaType.PPI.toString())
-                .subtype(CriteriaSubType.SURVEY.toString())
-                .group(false)
-                .standard(false)
-                .selectable(true)
-                .name("The Basics"));
+            DbCriteria.builder()
+                .addDomainId(DomainType.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addGroup(false)
+                .addStandard(false)
+                .addSelectable(true)
+                .addName("The Basics")
+                .build());
     sourceCriteria =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.CONDITION.toString())
-                .type(CriteriaType.ICD9CM.toString())
-                .count("100")
-                .standard(false)
-                .code("120"));
+            DbCriteria.builder()
+                .addDomainId(DomainType.CONDITION.toString())
+                .addType(CriteriaType.ICD9CM.toString())
+                .addCount("100")
+                .addStandard(false)
+                .addCode("120")
+                .build());
     standardCriteria =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.CONDITION.toString())
-                .type(CriteriaType.SNOMED.toString())
-                .count("100")
-                .hierarchy(true)
-                .conceptId("1")
-                .standard(true)
-                .code("120")
-                .synonyms("myMatch[CONDITION_rank1]"));
+            DbCriteria.builder()
+                .addDomainId(DomainType.CONDITION.toString())
+                .addType(CriteriaType.SNOMED.toString())
+                .addCount("100")
+                .addHierarchy(true)
+                .addConceptId("1")
+                .addStandard(true)
+                .addCode("120")
+                .addSynonyms("myMatch[CONDITION_rank1]")
+                .build());
     icd9Criteria =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.CONDITION.toString())
-                .type(CriteriaType.ICD9CM.toString())
-                .count("100")
-                .standard(false)
-                .code("001")
-                .synonyms("+[CONDITION_rank1]")
-                .path("1.5.99"));
+            DbCriteria.builder()
+                .addDomainId(DomainType.CONDITION.toString())
+                .addType(CriteriaType.ICD9CM.toString())
+                .addCount("100")
+                .addStandard(false)
+                .addCode("001")
+                .addSynonyms("+[CONDITION_rank1]")
+                .addPath("1.5.99")
+                .build());
     icd10Criteria =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.CONDITION.toString())
-                .type(CriteriaType.ICD10CM.toString())
-                .count("100")
-                .standard(false)
-                .conceptId("1")
-                .code("122")
-                .synonyms("+[CONDITION_rank1]"));
+            DbCriteria.builder()
+                .addDomainId(DomainType.CONDITION.toString())
+                .addType(CriteriaType.ICD10CM.toString())
+                .addCount("100")
+                .addStandard(false)
+                .addConceptId("1")
+                .addCode("122")
+                .addSynonyms("+[CONDITION_rank1]")
+                .build());
     measurementCriteria =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.MEASUREMENT.toString())
-                .type(CriteriaType.LOINC.toString())
-                .count("100")
-                .hierarchy(true)
-                .standard(true)
-                .code("LP123")
-                .synonyms("001[MEASUREMENT_rank1]"));
+            DbCriteria.builder()
+                .addDomainId(DomainType.MEASUREMENT.toString())
+                .addType(CriteriaType.LOINC.toString())
+                .addCount("100")
+                .addHierarchy(true)
+                .addStandard(true)
+                .addCode("LP123")
+                .addSynonyms("001[MEASUREMENT_rank1]")
+                .build());
     raceParent =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.PERSON.toString())
-                .type(CriteriaType.RACE.toString())
-                .name("Race")
-                .standard(true)
-                .parentId(0));
+            DbCriteria.builder()
+                .addDomainId(DomainType.PERSON.toString())
+                .addType(CriteriaType.RACE.toString())
+                .addName("Race")
+                .addStandard(true)
+                .addParentId(0)
+                .build());
     raceAsian =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.PERSON.toString())
-                .type(CriteriaType.RACE.toString())
-                .name("Asian")
-                .standard(true)
-                .parentId(raceParent.getId()));
+            DbCriteria.builder()
+                .addDomainId(DomainType.PERSON.toString())
+                .addType(CriteriaType.RACE.toString())
+                .addName("Asian")
+                .addStandard(true)
+                .addParentId(raceParent.getId())
+                .build());
     raceWhite =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.PERSON.toString())
-                .type(CriteriaType.RACE.toString())
-                .name("White")
-                .standard(true)
-                .parentId(raceParent.getId()));
+            DbCriteria.builder()
+                .addDomainId(DomainType.PERSON.toString())
+                .addType(CriteriaType.RACE.toString())
+                .addName("White")
+                .addStandard(true)
+                .addParentId(raceParent.getId())
+                .build());
   }
 
   @Test
