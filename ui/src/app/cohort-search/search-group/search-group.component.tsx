@@ -1,11 +1,9 @@
 import {Component, Input} from '@angular/core';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
 import * as React from 'react';
 
 import {SearchGroupItem} from 'app/cohort-search/search-group-item/search-group-item.component';
 import {criteriaMenuOptionsStore, initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
-import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
@@ -18,6 +16,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
 import {InputSwitch} from 'primereact/inputswitch';
 import {Menu} from 'primereact/menu';
+import {TieredMenu} from 'primereact/tieredmenu';
 
 const styles = reactStyles({
   card: {
@@ -77,7 +76,7 @@ const styles = reactStyles({
     padding: '0.5rem 0.25rem'
   },
   menuButton: {
-    borderColor: 'rgb(195, 195, 195)',
+    border: '1px solid rgb(195, 195, 195)',
     borderRadius: '0.125rem',
     color: 'rgb(114, 114, 114)',
     fontSize: '12px',
@@ -102,12 +101,6 @@ const styles = reactStyles({
     width: '3.4rem'
   }
 });
-
-// const overlayStyle = 'background: rgba(255, 255, 255, 0.9)',
-//   display: 'table',
-//   position: 'relative',
-//   textAlign: 'center',
-//   verticalAlign: 'middle',
 
 const temporalMentions = [
   TemporalMention.ANYMENTION,
@@ -169,6 +162,7 @@ export const SearchGroup = withCurrentWorkspace()(
     private criteriaMenu: any;
     private groupMenu: any;
     private mentionMenu: any;
+    private temporalCriteriaMenu: any;
     private timeMenu: any;
 
     constructor(props: any) {
@@ -458,8 +452,22 @@ export const SearchGroup = withCurrentWorkspace()(
     render() {
       const {group: {id, mention, status, temporal, time, timeValue}, index, role} = this.props;
       const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, loading, overlayStyle} = this.state;
-      const domainMap = (domain) => ({label: domain.name, command: () => this.launchWizard(domain)});
-      const criteriaMenuItems = temporal ? domainTypes.map(domainMap) : [...programTypes.map(domainMap), ...domainTypes.map(domainMap)];
+      const domainMap = (domain) => {
+        if (!!domain.children) {
+          return {label: domain.name, items: domain.children.map(child => ({label: child.name, command: () => this.launchWizard(child)}))};
+        } else {
+          return {label: domain.name, command: () => this.launchWizard(domain)};
+        }
+      };
+      const criteriaMenuItems = temporal
+        ? domainTypes.map(domainMap)
+        : [
+          {label: 'Program Data', className: 'menuitem-header'},
+          ...programTypes.map(domainMap),
+          {separator: true},
+          {label: 'Domains', className: 'menuitem-header'},
+          ...domainTypes.map(domainMap)
+        ];
       const groupMenuItems = [
         {label: 'Suppress group from total count', command: () => this.hide('hidden')},
         {label: 'Delete group', command: () => this.remove()},
@@ -472,19 +480,37 @@ export const SearchGroup = withCurrentWorkspace()(
           .p-inputswitch.p-disabled > .p-inputswitch-slider {
             cursor: not-allowed;
           }
+          body .p-menuitem > .p-menuitem-link {
+            height: 1.25rem;
+            line-height: 1.25rem;
+            padding: 0 1rem;
+          }
+          body .p-menuitem.menuitem-header > .p-menuitem-link {
+            font-size: 12px;
+            font-weight: 600;
+            height: auto;
+            line-height: 0.75rem;
+            padding-left: 0.5rem;
+          }
+          body .p-tieredmenu .p-menu-separator {
+            margin: 0.25rem 0;
+          }
+          body .p-tieredmenu .p-submenu-list {
+            width: 10rem;
+          }
         `}
         </style>
         <div id={id} className='bg-faded' style={styles.card}>
           <div style={styles.cardHeader}>
             <Menu style={styles.menu} appendTo={document.body} model={groupMenuItems} popup ref={el => this.groupMenu = el} />
-            <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(event) => this.groupMenu.toggle(event)}>
+            <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(e) => this.groupMenu.toggle(e)}>
               <ClrIcon style={{color: colors.accent}} shape='ellipsis-vertical'/>
             </Clickable>
-            Group {index + 1} {status}
+            Group {index + 1}
           </div>
           {temporal && <div className='card-block'>
             <Menu style={styles.menu} appendTo={document.body} model={mentionMenuItems} popup ref={el => this.mentionMenu = el} />
-            <button style={styles.menuButton}>
+            <button style={styles.menuButton} onClick={(e) => this.mentionMenu.toggle(e)}>
               {formatOption(mention)} <ClrIcon shape='caret down' size={12}/>
             </button>
             <span style={styles.ofText}> of </span>
@@ -494,15 +520,16 @@ export const SearchGroup = withCurrentWorkspace()(
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
           <div className='card-block'>
-            <Menu style={styles.menu} appendTo={document.body} model={criteriaMenuItems} popup ref={el => this.criteriaMenu = el} />
-            <button style={styles.menuButton}>
+            <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}} appendTo={document.body}
+              model={criteriaMenuItems} popup ref={el => this.criteriaMenu = el} />
+            <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
               Add Criteria <ClrIcon shape='caret down' size={12}/>
             </button>
           </div>
           {temporal && <React.Fragment>
             <div style={styles.temporalSubCardHeader}>
               <Menu style={styles.menu} appendTo={document.body} model={timeMenuItems} popup ref={el => this.timeMenu = el} />
-              <button style={styles.menuButton}>
+              <button style={styles.menuButton} onClick={(e) => this.timeMenu.toggle(e)}>
                 {formatOption(time)} <ClrIcon shape='caret down' size={12}/>
               </button>
               {time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
@@ -515,8 +542,9 @@ export const SearchGroup = withCurrentWorkspace()(
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
             <div style={styles.temporalSubCardHeader}>
-              <Menu style={styles.menu} appendTo={document.body} model={criteriaMenuItems} popup ref={el => this.criteriaMenu = el} />
-              <button style={styles.menuButton}>
+              <Menu style={styles.menu} appendTo={document.body} model={criteriaMenuItems}
+                popup ref={el => this.temporalCriteriaMenu = el} />
+              <button style={styles.menuButton} onClick={(e) => this.temporalCriteriaMenu.toggle(e)}>
                 Add Criteria <ClrIcon shape='caret down' size={12}/>
               </button>
             </div>
