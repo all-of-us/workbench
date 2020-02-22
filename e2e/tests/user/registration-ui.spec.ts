@@ -5,7 +5,6 @@ import {findText, getCursorValue} from '../../driver/elementHandle-util';
 import {waitForText, waitUntilFindTexts} from '../../driver/waitFuncs';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
 require('../../driver/waitFuncs');
-require('../../driver/puppeteerExtension');
 
 jest.setTimeout(60 * 1000);
 
@@ -84,13 +83,12 @@ describe('User registration tests:', () => {
     // Before user read all pdf pages, checkboxes are unchecked and disabled
     const privacyStatementCheckbox = await createAccountPage.getPrivacyStatementCheckbox();
     expect(privacyStatementCheckbox).toBeTruthy();
-    expect(await (new AouElement(privacyStatementCheckbox).getAttr('disabled'))).toBeDefined();
+    expect(await (new AouElement(privacyStatementCheckbox).getAttr('disabled'))).toBe('');
+    expect(await (new AouElement(privacyStatementCheckbox).getProp('checked'))).toBe(false);
 
     const termsOfUseCheckbox = await createAccountPage.getTermsOfUseCheckbox();
     expect(termsOfUseCheckbox).toBeTruthy();
-    expect(await (new AouElement(termsOfUseCheckbox).getAttr('disabled'))).toBeDefined();
-
-    expect(await (new AouElement(privacyStatementCheckbox).getProp('checked'))).toBe(false);
+    expect(await (new AouElement(termsOfUseCheckbox).getAttr('disabled'))).toBe('');
     expect(await (new AouElement(termsOfUseCheckbox).getProp('checked'))).toBe(false);
 
     const nextButton = await createAccountPage.getNextButton();
@@ -107,6 +105,7 @@ describe('User registration tests:', () => {
     // check on checkboxes
     await (await createAccountPage.getPrivacyStatementLabel()).click();
     await (await createAccountPage.getTermsOfUseLabel()).click();
+
     // verify checked
     expect(await (new AouElement(privacyStatementCheckbox).getProp('checked'))).toBe(true);
     expect(await (new AouElement(termsOfUseCheckbox).getProp('checked'))).toBe(true);

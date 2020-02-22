@@ -17,9 +17,9 @@ export default class AouElement {
    * Get attribute directly from a ElementHandle.
    * If the attribute have property counterparts, use getProperty function.
    */
-  public async getAttr(attr: string): Promise<unknown> {
-    const atr = await this.eHandle.getAttribute(attr);
-    return atr;
+  public async getAttr(attribute: string): Promise<unknown> {
+    const attr = await this.eHandle.evaluate( (node, attri) => node.getAttribute(attri), attribute);
+    return attr;
   }
 
   public async click() {
@@ -85,11 +85,6 @@ export default class AouElement {
     return await this.eHandle.select(aOptionalValue);
   }
 
-  // @ts-ignore
-  public async selectByText(textValue: string) {
-    // todo
-  }
-
   public async hasAttribute(attr: string): Promise<boolean> {
     if (await this.getAttr(attr)) { return; }
   }
@@ -103,7 +98,7 @@ export default class AouElement {
     await this.eHandle.press(key, options)
   }
 
-  public asElementHandle(): ElementHandle {
+  public asElement(): ElementHandle {
     return this.eHandle.asElement();
   }
 

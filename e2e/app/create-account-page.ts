@@ -90,8 +90,6 @@ export default class CreateAccountPage extends BasePage {
     }
 
     for (const field of fields) {
-      console.log(field.label);
-      console.log(field.value);
       const selector = formFieldXpathHelper(field.label);
       const e = await this.puppeteerPage.waitForXPath(selector, {visible: true});
       await e.focus();

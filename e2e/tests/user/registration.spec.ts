@@ -1,14 +1,11 @@
 import {ElementHandle} from 'puppeteer';
 import CreateAccountPage from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
-import PuppeteerLaunch from '../../services/puppeteer-launch';
-require('../../driver/waitFuncs');
-require('../../driver/puppeteerExtension');
 import {waitForText} from '../../driver/waitFuncs';
+import PuppeteerLaunch from '../../services/puppeteer-launch';
+const configs = require('../../resources/config');
 
 jest.setTimeout(60 * 1000);
-
-const configs = require('../../resources/config');
 
 describe('User registration tests:', () => {
 
