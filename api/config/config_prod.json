@@ -97,7 +97,8 @@
     "enableSumoLogicEventHandling": false,
     "useKeylessDelegatedCredentials": false,
     "sendFreeTierAlertEmails": false,
-    "enableMoodleV2Api": false
+    "enableMoodleV2Api": false,
+    "requireInstitutionalVerification": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-prod"

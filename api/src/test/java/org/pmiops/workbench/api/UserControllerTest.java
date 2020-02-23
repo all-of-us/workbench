@@ -27,6 +27,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionMapperImpl;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
@@ -56,7 +58,12 @@ public class UserControllerTest {
   private static long incrementedUserId = 1;
 
   @TestConfiguration
-  @Import({UserController.class, UserServiceImpl.class})
+  @Import({
+    UserController.class,
+    UserServiceImpl.class,
+    InstitutionServiceImpl.class,
+    InstitutionMapperImpl.class
+  })
   @MockBean({
     FireCloudService.class,
     ComplianceService.class,

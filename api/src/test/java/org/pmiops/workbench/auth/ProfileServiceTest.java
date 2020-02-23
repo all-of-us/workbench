@@ -8,10 +8,13 @@ import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -27,15 +30,17 @@ public class ProfileServiceTest {
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
   @Autowired ProfileService profileService;
+  @Autowired UserDao userDao;
+  @Autowired VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   @TestConfiguration
   @MockBean({FreeTierBillingService.class})
-  @Import(ProfileService.class)
+  @Import({ProfileService.class, VerifiedInstitutionalAffiliationMapperImpl.class})
   static class Configuration {}
 
   @Test
   public void testGetProfile_empty() {
-    assertThat(profileService.getProfile(new DbUser())).isNotNull();
+    assertThat(profileService.getProfile(userDao.save(new DbUser()))).isNotNull();
   }
 
   @Test
@@ -43,6 +48,7 @@ public class ProfileServiceTest {
     // Regression coverage for RW-4219.
     DbUser user = new DbUser();
     user.setDemographicSurvey(new DbDemographicSurvey());
+    user = userDao.save(user);
     assertThat(profileService.getProfile(user)).isNotNull();
   }
 

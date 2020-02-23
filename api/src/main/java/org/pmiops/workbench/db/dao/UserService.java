@@ -9,6 +9,7 @@ import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
@@ -31,9 +32,10 @@ public interface UserService {
       String areaOfResearch,
       String professionalUrl,
       List<Degree> degrees,
-      DbAddress address,
-      DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations);
+      DbAddress dbAddress,
+      DbDemographicSurvey dbDemographicSurvey,
+      List<DbInstitutionalAffiliation> dbAffiliations,
+      DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);

@@ -33,5 +33,20 @@
     "mode": "NULLABLE",
     "name": "age_at_cdr",
     "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_ehr_data",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_ppi_survey_data",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_physical_measurement_data",
+    "type": "INTEGER"
   }
 ]

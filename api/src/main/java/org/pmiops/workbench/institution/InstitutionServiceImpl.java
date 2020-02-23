@@ -1,14 +1,18 @@
 package org.pmiops.workbench.institution;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.InstitutionDao;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
-import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
-import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,87 +21,100 @@ import org.springframework.stereotype.Service;
 public class InstitutionServiceImpl implements InstitutionService {
 
   private final InstitutionDao institutionDao;
+  private final InstitutionMapper institutionMapper;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Autowired
-  InstitutionServiceImpl(InstitutionDao institutionDao) {
+  InstitutionServiceImpl(
+      InstitutionDao institutionDao,
+      InstitutionMapper institutionMapper,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.institutionDao = institutionDao;
+    this.institutionMapper = institutionMapper;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
   @Override
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(this::toModel)
+        .map(institutionMapper::dbToModel)
         .collect(Collectors.toList());
   }
 
   @Override
   public Optional<Institution> getInstitution(final String shortName) {
-    return getDbInstitution(shortName).map(this::toModel);
+    return getDbInstitution(shortName).map(institutionMapper::dbToModel);
+  }
+
+  @Override
+  public Optional<DbInstitution> getDbInstitution(final String shortName) {
+    return institutionDao.findOneByShortName(shortName);
   }
 
   @Override
   public Institution createInstitution(final Institution institutionToCreate) {
-    return toModel(institutionDao.save(newDbObject(institutionToCreate)));
+    return institutionMapper.dbToModel(
+        institutionDao.save(institutionMapper.modelToDb(institutionToCreate)));
   }
 
   @Override
-  public boolean deleteInstitution(final String shortName) {
-    return getDbInstitution(shortName)
-        .map(
-            dbInst -> {
-              institutionDao.delete(dbInst);
-              return true;
-            })
-        .orElse(false);
+  public void deleteInstitution(final String shortName) {
+    final DbInstitution institution =
+        getDbInstitution(shortName)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Could not delete Institution '%s' because it was not found",
+                            shortName)));
+
+    if (verifiedInstitutionalAffiliationDao.findAllByInstitution(institution).isEmpty()) {
+      // no verified user affiliations: safe to delete
+      institutionDao.delete(institution);
+    } else {
+      throw new ConflictException(
+          String.format(
+              "Could not delete Institution '%s' because it has verified user affiliations",
+              shortName));
+    }
   }
 
   @Override
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
     return getDbInstitution(shortName)
-        .map(dbInst -> toModel(institutionDao.save(updateDbObject(dbInst, institutionToUpdate))));
+        .map(DbInstitution::getInstitutionId)
+        .map(
+            dbId -> {
+              // create new DB object, but mark it with the original's ID to indicate that this is
+              // an update
+              final DbInstitution dbObjectToUpdate =
+                  institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId);
+              return institutionMapper.dbToModel(institutionDao.save(dbObjectToUpdate));
+            });
   }
 
-  private Optional<DbInstitution> getDbInstitution(String shortName) {
-    return institutionDao.findOneByShortName(shortName);
-  }
+  @Override
+  public boolean validateAffiliation(
+      @Nullable DbVerifiedInstitutionalAffiliation dbAffiliation, String contactEmail) {
+    if (dbAffiliation == null) {
+      return false;
+    }
 
-  private DbInstitution newDbObject(final Institution modelObject) {
-    return updateDbObject(new DbInstitution(), modelObject);
-  }
+    final Institution inst = institutionMapper.dbToModel(dbAffiliation.getInstitution());
 
-  private DbInstitution updateDbObject(
-      final DbInstitution dbObject, final Institution modelObject) {
-    return dbObject
-        .setShortName(modelObject.getShortName())
-        .setDisplayName(modelObject.getDisplayName())
-        .setOrganizationTypeEnum(modelObject.getOrganizationTypeEnum())
-        .setOrganizationTypeOtherText(modelObject.getOrganizationTypeOtherText())
-        .setEmailDomains(
-            Optional.ofNullable(modelObject.getEmailDomains()).orElse(Collections.emptyList())
-                .stream()
-                .map(domain -> new DbInstitutionEmailDomain().setEmailDomain(domain))
-                .collect(Collectors.toSet()))
-        .setEmailAddresses(
-            Optional.ofNullable(modelObject.getEmailAddresses()).orElse(Collections.emptyList())
-                .stream()
-                .map(address -> new DbInstitutionEmailAddress().setEmailAddress(address))
-                .collect(Collectors.toSet()));
-  }
+    try {
+      // TODO RW-4489: UserService should handle initial email validation
+      new InternetAddress(contactEmail).validate();
+    } catch (AddressException | NullPointerException e) {
+      return false;
+    }
 
-  private Institution toModel(final DbInstitution dbObject) {
-    return new Institution()
-        .shortName(dbObject.getShortName())
-        .displayName(dbObject.getDisplayName())
-        .organizationTypeEnum(dbObject.getOrganizationTypeEnum())
-        .organizationTypeOtherText(dbObject.getOrganizationTypeOtherText())
-        .emailDomains(
-            dbObject.getEmailDomains().stream()
-                .map(DbInstitutionEmailDomain::getEmailDomain)
-                .collect(Collectors.toList()))
-        .emailAddresses(
-            dbObject.getEmailAddresses().stream()
-                .map(DbInstitutionEmailAddress::getEmailAddress)
-                .collect(Collectors.toList()));
+    if (inst.getEmailAddresses().contains(contactEmail)) {
+      return true;
+    }
+
+    final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
+    return inst.getEmailDomains().contains(contactEmailDomain);
   }
 }

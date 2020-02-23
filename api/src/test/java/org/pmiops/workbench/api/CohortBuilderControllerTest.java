@@ -16,6 +16,7 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
@@ -51,6 +52,8 @@ public class CohortBuilderControllerTest {
 
   @Mock private CdrVersionService cdrVersionService;
 
+  @Mock private CohortBuilderService cohortBuilderService;
+
   @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
@@ -72,7 +75,8 @@ public class CohortBuilderControllerTest {
             cbCriteriaAttributeDao,
             cdrVersionService,
             elasticSearchService,
-            configProvider);
+            configProvider,
+            cohortBuilderService);
   }
 
   @Test
