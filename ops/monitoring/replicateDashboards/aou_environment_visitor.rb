@@ -9,8 +9,9 @@ class AouEnvironmentVisitor
   # environments is an array of AouEnvironmentInfo objects
   def initialize(service_account_prefix, environments_json_path = './environments.json')
     @service_account_prefix = service_account_prefix
+    @service_account = nil
     load_json_map(environments_json_path)
-    # @service_account = service_account
+    # @service_account = service_account_name(service_account_prefix)
     # @credentials_path = credentials_path
     @common = Common.new
   end
@@ -33,7 +34,7 @@ class AouEnvironmentVisitor
     @environments.each do |environment|
       @service_account = service_account_name(@service_account_prefix, environment.project_id)
 
-      @common.status("Visiting environment #{environment.short_name} in project #{environment.project_id}.")
+      @common.status("Visiting environment #{environment.short_name} in project #{environment.project_id} with SA #{@service_account}.")
       ServiceAccountContext.new(environment.project_id, @service_account).run do
         yield environment
       end
@@ -50,5 +51,9 @@ class AouEnvironmentVisitor
 
   def service_account_name(prefix, project)
     "#{prefix}@#{project}.iam.gserviceaccount.com"
+  end
+
+  def to_s
+    "#{}"
   end
 end

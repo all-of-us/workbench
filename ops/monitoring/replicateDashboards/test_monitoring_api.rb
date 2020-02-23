@@ -6,7 +6,7 @@ common = Common.new
 # service_account_context = ServiceAccountContext.new(project_id)
 visitor = AouEnvironmentVisitor.new('monitoring-alerts-admin')
 
-puts "visitor: #{pp(visitor)}"
+puts "visitor: #{pp(visitor.to_json)}"
 
 # service_account_context.run do
 visitor.visit do |environment|

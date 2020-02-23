@@ -1,5 +1,4 @@
 require "json"
-# require_relative "workbench"
 require_relative "utils/common"
 require 'tmpdir'
 require 'fileutils'
@@ -20,9 +19,7 @@ class ServiceAccountContext
     @service_account = service_account
     @credentials_path = credentials_path
     unless @credentials_path
-      creds_dir_path = File.join(Dir.tmpdir, 'service_account_keys')
-      Dir.mkdir(creds_dir_path) unless File.exists?(creds_dir_path)
-      @credentials_path = File.join(creds_dir_path, SERVICE_ACCOUNT_KEY_PATH)
+      make_credentials_path
     end
   end
 
@@ -38,7 +35,7 @@ class ServiceAccountContext
         return nil
       end
     end
-    return nil
+    nil
   end
 
   def run()
@@ -64,6 +61,12 @@ class ServiceAccountContext
   end
 
   private
+
+  def make_credentials_path
+    creds_dir_path = File.join(Dir.tmpdir, 'service_account_keys')
+    Dir.mkdir(creds_dir_path) unless File.exists?(creds_dir_path)
+    @credentials_path = File.join(creds_dir_path, SERVICE_ACCOUNT_KEY_PATH)
+  end
 
   def create_credentials_file
     @common.status("Making a new service account private key for #{@service_account} at #{@credentials_path}")
