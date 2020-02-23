@@ -1,4 +1,4 @@
-require './lib/serviceaccounts'
+require './lib/service_account_manager'
 require './aou_environment_info.rb'
 require_relative './lib/utils/common'
 
@@ -35,7 +35,7 @@ class AouEnvironmentVisitor
       @service_account = service_account_name(@service_account_prefix, environment.project_id)
 
       @common.status("Visiting environment #{environment.short_name} in project #{environment.project_id} with SA #{@service_account}.")
-      ServiceAccountContext.new(environment.project_id, @service_account).run do
+      ServiceAccountManager.new(environment.project_id, @service_account).run do
         yield environment
       end
       @common.status("Leaving environment #{environment.short_name} in project #{environment.project_id}.\n")
@@ -44,7 +44,7 @@ class AouEnvironmentVisitor
 
   def visit_single(short_name)
     environment = @environments.find { |env| env.short_name == short_name }
-    ServiceAccountContext.new(environment.project_id, @service_account, @credentials_path).run do
+    ServiceAccountManager.new(environment.project_id, @service_account, @credentials_path).run do
       yield environment
     end
   end

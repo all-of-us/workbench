@@ -1,7 +1,7 @@
 require "json"
-require_relative "utils/common"
 require 'tmpdir'
 require 'fileutils'
+require 'logger'
 
 # Entering a service account context ensures that a keyfile exists at the given
 # path for the given service account, and that GOOGLE_APPLICATION_CREDENTIALS is
@@ -9,7 +9,7 @@ require 'fileutils'
 # file if necessary, and destroys it when leaving the context.
 # The test SA key is a special case for local development, and is initialized
 # but not deleted.
-class ServiceAccountContext
+class ServiceAccountManager
 
   SERVICE_ACCOUNT_KEY_PATH = "sa-key.json"
 
