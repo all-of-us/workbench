@@ -1630,6 +1630,7 @@ def deploy_gcs_artifacts(cmd_name, args)
       start_notebook_cluster.sh
       activity-checker-extension.js
       aou-download-policy-extension.js
+      aou-upload-policy-extension.js
       generated/aou-snippets-menu.js
       gs://#{gcc.project}-cluster-resources/
     })
