@@ -1,24 +1,13 @@
-import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
+import mount from 'enzyme';
 import * as React from 'react';
 
-import {serverConfigStore} from 'app/utils/navigation';
 import {
   AccountCreationSurvey,
   AccountCreationSurveyProps,
 } from 'app/pages/login/account-creation/account-creation-survey';
 import {getEmptyProfile} from 'app/pages/login/test-utils';
+import {serverConfigStore} from 'app/utils/navigation';
 import {Ethnicity, GenderIdentity, Race, SexAtBirth} from 'generated/fetch';
-
-type AnyWrapper = (ShallowWrapper|ReactWrapper);
-const getPrivacyCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
-  return wrapper.find('CheckBox[data-test-id="privacy-statement-check"]');
-};
-const getTosCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
-  return wrapper.find('CheckBox[data-test-id="terms-of-service-check"]');
-};
-const getNextButton = (wrapper: AnyWrapper ): AnyWrapper => {
-  return wrapper.find('[data-test-id="next-button"]');
-};
 
 let props: AccountCreationSurveyProps;
 const onCompleteSpy = jest.fn();
@@ -48,7 +37,7 @@ it('should load existing profile data', async() => {
   demographicSurvey.genderIdentityList = [GenderIdentity.MAN];
   demographicSurvey.sexAtBirth = [SexAtBirth.MALE];
   demographicSurvey.identifiesAsLgbtq = true;
-  demographicSurvey.ethnicity = Ethnicity.HISPANIC
+  demographicSurvey.ethnicity = Ethnicity.HISPANIC;
   const wrapper = mount(<AccountCreationSurvey {...props} />);
 
   // Race
