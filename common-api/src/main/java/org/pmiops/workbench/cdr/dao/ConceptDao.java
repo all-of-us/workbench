@@ -197,6 +197,50 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "        where cr.domain_id = 'SURVEY' "
               + "          and cr.type = 'PPI' "
               + "          and cr.subtype = 'ANSWER' "
+              + "      ) a, "
+              + "      (select @curRow \\:= 0, @curType \\:= '') r "
+              + "    order by concept_name, id "
+              + "  ) as x "
+              + "where rank = 1 "
+              + "order by id "
+              + "limit :limit offset :offset",
+      nativeQuery = true)
+  List<DbConcept> findSurveys(@Param("limit") int limit, @Param("offset") int offset);
+
+  @Query(
+      value =
+          "select count(*) "
+              + "from "
+              + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
+              + "   id, @curType \\:= concept_name as concept_name, concept_id, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "    from "
+              + "      (select cr.id, c.* "
+              + "        from cb_criteria cr "
+              + "        join concept c on c.concept_id = cr.concept_id "
+              + "        where cr.domain_id = 'SURVEY' "
+              + "          and cr.type = 'PPI' "
+              + "          and cr.subtype = 'ANSWER' "
+              + "      ) a, "
+              + "      (select @curRow \\:= 0, @curType \\:= '') r "
+              + "    order by concept_name, id "
+              + "  ) as x "
+              + "where rank = 1",
+      nativeQuery = true)
+  long countSurveys();
+
+  @Query(
+      value =
+          "select concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "from "
+              + "  (select case when @curType = concept_name then @curRow \\:= @curRow + 1 else @curRow \\:= 1 end as rank, "
+              + "   id, @curType \\:= concept_name as concept_name, concept_id, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence, source_count_value, synonyms "
+              + "    from "
+              + "      (select cr.id, c.* "
+              + "        from cb_criteria cr "
+              + "        join concept c on c.concept_id = cr.concept_id "
+              + "        where cr.domain_id = 'SURVEY' "
+              + "          and cr.type = 'PPI' "
+              + "          and cr.subtype = 'ANSWER' "
               + "          and cr.path like CONCAT( "
               + "            (select dc.id "
               + "              from cb_criteria dc "
@@ -292,6 +336,9 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
   default List<DbConcept> findSurveys(String term, String surveyName, Pageable pageable) {
     int limit = pageable.getPageSize();
     int offset = pageable.getPageNumber() * limit;
+    if (StringUtils.isBlank(term) && StringUtils.isBlank(surveyName)) {
+      return findSurveys(limit, offset);
+    }
     if (StringUtils.isBlank(term)) {
       return findSurveysByName(surveyName, limit, offset);
     }
@@ -310,6 +357,9 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
    * @return
    */
   default long countSurveys(String term, String surveyName) {
+    if (StringUtils.isBlank(term) && StringUtils.isBlank(surveyName)) {
+      return countSurveys();
+    }
     if (StringUtils.isBlank(term)) {
       return countSurveyByName(surveyName);
     }
