@@ -22,7 +22,6 @@ export class ClusterApiStub extends ClusterApi {
 
   listClusters(extraHttpRequestParams?: any): Promise<DefaultClusterResponse> {
     return new Promise<DefaultClusterResponse>(resolve => {
-      console.log(this.cluster);
       resolve({defaultCluster: this.cluster});
     });
   }
