@@ -5,8 +5,11 @@
         "tslint-eslint-rules",
         "tslint-config-prettier"
     ],
-    "jsRules": {},
+    "jsRules": {
+        "object-literal-sort-keys": false
+    },
     "rules": {
+        "object-literal-sort-keys": false,
         "no-duplicate-imports": {
             "severity": "error",
             "options": {
