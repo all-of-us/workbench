@@ -20,10 +20,15 @@ import {TieredMenu} from 'primereact/tieredmenu';
 
 const styles = reactStyles({
   card: {
+    background: colors.white,
     borderColor: 'rgba(215, 215, 215, 0.5)',
     borderRadius: '0.2rem',
     boxShadow: '0 0.125rem 0.125rem 0 #d7d7d7',
     margin: '0 0 0.6rem'
+  },
+  cardBlock: {
+    borderBottom: '1px solid #eee',
+    padding: '0.5rem 0.75rem'
   },
   cardHeader: {
     backgroundColor: 'rgb(226, 226, 233)',
@@ -42,16 +47,20 @@ const styles = reactStyles({
     verticalAlign: 'middle',
   },
   overlayInner: {
-    background: 'rgba(255, 255, 255, 0.9)',
     color: colors.warning,
     display: 'table-cell',
     fontSize: '18px',
     verticalAlign: 'middle',
   },
   overlayButton: {
+    background: 'transparent',
+    border: 0,
     color: colors.accent,
+    cursor: 'pointer',
+    fontSize: '14px',
     fontWeight: 600,
-    letterSpacing: 0
+    letterSpacing: 0,
+    margin: '0.25rem 0',
   },
   itemOr: {
     background: colors.white,
@@ -65,13 +74,8 @@ const styles = reactStyles({
     minWidth: '5rem',
     width: 'auto'
   },
-  ofText: {
-    fontSize: '14px',
-    paddingRight: '6rem',
-    paddingTop: '0.2rem'
-  },
   searchItem: {
-    borderBottomColor: 'rgb(195, 195, 195)',
+    borderBottom: '1px solid rgb(195, 195, 195)',
     margin: '0 0.5rem',
     padding: '0.5rem 0.25rem'
   },
@@ -87,6 +91,17 @@ const styles = reactStyles({
     padding: '0 0.5rem',
     textTransform: 'uppercase',
     verticalAlign: 'middle'
+  },
+  row: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginLeft: '-0.5rem',
+    marginRight: '-0.5rem',
+  },
+  col6: {
+    flex: '0 0 50%',
+    maxWidth: '50%',
+    padding: '0 0.5rem',
   },
   temporalSubCardHeader: {
     display: 'flex',
@@ -450,7 +465,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     render() {
-      const {group: {id, mention, status, temporal, time, timeValue}, index, role} = this.props;
+      const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
       const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, loading, overlayStyle} = this.state;
       const domainMap = (domain) => {
         if (!!domain.children) {
@@ -500,7 +515,7 @@ export const SearchGroup = withCurrentWorkspace()(
           }
         `}
         </style>
-        <div id={id} className='bg-faded' style={styles.card}>
+        <div id={id} style={styles.card}>
           <div style={styles.cardHeader}>
             <Menu style={styles.menu} appendTo={document.body} model={groupMenuItems} popup ref={el => this.groupMenu = el} />
             <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(e) => this.groupMenu.toggle(e)}>
@@ -508,18 +523,18 @@ export const SearchGroup = withCurrentWorkspace()(
             </Clickable>
             Group {index + 1}
           </div>
-          {temporal && <div className='card-block'>
+          {temporal && <div style={styles.cardBlock}>
             <Menu style={styles.menu} appendTo={document.body} model={mentionMenuItems} popup ref={el => this.mentionMenu = el} />
             <button style={styles.menuButton} onClick={(e) => this.mentionMenu.toggle(e)}>
               {formatOption(mention)} <ClrIcon shape='caret down' size={12}/>
             </button>
-            <span style={styles.ofText}> of </span>
+            <span style={{fontSize: '14px', padding: '0.2rem 0.25rem 0'}}> of </span>
           </div>}
-          {this.items.map((item, i) => <div key={i} className='card-block' style={styles.searchItem}>
+          {this.items.map((item, i) => <div key={i} style={styles.searchItem}>
             <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
-          <div className='card-block'>
+          <div style={styles.cardBlock}>
             <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}} appendTo={document.body}
               model={criteriaMenuItems} popup ref={el => this.criteriaMenu = el} />
             <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
@@ -537,7 +552,7 @@ export const SearchGroup = withCurrentWorkspace()(
                   onChange={(v) => this.setTimeValue(parseInt(v.target.value, 10))}/>
               }
             </div>
-            {this.temporalItems.map((item, i) => <div key={i} className='card-block' style={styles.searchItem}>
+            {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem}>
               <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
@@ -549,13 +564,13 @@ export const SearchGroup = withCurrentWorkspace()(
               </button>
             </div>
           </React.Fragment>}
-          {!!this.hasActiveItems && <div className='container' style={styles.cardHeader}>
-            <div className='row' style={this.disableTemporal ? {cursor: 'not-allowed'} : {}}>
-              <div className='col-sm-6' style={{display: 'flex'}}>
+          {!!items.length && <div style={styles.cardHeader}>
+            <div style={this.disableTemporal ? {...styles.row, cursor: 'not-allowed'} : styles.row}>
+              <div style={{...styles.col6, display: 'flex'}}>
                 <InputSwitch checked={temporal} disabled={this.disableTemporal} onChange={(e) => this.handleTemporalChange(e)}/>
                 <div style={{paddingLeft: '0.5rem'}}>Temporal</div>
               </div>
-              <div className='col-sm-6' style={{textAlign: 'right'}}>
+              <div style={{...styles.col6, textAlign: 'right'}}>
                 <div>
                   Group Count:&nbsp;
                   {loading && (!temporal || !this.temporalError) && <Spinner size={16}/>}
@@ -582,14 +597,14 @@ export const SearchGroup = withCurrentWorkspace()(
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={56}/>
               <span>
                 This group has been deleted
-                <button className='btn btn-link' style={styles.overlayButton} onClick={() => this.undo()}>UNDO</button>
+                <button style={styles.overlayButton} onClick={() => this.undo()}>UNDO</button>
               </span>
             </React.Fragment>}
             {status === 'hidden' && <React.Fragment>
               <ClrIcon className='is-solid' shape='eye-hide' size={56}/>
               <span>
                 This group has been suppressed
-                <button className='btn btn-link' style={styles.overlayButton} onClick={() => this.enable()}>ENABLE</button>
+                <button style={styles.overlayButton} onClick={() => this.enable()}>ENABLE</button>
               </span>
             </React.Fragment>}
           </div>
