@@ -1,13 +1,12 @@
-require './lib/service_account_manager'
-require './lib/gcp_environment_info.rb'
+require_relative './service_account_manager'
+require_relative './gcp_environment_info.rb'
 
 class GcpEnvironmentVisitor
 
-  attr_reader :environments
   # environments is an array of AouEnvironmentInfo objects
   def initialize(environments_path,
                  logger = Logger.new(STDOUT))
-    load_environments_json(environments_path)
+    @environments = load_environments_json(environments_path)
     @logger = logger
   end
 
@@ -16,10 +15,9 @@ class GcpEnvironmentVisitor
   def load_environments_json(json_path)
     json = JSON.load(IO.read(json_path))
 
-    @environments = json['environments'].each.map do |env|
+    json['environments'].each.map do |env|
       GcpEnvironmentInfo.new(env)
     end
-    @environments
   end
 
   def visit
