@@ -3,7 +3,6 @@ package org.pmiops.workbench.rdr;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyListOf;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.Mockito.doNothing;
@@ -25,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Degree;
@@ -57,11 +57,9 @@ public class RdrExportServiceImplTest {
   @TestConfiguration
   @Import({RdrExportServiceImpl.class})
   @MockBean({
-      RdrApi.class,
-      RdrExportDao.class,
       WorkspaceDao.class,
       WorkspaceService.class,
-      UserDao.class
+      VerifiedInstitutionalAffiliationDao.class
   })
   static class Configuration {
     @Bean
@@ -109,7 +107,7 @@ public class RdrExportServiceImplTest {
     userIds.add(dbUserWithoutEmail.getUserId());
     rdrExportService.exportUsers(userIds);
 
-    verify(rdrExportService, times(1)).updateDBRdrExport(any(), anyList());
+    verify(rdrExportService, times(1)).updateDbRdrExport(any(), anyList());
   }
 
   @Test
@@ -121,6 +119,6 @@ public class RdrExportServiceImplTest {
     userIds.add(dbUserWithoutEmail.getUserId());
     rdrExportService.exportUsers(userIds);
 
-    verify(rdrExportService, times(0)).updateDBRdrExport(any(), anyList());
+    verify(rdrExportService, times(0)).updateDbRdrExport(any(), anyList());
   }
 }

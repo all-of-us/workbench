@@ -1,5 +1,6 @@
 package org.pmiops.workbench.rdr;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -136,7 +137,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       rdrApiProvider.get().getApiClient().setDebugging(true);
       rdrApiProvider.get().exportResearchers(rdrResearchersList);
 
-      updateDBRdrExport(RdrEntity.USER, userIds);
+      updateDbRdrExport(RdrEntity.USER, userIds);
     } catch (ApiException ex) {
       log.severe("Error while sending researcher data to RDR");
     }
@@ -162,7 +163,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       if (!rdrWorkspacesList.isEmpty()) {
         rdrApiProvider.get().getApiClient().setDebugging(true);
         rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
-        updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+        updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
       }
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
@@ -405,7 +406,8 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param entity
    * @param idList
    */
-  public void updateDBRdrExport(RdrEntity entity, List<Long> idList) {
+  @VisibleForTesting
+  public void updateDbRdrExport(RdrEntity entity, List<Long> idList) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     List<DbRdrExport> exportList =
