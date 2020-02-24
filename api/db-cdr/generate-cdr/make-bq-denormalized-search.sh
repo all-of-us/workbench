@@ -25,20 +25,29 @@ fi
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.cb_search_person
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_search_person.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.cb_search_person
+
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.cb_search_all_events
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_search_all_events.json --time_partitioning_type=DAY --clustering_fields concept_id $BQ_DATASET.cb_search_all_events
+
+
 ################################################
 # insert person data into cb_search_person
 ################################################
 echo "Inserting person data into cb_search_person"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
-    (person_id, gender, race, ethnicity, dob)
+    (person_id, gender, sex_at_birth, race, ethnicity, dob)
 SELECT p.person_id,
     case when p.gender_concept_id = 0 then 'Unknown' else g.concept_name end as gender,
+    case when p.sex_at_birth_concept_id = 0 then 'Unknown' else s.concept_name end as sex_at_birth,
     case when p.race_concept_id = 0 then 'Unknown' else regexp_replace(r.concept_name, r'^.+:\s', '') end as race,
     case when e.concept_name is null then 'Unknown' else regexp_replace(e.concept_name, r'^.+:\s', '') end as ethnicity,
     date(birth_datetime) as dob
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)"
 
