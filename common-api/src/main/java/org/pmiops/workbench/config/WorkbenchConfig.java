@@ -87,12 +87,8 @@ public class WorkbenchConfig {
     @Deprecated public Double defaultFreeCreditsLimit;
     // The default dollar limit to apply to free-credit usage in this environment.
     public Double defaultFreeCreditsDollarLimit;
-    // The default time limit in days to apply to free-credit usage in this environment.
-    public Short defaultFreeCreditsDaysLimit;
     // Thresholds for email alerting based on free tier usage, by cost
     public ArrayList<Double> freeTierCostAlertThresholds;
-    // Thresholds for email alerting based on free tier usage, by time
-    public ArrayList<Double> freeTierTimeAlertThresholds;
     // For project garbage collection, the max # of projects allowed to be associated with each
     // garbage-collection service account.
     public Integer garbageCollectionUserCapacity;

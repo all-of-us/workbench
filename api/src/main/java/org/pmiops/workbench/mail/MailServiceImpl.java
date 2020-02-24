@@ -6,13 +6,11 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -49,8 +47,6 @@ public class MailServiceImpl implements MailService {
   private static final String BETA_ACCESS_RESOURCE = "emails/betaaccessemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
       "emails/dollarthresholdemail/content.html";
-  private static final String FREE_TIER_TIME_THRESHOLD_RESOURCE =
-      "emails/timethresholdemail/content.html";
   private static final String FREE_TIER_EXPIRATION_RESOURCE =
       "emails/freecreditsexpirationemail/content.html";
 
@@ -100,11 +96,7 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void alertUserFreeTierDollarThreshold(
-      final DbUser user,
-      double threshold,
-      double currentUsage,
-      double remainingBalance,
-      final Optional<Instant> expirationTimeIfKnown)
+      final DbUser user, double threshold, double currentUsage, double remainingBalance)
       throws MessagingException {
     final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
@@ -118,8 +110,7 @@ public class MailServiceImpl implements MailService {
       final String msgHtml =
           buildHtml(
               FREE_TIER_DOLLAR_THRESHOLD_RESOURCE,
-              freeTierDollarThresholdSubstitutionMap(
-                  user, currentUsage, remainingBalance, expirationTimeIfKnown));
+              freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
       final String subject =
           String.format(
               "Reminder - %s Free credit usage in All of Us Researcher Workbench",
@@ -134,45 +125,6 @@ public class MailServiceImpl implements MailService {
 
       sendWithRetries(
           msg, String.format("User %s passed a free tier dollar threshold", user.getUsername()));
-    }
-  }
-
-  @Override
-  public void alertUserFreeTierTimeThreshold(
-      final DbUser user,
-      long daysRemaining,
-      final LocalDate expirationDate,
-      double remainingDollarBalance)
-      throws MessagingException {
-    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-
-    final String logMsg =
-        String.format(
-            "User %s has %d days remaining until their expiration date of %s.  Current total usage is $%.2f",
-            user.getUsername(), daysRemaining, formatDate(expirationDate), remainingDollarBalance);
-    log.info(logMsg);
-
-    if (workbenchConfig.featureFlags.sendFreeTierAlertEmails) {
-      final String msgHtml =
-          buildHtml(
-              FREE_TIER_TIME_THRESHOLD_RESOURCE,
-              freeTierTimeThresholdSubstitutionMap(
-                  user, daysRemaining, remainingDollarBalance, expirationDate));
-
-      final String subject =
-          String.format(
-              "Reminder - %d days remaining in Free credits in All of Us Researcher Workbench",
-              daysRemaining);
-
-      final MandrillMessage msg =
-          new MandrillMessage()
-              .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
-              .html(msgHtml)
-              .subject(subject)
-              .fromEmail(workbenchConfig.mandrill.fromEmail);
-
-      sendWithRetries(
-          msg, String.format("User %s passed a free tier time threshold", user.getUsername()));
     }
   }
 
@@ -247,15 +199,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private ImmutableMap<EmailSubstitutionField, String> freeTierDollarThresholdSubstitutionMap(
-      final DbUser user,
-      double currentUsage,
-      double remainingBalance,
-      final Optional<Instant> expirationTimeIfKnown) {
-
-    final String expirationDate =
-        expirationTimeIfKnown
-            .map(time -> formatDate(time.atZone(ZoneId.systemDefault()).toLocalDate()))
-            .orElse("[unknown]");
+      final DbUser user, double currentUsage, double remainingBalance) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
@@ -263,19 +207,6 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
         .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
         .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
-        .put(EmailSubstitutionField.EXPIRATION_DATE, expirationDate)
-        .build();
-  }
-
-  private ImmutableMap<EmailSubstitutionField, String> freeTierTimeThresholdSubstitutionMap(
-      DbUser user, long daysRemaining, double remainingDollarBalance, LocalDate expirationDate) {
-    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
-        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
-        .put(EmailSubstitutionField.REMAINING_DAYS, "" + daysRemaining)
-        .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingDollarBalance))
-        .put(EmailSubstitutionField.EXPIRATION_DATE, formatDate(expirationDate))
         .build();
   }
 
