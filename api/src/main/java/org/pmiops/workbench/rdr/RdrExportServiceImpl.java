@@ -60,7 +60,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   @Autowired
   public RdrExportServiceImpl(
       Clock clock,
-      Provider<RdrApi> RdrApiProvider,
+      Provider<RdrApi> rdrApiProvider,
       RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
@@ -68,7 +68,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.clock = clock;
     this.rdrExportDao = rdrExportDao;
-    this.rdrApiProvider = RdrApiProvider;
+    this.rdrApiProvider = rdrApiProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
@@ -405,7 +405,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param entity
    * @param idList
    */
-  private void updateDBRdrExport(RdrEntity entity, List<Long> idList) {
+  public void updateDBRdrExport(RdrEntity entity, List<Long> idList) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     List<DbRdrExport> exportList =
