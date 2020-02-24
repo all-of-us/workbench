@@ -585,6 +585,9 @@ To run tests in IntelliJ, go to your preferences, click plugins, and make sure y
 
 Once you have JUnit installed, go to the test file you want to run, right click on the test file, and select `Run` or `Debug` to run or debug the tests. To run or debug on a specific test class or method, open the file, and test running options should appear as green triangles pointing right on the side bar. Clicking that will open a dialog allowing you to run that specific class or method.
 
+## DevOps
+The `devops` frramework is describe [here](ops/ruby/devops-framework/DEVOPS_FRAMEWORK.md). Other
+documentation (including the playbook) is available for oncall engineers.
 ## Manual Testing
 
 ### Backend Swagger Portals
