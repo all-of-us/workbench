@@ -177,10 +177,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
           role: undefined,
         },
       ],
-      demographicSurvey: {
-
-
-      },
+      demographicSurvey: {},
       degrees: [] as Degree[],
     };
   }
