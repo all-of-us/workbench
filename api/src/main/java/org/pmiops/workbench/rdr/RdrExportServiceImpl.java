@@ -241,9 +241,10 @@ public class RdrExportServiceImpl implements RdrExportService {
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()
             .map(
-                inst -> new ResearcherAffiliation()
-                    .institution(inst.getInstitution())
-                    .role(inst.getRole()))
+                inst ->
+                    new ResearcherAffiliation()
+                        .institution(inst.getInstitution())
+                        .role(inst.getRole()))
             .collect(Collectors.toList()));
 
     verifiedInstitutionalAffiliationDao

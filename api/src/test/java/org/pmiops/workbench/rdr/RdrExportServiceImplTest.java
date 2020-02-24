@@ -1,6 +1,5 @@
 package org.pmiops.workbench.rdr;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -56,11 +55,7 @@ public class RdrExportServiceImplTest {
 
   @TestConfiguration
   @Import({RdrExportServiceImpl.class})
-  @MockBean({
-      WorkspaceDao.class,
-      WorkspaceService.class,
-      VerifiedInstitutionalAffiliationDao.class
-  })
+  @MockBean({WorkspaceDao.class, WorkspaceService.class, VerifiedInstitutionalAffiliationDao.class})
   static class Configuration {
     @Bean
     public Clock clock() {
