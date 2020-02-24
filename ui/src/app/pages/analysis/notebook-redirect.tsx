@@ -314,12 +314,11 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     private async initializeClusterStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
 
-      const initializer = new ClusterInitializer({
+      const cluster = await ClusterInitializer.initialize({
         workspaceNamespace: billingProjectId,
         onStatusUpdate: (status) => this.onClusterStatusUpdate(status),
         abortSignal: this.aborter.signal
       });
-      const cluster = await initializer.run();
       await this.connectToRunningCluster(cluster);
     }
 

@@ -170,12 +170,11 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private async runCluster(onClusterReady: Function): Promise<void> {
-      const initializer = new ClusterInitializer({
+      await ClusterInitializer.initialize({
         workspaceNamespace: this.props.urlParams.ns,
         onStatusUpdate: (status) => this.setState({clusterStatus: status}),
         abortSignal: this.aborter.signal
       });
-      await initializer.run();
       onClusterReady();
     }
 

@@ -206,7 +206,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Transactional
   @Override
-  public WorkspaceResponse getWorkspace(String workspaceNamespace) {
+  public WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException {
     DbWorkspace dbWorkspace =
         getByNamespace(workspaceNamespace)
             .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));

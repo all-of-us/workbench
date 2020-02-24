@@ -4,10 +4,15 @@ import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {clusterApi} from 'app/services/swagger-fetch-clients';
-import {ClusterInitializationFailedError, ClusterInitializer} from 'app/utils/cluster-initializer';
+import {
+  ClusterInitializationAbortedError,
+  ClusterInitializationFailedError,
+  ClusterInitializer,
+} from 'app/utils/cluster-initializer';
 import {
   ClusterStatus,
 } from 'generated/fetch/api';
+import {reportError} from 'app/utils/errors';
 
 const RESTART_LABEL = 'Reset server';
 const CREATE_LABEL = 'Create server';
@@ -54,39 +59,42 @@ export class ResetClusterButton extends React.Component<Props, State> {
     const maxActionCount = allowClusterActions ? 1 : 0;
 
     // Kick off an initializer which will poll for cluster status.
-    this.initializer = new ClusterInitializer({
-      workspaceNamespace: this.props.workspaceNamespace,
-      onStatusUpdate: (clusterStatus: ClusterStatus) => {
-        if (this.aborter.signal.aborted) {
-          // IF we've been unmounted, don't try to update state.
-          return;
-        }
-        this.setState({
-          clusterStatus: clusterStatus,
-        });
-      },
-      abortSignal: this.aborter.signal,
-      // For the reset button, we never want to affect the cluster state. With the maxFooCount set
-      // to zero, the initializer will reject the promise when it reaches a non-transitional state.
-      maxDeleteCount: maxActionCount,
-      maxCreateCount: maxActionCount,
-      maxResumeCount: maxActionCount,
-    });
-
     try {
       this.setState({isPollingCluster: true, clusterStatus: null});
-      await this.initializer.run();
+      await ClusterInitializer.initialize({
+        workspaceNamespace: this.props.workspaceNamespace,
+        onStatusUpdate: (clusterStatus: ClusterStatus) => {
+          if (this.aborter.signal.aborted) {
+            // IF we've been unmounted, don't try to update state.
+            return;
+          }
+          this.setState({
+            clusterStatus: clusterStatus,
+          });
+        },
+        abortSignal: this.aborter.signal,
+        // For the reset button, we never want to affect the cluster state. With the maxFooCount set
+        // to zero, the initializer will reject the promise when it reaches a non-transitional state.
+        maxDeleteCount: maxActionCount,
+        maxCreateCount: maxActionCount,
+        maxResumeCount: maxActionCount,
+      });
       this.setState({isPollingCluster: false});
     } catch (e) {
-      if (this.aborter.signal.aborted) {
+      if (e instanceof ClusterInitializationAbortedError) {
+        // Silently return if the init was aborted -- we've likely been unmounted and cannot call
+        // setState anymore.
         return;
+      } else if (e instanceof ClusterInitializationFailedError) {
+        this.setState({clusterStatus: e.cluster ? e.cluster.status : null, isPollingCluster: false});
+      } else {
+        // We only expect one of the above errors, so report any other types of errors to
+        // Stackdriver.
+        reportError(e);
+        this.setState({
+          isPollingCluster: false
+        });
       }
-      if (e instanceof ClusterInitializationFailedError) {
-        this.setState({clusterStatus: e.cluster ? e.cluster.status : null});
-      }
-      this.setState({
-        isPollingCluster: false
-      });
     }
   }
 
@@ -113,7 +121,9 @@ export class ResetClusterButton extends React.Component<Props, State> {
     if (this.state.isPollingCluster) {
       const tooltipContent = <div>
         Your notebook server is still being provisioned. <br/>
-        (detailed status: {this.state.clusterStatus})
+        {this.state.clusterStatus != null &&
+          <span>(detailed status: {this.state.clusterStatus})</span>
+        }
       </div>;
       return this.createTooltip(
         tooltipContent,
@@ -122,7 +132,7 @@ export class ResetClusterButton extends React.Component<Props, State> {
       // If the initializer has completed and the status is null, it means that
       // a cluster doesn't exist for this workspace.
       return this.createTooltip(
-        'You have not yet created a notebook server for this workspace.',
+        'You do not currently have an active notebook server for this workspace.',
         this.createButton(CREATE_LABEL, true, () => this.createOrResetCluster()));
     } else {
       // We usually reach this state if the cluster is at a "terminal" status and the initializer has

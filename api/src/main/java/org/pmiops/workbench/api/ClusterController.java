@@ -224,7 +224,7 @@ public class ClusterController implements ClusterApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
-    this.leonardoNotebooksClient.deleteCluster(
+    leonardoNotebooksClient.deleteCluster(
         workspaceNamespace, clusterNameForUser(userProvider.get()));
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -240,7 +240,7 @@ public class ClusterController implements ClusterApiDelegate {
     workspaceService.validateActiveBilling(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    FirecloudWorkspace firecloudWorkspace;
+    final FirecloudWorkspace firecloudWorkspace;
     try {
       firecloudWorkspace =
           fireCloudService
@@ -263,9 +263,9 @@ public class ClusterController implements ClusterApiDelegate {
 
     body.getNotebookNames()
         .forEach(
-            notebook ->
+            notebookName ->
                 userRecentResourceService.updateNotebookEntry(
-                    workspaceId, userProvider.get().getUserId(), gcsNotebooksDir + "/" + notebook));
+                    workspaceId, userProvider.get().getUserId(), gcsNotebooksDir + "/" + notebookName));
 
     String workspacePath = dbWorkspace.getFirecloudName();
     String editDir = "workspaces/" + workspacePath;
