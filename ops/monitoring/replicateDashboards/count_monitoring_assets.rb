@@ -1,6 +1,6 @@
 require "google/cloud/monitoring"
 require "./lib/service_account_manager"
-require './gcp_environment_visitor'
+require './lib/gcp_environment_visitor'
 require 'logger'
 
 CUSTOM_METRIC_FILTER = "metric.type = starts_with(\"custom.googleapis.com/\")"

@@ -1,5 +1,5 @@
 require './lib/service_account_manager'
-require './gcp_environment_info.rb'
+require './lib/gcp_environment_info.rb'
 
 class GcpEnvironmentVisitor
 
