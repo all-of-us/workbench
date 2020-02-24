@@ -59,6 +59,9 @@ public interface WorkspaceMapper {
       @MappingTarget DbWorkspace dbWorkspace, ResearchPurpose researchPurpose);
 
   @Mapping(target = "timeReviewed", ignore = true)
+  @Mapping(target = "disseminateResearchFindingList", ignore =  true)
+  @Mapping(target = "otherDisseminateResearchFindings", ignore = true)
+  @Mapping(target = "researchOutcomeList", ignore = true)
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
   // This method (defined by AfterMapping annotation) handles the scenario in which the name of the
