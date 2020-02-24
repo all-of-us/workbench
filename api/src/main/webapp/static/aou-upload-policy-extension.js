@@ -5,11 +5,11 @@ define([
 ], (Jupyter) => {
 
   const load_upload_extension = () => {
-  // This will open a dialog box when the user clicks Upload Button on the Jupyter File List page.
+  // This will open a dialog box when the user clicks File Upload.
   // File will be uploaded only if the user clicks OK else it will just close the dialog box and do nothing.
 
   $("#notebook_list_info input").click(function() {
-    return confirm("It is All of Us data use policy to not upload data or files containing " +
+    return confirm("It is <i>All of Us data</i> use policy to not upload data or files containing " +
         "personally identifiable information (PII). Any external data, files, or software that " +
         "is uploaded into the Workspace should be exclusively for the research purpose that was " +
         "provided for this Workspace.");
