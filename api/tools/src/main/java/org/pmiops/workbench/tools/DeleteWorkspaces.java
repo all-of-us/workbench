@@ -50,8 +50,13 @@ public class DeleteWorkspaces {
           .required()
           .hasArg()
           .build();
+  private static Option dryRunOpt =
+      Option.builder()
+          .longOpt("dry-run")
+          .desc("If specified, the tool runs in dry run mode; no modifications are made")
+          .build();
 
-  private static Options options = new Options().addOption(deleteListFilename);
+  private static Options options = new Options().addOption(deleteListFilename).addOption(dryRunOpt);
 
   @Bean
   public WorkspaceService workspaceService(
@@ -119,6 +124,7 @@ public class DeleteWorkspaces {
 
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
+      boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
 
       try (BufferedReader reader =
           new BufferedReader(
@@ -150,23 +156,33 @@ public class DeleteWorkspaces {
 
                   currentImpersonatedUser = dbWorkspace.getCreator();
                   try {
-                    workspaceService.deleteWorkspace(dbWorkspace);
+                    if (!dryRun) {
+                      workspaceService.deleteWorkspace(dbWorkspace);
+                    }
+
+                    dryLog(dryRun,
+                        "Deleted workspace ("
+                            + dbWorkspace.getWorkspaceNamespace()
+                            + ", "
+                            + dbWorkspace.getFirecloudName()
+                            + ")");
                   } catch (Exception e) {
                     log.log(
                         Level.WARNING,
                         "Could not delete workspace (" + namespace + ", " + fcName + ")",
                         e);
                   }
-
-                  log.info(
-                      "Deleted workspace ("
-                          + dbWorkspace.getWorkspaceNamespace()
-                          + ", "
-                          + dbWorkspace.getFirecloudName()
-                          + ")");
                 });
       }
     };
+  }
+
+  private static void dryLog(boolean dryRun, String msg) {
+    String prefix = "";
+    if (dryRun) {
+      prefix = "[DRY RUN] Would have... ";
+    }
+    log.info(prefix + msg);
   }
 
   public static void main(String[] args) {

@@ -1222,7 +1222,14 @@ def delete_workspaces(cmd_name, *args)
   ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
   op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
 
   op.add_typed_option(
       "--delete-list-filename [delete-list-filename]",
@@ -1238,9 +1245,17 @@ def delete_workspaces(cmd_name, *args)
   op.parse.validate
   gcc.validate()
 
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
   flags = ([
       ["--delete-list-filename", op.opts.deleteListFilename]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
   flags.map! { |f| "'#{f}'" }
 
   with_cloud_proxy_and_db(gcc) do
@@ -1250,10 +1265,12 @@ def delete_workspaces(cmd_name, *args)
   end
 end
 
+DELETE_WORKSPACES_CMD = "delete-workspaces"
+
 Common.register_command({
-    :invocation => "delete-workspaces",
+    :invocation => DELETE_WORKSPACES_CMD,
     :description => "Delete workspaces listed in given file.\n",
-    :fn => ->(*args) {delete_workspaces("delete-workspaces", *args)}
+    :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
 })
 
 def authority_options(cmd_name, args)
