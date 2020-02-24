@@ -8,7 +8,15 @@ directly, independently of the existing build, operations, and deployment pipeli
 ## Usage
 The entry point to all functionality is `devops.rb`, which provides command line and environment
 loading and dispatches to Task classes (not scripts) that do the real work.
-`./devops.rb  <task_name> --task-option-1 value1`
+`./devops.rb  -t <task_name> -e <env_file> --task-option-1 value1`
+
+There is also a dynamically-generated help file from the descriptions given in the options.
+```
+$ ruby ./devops.rb  --help
+Usage: devops [options]
+    -t, --task [TASK]                Task to be in in each environment
+    -e, --envs-file [ENVS_FILE]      Path to environments JSON file.
+```
 
 ##  Installation
 We need a newish version of Ruby. I'm running 2.6.5 as of this writing, but haven't gone

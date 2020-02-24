@@ -14,8 +14,13 @@ def parse_options
   options = {}
   OptionParser.new do |parser|
     parser.on('-t', '--task [TASK]', String, 'Task to be in in each environment')
-    parser.on('-e', '--envs-file [ENVS_FILE]', String, 'Path to environments JSON file.')
+    parser.on('-e', '--envs-file [ENVS]', String, 'Path to environments JSON file.')
   end.parse!({into: options})
+
+  #Now raise an exception if we have not found a required arg
+  raise OptionParser::MissingArgument.new('task') if options[:task].nil?
+  raise OptionParser::MissingArgument.new('envs-file') if options[:'envs-file'].nil?
+
   options
 end
 
