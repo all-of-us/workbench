@@ -1,6 +1,6 @@
-require '../replicateDashboards/aou_environment_visitor'
+require '../replicateDashboards/gcp_environment_visitor'
 
-require './aou_environment_visitor.rb'
+require './gcp_environment_visitor.rb'
 require 'google/cloud/monitoring/dashboard/v1'
 
 RESOURCE_NAMESPACE_PATTERN = /resource.label."namespace"="\w+"/
@@ -9,12 +9,12 @@ key_path = './monitoring-key.json'
 ENV["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
 #ENV['MONITORING_CREDENTIALS'] = key_path
 
-visitor = AouEnvironmentVisitor.new(
+visitor = GcpEnvironmentVisitor.new(
     [],
     'monitoring-alerts-admin@all-of-us-workbench-test.iam.gserviceaccount.com',
     './monitoring-key.json')
 
-visitor.load_json_map
+visitor.load_environments_json
 
 dashboard_template = nil
 

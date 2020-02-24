@@ -1,8 +1,8 @@
-require './aou_environment_visitor.rb'
+require './gcp_environment_visitor.rb'
 require "google/cloud/monitoring"
 
-visitor = AouEnvironmentVisitor.new
-visitor.load_json_map
+visitor = GcpEnvironmentVisitor.new
+visitor.load_environments_json
 
 visitor.visit do |env|
   # Build a new client in the context of the current project.

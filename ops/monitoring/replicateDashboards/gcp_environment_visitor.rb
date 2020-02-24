@@ -1,8 +1,7 @@
 require './lib/service_account_manager'
 require './gcp_environment_info.rb'
 
-# Visitor
-class AouEnvironmentVisitor
+class GcpEnvironmentVisitor
 
   attr_reader :environments
   # environments is an array of AouEnvironmentInfo objects
@@ -17,20 +16,20 @@ class AouEnvironmentVisitor
   def load_environments_json(json_path)
     json = JSON.load(IO.read(json_path))
 
-    @environments = json.environments.each.map |env|
+    @environments = json['environments'].each.map do |env|
       GcpEnvironmentInfo.new(env)
     end
-    self
+    @environments
   end
 
   def visit
-    @envyeironments.each do |environment|
-      ServiceAccountManager.new(environment.project_id, environment.service_account).run do
-        # @logger.info(">>>>>>>>>>>>>>>> Entering #{environment.short_name} >>>>>>>>>>>>>>>>")
+    @environments.each do |environment|
+      sa_mgr = ServiceAccountManager.new(environment.project_id, environment.service_account)
+      sa_mgr.run do
+        @logger.info(">>>>>>>>>>>>>>>> Entering #{environment.short_name} >>>>>>>>>>>>>>>>")
         yield environment
-        # @logger.info("<<<<<<<<<<<<<<<< Leaving #{environment.short_name} <<<<<<<<<<<<<<<<")
+        @logger.info("<<<<<<<<<<<<<<<< Leaving #{environment.short_name} <<<<<<<<<<<<<<<<")
       end
     end
   end
-
 end

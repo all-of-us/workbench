@@ -7,80 +7,75 @@ require 'logger'
 # path for the given service account, and that GOOGLE_APPLICATION_CREDENTIALS is
 # pointing to it (for application default credentials). Creates this SA key and
 # file if necessary, and destroys it when leaving the context.
-# The test SA key is a special case for local development, and is initialized
-# but not deleted.
+#
+# Nested service account contexts are not supported.
 class ServiceAccountManager
 
-  SERVICE_ACCOUNT_KEY_PATH = "sa-key.json"
+  SERVICE_ACCOUNT_KEY_FILE_NAME = "sa-key.json"
 
-  def initialize(project, service_account, credentials_path = nil)
-    @common = Common.new
+  def initialize(project, service_account, logger = Logger.new(STDOUT))
+    @logger = logger
     @project = project
     @service_account = service_account
-    @credentials_path = credentials_path
-    unless @credentials_path
-      make_credentials_path
-    end
   end
 
   attr_reader :project
   attr_reader :service_account
   attr_reader :credentials_path
 
-  def existing_file_account(path)
-    if File.exists?(path)
-      begin
-        return JSON.parse(File.read(path))["client_email"]
-      rescue JSON::ParserError => e
-        return nil
-      end
-    end
-    nil
-  end
-
   def run()
-    @common.status("Setting environment variable GOOGLE_APPLICATION_CREDENTIALS to #{@credentials_path}")
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = @credentials_path
-    @common.status("service_account = #{@service_account}")
+    @logger.info("service_account = #{@service_account}")
+    credentials_path = create_credentials_file
 
-    if @service_account == existing_file_account(@credentials_path)
-      # Don't generate another key if this account is already active. This can
-      # happen for nested service account contexts, for example.
-      @common.status "Attaching to existing keyfile @ #{@credentials_path}"
-      yield self
-      return
-    end
-
-    create_credentials_file
+    @logger.info("Setting environment variable GOOGLE_APPLICATION_CREDENTIALS to #{credentials_path}")
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
 
     begin
       yield self
     ensure
-      cleanup_key
+      cleanup_key(credentials_path)
+      ENV["GOOGLE_APPLICATION_CREDENTIALS"] = nil
     end
   end
 
-  private
-
   def make_credentials_path
-    creds_dir_path = File.join(Dir.tmpdir, 'service_account_keys')
-    Dir.mkdir(creds_dir_path) unless File.exists?(creds_dir_path)
-    @credentials_path = File.join(creds_dir_path, SERVICE_ACCOUNT_KEY_PATH)
+    random_dir = SecureRandom.alphanumeric
+    creds_dir_path = File.join(Dir.tmpdir, random_dir)
+    Dir.mkdir(creds_dir_path)
+    File.join(creds_dir_path, SERVICE_ACCOUNT_KEY_FILE_NAME)
   end
 
   def create_credentials_file
-    @common.status("Making a new service account private key for #{@service_account} at #{@credentials_path}")
-    @common.run_inline %W[gcloud iam service-accounts keys create #{@credentials_path}
+    credentials_path = make_credentials_path
+
+    @logger.info("Making a new service account private key for #{@service_account} at #{credentials_path}")
+    run_process %W[gcloud iam service-accounts keys create #{credentials_path}
         --iam-account=#{@service_account} --project=#{@project}]
+    unless File.exists? credentials_path
+      @logger.warning("Failed to create the key file at #{credentials_path}")
+    end
+    credentials_path
   end
 
-  def cleanup_key
-    @common.status("Deleting private key file")
-    tmp_private_key = `grep private_key_id #{@credentials_path} | cut -d\\\" -f4`.strip()
-    @common.status("Deleting SA key for #{tmp_private_key}")
-    @common.run_inline %W[gcloud iam service-accounts keys delete #{tmp_private_key} -q
+  def cleanup_key(credentials_path)
+    @logger.info("Deleting private key file")
+    tmp_private_key = `grep private_key_id #{credentials_path} | cut -d\\\" -f4`.strip
+    @logger.info("Deleting SA key for #{tmp_private_key}")
+    run_process %W[gcloud iam service-accounts keys delete #{tmp_private_key} -q
          --iam-account=#{service_account} --project=#{@project}]
-    # File.delete(@credentials_path)
-    FileUtils.remove_dir(File.dirname(@credentials_path))
+    FileUtils.remove_dir(File.dirname(credentials_path))
+  end
+
+  def run_process(cmd)
+    pid = spawn(*cmd)
+    Process.wait pid
+    if $?.exited?
+      unless $?.success?
+        exit $?.exitstatus
+      end
+    else
+      error "Command exited abnormally."
+      exit 1
+    end
   end
 end

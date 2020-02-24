@@ -1,5 +1,5 @@
 require 'google/cloud/monitoring/v3/alert_policy_service_client'
-require './aou_environment_visitor'
+require './gcp_environment_visitor'
 
 ENV['GOOGLE_APPLICATION_CREDENTIALS'] = './monitoring-key.json'
 
@@ -7,10 +7,10 @@ project_id = 'all-of-us-workbench-test'
 alerts_client = Google::Cloud::Monitoring::V3::AlertPolicyServiceClient.new
 
 
-visitor = AouEnvironmentVisitor.new([],
+visitor = GcpEnvironmentVisitor.new([],
                                     'monitoring-alerts-admin@all-of-us-workbench-test.iam.gserviceaccount.com',
                                     './monitoring-key.json')
-visitor.load_json_map
+visitor.load_environments_json
 
 puts visitor.environments
 
