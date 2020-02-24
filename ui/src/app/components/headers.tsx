@@ -39,6 +39,11 @@ export const styles = {
     fontWeight: 600,
     marginTop: 0,
     paddingTop: '0.5rem'
+  },
+  pageHeader: {
+    color: colors.primary,
+    fontSize: '28px',
+    fontWeight: 400
   }
 };
 
@@ -48,3 +53,4 @@ export const Header = withStyle(styles.h3)('h3');
 export const SemiBoldHeader = withStyle({...styles.h3, ...styles.semiBold})('h3');
 export const SmallHeader = withStyle(styles.h4)('h4');
 export const ListPageHeader = withStyle(styles.listPageHeader)('h3');
+export const PageHeader = withStyle(styles.pageHeader)('h2');

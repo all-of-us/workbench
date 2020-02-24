@@ -1,6 +1,7 @@
 import {
+  BiggerHeader,
   BolderHeader,
-  Header,
+  Header, PageHeader,
   SmallHeader
 } from 'app/components/headers';
 import {
@@ -11,6 +12,8 @@ import colors from 'app/styles/colors';
 
 import {Profile} from 'generated/fetch/api';
 import * as React from 'react';
+import {TextColumn} from "app/components/text-column";
+import {Divider} from "app/components/divider";
 
 const styles = {
   buttonLinkStyling: {
@@ -54,51 +57,40 @@ export class AccountCreationSuccess
 
   render() {
     return <React.Fragment>
-      <div style={{padding: '3rem 3rem 0 3rem', marginLeft: '-0.5rem', marginRight: '-0.5'}}>
-        <BolderHeader>
+      <div style={{padding: '3rem 3rem 0 3rem', marginLeft: '-0.5rem', marginRight: '-0.5', width: '25rem'}}>
+        <PageHeader>
           Congratulations!
-        </BolderHeader>
-        <div>
-          <SmallHeader style={{color: colors.primary}}>
+        </PageHeader>
+
+        <TextColumn>
+          <div style={{fontSize: '16px', marginTop: '.25rem'}}>
             Your <i>All of Us</i> research account has been created!
-          </SmallHeader>
-        </div>
-        <div>
-          <Header style={{fontWeight: 400, textColor: colors.primary}}>
-            Your new account
-          </Header>
-        </div>
-        <div style={{whiteSpace: 'nowrap'}}>
-          <Header style={{fontWeight: 400, marginTop: '0.5rem'}}>
-            {this.props.profile.username}
-          </Header>
-        </div>
-        <div>
-          <Header style={{marginTop: '.5rem', fontWeight: 400}}>
-            is hosted by Google.
-          </Header>
-        </div>
-        <div>
-          <SmallHeader style={{color: colors.primary}}>
+          </div>
+        </TextColumn>
+
+        <Divider verticalMargin='1rem' style={{width: '100%'}}/>
+
+        <TextColumn style={{fontSize: '20px'}}>
+          <div>
+            Your new research workbench account {this.props.profile.username} is hosted by Google.
+          </div>
+          <div style={{color: colors.black, marginTop: '1rem'}}>
             Check your contact email for instructions on getting started.
-          </SmallHeader>
-        </div>
-        <div>
-          <SmallHeader style={{color: colors.primary}}>
-            Your contact email is: {this.state.contactEmail}
-          </SmallHeader>
-        </div>
-        <div style={{paddingTop: '0.5rem'}}>
-          <button style={styles.buttonLinkStyling}
+          </div>
+        </TextColumn>
+
+        <Divider verticalMargin='1rem' style={{width: '100%'}}/>
+
+        <TextColumn style={{fontSize: '14px'}}>
+          <div>
+            Your contact email is: {this.props.profile.contactEmail}
+          </div>
+          <a style={{marginTop: '.25rem'}}
                   onClick={() => this.setState({resendModal: true})}>
             Resend Instructions
-          </button>
-          |
-          <button style={styles.buttonLinkStyling}
-                  onClick={() => this.setState({updateModal: true})}>
-            Change contact email
-          </button>
-        </div>
+          </a>
+        </TextColumn>
+
       </div>
       {this.state.resendModal && <AccountCreationResendModal
           username={this.props.profile.username}

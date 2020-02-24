@@ -3,12 +3,12 @@ import colors from 'app/styles/colors';
 import * as React from 'react';
 
 export const TextColumn = (props) => {
-  return <FlexColumn style={{
+  return <FlexColumn style={{...{
     color: colors.primary,
     fontSize: '14px',
     lineHeight: '22px',
     marginBottom: '0.5rem'
-  }}>
+  }, ...props.style}}>
     {props.children}
   </FlexColumn>;
 };
