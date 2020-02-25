@@ -299,8 +299,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
                   style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
         <div><img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
                   src={SIGNED_OUT_HEADER_IMAGE}/></div>
-        {/*{this.renderSignInStep(this.state.currentStep)}*/}
-        {this.renderSignInStep(SignInStep.SUCCESS_PAGE)}}
+        {this.renderSignInStep(this.state.currentStep)}
       </FlexColumn>
     </FlexColumn>;
   }

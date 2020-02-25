@@ -1,8 +1,5 @@
 import {
-  BiggerHeader,
-  BolderHeader,
-  Header, PageHeader,
-  SmallHeader
+  PageHeader,
 } from 'app/components/headers';
 import {
   AccountCreationResendModal,
@@ -10,10 +7,10 @@ import {
 } from 'app/pages/login/account-creation/account-creation-modals';
 import colors from 'app/styles/colors';
 
+import {Divider} from 'app/components/divider';
+import {TextColumn} from 'app/components/text-column';
 import {Profile} from 'generated/fetch/api';
 import * as React from 'react';
-import {TextColumn} from "app/components/text-column";
-import {Divider} from "app/components/divider";
 
 const styles = {
   buttonLinkStyling: {
@@ -70,12 +67,21 @@ export class AccountCreationSuccess
 
         <Divider verticalMargin='1rem' style={{width: '100%'}}/>
 
-        <TextColumn style={{fontSize: '20px'}}>
+        <TextColumn style={{fontSize: '20px', lineHeight: '30px'}}>
           <div>
-            Your new research workbench account {this.props.profile.username} is hosted by Google.
+            Your new research workbench account
           </div>
-          <div style={{color: colors.black, marginTop: '1rem'}}>
-            Check your contact email for instructions on getting started.
+          <div>
+            {this.props.profile.username}
+          </div>
+          <div>
+            is hosted by Google.
+          </div>
+          <div style={{marginTop: '1rem'}}>
+            Check your contact email for
+          </div>
+          <div>
+            instructions on getting started.
           </div>
         </TextColumn>
 
@@ -105,7 +111,7 @@ export class AccountCreationSuccess
           }}
           onClose={() => this.setState({updateModal: false})}
       />}
-      <div style={{paddingTop: '1.5rem'}}>
+      <div style={{paddingTop: '1rem'}}>
         <div style={styles.borderStyle}>
           Please note: For full access to the Research Workbench data and tools, you'll be required
           to complete the necessary registration steps.
