@@ -19,7 +19,7 @@ def parse_options
     parser.on('-e', '--envs-file [ENVS]', String, 'Path to environments JSON file.')
     parser.on('-s', '--source-uri [SOURCE-URI]', String, 'URI or FQ name for source asset')
     parser.on('-s', '--source-env [SOURCE-ENV]', String, 'Short name for source URI (lowercase)')
-    parser.on('-d', '--dry-run TRUE', 'Dry run if true')
+    parser.on('-d', '--dry-run', 'Dry run if true')
   end.parse!({into: options})
 
   #Now raise an exception if we have not found a required arg

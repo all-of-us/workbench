@@ -16,7 +16,7 @@ class DeleteAllServiceAccountKeys
       keys = get_keys(env)
       keys.each do |key|
         if @is_dry_run == true
-          @logger.info("would delete key #{key} for SA #{env.service_account} in project)")
+          @logger.info("would delete key #{key} for SA #{env.service_account} in project")
         else
           delete_key(key, env)
         end
@@ -25,17 +25,16 @@ class DeleteAllServiceAccountKeys
   end
 
 
-  # Get key names (long form)
+  # Get key JSON objects
   def get_keys(env)
     list_cmd = %W[gcloud iam service-accounts keys list
       --iam-account=#{env.service_account}
       --project=#{env.project_id}
-      --format=json]
-    stdout, stderr, status = Open3.capture2(list_cmd.join(' '))
-    @logger.error(stderr) if status != 0
-    @logger.info(stdout)
-    json = JSON.load(stdout)
-    json
+      --format=json].join(' ')
+    stdout, stderr = Open3.capture2(list_cmd)
+    @logger.error(stderr) if stderr
+    json_array = JSON.load(stdout)
+    json_array
   end
 
   def delete_key(key, env)
@@ -48,9 +47,9 @@ class DeleteAllServiceAccountKeys
       #{key['name']}
       --iam-account=#{env.service_account}
       --project=#{env.project_id}
-    ]
+    ].join(' ')
 
-    stdout, stderr = Open3.capture2(delete_cmd.join(' '))
+    stdout, stderr = Open3.capture2(delete_cmd)
     @logger.error(stderr) if stderr
     stdout
   end
