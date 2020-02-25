@@ -7,7 +7,7 @@ import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
+import {AgeType, AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const minAge = 18;
 const maxAge = 120;
@@ -24,6 +24,8 @@ function sortByCountThenName(critA, critB) {
         ? (critA.name > critB.name ? 1 : -1)
         : diff;
 }
+// Mocked Feature Flag. TODO remove once server-side config is in place
+const enableCBAgeOptions = true;
 
 @Component({
   selector: 'crit-list-demographics',
@@ -245,6 +247,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
           const selections = [parameterId];
           selectionsStore.next(selections);
         }
+        if (enableCBAgeOptions) {
+          this.calculateAge();
+        }
       });
     this.subscription.add(ageDiff);
   }
@@ -295,27 +300,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.calculating = true;
     }
     const cdrVersionId = currentWorkspaceStore.getValue().cdrVersionId;
-    const parameter = init ? {
-      ...this.ageNode,
-      name: `Age In Range ${minAge} - ${maxAge}`,
-      attributes: [{
-        name: AttrName.AGE,
-        operator: Operator.BETWEEN,
-        operands: [minAge.toString(), maxAge.toString()]
-      }],
-    } : this.selectedNode;
-    const request = {
-      excludes: [],
-      includes: [{
-        items: [{
-          type: DomainType[DomainType.PERSON],
-          searchParameters: [mapParameter(parameter)],
-          modifiers: []
-        }],
-        temporal: false
-      }]
-    };
-    cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
+    const [min, max] = init ? [minAge, maxAge] : this.selectedNode.attributes[0].operands.map(op => +op);
+    cohortBuilderApi().countAgesByType(+cdrVersionId, AgeType.AGE.toString(), min, max).then(response => {
       if (init) {
         const ageCounts = ageCountStore.getValue();
         ageCounts[cdrVersionId] = response;
