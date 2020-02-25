@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {MODIFIERS_MAP} from 'app/cohort-search/constant';
@@ -346,19 +345,3 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  selector: 'app-list-search-group-item',
-  template: '<div #root></div>'
-})
-export class SearchGroupItemComponent extends ReactWrapperBase {
-  @Input('role') role: Props['role'];
-  @Input('groupId') groupId: Props['groupId'];
-  @Input('item') item: Props['item'];
-  @Input('index') index: Props['index'];
-  @Input('updateGroup') updateGroup: Props['updateGroup'];
-
-  constructor() {
-    super(SearchGroupItem, ['role', 'groupId', 'item', 'index', 'updateGroup']);
-  }
-}

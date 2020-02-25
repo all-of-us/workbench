@@ -20,7 +20,6 @@ import {NodeComponent} from './node/node.component';
 import {OptionInfoComponent} from './option-info/option-info.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchBarComponent} from './search-bar/search-bar.component';
-import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {SearchGroupSelectComponent} from './search-group-select/search-group-select.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
@@ -71,7 +70,6 @@ const routes: Routes = [{
     OptionInfoComponent,
     OverviewComponent,
     SearchBarComponent,
-    SearchGroupItemComponent,
     SearchGroupListComponent,
     SearchGroupComponent,
     ListSearchComponent,
