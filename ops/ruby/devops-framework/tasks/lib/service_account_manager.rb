@@ -2,6 +2,7 @@ require "json"
 require 'tmpdir'
 require 'fileutils'
 require 'logger'
+require_relative './process_runner.rb'
 
 # Entering a service account context ensures that a keyfile exists at the given
 # path for the given service account, and that GOOGLE_APPLICATION_CREDENTIALS is
@@ -67,15 +68,6 @@ class ServiceAccountManager
   end
 
   def run_process(cmd)
-    pid = spawn(*cmd)
-    Process.wait pid
-    if $?.exited?
-      unless $?.success?
-        exit $?.exitstatus
-      end
-    else
-      error "Command exited abnormally."
-      exit 1
-    end
+    ProcessRunner.run(cmd)
   end
 end

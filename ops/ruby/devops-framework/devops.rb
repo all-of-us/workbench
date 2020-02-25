@@ -1,6 +1,8 @@
 require 'logger'
 require 'optparse'
-require_relative 'tasks/count_monitoring_assets.rb'
+require_relative 'tasks/count_monitoring_assets'
+require_relative 'tasks/replicate_logs_based_metric'
+require_relative 'tasks/delete_all_service_account_keys'
 
 # Single entry point for the devops framework. This is the only true Ruby Script file. The
 # rest are classes.
@@ -15,6 +17,9 @@ def parse_options
   OptionParser.new do |parser|
     parser.on('-t', '--task [TASK]', String, 'Task to be in in each environment')
     parser.on('-e', '--envs-file [ENVS]', String, 'Path to environments JSON file.')
+    parser.on('-s', '--source-uri [SOURCE-URI]', String, 'URI or FQ name for source asset')
+    parser.on('-s', '--source-env [SOURCE-ENV]', String, 'Short name for source URI (lowercase)')
+    parser.on('-d', '--dry-run TRUE', 'Dry run if true')
   end.parse!({into: options})
 
   #Now raise an exception if we have not found a required arg
@@ -25,13 +30,16 @@ def parse_options
 end
 
 def run_task(options)
-  logger = Logger.new(STDOUT)
+  options[:logger] = Logger.new(STDOUT)
 
   # New tasks must be included here.
   case options[:task]
   when 'inventory'
-    monitoring_assets = MonitoringAssets.new(options[:'envs-file'], logger)
-    monitoring_assets.inventory
+    MonitoringAssets.new(options[:'envs-file'], options[:logger]).inventory
+  when 'replicate-logs-based-metric'
+    ReplicateLogsBasedMetric.new(options, options[:logger]).run
+  when 'delete-all-service-account-keys'
+    DeleteAllServiceAccountKeys.new(options).run
   else
     logger.error("Unrecognized task #{options[:task]}")
   end

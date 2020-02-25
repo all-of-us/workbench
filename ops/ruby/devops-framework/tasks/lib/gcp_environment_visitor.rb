@@ -20,13 +20,13 @@ class GcpEnvironmentVisitor
     end
   end
 
-  def visit
-    @environments.each do |environment|
-      sa_mgr = ServiceAccountManager.new(environment.project_id, environment.service_account)
-      sa_mgr.run do
-        @logger.info(">>>>>>>>>>>>>>>> Entering #{environment.short_name} >>>>>>>>>>>>>>>>")
-        yield environment
-        @logger.info("<<<<<<<<<<<<<<<< Leaving #{environment.short_name} <<<<<<<<<<<<<<<<")
+  def visit(env_list = @environments)
+    Array(env_list).each do |env|
+      sa_mgr = ServiceAccountManager.new(env.project_id, env.service_account)
+      sa_mgr.run do |svc_acct|
+        @logger.info(">>>>>>>>>>>>>>>> Entering #{env.short_name} >>>>>>>>>>>>>>>>")
+        yield env
+        @logger.info("<<<<<<<<<<<<<<<< Leaving #{env.short_name} <<<<<<<<<<<<<<<<")
       end
     end
   end
