@@ -1,8 +1,9 @@
 require 'logger'
 require 'optparse'
 require_relative 'tasks/count_monitoring_assets'
-require_relative 'tasks/replicate_logs_based_metric'
-require_relative 'tasks/delete_all_service_account_keys'
+require_relative 'tasks/dashboards'
+require_relative 'tasks/logs_based_metrics'
+require_relative 'tasks/service_accounts'
 
 # Single entry point for the devops framework. This is the only true Ruby Script file. The
 # rest are classes.
@@ -18,8 +19,8 @@ def parse_options
     parser.on('-t', '--task [TASK]', String, 'Task to be in in each environment')
     parser.on('-e', '--envs-file [ENVS]', String, 'Path to environments JSON file.')
     parser.on('-s', '--source-uri [SOURCE-URI]', String, 'URI or FQ name for source asset')
-    parser.on('-s', '--source-env [SOURCE-ENV]', String, 'Short name for source URI (lowercase)')
-    parser.on('-d', '--dry-run', 'Dry run if true')
+    parser.on('-u', '--source-env [SOURCE-ENV]', String, 'Short name for source Environment (lowercase)')
+    parser.on('-d', '--dry-run', 'Execute a dry run of the task')
   end.parse!({into: options})
 
   #Now raise an exception if we have not found a required arg
@@ -29,19 +30,32 @@ def parse_options
   options
 end
 
+def build_logger
+  logger = Logger.new(STDOUT)
+  logger.formatter = proc do |severity, datetime, progname, msg|
+    "#{datetime} #{severity}: #{msg}\n"
+  end
+  logger.datetime_format = '%Y-%m-%d %H:%M:%S'
+  logger
+end
+
 def run_task(options)
-  options[:logger] = Logger.new(STDOUT)
+  options[:logger] = build_logger
 
   # New tasks must be included here.
   case options[:task]
+  when 'list-dashboards'
+    Dashboards.new(options).list
   when 'inventory'
     MonitoringAssets.new(options[:'envs-file'], options[:logger]).inventory
   when 'replicate-logs-based-metric'
-    ReplicateLogsBasedMetric.new(options).run
+    LogsBasedMetrics.new(options).replicate
   when 'delete-all-service-account-keys'
-    DeleteAllServiceAccountKeys.new(options).run
+    ServiceAccounts.new(options).delete_all_keys
+  when 'list-dashboards'
+    Dashboards.new(options).list
   else
-    logger.error("Unrecognized task #{options[:task]}")
+    build_logger.error("Unrecognized task #{options[:task]}")
   end
 end
 

@@ -2,16 +2,16 @@
 require 'open3'
 require_relative 'lib/process_runner'
 
-class DeleteAllServiceAccountKeys
+class ServiceAccounts
   def initialize(options, logger = Logger.new(STDOUT), is_dry_run = true)
     envs_json = JSON.load(IO.read(options[:'envs-file']))
     @environments = envs_json['environments'].map { |env| GcpEnvironmentInfo.new(env) }
     @logger = options[:logger]
-    @is_dry_run = options[:'dry-run']
+    @is_dry_run = options[:'replicate']
   end
 
   # This tool does not use the GcpEnvironmentVisitor, as it's specifically cleaning up after it.
-  def run
+  def delete_all_keys
     @environments.each do |env|
       keys = get_keys(env)
       keys.each do |key|
@@ -24,15 +24,13 @@ class DeleteAllServiceAccountKeys
     end
   end
 
-
   # Get key JSON objects
   def get_keys(env)
     list_cmd = %W[gcloud iam service-accounts keys list
       --iam-account=#{env.service_account}
       --project=#{env.project_id}
       --format=json].join(' ')
-    stdout, stderr = Open3.capture2(list_cmd)
-    @logger.error(stderr) if stderr
+    stdout, stderr = Open3.capture2(list_cmd) # stderr is spammed by this command, but here for debugging
     json_array = JSON.load(stdout)
     json_array
   end

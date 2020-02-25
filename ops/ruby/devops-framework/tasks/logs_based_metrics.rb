@@ -5,17 +5,17 @@ require_relative 'lib/gcp_environment_visitor.rb'
 # Note well: if two environments share a GCP project, this means they share a metrics namespace.
 # If those projects share a log file (distinguished by MonitoredResource), then we dont' want to duplicate
 # a metric into that shared environment.
-class ReplicateLogsBasedMetric
+class LogsBasedMetrics
   def initialize(options)
     @envs_file = options[:'envs-file']
     @source_metric_name = options[:'source-uri']
     @source_env_short_name = options[:'source-env']
     @logger = options[:logger] || Logger.new(STDOUT)
-    @is_dry_run = options[:'dry-run']
+    @is_dry_run = options[:'replicate']
     @visitor = GcpEnvironmentVisitor.new(@envs_file, @logger)
   end
 
-  def run
+  def replicate
     # Visit the source environment and smuggle out a metric definition
     source_metric = get_source_metric
 

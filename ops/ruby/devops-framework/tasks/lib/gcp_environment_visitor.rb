@@ -22,7 +22,7 @@ class GcpEnvironmentVisitor
 
   def visit(env_list = @environments)
     Array(env_list).each do |env|
-      sa_mgr = ServiceAccountManager.new(env.project_id, env.service_account)
+      sa_mgr = ServiceAccountManager.new(env.project_id, env.service_account, @logger)
       sa_mgr.run do |svc_acct|
         @logger.info(">>>>>>>>>>>>>>>> Entering #{env.short_name} >>>>>>>>>>>>>>>>")
         yield env
