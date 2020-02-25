@@ -905,7 +905,7 @@ definitions:
   AttrName:
     type: string
     description: Name that descibes the type of attribute
-    enum: [ANY, NUM, CAT, AGE]
+    enum: [ANY, NUM, CAT, AGE, AGE_AT_CONSENT, AGE_AT_CDR]
 
   DemoChartInfoListResponse:
     type: object

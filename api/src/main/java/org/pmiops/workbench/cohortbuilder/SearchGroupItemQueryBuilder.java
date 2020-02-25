@@ -110,8 +110,20 @@ public final class SearchGroupItemQueryBuilder {
   // sql parts to help construct demographic BigQuery sql
   private static final String DEMO_BASE =
       "select person_id\n" + "from `${projectId}.${dataSetId}.person` p\nwhere\n";
+  private static final String AGE_BASE =
+      "select person_id\n" + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere\n";
   private static final String AGE_SQL =
-      "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) %s %s\n"
+      "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(dob), MONTH)/12) as INT64) %s %s\n"
+          + "and not exists (\n"
+          + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
+          + "where d.person_id = p.person_id)\n";
+  private static final String AGE_AT_CONSENT_SQL =
+      "p.age_at_consent %s %s\n"
+          + "and not exists (\n"
+          + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
+          + "where d.person_id = p.person_id)\n";
+  private static final String AGE_AT_CDR_SQL =
+      "p.age_at_cdr %s %s\n"
           + "and not exists (\n"
           + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
           + "where d.person_id = p.person_id)\n";
@@ -230,16 +242,16 @@ public final class SearchGroupItemQueryBuilder {
         String ageNamedParameter1 =
             addQueryParameterValue(
                 queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
-        String finaParam = ageNamedParameter1;
+        String finalParam = ageNamedParameter1;
         if (attribute.getOperands().size() > 1) {
           String ageNamedParameter2 =
               addQueryParameterValue(
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
-          finaParam = finaParam + AND + ageNamedParameter2;
+          finalParam = finalParam + AND + ageNamedParameter2;
         }
-        return DEMO_BASE
+        return AGE_BASE
             + String.format(
-                AGE_SQL, OperatorUtils.getSqlOperator(attribute.getOperator()), finaParam);
+                AGE_SQL, OperatorUtils.getSqlOperator(attribute.getOperator()), finalParam);
       case GENDER:
       case SEX:
       case ETHNICITY:
