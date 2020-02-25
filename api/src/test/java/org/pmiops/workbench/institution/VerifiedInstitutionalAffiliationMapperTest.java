@@ -22,7 +22,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import({
   VerifiedInstitutionalAffiliationMapperImpl.class,
   InstitutionServiceImpl.class,
-  InstitutionMapperImpl.class
+  InstitutionMapperImpl.class,
+  PublicInstitutionDetailsMapperImpl.class
 })
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

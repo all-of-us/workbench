@@ -32,6 +32,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -76,7 +77,12 @@ public class UserServiceTest {
   @Autowired private UserDao userDao;
 
   @TestConfiguration
-  @Import({UserServiceImpl.class, InstitutionServiceImpl.class, InstitutionMapperImpl.class})
+  @Import({
+    UserServiceImpl.class,
+    InstitutionServiceImpl.class,
+    InstitutionMapperImpl.class,
+    PublicInstitutionDetailsMapperImpl.class
+  })
   static class Configuration {
     @Bean
     Clock clock() {

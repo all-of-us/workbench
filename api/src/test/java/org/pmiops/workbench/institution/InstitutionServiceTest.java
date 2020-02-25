@@ -28,7 +28,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import({InstitutionServiceImpl.class, InstitutionMapperImpl.class})
+@Import({
+  InstitutionServiceImpl.class,
+  InstitutionMapperImpl.class,
+  PublicInstitutionDetailsMapperImpl.class
+})
 public class InstitutionServiceTest {
   @Autowired private InstitutionService service;
   @Autowired private UserDao userDao;
