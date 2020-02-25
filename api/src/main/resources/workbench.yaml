@@ -1081,7 +1081,7 @@ paths:
         - workspaceAdmin
       description: >
         Given a workspace namespace (Google Cloud Platform  Project ID), returns workspace details.
-        Only accessible to privileged admin users.
+        Requires the WORKSPACES_VIEW authority.
       operationId: getFederatedWorkspaceDetails
       responses:
         200:
@@ -1092,6 +1092,22 @@ paths:
           description: Workspace not found for namespace
           schema:
             $ref: '#/definitions/ErrorResponse'
+
+  /v1/admin/workspaces/{workspaceNamespace}/cloudStorageTraffic:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+    get:
+      tags:
+        - workspaceAdmin
+      description: >
+        Returns a time series of cloud storage traffic for the given project.
+        Requires the WORKSPACES_VIEW authority.
+      operationId: getCloudStorageTraffic
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/CloudStorageTraffic"
 
   /v1/admin/clusters/updateConfig:
     post:
@@ -4502,3 +4518,25 @@ definitions:
       storageBytesUsed:
         type: integer
         format: int64
+
+  CloudStorageTraffic:
+    type: object
+    properties:
+      receivedBytes:
+        type: array
+        items:
+          $ref: "#/definitions/TimeSeriesPoint"
+
+  TimeSeriesPoint:
+    type: object
+    description: Represents a floating-point valued time series point.
+    properties:
+      timestamp:
+        type: integer
+        format: int64
+        description: >
+          Timestamp, in milliseconds since Unix epoch, of the end point of the time window
+          covered by this time series point.
+      value:
+        type: number
+        format: double

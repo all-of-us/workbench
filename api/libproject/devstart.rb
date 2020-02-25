@@ -1400,15 +1400,14 @@ Common.register_command({
 })
 
 def set_authority_local(cmd_name, *args)
-  ensure_docker_api(cmd_name, args)
+  setup_local_environment
 
   op = authority_options(cmd_name, args)
   op.parse.validate
 
+  app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]"]
   common = Common.new
-  common.run_inline %W{
-      gradle setAuthority
-     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+  common.run_inline %W{docker-compose run api-scripts ./gradlew setAuthority} + app_args
 end
 
 Common.register_command({

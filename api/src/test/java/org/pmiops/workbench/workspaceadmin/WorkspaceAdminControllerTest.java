@@ -1,29 +1,34 @@
 package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.google.monitoring.v3.Point;
+import com.google.monitoring.v3.TimeInterval;
+import com.google.monitoring.v3.TimeSeries;
+import com.google.monitoring.v3.TypedValue;
+import com.google.protobuf.util.Timestamps;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
+import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -46,13 +51,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 public class WorkspaceAdminControllerTest {
-  @Autowired private FireCloudService mockFirecloudService;
-  @Autowired private LeonardoNotebooksClient mockLeonardoNotebooksClient;
-  @Autowired private WorkspaceAdminController workspaceAdminController;
-  @Autowired private WorkspaceAdminService mockWorkspaceAdminService;
-  @Autowired private WorkspaceService mockWorkspaceService;
+  @MockBean private CloudMonitoringService mockCloudMonitoringService;
+  @MockBean private FireCloudService mockFirecloudService;
+  @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
+  @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
+  @MockBean private WorkspaceService mockWorkspaceService;
 
-  private static final String WORKSPACE_NAMESPACE = "namespace";
+  @Autowired private WorkspaceAdminController workspaceAdminController;
+
+  private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
   private static final String WORKSPACE_NAME = "name";
 
@@ -60,15 +67,7 @@ public class WorkspaceAdminControllerTest {
   @Import({WorkspaceAdminController.class, WorkspaceMapperImpl.class})
   @MockBean({
     CloudStorageService.class,
-    CohortDao.class,
-    ConceptSetDao.class,
-    DataSetDao.class,
-    FireCloudService.class,
-    LeonardoNotebooksClient.class,
     NotebooksService.class,
-    WorkspaceAdminService.class,
-    WorkspaceDao.class,
-    WorkspaceService.class
   })
   static class Configuration {}
 
@@ -155,6 +154,33 @@ public class WorkspaceAdminControllerTest {
     ResponseEntity<AdminFederatedWorkspaceDetailsResponse> response =
         workspaceAdminController.getFederatedWorkspaceDetails(NONSENSE_NAMESPACE);
     assertThat(response.getStatusCodeValue()).isEqualTo(404);
+  }
+
+  @Test
+  public void getCloudStorageTraffic_sortsPointsByTimestamp() {
+    TimeSeries timeSeries =
+        TimeSeries.newBuilder()
+            .addPoints(
+                Point.newBuilder()
+                    .setInterval(
+                        TimeInterval.newBuilder().setStartTime(Timestamps.fromMillis(2000)))
+                    .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
+            .addPoints(
+                Point.newBuilder()
+                    .setInterval(
+                        TimeInterval.newBuilder().setStartTime(Timestamps.fromMillis(1000)))
+                    .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
+            .build();
+    when(mockCloudMonitoringService.getCloudStorageReceivedBytes(anyString()))
+        .thenReturn(Arrays.asList(timeSeries));
+
+    CloudStorageTraffic cloudStorageTraffic =
+        workspaceAdminController.getCloudStorageTraffic(WORKSPACE_NAMESPACE).getBody();
+    assertThat(
+            cloudStorageTraffic.getReceivedBytes().stream()
+                .map(timeSeriesPoint -> timeSeriesPoint.getTimestamp())
+                .collect(Collectors.toList()))
+        .containsExactly(1000L, 2000L);
   }
 
   private DbWorkspace createDbWorkspaceStub(Workspace workspace) {
