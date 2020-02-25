@@ -37,7 +37,7 @@ def run_task(options)
   when 'inventory'
     MonitoringAssets.new(options[:'envs-file'], options[:logger]).inventory
   when 'replicate-logs-based-metric'
-    ReplicateLogsBasedMetric.new(options, options[:logger]).run
+    ReplicateLogsBasedMetric.new(options).run
   when 'delete-all-service-account-keys'
     DeleteAllServiceAccountKeys.new(options).run
   else

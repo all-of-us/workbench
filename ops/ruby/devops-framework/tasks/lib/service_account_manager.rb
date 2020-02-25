@@ -59,15 +59,15 @@ class ServiceAccountManager
   end
 
   def cleanup_key(credentials_path)
-    @logger.info("Deleting private key file")
     tmp_private_key = `grep private_key_id #{credentials_path} | cut -d\\\" -f4`.strip
     @logger.info("Deleting SA key for #{tmp_private_key}")
     run_process %W[gcloud iam service-accounts keys delete #{tmp_private_key} -q
          --iam-account=#{service_account} --project=#{@project}]
+    @logger.info("Deleting private key file and directory #{credentials_path}")
     FileUtils.remove_dir(File.dirname(credentials_path))
   end
 
   def run_process(cmd)
-    ProcessRunner.run(cmd)
+    ProcessRunner.new.run(cmd)
   end
 end
