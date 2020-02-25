@@ -265,7 +265,9 @@ public class ClusterController implements ClusterApiDelegate {
         .forEach(
             notebookName ->
                 userRecentResourceService.updateNotebookEntry(
-                    workspaceId, userProvider.get().getUserId(), gcsNotebooksDir + "/" + notebookName));
+                    workspaceId,
+                    userProvider.get().getUserId(),
+                    gcsNotebooksDir + "/" + notebookName));
 
     String workspacePath = dbWorkspace.getFirecloudName();
     String editDir = "workspaces/" + workspacePath;

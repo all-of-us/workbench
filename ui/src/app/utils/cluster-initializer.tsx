@@ -316,7 +316,7 @@ export class ClusterInitializer {
         return this.reject(e);
       } else {
         this.handleUnknownError(e);
-        if (this.tooManyServerErrors()) {
+        if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError('Reached max server error count', this.currentCluster));
         }

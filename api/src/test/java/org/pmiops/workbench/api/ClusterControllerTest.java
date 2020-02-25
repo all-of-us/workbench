@@ -520,7 +520,8 @@ public class ClusterControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     stubGetWorkspace("other-proj", "myotherworkspace", LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp = clusterController.localize("other-proj", req).getBody();
-    verify(mockLeoNotebooksClient).localize(eq("other-proj"), eq(getClusterName()), mapCaptor.capture());
+    verify(mockLeoNotebooksClient)
+        .localize(eq("other-proj"), eq(getClusterName()), mapCaptor.capture());
 
     Map<String, String> localizeMap = mapCaptor.getValue();
     assertThat(localizeMap.keySet())
