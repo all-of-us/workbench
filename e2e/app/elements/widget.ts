@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import * as widgetxpath from './widgetxpath';
+import * as widgetxpath from './xpath-defaults';
 
 // UI widgets finder
 export default class Widget {

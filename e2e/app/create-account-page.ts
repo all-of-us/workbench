@@ -1,5 +1,5 @@
 import {ElementHandle} from 'puppeteer';
-import * as widgetXpath from './elements/widgetxpath';
+import * as widgetXpath from './elements/xpath-defaults';
 import BasePage from './mixin/basepage';
 import DropdownSelect from './mixin/dropdown-list-select';
 

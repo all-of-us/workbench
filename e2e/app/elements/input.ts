@@ -1,9 +1,10 @@
-import {Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import * as elementHandler from '../../driver/elementHandle-util';
 import Widget from './widget';
 
 export default class Input extends Widget {
   public label: string;
+  public elemHandler: ElementHandle;
 
   constructor(page: Page, label: string) {
     super(page);
@@ -27,6 +28,35 @@ export default class Input extends Widget {
 
   public async getValue() {
     const input = await this.get();
+    return await elementHandler.getValue(this.puppeteerPage, input);
+  }
+
+  public async isDisabled() {
+    const attrChecked = await elementHandler.getProperty(this.puppeteerPage, await this.get(), 'disabled');
+    return attrChecked !== null && attrChecked === true;
+  }
+
+
+}
+
+export class InputElement {
+  private readonly element: ElementHandle;
+
+  constructor(elemHandler: ElementHandle) {
+    this.element = elemHandler;
+  }
+
+  public async focus() {
+    await this.element.focus();
+  }
+
+  public async type(inputTexts: string) {
+    await this.element.focus();
+    await this.element.type(inputTexts);
+  }
+
+  public async getValue() {
+    this.element.getProperty("value")
     return await elementHandler.getValue(this.puppeteerPage, input);
   }
 

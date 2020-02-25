@@ -1,15 +1,16 @@
 import { ElementHandle, Page } from 'puppeteer';
+import input from "../app/elements/input";
 
 export default class AouElement {
 
-  public eHandle: ElementHandle;
+  private element: ElementHandle;
 
-  constructor(handle: ElementHandle) {
-    this.eHandle = handle;
+  constructor(elementhandle: ElementHandle) {
+    this.element = elementhandle;
   }
 
   public async getProp(property: string): Promise<unknown> {
-    const prop = await this.eHandle.getProperty(property);
+    const prop = await this.element.getProperty(property);
     return await prop.jsonValue();
   }
 
@@ -18,27 +19,27 @@ export default class AouElement {
    * If the attribute have property counterparts, use getProperty function.
    */
   public async getAttr(attribute: string): Promise<unknown> {
-    const attr = await this.eHandle.evaluate( (node, attri) => node.getAttribute(attri), attribute);
+    const attr = await this.element.evaluate( (node, attri) => node.getAttribute(attri), attribute);
     return attr;
   }
 
   public async click() {
-    await this.eHandle.asElement().click();
+    await this.element.asElement().click();
   }
 
   public async focus() {
     return Promise.all([
-      this.eHandle.focus(),
-      this.eHandle.hover()
+      this.element.focus(),
+      this.element.hover()
     ]);
   }
 
   public async isVisible(): Promise<boolean> {
-    return (await this.eHandle.asElement().boxModel() !== null);
+    return (await this.element.asElement().boxModel() !== null);
   }
 
   public async exists(): Promise<boolean> {
-    return (await this.eHandle.asElement() !== null);
+    return (await this.element.asElement() !== null);
   }
 
   public async isCheckbox() {
@@ -82,7 +83,7 @@ export default class AouElement {
   }
 
   public async selectByValue(aOptionalValue: string) {
-    return await this.eHandle.select(aOptionalValue);
+    return await this.element.select(aOptionalValue);
   }
 
   public async hasAttribute(attr: string): Promise<boolean> {
@@ -90,16 +91,20 @@ export default class AouElement {
   }
 
   public async type(txt: string) {
-    await this.eHandle.focus();
-    await this.eHandle.type(txt);
+    await this.element.focus();
+    await this.element.type(txt);
   }
 
   public async press(key: string, options?: { text?: string, delay?: number }) {
-    await this.eHandle.press(key, options)
+    await this.element.press(key, options)
   }
 
   public asElement(): ElementHandle {
-    return this.eHandle.asElement();
+    return this.element.asElement();
+  }
+
+  public asInput(page: Page): input {
+    return null;
   }
 
 }
