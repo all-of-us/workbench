@@ -9,10 +9,10 @@ import {
   ClusterInitializationFailedError,
   ClusterInitializer,
 } from 'app/utils/cluster-initializer';
+import {reportError} from 'app/utils/errors';
 import {
   ClusterStatus,
 } from 'generated/fetch/api';
-import {reportError} from 'app/utils/errors';
 
 const RESTART_LABEL = 'Reset server';
 const CREATE_LABEL = 'Create server';
@@ -37,7 +37,6 @@ interface State {
 
 export class ResetClusterButton extends React.Component<Props, State> {
   private aborter = new AbortController();
-  private initializer?: ClusterInitializer;
 
   constructor(props) {
     super(props);
