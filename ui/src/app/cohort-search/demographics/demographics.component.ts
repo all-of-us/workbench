@@ -3,7 +3,7 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ageCountStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
+import {typeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -24,8 +24,6 @@ function sortByCountThenName(critA, critB) {
         ? (critA.name > critB.name ? 1 : -1)
         : diff;
 }
-// Mocked Feature Flag. TODO remove once server-side config is in place
-const enableCBAgeOptions = true;
 
 @Component({
   selector: 'crit-list-demographics',
@@ -44,12 +42,20 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   calculating = false;
   subscription = new Subscription();
   selectedNode: any;
+// Mocked Feature Flag. TODO remove once server-side config is in place. Need to FF the Age title returned from typeToTitle also
+  enableCBAgeOptions = true;
+  ageTypes = [
+    {label: 'Current Age', type: AgeType.AGE.toString()},
+    {label: 'Age at Consent', type: AgeType.CONSENT.toString()},
+    {label: 'Age at CDR Date', type: AgeType.CDR.toString()}
+  ];
 
     /* The Demographics form controls and associated convenience lenses */
   demoForm = new FormGroup({
     ageMin: new FormControl(18),
     ageMax: new FormControl(120),
     ageRange: new FormControl([this.minAge, this.maxAge]),
+    ageType: new FormControl('age'),
     deceased: new FormControl(),
   });
   get ageRange() { return this.demoForm.get('ageRange'); }
@@ -167,21 +173,34 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
       min.setValue(lo, {emitEvent: false});
       max.setValue(hi, {emitEvent: false});
-      this.count = null;
+      if (this.enableCBAgeOptions) {
+        setTimeout(() => this.centerAgeCount(), 300);
+        this.calculating = true;
+      } else {
+        this.count = null;
+      }
     }));
 
     this.subscription.add(min.valueChanges.subscribe(value => {
       const [_, hi] = [...this.ageRange.value];
       if (value <= hi && value >= this.minAge) {
         this.ageRange.setValue([value, hi], {emitEvent: false});
-        this.count = null;
+        if (this.enableCBAgeOptions) {
+          this.calculating = true;
+        } else {
+          this.count = null;
+        }
       }
     }));
     this.subscription.add(max.valueChanges.subscribe(value => {
       const [lo, _] = [...this.ageRange.value];
       if (value >= lo) {
         this.ageRange.setValue([lo, value], {emitEvent: false});
-        this.count = null;
+        if (this.enableCBAgeOptions) {
+          this.calculating = true;
+        } else {
+          this.count = null;
+        }
       }
     }));
   }
@@ -247,7 +266,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
           const selections = [parameterId];
           selectionsStore.next(selections);
         }
-        if (enableCBAgeOptions) {
+        if (this.enableCBAgeOptions) {
           this.calculateAge();
         }
       });
@@ -269,6 +288,25 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       selectionsStore.next(selections);
       this.count = includeDeceased ? this.deceasedNode.count : null;
     });
+  }
+
+  centerAgeCount() {
+    if (this.enableCBAgeOptions) {
+      const slider = <HTMLElement>document.getElementsByClassName('noUi-connect')[0];
+      const wrapper = document.getElementById('count-wrapper');
+      const count = document.getElementById('age-count');
+      wrapper.setAttribute(
+        'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
+      );
+      // set style properties also for cross-browser compatibility
+      wrapper.style.width = slider.offsetWidth.toString();
+      wrapper.style.left = slider.offsetLeft.toString();
+      if (!!count && slider.offsetWidth < count.offsetWidth) {
+        const margin = (slider.offsetWidth - count.offsetWidth) / 2;
+        count.setAttribute('style', 'margin-left: ' + margin + 'px;');
+        count.style.marginLeft = margin.toString();
+      }
+    }
   }
 
   selectOption = (opt: any) => {
@@ -324,7 +362,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   get showPreview() {
-    return !this.loading && (this.selections && this.selections.length);
+    return !this.loading
+      && (this.selections && this.selections.length)
+      && !(this.wizard.type === CriteriaType.AGE && this.enableCBAgeOptions);
   }
 
   // Checks if form is in its initial state and if a count already exists before setting the total age count
