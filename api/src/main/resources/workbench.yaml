@@ -3941,7 +3941,6 @@ definitions:
         $ref: '#/definitions/Education'
       disability:
         type: boolean
-        default: false
 
   Address:
     type: object
