@@ -32,6 +32,8 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapperImpl;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -43,7 +45,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
-import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CriteriaMenuOption;
@@ -88,7 +89,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
     CdrVersionService.class,
-    CriteriaMapperImpl.class
+    CriteriaMapperImpl.class,
+    AgeTypeCountMapperImpl.class
   })
   @MockBean({FireCloudService.class})
   static class Configuration {
@@ -121,6 +123,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
   @Autowired private CriteriaMapper criteriaMapper;
+
+  @Autowired private AgeTypeCountMapper ageTypeCountMapper;
 
   @Autowired private FireCloudService firecloudService;
 
@@ -1904,15 +1908,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
     assertThat(expectedResult)
         .isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
-  }
-
-  @Test
-  public void countAgesByType() {
-    assertThat(3)
-        .isEqualTo(
-            controller
-                .countAgesByType(cdrVersion.getCdrVersionId(), AgeType.CONSENT.toString(), 20, 120)
-                .getBody());
   }
 
   protected String getTablePrefix() {

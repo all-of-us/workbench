@@ -259,36 +259,19 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaAttributeListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/age/{ageType}/range/{startAge}/{endAge}:
+  /v1/cohortbuilder/{cdrVersionId}/age/counts:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
-      description: Return count for age type and range
-      operationId: "countAgesByType"
-      parameters:
-        - in: path
-          name: ageType
-          type: string
-          required: true
-          description: the specific age type
-        - in: path
-          name: startAge
-          type: integer
-          required: true
-          description: the start age
-        - in: path
-          name: endAge
-          type: integer
-          required: true
-          description: the end age
+      description: Return counts for age type and age
+      operationId: "findAgeTypeCounts"
       responses:
         200:
-          description: A count of subjects for age range
+          description: A collection age type counts
           schema:
-            type: integer
-            format: int64
+            $ref: "#/definitions/AgeTypeCountListResponse"
 
   /v1/cohortbuilder/{cdrVersionId}/search:
     parameters:
@@ -356,10 +339,33 @@ paths:
 ##########################################################################################
 definitions:
 
-  AgeType:
-    type: string
-    description: possible types of ages
-    enum: [AGE, CONSENT, CDR]
+  AgeTypeCountListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/AgeTypeCount"
+
+  AgeTypeCount:
+    type: object
+    required:
+      - ageType
+      - age
+      - count
+    properties:
+      ageType:
+        description: type of age
+        type: string
+      age:
+        description: age
+        type: integer
+      count:
+        description: count
+        type: integer
+        format: int64
 
   CriteriaListResponse:
     type: object
@@ -497,6 +503,7 @@ definitions:
         description: Reveals if this criteria is standard or source.
         type: boolean
         default: false
+
   CriteriaMenuOption:
     type: object
     required:

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortbuilder;
+package org.pmiops.workbench.cohortbuilder.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -6,8 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbCriteria;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
