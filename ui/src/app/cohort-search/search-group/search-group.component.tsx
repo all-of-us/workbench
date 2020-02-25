@@ -198,9 +198,10 @@ export const SearchGroup = withCurrentWorkspace()(
 
     componentDidMount(): void {
       const {group: {id}, workspace: {cdrVersionId}} = this.props;
-      criteriaMenuOptionsStore.filter(options => !!options[cdrVersionId]).subscribe(options => {
-        this.setState({criteriaMenuOptions: options[cdrVersionId]});
-        setTimeout(() => this.setDemoMenuHover());
+      criteriaMenuOptionsStore.subscribe(options => {
+        if (!!options[cdrVersionId]) {
+          this.setState({criteriaMenuOptions: options[cdrVersionId]});
+        }
       });
       if (typeof ResizeObserver === 'function') {
         const groupDiv = document.getElementById(id);
@@ -220,23 +221,6 @@ export const SearchGroup = withCurrentWorkspace()(
 
     componentWillUnmount(): void {
       this.aborter.abort();
-    }
-
-    setDemoMenuHover() {
-      const {group, index} = this.props;
-      const {status} = this.state;
-      const demoItem = document.getElementById('DEMO-' + index);
-      if (demoItem) {
-        demoItem.addEventListener('mouseenter', () => {
-          this.setState({demoOpen: true});
-          setTimeout(() => {
-            const demoMenu = document.getElementById('demo-menu-' + index);
-            demoMenu.addEventListener('mouseenter', () => this.setState({demoMenuHover: true}));
-            demoMenu.addEventListener('mouseleave', () => this.setState({demoMenuHover: false}));
-          });
-        });
-        demoItem.addEventListener('mouseleave', () => setTimeout(() => this.setState({demoOpen: false})));
-      }
     }
 
     getGroupCount() {
@@ -530,7 +514,7 @@ export const SearchGroup = withCurrentWorkspace()(
             </button>
             <span style={{fontSize: '14px', padding: '0.2rem 0.25rem 0'}}> of </span>
           </div>}
-          {this.items.map((item, i) => <div key={i} style={styles.searchItem}>
+          {this.items.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='item-list'>
             <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
@@ -552,7 +536,7 @@ export const SearchGroup = withCurrentWorkspace()(
                   onChange={(v) => this.setTimeValue(parseInt(v.target.value, 10))}/>
               }
             </div>
-            {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem}>
+            {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
               <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
@@ -591,7 +575,7 @@ export const SearchGroup = withCurrentWorkspace()(
             </div>
           </div>}
         </div>
-        {status !== 'active' && <div style={{...styles.overlay, ...overlayStyle}}>
+        {status !== 'active' && <div style={{...styles.overlay, ...overlayStyle}} data-test-id='disabled-overlay'>
           <div style={styles.overlayInner}>
             {status === 'pending' && <React.Fragment>
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={56}/>
