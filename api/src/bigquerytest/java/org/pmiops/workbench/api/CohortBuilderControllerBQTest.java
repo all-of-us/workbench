@@ -1333,6 +1333,38 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsDemoAgeAtConsent() {
+    SearchParameter demo = age();
+    demo.attributes(
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.AGE_AT_CONSENT)
+                .operator(Operator.BETWEEN)
+                .operands(ImmutableList.of("29", "30"))));
+    SearchRequest searchRequests =
+        createSearchRequests(
+            DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+  }
+
+  @Test
+  public void countSubjectsDemoAgeAtCdr() {
+    SearchParameter demo = age();
+    demo.attributes(
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.AGE_AT_CDR)
+                .operator(Operator.BETWEEN)
+                .operands(ImmutableList.of("29", "30"))));
+    SearchRequest searchRequests =
+        createSearchRequests(
+            DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+  }
+
+  @Test
   public void countSubjectsICD9AndDemo() {
     SearchParameter demoAgeSearchParam = age();
     int lo = getTestPeriod().getYears() - 1;

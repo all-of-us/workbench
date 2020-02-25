@@ -249,9 +249,15 @@ public final class SearchGroupItemQueryBuilder {
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
           finalParam = finalParam + AND + ageNamedParameter2;
         }
+        String finalAgeSql = AGE_SQL;
+        if (AttrName.AGE_AT_CONSENT.equals(attribute.getName())) {
+          finalAgeSql = AGE_AT_CONSENT_SQL;
+        } else if (AttrName.AGE_AT_CDR.equals(attribute.getName())) {
+          finalAgeSql = AGE_AT_CDR_SQL;
+        }
         return AGE_BASE
             + String.format(
-                AGE_SQL, OperatorUtils.getSqlOperator(attribute.getOperator()), finalParam);
+                finalAgeSql, OperatorUtils.getSqlOperator(attribute.getOperator()), finalParam);
       case GENDER:
       case SEX:
       case ETHNICITY:
