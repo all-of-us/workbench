@@ -398,7 +398,7 @@ public class DataSetController implements DataSetApiDelegate {
               valuePreviewList
                   .get(columnNumber)
                   .addQueryValueItem(
-                      Optional.ofNullable(fieldValueList.get(columnNumber))
+                      Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
                           .map(Object::toString)
                           .orElse(EMPTY_CELL_MARKER));
             });
