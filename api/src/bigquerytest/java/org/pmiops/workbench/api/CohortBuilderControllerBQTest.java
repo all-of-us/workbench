@@ -1329,7 +1329,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
   }
 
   @Test
@@ -1364,7 +1364,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
   }
 
   @Test
