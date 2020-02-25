@@ -39,7 +39,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.AgeTypeCountListResponse;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
@@ -193,18 +193,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Long> countAgesByType(
-      Long cdrVersionId, String ageType, Integer startAge, Integer endAge) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    AgeType type =
-        Optional.ofNullable(AgeType.fromValue(ageType))
-            .orElseThrow(
-                () -> new BadRequestException("Please provide a valid ageType: " + ageType));
-    if (startAge > endAge) {
-      throw new BadRequestException(
-          "Start age must less than or equal to end age: " + startAge + " - " + endAge);
-    }
-    return ResponseEntity.ok(cohortBuilderService.countAgesByType(type, startAge, endAge));
+  public ResponseEntity<AgeTypeCountListResponse> findAgeTypeCounts(Long cdrVersionId) {
+    return ResponseEntity.ok(
+        new AgeTypeCountListResponse().items(cohortBuilderService.findAgeTypeCounts(cdrVersionId)));
   }
 
   /**
