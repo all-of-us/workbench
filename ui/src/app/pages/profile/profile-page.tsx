@@ -12,12 +12,12 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import { getRegistrationTasksMap } from 'app/pages/homepage/registration-dashboard';
 import { ProfileRegistrationStepStatus } from 'app/pages/profile/profile-registration-step-status';
-import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import {Institution, InstitutionalAffiliation, InstitutionalRole, Profile} from 'generated/fetch';
+import {InstitutionalAffiliation, InstitutionalRole, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   h1: {
@@ -71,7 +71,7 @@ const validators = {
 
 export const ProfilePage = withUserProfile()(class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
-  { profileEdits: Profile, updating: boolean, verifiedInstitution?: Institution }
+  { profileEdits: Profile, updating: boolean }
 > {
   static displayName = 'ProfilePage';
 
@@ -80,23 +80,13 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
     this.state = {
       profileEdits: props.profileState.profile || {},
-      updating: false,
-      verifiedInstitution: undefined
+      updating: false
     };
   }
 
   navigateToTraining(): void {
     window.location.assign(
       environment.trainingUrl + '/static/data-researcher.html?saml=on');
-  }
-
-  async componentDidMount() {
-    const {profileState: {profile: {verifiedInstitutionalAffiliation}}} = this.props;
-    if (verifiedInstitutionalAffiliation) {
-      await institutionApi().getInstitution(verifiedInstitutionalAffiliation.institutionShortName).then(institution =>
-        this.setState({verifiedInstitution: institution})
-      );
-    }
   }
 
   componentDidUpdate(prevProps) {
@@ -124,7 +114,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
   render() {
     const {profileState: {profile}} = this.props;
-    const {profileEdits, updating, verifiedInstitution} = this.state;
+    const {profileEdits, updating} = this.state;
     const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, requireInstitutionalVerification} =
       serverConfigStore.getValue();
     const {
@@ -195,13 +185,13 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
         return;
       }
 
-      const {institutionalRoleEnum, institutionalRoleOtherText} = verifiedInstitutionalAffiliation;
-      return verifiedInstitution && <React.Fragment>
+      const {institutionDisplayName, institutionalRoleEnum, institutionalRoleOtherText} = verifiedInstitutionalAffiliation;
+      return <React.Fragment>
         <div style={{...styles.h1, marginBottom: 24}}>Verified Institutional Affiliation</div>
         <FlexRow>
           <FlexColumn>
             <div style={styles.inputLabel}>Institution</div>
-            <div style={styles.uneditableProfileElement}>{verifiedInstitution.displayName}</div>
+            <div style={styles.uneditableProfileElement}>{institutionDisplayName}</div>
           </FlexColumn>
           <FlexColumn>
             <div style={styles.inputLabel}>Role</div>
