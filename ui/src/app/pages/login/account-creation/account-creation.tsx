@@ -42,6 +42,7 @@ import {AouTitle} from 'app/components/text-wrappers';
 import {reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {AccountCreationOptions} from './account-creation-options';
+import {Divider} from "app/components/divider";
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -80,11 +81,9 @@ const styles = reactStyles({
   },
   sectionHeader: {
     width: '26rem',
-    borderBottom: `1px solid ${colors.primary}`,
     color: colors.primary,
     fontWeight: 600,
     fontSize: 18,
-    marginBottom: '1rem',
   },
   sectionInput: {
     width: '12rem',
@@ -111,9 +110,13 @@ const nameLength = 80;
 export const Section = (props) => {
   return <FormSection
       style={{...flexStyle.column, ...props.style}}>
-    <label style={{...styles.sectionHeader, ...props.sectionHeaderStyles}}>
-      {props.header}
-    </label>
+    <div>
+      <label style={{...styles.sectionHeader, ...props.sectionHeaderStyles}}>
+        {props.header}
+      </label>
+      <label style={{color: colors.primary, fontSize: '12px', marginLeft: '.25rem'}}> {props.subHeader} </label>
+    </div>
+    <Divider style={{marginTop: '.25rem'}}/>
     {props.children}
   </FormSection>;
 };

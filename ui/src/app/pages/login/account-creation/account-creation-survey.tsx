@@ -125,13 +125,13 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           Please complete Step 2 of 2
         </div>
         <div>
-          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> The <i>All of Us</i>
+          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> The <i>All of Us </i>
           Research Program will use this information to measure our success at reaching diverse researchers.
           We will not share your individual answers.
         </div>
       </TextColumn>
       {/*Race section*/}
-      <Section header='Race'>
+      <Section header='Race' subHeader='Select all that apply'>
         <FlexColumn style={styles.checkboxAreaContainer}>
           {AccountCreationOptions.race.map((race) => {
             return this.createOptionCheckbox(race.label, 'race', race.value, race.value.toString());
@@ -145,7 +145,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
 
       {/*Gender identity section*/}
-      <Section header='Gender identity'>
+      <Section header='Gender identity' subHeader='Select all that apply'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
             return this.createOptionCheckbox(genderIdentity.label, 'genderIdentityList',
@@ -180,7 +180,7 @@ or another sexual and/or gender minority?'>
       </Section>
 
       {/*Sex at birth section*/}
-      <Section header='Sex at birth'>
+      <Section header='Sex at birth' subHeader='Select all that apply'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth',
