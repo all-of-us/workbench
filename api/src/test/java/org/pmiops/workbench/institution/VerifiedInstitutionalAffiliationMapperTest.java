@@ -76,6 +76,8 @@ public class VerifiedInstitutionalAffiliationMapperTest {
 
     assertThat(affiliation.getInstitutionShortName())
         .isEqualTo(dbAffiliation.getInstitution().getShortName());
+    assertThat(affiliation.getInstitutionDisplayName())
+        .isEqualTo(dbAffiliation.getInstitution().getDisplayName());
     assertThat(affiliation.getInstitutionalRoleEnum())
         .isEqualTo(dbAffiliation.getInstitutionalRoleEnum());
     assertThat(affiliation.getInstitutionalRoleOtherText())
@@ -98,6 +100,7 @@ public class VerifiedInstitutionalAffiliationMapperTest {
     final VerifiedInstitutionalAffiliation affiliation =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName(testInstitution.getShortName())
+            .institutionDisplayName(testInstitution.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.FELLOW)
             .institutionalRoleOtherText("A fine fellow, specifically");
 
@@ -107,6 +110,8 @@ public class VerifiedInstitutionalAffiliationMapperTest {
 
     assertThat(dbAffiliation.getInstitution().getShortName())
         .isEqualTo(affiliation.getInstitutionShortName());
+    assertThat(dbAffiliation.getInstitution().getDisplayName())
+        .isEqualTo(affiliation.getInstitutionDisplayName());
     assertThat(dbAffiliation.getInstitutionalRoleEnum())
         .isEqualTo(affiliation.getInstitutionalRoleEnum());
     assertThat(dbAffiliation.getInstitutionalRoleOtherText())
@@ -116,6 +121,8 @@ public class VerifiedInstitutionalAffiliationMapperTest {
 
     assertThat(roundTrip.getInstitutionShortName())
         .isEqualTo(affiliation.getInstitutionShortName());
+    assertThat(roundTrip.getInstitutionDisplayName())
+        .isEqualTo(affiliation.getInstitutionDisplayName());
     assertThat(roundTrip.getInstitutionalRoleEnum())
         .isEqualTo(affiliation.getInstitutionalRoleEnum());
     assertThat(roundTrip.getInstitutionalRoleOtherText())

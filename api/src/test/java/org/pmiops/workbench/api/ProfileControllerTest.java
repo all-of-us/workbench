@@ -446,6 +446,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName(broad.getShortName())
+            .institutionDisplayName(broad.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
     createAccountRequest
         .getProfile()

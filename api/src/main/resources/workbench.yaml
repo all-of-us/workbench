@@ -4443,6 +4443,11 @@ definitions:
       institutionShortName:
         type: string
         description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'VUMC'
+      institutionDisplayName:
+        type: string
+        description: >
+          The longer, more descriptive name of the Institution where the user has a Verified Affiliation,
+          such as 'Vanderbilt University Medical Center'
       institutionalRoleEnum:
         $ref: '#/definitions/InstitutionalRole'
         description: >
