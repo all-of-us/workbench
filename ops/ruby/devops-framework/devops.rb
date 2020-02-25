@@ -1,6 +1,8 @@
+#!/usr/bin/env ruby
+
 require 'logger'
 require 'optparse'
-require_relative 'tasks/count_monitoring_assets.rb'
+require_relative 'tasks/count_monitoring_assets'
 
 # Single entry point for the devops framework. This is the only true Ruby Script file. The
 # rest are classes.
