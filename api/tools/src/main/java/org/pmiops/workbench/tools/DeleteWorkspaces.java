@@ -160,7 +160,8 @@ public class DeleteWorkspaces {
                       workspaceService.deleteWorkspace(dbWorkspace);
                     }
 
-                    dryLog(dryRun,
+                    dryLog(
+                        dryRun,
                         "Deleted workspace ("
                             + dbWorkspace.getWorkspaceNamespace()
                             + ", "
