@@ -573,7 +573,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
               <FlexRow style={{marginTop: '0.75rem'}}>
                 <TextInputWithLabel dataTestId='zip' inputName='zip' placeholder='Zip code'
-                                    value={zipCode} labelText='Zip Code'
+                                    value={zipCode} labelText='Zip code'
                                     onChange={value => this.updateAddress('zipCode', value)}/>
                 <TextInputWithLabel dataTestId='country' inputName='country' placeholder='Country' value={country}
                                     labelText='Country' containerStyle={styles.multiInputSpacing}

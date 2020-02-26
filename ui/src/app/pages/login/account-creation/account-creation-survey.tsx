@@ -16,6 +16,7 @@ import {toggleIncludes} from 'app/utils';
 import {Profile} from 'generated/fetch';
 import {Section, TextInputWithLabel} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
+import {AouTitle} from "app/components/text-wrappers";
 
 const styles = {
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
@@ -125,8 +126,8 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           Please complete Step 2 of 2
         </div>
         <div>
-          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> The <i>All of Us </i>
-          Research Program will use this information to measure our success at reaching diverse researchers.
+          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> <AouTitle/> will
+          use this information to measure our success at reaching diverse researchers.
           We will not share your individual answers.
         </div>
       </TextColumn>
