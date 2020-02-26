@@ -1329,7 +1329,39 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+  }
+
+  @Test
+  public void countSubjectsDemoAgeAtConsent() {
+    SearchParameter demo = age();
+    demo.attributes(
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.AGE_AT_CONSENT)
+                .operator(Operator.BETWEEN)
+                .operands(ImmutableList.of("29", "30"))));
+    SearchRequest searchRequests =
+        createSearchRequests(
+            DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+  }
+
+  @Test
+  public void countSubjectsDemoAgeAtCdr() {
+    SearchParameter demo = age();
+    demo.attributes(
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.AGE_AT_CDR)
+                .operator(Operator.BETWEEN)
+                .operands(ImmutableList.of("29", "30"))));
+    SearchRequest searchRequests =
+        createSearchRequests(
+            DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
   }
 
   @Test
@@ -1341,6 +1373,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     demoAgeSearchParam.attributes(
         ImmutableList.of(
             new Attribute()
+                .name(AttrName.AGE)
                 .operator(Operator.BETWEEN)
                 .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
 
@@ -1364,7 +1397,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
   }
 
   @Test
