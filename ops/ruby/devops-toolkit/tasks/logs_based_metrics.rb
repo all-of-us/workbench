@@ -8,7 +8,7 @@ require_relative 'lib/gcp_environment_visitor.rb'
 class LogsBasedMetrics
   def initialize(options)
     @envs_file = options[:'envs-file']
-    @source_metric_name = options[:'source-uri']
+    @source_dashboard_number = options[:'source-uri']
     @source_env_short_name = options[:'source-env']
     @logger = options[:logger] || Logger.new(STDOUT)
     @is_dry_run = options[:'replicate']
@@ -24,6 +24,20 @@ class LogsBasedMetrics
   end
 
   private
+
+  # Fetch the source metric by name from the source environment
+  def get_source_metric
+    source_env = @visitor.env_by_short_name(@source_env_short_name)
+    @logger.info("Source environment is #{source_env.to_s}")
+    source_metric = nil # extract from its environment
+    @visitor.visit(source_env) do |env|
+      logging_client = Google::Cloud::Logging.new({project: env.project_id})
+      metrics = logging_client.metrics
+      source_metric = metrics.select { |m| m.name == @source_dashboard_number }.first
+      @logger.info("located source metric #{source_metric.name}")
+    end
+    source_metric
+  end
 
   # Copy the source metric into a new metric on each target enviornment.
   def copy_to_target_envs(source_metric)
@@ -41,20 +55,6 @@ class LogsBasedMetrics
         @logger.info("Created new metric in #{tgt_env.short_name}:\n#{metric_to_str(copied_metric)}")
       end
     end
-  end
-
-  # Fetch the source metric by name from the source environment
-  def get_source_metric
-    source_env = @visitor.environments.select { |env| env.short_name == @source_env_short_name }.first
-    @logger.info("Source environment is #{source_env.to_s}")
-    source_metric = nil # extract from its environment
-    @visitor.visit(source_env) do |env|
-      logging_client = Google::Cloud::Logging.new({project: env.project_id})
-      metrics = logging_client.metrics
-      source_metric = metrics.select { |m| m.name == @source_metric_name }.first
-      @logger.info("located source metric #{source_metric.name}")
-    end
-    source_metric
   end
 
   def metric_to_str(metric)

@@ -1,13 +1,21 @@
-# require 'logger'
 require 'open3'
-require_relative 'lib/process_runner'
 
+# This class avoids the GcpEnvironmentVisitor because we don't want to create or delete
+# any new SA keys, and we're doing everything with the gcloud command line anyway.
 class ServiceAccounts
-  def initialize(options, logger = Logger.new(STDOUT), is_dry_run = true)
+  def initialize(options)
     envs_json = JSON.load(IO.read(options[:'envs-file']))
     @environments = envs_json['environments'].map { |env| GcpEnvironmentInfo.new(env) }
     @logger = options[:logger]
-    @is_dry_run = options[:'replicate']
+    @is_dry_run = !!options[:'dry-run']
+  end
+
+  def list_keys
+    @environments.each do |env|
+      get_keys(env).each do |key|
+        @logger.info(key)
+      end
+    end
   end
 
   # This tool does not use the GcpEnvironmentVisitor, as it's specifically cleaning up after it.
@@ -31,8 +39,7 @@ class ServiceAccounts
       --project=#{env.project_id}
       --format=json].join(' ')
     stdout, stderr = Open3.capture2(list_cmd) # stderr is spammed by this command, but here for debugging
-    json_array = JSON.load(stdout)
-    json_array
+    JSON.load(stdout)
   end
 
   def delete_key(key, env)

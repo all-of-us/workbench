@@ -24,18 +24,20 @@ class ServiceAccountManager
   attr_reader :service_account
   attr_reader :credentials_path
 
+  CREDENTIALS_ENV_VAR = "GOOGLE_APPLICATION_CREDENTIALS"
+
   def run()
     @logger.info("service_account = #{@service_account}")
     credentials_path = create_credentials_file
 
     @logger.info("Setting environment variable GOOGLE_APPLICATION_CREDENTIALS to #{credentials_path}")
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
+    ENV[CREDENTIALS_ENV_VAR] = credentials_path
 
     begin
       yield self
     ensure
       cleanup_key(credentials_path)
-      ENV["GOOGLE_APPLICATION_CREDENTIALS"] = nil
+      ENV[CREDENTIALS_ENV_VAR] = nil
     end
   end
 
