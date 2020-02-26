@@ -10,7 +10,7 @@ import {
   SpecificPopulationItems
 } from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {isBlank, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
   getSelectedResearchPurposeItems
@@ -19,6 +19,16 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
+  editIcon: {
+    marginTop: '0.1rem',
+    height: 22,
+    width: 22,
+    fill: colors.light,
+    backgroundColor: colors.accent,
+    cursor: 'pointer',
+    padding: '5px',
+    borderRadius: '23px'
+  },
   mainHeader: {
     fontSize: '16px', fontWeight: 600, color: colors.primary, marginBottom: '0.5rem',
     display: 'flex', flexDirection: 'row', alignItems: 'center'
@@ -80,13 +90,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
                        ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>
             <EditComponentReact enableHoverEffect={true}
                                 disabled={!workspacePermissions.canWrite}
-                                style={{marginTop: '0.1rem', height: 22,
-                                  width: 22,
-                                  fill: colors.light,
-                                  backgroundColor: colors.accent,
-                                  cursor: 'pointer',
-                                  padding: '5px',
-                                  borderRadius: '23px'}}/>
+                                style={styles.editIcon}/>
           </Clickable>
         </div>
         <div style={styles.sectionContentContainer}>
@@ -97,15 +101,13 @@ export const ResearchPurpose = withCurrentWorkspace()(
         <div style={styles.sectionHeader}>Summary of research purpose</div>
         <div style={styles.sectionContentContainer}>
           <div style={styles.sectionSubHeader}>{researchPurposeQuestions[2].header}</div>
-          <div style={{...styles.sectionItemWithBackground, minHeight: '6rem', padding: '15px'}}>
+          <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
             {workspace.researchPurpose.intendedStudy}</div>
-          <div style={styles.sectionSubHeader}>{researchPurposeQuestions[3].header}
-          </div>
-          <div style={{...styles.sectionItemWithBackground, minHeight: '6rem', padding: '15px'}}>
+          <div style={styles.sectionSubHeader}>{researchPurposeQuestions[3].header}</div>
+          <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
             {workspace.researchPurpose.scientificApproach}</div>
-          <div style={styles.sectionSubHeader}>{researchPurposeQuestions[4].header}
-          </div>
-          <div style={{...styles.sectionItemWithBackground, minHeight: '6rem', padding: '15px'}}>
+          <div style={styles.sectionSubHeader}>{researchPurposeQuestions[4].header}</div>
+          <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
             {workspace.researchPurpose.anticipatedFindings}
           </div>
         </div>
@@ -123,16 +125,18 @@ export const ResearchPurpose = withCurrentWorkspace()(
               .find(outcome => outcome.shortName === workspaceOutcome).label}</div>
           )}
         </div>
-        <div style={styles.sectionHeader}>Population of interest</div>
-        <div style={styles.sectionContentContainer}>
-          {selectedPopulationsOfInterest.map(selectedPopulationOfInterest => {
-            return <React.Fragment>
-              <div style={{...styles.sectionSubHeader, marginTop: '0.5rem'}}>{selectedPopulationOfInterest.label}</div>
-              {selectedPopulationOfInterest.subCategory.map(subCategory => <div style={{
-                ...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{subCategory.label}</div>)}
-            </React.Fragment>;
-          })}
-        </div>
+        {workspace.researchPurpose.population && <React.Fragment>
+          <div style={styles.sectionHeader}>Population of interest</div>
+          <div style={styles.sectionContentContainer}>
+            {selectedPopulationsOfInterest.map(selectedPopulationOfInterest => {
+              return <React.Fragment>
+                <div style={{...styles.sectionSubHeader, marginTop: '0.5rem'}}>{selectedPopulationOfInterest.label}</div>
+                {selectedPopulationOfInterest.subCategory.map(subCategory => <div style={{
+                  ...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{subCategory.label}</div>)}
+              </React.Fragment>;
+            })}
+          </div>
+        </React.Fragment>}
       </FadeBox>;
     }
   }
