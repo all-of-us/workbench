@@ -11,10 +11,8 @@ import {
 } from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 import {
-  getSelectedPopulations,
   getSelectedResearchPurposeItems
 } from 'app/utils/research-purpose';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -58,16 +56,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
       };
     }
 
-    getSelectedPopulationsSlice(left: boolean) {
-      const populations = getSelectedPopulations(this.props.workspace.researchPurpose);
-      const populationsHalfLen = sliceByHalfLength(populations);
-      if (left) {
-        return populations.slice(0, populationsHalfLen);
-      } else {
-        return populations.slice(populationsHalfLen);
-      }
-    }
-
+    // TODO: Move this to an abstract function and also change the admin workspace to use it
     getSelectedPopulationsOfInterest() {
       const researchPurpose = this.props.workspace.researchPurpose;
       const categories = SpecificPopulationItems.filter(specificPopulationItem => specificPopulationItem
