@@ -120,8 +120,8 @@ export const ResearchPurpose = withCurrentWorkspace()(
         {/*Findings section*/}
         <div style={styles.sectionHeader}>Findings will be disseminate by the following:</div>
         <div style={styles.sectionContentContainer}>
-          {workspace.researchPurpose.disseminateResearchFindingList.map(disseminateFinding =>
-            <div style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{disseminateFindings
+          {workspace.researchPurpose.disseminateResearchFindingList.map((disseminateFinding, i) =>
+            <div key={i} style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{disseminateFindings
               .find(finding => finding.shortName === disseminateFinding).label}</div>
           )}
         </div>
@@ -129,8 +129,8 @@ export const ResearchPurpose = withCurrentWorkspace()(
         {/*Outcomes section*/}
         <div style={styles.sectionHeader}>Outcomes anticipated from the research:</div>
         <div style={styles.sectionContentContainer}>
-          {workspace.researchPurpose.researchOutcomeList.map(workspaceOutcome =>
-            <div style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{researchOutcomes
+          {workspace.researchPurpose.researchOutcomeList.map((workspaceOutcome, i) =>
+            <div key={i} style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{researchOutcomes
               .find(outcome => outcome.shortName === workspaceOutcome).label}</div>
           )}
         </div>
@@ -139,11 +139,14 @@ export const ResearchPurpose = withCurrentWorkspace()(
         {workspace.researchPurpose.population && <React.Fragment>
           <div style={styles.sectionHeader}>Population of interest</div>
           <div style={styles.sectionContentContainer}>
-            {selectedPopulationsOfInterest.map(selectedPopulationOfInterest => {
+            {selectedPopulationsOfInterest.map((selectedPopulationOfInterest, index) => {
               return <React.Fragment>
-                <div style={{...styles.sectionSubHeader, marginTop: '0.5rem'}}>{selectedPopulationOfInterest.label}</div>
-                {selectedPopulationOfInterest.subCategory.map(subCategory => <div style={{
-                  ...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{subCategory.label}</div>)}
+                <div key={index} style={{...styles.sectionSubHeader, marginTop: '0.5rem'}}>
+                  {selectedPopulationOfInterest.label}</div>
+                {selectedPopulationOfInterest.subCategory.map((subCategory, subCategoryIndex) => <div style={{
+                  ...styles.sectionItemWithBackground, marginTop: '0.5rem'}} key={subCategoryIndex}>
+                  {subCategory.label}
+                </div>)}
               </React.Fragment>;
             })}
           </div>
