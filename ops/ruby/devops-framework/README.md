@@ -8,14 +8,44 @@ directly, independently of the existing build, operations, and deployment pipeli
 ## Usage
 The entry point to all functionality is `devops.rb`, which provides command line and environment
 loading and dispatches to Task classes (not scripts) that do the real work.
-`./devops.rb  -t <task_name> -e <env_file> --task-option-1 value1`
+
+```
+chmod +x devops.rb # allows running without ruby command
+./devops.rb  -t <task_name> -e <env_file> --task-option-1 value1
+```
 
 There is also a dynamically-generated help file from the descriptions given in the options.
+
 ```
-$ ruby ./devops.rb  --help
+$ ./devops.rb  --help
 Usage: devops [options]
-    -t, --task [TASK]                Task to be in in each environment
+    -t, --task [TASK]                Task to be run in in each provided environment
     -e, --envs-file [ENVS_FILE]      Path to environments JSON file.
+```
+
+The environments JSON file lists target environments for each command.
+Some tasks may only need to use a subset of the environments, and can identify which 
+one(s) via an additional parameter. (More to come here). The format for this file is 
+a JSON object that has a single member named `environments` which is an
+array of objects with four keys each, e.g.:
+```json
+{
+  "environments": [
+    {
+      "short_name": "qa",
+      "project_id": "my-qa-gcp-project",
+      "project_number": 11111111,
+      "service_account": "devops-service-account@my-qa-gcp-project.iam.gserviceaccount.com"
+    },
+    {
+      "short_name": "scratch",
+      "project_id": "my-scratch-gcp-project",
+      "project_number": 22222222,
+      "service_account": "devops-service-account@my-scratch-gcp-project.iam.gserviceaccount.com"
+    }
+  ]
+}
+
 ```
 
 ##  Installation
@@ -56,7 +86,7 @@ which means we would be in danger of holding up a release if we needed to make a
 * `Common.rb`: There are a number of useful snippets and  functions in this class, and I decided to steal
 selectively and adapt rather than try to reuse it. It isn't a standard package, isn't actively maintained,
 and it's not laid out in such a way that I can only bring in the  pieces I want. Logging  uses the
-standnard Ruby logger, and I'm re-evaluating how we do subprocesses.
+standard Ruby logger, and I'm re-evaluating how we do subprocesses.
 
 ### Use of Google Client Libraries Instead of `gcloud` Tool
 `gcloud` is certainly a handy and indespensible tool for daily use for one-off tasks,
@@ -72,7 +102,7 @@ these tools.
 
 ### Use of a Limited Service Account
 The framework supports a bring-you-own-service-account model. I.e. any evaluation of permissions
-is left up to GCP. I requested new  monitoring-speicic service accounts for this framework so
-that no matter how bad an error we have in our Ruby code, we can't brerak any services AoU actively
+is left up to GCP. I requested new  monitoring-speific service accounts for this framework so
+that no matter how bad an error we have in our Ruby code, we can't break any services AoU actively
 depends on. It also helps ensure we're not sloppy with assumptions that happen to be true
 only in special cases.

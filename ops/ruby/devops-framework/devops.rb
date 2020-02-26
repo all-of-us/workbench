@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'logger'
 require 'optparse'
 require_relative 'tasks/count_monitoring_assets'
