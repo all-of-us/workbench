@@ -3,11 +3,11 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ageCountStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {typeToTitle} from 'app/cohort-search/utils';
+import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {AgeType, AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
+import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const minAge = 18;
 const maxAge = 120;
@@ -45,9 +45,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 // Mocked Feature Flag. TODO remove once server-side config is in place. Need to FF the Age title returned from typeToTitle also
   enableCBAgeOptions = true;
   ageTypes = [
-    {label: 'Current Age', type: AgeType.AGE.toString()},
-    {label: 'Age at Consent', type: AgeType.CONSENT.toString()},
-    {label: 'Age at CDR Date', type: AgeType.CDR.toString()}
+    {label: 'Current Age', type: AttrName.AGE.toString()},
+    {label: 'Age at Consent', type: 'AGE_AT_CONSENT'}, // TODO replace type with enum value once RW-4509 is complete
+    {label: 'Age at CDR Date', type: 'AGE_AT_CDR'} // TODO replace type with enum value once RW-4509 is complete
   ];
 
     /* The Demographics form controls and associated convenience lenses */
@@ -55,7 +55,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     ageMin: new FormControl(18),
     ageMax: new FormControl(120),
     ageRange: new FormControl([this.minAge, this.maxAge]),
-    ageType: new FormControl('age'),
+    ageType: new FormControl(AttrName.AGE.toString()),
     deceased: new FormControl(),
   });
   get ageRange() { return this.demoForm.get('ageRange'); }
@@ -73,11 +73,13 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     type: CriteriaType.AGE,
     value: ''
   };
-  deceasedNode;
+  deceasedNode: any;
 
   nodes = [];
+  ageNodes: any;
   selections: Array<any>;
-  count: any;
+  count: number;
+  ageCount: number;
   wizard: any;
 
   ngOnInit() {
@@ -92,7 +94,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.initAgeControls();
       this.initDeceased();
       this.initAgeRange();
-      this.loadNodesFromApi(CriteriaType[CriteriaType.DECEASED]);
+      this.loadAgeNodesFromApi();
     } else {
       this.loadNodesFromApi();
     }
@@ -102,60 +104,69 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  loadNodesFromApi(type?: string) {
-    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    type = type || this.wizard.type;
-    /*
-     * Each subtype's possible criteria is loaded via the API.  Race and Gender
-     * criteria nodes become options in their respective dropdowns; deceased
-     * and age are used as templates for constructing relevant search
-     * parameters.  Upon load we sort them by count, then by name.
-     */
+  loadNodesFromApi() {
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    const {item: {searchParameters}, type} = this.wizard;
     this.loading = true;
-    cohortBuilderApi().getCriteriaBy(cdrid, DomainType[DomainType.PERSON], type).then(response => {
-      const items = response.items.filter(item => item.parentId !== 0 || type === CriteriaType[CriteriaType.DECEASED]);
-      if (type !== CriteriaType[CriteriaType.AGE]) {
-        items.sort(sortByCountThenName);
+    cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), type).then(response => {
+      this.nodes = response.items
+        .filter(item => item.parentId !== 0)
+        .sort(sortByCountThenName)
+        .map(node => {
+          node['parameterId'] = `param${node.conceptId || node.code}`;
+          return node;
+        });
+      if (searchParameters.length) {
+        this.calculate(true);
       }
-      const nodes = items.map(node => {
-        if (type !== CriteriaType[CriteriaType.AGE]) {
-          node['parameterId'] = type === CriteriaType[CriteriaType.DECEASED] ? 'param-dec' :
-            `param${node.conceptId || node.code}`;
-        }
-        return node;
-      });
-      this.loadOptions(nodes, type);
+      this.loading = false;
     });
   }
 
-  loadOptions(nodes: any, type: string) {
+  async loadAgeNodesFromApi() {
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    this.loading = true;
+    const promises = [
+      cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), CriteriaType.DECEASED.toString()).then(response => {
+        this.deceasedNode = {...response.items[0], parameterId: 'param-dec'};
+      })
+    ];
+    if (this.enableCBAgeOptions) {
+      const initialValue = {[AttrName.AGE.toString()]: [], 'AGE_AT_CONSENT': [], 'AGE_AT_CDR': []};
+      promises.push(
+        cohortBuilderApi().findAgeTypeCounts(+cdrVersionId).then(response => {
+          this.ageNodes = response.items.reduce((acc, item) => {
+            acc[item.ageType].push(item);
+            return acc;
+          }, initialValue);
+        })
+      );
+    }
+    await Promise.all(promises);
+    this.calculateAge();
+    this.loading = false;
+  }
+
+  loadOptions(nodes: any) {
     const params = this.wizard.item.searchParameters;
-    if (type === CriteriaType[CriteriaType.DECEASED]) {
-      const attributes = params.length && params[0].type === CriteriaType.AGE
-        ? params[0].attributes
-        : [{
-          name: AttrName.AGE,
-          operator: Operator.BETWEEN,
-          operands: [minAge.toString(), maxAge.toString()]
-        }];
-      this.selectedNode = {
-        ...this.ageNode,
-        name: `Age In Range ${minAge} - ${maxAge}`,
-        attributes,
-      };
-      if (!params.length) {
-        const wizard = this.wizard;
-        wizard.item.searchParameters.push(this.selectedNode);
-        const selections = [this.ageNode.parameterId, ...this.selections];
-        selectionsStore.next(selections);
-        wizardStore.next(wizard);
-      }
-      this.deceasedNode = nodes[0];
-    } else {
-      this.nodes = nodes;
-      if (params.length) {
-        this.calculate(true);
-      }
+    const attributes = params.length && params[0].type === CriteriaType.AGE
+      ? params[0].attributes
+      : [{
+        name: AttrName.AGE,
+        operator: Operator.BETWEEN,
+        operands: [minAge.toString(), maxAge.toString()]
+      }];
+    this.selectedNode = {
+      ...this.ageNode,
+      name: `Age In Range ${minAge} - ${maxAge}`,
+      attributes,
+    };
+    if (!params.length) {
+      const wizard = this.wizard;
+      wizard.item.searchParameters.push(this.selectedNode);
+      const selections = [this.ageNode.parameterId, ...this.selections];
+      selectionsStore.next(selections);
+      wizardStore.next(wizard);
     }
     this.loading = false;
   }
@@ -175,7 +186,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       max.setValue(hi, {emitEvent: false});
       if (this.enableCBAgeOptions) {
         setTimeout(() => this.centerAgeCount(), 300);
-        this.calculating = true;
       } else {
         this.count = null;
       }
@@ -185,9 +195,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       const [_, hi] = [...this.ageRange.value];
       if (value <= hi && value >= this.minAge) {
         this.ageRange.setValue([value, hi], {emitEvent: false});
-        if (this.enableCBAgeOptions) {
-          this.calculating = true;
-        } else {
+        if (!this.enableCBAgeOptions) {
           this.count = null;
         }
       }
@@ -196,13 +204,12 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       const [lo, _] = [...this.ageRange.value];
       if (value >= lo) {
         this.ageRange.setValue([lo, value], {emitEvent: false});
-        if (this.enableCBAgeOptions) {
-          this.calculating = true;
-        } else {
+        if (!this.enableCBAgeOptions) {
           this.count = null;
         }
       }
     }));
+    this.subscription.add(this.demoForm.get('ageType').valueChanges.subscribe(() => this.calculateAge()));
   }
 
   checkMax() {
@@ -227,19 +234,41 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     const min = this.demoForm.get('ageMin');
     const max = this.demoForm.get('ageMax');
     const params = this.wizard.item.searchParameters;
+    let attributes;
     if (params.length && params[0].type === CriteriaType.AGE) {
+      attributes = params[0].attributes;
       const range = params[0].attributes[0].operands.map(op => parseInt(op, 10));
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
       this.count = this.wizard.count;
+    } else {
+      attributes = [{
+        name: AttrName.AGE,
+        operator: Operator.BETWEEN,
+        operands: [minAge.toString(), maxAge.toString()]
+      }];
     }
-    const cdrid = currentWorkspaceStore.getValue().cdrVersionId;
-    if (!ageCountStore.getValue()[cdrid]) {
-      // Get total age count for this cdr version if it doesn't exist in the store yet
-      this.calculateAge(true);
-    } else if (this.setTotalAge) {
-      this.count = ageCountStore.getValue()[cdrid];
+    this.selectedNode = {
+      ...this.ageNode,
+      name: `Age In Range ${attributes[0].operands[0]} - ${attributes[0].operands[1]}`,
+      attributes,
+    };
+    if (!params.length) {
+      const wizard = this.wizard;
+      wizard.item.searchParameters.push(this.selectedNode);
+      const selections = [this.ageNode.parameterId, ...this.selections];
+      selectionsStore.next(selections);
+      wizardStore.next(wizard);
+    }
+    if (!this.enableCBAgeOptions) {
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      if (!ageCountStore.getValue()[cdrVersionId]) {
+        // Get total age count for this cdr version if it doesn't exist in the store yet
+        this.calculateAge(true);
+      } else if (this.setTotalAge) {
+        this.count = ageCountStore.getValue()[cdrVersionId];
+      }
     }
 
     const ageDiff = this.ageRange.valueChanges
@@ -266,15 +295,12 @@ export class DemographicsComponent implements OnInit, OnDestroy {
           const selections = [parameterId];
           selectionsStore.next(selections);
         }
-        if (this.enableCBAgeOptions) {
-          this.calculateAge();
-        }
       });
     this.subscription.add(ageDiff);
   }
 
   initDeceased() {
-    const existent = this.wizard.item.searchParameters.find(s => s.type === CriteriaType[CriteriaType.DECEASED]);
+    const existent = this.wizard.item.searchParameters.find(s => s.type === CriteriaType.DECEASED.toString());
     if (existent !== undefined) {
       this.deceased.setValue(true);
       this.count = this.wizard.count;
@@ -292,6 +318,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
   centerAgeCount() {
     if (this.enableCBAgeOptions) {
+      this.calculateAge();
       const slider = <HTMLElement>document.getElementsByClassName('noUi-connect')[0];
       const wrapper = document.getElementById('count-wrapper');
       const count = document.getElementById('age-count');
@@ -334,27 +361,55 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   calculateAge(init?: boolean) {
-    if (!init || this.setTotalAge) {
-      this.calculating = true;
-    }
-    const cdrVersionId = currentWorkspaceStore.getValue().cdrVersionId;
-    const [min, max] = init ? [minAge, maxAge] : this.selectedNode.attributes[0].operands.map(op => +op);
-    cohortBuilderApi().countAgesByType(+cdrVersionId, AgeType.AGE.toString(), min, max).then(response => {
-      if (init) {
-        const ageCounts = ageCountStore.getValue();
-        ageCounts[cdrVersionId] = response;
-        ageCountStore.next(ageCounts);
-        if (this.setTotalAge) {
+    if (this.enableCBAgeOptions) {
+      const ageType = this.demoForm.get('ageType').value;
+      const min = this.demoForm.get('ageMin').value;
+      const max = this.demoForm.get('ageMax').value;
+      this.ageCount = this.ageNodes[ageType]
+        .filter(node => node.age >= min && node.age <= max)
+        .reduce((acc, node) => acc + node.count, 0);
+    } else {
+      if (!init || this.setTotalAge) {
+        this.calculating = true;
+      }
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const parameter = init ? {
+        ...this.ageNode,
+        name: `Age In Range ${minAge} - ${maxAge}`,
+        attributes: [{
+          name: AttrName.AGE,
+          operator: Operator.BETWEEN,
+          operands: [minAge.toString(), maxAge.toString()]
+        }],
+      } : this.selectedNode;
+      const request = {
+        excludes: [],
+        includes: [{
+          items: [{
+            type: DomainType.PERSON.toString(),
+            searchParameters: [mapParameter(parameter)],
+            modifiers: []
+          }],
+          temporal: false
+        }]
+      };
+      cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
+        if (init) {
+          const ageCounts = ageCountStore.getValue();
+          ageCounts[cdrVersionId] = response;
+          ageCountStore.next(ageCounts);
+          if (this.setTotalAge) {
+            this.count = response;
+          }
+        } else {
           this.count = response;
         }
-      } else {
-        this.count = response;
-      }
-      this.calculating = false;
-    }, (err) => {
-      console.error(err);
-      this.calculating = false;
-    });
+        this.calculating = false;
+      }, (err) => {
+        console.error(err);
+        this.calculating = false;
+      });
+    }
   }
 
   get noSexData() {
