@@ -1,5 +1,27 @@
 import {Page} from 'puppeteer';
 
+export async function clickByXpath(page: Page, xpathSelector: string) {
+  return page.evaluate((selector) => {
+    const node: any = document.evaluate(
+       selector,
+       document,
+       null,
+       XPathResult.FIRST_ORDERED_NODE_TYPE,
+       null
+    ).singleNodeValue;
+    document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    node.click();
+  }, xpathSelector);
+}
+
+export async function clickByCss(page: Page, cssSelector: string) {
+  return page.evaluate((selector) => {
+    const node: any = document.querySelector(selector);
+    node.click();
+  }, cssSelector);
+
+}
+
 /**
  * Summary: Helper functions when directly dealing with CSS selectors.
  */

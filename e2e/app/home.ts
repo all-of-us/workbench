@@ -1,12 +1,12 @@
 import {ElementHandle} from 'puppeteer';
-import * as xpathHandler from '../services/xpath-handler';
+import * as xpathHandler from '../driver/xpath-handler';
 import AuthenticatedPage from './mixin/authenticatedpage';
 
 const selectors = {
   pageTitle: 'Homepage',
   header: '//h3[normalize-space(text())="Workspaces"]',
   seeAllWorkspacesLink: '//*[normalize-space()="See all Workspaces"]',
-  createNewWorkspaceLink: '//*[normalize-space(.)="Workspaces"]//*[@role="img"]'
+  createNewWorkspaceLink: '//*[normalize-space(.)="Workspaces"]/clr-icon[@shape="plus-circle"]/*[@role="img"]',
 };
 
 export default class Home extends AuthenticatedPage {

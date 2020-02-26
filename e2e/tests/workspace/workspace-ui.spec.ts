@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
 import WebElement from '../../app/elements/web-element';
 import Home from '../../app/home';
-import WorkspacePage from '../../app/workspace-page';
+import WorkspaceEditPage from '../../app/workspace-edit';
 
 const Chrome = require('../../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
@@ -19,13 +19,13 @@ describe('Edit Workspace page', () => {
   });
 
   // Click CreateNewWorkspace link in Home page => Open Create Workspace page
-  test('Home page: Click link Create-New-Workspace', async () => {
+  test('Home page: Click Create-New-Workspace link', async () => {
     const home = new Home(page);
     const link = await home.getCreateNewWorkspaceLink();
     expect(await link.boxModel() != null).toBe(true);
     await link.click();
 
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.waitUntilPageReady();
 
     // expect Workspace-Name Input text field exists and is NOT readOnly
@@ -40,7 +40,7 @@ describe('Edit Workspace page', () => {
 
   // Click CreateNewWorkspace link in My Workpsaces page => Open Create Workspace page
   test('My Workspaces page: Click link Create-New-Workspace', async () => {
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.goURL();
     await workspace.click_button_CreateNewWorkspace();
     await workspace.waitUntilPageReady();
@@ -48,7 +48,7 @@ describe('Edit Workspace page', () => {
 
   // Checking all fields out-of-box
   test('Create Workspace page: Question 1', async () => {
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.goURL();
     await workspace.click_button_CreateNewWorkspace();
     await workspace.waitUntilPageReady();
@@ -90,7 +90,7 @@ describe('Edit Workspace page', () => {
   }, 60 * 1000);
 
   test('Create Workspace page: Question 2', async () => {
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.goURL();
     await workspace.click_button_CreateNewWorkspace();
 
@@ -109,7 +109,7 @@ describe('Edit Workspace page', () => {
   }, 60 * 1000);
 
   test.skip('Create Workspace page: Question 3', async () => {
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.goURL();
     await workspace.click_button_CreateNewWorkspace();
 
@@ -117,7 +117,7 @@ describe('Edit Workspace page', () => {
   }, 60 * 1000);
 
   test.skip('Create Workspace page: Question 4', async () => {
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.goURL();
     await workspace.click_button_CreateNewWorkspace();
 
@@ -125,7 +125,7 @@ describe('Edit Workspace page', () => {
   }, 60 * 1000);
 
   test('Create Workspace page: Question 5 Population of interest', async () => {
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.goURL();
     await workspace.click_button_CreateNewWorkspace();
 
@@ -133,7 +133,7 @@ describe('Edit Workspace page', () => {
   }, 60 * 1000);
 
   test('Create Workspace page: Question 6 Request for Review of Research Purpose Description', async () => {
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.goURL();
     await workspace.click_button_CreateNewWorkspace();
 

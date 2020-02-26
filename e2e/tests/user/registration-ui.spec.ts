@@ -3,7 +3,7 @@ import WebElement from '../../app/elements/web-element';
 import GoogleLoginPage from '../../app/google-login';
 import {findText, getCursorValue} from '../../driver/element-util';
 import {waitForText, waitUntilFindTexts} from '../../driver/waitFuncs';
-import PuppeteerLaunch from '../../services/puppeteer-launch';
+import PuppeteerLaunch from '../../driver/puppeteer-launch';
 require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);

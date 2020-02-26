@@ -1,6 +1,6 @@
 import DataPage from '../../app/data-page';
 import Home from '../../app/home';
-import WorkspacePage from '../../app/workspace-page';
+import WorkspaceEditPage from '../../app/workspace-edit';
 import { getCursorValue } from '../../driver/element-util'
 
 const Chrome = require('../../driver/ChromeDriver');
@@ -26,7 +26,7 @@ describe('Workspace create:', () => {
     const link = await home.getCreateNewWorkspaceLink();
     await link.click();
 
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     await workspace.waitUntilPageReady();
 
     // wait for auto-selected value in Select billing account
@@ -99,7 +99,7 @@ describe('Workspace create:', () => {
     const link = await home.getCreateNewWorkspaceLink();
     await link.click();
 
-    const workspace = new WorkspacePage(page);
+    const workspace = new WorkspaceEditPage(page);
     const workspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
     await (await workspace.getWorkspaceNameTextbox()).type(workspaceName);
     await (await workspace.getDataSetSelectOption()).select('2');

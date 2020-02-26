@@ -1,8 +1,8 @@
 import GoogleLoginPage from '../../app/google-login';
 import Home from '../../app/home';
 import Profile from '../../app/profile';
-import WorkspacePage from '../../app/workspace-page';
-import PuppeteerLaunch from '../../services/puppeteer-launch';
+import WorkspaceEditPage from '../../app/workspace-edit';
+import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);
 
@@ -60,7 +60,7 @@ describe.skip('Navigation menu tests:', () => {
 
     await homePage.navigation.toAllWorkspaces();
 
-    const workspaces = new WorkspacePage(page);
+    const workspaces = new WorkspaceEditPage(page);
     await workspaces.waitForReady();
     expect(await page.url()).toContain('workspaces');
   });

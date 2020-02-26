@@ -1,7 +1,7 @@
 import GoogleLoginPage from '../../app/google-login';
 import Home from '../../app/home';
 import {waitUntilURLMatch} from '../../driver/waitFuncs';
-import PuppeteerLaunch from '../../services/puppeteer-launch';
+import PuppeteerLaunch from '../../driver/puppeteer-launch';
 require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);

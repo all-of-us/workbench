@@ -21,7 +21,7 @@ const selectors = {
 };
 
 
-export default class WorkspacePage extends authenticatedpage {
+export default class WorkspaceEditPage extends authenticatedpage {
 
   public async getCreateWorkspaceButton(): Promise<ElementHandle> {
     return findButton(this.puppeteerPage, selectors.createWorkspaceButton);
@@ -112,7 +112,7 @@ export default class WorkspacePage extends authenticatedpage {
     return new RadioButton(this.puppeteerPage, 'No, my study will not center on underrepresented populations.');
   }
 
-  public async waitForReady(): Promise<WorkspacePage> {
+  public async waitForReady(): Promise<WorkspaceEditPage> {
     await super.isLoaded(selectors.pageTitleRegex);
     return this;
   }
@@ -120,7 +120,7 @@ export default class WorkspacePage extends authenticatedpage {
   /**
    * go directly to the URL of My Workspaces page
    */
-  public async goURL(): Promise<WorkspacePage> {
+  public async goURL(): Promise<WorkspaceEditPage> {
     await this.puppeteerPage.goto(configs.uiBaseUrl + configs.workspacesUrlPath, {waitUntil: ['domcontentloaded','networkidle0']});
     await this.puppeteerPage.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true});
     await this.waitForSpinner();

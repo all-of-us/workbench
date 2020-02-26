@@ -2,7 +2,7 @@ import {ElementHandle} from 'puppeteer';
 import CreateAccountPage from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
 import {waitForText} from '../../driver/waitFuncs';
-import PuppeteerLaunch from '../../services/puppeteer-launch';
+import PuppeteerLaunch from '../../driver/puppeteer-launch';
 const configs = require('../../resources/config');
 
 jest.setTimeout(60 * 1000);

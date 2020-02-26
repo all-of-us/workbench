@@ -64,6 +64,14 @@ export function textXpath(label: string) {
 }
 
 /**
+ * Finds element that match xpath selector: //clr-icon[@shape="plus-circle"]
+ * @param label
+ */
+export function addLinkXpath(label: string) {
+  return `//*[normalize-space(text())="${label}"]/clr-icon[@shape="plus-circle"]/*[@role="img"]`;
+}
+
+/**
  * Clickable element with label.
  * @param label
  */

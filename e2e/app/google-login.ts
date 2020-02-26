@@ -1,5 +1,5 @@
 import { ElementHandle, Page } from 'puppeteer';
-import { waitForNavigation } from '../services/page-wait';
+import { waitForNavigation } from '../driver/page-wait';
 
 const configs = require('../resources/config');
 
