@@ -10,7 +10,7 @@ import {
   SpecificPopulationItems
 } from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
-import {isBlank, reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
   getSelectedResearchPurposeItems
