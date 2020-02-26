@@ -16,6 +16,7 @@ import com.google.api.client.util.Sets;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,6 +44,12 @@ public final class SearchGroupItemQueryBuilder {
 
   private static final int STANDARD = 1;
   private static final int SOURCE = 0;
+
+  private static final ImmutableMap<AttrName, String> AGE_COLUMN_SQL_MAP =
+      ImmutableMap.of(
+          AttrName.AGE, "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(dob), MONTH)/12) as INT64)",
+          AttrName.AGE_AT_CONSENT, "age_at_consent",
+          AttrName.AGE_AT_CDR, "age_at_cdr");
 
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " or\n";
@@ -113,17 +120,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String AGE_BASE =
       "select person_id\n" + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere\n";
   private static final String AGE_SQL =
-      "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(dob), MONTH)/12) as INT64) %s %s\n"
-          + "and not exists (\n"
-          + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
-          + "where d.person_id = p.person_id)\n";
-  private static final String AGE_AT_CONSENT_SQL =
-      "p.age_at_consent %s %s\n"
-          + "and not exists (\n"
-          + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
-          + "where d.person_id = p.person_id)\n";
-  private static final String AGE_AT_CDR_SQL =
-      "p.age_at_cdr %s %s\n"
+      "%s %s %s\n"
           + "and not exists (\n"
           + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
           + "where d.person_id = p.person_id)\n";
@@ -249,15 +246,12 @@ public final class SearchGroupItemQueryBuilder {
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
           finalParam = finalParam + AND + ageNamedParameter2;
         }
-        String finalAgeSql = AGE_SQL;
-        if (AttrName.AGE_AT_CONSENT.equals(attribute.getName())) {
-          finalAgeSql = AGE_AT_CONSENT_SQL;
-        } else if (AttrName.AGE_AT_CDR.equals(attribute.getName())) {
-          finalAgeSql = AGE_AT_CDR_SQL;
-        }
         return AGE_BASE
             + String.format(
-                finalAgeSql, OperatorUtils.getSqlOperator(attribute.getOperator()), finalParam);
+                AGE_SQL,
+                AGE_COLUMN_SQL_MAP.get(attribute.getName()),
+                OperatorUtils.getSqlOperator(attribute.getOperator()),
+                finalParam);
       case GENDER:
       case SEX:
       case ETHNICITY:
