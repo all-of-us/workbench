@@ -7,7 +7,7 @@ import {
 } from 'app/pages/login/account-creation/account-creation-survey';
 import {serverConfigStore} from 'app/utils/navigation';
 import {Ethnicity, GenderIdentity, Race, SexAtBirth} from 'generated/fetch';
-import {createEmptyProfile} from "../sign-in";
+import {createEmptyProfile} from 'app/pages/login/sign-in';
 
 let props: AccountCreationSurveyProps;
 const onCompleteSpy = jest.fn();
