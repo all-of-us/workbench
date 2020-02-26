@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,7 @@ import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -171,7 +173,7 @@ public class WorkspaceAdminControllerTest {
                         TimeInterval.newBuilder().setStartTime(Timestamps.fromMillis(1000)))
                     .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
             .build();
-    when(mockCloudMonitoringService.getCloudStorageReceivedBytes(anyString()))
+    when(mockCloudMonitoringService.getCloudStorageReceivedBytes(anyString(), any(Duration.class)))
         .thenReturn(Arrays.asList(timeSeries));
 
     CloudStorageTraffic cloudStorageTraffic =

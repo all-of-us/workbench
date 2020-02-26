@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CloudMonitoringServiceImpl implements CloudMonitoringService {
 
-  private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
-
   private final MetricServiceClient metricServiceClient;
 
   @Autowired
@@ -33,8 +31,8 @@ public class CloudMonitoringServiceImpl implements CloudMonitoringService {
         .build();
   }
 
-  private static TimeInterval getTimeInterval() {
-    long windowStartMillis = Instant.now().minus(TRAILING_TIME_TO_QUERY).toEpochMilli();
+  private static TimeInterval getTimeInterval(Duration trailingTimeToQuery) {
+    long windowStartMillis = Instant.now().minus(trailingTimeToQuery).toEpochMilli();
     long windowEndMillis = Instant.now().toEpochMilli();
 
     return TimeInterval.newBuilder()
@@ -44,13 +42,14 @@ public class CloudMonitoringServiceImpl implements CloudMonitoringService {
   }
 
   @Override
-  public Iterable<TimeSeries> getCloudStorageReceivedBytes(String workspaceNamespace) {
+  public Iterable<TimeSeries> getCloudStorageReceivedBytes(
+      String workspaceNamespace, Duration trailingTimeToQuery) {
     ListTimeSeriesRequest request =
         ListTimeSeriesRequest.newBuilder()
             .setName(ProjectName.of(workspaceNamespace).toString())
             .setFilter("metric.type = \"storage.googleapis.com/network/received_bytes_count\"")
             .setAggregation(getAggregation())
-            .setInterval(getTimeInterval())
+            .setInterval(getTimeInterval(trailingTimeToQuery))
             .setView(ListTimeSeriesRequest.TimeSeriesView.FULL)
             .build();
 

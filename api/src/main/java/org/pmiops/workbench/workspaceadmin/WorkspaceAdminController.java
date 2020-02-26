@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaceadmin;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.protobuf.util.Timestamps;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
+
+  private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
+
   private final CloudMonitoringService cloudMonitoringService;
   private final FireCloudService fireCloudService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
@@ -63,7 +67,8 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     CloudStorageTraffic response = new CloudStorageTraffic();
 
     for (TimeSeries timeSeries :
-        cloudMonitoringService.getCloudStorageReceivedBytes(workspaceNamespace)) {
+        cloudMonitoringService.getCloudStorageReceivedBytes(
+            workspaceNamespace, TRAILING_TIME_TO_QUERY)) {
       for (Point point : timeSeries.getPointsList()) {
         response.addReceivedBytesItem(
             new TimeSeriesPoint()
