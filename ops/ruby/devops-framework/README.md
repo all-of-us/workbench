@@ -86,7 +86,7 @@ which means we would be in danger of holding up a release if we needed to make a
 * `Common.rb`: There are a number of useful snippets and  functions in this class, and I decided to steal
 selectively and adapt rather than try to reuse it. It isn't a standard package, isn't actively maintained,
 and it's not laid out in such a way that I can only bring in the  pieces I want. Logging  uses the
-standnard Ruby logger, and I'm re-evaluating how we do subprocesses.
+standard Ruby logger, and I'm re-evaluating how we do subprocesses.
 
 ### Use of Google Client Libraries Instead of `gcloud` Tool
 `gcloud` is certainly a handy and indespensible tool for daily use for one-off tasks,
@@ -102,7 +102,7 @@ these tools.
 
 ### Use of a Limited Service Account
 The framework supports a bring-you-own-service-account model. I.e. any evaluation of permissions
-is left up to GCP. I requested new  monitoring-speicic service accounts for this framework so
-that no matter how bad an error we have in our Ruby code, we can't brerak any services AoU actively
+is left up to GCP. I requested new  monitoring-speific service accounts for this framework so
+that no matter how bad an error we have in our Ruby code, we can't break any services AoU actively
 depends on. It also helps ensure we're not sloppy with assumptions that happen to be true
 only in special cases.

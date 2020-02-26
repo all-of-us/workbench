@@ -1,11 +1,4 @@
 class GcpEnvironmentInfo
-  # def initialize(short_name, project_id, project_number, service_account)
-  #   @short_name = short_name
-  #   @project_id = project_id
-  #   @project_number = project_number
-  #   @service_account = service_account
-  # end
-
   def initialize(env_info)
     @short_name = env_info['short_name']
     @project_id = env_info['project_id']

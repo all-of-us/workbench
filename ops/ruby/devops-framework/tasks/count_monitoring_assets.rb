@@ -10,8 +10,8 @@ USER_LOGS_BASED_METRIC_FILTER = "metric.type = starts_with(\"logging.googleapis.
 
 logger = Logger.new(STDOUT)
 class MonitoringAssets
-  def initialize(envrionments_path_json, logger = Logger.new(STDOUT))
-    @visitor = GcpEnvironmentVisitor.new(envrionments_path_json, logger)
+  def initialize(envs_path, logger = Logger.new(STDOUT))
+    @visitor = GcpEnvironmentVisitor.new(envs_path, logger)
     @logger = logger
   end
 
@@ -40,14 +40,14 @@ class MonitoringAssets
 
       user_logs_based_metrics = metric_client.list_metric_descriptors(metric_project_path, {filter: USER_LOGS_BASED_METRIC_FILTER})
       counts['user_logs_based_metrics'] = user_logs_based_metrics.count
-      @logger.info("found  #{user_logs_based_metrics.count} user-defined  logs-baed metrics")
+      @logger.info("found  #{user_logs_based_metrics.count} user-defined  logs-based metrics")
 
       user_logs_based_metrics.each do |metric|
         @logger.info("\t#{metric.name}: #{metric.description}")
       end
 
       total_logs_based_metrics = metric_client.list_metric_descriptors(metric_project_path, {filter: LOGS_BASED_METRIC_FILTER})
-      @logger.info("found  #{total_logs_based_metrics.count} total logs-baed metrics")
+      @logger.info("found  #{total_logs_based_metrics.count} total logs-based metrics")
 
       alerts_client = Google::Cloud::Monitoring::V3::AlertPolicyServiceClient.new
       policies = alerts_client.list_alert_policies(env.formatted_project_name)
