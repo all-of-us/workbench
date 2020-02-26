@@ -1373,6 +1373,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     demoAgeSearchParam.attributes(
         ImmutableList.of(
             new Attribute()
+                .name(AttrName.AGE)
                 .operator(Operator.BETWEEN)
                 .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
 
