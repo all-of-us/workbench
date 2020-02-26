@@ -100,17 +100,24 @@ export const ResearchPurpose = withCurrentWorkspace()(
         </div>
         <div style={styles.sectionHeader}>Summary of research purpose</div>
         <div style={styles.sectionContentContainer}>
+          {/*Intended study section*/}
           <div style={styles.sectionSubHeader}>{researchPurposeQuestions[2].header}</div>
           <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
             {workspace.researchPurpose.intendedStudy}</div>
+
+          {/*Scientific approach section*/}
           <div style={styles.sectionSubHeader}>{researchPurposeQuestions[3].header}</div>
           <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
             {workspace.researchPurpose.scientificApproach}</div>
+
+          {/*Anticipated findings section*/}
           <div style={styles.sectionSubHeader}>{researchPurposeQuestions[4].header}</div>
           <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
             {workspace.researchPurpose.anticipatedFindings}
           </div>
         </div>
+
+        {/*Findings section*/}
         <div style={styles.sectionHeader}>Findings will be disseminate by the following:</div>
         <div style={styles.sectionContentContainer}>
           {workspace.researchPurpose.disseminateResearchFindingList.map(disseminateFinding =>
@@ -118,6 +125,8 @@ export const ResearchPurpose = withCurrentWorkspace()(
               .find(finding => finding.shortName === disseminateFinding).label}</div>
           )}
         </div>
+
+        {/*Outcomes section*/}
         <div style={styles.sectionHeader}>Outcomes anticipated from the research:</div>
         <div style={styles.sectionContentContainer}>
           {workspace.researchPurpose.researchOutcomeList.map(workspaceOutcome =>
@@ -125,6 +134,8 @@ export const ResearchPurpose = withCurrentWorkspace()(
               .find(outcome => outcome.shortName === workspaceOutcome).label}</div>
           )}
         </div>
+
+        {/*Underserved populations section*/}
         {workspace.researchPurpose.population && <React.Fragment>
           <div style={styles.sectionHeader}>Population of interest</div>
           <div style={styles.sectionContentContainer}>
