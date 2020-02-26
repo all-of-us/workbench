@@ -57,12 +57,10 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     };
   }
 
-  async getFederatedWorkspaceInformation(showLoadingSpinner: boolean = true) {
-    if (showLoadingSpinner) {
-      this.setState({
-        loadingData: true,
-      });
-    }
+  async getFederatedWorkspaceInformation() {
+    this.setState({
+      loadingData: true,
+    });
 
     // Fire off both requests in parallel
     const workspaceDetailsPromise = workspaceAdminApi().getFederatedWorkspaceDetails(this.state.googleProject);
@@ -162,8 +160,8 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     await clusterApi().deleteClustersInProject(
       this.state.googleProject,
       {clustersToDelete: [this.state.clusterToDelete.clusterName]});
-    await this.getFederatedWorkspaceInformation(false);
     this.setState({clusterToDelete: null});
+    await this.getFederatedWorkspaceInformation();
   }
 
   private cancelDeleteCluster() {

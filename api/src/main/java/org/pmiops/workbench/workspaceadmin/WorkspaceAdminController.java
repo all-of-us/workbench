@@ -4,6 +4,7 @@ import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @Override
   @AuthorityRequired({Authority.WORKSPACES_VIEW})
   public ResponseEntity<CloudStorageTraffic> getCloudStorageTraffic(String workspaceNamespace) {
-    CloudStorageTraffic response = new CloudStorageTraffic();
+    CloudStorageTraffic response = new CloudStorageTraffic().receivedBytes(new ArrayList<>());
 
     for (TimeSeries timeSeries :
         cloudMonitoringService.getCloudStorageReceivedBytes(
