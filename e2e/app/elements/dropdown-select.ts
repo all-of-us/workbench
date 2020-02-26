@@ -2,8 +2,8 @@ import {ElementHandle, Page} from 'puppeteer';
 
 export default class DropdownSelect {
 
-  private page: Page;
-  private label: string;
+  private readonly page: Page;
+  private readonly label: string;
 
   constructor(page: Page, label?: string) {
     this.page = page;
@@ -17,7 +17,7 @@ export default class DropdownSelect {
     await selectValue.click();
   }
 
-  public async displayedValue() {
+  public async getSelectedValue() {
     const selector = this.componentXpath() + '/label';
     const displayedValue = await this.page.waitForXPath(selector, { visible: true });
     const jValue = await (await displayedValue.getProperty('innerText')).jsonValue();

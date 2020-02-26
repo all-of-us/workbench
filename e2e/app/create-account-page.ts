@@ -1,7 +1,7 @@
 import {ElementHandle} from 'puppeteer';
 import * as widgetXpath from './elements/xpath-defaults';
 import BasePage from './mixin/basepage';
-import DropdownSelect from './mixin/dropdown-list-select';
+import DropdownSelect from './elements/dropdown-select';
 
 const registrationFields = require('../resources/data/user-registration-fields');
 const faker = require('faker/locale/en_US');
@@ -12,12 +12,12 @@ export default class CreateAccountPage extends BasePage {
   }
 
   public async getSubmitButton(): Promise<ElementHandle> {
-    const xpath = widgetXpath.button('Submit');
+    const xpath = widgetXpath.buttonXpath('Submit');
     return await this.puppeteerPage.waitForXPath(xpath, {visible:true})
   }
 
   public async getNextButton(): Promise<ElementHandle> {
-    const xpath = widgetXpath.button('Next');
+    const xpath = widgetXpath.buttonXpath('Next');
     return await this.puppeteerPage.waitForXPath(xpath, {visible:true})
   }
 
@@ -111,7 +111,7 @@ export default class CreateAccountPage extends BasePage {
 
   public async getInstitutionValue() {
     const dropdown = new DropdownSelect(this.puppeteerPage);
-    return await dropdown.displayedValue();
+    return await dropdown.getSelectedValue();
   }
 
   // select Institution Affiliation from a dropdown

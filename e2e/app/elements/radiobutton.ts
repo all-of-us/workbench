@@ -1,8 +1,8 @@
 import {Page} from 'puppeteer';
 import WebElement from './web-element';
-import {findCheckbox} from './xpath-finder';
+import {findRadioButton} from './xpath-finder';
 
-export default class Checkbox {
+export default class RadioButton {
 
   private readonly label: string;
   private readonly page: Page;
@@ -15,35 +15,32 @@ export default class Checkbox {
 
   public async get(): Promise<WebElement> {
     if (!!this.webElement) {
-      const element = await findCheckbox(this.page, this.label);
+      const element = await findRadioButton(this.page, this.label);
       this.webElement = new WebElement(element);
     }
     return this.webElement;
   }
 
-  /**
-   * Checked means element does not have a `checked` property
-   */
-  public async isChecked(): Promise<boolean> {
+  public async isSelected() {
     const propChecked = (await this.get()).getProperty('checked');
     return !!propChecked;
   }
 
   /**
-   * Make checkbox element checked
+   * Select a Radio button.
    */
-  public async check(): Promise<void> {
-    const isChecked = await this.isChecked();
+  public async select(): Promise<void> {
+    const isChecked = await this.isSelected();
     if (!isChecked) {
       (await this.get()).click();
     }
   }
 
   /**
-   * Make checkbox element unchecked
+   * Unselect a Radio button.
    */
-  public async unCheck() {
-    const isChecked = await this.isChecked();
+  public async unSelect() {
+    const isChecked = await this.isSelected();
     if (isChecked) {
       (await this.get()).click();
     }

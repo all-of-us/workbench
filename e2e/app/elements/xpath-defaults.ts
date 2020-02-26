@@ -1,67 +1,72 @@
 
-  /**
-   * Clickable element with label.
-   * @param label
-   */
-export function clickable(label: string) {
-  return `(//a | //*[@role='button'])[normalize-space()='${label}' or contains(@aria-label,'${label}')]`;
+/**
+ * a BUTTON element with specified label.
+ * @param label
+ */
+export function buttonXpath(label: string) {
+  return `//*[@role='button' and contains(normalize-space(text()),'${label}')]`;
+}
+
+/**
+ * a TEXTAREA element with specified label.
+ * @param label
+ */
+export function textareaXpath(label: string) {
+  return `${inputXpath(label, 'textarea')}`;
 }
 
   /**
-   * a BUTTON element with label.
+   * a textbox element with specified label.
    * @param label
    */
-export function button(label: string) {
-  return `//*[@role='button' and normalize-space(text())='${label}']`;
+export function textboxXpath(label: string) {
+  return `${inputXpath(label, 'text')}`;
 }
 
-  /**
-   * a TEXTAREA element with label.
-   * @param label
-   */
-export function textarea(label: string) {
-  return `//*[normalize-space(text())='${label}']/ancestor::*/textarea`;
-      // return `//*[..//*[contains(normalize-space(text()),'${label}')]]/textarea`;
-}
-
-  /**
-   * a text INPUT element with label.
-   * @param label
-   */
-export function textInput(label: string) {
-  return `//*[normalize-space(text())='${label}']/ancestor::*/input[@type='text']`;
-      // return `//*[./*[normalize-space(text())='${label}']]/input[@type='text']`;
-}
-
-  /**
-   * a IMAGE element with label.
-   * @param label
-   */
-export function image(label: string) {
+/**
+ * a IMAGE element with specified label.
+ * @param label
+ */
+export function imageXpath(label: string) {
   return `//*[normalize-space(text())='${label}']//*[@role='img']`
-      // return `//*[./*[normalize-space(text())='${label}']]//*[@role='img']`;
 }
 
-  /**
-   * a CHECKBOX element with label.
-   * @param label
-   */
-export function checkbox(label: string) {
-  return `//*[contains(normalize-space(.),'${label}')]/ancestor::*/input[@type='checkbox']`;
+/**
+ * a CHECKBOX element with specified label.
+ * @param label
+ */
+export function checkboxXpath(label: string) {
+  return `${inputXpath(label, 'checkbox')}`;
 }
 
-  /**
-   * a RADIO element with label.
-   * @param label
-   */
-export function radio(label: string) {
-  return `//*[label[contains(normalize-space(.),"${label}")]]/input[@type="radio"]`;
+/**
+ * a RADIOBUTTON element with specified label.
+ * @param label
+ */
+export function radioButtonXpath(label: string) {
+  return `${inputXpath(label, 'radio')}`;
 }
 
-  /**
-   * Visible text element.
-   * @param text
-   */
-export function textString(text: string) {
-  return `//*[contains(normalize-space(text()),'${text}')]`;
+export function inputXpath(label: string, inputType?: string) {
+  if (!!inputType) {
+    return `${textXpath(label)}/ancestor::node()[1]/input[@type=${inputType}] | /ancestor::node()[2]//input[@type=${inputType}]`;
+  }
+  // return all input nodes
+  return `${textXpath(label)}/ancestor::node()[1]/input | /ancestor::node()[2]//input`;
+}
+
+/**
+ * Texts or label. It can be partial or full string.
+ * @param labelText
+ */
+export function textXpath(label: string) {
+  return `//*[contains(normalize-space(text()),"${label}")]`;
+}
+
+/**
+ * Clickable element with label.
+ * @param label
+ */
+export function clickableXpath(label: string) {
+  return `(//a | //*[@role='button'])[normalize-space()='${label}' or contains(@aria-label,'${label}')]`;
 }

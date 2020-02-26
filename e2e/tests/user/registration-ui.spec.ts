@@ -1,7 +1,7 @@
 import CreateAccountPage from '../../app/create-account-page';
+import WebElement from '../../app/elements/web-element';
 import GoogleLoginPage from '../../app/google-login';
-import AouElement from '../../driver/AouElement';
-import {findText, getCursorValue} from '../../driver/elementHandle-util';
+import {findText, getCursorValue} from '../../driver/element-util';
 import {waitForText, waitUntilFindTexts} from '../../driver/waitFuncs';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
 require('../../driver/waitFuncs');
@@ -83,13 +83,13 @@ describe('User registration tests:', () => {
     // Before user read all pdf pages, checkboxes are unchecked and disabled
     const privacyStatementCheckbox = await createAccountPage.getPrivacyStatementCheckbox();
     expect(privacyStatementCheckbox).toBeTruthy();
-    expect(await (new AouElement(privacyStatementCheckbox).getAttr('disabled'))).toBe('');
-    expect(await (new AouElement(privacyStatementCheckbox).getProp('checked'))).toBe(false);
+    expect(await (new WebElement(privacyStatementCheckbox).getAttr('disabled'))).toBe('');
+    expect(await (new WebElement(privacyStatementCheckbox).getProp('checked'))).toBe(false);
 
     const termsOfUseCheckbox = await createAccountPage.getTermsOfUseCheckbox();
     expect(termsOfUseCheckbox).toBeTruthy();
-    expect(await (new AouElement(termsOfUseCheckbox).getAttr('disabled'))).toBe('');
-    expect(await (new AouElement(termsOfUseCheckbox).getProp('checked'))).toBe(false);
+    expect(await (new WebElement(termsOfUseCheckbox).getAttr('disabled'))).toBe('');
+    expect(await (new WebElement(termsOfUseCheckbox).getProp('checked'))).toBe(false);
 
     const nextButton = await createAccountPage.getNextButton();
     // Next button should be disabled
@@ -99,16 +99,16 @@ describe('User registration tests:', () => {
     // scroll to last pdf file will enables checkboxes
     await createAccountPage.scrollToLastPdfPage();
 
-    expect(await (new AouElement(privacyStatementCheckbox).getAttr('disabled'))).toBeNull();
-    expect(await (new AouElement(termsOfUseCheckbox).getAttr('disabled'))).toBeNull();
+    expect(await (new WebElement(privacyStatementCheckbox).getAttr('disabled'))).toBeNull();
+    expect(await (new WebElement(termsOfUseCheckbox).getAttr('disabled'))).toBeNull();
 
     // check on checkboxes
     await (await createAccountPage.getPrivacyStatementLabel()).click();
     await (await createAccountPage.getTermsOfUseLabel()).click();
 
     // verify checked
-    expect(await (new AouElement(privacyStatementCheckbox).getProp('checked'))).toBe(true);
-    expect(await (new AouElement(termsOfUseCheckbox).getProp('checked'))).toBe(true);
+    expect(await (new WebElement(privacyStatementCheckbox).getProp('checked'))).toBe(true);
+    expect(await (new WebElement(termsOfUseCheckbox).getProp('checked'))).toBe(true);
   });
 
   test('Loading User information page', async () => {
@@ -153,7 +153,7 @@ describe('User registration tests:', () => {
     // verify all input fields are visible and editable on this page
     const allInputs = await page.$$('input', { visible: true });
     for (const aInput of allInputs) {
-      const isDisabled = await (new AouElement(aInput)).getAttr('disabled');
+      const isDisabled = await (new WebElement(aInput)).getAttr('disabled');
       expect(isDisabled).toBeNull();
     }
 

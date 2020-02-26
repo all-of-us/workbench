@@ -78,7 +78,7 @@ export async function exists(page: Page, element: ElementHandle) {
  * @param {Page} page
  * @param {ElementHandle} element
  */
-export async function visible(page: Page, element: ElementHandle) {
+export async function isVisible(page: Page, element: ElementHandle) {
   return await page.evaluate(elem => {
     return elem.boundingBox() !== null;
   }, element);

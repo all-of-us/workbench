@@ -1,8 +1,8 @@
 import {Page} from 'puppeteer';
 import WebElement from './web-element';
-import {findButton} from './xpath-finder';
+import {findTextarea} from './xpath-finder';
 
-export default class Button {
+export default class TextArea {
 
   private readonly label: string;
   private readonly page: Page;
@@ -15,23 +15,14 @@ export default class Button {
 
   public async get(): Promise<WebElement> {
     if (!!this.webElement) {
-      const element = await findButton(this.page, this.label);
+      const element = await findTextarea(this.page, this.label);
       this.webElement = new WebElement(element);
     }
     return this.webElement;
   }
 
-  public async getButtonLabel(): Promise<string> {
-    return (await this.get()).getTextContent();
+  public async getValue(): Promise<unknown> {
+    return (await this.get()).getProperty("value");
   }
-
-   /**
-    * Checking style 'cursor' value.
-    */
-  public async isDisabled() {
-    const cursor = await (await this.get()).getComputedStyle("cursor");
-    return cursor === 'not-allowed';
-  }
-
 
 }
