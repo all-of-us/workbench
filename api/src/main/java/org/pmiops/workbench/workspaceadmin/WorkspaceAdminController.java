@@ -72,7 +72,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       for (Point point : timeSeries.getPointsList()) {
         response.addReceivedBytesItem(
             new TimeSeriesPoint()
-                .timestamp(Timestamps.toMillis(point.getInterval().getStartTime()))
+                .timestamp(Timestamps.toMillis(point.getInterval().getEndTime()))
                 .value(point.getValue().getDoubleValue()));
       }
     }

@@ -165,12 +165,12 @@ public class WorkspaceAdminControllerTest {
             .addPoints(
                 Point.newBuilder()
                     .setInterval(
-                        TimeInterval.newBuilder().setStartTime(Timestamps.fromMillis(2000)))
+                        TimeInterval.newBuilder().setEndTime(Timestamps.fromMillis(2000)))
                     .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
             .addPoints(
                 Point.newBuilder()
                     .setInterval(
-                        TimeInterval.newBuilder().setStartTime(Timestamps.fromMillis(1000)))
+                        TimeInterval.newBuilder().setEndTime(Timestamps.fromMillis(1000)))
                     .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
             .build();
     when(mockCloudMonitoringService.getCloudStorageReceivedBytes(anyString(), any(Duration.class)))

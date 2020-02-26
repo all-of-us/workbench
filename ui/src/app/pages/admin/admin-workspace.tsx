@@ -64,7 +64,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
       });
     }
 
-    // Fire off both promises in parallel
+    // Fire off both requests in parallel
     const workspaceDetailsPromise = workspaceAdminApi().getFederatedWorkspaceDetails(this.state.googleProject);
     const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(this.state.googleProject);
     // Wait for both promises to complete before updating state.
