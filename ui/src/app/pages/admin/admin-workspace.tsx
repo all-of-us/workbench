@@ -4,10 +4,9 @@ import {Component} from '@angular/core';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {TextInput} from 'app/components/inputs';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
@@ -44,26 +43,28 @@ const PurpleLabel = ({style = {}, children}) => {
 };
 
 interface State {
-  googleProject: string;
   workspace: Workspace;
   collaborators: Array<UserRole>;
   resources: AdminWorkspaceResources;
 }
 
-export class AdminWorkspace extends React.Component<{}, State> {
+class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
   constructor(props) {
     super(props);
 
     this.state = {
-      googleProject: '',
       workspace: null,
       collaborators: [],
       resources: {},
     };
   }
 
+  componentDidMount() {
+    this.getFederatedWorkspaceInformation();
+  }
+
   getFederatedWorkspaceInformation() {
-    workspaceAdminApi().getFederatedWorkspaceDetails(this.state.googleProject).then(
+    workspaceAdminApi().getFederatedWorkspaceDetails(this.props.urlParams.workspaceNamespace).then(
       response => {
         this.setState({
           workspace: response.workspace,
@@ -74,7 +75,7 @@ export class AdminWorkspace extends React.Component<{}, State> {
     );
   }
 
-  maybeGetFederatedWorkspaceInformation(event) {
+  maybeGetFederatedWorkspaceInformation(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       return this.getFederatedWorkspaceInformation();
     }
@@ -111,25 +112,8 @@ export class AdminWorkspace extends React.Component<{}, State> {
 
   render() {
     const {workspace, collaborators, resources} = this.state;
+
     return <div>
-      <h2 style={{margin: 'auto'}}>Manage Workspaces</h2>
-      <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center'}}>
-        <PurpleLabel style={{marginRight: '1rem'}}>Google Project ID</PurpleLabel>
-        <TextInput
-            style={{
-              width: '10rem',
-              marginRight: '1rem'
-            }}
-            onChange={value => this.setState({googleProject: value})}
-            onKeyDown={event => this.maybeGetFederatedWorkspaceInformation(event)}
-        />
-        <Button
-            style={{height: '1.5rem'}}
-            onClick={() => this.getFederatedWorkspaceInformation()}
-        >
-          Search
-        </Button>
-      </FlexRow>
       {
         workspace && <FlexColumn>
           <h3>Workspace Admin Actions</h3>
@@ -281,6 +265,8 @@ export class AdminWorkspace extends React.Component<{}, State> {
     </div>;
   }
 }
+
+export const AdminWorkspace = withUrlParams()(AdminWorkspaceImpl);
 
 @Component({
   template: '<div #root></div>'

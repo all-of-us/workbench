@@ -345,9 +345,9 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       }
       {
         profile.authorities.includes(Authority.WORKSPACESVIEW) && this.state.showAdminOptions && <SideNavItem
-            content={'Manage Workspaces'}
+            content={'Workspaces'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
-            href={'admin/workspace'}
+            href={'admin/workspaces'}
             active={this.props.workspaceAdminActive}
         />
       }
