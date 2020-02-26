@@ -344,7 +344,7 @@ public final class DbStorageEnums {
           .put(InstitutionalRole.LATE_CAREER, (short) 5)
           .put(InstitutionalRole.PRE_DOCTORAL, (short) 6)
           .put(InstitutionalRole.POST_DOCTORAL, (short) 7)
-          .put(InstitutionalRole.PI, (short) 8)
+          .put(InstitutionalRole.SENIOR_RESEARCHER, (short) 8)
           .put(InstitutionalRole.TEACHER, (short) 9)
           .put(InstitutionalRole.STUDENT, (short) 10)
           .put(InstitutionalRole.ADMIN, (short) 11)
