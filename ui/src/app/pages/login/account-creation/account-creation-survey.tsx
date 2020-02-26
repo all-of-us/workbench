@@ -10,13 +10,13 @@ import {CheckBox, RadioButton} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
+import {AouTitle} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {toggleIncludes} from 'app/utils';
 import {Profile} from 'generated/fetch';
 import {Section, TextInputWithLabel} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
-import {AouTitle} from "app/components/text-wrappers";
 
 const styles = {
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
