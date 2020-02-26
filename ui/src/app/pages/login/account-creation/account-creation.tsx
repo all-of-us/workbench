@@ -375,6 +375,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
   }
 
+  // TODO remove after we switch to verified institutional affiliation
+  showInstitutionAffiliationFreeTextField(option) {
+    return option === NonAcademicAffiliation.FREETEXT ||
+      option === IndustryRole.FREETEXT ||
+      option === EducationalRole.FREETEXT;
+  }
+
   // cannot destructure because verifiedInstitutionalAffiliation may not be defined
   // todo is this a code smell?
   getVerifiedInstitutionalAffiliationAttribute(attribute: string) {
@@ -384,13 +391,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     } else {
       return verifiedInstitutionalAffiliation[attribute];
     }
-  }
-
-  // TODO remove after we switch to verified institutional affiliation
-  showInstitutionAffiliationFreeTextField(option) {
-    return option === NonAcademicAffiliation.FREETEXT ||
-      option === IndustryRole.FREETEXT ||
-      option === EducationalRole.FREETEXT;
   }
 
   // TODO remove after we switch to verified institutional affiliation

@@ -16,13 +16,12 @@ const component = () => {
 const defaultConfig = {
   gsuiteDomain: 'researchallofus.org',
   enableNewAccountCreation: false,
-  requireInstitutionalVerification: false
 };
 
 beforeEach(() => {
   serverConfigStore.next(defaultConfig);
   props = {
-    profile: createEmptyProfile(defaultConfig.requireInstitutionalVerification),
+    profile: createEmptyProfile(),
     invitationKey: '',
     onComplete: (profile: Profile) => {},
   };

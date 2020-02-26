@@ -129,7 +129,7 @@ interface SignInState {
   termsOfServiceVersion?: number;
 }
 
-export const createEmptyProfile = (requireInstitutionalVerification: boolean): Profile => {
+export const createEmptyProfile = (requireInstitutionalVerification: boolean = false): Profile => {
   const profile: Profile = {
     // Note: We abuse the "username" field here by omitting "@domain.org". After
     // profile creation, this field is populated with the full email address.

@@ -80,7 +80,6 @@ describe('SignInReact', () => {
 
   it('should handle sign-up flow for legacy account creation', () => {
     const wrapper = shallowComponent();
-    const requireInstitutionalVerification = false;
 
     // To start, the landing page / login component should be shown.
     expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
@@ -92,7 +91,7 @@ describe('SignInReact', () => {
     wrapper.find(InvitationKey).props().onInvitationKeyVerified('asdf');
 
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
+    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
 
     // Success!
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
