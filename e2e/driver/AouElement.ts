@@ -10,7 +10,6 @@ export default class AouElement {
 
   public async getProp(property: string): Promise<unknown> {
     const prop = await this.eHandle.getProperty(property);
-    console.log(`getProp(${property}) function: ${await prop.jsonValue()}`);
     return await prop.jsonValue();
   }
 
@@ -18,10 +17,9 @@ export default class AouElement {
    * Get attribute directly from a ElementHandle.
    * If the attribute have property counterparts, use getProperty function.
    */
-  public async getAttr(attr: string): Promise<unknown> {
-    const atr = await this.eHandle.getAttribute(attr);
-    console.log(`getAttr(${attr}) function: ${atr}`);
-    return atr;
+  public async getAttr(attribute: string): Promise<unknown> {
+    const attr = await this.eHandle.evaluate( (node, attri) => node.getAttribute(attri), attribute);
+    return attr;
   }
 
   public async click() {
@@ -54,7 +52,6 @@ export default class AouElement {
   public async check() {
     const cValue = await this.isChecked();
     if (!cValue) {
-      console.log('going to check the checkbox');
       await this.click();
     }
   }
@@ -62,7 +59,6 @@ export default class AouElement {
   public async unCheck() {
     const cValue = await this.isChecked();
     if (cValue) {
-      console.log('going to uncheck the checkbox');
       await this.click();
     }
   }
@@ -82,17 +78,11 @@ export default class AouElement {
 
   public async isChecked(): Promise<boolean> {
     const checkedProp = await this.getProp('checked');
-    console.log('isChecked function returned: ' + checkedProp);
     return checkedProp === true;
   }
 
   public async selectByValue(aOptionalValue: string) {
     return await this.eHandle.select(aOptionalValue);
-  }
-
-  // @ts-ignore
-  public async selectByText(textValue: string) {
-    // todo
   }
 
   public async hasAttribute(attr: string): Promise<boolean> {
@@ -108,7 +98,7 @@ export default class AouElement {
     await this.eHandle.press(key, options)
   }
 
-  public asElementHandle(): ElementHandle {
+  public asElement(): ElementHandle {
     return this.eHandle.asElement();
   }
 

@@ -2,7 +2,7 @@ import * as Puppeteer from 'puppeteer';
 import {Browser} from 'puppeteer';
 
 const defaultLaunchOpts = {
-  headless: true,
+  headless: !!process.env.PUPPETEER_HEADLESS,
   slowMo: 10,
   defaultViewport: null,
   devtools: false,

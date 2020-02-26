@@ -114,7 +114,7 @@ public class EgressEventAuditorTest {
         .containsExactly(AgentType.USER);
     assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
         .containsExactly(ActionType.DETECT_HIGH_EGRESS_EVENT);
-    assertThat(events.stream().map(event -> event.getAgentId()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(USER_ID);
     assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
         .containsExactly(USER_EMAIL);
@@ -156,7 +156,7 @@ public class EgressEventAuditorTest {
 
     // Some of the properties should be nulled out, since we can't identify the target workspace
     // for the egress event.
-    assertThat(events.stream().map(event -> event.getAgentId()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(0);
     assertThat(
             events.stream()

@@ -25,9 +25,17 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cdr.model.DbPerson;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapperImpl;
+import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -78,8 +86,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     BigQueryTestService.class,
     CloudStorageServiceImpl.class,
     CohortQueryBuilder.class,
+    CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
-    CdrVersionService.class
+    CdrVersionService.class,
+    CriteriaMapperImpl.class,
+    AgeTypeCountMapperImpl.class
   })
   @MockBean({FireCloudService.class})
   static class Configuration {
@@ -101,6 +112,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
 
+  @Autowired private CohortBuilderService cohortBuilderService;
+
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -109,7 +122,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
+  @Autowired private CriteriaMapper criteriaMapper;
+
+  @Autowired private AgeTypeCountMapper ageTypeCountMapper;
+
   @Autowired private FireCloudService firecloudService;
+
+  @Autowired private PersonDao personDao;
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
@@ -133,6 +152,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private DbCriteria surveyNode;
   private DbCriteria questionNode;
   private DbCriteria answerNode;
+  private DbPerson dbPerson1;
+  private DbPerson dbPerson2;
+  private DbPerson dbPerson3;
 
   @Override
   public List<String> getTableNames() {
@@ -164,7 +186,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             cbCriteriaAttributeDao,
             cdrVersionService,
             elasticSearchService,
-            configProvider);
+            configProvider,
+            cohortBuilderService,
+            criteriaMapper);
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
@@ -194,128 +218,144 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     icd9 =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.CONDITION.toString())
-                .type(CriteriaType.ICD9CM.toString())
-                .standard(false));
+            DbCriteria.builder()
+                .addDomainId(DomainType.CONDITION.toString())
+                .addType(CriteriaType.ICD9CM.toString())
+                .addStandard(false)
+                .build());
     icd10 =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.CONDITION.toString())
-                .type(CriteriaType.ICD10CM.toString())
-                .standard(false));
+            DbCriteria.builder()
+                .addDomainId(DomainType.CONDITION.toString())
+                .addType(CriteriaType.ICD10CM.toString())
+                .addStandard(false)
+                .build());
     snomedStandard =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.CONDITION.toString())
-                .type(CriteriaType.SNOMED.toString())
-                .standard(true));
+            DbCriteria.builder()
+                .addDomainId(DomainType.CONDITION.toString())
+                .addType(CriteriaType.SNOMED.toString())
+                .addStandard(true)
+                .build());
     snomedSource =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.CONDITION.toString())
-                .type(CriteriaType.SNOMED.toString())
-                .standard(false));
+            DbCriteria.builder()
+                .addDomainId(DomainType.CONDITION.toString())
+                .addType(CriteriaType.SNOMED.toString())
+                .addStandard(false)
+                .build());
     cpt4 =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.PROCEDURE.toString())
-                .type(CriteriaType.CPT4.toString())
-                .standard(false));
+            DbCriteria.builder()
+                .addDomainId(DomainType.PROCEDURE.toString())
+                .addType(CriteriaType.CPT4.toString())
+                .addStandard(false)
+                .build());
 
     temporalParent1 =
-        new DbCriteria()
-            .ancestorData(false)
-            .code("001")
-            .conceptId("0")
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD10CM.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .synonyms("+[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addAncestorData(false)
+            .addCode("001")
+            .addConceptId("0")
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD10CM.toString())
+            .addGroup(true)
+            .addSelectable(true)
+            .addStandard(false)
+            .addSynonyms("+[CONDITION_rank1]")
+            .build();
     saveCriteriaWithPath("0", temporalParent1);
     temportalChild1 =
-        new DbCriteria()
-            .parentId(temporalParent1.getId())
-            .ancestorData(false)
-            .code("001.1")
-            .conceptId("1")
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD10CM.toString())
-            .group(false)
-            .selectable(true)
-            .standard(false)
-            .synonyms("+[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addParentId(temporalParent1.getId())
+            .addAncestorData(false)
+            .addCode("001.1")
+            .addConceptId("1")
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD10CM.toString())
+            .addGroup(false)
+            .addSelectable(true)
+            .addStandard(false)
+            .addSynonyms("+[CONDITION_rank1]")
+            .build();
     saveCriteriaWithPath(temporalParent1.getPath(), temportalChild1);
 
     procedureParent1 =
-        new DbCriteria()
-            .parentId(99999)
-            .domainId(DomainType.PROCEDURE.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .standard(true)
-            .code("386637004")
-            .name("Obstetric procedure")
-            .count("36673")
-            .group(true)
-            .selectable(true)
-            .ancestorData(false)
-            .conceptId("4302541")
-            .synonyms("+[PROCEDURE_rank1]");
+        DbCriteria.builder()
+            .addParentId(99999)
+            .addDomainId(DomainType.PROCEDURE.toString())
+            .addType(CriteriaType.SNOMED.toString())
+            .addStandard(true)
+            .addCode("386637004")
+            .addName("Obstetric procedure")
+            .addCount("36673")
+            .addGroup(true)
+            .addSelectable(true)
+            .addAncestorData(false)
+            .addConceptId("4302541")
+            .addSynonyms("+[PROCEDURE_rank1]")
+            .build();
     saveCriteriaWithPath("0", procedureParent1);
     procedureChild1 =
-        new DbCriteria()
-            .parentId(procedureParent1.getId())
-            .domainId(DomainType.PROCEDURE.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .standard(true)
-            .code("386639001")
-            .name("Termination of pregnancy")
-            .count("50")
-            .group(false)
-            .selectable(true)
-            .ancestorData(false)
-            .conceptId("4")
-            .synonyms("+[PROCEDURE_rank1]");
+        DbCriteria.builder()
+            .addParentId(procedureParent1.getId())
+            .addDomainId(DomainType.PROCEDURE.toString())
+            .addType(CriteriaType.SNOMED.toString())
+            .addStandard(true)
+            .addCode("386639001")
+            .addName("Termination of pregnancy")
+            .addCount("50")
+            .addGroup(false)
+            .addSelectable(true)
+            .addAncestorData(false)
+            .addConceptId("4")
+            .addSynonyms("+[PROCEDURE_rank1]")
+            .build();
     saveCriteriaWithPath(procedureParent1.getPath(), procedureChild1);
 
     surveyNode =
-        new DbCriteria()
-            .parentId(0)
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.SURVEY.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .conceptId("22");
+        DbCriteria.builder()
+            .addParentId(0)
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.SURVEY.toString())
+            .addGroup(true)
+            .addSelectable(true)
+            .addStandard(false)
+            .addConceptId("22")
+            .build();
     saveCriteriaWithPath("0", surveyNode);
     questionNode =
-        new DbCriteria()
-            .parentId(surveyNode.getId())
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.QUESTION.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .name("In what country were you born?")
-            .conceptId("1585899")
-            .synonyms("[SURVEY_rank1]");
+        DbCriteria.builder()
+            .addParentId(surveyNode.getId())
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.QUESTION.toString())
+            .addGroup(true)
+            .addSelectable(true)
+            .addStandard(false)
+            .addName("In what country were you born?")
+            .addConceptId("1585899")
+            .addSynonyms("[SURVEY_rank1]")
+            .build();
     saveCriteriaWithPath(surveyNode.getPath(), questionNode);
     answerNode =
-        new DbCriteria()
-            .parentId(questionNode.getId())
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.ANSWER.toString())
-            .group(false)
-            .selectable(true)
-            .standard(false)
-            .name("USA")
-            .conceptId("5");
+        DbCriteria.builder()
+            .addParentId(questionNode.getId())
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.ANSWER.toString())
+            .addGroup(false)
+            .addSelectable(true)
+            .addStandard(false)
+            .addName("USA")
+            .addConceptId("5")
+            .build();
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
+
+    dbPerson1 = personDao.save(DbPerson.builder().addAgeAtConsent(55).addAgeAtCdr(56).build());
+    dbPerson2 = personDao.save(DbPerson.builder().addAgeAtConsent(22).addAgeAtCdr(22).build());
+    dbPerson3 = personDao.save(DbPerson.builder().addAgeAtConsent(34).addAgeAtCdr(35).build());
   }
 
   @After
@@ -338,6 +378,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         surveyNode,
         questionNode,
         answerNode);
+    personDao.delete(dbPerson1.getPersonId());
+    personDao.delete(dbPerson2.getPersonId());
+    personDao.delete(dbPerson3.getPersonId());
   }
 
   private static SearchParameter icd9() {
@@ -631,55 +674,59 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   private static DbCriteria drugCriteriaParent() {
-    return new DbCriteria()
-        .parentId(99999)
-        .domainId(DomainType.DRUG.toString())
-        .type(CriteriaType.ATC.toString())
-        .conceptId("21600932")
-        .group(true)
-        .standard(true)
-        .selectable(true);
+    return DbCriteria.builder()
+        .addParentId(99999)
+        .addDomainId(DomainType.DRUG.toString())
+        .addType(CriteriaType.ATC.toString())
+        .addConceptId("21600932")
+        .addGroup(true)
+        .addStandard(true)
+        .addSelectable(true)
+        .build();
   }
 
   private static DbCriteria drugCriteriaChild(long parentId) {
-    return new DbCriteria()
-        .parentId(parentId)
-        .domainId(DomainType.DRUG.toString())
-        .type(CriteriaType.RXNORM.toString())
-        .conceptId("1520218")
-        .group(false)
-        .selectable(true);
+    return DbCriteria.builder()
+        .addParentId(parentId)
+        .addDomainId(DomainType.DRUG.toString())
+        .addType(CriteriaType.RXNORM.toString())
+        .addConceptId("1520218")
+        .addGroup(false)
+        .addSelectable(true)
+        .build();
   }
 
   private static DbCriteria icd9CriteriaParent() {
-    return new DbCriteria()
-        .parentId(99999)
-        .domainId(DomainType.CONDITION.toString())
-        .type(CriteriaType.ICD9CM.toString())
-        .standard(false)
-        .code("001")
-        .name("Cholera")
-        .count("19")
-        .group(true)
-        .selectable(true)
-        .ancestorData(false)
-        .conceptId("2")
-        .synonyms("[CONDITION_rank1]");
+    return DbCriteria.builder()
+        .addParentId(99999)
+        .addDomainId(DomainType.CONDITION.toString())
+        .addType(CriteriaType.ICD9CM.toString())
+        .addStandard(false)
+        .addCode("001")
+        .addName("Cholera")
+        .addCount("19")
+        .addGroup(true)
+        .addSelectable(true)
+        .addAncestorData(false)
+        .addConceptId("2")
+        .addSynonyms("[CONDITION_rank1]")
+        .build();
   }
 
   private static DbCriteria icd9CriteriaChild(long parentId) {
-    return new DbCriteria()
-        .parentId(parentId)
-        .domainId(DomainType.CONDITION.toString())
-        .type(CriteriaType.ICD9CM.toString())
-        .standard(false)
-        .code("001.1")
-        .name("Cholera")
-        .count("19")
-        .group(false)
-        .selectable(true)
-        .ancestorData(false)
-        .conceptId("1");
+    return DbCriteria.builder()
+        .addParentId(parentId)
+        .addDomainId(DomainType.CONDITION.toString())
+        .addType(CriteriaType.ICD9CM.toString())
+        .addStandard(false)
+        .addCode("001.1")
+        .addName("Cholera")
+        .addCount("19")
+        .addGroup(false)
+        .addSelectable(true)
+        .addAncestorData(false)
+        .addConceptId("1")
+        .build();
   }
 
   @Test
@@ -1896,7 +1943,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private void saveCriteriaWithPath(String path, DbCriteria criteria) {
     criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
-    criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
+    criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
     criteria = cbCriteriaDao.save(criteria);
   }
 

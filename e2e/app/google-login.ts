@@ -111,4 +111,8 @@ export default class GoogleLoginPage {
     return await this.login(email, paswd);
   }
 
+  public async createAccountButton(): Promise<ElementHandle> {
+    return await this.page.waitForXPath('//*[@role=\'button\'][(text()=\'Create Account\')]', {visible:true})
+  }
+
 }

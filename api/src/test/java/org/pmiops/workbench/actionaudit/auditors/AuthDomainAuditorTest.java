@@ -41,7 +41,7 @@ public class AuthDomainAuditorTest {
 
     assertThat(event.getTimestamp()).isEqualTo(ActionAuditTestConfig.INSTANT.toEpochMilli());
     assertThat(event.getAgentType()).isEqualTo(AgentType.ADMINISTRATOR);
-    assertThat(event.getAgentId()).isEqualTo(ActionAuditTestConfig.ADMINISTRATOR_USER_ID);
+    assertThat(event.getAgentIdMaybe()).isEqualTo(ActionAuditTestConfig.ADMINISTRATOR_USER_ID);
     assertThat(event.getAgentEmailMaybe()).contains(ActionAuditTestConfig.ADMINISTRATOR_EMAIL);
     assertThat(event.getActionId()).contains(ActionAuditTestConfig.ACTION_ID);
     assertThat(event.getActionType()).isEqualTo(ActionType.EDIT);

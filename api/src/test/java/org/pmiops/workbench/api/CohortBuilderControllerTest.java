@@ -16,7 +16,10 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -32,6 +35,8 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -51,13 +56,21 @@ public class CohortBuilderControllerTest {
 
   @Mock private CdrVersionService cdrVersionService;
 
+  @Mock private CohortBuilderService cohortBuilderService;
+
   @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
   @Autowired private JdbcTemplate jdbcTemplate;
 
+  @Autowired private CriteriaMapper criteriaMapper;
+
   @Mock private Provider<WorkbenchConfig> configProvider;
+
+  @TestConfiguration
+  @Import({CriteriaMapperImpl.class})
+  static class Configuration {}
 
   @Before
   public void setUp() {
@@ -72,28 +85,32 @@ public class CohortBuilderControllerTest {
             cbCriteriaAttributeDao,
             cdrVersionService,
             elasticSearchService,
-            configProvider);
+            configProvider,
+            cohortBuilderService,
+            criteriaMapper);
   }
 
   @Test
   public void getCriteriaBy() {
     DbCriteria icd9CriteriaParent =
-        new DbCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .count("0")
-            .hierarchy(true)
-            .standard(false)
-            .parentId(0L);
+        DbCriteria.builder()
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addCount("0")
+            .addHierarchy(true)
+            .addStandard(false)
+            .addParentId(0L)
+            .build();
     cbCriteriaDao.save(icd9CriteriaParent);
     DbCriteria icd9Criteria =
-        new DbCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .count("0")
-            .hierarchy(true)
-            .standard(false)
-            .parentId(icd9CriteriaParent.getId());
+        DbCriteria.builder()
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addCount("0")
+            .addHierarchy(true)
+            .addStandard(false)
+            .addParentId(icd9CriteriaParent.getId())
+            .build();
     cbCriteriaDao.save(icd9Criteria);
 
     assertEquals(
@@ -151,11 +168,12 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaByDemo() {
     DbCriteria demoCriteria =
-        new DbCriteria()
-            .domainId(DomainType.PERSON.toString())
-            .type(CriteriaType.AGE.toString())
-            .count("0")
-            .parentId(0L);
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.AGE.toString())
+            .addCount("0")
+            .addParentId(0L)
+            .build();
     cbCriteriaDao.save(demoCriteria);
 
     assertEquals(
@@ -171,13 +189,14 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaAutoCompleteMatchesSynonyms() {
     DbCriteria criteria =
-        new DbCriteria()
-            .domainId(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .count("0")
-            .hierarchy(true)
-            .standard(true)
-            .synonyms("LP12*[MEASUREMENT_rank1]");
+        DbCriteria.builder()
+            .addDomainId(DomainType.MEASUREMENT.toString())
+            .addType(CriteriaType.LOINC.toString())
+            .addCount("0")
+            .addHierarchy(true)
+            .addStandard(true)
+            .addSynonyms("LP12*[MEASUREMENT_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -198,14 +217,15 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaAutoCompleteMatchesCode() {
     DbCriteria criteria =
-        new DbCriteria()
-            .domainId(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .count("0")
-            .hierarchy(true)
-            .standard(true)
-            .code("LP123")
-            .synonyms("+[MEASUREMENT_rank1]");
+        DbCriteria.builder()
+            .addDomainId(DomainType.MEASUREMENT.toString())
+            .addType(CriteriaType.LOINC.toString())
+            .addCount("0")
+            .addHierarchy(true)
+            .addStandard(true)
+            .addCode("LP123")
+            .addSynonyms("+[MEASUREMENT_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -226,13 +246,14 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaAutoCompleteSnomed() {
     DbCriteria criteria =
-        new DbCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .count("0")
-            .hierarchy(true)
-            .standard(true)
-            .synonyms("LP12*[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.SNOMED.toString())
+            .addCount("0")
+            .addHierarchy(true)
+            .addStandard(true)
+            .addSynonyms("LP12*[CONDITION_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -284,19 +305,20 @@ public class CohortBuilderControllerTest {
   @Test
   public void findCriteriaByDomainAndSearchTermMatchesSourceCode() {
     DbCriteria criteria =
-        new DbCriteria()
-            .code("001")
-            .count("10")
-            .conceptId("123")
-            .domainId(DomainType.CONDITION.toString())
-            .group(Boolean.TRUE)
-            .selectable(Boolean.TRUE)
-            .name("chol blah")
-            .parentId(0)
-            .type(CriteriaType.ICD9CM.toString())
-            .attribute(Boolean.FALSE)
-            .standard(false)
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addCode("001")
+            .addCount("10")
+            .addConceptId("123")
+            .addDomainId(DomainType.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.ICD9CM.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(false)
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -311,19 +333,20 @@ public class CohortBuilderControllerTest {
   @Test
   public void findCriteriaByDomainAndSearchTermLikeSourceCode() {
     DbCriteria criteria =
-        new DbCriteria()
-            .code("00")
-            .count("10")
-            .conceptId("123")
-            .domainId(DomainType.CONDITION.toString())
-            .group(Boolean.TRUE)
-            .selectable(Boolean.TRUE)
-            .name("chol blah")
-            .parentId(0)
-            .type(CriteriaType.ICD9CM.toString())
-            .attribute(Boolean.FALSE)
-            .standard(false)
-            .synonyms("+[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addCode("00")
+            .addCount("10")
+            .addConceptId("123")
+            .addDomainId(DomainType.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.ICD9CM.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(false)
+            .addSynonyms("+[CONDITION_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
 
     List<Criteria> results =
@@ -339,19 +362,20 @@ public class CohortBuilderControllerTest {
   @Test
   public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCodeBrand() {
     DbCriteria criteria1 =
-        new DbCriteria()
-            .code("672535")
-            .count("-1")
-            .conceptId("19001487")
-            .domainId(DomainType.DRUG.toString())
-            .group(Boolean.FALSE)
-            .selectable(Boolean.TRUE)
-            .name("4-Way")
-            .parentId(0)
-            .type(CriteriaType.BRAND.toString())
-            .attribute(Boolean.FALSE)
-            .standard(true)
-            .synonyms("[DRUG_rank1]");
+        DbCriteria.builder()
+            .addCode("672535")
+            .addCount("-1")
+            .addConceptId("19001487")
+            .addDomainId(DomainType.DRUG.toString())
+            .addGroup(Boolean.FALSE)
+            .addSelectable(Boolean.TRUE)
+            .addName("4-Way")
+            .addParentId(0)
+            .addType(CriteriaType.BRAND.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addSynonyms("[DRUG_rank1]")
+            .build();
     cbCriteriaDao.save(criteria1);
 
     List<Criteria> results =
@@ -366,19 +390,20 @@ public class CohortBuilderControllerTest {
   @Test
   public void findCriteriaByDomainAndSearchTermMatchesStandardCode() {
     DbCriteria criteria =
-        new DbCriteria()
-            .code("LP12")
-            .count("10")
-            .conceptId("123")
-            .domainId(DomainType.CONDITION.toString())
-            .group(Boolean.TRUE)
-            .selectable(Boolean.TRUE)
-            .name("chol blah")
-            .parentId(0)
-            .type(CriteriaType.LOINC.toString())
-            .attribute(Boolean.FALSE)
-            .standard(true)
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addCode("LP12")
+            .addCount("10")
+            .addConceptId("123")
+            .addDomainId(DomainType.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.LOINC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -393,19 +418,20 @@ public class CohortBuilderControllerTest {
   @Test
   public void findCriteriaByDomainAndSearchTermMatchesSynonyms() {
     DbCriteria criteria =
-        new DbCriteria()
-            .code("001")
-            .count("10")
-            .conceptId("123")
-            .domainId(DomainType.CONDITION.toString())
-            .group(Boolean.TRUE)
-            .selectable(Boolean.TRUE)
-            .name("chol blah")
-            .parentId(0)
-            .type(CriteriaType.LOINC.toString())
-            .attribute(Boolean.FALSE)
-            .standard(true)
-            .synonyms("LP12*[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addCode("001")
+            .addCount("10")
+            .addConceptId("123")
+            .addDomainId(DomainType.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.LOINC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addSynonyms("LP12*[CONDITION_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -422,19 +448,20 @@ public class CohortBuilderControllerTest {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     DbCriteria criteria =
-        new DbCriteria()
-            .code("001")
-            .count("10")
-            .conceptId("123")
-            .domainId(DomainType.DRUG.toString())
-            .group(Boolean.TRUE)
-            .selectable(Boolean.TRUE)
-            .name("chol blah")
-            .parentId(0)
-            .type(CriteriaType.ATC.toString())
-            .attribute(Boolean.FALSE)
-            .standard(true)
-            .synonyms("LP12*[DRUG_rank1]");
+        DbCriteria.builder()
+            .addCode("001")
+            .addCount("10")
+            .addConceptId("123")
+            .addDomainId(DomainType.DRUG.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.ATC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addSynonyms("LP12*[DRUG_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -454,13 +481,14 @@ public class CohortBuilderControllerTest {
     jdbcTemplate.execute(
         "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
     DbCriteria criteria =
-        new DbCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD10CM.toString())
-            .standard(true)
-            .count("1")
-            .conceptId("1")
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD10CM.toString())
+            .addStandard(true)
+            .addCount("1")
+            .addConceptId("1")
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     cbCriteriaDao.save(criteria);
     assertEquals(
         createResponseCriteria(criteria),
@@ -475,28 +503,30 @@ public class CohortBuilderControllerTest {
   @Test
   public void getDrugBrandOrIngredientByName() {
     DbCriteria drugATCCriteria =
-        new DbCriteria()
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .parentId(0L)
-            .code("LP12345")
-            .name("drugName")
-            .conceptId("12345")
-            .group(true)
-            .selectable(true)
-            .count("12");
+        DbCriteria.builder()
+            .addDomainId(DomainType.DRUG.toString())
+            .addType(CriteriaType.ATC.toString())
+            .addParentId(0L)
+            .addCode("LP12345")
+            .addName("drugName")
+            .addConceptId("12345")
+            .addGroup(true)
+            .addSelectable(true)
+            .addCount("12")
+            .build();
     cbCriteriaDao.save(drugATCCriteria);
     DbCriteria drugBrandCriteria =
-        new DbCriteria()
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.BRAND.toString())
-            .parentId(0L)
-            .code("LP6789")
-            .name("brandName")
-            .conceptId("1235")
-            .group(true)
-            .selectable(true)
-            .count("33");
+        DbCriteria.builder()
+            .addDomainId(DomainType.DRUG.toString())
+            .addType(CriteriaType.BRAND.toString())
+            .addParentId(0L)
+            .addCode("LP6789")
+            .addName("brandName")
+            .addConceptId("1235")
+            .addGroup(true)
+            .addSelectable(true)
+            .addCount("33")
+            .build();
     cbCriteriaDao.save(drugBrandCriteria);
 
     assertEquals(

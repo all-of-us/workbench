@@ -102,3 +102,19 @@ export async function waitUntilContainsAttributeValue(page: Page, cssSelector, a
     return element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
   }, {timeout: this.timeout}, cssSelector, attribute, value);
 }
+
+/**
+ * Wait for exact text to match.
+ * @param page
+ * @param cssSelector
+ * @param expectedText
+ */
+export async function waitForText(page: Page, cssSelector: string, expectedText: string) {
+  return  await page.waitForFunction( (css, expText) => {
+    const t = document.querySelector(css);
+    if (t !== undefined) {
+      return t.innerText === expText;
+    }
+    return false;
+  }, {timeout: 50000}, cssSelector, expectedText);
+}

@@ -83,6 +83,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     nbExtensions.put("aou-download-extension", assetsBaseUrl + "/aou-download-policy-extension.js");
     nbExtensions.put(
         "aou-activity-checker-extension", assetsBaseUrl + "/activity-checker-extension.js");
+    nbExtensions.put(
+        "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
 
     return new ClusterRequest()
         .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))

@@ -15,7 +15,7 @@ describe('ConceptAddModal', () => {
   let props;
   let conceptSetsApi: ConceptSetsApiStub;
   const stubConcepts = ConceptStubVariables.STUB_CONCEPTS;
-  const selectedDomain = DomainCountStubVariables.STUB_DOMAIN_COUNTS[0];
+  const activeDomainTab = DomainCountStubVariables.STUB_DOMAIN_COUNTS[0];
 
   const component = () => {
     return mount(<ConceptAddModal {...props}/>);
@@ -26,7 +26,7 @@ describe('ConceptAddModal', () => {
       onSave: () => {},
       onClose: () => {},
       selectedConcepts: stubConcepts,
-      selectedDomain: selectedDomain
+      activeDomainTab: activeDomainTab
     };
 
     conceptSetsApi = new ConceptSetsApiStub();
@@ -36,17 +36,17 @@ describe('ConceptAddModal', () => {
 
   it('finds the correct number of concepts in the selected domain', async () => {
     const wrapper = component();
-    const stubConceptsInDomain = stubConcepts.filter((c) => c.domainId === selectedDomain.name);
+    const stubConceptsInDomain = stubConcepts.filter((c) => c.domainId === activeDomainTab.name);
     expect(wrapper.find('[data-test-id="add-concept-title"]').first().text())
         .toBe('Add ' + stubConceptsInDomain.length + ' Concepts to '
-            + selectedDomain.name + ' Concept Set');
+            + activeDomainTab.name + ' Concept Set');
 
   });
 
   it('displays option to add to existing concept set if concept set in domain exists', async () => {
     const wrapper = component();
     const stubSetsInDomain = conceptSetsApi.conceptSets
-        .filter(s => s.domain === selectedDomain.domain)
+        .filter(s => s.domain === activeDomainTab.domain)
         .map(s => s.name);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="add-to-existing"]').exists()).toBeTruthy();
@@ -56,7 +56,7 @@ describe('ConceptAddModal', () => {
   });
 
   it('disables option to add to existing if concept set does not exist & defaults to create', async () => {
-    props.selectedDomain = DomainCountStubVariables.STUB_DOMAIN_COUNTS[2];
+    props.activeDomainTab = DomainCountStubVariables.STUB_DOMAIN_COUNTS[2];
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="add-to-existing"]').exists()).toBeFalsy();
@@ -77,7 +77,7 @@ describe('ConceptAddModal', () => {
   it('disables save button if user enters an invalid name for a new set', async () => {
     const wrapper = component();
     const stubSetsInDomain = conceptSetsApi.conceptSets
-        .filter(s => s.domain === selectedDomain.domain)
+        .filter(s => s.domain === activeDomainTab.domain)
         .map(s => s.name);
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="toggle-new-set"]').first().simulate('click');

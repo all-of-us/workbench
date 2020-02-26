@@ -1,9 +1,6 @@
 package org.pmiops.workbench.mail;
 
 import com.google.api.services.directory.model.User;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Optional;
 import javax.mail.MessagingException;
 import org.pmiops.workbench.db.model.DbUser;
 
@@ -18,18 +15,7 @@ public interface MailService {
       throws MessagingException;
 
   void alertUserFreeTierDollarThreshold(
-      final DbUser user,
-      double threshold,
-      double currentUsage,
-      double remainingBalance,
-      final Optional<Instant> expirationTimeIfKnown)
-      throws MessagingException;
-
-  void alertUserFreeTierTimeThreshold(
-      final DbUser user,
-      long daysRemaining,
-      final LocalDate expirationDate,
-      double remainingDollarBalance)
+      final DbUser user, double threshold, double currentUsage, double remainingBalance)
       throws MessagingException;
 
   void alertUserFreeTierExpiration(final DbUser user) throws MessagingException;
