@@ -117,10 +117,9 @@ public final class SearchGroupItemQueryBuilder {
   // sql parts to help construct demographic BigQuery sql
   private static final String DEMO_BASE =
       "select person_id\n" + "from `${projectId}.${dataSetId}.person` p\nwhere\n";
-  private static final String AGE_BASE =
-      "select person_id\n" + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere\n";
   private static final String AGE_SQL =
-      "%s %s %s\n"
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n"
           + "and not exists (\n"
           + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
           + "where d.person_id = p.person_id)\n";
@@ -246,12 +245,11 @@ public final class SearchGroupItemQueryBuilder {
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
           finalParam = finalParam + AND + ageNamedParameter2;
         }
-        return AGE_BASE
-            + String.format(
-                AGE_SQL,
-                AGE_COLUMN_SQL_MAP.get(attribute.getName()),
-                OperatorUtils.getSqlOperator(attribute.getOperator()),
-                finalParam);
+        return String.format(
+            AGE_SQL,
+            AGE_COLUMN_SQL_MAP.get(attribute.getName()),
+            OperatorUtils.getSqlOperator(attribute.getOperator()),
+            finalParam);
       case GENDER:
       case SEX:
       case ETHNICITY:
