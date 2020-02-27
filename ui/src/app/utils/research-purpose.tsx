@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import {ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
-import {ResearchPurpose, SpecificPopulationEnum} from 'generated/fetch';
+import {ResearchPurpose} from 'generated/fetch';
 
 const styles = {
   researchPurposeItemHeader: {
@@ -15,7 +15,14 @@ const styles = {
     fontWeight: 400,
     color: colors.primary,
     lineHeight: '22px'
-  }
+  },
+  sectionItemWithBackground: {
+    padding: '10px',
+    backgroundColor: colors.white,
+    color: colors.primary,
+    marginLeft: '0.5rem',
+    borderRadius: '3px'
+  },
 };
 
 export function getSelectedResearchPurposeItems(researchPurpose: ResearchPurpose) {
@@ -36,11 +43,20 @@ export function getSelectedResearchPurposeItems(researchPurpose: ResearchPurpose
 }
 
 export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
-  const populations = SpecificPopulationItems.filter(sp =>
-      researchPurpose.populationDetails.includes(sp.shortName))
-  .map(sp => sp.ubrLabel);
-  if (researchPurpose.populationDetails.includes(SpecificPopulationEnum.OTHER)) {
-    populations.push('Other: ' + researchPurpose.otherPopulationDetails);
-  }
-  return populations;
+  const categories = SpecificPopulationItems.filter(specificPopulationItem => specificPopulationItem
+    .subCategory.filter(item => researchPurpose.populationDetails.includes(item.shortName)).length > 0);
+  categories.forEach(category => category.subCategory = category.subCategory
+    .filter(subCategoryItem => researchPurpose.populationDetails.includes(subCategoryItem.shortName)));
+  return categories.map((selectedPopulationOfInterest, index) => {
+    return <React.Fragment>
+      {/*Generate a header for each section of underserved populations*/}
+      <div key={index} style={{...styles.researchPurposeItemHeader, marginTop: index === 0 ? 0 : '0.5rem'}}>
+        {selectedPopulationOfInterest.label}</div>
+      {/*Iterate through the subcategories of underserved populations and list each of them*/}
+      {selectedPopulationOfInterest.subCategory.map((subCategory, subCategoryIndex) => <div style={{
+        ...styles.sectionItemWithBackground, marginTop: '0.5rem'}} key={subCategoryIndex}>
+        {subCategory.label}
+      </div>)}
+    </React.Fragment>;
+  });
 }
