@@ -5,6 +5,14 @@ This is a small but flexible framework for automating DevOps actions and ensurin
 taken in a traceable, repeatable, and consistent way. It operates by  communicating to Google Cloud Platform
 directly, independently of the existing build, operations, and deployment pipeline(s).
 
+This is an experiment in an approach to a devops framework. The rationale for it coexisting with the
+other All of Us Workbench devops tooling is (1) that the current framework has many issues, and it would
+be a large undertaking to refactor the entirety of the existing system in one go, and (2) that we do not
+want new code to depend on or interfere  with existing devlopment tooling or the local dev environment except
+where  necessary (and explicit). At a later point we 
+will evaluate the best ways to configure, distribute, and provide an interface to these capabilities. In
+particular, the command-line options parser used is likely not going to be the long-term model.
+
 ## Usage
 The entry point to all functionality is `devops.rb`, which provides command line and environment
 loading and dispatches to Task classes (not scripts) that do the real work.
@@ -55,7 +63,7 @@ sufficient privilege account to create service account tokens.
 
 Additionally, you'll need to install a gem or two. Right now, it's
 
-`gem install google-cloud-monitoring` for the monitoring library
+`gem install --user google-cloud-monitoring` for the monitoring library
 
 ## Design Decisions
 I should justify some of the  directions I've taken here, since they're departures to varying
@@ -66,20 +74,21 @@ I wrestled a bit with this actually. I haven't seen anything that Ruby can do th
 for example, and in general the latter language has much more documentation, a more active
 community, and many more programmers. Ultimately, it would've  been a big reset to change
 code bases and languages all at once, so I'll continue to write the first  version in Ruby until
-I get ~~an excuse~~ a requirement to port to Python. One such requirement could come in the form
+I have a reason to port to Python or some  other language. One such requirement could come in the form
 of other teams we depend  on and wish to integrate tightly with using some other language.
 
 ### Task Classes Instead of Scripts
 I  decided to make the tasks full  Ruby classes instead of stand-alone scripts for a couple  of reasons.
 First, it ensures that we can minimize usage of global state (which can get away from you easily
-in Ruby). Second, we can now configure things  like log levels in one place.
+in Ruby). Second, we can now configure things like log levels and common options in one place.
 
 ### Independence of All Things All of Us
 There are no dependencies on any AoU application or build/release code, or anything in
 the utils repository. This allows us to avoid refactoring the legacy Ruby stack, and ensures
 that this framework can be reused externally. Some notably absent things:
 * `project.rb` System: This system depends on and is depended on by our  build & release framework, 
-which means we would be in danger of holding up a release if we needed to make a quick change.
+which means we could theoretically interfere  with local development or deploy processes. In any case,
+such a dependency would render this new functionality very difficult to share with other projects.
 * `ServiceAccountContext`: This system was a  major source of inspiration  for the new
  `ServiceAccountManager`, but had some customizations and legacy assumptions that were not compatible with the goals
  of this project.
