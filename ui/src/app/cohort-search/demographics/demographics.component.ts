@@ -143,30 +143,10 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       );
     }
     await Promise.all(promises);
-    this.calculateAge();
-    this.loading = false;
-  }
-
-  loadOptions(nodes: any) {
-    const params = this.wizard.item.searchParameters;
-    const attributes = params.length && params[0].type === CriteriaType.AGE
-      ? params[0].attributes
-      : [{
-        name: AttrName.AGE,
-        operator: Operator.BETWEEN,
-        operands: [minAge.toString(), maxAge.toString()]
-      }];
-    this.selectedNode = {
-      ...this.ageNode,
-      name: `Age In Range ${minAge} - ${maxAge}`,
-      attributes,
-    };
-    if (!params.length) {
-      const wizard = this.wizard;
-      wizard.item.searchParameters.push(this.selectedNode);
-      const selections = [this.ageNode.parameterId, ...this.selections];
-      selectionsStore.next(selections);
-      wizardStore.next(wizard);
+    if (this.enableCBAgeOptions) {
+      setTimeout(() => this.centerAgeCount());
+    } else {
+      this.calculateAge();
     }
     this.loading = false;
   }
@@ -185,7 +165,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       min.setValue(lo, {emitEvent: false});
       max.setValue(hi, {emitEvent: false});
       if (this.enableCBAgeOptions) {
-        setTimeout(() => this.centerAgeCount(), 300);
+        if (!!this.ageNodes) {
+          this.centerAgeCount();
+        }
       } else {
         this.count = null;
       }
