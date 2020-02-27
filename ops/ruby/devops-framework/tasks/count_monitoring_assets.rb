@@ -8,7 +8,6 @@ CUSTOM_METRIC_FILTER = "metric.type = starts_with(\"custom.googleapis.com/\")"
 LOGS_BASED_METRIC_FILTER = "metric.type = starts_with(\"logging.googleapis.com/\")"
 USER_LOGS_BASED_METRIC_FILTER = "metric.type = starts_with(\"logging.googleapis.com/user/\")"
 
-logger = Logger.new(STDOUT)
 class MonitoringAssets
   def initialize(envs_path, logger = Logger.new(STDOUT))
     @visitor = GcpEnvironmentVisitor.new(envs_path, logger)
@@ -58,7 +57,7 @@ class MonitoringAssets
         @logger.info("\t#{policy.display_name}, #{policy.name}, #{policy.conditions.count} conditions")
       end
 
-      @logger.info("Total counts for #{env.short_name}: #{counts.to_s}")
+      @logger.info("Total counts for #{env.short_name}: #{counts}")
     end
 
   end
