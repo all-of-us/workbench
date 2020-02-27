@@ -206,16 +206,30 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Transactional
   @Override
+  public WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException {
+    DbWorkspace dbWorkspace =
+        getByNamespace(workspaceNamespace)
+            .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
+    return getWorkspaceImpl(dbWorkspace);
+  }
+
+  @Transactional
+  @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+    return getWorkspaceImpl(dbWorkspace);
+  }
 
+  private WorkspaceResponse getWorkspaceImpl(DbWorkspace dbWorkspace) {
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspace fcWorkspace;
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.
-    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    fcResponse =
+        fireCloudService.getWorkspace(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     fcWorkspace = fcResponse.getWorkspace();
 
     if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {

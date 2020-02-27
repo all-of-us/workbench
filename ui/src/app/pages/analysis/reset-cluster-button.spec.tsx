@@ -19,8 +19,7 @@ describe('ResetClusterButton', () => {
 
   beforeEach(() => {
     props = {
-      billingProjectId: "billing-project-123",
-      workspaceFirecloudName: "workspace-name-123"
+      workspaceNamespace: 'billing-project-123',
     };
 
     registerApiClient(ClusterApi, new ClusterApiStub());
@@ -45,4 +44,5 @@ describe('ResetClusterButton', () => {
     expect(spy).toHaveBeenCalled();
     expect(wrapper.find('Modal[data-test-id="reset-notebook-modal"]').length).toBe(0);
   });
+
 });
