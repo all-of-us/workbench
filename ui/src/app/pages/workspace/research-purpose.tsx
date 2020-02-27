@@ -13,6 +13,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
+  getSelectedPopulations,
   getSelectedResearchPurposeItems
 } from 'app/utils/research-purpose';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -47,7 +48,7 @@ const styles = reactStyles({
     borderRadius: '3px'
   },
   sectionSubHeader: {
-    fontSize: '14px', fontWeight: 600, color: colors.primary
+    fontSize: '14px', fontWeight: 600, color: colors.primary, marginTop: '0.5rem'
   },
   sectionText: {
     fontSize: '14px', lineHeight: '24px', color: colors.primary, marginTop: '0.3rem'
@@ -66,21 +67,10 @@ export const ResearchPurpose = withCurrentWorkspace()(
       };
     }
 
-    // TODO: Move this to an abstract function and also change the admin workspace to use it
-    getSelectedPopulationsOfInterest() {
-      const researchPurpose = this.props.workspace.researchPurpose;
-      const categories = SpecificPopulationItems.filter(specificPopulationItem => specificPopulationItem
-        .subCategory.filter(item => researchPurpose.populationDetails.includes(item.shortName)).length > 0);
-      categories.forEach(category => category.subCategory = category.subCategory
-        .filter(subCategoryItem => researchPurpose.populationDetails.includes(subCategoryItem.shortName)));
-      return categories;
-    }
-
     render() {
       const {workspace} = this.props;
       const {workspacePermissions} = this.state;
       const selectedResearchPurposeItems = getSelectedResearchPurposeItems(this.props.workspace.researchPurpose);
-      const selectedPopulationsOfInterest = this.getSelectedPopulationsOfInterest();
       return <FadeBox>
         <div style={styles.mainHeader}>Primary purpose of project
           <Clickable disabled={!workspacePermissions.canWrite}
@@ -139,16 +129,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
         {workspace.researchPurpose.population && <React.Fragment>
           <div style={styles.sectionHeader}>Population of interest</div>
           <div style={styles.sectionContentContainer}>
-            {selectedPopulationsOfInterest.map((selectedPopulationOfInterest, index) => {
-              return <React.Fragment>
-                <div key={index} style={{...styles.sectionSubHeader, marginTop: '0.5rem'}}>
-                  {selectedPopulationOfInterest.label}</div>
-                {selectedPopulationOfInterest.subCategory.map((subCategory, subCategoryIndex) => <div style={{
-                  ...styles.sectionItemWithBackground, marginTop: '0.5rem'}} key={subCategoryIndex}>
-                  {subCategory.label}
-                </div>)}
-              </React.Fragment>;
-            })}
+            <div style={{marginTop: '0.5rem'}}>{getSelectedPopulations(workspace.researchPurpose)}</div>
           </div>
         </React.Fragment>}
       </FadeBox>;

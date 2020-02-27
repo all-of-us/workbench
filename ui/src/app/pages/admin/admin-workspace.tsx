@@ -310,7 +310,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
             {
               workspace.researchPurpose.population && this.workspaceInfoField(
                 'Population area(s) of focus',
-                getSelectedPopulations(workspace.researchPurpose).map((selectedPopulation, i) => <div key={i}>{selectedPopulation}</div>)
+                getSelectedPopulations(workspace.researchPurpose)
               )
             }
           </div>
