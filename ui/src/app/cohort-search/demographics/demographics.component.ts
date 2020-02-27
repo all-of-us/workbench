@@ -46,8 +46,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   enableCBAgeOptions = true;
   ageTypes = [
     {label: 'Current Age', type: AttrName.AGE.toString()},
-    {label: 'Age at Consent', type: 'AGE_AT_CONSENT'}, // TODO replace type with enum value once RW-4509 is complete
-    {label: 'Age at CDR Date', type: 'AGE_AT_CDR'} // TODO replace type with enum value once RW-4509 is complete
+    {label: 'Age at Consent', type: AttrName.AGEATCONSENT.toString()},
+    {label: 'Age at CDR Date', type: AttrName.AGEATCDR.toString()}
   ];
 
     /* The Demographics form controls and associated convenience lenses */
@@ -191,7 +191,13 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         }
       }
     }));
-    this.subscription.add(this.demoForm.get('ageType').valueChanges.subscribe(() => this.calculateAge()));
+    this.subscription.add(this.demoForm.get('ageType').valueChanges.subscribe(name => {
+      this.calculateAge();
+      const wizard = this.wizard;
+      this.selectedNode.attributes[0].name = name;
+      wizard.item.searchParameters = [this.selectedNode];
+      wizardStore.next(wizard);
+    }));
   }
 
   checkMax() {
@@ -215,6 +221,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   initAgeRange() {
     const min = this.demoForm.get('ageMin');
     const max = this.demoForm.get('ageMax');
+    const ageType = this.demoForm.get('ageType');
     const params = this.wizard.item.searchParameters;
     let attributes;
     if (params.length && params[0].type === CriteriaType.AGE) {
@@ -223,6 +230,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
+      if (this.enableCBAgeOptions) {
+        ageType.setValue(attributes[0].name, {emitEvent: false});
+      }
       this.count = this.wizard.count;
     } else {
       attributes = [{
@@ -258,7 +268,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       .distinctUntilChanged()
       .map(([lo, hi]) => {
         const attr = {
-          name: AttrName.AGE,
+          name: ageType.value,
           operator: Operator.BETWEEN,
           operands: [lo.toString(), hi.toString()]
         };
