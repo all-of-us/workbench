@@ -6,10 +6,7 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {
-  Error as ErrorDiv,
-  TextInput
-} from 'app/components/inputs';
+import {Error as ErrorDiv} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {clusterApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
