@@ -61,15 +61,21 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     };
   }
 
+  componentDidMount() {
+    this.getFederatedWorkspaceInformation();
+  }
+
   async getFederatedWorkspaceInformation() {
+    const {urlParams: { workspaceNamespace } } = this.props;
+
     this.setState({
       loadingData: true,
     });
 
     try {
       // Fire off both requests in parallel
-      const workspaceDetailsPromise = workspaceAdminApi().getFederatedWorkspaceDetails(this.state.googleProject);
-      const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(this.state.googleProject);
+      const workspaceDetailsPromise = workspaceAdminApi().getFederatedWorkspaceDetails(workspaceNamespace);
+      const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(workspaceNamespace);
       // Wait for both promises to complete before updating state.
       const workspaceDetails = await workspaceDetailsPromise;
       const cloudStorageTraffic = await cloudStorageTrafficPromise;
@@ -82,7 +88,6 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     } finally {
       this.setState({loadingData: false});
     }
-
   }
 
   maybeGetFederatedWorkspaceInformation(event: KeyboardEvent) {
@@ -171,7 +176,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
 
   private async deleteCluster() {
     await clusterApi().deleteClustersInProject(
-      this.state.googleProject,
+      this.props.urlParams.workspaceNamespace,
       {clustersToDelete: [this.state.clusterToDelete.clusterName]});
     this.setState({clusterToDelete: null});
     await this.getFederatedWorkspaceInformation();
