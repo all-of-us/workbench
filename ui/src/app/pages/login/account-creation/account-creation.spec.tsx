@@ -126,9 +126,7 @@ it('should handle invalid Email', () => {
   expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
 });
 
-// TODO update these tests like so:
-// serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: true});
-
+// TODO remove after we switch to verified institutional affiliation
 it('should display Institution name and role option by default', () => {
   serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
@@ -140,6 +138,7 @@ it('should display Institution name and role option by default', () => {
   expect(institutionRole.find('li').get(0).props.children).toBe(AccountCreationOptions.roles[0].label);
 });
 
+// TODO remove after we switch to verified institutional affiliation
 it('should display Affiliation information if No is selected', () => {
   serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
@@ -154,6 +153,7 @@ it('should display Affiliation information if No is selected', () => {
     .toBe(AccountCreationOptions.nonAcademicAffiliations[0].label);
 });
 
+// TODO remove after we switch to verified institutional affiliation
 it('should display Affiliation Roles should change as per affiliation', () => {
   serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
@@ -191,5 +191,3 @@ it('should display Affiliation Roles should change as per affiliation', () => {
   affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
   expect(affilationRoleDropDowns.length).toBe(0);
 });
-
-// TODO end
