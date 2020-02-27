@@ -2516,6 +2516,10 @@ definitions:
         description: >
           Feature flag for verifying the institutional affiliation of new users by validating their
           contact emails.
+      enableCBAgeTypeOptions:
+        type: boolean
+        default: false
+        description: Whether to use the new age type options in cohort builder age wizard
 
 
   FeaturedWorkspacesConfigResponse:

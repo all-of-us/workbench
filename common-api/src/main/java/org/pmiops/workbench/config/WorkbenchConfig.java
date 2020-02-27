@@ -237,6 +237,8 @@ public class WorkbenchConfig {
     // enforced by pattern-matching the user's contact email against the institution's
     // set of whitelisted email domains or addresses
     public boolean requireInstitutionalVerification;
+    // Flag to indicate whether to use the new age type options in cohort builder age wizard
+    public boolean enableCBAgeTypeOptions;
   }
 
   public static class ActionAuditConfig {

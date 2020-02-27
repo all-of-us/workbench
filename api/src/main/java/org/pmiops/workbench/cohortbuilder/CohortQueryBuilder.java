@@ -277,13 +277,13 @@ public class CohortQueryBuilder {
    * @return
    */
   private static String getAgeRangeSql(int lo, int hi) {
-    return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE("
+    return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, "
         + SEARCH_PERSON_TABLE
-        + ".dob), MONTH)/12) as INT64) >= "
+        + ".dob, MONTH)/12) as INT64) >= "
         + lo
-        + " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE("
+        + " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, "
         + SEARCH_PERSON_TABLE
-        + ".dob), MONTH)/12) as INT64) <= "
+        + ".dob, MONTH)/12) as INT64) <= "
         + hi
         + " then '"
         + lo
