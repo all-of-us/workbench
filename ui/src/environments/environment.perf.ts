@@ -4,6 +4,7 @@ export const environment: Environment = {
   displayTag: 'Perf',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'https://api-dot-all-of-us-rw-perf.appspot.com',
+  captchaSiteKey: '6LeELtwUAAAAAKB6KkKHcy1HyCQtX4nJDhmvX9nP',
   clientId: '63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com',
   leoApiUrl: 'https://leonardo.dsde-perf.broadinstitute.org',
   // There is no perf environment for the data browser
@@ -19,6 +20,7 @@ export const environment: Environment = {
   shibbolethUrl: 'https://shibboleth.dsde-perf.broadinstitute.org',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
+  enableCaptcha: false,
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: false,
   enableNewConceptTabs: false

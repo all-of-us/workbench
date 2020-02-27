@@ -3,6 +3,7 @@
 export const testEnvironmentBase = {
   allOfUsApiUrl: 'https://api-dot-all-of-us-workbench-test.appspot.com',
   clientId: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
+  captchaSiteKey: '6LdtP9wUAAAAANDDWvO8UYsrm4HSVSaWCEYLomEx',
   // Keep in sync with config_test.json.
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicUiUrl: 'https://aou-db-test.appspot.com',
@@ -17,6 +18,7 @@ export const testEnvironmentBase = {
   shouldShowDisplayTag: true,
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
+  enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,
   enableNewConceptTabs: false

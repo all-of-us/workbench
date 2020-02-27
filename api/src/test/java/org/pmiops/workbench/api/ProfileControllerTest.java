@@ -32,6 +32,7 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
@@ -93,6 +94,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String INVITATION_KEY = "secretpassword";
+  private static final String CAPTCHA_TOKEN = "captchaToken";
+  private static final String WRONG_CAPTCHA_TOKEN = "WrongcaptchaToken";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
@@ -107,6 +110,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private MailService mailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private CaptchaVerificationService captchaVerificationService;
 
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
@@ -131,7 +135,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     ProfileController.class,
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class
+    VerifiedInstitutionalAffiliationMapperImpl.class,
+    CaptchaVerificationService.class
   })
   static class Configuration {
     @Bean
@@ -178,6 +183,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
+    createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
     invitationVerificationRequest = new InvitationVerificationRequest();
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
@@ -194,6 +200,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     } catch (MessagingException e) {
       e.printStackTrace();
     }
+    when(cloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
+    when(captchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
+    when(captchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
   }
 
   @Test(expected = BadRequestException.class)
@@ -201,6 +210,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCreateAccount_invalidCaptchaToken() {
+    createUser();
+    createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
     profileController.createAccount(createAccountRequest);
   }
 
@@ -255,6 +271,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     CreateAccountRequest accountRequest = new CreateAccountRequest();
     accountRequest.setInvitationKey(INVITATION_KEY);
+    accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
     createAccountRequest.getProfile().setUsername("12");
     accountRequest.setProfile(createAccountRequest.getProfile());
     exception.expect(BadRequestException.class);

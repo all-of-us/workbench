@@ -110,5 +110,9 @@
     "host": "pmi-drc-api-test.appspot.com",
     "queueName": "rdrQueue",
     "exportObjectsPerTask" : 10
+  },
+  "captcha": {
+    "enableCaptcha": false,
+    "serverKeyFileName": "captcha-server-key.txt"
   }
 }

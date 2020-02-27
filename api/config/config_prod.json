@@ -107,5 +107,9 @@
     "host": "all-of-us-rdr-prod.appspot.com",
     "queueName": "rdrQueue",
     "exportObjectsPerTask" : 10
+  },
+  "captcha": {
+    "enableCaptcha": false,
+    "serverKeyFileName": "captcha-server-key.txt"
   }
 }
