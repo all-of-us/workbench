@@ -137,7 +137,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
-    CaptchaVerificationService.class
+    CaptchaVerificationService.class,
     PublicInstitutionDetailsMapperImpl.class,
     VerifiedInstitutionalAffiliationMapperImpl.class
   })

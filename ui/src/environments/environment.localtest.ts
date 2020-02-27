@@ -5,7 +5,6 @@ import {testEnvironmentBase} from 'environments/test-env-base';
 // run yarn dev-up with no arguments
 export const environment: Environment = {
   ...testEnvironmentBase,
-  captchaSiteKey: '6LeELtwUAAAAAKB6KkKHcy1HyCQtX4nJDhmvX9nP',
   displayTag: 'Local->Test',
   debug: true,
   gaId: 'UA-112406425-5'
