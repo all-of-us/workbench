@@ -6,7 +6,7 @@ import {ageCountStore, selectionsStore, wizardStore} from 'app/cohort-search/sea
 import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const minAge = 18;
@@ -42,8 +42,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   calculating = false;
   subscription = new Subscription();
   selectedNode: any;
-// Mocked Feature Flag. TODO remove once server-side config is in place. Need to FF the Age title returned from typeToTitle also
-  enableCBAgeOptions = true;
+  enableCBAgeTypeOptions = serverConfigStore.getValue().enableCBAgeTypeOptions;
   ageTypes = [
     {label: 'Current Age', type: AttrName.AGE.toString()},
     {label: 'Age at Consent', type: AttrName.AGEATCONSENT.toString()},
@@ -131,7 +130,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         this.deceasedNode = {...response.items[0], parameterId: 'param-dec'};
       })
     ];
-    if (this.enableCBAgeOptions) {
+    if (this.enableCBAgeTypeOptions) {
       const initialValue = {[AttrName.AGE.toString()]: [], 'AGE_AT_CONSENT': [], 'AGE_AT_CDR': []};
       promises.push(
         cohortBuilderApi().findAgeTypeCounts(+cdrVersionId).then(response => {
@@ -143,10 +142,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       );
     }
     await Promise.all(promises);
-    if (this.enableCBAgeOptions) {
+    if (this.enableCBAgeTypeOptions) {
       setTimeout(() => this.centerAgeCount());
-    } else {
-      this.calculateAge();
     }
     this.loading = false;
   }
@@ -164,7 +161,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
       min.setValue(lo, {emitEvent: false});
       max.setValue(hi, {emitEvent: false});
-      if (this.enableCBAgeOptions) {
+      if (this.enableCBAgeTypeOptions) {
         if (!!this.ageNodes) {
           this.centerAgeCount();
         }
@@ -177,7 +174,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       const [_, hi] = [...this.ageRange.value];
       if (value <= hi && value >= this.minAge) {
         this.ageRange.setValue([value, hi], {emitEvent: false});
-        if (!this.enableCBAgeOptions) {
+        if (!this.enableCBAgeTypeOptions) {
           this.count = null;
         }
       }
@@ -186,18 +183,20 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       const [lo, _] = [...this.ageRange.value];
       if (value >= lo) {
         this.ageRange.setValue([lo, value], {emitEvent: false});
-        if (!this.enableCBAgeOptions) {
+        if (!this.enableCBAgeTypeOptions) {
           this.count = null;
         }
       }
     }));
-    this.subscription.add(this.demoForm.get('ageType').valueChanges.subscribe(name => {
-      this.calculateAge();
-      const wizard = this.wizard;
-      this.selectedNode.attributes[0].name = name;
-      wizard.item.searchParameters = [this.selectedNode];
-      wizardStore.next(wizard);
-    }));
+    if (this.enableCBAgeTypeOptions) {
+      this.subscription.add(this.demoForm.get('ageType').valueChanges.subscribe(name => {
+        this.calculateAge();
+        const wizard = this.wizard;
+        this.selectedNode.attributes[0].name = name;
+        wizard.item.searchParameters = [this.selectedNode];
+        wizardStore.next(wizard);
+      }));
+    }
   }
 
   checkMax() {
@@ -230,7 +229,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
-      if (this.enableCBAgeOptions) {
+      if (this.enableCBAgeTypeOptions) {
         ageType.setValue(attributes[0].name, {emitEvent: false});
       }
       this.count = this.wizard.count;
@@ -253,7 +252,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       selectionsStore.next(selections);
       wizardStore.next(wizard);
     }
-    if (!this.enableCBAgeOptions) {
+    if (!this.enableCBAgeTypeOptions) {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       if (!ageCountStore.getValue()[cdrVersionId]) {
         // Get total age count for this cdr version if it doesn't exist in the store yet
@@ -297,7 +296,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.deceased.setValue(true);
       this.count = this.wizard.count;
     }
-    this.subscription = this.deceased.valueChanges.subscribe(includeDeceased => {
+    this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
       triggerEvent('Cohort Builder Search', 'Click', 'Demo - Age/Deceased - Deceased Box');
       const wizard = this.wizard;
       wizard.item.searchParameters = [includeDeceased ? this.deceasedNode : this.selectedNode];
@@ -305,11 +304,11 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       wizardStore.next(wizard);
       selectionsStore.next(selections);
       this.count = includeDeceased ? this.deceasedNode.count : null;
-    });
+    }));
   }
 
   centerAgeCount() {
-    if (this.enableCBAgeOptions) {
+    if (this.enableCBAgeTypeOptions) {
       this.calculateAge();
       const slider = <HTMLElement>document.getElementsByClassName('noUi-connect')[0];
       const wrapper = document.getElementById('count-wrapper');
@@ -353,7 +352,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   calculateAge(init?: boolean) {
-    if (this.enableCBAgeOptions) {
+    if (this.enableCBAgeTypeOptions) {
       const ageType = this.demoForm.get('ageType').value;
       const min = this.demoForm.get('ageMin').value;
       const max = this.demoForm.get('ageMax').value;
@@ -411,7 +410,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   get showPreview() {
     return !this.loading
       && (this.selections && this.selections.length)
-      && !(this.wizard.type === CriteriaType.AGE && this.enableCBAgeOptions);
+      && !(this.wizard.type === CriteriaType.AGE && this.enableCBAgeTypeOptions);
   }
 
   // Checks if form is in its initial state and if a count already exists before setting the total age count

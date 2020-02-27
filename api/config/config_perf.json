@@ -99,7 +99,8 @@
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false
+    "requireInstitutionalVerification": false,
+    "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf"

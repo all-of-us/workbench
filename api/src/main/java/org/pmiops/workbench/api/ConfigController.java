@@ -35,6 +35,7 @@ public class ConfigController implements ConfigApiDelegate {
             .enableNewAccountCreation(config.featureFlags.enableNewAccountCreation)
             .requireInvitationKey(config.access.requireInvitationKey)
             .requireInstitutionalVerification(
-                config.featureFlags.requireInstitutionalVerification));
+                config.featureFlags.requireInstitutionalVerification)
+            .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions));
   }
 }
