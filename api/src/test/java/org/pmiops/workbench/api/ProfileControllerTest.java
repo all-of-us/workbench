@@ -50,6 +50,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
@@ -131,6 +132,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     ProfileController.class,
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
+    PublicInstitutionDetailsMapperImpl.class,
     VerifiedInstitutionalAffiliationMapperImpl.class
   })
   static class Configuration {
@@ -446,6 +448,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName(broad.getShortName())
+            .institutionDisplayName(broad.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
     createAccountRequest
         .getProfile()

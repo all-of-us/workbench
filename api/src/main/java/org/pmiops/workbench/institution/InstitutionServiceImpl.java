@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.PublicInstitutionDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,15 +23,18 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private final InstitutionDao institutionDao;
   private final InstitutionMapper institutionMapper;
+  private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Autowired
   InstitutionServiceImpl(
       InstitutionDao institutionDao,
       InstitutionMapper institutionMapper,
+      PublicInstitutionDetailsMapper publicInstitutionDetailsMapper,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.institutionDao = institutionDao;
     this.institutionMapper = institutionMapper;
+    this.publicInstitutionDetailsMapper = publicInstitutionDetailsMapper;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
@@ -38,6 +42,13 @@ public class InstitutionServiceImpl implements InstitutionService {
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
         .map(institutionMapper::dbToModel)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<PublicInstitutionDetails> getPublicInstitutionDetails() {
+    return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
+        .map(publicInstitutionDetailsMapper::dbToModel)
         .collect(Collectors.toList());
   }
 

@@ -2341,7 +2341,8 @@ paths:
       tags:
         - institution
       description: >
-        Gets a list of all Institutions.
+        Gets the list of all Institutions.
+        Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitutions"
       responses:
         200:
@@ -2370,6 +2371,21 @@ paths:
           schema:
             $ref: "#/definitions/Institution"
 
+  /v1/institutions/publicDetails:
+    get:
+      tags:
+        - institution
+      description: >
+        Gets the public details for the list of all Institutions.
+      operationId: "getPublicInstitutionDetails"
+      security: []
+      responses:
+        200:
+          description: >
+            A list of all Institutions
+          schema:
+            $ref: "#/definitions/GetPublicInstitutionDetailsResponse"
+
   /v1/institutions/{shortName}:
     parameters:
       - in: path
@@ -2382,6 +2398,7 @@ paths:
         - institution
       description: >
         Gets the Institution corresponding to the shortName ID.
+        Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitution"
       responses:
         200:
@@ -4390,7 +4407,9 @@ definitions:
 
   Institution:
     type: object
-    description: Represents an institution which has been approved to validate researchers who wish to use the system
+    description: >
+      Represents an institution which has been approved to validate researchers who wish to use the system,
+      including the email patterns which we use to validate users.
     required:
       - shortName
       - displayName
@@ -4423,6 +4442,28 @@ definitions:
         items:
           type: string
 
+  PublicInstitutionDetails:
+    type: object
+    description: >
+      Represents an institution which has been approved to validate researchers who wish to use the system.
+      Does not include the sensitive email patterns used to validate users.
+    required:
+      - shortName
+      - displayName
+      - organizationTypeEnum
+    properties:
+      shortName:
+        type: string
+        description: A short unique name for the Institution used as an identifier, such as 'VUMC'
+      displayName:
+        type: string
+        description: A more descriptive name for the Institution, such as 'Vanderbilt University Medical Center'
+      organizationTypeEnum:
+        $ref: '#/definitions/OrganizationType'
+        description: >
+          The Organization Type of this institution if it is one of the enumerated
+          OrganizationTypes, or OrganizationType.OTHER if it is not
+
   GetInstitutionsResponse:
     type: object
     required:
@@ -4432,6 +4473,16 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Institution"
+
+  GetPublicInstitutionDetailsResponse:
+    type: object
+    required:
+      - institutions
+    properties:
+      institutions:
+        type: "array"
+        items:
+          $ref: "#/definitions/PublicInstitutionDetails"
 
   OrganizationType:
     type: string
@@ -4445,7 +4496,7 @@ definitions:
       derived from CAPS requirements.
     enum: [
       UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, MID_CAREER, LATE_CAREER,
-      PRE_DOCTORAL, POST_DOCTORAL, PI,
+      PRE_DOCTORAL, POST_DOCTORAL, SENIOR_RESEARCHER,
       TEACHER, STUDENT, ADMIN,
       PROJECT_PERSONNEL, OTHER
     ]
@@ -4459,6 +4510,11 @@ definitions:
       institutionShortName:
         type: string
         description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'VUMC'
+      institutionDisplayName:
+        type: string
+        description: >
+          The longer, more descriptive name of the Institution where the user has a Verified Affiliation,
+          such as 'Vanderbilt University Medical Center'
       institutionalRoleEnum:
         $ref: '#/definitions/InstitutionalRole'
         description: >

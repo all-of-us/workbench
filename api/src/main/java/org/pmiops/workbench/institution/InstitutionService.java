@@ -6,9 +6,12 @@ import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.PublicInstitutionDetails;
 
 public interface InstitutionService {
   List<Institution> getInstitutions();
+
+  List<PublicInstitutionDetails> getPublicInstitutionDetails();
 
   Optional<Institution> getInstitution(final String shortName);
 
