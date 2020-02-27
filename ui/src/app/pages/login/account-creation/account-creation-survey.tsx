@@ -94,9 +94,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
         if (environment.enableCaptcha) {
           // Reset captcha
           this.captchaRef.current.reset();
+          this.setState({captcha: false});
         }
         // TODO: we need to show some user-facing error message when this fails.
-        this.setState({creatingAccount: false, captcha: false});
+        this.setState({creatingAccount: false});
 
       });
   }
@@ -105,10 +106,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     this.setState({captchaToken: token, captcha: true});
   }
 
-  updateList(attribute, value) {
+  updateList(key, value) {
     // Toggle Includes removes the element if it already exist and adds if not
-    const attributeList = toggleIncludes(value, this.state.profile.demographicSurvey[attribute] || []);
-    this.updateDemographicAttribute(attribute, attributeList);
+    const attributeList = toggleIncludes(value, this.state.profile.demographicSurvey[key] || []);
+    this.updateDemographicAttribute(key, attributeList);
   }
 
   updateDemographicAttribute(attribute, value) {
