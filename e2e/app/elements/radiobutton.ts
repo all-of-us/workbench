@@ -14,7 +14,7 @@ export default class RadioButton {
   }
 
   public async get(): Promise<WebElement> {
-    if (!!this.webElement) {
+    if (this.webElement === undefined) {
       const element = await findRadioButton(this.page, this.label);
       this.webElement = new WebElement(element);
     }
@@ -22,7 +22,7 @@ export default class RadioButton {
   }
 
   public async isSelected() {
-    const propChecked = (await this.get()).getProperty('checked');
+    const propChecked = await (await this.get()).getProperty('checked');
     return !!propChecked;
   }
 
@@ -32,7 +32,7 @@ export default class RadioButton {
   public async select(): Promise<void> {
     const isChecked = await this.isSelected();
     if (!isChecked) {
-      (await this.get()).click();
+      await (await this.get()).click();
     }
   }
 
@@ -42,7 +42,7 @@ export default class RadioButton {
   public async unSelect() {
     const isChecked = await this.isSelected();
     if (isChecked) {
-      (await this.get()).click();
+      await (await this.get()).click();
     }
   }
 

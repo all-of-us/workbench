@@ -12,8 +12,6 @@ export interface ElementInterface {
 
   hasAttribute(attr: string): Promise<boolean>;
 
-  isEnabled(): Promise<boolean>;
-
   isDisabled(): Promise<boolean>;
 
   click(options?: ClickOptions): Promise<void>;

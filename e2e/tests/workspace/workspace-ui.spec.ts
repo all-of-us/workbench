@@ -1,94 +1,150 @@
-import {Page} from 'puppeteer';
+import {Browser, Page} from 'puppeteer';
+import Textbox from "../../app/elements/textbox";
 import WebElement from '../../app/elements/web-element';
+import GoogleLoginPage from "../../app/google-login";
 import Home from '../../app/home';
 import WorkspaceEditPage from '../../app/workspace-edit';
+import Workspaces from "../../app/workspaces";
 
 const Chrome = require('../../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
 
-describe('Edit Workspace page', () => {
+describe('Workspace', () => {
 
+  let chromeBrowser: Browser;
   let page: Page;
 
+  beforeAll(async () => {
+    chromeBrowser = await Chrome.newBrowser();
+  });
+
+  afterAll(async () => {
+    await chromeBrowser.close();
+  });
+
   beforeEach(async () => {
-    page = await Chrome.setup();
+    const incognitoContext = await chromeBrowser.createIncognitoBrowserContext();
+    page = await incognitoContext.newPage();
+    const loginPage = new GoogleLoginPage(page);
+    await loginPage.login();
   });
 
   afterEach(async () => {
-    await Chrome.teardown();
+    await page.close();
+    await page.waitFor(1000);
   });
 
-  // Click CreateNewWorkspace link in Home page => Open Create Workspace page
-  test('Home page: Click Create-New-Workspace link', async () => {
+  // Click CreateNewWorkspace link on Home page => Open Create Workspace page
+  test('Can create new workspace on Home page', async () => {
+
     const home = new Home(page);
-    const link = await home.getCreateNewWorkspaceLink();
-    expect(await link.boxModel() != null).toBe(true);
-    await link.click();
+    await home.getCreateNewWorkspaceLink()
+      .then((link) => link.click());
 
-    const workspace = new WorkspaceEditPage(page);
-    await workspace.waitUntilPageReady();
+    const workspaceEdit = new WorkspaceEditPage(page);
+    await workspaceEdit.waitUntilReady();
 
-    // expect Workspace-Name Input text field exists and is NOT readOnly
-    const nameInput = new WebElement(await workspace.getWorkspaceNameTextbox());
+    // expect Workspace-Name Input text field exists and is NOT disabled
+    const nameInput = new WebElement(await workspaceEdit.getWorkspaceNameTextbox());
     expect(await nameInput.isVisible()).toBe(true);
-    expect(await nameInput.isReadOnly()).toBe(false);
+    expect(await nameInput.isDisabled()).toBe(false);
 
-    // expect DataSet Select field exists
-    const dataSetSelect = new WebElement(await workspace.getDataSetSelectOption());
+    // expect DataSet Select field exists and is NOT disabled
+    const dataSetSelect = new WebElement(await workspaceEdit.getDataSetSelectOption());
     expect(await dataSetSelect.isVisible()).toBe(true);
-  }, 60 * 1000);
+    expect(await nameInput.isDisabled()).toBe(false);
 
-  // Click CreateNewWorkspace link in My Workpsaces page => Open Create Workspace page
-  test('My Workspaces page: Click link Create-New-Workspace', async () => {
-    const workspace = new WorkspaceEditPage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
-    await workspace.waitUntilPageReady();
-  }, 60 * 1000);
+  });
 
-  // Checking all fields out-of-box
-  test('Create Workspace page: Question 1', async () => {
-    const workspace = new WorkspaceEditPage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
-    await workspace.waitUntilPageReady();
+  // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
+  test('Can create new workspace on My Workspaces page', async () => {
+
+    const workspaces = new Workspaces(page);
+    const workspaceEdit = await workspaces.createNewWorkspace();
+
+    const nameInput = new WebElement(await workspaceEdit.getWorkspaceNameTextbox());
+    expect(await nameInput.isVisible()).toBe(true);
+
+  });
+
+
+  // Checking all fields in Research Purpose section
+  test('Checking Research Purpose questions on Create new workspace page', async () => {
+
+    const workspaces = new Workspaces(page);
+    const workspaceEdit = await workspaces.createNewWorkspace();
 
     // expand Disease purpose section if needed
-    const expandIcon = await workspace.getResearchPurposeExpandIcon();
-    if (expandIcon !== undefined) {
-      await (expandIcon[0]).click();
+    const researchPurpose = workspaceEdit.getResearchPurpose();
+    const researchPurposeCheckbox = researchPurpose.asCheckbox();
+    if (!await researchPurposeCheckbox.isChecked()) {
+      await (researchPurposeCheckbox.check());
+      await page.waitFor(1000);
     }
+
     // Disease-focused research checkbox
-    const diseaseName = workspace.question1_diseaseFocusedResearch();
-    let cbox = (await diseaseName.checkbox());
-    expect(await cbox.isVisible()).toBe(true);
-    expect(await cbox.getProp('checked')).toBe(false);
-    expect(await cbox.getProp('disabled')).toBe(false);
-    const txtField = await diseaseName.textfield();
-    expect(await txtField.isVisible()).toBe(true);
-    expect(await txtField.getProp('disabled')).toBe(true);
+    const diseaseName = workspaceEdit.question1_diseaseFocusedResearch();
+    const diseaseNameCheckbox = diseaseName.asCheckbox();
+    const diseaseNameElement = await diseaseNameCheckbox.get();
+    expect(await diseaseNameElement.isVisible()).toBe(true);
+    expect(await diseaseNameElement.getProperty('checked')).toBe(false);
+    expect(await diseaseNameElement.isDisabled()).toBe(false);
 
-    // Set the checkbox checked
-    await page.evaluate(elem => elem.click(), await (await diseaseName.checkbox()).asElement() );
-    // TODO wait async for checked and disabled checking or test will fail
+    const diseaseNameTextbox: Textbox = diseaseName.asTextbox();
+    const diseaseNameTextboxElement = await diseaseNameTextbox.focus();
+    expect(await diseaseNameTextboxElement.isVisible()).toBe(true);
+    expect(await diseaseNameTextboxElement.isDisabled()).toBe(true);
+
+    // Select the checkbox (checked)
+    await diseaseNameCheckbox.check();
+    // TODO wait async after change or test will fail
     await page.waitFor(1000);
-    cbox = await diseaseName.checkbox();
-    expect(await cbox.getProp('checked')).toBe(true);
-    expect(await txtField.getProp('disabled')).toBe(false);
+    expect(await diseaseNameElement.getProperty('checked')).toBe(true);
+    expect(await diseaseNameTextboxElement.isDisabled()).toBe(false);
 
-    // check all other fields in Question #1. What is the primary purpose of your project?
-    expect(await (await workspace.question1_populationHealth().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_methodsDevelopmentValidationStudy().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_drugTherapeuticsDevelopmentResearch().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_forProfitPurpose().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_researchControl().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_educationalPurpose().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_geneticResearch().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_socialBehavioralResearch().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_otherPurpose().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1_otherPurpose().textarea()).isVisible()).toBe(true);
-  }, 60 * 1000);
+    // check rest fields
+    const populationCheckbox = workspaceEdit.question1_populationHealth().asCheckbox();
+    expect(await (await populationCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await populationCheckbox.get()).isDisabled()).toBe(false);
 
+    const methodsCheckbox = workspaceEdit.question1_methodsDevelopmentValidationStudy().asCheckbox();
+    expect(await (await methodsCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await methodsCheckbox.get()).isDisabled()).toBe(false);
+
+    const drugCheckbox = workspaceEdit.question1_drugTherapeuticsDevelopmentResearch().asCheckbox();
+    expect(await (await drugCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await drugCheckbox.get()).isDisabled()).toBe(false);
+
+    const forProfitCheckbox = workspaceEdit.question1_forProfitPurpose().asCheckbox();
+    expect(await (await forProfitCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await forProfitCheckbox.get()).isDisabled()).toBe(false);
+
+    const researchCheckbox = workspaceEdit.question1_researchControl().asCheckbox();
+    expect(await (await researchCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await researchCheckbox.get()).isDisabled()).toBe(false);
+
+    const educationCheckbox = workspaceEdit.question1_educationalPurpose().asCheckbox();
+    expect(await (await educationCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await educationCheckbox.get()).isDisabled()).toBe(false);
+
+    const geneticCheckbox = workspaceEdit.question1_geneticResearch().asCheckbox();
+    expect(await (await geneticCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await geneticCheckbox.get()).isDisabled()).toBe(false);
+
+    const socialCheckbox = workspaceEdit.question1_socialBehavioralResearch().asCheckbox();
+    expect(await (await socialCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await socialCheckbox.get()).isDisabled()).toBe(false);
+
+    const otherPurpose = workspaceEdit.question1_otherPurpose();
+    const otherPurposeCheckbox = otherPurpose.asCheckbox();
+    expect(await (await otherPurposeCheckbox.get()).isVisible()).toBe(true);
+    expect(await (await otherPurposeCheckbox.get()).isDisabled()).toBe(false);
+    const otherPurposeTextarea = otherPurpose.asTextArea();
+    expect(await (await otherPurposeTextarea.focus()).isDisabled()).toBe(true);
+
+  });
+
+  /*
   test('Create Workspace page: Question 2', async () => {
     const workspace = new WorkspaceEditPage(page);
     await workspace.goURL();
@@ -146,4 +202,7 @@ describe('Edit Workspace page', () => {
     ).toBe(true);
   }, 60 * 1000);
 
+
+
+   */
 });

@@ -13,27 +13,28 @@ export default class Textbox {
     this.label = label;
   }
 
-  public async get(): Promise<WebElement> {
-    if (!!this.webElement) {
+  public async getWebElement(): Promise<WebElement> {
+    if (this.webElement === undefined) {
       const element = await findTextbox(this.page, this.label);
       this.webElement = new WebElement(element);
     }
     return this.webElement;
   }
 
-  public async focus(): Promise<void> {
-    const input = await this.get();
+  public async focus(): Promise<WebElement> {
+    const input = await this.getWebElement();
     await input.focus();
+    return input;
   }
 
   public async type(inputValue: string): Promise<void> {
-    const input = await this.get();
+    const input = await this.getWebElement();
     await input.focus();
     await input.type(inputValue);
   }
 
   public async getValue(): Promise<unknown> {
-    return (await this.get()).getProperty("value");
+    return await (await this.getWebElement()).getProperty("value");
   }
 
 }

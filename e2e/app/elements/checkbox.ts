@@ -1,6 +1,6 @@
-import {Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import WebElement from './web-element';
-import {findCheckbox} from './xpath-finder';
+import {findCheckbox, findText} from './xpath-finder';
 
 export default class Checkbox {
 
@@ -14,7 +14,7 @@ export default class Checkbox {
   }
 
   public async get(): Promise<WebElement> {
-    if (!!this.webElement) {
+    if (this.webElement === undefined) {
       const element = await findCheckbox(this.page, this.label);
       this.webElement = new WebElement(element);
     }
@@ -25,7 +25,7 @@ export default class Checkbox {
    * Checked means element does not have a `checked` property
    */
   public async isChecked(): Promise<boolean> {
-    const propChecked = (await this.get()).getProperty('checked');
+    const propChecked = await (await this.get()).getProperty('checked');
     return !!propChecked;
   }
 
@@ -35,7 +35,7 @@ export default class Checkbox {
   public async check(): Promise<void> {
     const isChecked = await this.isChecked();
     if (!isChecked) {
-      (await this.get()).click();
+      await (await this.text()).click();
     }
   }
 
@@ -45,9 +45,12 @@ export default class Checkbox {
   public async unCheck() {
     const isChecked = await this.isChecked();
     if (isChecked) {
-      (await this.get()).click();
+      await (await this.text()).click();
     }
   }
 
+  private async text(): Promise<ElementHandle> {
+    return await findText(this.page, this.label);
+  }
 
 }

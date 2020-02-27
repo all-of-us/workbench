@@ -10,8 +10,7 @@ export default class WebElement implements ElementInterface {
   }
 
   public async click(options?: ClickOptions): Promise<void> {
-    const eHandle = this.element.asElement();
-    return eHandle.click(options);
+    return this.element.asElement().click(options);
   }
 
   public async type(text: string, options?: { delay: number }): Promise<void> {
@@ -20,16 +19,14 @@ export default class WebElement implements ElementInterface {
   }
 
   public async pressKeyboard(key: string, options?: { text?: string, delay?: number }): Promise<void> {
-    const eHandle = this.element.asElement();
-    return eHandle.press(key, options);
+    return this.element.asElement().press(key, options);
   }
 
   /**
    * Finds the value of a property
    */
   public async getProperty(propertyName: string): Promise<unknown> {
-    const eHandle = this.element.asElement();
-    const p = await eHandle.getProperty(propertyName);
+    const p = await this.element.asElement().getProperty(propertyName);
     return p.jsonValue();
   }
 
@@ -37,41 +34,32 @@ export default class WebElement implements ElementInterface {
    * Finds the value of an attribute
    */
   public async getAttribute(attributeName: string): Promise<string | null> {
-    const eHandle = this.element.asElement();
-    return eHandle.executionContext()
-      .evaluate(
-         (e: HTMLElement, attr: string) => e.getAttribute(attr), this.element, attributeName
+    return await this.element.evaluate(
+         (e: HTMLElement, attr: string) => e.getAttribute(attr), this.element, attributeName,
       );
   }
 
   public async hasAttribute(attributeName: string): Promise<boolean> {
-    return this.getAttribute(attributeName) !== null;
+    return await this.getAttribute(attributeName) !== null;
   }
 
   public async getTextContent(): Promise<string> {
-    const eHandle = this.element.asElement();
-    return eHandle.executionContext()
-      .evaluate(
+    return await this.element.evaluate(
          (element: HTMLElement) => (element.textContent ? element.textContent.trim() : ''), this.element,
-      )
-  }
-
-  /**
-   * Enabled means element does not have a `disabled` attribute
-   */
-  public async isEnabled(): Promise<boolean> {
-    return this.getAttribute('disabled') === null;
+      );
   }
 
   /**
    * Disabled means element have a `disabled` attribute
    */
   public async isDisabled(): Promise<boolean> {
-    return !this.isEnabled();
+    const disabled = await this.getProperty('disabled');
+    return !!disabled ;
   }
 
   public async isVisible(): Promise<boolean> {
     const eHandle = this.element.asElement();
+    if (eHandle === null) return false;
     return await eHandle.boundingBox() !== null;
   }
 
@@ -101,6 +89,10 @@ export default class WebElement implements ElementInterface {
    */
   public exists(): boolean {
     return this.element.asElement() !== null;
+  }
+
+  public getElementHandle() {
+    return this.element.asElement();
   }
 
 }

@@ -63,12 +63,10 @@ export default class ChromeDriver {
 
   public async setup():  Promise<Puppeteer.Page>{
     await this.newPage();
-    const loginPage = new GoogleLoginPage(this.page);
-    await loginPage.login();
-    return this.page;
+    return this.logInWithDefaultUser();
   }
 
-  public async logIn():  Promise<Puppeteer.Page>{
+  public async logInWithDefaultUser():  Promise<Puppeteer.Page>{
     const loginPage = new GoogleLoginPage(this.page);
     await loginPage.login();
     return this.page;

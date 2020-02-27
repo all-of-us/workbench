@@ -17,7 +17,6 @@
     "outDir": "./tsc-out",
     "allowJs": true,
     "baseUrl": "./",
-    "jsx": "react",
     "typeRoots": [
       "./node_modules/@types"
     ],

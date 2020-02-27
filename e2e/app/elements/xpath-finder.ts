@@ -72,3 +72,12 @@ export async function findRadioButton(page: Page, label: string): Promise<Elemen
   const selector = widgetxpath.radioButtonXpath(label);
   return page.waitForXPath(selector, {visible: true})
 }
+
+/**
+ * Find plus-circle icon element with a specified label.
+ * @param {string} label text
+ */
+export async function findPlusCircleIcon(page: Page, label: string): Promise<ElementHandle> {
+  const selector = widgetxpath.plusCircleIconXpath(label);
+  return page.waitForXPath(selector, {visible: true})
+}

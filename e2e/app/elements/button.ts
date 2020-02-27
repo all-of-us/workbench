@@ -14,7 +14,7 @@ export default class Button {
   }
 
   public async get(): Promise<WebElement> {
-    if (!!this.webElement) {
+    if (this.webElement === undefined) {
       const element = await findButton(this.page, this.label);
       this.webElement = new WebElement(element);
     }
@@ -22,13 +22,13 @@ export default class Button {
   }
 
   public async getButtonLabel(): Promise<string> {
-    return (await this.get()).getTextContent();
+    return await (await this.get()).getTextContent();
   }
 
    /**
     * Checking style 'cursor' value.
     */
-  public async isDisabled() {
+  public async isDisabled(): Promise<boolean> {
     const cursor = await (await this.get()).getComputedStyle("cursor");
     return cursor === 'not-allowed';
   }

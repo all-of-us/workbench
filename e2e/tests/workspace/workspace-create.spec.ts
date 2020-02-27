@@ -27,7 +27,7 @@ describe('Workspace create:', () => {
     await link.click();
 
     const workspace = new WorkspaceEditPage(page);
-    await workspace.waitUntilPageReady();
+    await workspace.waitUntilReady();
 
     // wait for auto-selected value in Select billing account
     await page.waitForXPath('//label[contains(normalize-space(text()),"Use All of Us free credits")]', {visible: true});

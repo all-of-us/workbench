@@ -14,7 +14,7 @@ export default class Text {
   }
 
   public async get(): Promise<WebElement> {
-    if (!!this.webElement) {
+    if (this.webElement === undefined) {
       const element = await findText(this.page, this.label);
       this.webElement = new WebElement(element);
     }

@@ -1,9 +1,10 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
 import {waitUntilTitleMatch} from '../driver/waitFuncs';
+import DropdownSelect from "./elements/dropdown-select";
 import RadioButton from './elements/radiobutton';
 import WebComponent from "./elements/web-component";
 import {findButton, findTextbox} from "./elements/xpath-finder";
-import authenticatedpage from './mixin/authenticatedpage';
+import AuthenticatedPage from "./mixin/authenticatedpage";
 require('../driver/waitFuncs');
 
 const configs = require('../resources/config.js');
@@ -17,11 +18,11 @@ const selectors = {
   // button CANCEL
   cancelButton: `Cancel`,
   // input textbox - Workspace Name
-  workspaceName: 'Workspace Name',
+  workspaceName: 'Create a new Workspace',
 };
 
 
-export default class WorkspaceEditPage extends authenticatedpage {
+export default class WorkspaceEditPage extends AuthenticatedPage {
 
   public async getCreateWorkspaceButton(): Promise<ElementHandle> {
     return findButton(this.puppeteerPage, selectors.createWorkspaceButton);
@@ -37,6 +38,10 @@ export default class WorkspaceEditPage extends authenticatedpage {
 
   public async getDataSetSelectOption(): Promise<ElementHandle> {
     return await this.puppeteerPage.waitFor(selectors.dataSet, { visible: true });
+  }
+
+  public getResearchPurpose(): WebComponent {
+    return new WebComponent(this.puppeteerPage, "Research purpose");
   }
 
   public question1_researchPurpose(): WebComponent {
@@ -118,19 +123,10 @@ export default class WorkspaceEditPage extends authenticatedpage {
   }
 
   /**
-   * go directly to the URL of My Workspaces page
-   */
-  public async goURL(): Promise<WorkspaceEditPage> {
-    await this.puppeteerPage.goto(configs.uiBaseUrl + configs.workspacesUrlPath, {waitUntil: ['domcontentloaded','networkidle0']});
-    await this.puppeteerPage.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true});
-    await this.waitForSpinner();
-    return this;
-  }
-
-  /**
    * Find and Click "Create a New Workspace" button.
    */
   public async click_button_CreateNewWorkspace(): Promise<void> {
+
     const buttonSelectr = '//*[@role="button" and normalize-space(.)="Create a New Workspace"]';
     const button = await this.puppeteerPage.waitForXPath(buttonSelectr, { visible: true });
     await button.click();
@@ -163,18 +159,15 @@ export default class WorkspaceEditPage extends authenticatedpage {
     return await this.puppeteerPage.waitForXPath(this.workspaceLink(workspaceName));
   }
 
-  public async waitUntilPageReady() {
+  public async waitUntilReady() {
     await waitUntilTitleMatch(this.puppeteerPage, 'Create Workspace');
     await this.waitForSpinner();
-    await this.puppeteerPage.waitForXPath('//*[normalize-space(.)="Create a new Workspace"]', {visible: true});
+    await this.getWorkspaceNameTextbox();
     await this.getDataSetSelectOption();
     await this.getCreateWorkspaceButton();
-
+    await new DropdownSelect(this.puppeteerPage, "Select account").getSelectedValue();
   }
 
-  public async getResearchPurposeExpandIcon(): Promise<ElementHandle[]> {
-    return await this.puppeteerPage.$x('//*[child::*/*[contains(normalize-space(text()),"Research purpose")]]//i[contains(@class,"pi-angle-right")]')
-  }
 
   private workspaceLink(workspaceName: string) {
     return `//*[@role='button'][./*[@data-test-id='workspace-card-name' and normalize-space(text())='${workspaceName}']]`

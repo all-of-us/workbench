@@ -13,8 +13,8 @@ export default class TextArea {
     this.label = label;
   }
 
-  public async get(): Promise<WebElement> {
-    if (!!this.webElement) {
+  public async getWebElement(): Promise<WebElement> {
+    if (this.webElement === undefined) {
       const element = await findTextarea(this.page, this.label);
       this.webElement = new WebElement(element);
     }
@@ -22,7 +22,14 @@ export default class TextArea {
   }
 
   public async getValue(): Promise<unknown> {
-    return (await this.get()).getProperty("value");
+    await this.getWebElement();
+    return await this.webElement.getProperty("value");
+  }
+
+  public async focus(): Promise<WebElement> {
+    await this.getWebElement();
+    await this.webElement.focus();
+    return this.webElement;
   }
 
 }

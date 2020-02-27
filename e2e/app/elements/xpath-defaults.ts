@@ -1,10 +1,10 @@
 
 /**
- * a BUTTON element with specified label.
+ * a @role=button element with specified label.
  * @param label
  */
 export function buttonXpath(label: string) {
-  return `//*[@role='button' and contains(normalize-space(text()),'${label}')]`;
+  return `//*[(normalize-space(text())='${label}' or normalize-space(.)='${label}') and @role='button']`;
 }
 
 /**
@@ -12,7 +12,7 @@ export function buttonXpath(label: string) {
  * @param label
  */
 export function textareaXpath(label: string) {
-  return `${inputXpath(label, 'textarea')}`;
+  return `${textXpath(label)}/ancestor::node()[2]//textarea`;
 }
 
   /**
@@ -49,10 +49,10 @@ export function radioButtonXpath(label: string) {
 
 export function inputXpath(label: string, inputType?: string) {
   if (!!inputType) {
-    return `${textXpath(label)}/ancestor::node()[1]/input[@type=${inputType}] | /ancestor::node()[2]//input[@type=${inputType}]`;
+    return `${textXpath(label)}/ancestor::node()[2]//input[@type='${inputType}']`;
   }
   // return all input nodes
-  return `${textXpath(label)}/ancestor::node()[1]/input | /ancestor::node()[2]//input`;
+  return `${textXpath(label)}/ancestor::node()[2]//input`;
 }
 
 /**
@@ -60,15 +60,15 @@ export function inputXpath(label: string, inputType?: string) {
  * @param labelText
  */
 export function textXpath(label: string) {
-  return `//*[contains(normalize-space(text()),"${label}")]`;
+  return `//*[contains(normalize-space(text()),'${label}')]`;
 }
 
 /**
  * Finds element that match xpath selector: //clr-icon[@shape="plus-circle"]
  * @param label
  */
-export function addLinkXpath(label: string) {
-  return `//*[normalize-space(text())="${label}"]/clr-icon[@shape="plus-circle"]/*[@role="img"]`;
+export function plusCircleIconXpath(label: string) {
+  return `//*[*[normalize-space(text())='${label}' or normalize-space(.)='${label}']]//clr-icon[@shape='plus-circle']/*[@role='img']`;
 }
 
 /**
