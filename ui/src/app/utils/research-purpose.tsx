@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import {ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
-import {ResearchPurpose, SpecificPopulationEnum} from 'generated/fetch';
+import {ResearchPurpose} from 'generated/fetch';
 
 const styles = {
   researchPurposeItemHeader: {
