@@ -94,33 +94,7 @@ class Dashboards
 
       # Customize this dashboard for the current environment. Typically this means setting the
       # namespace properly in all the charts and/or adjusting the title.
-      replacement_dashboard = source_dashboard.dup
-      replacement_dashboard.name = target_resource_path
-
-      # Monitored Resource namespace is set up in StackDriver to match our environment short name (lowercased)
-      namespace = env.short_name
-      environment_title = "[#{namespace.capitalize}]"
-
-      # Keep the environment title in the dashboard title for human-readability, and to separate
-      # any environments that share a GCP project in the Dashboards view.
-      replacement_dashboard.display_name =
-          dashboard_template.display_name.gsub(/\[(.*)\]/, environment_title)
-      @logger.info("new display_name: #{replacement_dashboard.display_name}, name: #{replacement_dashboard.name}")
-
-      # Adjust the filter on each metric (a.k.a. data_set) so that the correct namespace is set.
-      replacement_dashboard.grid_layout.widgets.each do |widget|
-        @logger.info("Updating chart/widget #{widget.title}")
-        widget.xy_chart.data_sets.map! do |metric|
-          @logger.info("\tUpdating metric #{metric.name}")
-          old_filter = metric.time_series_query.time_series_filter.filter
-          metric.time_series_query.time_series_filter.filter =
-              old_filter.gsub(RESOURCE_NAMESPACE_PATTERN,"resource.label.\"namespace\"=\"#{namespace}\"")
-          @logger.info("Metric filter is now #{metric.time_series_query.time_series_filter.filter}")
-          # metric
-        end
-      end
-
-      @logger.info("Replacement dashboard: #{replacement_dashboard.to_json}")
+      replacement_dashboard = build_replacement_dashboard(env, source_dashboard, target_resource_path)
 
       # add the dashboard to the project
       @logger.info("creating with parent: #{env.formatted_project_number}, dashboard name: #{replacement_dashboard.name}")
@@ -128,5 +102,51 @@ class Dashboards
         @logger.info("block received from create_dashboard: #{stuff.to_s}")
       end
     end
+  end
+
+  def build_replacement_dashboard(env, source_dashboard, target_resource_path)
+    result = Google::Monitoring::Dashboard::V1::Dashboard.new
+    result.name = target_resource_path
+    result.grid_layout = Google::Monitoring::Dashboard::V1::GridLayout.new
+    # Monitored Resource namespace is set up in StackDriver to match our environment short name (lowercased)
+    namespace = env.short_name
+    environment_title = "[#{namespace.capitalize}]"
+
+    # Keep the environment title in the dashboard title for human-readability, and to separate
+    # any environments that share a GCP project in the Dashboards view.
+    result.display_name =
+        source_dashboard.display_name.gsub(/\[(.*)\]/, environment_title)
+    @logger.info("new display_name: #{result.display_name}, name: #{result.name}")
+
+    # Adjust the filter on each metric (a.k.a. data_set) so that the correct namespace is set.
+    result.grid_layout.widgets = source_dashboard.grid_layout.widgets.map do |widget|
+      @logger.info("Updating chart/widget #{widget.title}")
+
+      # new_widget = widget.dup
+      new_widget = Google::Monitoring::Dashboard::V1::Widget.new
+      new_widget.title = widget.title
+      new_widget.xy_chart = Google::Monitoring::Dashboard::V1::XyChart.new
+
+      widget.xy_chart.data_sets.each do |data_set|
+        # @logger.info("\tUpdating metric #{data_set.name}")
+        new_data_set = data_set.dup
+        old_filter = data_set.time_series_query.time_series_filter.filter
+        new_data_set.time_series_query.time_series_filter.filter =
+            replace_filter_namespace(namespace, old_filter)
+        @logger.info("Metric filter is now #{new_data_set.time_series_query.time_series_filter.filter}")
+
+        # data_sets is a protobuf repeated field, so we need to use +=
+        # https://developers.google.com/protocol-buffers/docs/reference/ruby-generated#repeated-fields
+        new_widget.xy_chart.data_sets += new_data_set
+      end
+      new_widget
+    end
+
+    @logger.info("Replacement dashboard: #{result.to_json}")
+    result
+  end
+
+  def replace_filter_namespace(namespace, old_filter)
+    old_filter.gsub(RESOURCE_NAMESPACE_PATTERN, "resource.label.\"namespace\"=\"#{namespace}\"")
   end
 end

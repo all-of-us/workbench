@@ -41,12 +41,12 @@ class LogsBasedMetrics
 
   # Copy the source metric into a new metric on each target enviornment.
   def copy_to_target_envs(source_metric)
-    target_envs = visitor.environments.select { |env| env.short_name != @source_env_short_name }
+    target_envs = @visitor.environments.select { |env| env.short_name != @source_env_short_name }
 
-    visitor.visit(target_envs) do |tgt_env|
+    @visitor.visit(target_envs) do |tgt_env|
       logging_client = Google::Cloud::Logging.new({project: tgt_env.project_id})
       if exists?(source_metric.name, logging_client)
-        @logger.warning("Skipping target env #{tgt_env.shrot_name} as #{source_metric.name} is already there.")
+        @logger.warn("Skipping target env #{tgt_env.short_name} as #{source_metric.name} is already there.")
         next
       else
         # TODO(jaycarlton): Set namespace equal to project short name in the filter
