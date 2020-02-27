@@ -49,6 +49,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -108,7 +109,8 @@ public class ClusterControllerTest {
     ClusterController.class,
     UserServiceImpl.class,
     InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class
+    InstitutionMapperImpl.class,
+    PublicInstitutionDetailsMapperImpl.class
   })
   @MockBean({
     ClusterAuditor.class,

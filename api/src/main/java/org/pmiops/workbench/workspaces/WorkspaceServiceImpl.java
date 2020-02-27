@@ -285,6 +285,21 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+    // This deletes all Firecloud and google resources, however saves all references
+    // to the workspace and its resources in the Workbench database.
+    // This is for auditing purposes and potentially workspace restore.
+    // TODO: do we want to delete workspace resource references and save only metadata?
+
+    // This automatically handles access control to the workspace.
+    fireCloudService.deleteWorkspace(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    dbWorkspace = saveWithLastModified(dbWorkspace);
+    maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
+  }
+
+  @Override
   public void validateActiveBilling(String workspaceNamespace, String workspaceId)
       throws ForbiddenException {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {

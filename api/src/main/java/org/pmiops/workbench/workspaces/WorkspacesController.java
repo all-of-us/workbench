@@ -369,22 +369,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
     recordOperationTime(
-        () -> deleteWorkspaceImpl(workspaceNamespace, workspaceId), "deleteWorkspace");
+        () -> {
+          DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+          workspaceService.deleteWorkspace(dbWorkspace);
+          workspaceAuditor.fireDeleteAction(dbWorkspace);
+        },
+        "deleteWorkspace");
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  private void deleteWorkspaceImpl(String workspaceNamespace, String workspaceId) {
-    // This deletes all Firecloud and google resources, however saves all references
-    // to the workspace and its resources in the Workbench database.
-    // This is for auditing purposes and potentially workspace restore.
-    // TODO: do we want to delete workspace resource references and save only metadata?
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    // This automatically handles access control to the workspace.
-    fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-    workspaceAuditor.fireDeleteAction(dbWorkspace);
   }
 
   @Override

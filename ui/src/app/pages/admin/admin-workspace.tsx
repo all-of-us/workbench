@@ -1,24 +1,26 @@
-import * as React from 'react';
-
 import {Component} from '@angular/core';
+import * as HighCharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+import * as moment from 'moment';
+import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {TextInput} from 'app/components/inputs';
-import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import {Error as ErrorDiv} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {clusterApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
 } from 'app/utils/research-purpose';
-
 import {
-  AdminWorkspaceResources,
-  UserRole,
-  Workspace
+  AdminFederatedWorkspaceDetailsResponse,
+  CloudStorageTraffic, ListClusterResponse,
 } from 'generated/fetch';
-
+import {ReactFragment} from 'react';
 
 const styles = reactStyles({
   wideWithMargin: {
@@ -31,12 +33,6 @@ const styles = reactStyles({
   }
 });
 
-const FlexWithMargin = ({style = {}, children}) => {
-  return <FlexColumn style={{...styles.wideWithMargin, ...style}}>
-    {...children}
-  </FlexColumn>;
-};
-
 const PurpleLabel = ({style = {}, children}) => {
   return <label style={{color: colors.primary, ...style}}>
     {...children}
@@ -44,47 +40,65 @@ const PurpleLabel = ({style = {}, children}) => {
 };
 
 interface State {
-  googleProject: string;
-  workspace: Workspace;
-  collaborators: Array<UserRole>;
-  resources: AdminWorkspaceResources;
+  workspaceDetails?: AdminFederatedWorkspaceDetailsResponse;
+  cloudStorageTraffic?: CloudStorageTraffic;
+  loadingData?: boolean;
+  clusterToDelete?: ListClusterResponse;
+  confirmDeleteCluster?: boolean;
+  dataLoadError?: Response;
 }
 
-export class AdminWorkspace extends React.Component<{}, State> {
+class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
   constructor(props) {
     super(props);
 
     this.state = {
-      googleProject: '',
-      workspace: null,
-      collaborators: [],
-      resources: {},
+      workspaceDetails: {},
+      cloudStorageTraffic: null,
     };
   }
 
-  getFederatedWorkspaceInformation() {
-    workspaceAdminApi().getFederatedWorkspaceDetails(this.state.googleProject).then(
-      response => {
-        this.setState({
-          workspace: response.workspace,
-          collaborators: response.collaborators,
-          resources: response.resources
-        });
-      }
-    );
+  componentDidMount() {
+    this.getFederatedWorkspaceInformation();
   }
 
-  maybeGetFederatedWorkspaceInformation(event) {
+  async getFederatedWorkspaceInformation() {
+    const {urlParams: { workspaceNamespace } } = this.props;
+
+    this.setState({
+      loadingData: true,
+    });
+
+    try {
+      // Fire off both requests in parallel
+      const workspaceDetailsPromise = workspaceAdminApi().getFederatedWorkspaceDetails(workspaceNamespace);
+      const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(workspaceNamespace);
+      // Wait for both promises to complete before updating state.
+      const workspaceDetails = await workspaceDetailsPromise;
+      const cloudStorageTraffic = await cloudStorageTrafficPromise;
+      this.setState({cloudStorageTraffic, workspaceDetails});
+    } catch (error) {
+      if (error instanceof Response) {
+        console.log('error', error, await error.json());
+        this.setState({dataLoadError: error});
+      }
+    } finally {
+      this.setState({loadingData: false});
+    }
+  }
+
+  maybeGetFederatedWorkspaceInformation(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       return this.getFederatedWorkspaceInformation();
     }
   }
 
   workspaceInfoField(labelText, divContents) {
-    return <FlexRow style={{width: '100%'}}>
+    return <FlexRow style={{width: '80%', maxWidth: '1000px'}}>
       <PurpleLabel
         style={{
-          width: '40%',
+          width: '250px',
+          minWidth: '180px',
           textAlign: 'right',
           marginRight: '1rem',
         }}
@@ -93,7 +107,7 @@ export class AdminWorkspace extends React.Component<{}, State> {
       </PurpleLabel>
       <div
         style={{
-          width: '60%',
+          flex: 1,
           wordWrap: 'break-word',
         }}
       >
@@ -102,51 +116,99 @@ export class AdminWorkspace extends React.Component<{}, State> {
     </FlexRow>;
   }
 
-  researchPurposeField(labelText, divContents) {
-    return <FlexWithMargin>
-      <PurpleLabel>{labelText}</PurpleLabel>
-      <div style={{wordWrap: 'break-word'}}>{divContents}</div>
-    </FlexWithMargin>;
+  renderHighChart(cloudStorageTraffic: CloudStorageTraffic): ReactFragment {
+    HighCharts.setOptions({
+      global: {
+        useUTC: false,
+      },
+      lang: {
+        decimalPoint: '.',
+        thousandsSep: ','
+      },
+    });
+    const options = {
+      animation: false,
+      chart: {
+        animation: false,
+        height: '150px',
+      },
+      credits: {
+        enabled: false,
+      },
+      legend: {
+        enabled: false,
+      },
+      title: {
+        text: undefined,
+      },
+      tooltip: {
+        xDateFormat: '%A, %b %e, %H:%M',
+        valueDecimals: 0,
+      },
+      xAxis: {
+        min: moment().subtract(6, 'hours').valueOf(),
+        max: moment().valueOf(),
+        title: {
+          enabled: false,
+        },
+        type: 'datetime',
+        zoomEnabled: false,
+      },
+      yAxis: {
+        title: {
+          enabled: false,
+        },
+        zoomEnabled: false,
+      },
+      series: [{
+        data: cloudStorageTraffic.receivedBytes.map(x => [x.timestamp, x.value]),
+        lineWidth: 0.5,
+        name: 'GCS received bytes'
+      }]
+    };
+    return <div style={{width: '500px', zIndex: 1001}}>
+      <HighchartsReact highcharts={HighCharts} options={options}/>
+    </div>;
+  }
+
+  private async deleteCluster() {
+    await clusterApi().deleteClustersInProject(
+      this.props.urlParams.workspaceNamespace,
+      {clustersToDelete: [this.state.clusterToDelete.clusterName]});
+    this.setState({clusterToDelete: null});
+    await this.getFederatedWorkspaceInformation();
+  }
+
+  private cancelDeleteCluster() {
+    this.setState({
+      confirmDeleteCluster: false,
+      clusterToDelete: null
+    });
   }
 
   render() {
-    const {workspace, collaborators, resources} = this.state;
-    return <div>
-      <h2 style={{margin: 'auto'}}>Manage Workspaces</h2>
-      <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center'}}>
-        <PurpleLabel style={{marginRight: '1rem'}}>Google Project ID</PurpleLabel>
-        <TextInput
-            style={{
-              width: '10rem',
-              marginRight: '1rem'
-            }}
-            onChange={value => this.setState({googleProject: value})}
-            onKeyDown={event => this.maybeGetFederatedWorkspaceInformation(event)}
-        />
-        <Button
-            style={{height: '1.5rem'}}
-            onClick={() => this.getFederatedWorkspaceInformation()}
-        >
-          Search
-        </Button>
-      </FlexRow>
-      {
-        workspace && <FlexColumn>
-          <h3>Workspace Admin Actions</h3>
-          <FlexRow style={{justifyContent: 'space-between'}}>
-            <Button>Shut down all VMs</Button>
-            <Button>Disable workspace</Button>
-            <Button>Disable all collaborators</Button>
-            <Button>Exclude from public directory</Button>
-            <Button>Log administrative comment</Button>
-            <Button>Publish workspace</Button>
-          </FlexRow>
-        </FlexColumn>
+    const {
+      cloudStorageTraffic,
+      clusterToDelete,
+      confirmDeleteCluster,
+      loadingData,
+      dataLoadError,
+      workspaceDetails: {collaborators, resources, workspace},
+    } = this.state;
+    return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+
+      {dataLoadError &&
+        <ErrorDiv>
+          Error loading data. Please refresh the page or contact the development team.
+        </ErrorDiv>
       }
-      {workspace && resources.workspaceObjects && resources.cloudStorage && collaborators &&
-        <FlexRow>
-          <FlexColumn style={styles.wideWithMargin}>
-            <h3>Basic Information</h3>
+      {loadingData && <SpinnerOverlay />}
+
+      {workspace &&
+        <div>
+          <h2>Workspace</h2>
+          <h3>Basic Information</h3>
+          <div className='basic-info' style={{marginTop: '1rem'}}>
             {this.workspaceInfoField('Workspace Name', workspace.name)}
             {this.workspaceInfoField('Google Project Id', workspace.namespace)}
             {this.workspaceInfoField('Billing Status', workspace.billingStatus)}
@@ -163,9 +225,17 @@ export class AdminWorkspace extends React.Component<{}, State> {
               'Workspace Published',
               workspace.published ? 'Yes' : 'No'
             )}
-          </FlexColumn>
-          <FlexColumn style={styles.wideWithMargin}>
-            <h3>Workspace Objects</h3>
+          </div>
+          <h3>Collaborators</h3>
+          <div className='collaborators' style={{marginTop: '1rem'}}>
+            {collaborators.map((userRole, i) =>
+              <div key={i}>
+                {userRole.email + ': ' + userRole.role}
+              </div>
+            )}
+          </div>
+          <h3>Cohort Builder</h3>
+          <div className='cohort-builder' style={{marginTop: '1rem'}}>
             {
               this.workspaceInfoField(
                 '# of Cohorts',
@@ -184,9 +254,9 @@ export class AdminWorkspace extends React.Component<{}, State> {
                 resources.workspaceObjects.datasetCount
               )
             }
-          </FlexColumn>
-          <FlexColumn style={styles.wideWithMargin}>
-            <h3>Cloud Storage</h3>
+          </div>
+          <h3>Cloud Storage Objects</h3>
+          <div className='cloud-storage-objects' style={{marginTop: '1rem'}}>
             {
               this.workspaceInfoField(
                 '# of Notebook Files',
@@ -205,22 +275,11 @@ export class AdminWorkspace extends React.Component<{}, State> {
                 resources.cloudStorage.storageBytesUsed
               )
             }
-          </FlexColumn>
-          <FlexColumn style={styles.wideWithMargin}>
-            <h3>Workspace Collaborators</h3>
-            {collaborators.map((userRole, i) =>
-                <div key={i}>
-                  {userRole.email + ': ' + userRole.role}
-                </div>
-            )}
-          </FlexColumn>
-        </FlexRow>
-      }
-      {workspace && <FlexColumn>
+          </div>
           <h3>Research Purpose</h3>
-          <FlexRow style={{flex: '1 0 auto'}}>
+          <div className='research-purpose' style={{marginTop: '1rem'}}>
             {
-              this.researchPurposeField(
+              this.workspaceInfoField(
                 'Primary purpose of project',
                 getSelectedResearchPurposeItems(
                   workspace.researchPurpose).map(
@@ -231,34 +290,49 @@ export class AdminWorkspace extends React.Component<{}, State> {
                 )
             }
             {
-              this.researchPurposeField(
+              this.workspaceInfoField(
                 'Reason for choosing All of Us',
                 workspace.researchPurpose.reasonForAllOfUs
               )
             }
             {
-              this.researchPurposeField(
+              this.workspaceInfoField(
                 'Area of intended study',
                 workspace.researchPurpose.intendedStudy
               )
             }
             {
-              this.researchPurposeField(
+              this.workspaceInfoField(
                 'Anticipated findings',
                 workspace.researchPurpose.anticipatedFindings
               )
             }
             {
-              workspace.researchPurpose.population && this.researchPurposeField(
+              workspace.researchPurpose.population && this.workspaceInfoField(
                 'Population area(s) of focus',
-                getSelectedPopulations(workspace.researchPurpose).map((selectedPopulation, i) => <div key={i}>{selectedPopulation}</div>)
+                getSelectedPopulations(workspace.researchPurpose)
               )
             }
-          </FlexRow>
-        </FlexColumn>
+          </div>
+        </div>
       }
-      {workspace && resources.clusters.length > 0 && <FlexColumn>
-          <h3>Clusters</h3>
+
+      {cloudStorageTraffic && cloudStorageTraffic.receivedBytes &&
+        <div>
+          <h2>Cloud Storage Traffic</h2>
+          <div>Cloud Storage <i>received_bytes_count</i> over the past 6 hours.</div>
+          {this.renderHighChart(cloudStorageTraffic)}
+        </div>
+      }
+
+      {resources && resources.clusters.length === 0 && <div>
+        <h2>Clusters</h2>
+        <p>No active clusters exist for this workspace.</p>
+      </div>
+      }
+      {resources && resources.clusters.length > 0 && <div>
+        <h2>Clusters</h2>
+        <FlexColumn>
           <FlexRow>
             <PurpleLabel style={styles.narrowWithMargin}>Cluster Name</PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>Google Project</PurpleLabel>
@@ -267,20 +341,45 @@ export class AdminWorkspace extends React.Component<{}, State> {
             <PurpleLabel style={styles.narrowWithMargin}>Status</PurpleLabel>
           </FlexRow>
           {resources.clusters.map((cluster, i) =>
-              <FlexRow>
+              <FlexRow key={i}>
                 <div style={styles.narrowWithMargin}>{cluster.clusterName}</div>
                 <div style={styles.narrowWithMargin}>{cluster.googleProject}</div>
                 <div style={styles.narrowWithMargin}>{new Date(cluster.createdDate).toDateString()}</div>
                 <div style={styles.narrowWithMargin}>{new Date(cluster.dateAccessed).toDateString()}</div>
                 <div style={styles.narrowWithMargin}>{cluster.status}</div>
-                <Button>Disable</Button>
+                <Button onClick={() =>
+                  this.setState({clusterToDelete: cluster, confirmDeleteCluster: true})}
+                  disabled={clusterToDelete && clusterToDelete.clusterName === cluster.clusterName}>
+                  Delete
+                </Button>
               </FlexRow>
           )}
         </FlexColumn>
+      </div>
       }
+      {confirmDeleteCluster &&
+        <Modal onRequestClose={() => this.cancelDeleteCluster()}>
+          <ModalTitle>Delete Cluster</ModalTitle>
+          <ModalBody>
+            This will immediately delete the given cluster. This will disrupt the user's work
+            and may cause data loss.<br/><br/><b>Are you sure?</b>
+          </ModalBody>
+          <ModalFooter>
+            <Button type='secondary'
+                    onClick={() => this.cancelDeleteCluster()}>Cancel</Button>
+            <Button style={{marginLeft: '0.5rem'}}
+                    onClick={() => {
+                      this.setState({confirmDeleteCluster: false});
+                      this.deleteCluster();
+                    }}
+            >Delete</Button>
+          </ModalFooter>
+      </Modal>}
     </div>;
   }
 }
+
+export const AdminWorkspace = withUrlParams()(AdminWorkspaceImpl);
 
 @Component({
   template: '<div #root></div>'

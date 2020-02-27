@@ -5,6 +5,7 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -46,10 +47,20 @@ public interface VerifiedInstitutionalAffiliationMapper {
                             modelObject.getInstitutionShortName()))));
   }
 
-  @Mapping(target = "institutionShortName", source = "institution")
+  @Mapping(target = "institutionShortName", source = "institution", qualifiedByName = "shortName")
+  @Mapping(
+      target = "institutionDisplayName",
+      source = "institution",
+      qualifiedByName = "displayName")
   VerifiedInstitutionalAffiliation dbToModel(DbVerifiedInstitutionalAffiliation dbObject);
 
+  @Named("shortName")
   default String toShortName(DbInstitution institution) {
     return institution.getShortName();
+  }
+
+  @Named("displayName")
+  default String toDisplayName(DbInstitution institution) {
+    return institution.getDisplayName();
   }
 }

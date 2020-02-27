@@ -47,7 +47,7 @@ public class CriteriaLookupUtilTest {
   private void saveCriteriaWithPath(String path, DbCriteria criteria) {
     cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
-    criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
+    criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
     cbCriteriaDao.save(criteria);
   }
 
@@ -66,31 +66,34 @@ public class CriteriaLookupUtilTest {
   @Test
   public void buildCriteriaLookupMapDrugCriteria_ATC() {
     DbCriteria drugNode1 =
-        new DbCriteria()
-            .parentId(99999)
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .conceptId("21600002")
-            .group(true)
-            .selectable(true);
+        DbCriteria.builder()
+            .addParentId(99999)
+            .addDomainId(DomainType.DRUG.toString())
+            .addType(CriteriaType.ATC.toString())
+            .addConceptId("21600002")
+            .addGroup(true)
+            .addSelectable(true)
+            .build();
     saveCriteriaWithPath("0", drugNode1);
     DbCriteria drugNode2 =
-        new DbCriteria()
-            .parentId(drugNode1.getId())
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.RXNORM.toString())
-            .conceptId("19069022")
-            .group(false)
-            .selectable(true);
+        DbCriteria.builder()
+            .addParentId(drugNode1.getId())
+            .addDomainId(DomainType.DRUG.toString())
+            .addType(CriteriaType.RXNORM.toString())
+            .addConceptId("19069022")
+            .addGroup(false)
+            .addSelectable(true)
+            .build();
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
     DbCriteria drugNode3 =
-        new DbCriteria()
-            .parentId(drugNode1.getId())
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.RXNORM.toString())
-            .conceptId("1036094")
-            .group(false)
-            .selectable(true);
+        DbCriteria.builder()
+            .addParentId(drugNode1.getId())
+            .addDomainId(DomainType.DRUG.toString())
+            .addType(CriteriaType.RXNORM.toString())
+            .addConceptId("1036094")
+            .addGroup(false)
+            .addSelectable(true)
+            .build();
     saveCriteriaWithPath(drugNode1.getPath(), drugNode3);
 
     // Use jdbcTemplate to create/insert data into the ancestor table
@@ -124,22 +127,24 @@ public class CriteriaLookupUtilTest {
   @Test
   public void buildCriteriaLookupMapDrugCriteria_RXNORM() {
     DbCriteria drugNode1 =
-        new DbCriteria()
-            .parentId(99999)
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .conceptId("21600002")
-            .group(true)
-            .selectable(true);
+        DbCriteria.builder()
+            .addParentId(99999)
+            .addDomainId(DomainType.DRUG.toString())
+            .addType(CriteriaType.ATC.toString())
+            .addConceptId("21600002")
+            .addGroup(true)
+            .addSelectable(true)
+            .build();
     saveCriteriaWithPath("0", drugNode1);
     DbCriteria drugNode2 =
-        new DbCriteria()
-            .parentId(drugNode1.getId())
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.RXNORM.toString())
-            .conceptId("19069022")
-            .group(false)
-            .selectable(true);
+        DbCriteria.builder()
+            .addParentId(drugNode1.getId())
+            .addDomainId(DomainType.DRUG.toString())
+            .addType(CriteriaType.RXNORM.toString())
+            .addConceptId("19069022")
+            .addGroup(false)
+            .addSelectable(true)
+            .build();
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
 
     // Use jdbcTemplate to create/insert data into the ancestor table
@@ -173,41 +178,44 @@ public class CriteriaLookupUtilTest {
   @Test
   public void buildCriteriaLookupMapPPICriteria() {
     DbCriteria surveyNode =
-        new DbCriteria()
-            .parentId(0)
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.SURVEY.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .conceptId("22");
+        DbCriteria.builder()
+            .addParentId(0)
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.SURVEY.toString())
+            .addGroup(true)
+            .addSelectable(true)
+            .addStandard(false)
+            .addConceptId("22")
+            .build();
     saveCriteriaWithPath("0", surveyNode);
     DbCriteria questionNode =
-        new DbCriteria()
-            .parentId(surveyNode.getId())
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.QUESTION.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .name("In what country were you born?")
-            .conceptId("1586135")
-            .synonyms("[SURVEY_rank1]");
+        DbCriteria.builder()
+            .addParentId(surveyNode.getId())
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.QUESTION.toString())
+            .addGroup(true)
+            .addSelectable(true)
+            .addStandard(false)
+            .addName("In what country were you born?")
+            .addConceptId("1586135")
+            .addSynonyms("[SURVEY_rank1]")
+            .build();
     saveCriteriaWithPath(surveyNode.getPath(), questionNode);
     DbCriteria answerNode =
-        new DbCriteria()
-            .parentId(questionNode.getId())
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.ANSWER.toString())
-            .group(false)
-            .selectable(true)
-            .standard(false)
-            .name("USA")
-            .conceptId("5")
-            .synonyms("[SURVEY_rank1]");
+        DbCriteria.builder()
+            .addParentId(questionNode.getId())
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.ANSWER.toString())
+            .addGroup(false)
+            .addSelectable(true)
+            .addStandard(false)
+            .addName("USA")
+            .addConceptId("5")
+            .addSynonyms("[SURVEY_rank1]")
+            .build();
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
 
     // Survey search
@@ -269,37 +277,40 @@ public class CriteriaLookupUtilTest {
   @Test
   public void buildCriteriaLookupMapConditionSnomedCriteria() {
     DbCriteria snomedParent1 =
-        new DbCriteria()
-            .parentId(0)
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .group(true)
-            .selectable(true)
-            .standard(true)
-            .conceptId("132277")
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addParentId(0)
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.SNOMED.toString())
+            .addGroup(true)
+            .addSelectable(true)
+            .addStandard(true)
+            .addConceptId("132277")
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     saveCriteriaWithPath("0", snomedParent1);
     DbCriteria snomedParent2 =
-        new DbCriteria()
-            .parentId(snomedParent1.getId())
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .group(true)
-            .selectable(true)
-            .standard(true)
-            .conceptId("27835")
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addParentId(snomedParent1.getId())
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.SNOMED.toString())
+            .addGroup(true)
+            .addSelectable(true)
+            .addStandard(true)
+            .addConceptId("27835")
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     saveCriteriaWithPath(snomedParent1.getPath(), snomedParent2);
     DbCriteria snomedChild =
-        new DbCriteria()
-            .parentId(snomedParent2.getId())
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .group(false)
-            .selectable(true)
-            .standard(true)
-            .conceptId("4099351")
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addParentId(snomedParent2.getId())
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.SNOMED.toString())
+            .addGroup(false)
+            .addSelectable(true)
+            .addStandard(true)
+            .addConceptId("4099351")
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     saveCriteriaWithPath(snomedParent2.getPath(), snomedChild);
 
     List<Long> childConceptIds = ImmutableList.of(27835L, 4099351L);
@@ -324,37 +335,40 @@ public class CriteriaLookupUtilTest {
   @Test
   public void buildCriteriaLookupMapConditionICD9Criteria() {
     DbCriteria icd9Parent =
-        new DbCriteria()
-            .parentId(0)
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .conceptId("44829696")
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addParentId(0)
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addGroup(true)
+            .addSelectable(true)
+            .addStandard(false)
+            .addConceptId("44829696")
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     saveCriteriaWithPath("0", icd9Parent);
     DbCriteria icd9Child1 =
-        new DbCriteria()
-            .parentId(icd9Parent.getId())
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .selectable(true)
-            .standard(false)
-            .conceptId("44829697")
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addParentId(icd9Parent.getId())
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addGroup(false)
+            .addSelectable(true)
+            .addStandard(false)
+            .addConceptId("44829697")
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child1);
     DbCriteria icd9Child2 =
-        new DbCriteria()
-            .parentId(icd9Parent.getId())
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .selectable(true)
-            .standard(false)
-            .conceptId("44835564")
-            .synonyms("[CONDITION_rank1]");
+        DbCriteria.builder()
+            .addParentId(icd9Parent.getId())
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addGroup(false)
+            .addSelectable(true)
+            .addStandard(false)
+            .addConceptId("44835564")
+            .addSynonyms("[CONDITION_rank1]")
+            .build();
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child2);
 
     List<Long> childConceptIds = ImmutableList.of(44829697L, 44835564L);

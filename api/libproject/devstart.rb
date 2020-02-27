@@ -1298,6 +1298,62 @@ Common.register_command({
     :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
 })
 
+def delete_workspaces(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  op.add_typed_option(
+      "--delete-list-filename [delete-list-filename]",
+      String,
+      ->(opts, v) { opts.deleteListFilename = v},
+      "File containing list of workspaces to delete.
+      Each line should contain a single workspace's namespace and firecloud name, separated by a comma
+      Example: ws-namespace-1,fc-id-1 \n ws-namespace-2,fc-id-2 \n ws-namespace-3, fc-id-3")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  flags = ([
+      ["--delete-list-filename", op.opts.deleteListFilename]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle deleteWorkspaces
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+DELETE_WORKSPACES_CMD = "delete-workspaces"
+
+Common.register_command({
+    :invocation => DELETE_WORKSPACES_CMD,
+    :description => "Delete workspaces listed in given file.\n",
+    :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
+})
+
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false
@@ -1344,15 +1400,14 @@ Common.register_command({
 })
 
 def set_authority_local(cmd_name, *args)
-  ensure_docker_api(cmd_name, args)
+  setup_local_environment
 
   op = authority_options(cmd_name, args)
   op.parse.validate
 
+  app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]"]
   common = Common.new
-  common.run_inline %W{
-      gradle setAuthority
-     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+  common.run_inline %W{docker-compose run api-scripts ./gradlew setAuthority} + app_args
 end
 
 Common.register_command({

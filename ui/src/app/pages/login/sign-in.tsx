@@ -187,6 +187,12 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
     this.props.onInit();
   }
 
+  componentDidUpdate(prevProps: SignInProps, prevState: SignInState, snapshot) {
+    if (prevState.currentStep !== this.state.currentStep) {
+      window.scrollTo(0, 0);
+    }
+  }
+
   /**
    * Creates the appropriate set of steps based on the server-side config.
    *

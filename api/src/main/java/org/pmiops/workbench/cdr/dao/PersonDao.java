@@ -1,31 +1,32 @@
 package org.pmiops.workbench.cdr.dao;
 
+import java.util.List;
+import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
 import org.pmiops.workbench.cdr.model.DbPerson;
-import org.pmiops.workbench.model.AgeType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 public interface PersonDao extends CrudRepository<DbPerson, Long> {
 
   @Query(
       value =
-          "SELECT count(person_id)\n"
-              + "from cb_person\n"
-              + "where DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(dob, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT(dob, '00-%m-%d')) between :startAge and :endAge",
+          "SELECT * FROM \n"
+              + "  (\n"
+              + "    SELECT 'Age' as age_type, DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(dob, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT(dob, '00-%m-%d')) as age, count(*) as count \n"
+              + "    FROM cb_person \n"
+              + "    GROUP BY age_type, age \n"
+              + "    UNION \n"
+              + "    SELECT 'Age at consent' as age_type, age_at_consent as age, count(*) as count \n"
+              + "    FROM cb_person \n"
+              + "    WHERE age_at_consent != 0 \n"
+              + "    GROUP BY age_type, age \n"
+              + "    UNION \n"
+              + "    SELECT 'Age at cdr' as age_type, age_at_consent as age, count(*) as count \n"
+              + "    FROM cb_person \n"
+              + "    WHERE age_at_consent != 0 \n"
+              + "    GROUP BY age_type, age\n"
+              + "  ) a \n"
+              + "ORDER BY age_type, age",
       nativeQuery = true)
-  long countByAge(@Param("startAge") int startAge, @Param("endAge") int endAge);
-
-  long countByAgeAtConsentBetween(int startAge, int endAge);
-
-  long countByAgeAtCdrBetween(int startAge, int endAge);
-
-  default long countAgesByType(AgeType ageType, int startAge, int endAge) {
-    if (AgeType.AGE.equals(ageType)) {
-      return countByAge(startAge, endAge);
-    } else if (AgeType.CONSENT.equals(ageType)) {
-      return countByAgeAtConsentBetween(startAge, endAge);
-    }
-    return countByAgeAtCdrBetween(startAge, endAge);
-  }
+  List<DbAgeTypeCount> findAgeTypeCounts();
 }

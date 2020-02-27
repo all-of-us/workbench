@@ -16,6 +16,7 @@ import com.google.api.client.util.Sets;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,6 +44,19 @@ public final class SearchGroupItemQueryBuilder {
 
   private static final int STANDARD = 1;
   private static final int SOURCE = 0;
+
+  private static final ImmutableMap<AttrName, String> AGE_COLUMN_SQL_MAP =
+      ImmutableMap.of(
+          AttrName.AGE, "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(dob), MONTH)/12) as INT64)",
+          AttrName.AGE_AT_CONSENT, "age_at_consent",
+          AttrName.AGE_AT_CDR, "age_at_cdr");
+
+  private static final ImmutableMap<CriteriaType, String> DEMO_COLUMN_SQL_MAP =
+      ImmutableMap.of(
+          CriteriaType.RACE, "race_concept_id",
+          CriteriaType.GENDER, "gender_concept_id",
+          CriteriaType.SEX, "sex_at_birth_concept_id",
+          CriteriaType.ETHNICITY, "ethnicity_concept_id");
 
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " or\n";
@@ -108,21 +122,18 @@ public final class SearchGroupItemQueryBuilder {
   private static final String ENCOUNTERS_SQL_TEMPLATE = "and visit_concept_id ";
 
   // sql parts to help construct demographic BigQuery sql
-  private static final String DEMO_BASE =
-      "select person_id\n" + "from `${projectId}.${dataSetId}.person` p\nwhere\n";
-  private static final String AGE_SQL =
-      "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) %s %s\n"
-          + "and not exists (\n"
-          + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
-          + "where d.person_id = p.person_id)\n";
-  private static final String RACE_SQL = "p.race_concept_id in unnest(%s)\n";
-  private static final String GEN_SQL = "p.gender_concept_id in unnest(%s)\n";
-  private static final String ETH_SQL = "p.ethnicity_concept_id in unnest(%s)\n";
-  private static final String SEX_SQL = "p.sex_at_birth_concept_id in unnest(%s)\n";
   private static final String DEC_SQL =
       "exists (\n"
           + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
           + "where d.person_id = p.person_id)\n";
+  private static final String DEMO_BASE =
+      "select person_id\n" + "from `${projectId}.${dataSetId}.person` p\nwhere\n";
+  private static final String AGE_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n"
+          + "and not "
+          + DEC_SQL;
+  private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
 
   /** Build the inner most sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -230,16 +241,18 @@ public final class SearchGroupItemQueryBuilder {
         String ageNamedParameter1 =
             addQueryParameterValue(
                 queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
-        String finaParam = ageNamedParameter1;
+        String finalParam = ageNamedParameter1;
         if (attribute.getOperands().size() > 1) {
           String ageNamedParameter2 =
               addQueryParameterValue(
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
-          finaParam = finaParam + AND + ageNamedParameter2;
+          finalParam = finalParam + AND + ageNamedParameter2;
         }
-        return DEMO_BASE
-            + String.format(
-                AGE_SQL, OperatorUtils.getSqlOperator(attribute.getOperator()), finaParam);
+        return String.format(
+            AGE_SQL,
+            AGE_COLUMN_SQL_MAP.get(attribute.getName()),
+            OperatorUtils.getSqlOperator(attribute.getOperator()),
+            finalParam);
       case GENDER:
       case SEX:
       case ETHNICITY:
@@ -252,13 +265,9 @@ public final class SearchGroupItemQueryBuilder {
         String namedParameter =
             addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds, Long.class));
 
-        String demoSql =
-            CriteriaType.RACE.toString().equals(param.getType())
-                ? RACE_SQL
-                : CriteriaType.GENDER.toString().equals(param.getType())
-                    ? GEN_SQL
-                    : CriteriaType.ETHNICITY.toString().equals(param.getType()) ? ETH_SQL : SEX_SQL;
-        return DEMO_BASE + String.format(demoSql, namedParameter);
+        CriteriaType criteriaType = CriteriaType.fromValue(param.getType());
+        return DEMO_BASE
+            + String.format(DEMO_IN_SQL, DEMO_COLUMN_SQL_MAP.get(criteriaType), namedParameter);
       case DECEASED:
         return DEMO_BASE + DEC_SQL;
       default:

@@ -45,11 +45,6 @@ public class DbCriteria {
     this.id = id;
   }
 
-  public DbCriteria id(long id) {
-    this.id = id;
-    return this;
-  }
-
   @Column(name = "parent_id")
   public long getParentId() {
     return parentId;
@@ -57,11 +52,6 @@ public class DbCriteria {
 
   public void setParentId(long parentId) {
     this.parentId = parentId;
-  }
-
-  public DbCriteria parentId(long parentId) {
-    this.parentId = parentId;
-    return this;
   }
 
   @Column(name = "subtype")
@@ -73,11 +63,6 @@ public class DbCriteria {
     this.subtype = subtype;
   }
 
-  public DbCriteria subtype(String subtype) {
-    this.subtype = subtype;
-    return this;
-  }
-
   @Column(name = "type")
   public String getType() {
     return type;
@@ -85,11 +70,6 @@ public class DbCriteria {
 
   public void setType(String type) {
     this.type = type;
-  }
-
-  public DbCriteria type(String type) {
-    this.type = type;
-    return this;
   }
 
   @Column(name = "code")
@@ -101,11 +81,6 @@ public class DbCriteria {
     this.code = code;
   }
 
-  public DbCriteria code(String code) {
-    this.code = code;
-    return this;
-  }
-
   @Column(name = "name")
   public String getName() {
     return name;
@@ -113,11 +88,6 @@ public class DbCriteria {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public DbCriteria name(String name) {
-    this.name = name;
-    return this;
   }
 
   @Column(name = "is_group")
@@ -129,11 +99,6 @@ public class DbCriteria {
     this.group = group;
   }
 
-  public DbCriteria group(boolean group) {
-    this.group = group;
-    return this;
-  }
-
   @Column(name = "is_selectable")
   public boolean getSelectable() {
     return selectable;
@@ -143,11 +108,6 @@ public class DbCriteria {
     this.selectable = selectable;
   }
 
-  public DbCriteria selectable(boolean selectable) {
-    this.selectable = selectable;
-    return this;
-  }
-
   @Column(name = "est_count")
   public String getCount() {
     return count;
@@ -155,11 +115,6 @@ public class DbCriteria {
 
   public void setCount(String count) {
     this.count = count;
-  }
-
-  public DbCriteria count(String count) {
-    this.count = count;
-    return this;
   }
 
   @Transient
@@ -176,11 +131,6 @@ public class DbCriteria {
     this.conceptId = conceptId;
   }
 
-  public DbCriteria conceptId(String conceptId) {
-    this.conceptId = conceptId;
-    return this;
-  }
-
   @Transient
   public Long getLongConceptId() {
     return Strings.isNullOrEmpty(this.conceptId) ? null : Long.valueOf(this.conceptId);
@@ -195,11 +145,6 @@ public class DbCriteria {
     this.domainId = domainId;
   }
 
-  public DbCriteria domainId(String domainId) {
-    this.domainId = domainId;
-    return this;
-  }
-
   @Column(name = "has_attribute")
   public boolean getAttribute() {
     return attribute;
@@ -207,11 +152,6 @@ public class DbCriteria {
 
   public void setAttribute(boolean attribute) {
     this.attribute = attribute;
-  }
-
-  public DbCriteria attribute(boolean attribute) {
-    this.attribute = attribute;
-    return this;
   }
 
   @Column(name = "path")
@@ -223,11 +163,6 @@ public class DbCriteria {
     this.path = path;
   }
 
-  public DbCriteria path(String path) {
-    this.path = path;
-    return this;
-  }
-
   @Column(name = "synonyms")
   public String getSynonyms() {
     return synonyms;
@@ -235,11 +170,6 @@ public class DbCriteria {
 
   public void setSynonyms(String synonyms) {
     this.synonyms = synonyms;
-  }
-
-  public DbCriteria synonyms(String synonyms) {
-    this.synonyms = synonyms;
-    return this;
   }
 
   @Column(name = "value")
@@ -251,11 +181,6 @@ public class DbCriteria {
     this.value = value;
   }
 
-  public DbCriteria value(String value) {
-    this.value = value;
-    return this;
-  }
-
   @Column(name = "has_hierarchy")
   public boolean getHierarchy() {
     return hierarchy;
@@ -263,11 +188,6 @@ public class DbCriteria {
 
   public void setHierarchy(boolean hierarchy) {
     this.hierarchy = hierarchy;
-  }
-
-  public DbCriteria hierarchy(boolean hierarchy) {
-    this.hierarchy = hierarchy;
-    return this;
   }
 
   @Column(name = "has_ancestor_data")
@@ -279,11 +199,6 @@ public class DbCriteria {
     this.ancestorData = ancestorData;
   }
 
-  public DbCriteria ancestorData(boolean ancestorData) {
-    this.ancestorData = ancestorData;
-    return this;
-  }
-
   @Column(name = "is_standard")
   public boolean getStandard() {
     return standard;
@@ -291,11 +206,6 @@ public class DbCriteria {
 
   public void setStandard(boolean standard) {
     this.standard = standard;
-  }
-
-  public DbCriteria standard(boolean standard) {
-    this.standard = standard;
-    return this;
   }
 
   @Override
@@ -344,5 +254,145 @@ public class DbCriteria {
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this);
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    private long id;
+    private long parentId;
+    private String type;
+    private String subtype;
+    private String code;
+    private String name;
+    private boolean group;
+    private boolean selectable;
+    private String count;
+    private String conceptId;
+    private String domainId;
+    private boolean attribute;
+    private String path;
+    private String synonyms;
+    private String value;
+    private boolean hierarchy;
+    private boolean ancestorData;
+    private boolean standard;
+
+    private Builder() {}
+
+    public Builder addId(long id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder addParentId(long parentId) {
+      this.parentId = parentId;
+      return this;
+    }
+
+    public Builder addType(String type) {
+      this.type = type;
+      return this;
+    }
+
+    public Builder addSubtype(String subtype) {
+      this.subtype = subtype;
+      return this;
+    }
+
+    public Builder addCode(String code) {
+      this.code = code;
+      return this;
+    }
+
+    public Builder addName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder addGroup(boolean group) {
+      this.group = group;
+      return this;
+    }
+
+    public Builder addSelectable(boolean selectable) {
+      this.selectable = selectable;
+      return this;
+    }
+
+    public Builder addCount(String count) {
+      this.count = count;
+      return this;
+    }
+
+    public Builder addConceptId(String conceptId) {
+      this.conceptId = conceptId;
+      return this;
+    }
+
+    public Builder addDomainId(String domainId) {
+      this.domainId = domainId;
+      return this;
+    }
+
+    public Builder addAttribute(boolean attribute) {
+      this.attribute = attribute;
+      return this;
+    }
+
+    public Builder addPath(String path) {
+      this.path = path;
+      return this;
+    }
+
+    public Builder addSynonyms(String synonyms) {
+      this.synonyms = synonyms;
+      return this;
+    }
+
+    public Builder addValue(String value) {
+      this.value = value;
+      return this;
+    }
+
+    public Builder addHierarchy(boolean hierarchy) {
+      this.hierarchy = hierarchy;
+      return this;
+    }
+
+    public Builder addAncestorData(boolean ancestorData) {
+      this.ancestorData = ancestorData;
+      return this;
+    }
+
+    public Builder addStandard(boolean standard) {
+      this.standard = standard;
+      return this;
+    }
+
+    public DbCriteria build() {
+      DbCriteria dbCriteria = new DbCriteria();
+      dbCriteria.setId(this.id);
+      dbCriteria.setParentId(this.parentId);
+      dbCriteria.setType(this.type);
+      dbCriteria.setSubtype(this.subtype);
+      dbCriteria.setCode(this.code);
+      dbCriteria.setName(this.name);
+      dbCriteria.setGroup(this.group);
+      dbCriteria.setSelectable(this.selectable);
+      dbCriteria.setCount(this.count);
+      dbCriteria.setConceptId(this.conceptId);
+      dbCriteria.setDomainId(this.domainId);
+      dbCriteria.setAttribute(this.attribute);
+      dbCriteria.setPath(this.path);
+      dbCriteria.setSynonyms(this.synonyms);
+      dbCriteria.setValue(this.value);
+      dbCriteria.setHierarchy(this.hierarchy);
+      dbCriteria.setAncestorData(this.ancestorData);
+      dbCriteria.setStandard(this.standard);
+      return dbCriteria;
+    }
   }
 }

@@ -233,7 +233,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get workspaceAdminActive(): boolean {
-    return this.locationService.path() === '/admin/workspace';
+    return this.locationService.path() === '/admin/workspaces';
   }
 
   get homeActive(): boolean {

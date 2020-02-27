@@ -29,6 +29,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
@@ -62,7 +63,8 @@ public class UserControllerTest {
     UserController.class,
     UserServiceImpl.class,
     InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class
+    InstitutionMapperImpl.class,
+    PublicInstitutionDetailsMapperImpl.class
   })
   @MockBean({
     FireCloudService.class,
