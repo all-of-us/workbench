@@ -20,7 +20,7 @@
     "mode": "NULLABLE"
   },
   {
-    "type": "timestamp",
+    "type": "date",
     "name": "dob",
     "mode": "nullable"
   },
