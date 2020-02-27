@@ -24,9 +24,7 @@
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsLimit": 100.0,
     "defaultFreeCreditsDollarLimit": 100.0,
-    "defaultFreeCreditsDaysLimit": 180,
     "freeTierCostAlertThresholds": [0.5, 0.75],
-    "freeTierTimeAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-stable-1@all-of-us-rw-stable.iam.gserviceaccount.com"
@@ -98,7 +96,8 @@
     "useKeylessDelegatedCredentials": false,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false
+    "requireInstitutionalVerification": false,
+    "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-stable"

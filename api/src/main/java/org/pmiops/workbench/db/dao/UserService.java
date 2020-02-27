@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.function.Function;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
@@ -15,7 +16,7 @@ import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
-  DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser);
+  DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
 
   DbUser createServiceAccountUser(String email);
 
@@ -73,21 +74,21 @@ public interface UserService {
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   @Deprecated
-  DbUser syncComplianceTrainingStatusV1(DbUser user)
+  DbUser syncComplianceTrainingStatusV1(DbUser user, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
-  DbUser syncComplianceTrainingStatusV2(DbUser user)
+  DbUser syncComplianceTrainingStatusV2(DbUser user, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   DbUser syncEraCommonsStatus();
 
-  DbUser syncEraCommonsStatusUsingImpersonation(DbUser user)
+  DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
       throws IOException, org.pmiops.workbench.firecloud.ApiException;
 
   void syncTwoFactorAuthStatus();
 
-  DbUser syncTwoFactorAuthStatus(DbUser targetUser);
+  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
 }

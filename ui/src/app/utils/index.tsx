@@ -369,6 +369,9 @@ export const withUserProfile = () => {
 export const withUrlParams = () => {
   return connectBehaviorSubject(urlParamsStore, 'urlParams');
 };
+export interface UrlParamsProps {
+  urlParams: { [key: string]: any; };
+}
 
 // HOC that provides a 'routeConfigData' prop with current route's data object
 export const withRouteConfigData = () => {

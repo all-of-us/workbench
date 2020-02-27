@@ -1,12 +1,13 @@
-import DataPage from "../../app/data-page";
+import DataPage from '../../app/data-page';
 import Home from '../../app/home';
 import WorkspacePage from '../../app/workspace-page';
-const Chrome = require('../../driver/ChromeDriver');
-const faker = require('faker/locale/en_US');
-require('../../driver/puppeteerExtension');
 import { getCursorValue } from '../../driver/elementHandle-util'
 
+const Chrome = require('../../driver/ChromeDriver');
+const faker = require('faker/locale/en_US');
+
 jest.setTimeout(300000);
+
 describe('Workspace create:', () => {
 
   let page;
@@ -62,7 +63,7 @@ describe('Workspace create:', () => {
     expect(cursor).toEqual('not-allowed');
 
     const words = faker.lorem.word();
-    const q2 = await workspace.question2ReasonForChoosing();
+    const q2 = await workspace.question2ScientificReason();
     await q2.type(words);
 
     // CREATE WORKSPACE button should be disabled
@@ -90,10 +91,6 @@ describe('Workspace create:', () => {
 
     await createButton.click();
     await (new DataPage(page)).waitUntilPageReady();
-
-    console.log("done");
-    await page.waitFor(1);
-
   }, 2 * 60 * 1000);
 
   // unfinished

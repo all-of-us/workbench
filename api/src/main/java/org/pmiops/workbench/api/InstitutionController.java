@@ -5,6 +5,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
+import org.pmiops.workbench.model.GetPublicInstitutionDetailsResponse;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Institution> getInstitution(final String shortName) {
     final Institution institution =
         institutionService
@@ -47,9 +49,20 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<GetInstitutionsResponse> getInstitutions() {
     final GetInstitutionsResponse response =
         new GetInstitutionsResponse().institutions(institutionService.getInstitutions());
+    return ResponseEntity.ok(response);
+  }
+
+  // note: this endpoint is publicly accessible because it is needed for account creation
+
+  @Override
+  public ResponseEntity<GetPublicInstitutionDetailsResponse> getPublicInstitutionDetails() {
+    final GetPublicInstitutionDetailsResponse response =
+        new GetPublicInstitutionDetailsResponse()
+            .institutions(institutionService.getPublicInstitutionDetails());
     return ResponseEntity.ok(response);
   }
 

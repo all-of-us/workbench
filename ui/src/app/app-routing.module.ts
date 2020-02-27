@@ -11,6 +11,7 @@ import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
+import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {CookiePolicyComponent} from './pages/cookie-policy';
@@ -150,6 +151,8 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
+                      helpContent: 'preview',
+                      notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
                   }
@@ -287,9 +290,13 @@ const routes: Routes = [
         component: AdminBannerComponent,
         data: {title: 'Create Banner'}
       }, {
-        path: 'admin/workspace',
+        path: 'admin/workspaces',
+        component: AdminWorkspaceSearchComponent,
+        data: { title: 'Workspace Admin'},
+      }, {
+        path: 'admin/workspaces/:workspaceNamespace',
         component: AdminWorkspaceComponent,
-        data: { title: 'Manage Workspaces'}
+        data: { title: 'Workspace Admin'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,

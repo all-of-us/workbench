@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
@@ -83,6 +84,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     nbExtensions.put("aou-download-extension", assetsBaseUrl + "/aou-download-policy-extension.js");
     nbExtensions.put(
         "aou-activity-checker-extension", assetsBaseUrl + "/activity-checker-extension.js");
+    nbExtensions.put(
+        "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
 
     return new ClusterRequest()
         .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))
@@ -169,7 +172,12 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   @Override
   public Cluster getCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
-    return retryHandler.run((context) -> clusterApi.getCluster(googleProject, clusterName));
+    try {
+      return retryHandler.runAndThrowChecked(
+          (context) -> clusterApi.getCluster(googleProject, clusterName));
+    } catch (ApiException e) {
+      throw ExceptionUtils.convertNotebookException(e);
+    }
   }
 
   @Override

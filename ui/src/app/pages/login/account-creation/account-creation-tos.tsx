@@ -147,7 +147,7 @@ export const AccountCreationTos = withWindowSize()(
               <CheckBox data-test-id='privacy-statement-check'
                         checked={false}
                         disabled={!hasReadEntireTos}
-                        onChange={checked => this.setState({hasAckedPrivacyStatement: true})}
+                        onChange={checked => this.setState({hasAckedPrivacyStatement: checked})}
                         style={styles.checkbox}
                         labelStyle={hasReadEntireTos ?
                           styles.checkboxLabel :
@@ -160,7 +160,7 @@ export const AccountCreationTos = withWindowSize()(
               <CheckBox data-test-id='terms-of-service-check'
                         checked={false}
                         disabled={!hasReadEntireTos}
-                        onChange={checked => this.setState({hasAckedTermsOfService: true})}
+                        onChange={checked => this.setState({hasAckedTermsOfService: checked})}
                         style={styles.checkbox}
                         labelStyle={hasReadEntireTos ?
                           styles.checkboxLabel :

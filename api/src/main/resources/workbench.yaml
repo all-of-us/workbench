@@ -71,6 +71,21 @@ parameters:
     format: int64
     required: true
     description: Data set ID
+  workspaceNamespace:
+    in: path
+    name: workspaceNamespace
+    type: string
+    required: true
+    description: The workspace namespace, aka Google Cloud project ID.
+  workspaceId:
+    in: path
+    name: workspaceId
+    type: string
+    required: true
+    description: >
+      The workspace ID, aka the Firecloud workspace ID. This is actually an immutable string,
+      which in AoU looks like a lower-cased concatenation of the workspace name when it was first
+      created.
 
 paths:
   /v1/status:
@@ -583,88 +598,77 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/clusters/{billingProjectId}/{workspaceFirecloudName}:
+  /v1/clusters/{workspaceNamespace}:
     get:
-      summary: List available notebook clusters
+      summary: Get the user's workspace cluster.
       description: >
-        Returns the clusters available to the current user in the given billing project.
-        Currently there is a single default cluster supported per billing project
-        and this cluster should always either exist or be in the process of being
-        initialized. In a future where researchers have more control over cluster
-        creation, this endpoint would be extended to return all clusters.
-      operationId: listClusters
+        Returns the current user's cluster, if any, which has been created for the given workspace.
+      operationId: getCluster
       tags:
         - cluster
       parameters:
-        - in: path
-          name: billingProjectId
-          description: The unique identifier of the Google Billing Project containing the clusters
-          required: true
-          type: string
-        - in: path
-          name: workspaceFirecloudName
-          description: The firecloudName of the workspace whose notebook we're looking at
-          required: true
-          type: string
+        - $ref: '#/parameters/workspaceNamespace'
       responses:
         200:
-          description: The users cluster
+          description: The cluster for this user and workspace.
           schema:
-            $ref: '#/definitions/DefaultClusterResponse'
-        500:
-          description: Internal Error
+            $ref: '#/definitions/Cluster'
+        404:
+          description: No cluster exists for this user and workspace.
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  /v1/clusters/{clusterNamespace}/{clusterName}:
+    post:
+      summary: Create a workspace cluster.
+      description: >
+        Creates a new cluster for the current user in the given billing project. If a cluster already
+        exists for the user in this billing project, a 409 conflict error is returned (even if the cluster
+        is still initializing or is not in a ready state).
+      operationId: createCluster
+      tags:
+        - cluster
+      parameters:
+        # TODO(RW-3697): Custom cluster creation params should be added as a body param here.
+        - $ref: '#/parameters/workspaceNamespace'
+      responses:
+        200:
+          description: Returns the cluster that was created for this user and workspace.
+          schema:
+            $ref: '#/definitions/Cluster'
+        409:
+          description: A cluster for this user and workspace already exists.
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+    # TODO(RW-3695): updateCluster should be added as a PATCH endpoint here.
     delete:
-      summary: Delete a cluster by name.
+      summary: Delete a workspace cluster.
       operationId: deleteCluster
       tags:
         - cluster
       parameters:
-        - in: path
-          name: clusterNamespace
-          description: clusterNamespace
-          required: true
-          type: string
-        - in: path
-          name: clusterName
-          description: clusterName
-          required: true
-          type: string
+        - $ref: '#/parameters/workspaceNamespace'
       responses:
         200:
-          description: Deletion success
+          description: Success
           schema:
             $ref: '#/definitions/EmptyResponse'
-        500:
-          description: Internal Error
+        404:
+          description: No cluster exists for this user and workspace.
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: "#/definitions/ErrorResponse"
 
-  /v1/clusters/{clusterNamespace}/{clusterName}/localize:
+  /v1/clusters/{workspaceNamespace}/localize:
     post:
-      summary: >
-        Localize files from a workspace to notebook cluster. As a side-effect,
+      summary: Localize files to the user's cluster.
+      description: >
+        Localizes files to the cluster for the current user and given workspace. As a side-effect,
         JSON workspace environment files will also be localized to the cluster.
-      description: Localize notebook files to the corresponding notebook cluster.
       operationId: localize
       tags:
         - cluster
       consumes:
         - application/json
       parameters:
-        - in: path
-          name: clusterNamespace
-          description: clusterNamespace
-          required: true
-          type: string
-        - in: path
-          name: clusterName
-          description: clusterName
-          required: true
-          type: string
+        - $ref: '#/parameters/workspaceNamespace'
         - in: body
           name: body
           description: Localization request.
@@ -1081,7 +1085,7 @@ paths:
         - workspaceAdmin
       description: >
         Given a workspace namespace (Google Cloud Platform  Project ID), returns workspace details.
-        Only accessible to privileged admin users.
+        Requires the WORKSPACES_VIEW authority.
       operationId: getFederatedWorkspaceDetails
       responses:
         200:
@@ -1092,6 +1096,22 @@ paths:
           description: Workspace not found for namespace
           schema:
             $ref: '#/definitions/ErrorResponse'
+
+  /v1/admin/workspaces/{workspaceNamespace}/cloudStorageTraffic:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+    get:
+      tags:
+        - workspaceAdmin
+      description: >
+        Returns a time series of cloud storage traffic for the given project.
+        Requires the WORKSPACES_VIEW authority.
+      operationId: getCloudStorageTraffic
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/CloudStorageTraffic"
 
   /v1/admin/clusters/updateConfig:
     post:
@@ -2325,7 +2345,8 @@ paths:
       tags:
         - institution
       description: >
-        Gets a list of all Institutions.
+        Gets the list of all Institutions.
+        Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitutions"
       responses:
         200:
@@ -2354,6 +2375,21 @@ paths:
           schema:
             $ref: "#/definitions/Institution"
 
+  /v1/institutions/publicDetails:
+    get:
+      tags:
+        - institution
+      description: >
+        Gets the public details for the list of all Institutions.
+      operationId: "getPublicInstitutionDetails"
+      security: []
+      responses:
+        200:
+          description: >
+            A list of all Institutions
+          schema:
+            $ref: "#/definitions/GetPublicInstitutionDetailsResponse"
+
   /v1/institutions/{shortName}:
     parameters:
       - in: path
@@ -2366,6 +2402,7 @@ paths:
         - institution
       description: >
         Gets the Institution corresponding to the shortName ID.
+        Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitution"
       responses:
         200:
@@ -2483,6 +2520,10 @@ definitions:
         description: >
           Feature flag for verifying the institutional affiliation of new users by validating their
           contact emails.
+      enableCBAgeTypeOptions:
+        type: boolean
+        default: false
+        description: Whether to use the new age type options in cohort builder age wizard
 
 
   FeaturedWorkspacesConfigResponse:
@@ -4031,12 +4072,20 @@ definitions:
         format: int64
         description: Milliseconds since the UNIX epoch.
 
-  DefaultClusterResponse:
+  GetClusterResponse:
+    type: object
+    properties:
+      cluster:
+        description: The cluster associated with a given user and workspace. May be empty.
+        $ref: "#/definitions/Cluster"
+
+  CreateClusterResponse:
     type: object
     required:
-      - defaultCluster
+      - cluster
     properties:
-      defaultCluster:
+      cluster:
+        description: The cluster that was created.
         $ref: "#/definitions/Cluster"
 
   ListClusterResponse:
@@ -4080,17 +4129,9 @@ definitions:
   ClusterLocalizeRequest:
     type: object
     required:
-      - workspaceNamespace
-      - workspaceId
       - notebookNames
       - playgroundMode
     properties:
-      workspaceNamespace:
-        type: string
-        description: Workspace namespace from which to source notebooks
-      workspaceId:
-        type: string
-        description: Workspace from which to source notebooks
       notebookNames:
         type: array
         description: >
@@ -4374,7 +4415,9 @@ definitions:
 
   Institution:
     type: object
-    description: Represents an institution which has been approved to validate researchers who wish to use the system
+    description: >
+      Represents an institution which has been approved to validate researchers who wish to use the system,
+      including the email patterns which we use to validate users.
     required:
       - shortName
       - displayName
@@ -4407,6 +4450,28 @@ definitions:
         items:
           type: string
 
+  PublicInstitutionDetails:
+    type: object
+    description: >
+      Represents an institution which has been approved to validate researchers who wish to use the system.
+      Does not include the sensitive email patterns used to validate users.
+    required:
+      - shortName
+      - displayName
+      - organizationTypeEnum
+    properties:
+      shortName:
+        type: string
+        description: A short unique name for the Institution used as an identifier, such as 'VUMC'
+      displayName:
+        type: string
+        description: A more descriptive name for the Institution, such as 'Vanderbilt University Medical Center'
+      organizationTypeEnum:
+        $ref: '#/definitions/OrganizationType'
+        description: >
+          The Organization Type of this institution if it is one of the enumerated
+          OrganizationTypes, or OrganizationType.OTHER if it is not
+
   GetInstitutionsResponse:
     type: object
     required:
@@ -4416,6 +4481,16 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Institution"
+
+  GetPublicInstitutionDetailsResponse:
+    type: object
+    required:
+      - institutions
+    properties:
+      institutions:
+        type: "array"
+        items:
+          $ref: "#/definitions/PublicInstitutionDetails"
 
   OrganizationType:
     type: string
@@ -4429,7 +4504,7 @@ definitions:
       derived from CAPS requirements.
     enum: [
       UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, MID_CAREER, LATE_CAREER,
-      PRE_DOCTORAL, POST_DOCTORAL, PI,
+      PRE_DOCTORAL, POST_DOCTORAL, SENIOR_RESEARCHER,
       TEACHER, STUDENT, ADMIN,
       PROJECT_PERSONNEL, OTHER
     ]
@@ -4443,6 +4518,11 @@ definitions:
       institutionShortName:
         type: string
         description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'VUMC'
+      institutionDisplayName:
+        type: string
+        description: >
+          The longer, more descriptive name of the Institution where the user has a Verified Affiliation,
+          such as 'Vanderbilt University Medical Center'
       institutionalRoleEnum:
         $ref: '#/definitions/InstitutionalRole'
         description: >
@@ -4502,3 +4582,25 @@ definitions:
       storageBytesUsed:
         type: integer
         format: int64
+
+  CloudStorageTraffic:
+    type: object
+    properties:
+      receivedBytes:
+        type: array
+        items:
+          $ref: "#/definitions/TimeSeriesPoint"
+
+  TimeSeriesPoint:
+    type: object
+    description: Represents a floating-point valued time series point.
+    properties:
+      timestamp:
+        type: integer
+        format: int64
+        description: >
+          Timestamp, in milliseconds since Unix epoch, of the end point of the time window
+          covered by this time series point.
+      value:
+        type: number
+        format: double

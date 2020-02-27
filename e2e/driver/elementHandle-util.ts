@@ -91,9 +91,9 @@ async function isLocatorVisible(element, page) {
     return (style && style.display !== 'none' &&
        style.visibility !== 'hidden' && style.opacity !== '0');
   }, element);
-  const visible = await isVisibleHandle.jsonValue();
-  const box = await element.boxModel();
-  if (visible && box) {
+  const jValue = await isVisibleHandle.jsonValue();
+  const boxModelValue = await element.boxModel();
+  if (jValue && boxModelValue) {
     return true;
   }
   return false;
@@ -108,4 +108,8 @@ export async function getCursorValue(page: Page, element: ElementHandle) {
   const cursorValue = await cursor.jsonValue();
   return cursorValue;
 
+}
+
+export async function findText(page: Page, txt: string) {
+  return (await page.content()).match(txt);
 }

@@ -1,8 +1,9 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import org.pmiops.workbench.model.AgeType;
+import java.util.List;
+import org.pmiops.workbench.model.AgeTypeCount;
 
 public interface CohortBuilderService {
 
-  long countAgesByType(AgeType ageType, int startAge, int endAge);
+  List<AgeTypeCount> findAgeTypeCounts(Long cdrVersionId);
 }

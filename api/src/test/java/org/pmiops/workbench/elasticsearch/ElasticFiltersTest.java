@@ -46,30 +46,33 @@ public class ElasticFiltersTest {
   @Autowired private JdbcTemplate jdbcTemplate;
 
   private static DbCriteria icd9Criteria() {
-    return new DbCriteria()
-        .domainId(DomainType.CONDITION.toString())
-        .type(CriteriaType.ICD9CM.toString())
-        .attribute(Boolean.FALSE)
-        .standard(false)
-        .synonyms("[CONDITION_rank1]");
+    return DbCriteria.builder()
+        .addDomainId(DomainType.CONDITION.toString())
+        .addType(CriteriaType.ICD9CM.toString())
+        .addAttribute(Boolean.FALSE)
+        .addStandard(false)
+        .addSynonyms("[CONDITION_rank1]")
+        .build();
   }
 
   private static DbCriteria drugCriteria() {
-    return new DbCriteria()
-        .domainId(DomainType.DRUG.toString())
-        .type(CriteriaType.ATC.toString())
-        .attribute(Boolean.FALSE)
-        .standard(true);
+    return DbCriteria.builder()
+        .addDomainId(DomainType.DRUG.toString())
+        .addType(CriteriaType.ATC.toString())
+        .addAttribute(Boolean.FALSE)
+        .addStandard(true)
+        .build();
   }
 
   private static DbCriteria basicsCriteria() {
-    return new DbCriteria()
-        .domainId(DomainType.SURVEY.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.SURVEY.toString())
-        .attribute(Boolean.FALSE)
-        .standard(false)
-        .synonyms("+[SURVEY_rank1]");
+    return DbCriteria.builder()
+        .addDomainId(DomainType.SURVEY.toString())
+        .addType(CriteriaType.PPI.toString())
+        .addSubtype(CriteriaSubType.SURVEY.toString())
+        .addAttribute(Boolean.FALSE)
+        .addStandard(false)
+        .addSynonyms("+[SURVEY_rank1]")
+        .build();
   }
 
   private SearchParameter leafParam2;
@@ -80,62 +83,68 @@ public class ElasticFiltersTest {
     // 1
     // | - 2
     // | - 3
-    DbCriteria icd9Parent =
-        icd9Criteria().code("001").conceptId("771").group(true).selectable(false).parentId(0);
+    DbCriteria icd9Parent = icd9Criteria();
+    icd9Parent.setCode("001");
+    icd9Parent.setConceptId("771");
+    icd9Parent.setGroup(true);
+    icd9Parent.setSelectable(false);
+    icd9Parent.setParentId(0);
     saveCriteriaWithPath("", icd9Parent);
 
-    DbCriteria icd9Child1 =
-        icd9Criteria()
-            .code("001.002")
-            .conceptId("772")
-            .group(false)
-            .selectable(true)
-            .parentId(icd9Parent.getId());
+    DbCriteria icd9Child1 = icd9Criteria();
+    icd9Child1.setCode("001.002");
+    icd9Child1.setConceptId("772");
+    icd9Child1.setGroup(false);
+    icd9Child1.setSelectable(true);
+    icd9Child1.setParentId(icd9Parent.getId());
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child1);
-    DbCriteria icd9Child2 =
-        icd9Criteria()
-            .code("001.003")
-            .conceptId("773")
-            .group(true)
-            .selectable(true)
-            .parentId(icd9Parent.getId());
+
+    DbCriteria icd9Child2 = icd9Criteria();
+    icd9Child2.setCode("001.003");
+    icd9Child2.setConceptId("773");
+    icd9Child2.setGroup(true);
+    icd9Child2.setSelectable(true);
+    icd9Child2.setParentId(icd9Parent.getId());
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child2);
 
     // Singleton SNOMED code.
     cbCriteriaDao.save(
-        new DbCriteria()
-            .code("005")
-            .conceptId("775")
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .attribute(Boolean.FALSE)
-            .group(false)
-            .selectable(true)
-            .parentId(0)
-            .path(""));
+        DbCriteria.builder()
+            .addCode("005")
+            .addConceptId("775")
+            .addDomainId(DomainType.CONDITION.toString())
+            .addType(CriteriaType.SNOMED.toString())
+            .addAttribute(Boolean.FALSE)
+            .addGroup(false)
+            .addSelectable(true)
+            .addParentId(0)
+            .addPath("")
+            .build());
 
     // Four node PPI tree, survey, question, 1 answer.
-    DbCriteria survey =
-        basicsCriteria().code("006").group(true).selectable(true).parentId(0).conceptId("77");
+    DbCriteria survey = basicsCriteria();
+    survey.setCode("006");
+    survey.setGroup(true);
+    survey.setSelectable(true);
+    survey.setParentId(0);
+    survey.setConceptId("77");
     saveCriteriaWithPath("", survey);
 
-    DbCriteria question =
-        basicsCriteria()
-            .code("007")
-            .conceptId("777")
-            .group(true)
-            .selectable(true)
-            .parentId(survey.getId());
+    DbCriteria question = basicsCriteria();
+    question.setCode("007");
+    question.setConceptId("777");
+    question.setGroup(true);
+    question.setSelectable(true);
+    question.setParentId(survey.getId());
     saveCriteriaWithPath(survey.getPath(), question);
 
-    DbCriteria answer =
-        basicsCriteria()
-            .code("008")
-            // Concept ID matches the question.
-            .conceptId("7771")
-            .group(false)
-            .selectable(true)
-            .parentId(question.getId());
+    DbCriteria answer = basicsCriteria();
+    answer.setCode("008");
+    // Concept ID matches the question.
+    answer.setConceptId("7771");
+    answer.setGroup(false);
+    answer.setSelectable(true);
+    answer.setParentId(question.getId());
     saveCriteriaWithPath(question.getPath(), answer);
 
     // drug tree
@@ -145,41 +154,45 @@ public class ElasticFiltersTest {
         "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (19069022, 21600009)");
-    DbCriteria drugParent =
-        drugCriteria().code("A").conceptId("21600001").group(true).selectable(false).parentId(0);
+    DbCriteria drugParent = drugCriteria();
+    drugParent.setCode("A");
+    drugParent.setConceptId("21600001");
+    drugParent.setGroup(true);
+    drugParent.setSelectable(false);
+    drugParent.setParentId(0);
     saveCriteriaWithPath("", drugParent);
-    DbCriteria drug1 =
-        drugCriteria()
-            .code("A01")
-            .conceptId("21600002")
-            .group(true)
-            .selectable(true)
-            .parentId(drugParent.getId());
+
+    DbCriteria drug1 = drugCriteria();
+    drug1.setCode("A01");
+    drug1.setConceptId("21600002");
+    drug1.setGroup(true);
+    drug1.setSelectable(true);
+    drug1.setParentId(drugParent.getId());
     saveCriteriaWithPath(drugParent.getPath(), drug1);
-    DbCriteria drug2 =
-        drugCriteria()
-            .code("A01A")
-            .conceptId("21600003")
-            .group(true)
-            .selectable(true)
-            .parentId(drug1.getId());
+
+    DbCriteria drug2 = drugCriteria();
+    drug2.setCode("A01A");
+    drug2.setConceptId("21600003");
+    drug2.setGroup(true);
+    drug2.setSelectable(true);
+    drug2.setParentId(drug1.getId());
     saveCriteriaWithPath(drug1.getPath(), drug2);
-    DbCriteria drug3 =
-        drugCriteria()
-            .code("A01AA")
-            .conceptId("21600004")
-            .group(true)
-            .selectable(true)
-            .parentId(drug2.getId());
+
+    DbCriteria drug3 = drugCriteria();
+    drug3.setCode("A01AA");
+    drug3.setConceptId("21600004");
+    drug3.setGroup(true);
+    drug3.setSelectable(true);
+    drug3.setParentId(drug2.getId());
     saveCriteriaWithPath(drug2.getPath(), drug3);
-    DbCriteria drug4 =
-        drugCriteria()
-            .code("9873")
-            .conceptId("19069022")
-            .group(false)
-            .selectable(true)
-            .type(CriteriaType.RXNORM.toString())
-            .parentId(drug3.getId());
+
+    DbCriteria drug4 = drugCriteria();
+    drug4.setCode("9873");
+    drug4.setConceptId("19069022");
+    drug4.setGroup(false);
+    drug4.setSelectable(true);
+    drug4.setType(CriteriaType.RXNORM.toString());
+    drug4.setParentId(drug3.getId());
     saveCriteriaWithPath(drug3.getPath(), drug4);
 
     leafParam2 =
@@ -979,7 +992,7 @@ public class ElasticFiltersTest {
   private void saveCriteriaWithPath(String path, DbCriteria criteria) {
     cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
-    criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
+    criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
     cbCriteriaDao.save(criteria);
   }
 }

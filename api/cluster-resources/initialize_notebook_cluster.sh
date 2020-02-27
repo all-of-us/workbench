@@ -18,6 +18,9 @@ jupyter kernelspec uninstall -f pyspark3
 # snippet insertion, see README.md for more details.
 jupyter nbextension enable snippets_menu/main
 
+# Section represents the jupyter page to which the extension will be applied to
+jupyter nbextension enable aou-upload-policy-extension/main --section=tree
+
 # reticulate is our preferred access method for the AoU client library - default
 # to python3 as our pyclient has better support for python3. Rprofile is executed
 # each time the R kernel starts.

@@ -10,9 +10,7 @@ import {Profile} from 'generated/fetch';
 
 let props: AccountCreationProps;
 const component = () => {
-  return mount<AccountCreation,
-    AccountCreationProps,
-    AccountCreationState>(<AccountCreation {...props}/>);
+  return mount(<AccountCreation {...props}/>);
 };
 
 const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: false};

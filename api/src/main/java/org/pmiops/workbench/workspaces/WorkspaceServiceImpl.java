@@ -206,16 +206,30 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Transactional
   @Override
+  public WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException {
+    DbWorkspace dbWorkspace =
+        getByNamespace(workspaceNamespace)
+            .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
+    return getWorkspaceImpl(dbWorkspace);
+  }
+
+  @Transactional
+  @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+    return getWorkspaceImpl(dbWorkspace);
+  }
 
+  private WorkspaceResponse getWorkspaceImpl(DbWorkspace dbWorkspace) {
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspace fcWorkspace;
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.
-    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    fcResponse =
+        fireCloudService.getWorkspace(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     fcWorkspace = fcResponse.getWorkspace();
 
     if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
@@ -282,6 +296,21 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;
+  }
+
+  @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+    // This deletes all Firecloud and google resources, however saves all references
+    // to the workspace and its resources in the Workbench database.
+    // This is for auditing purposes and potentially workspace restore.
+    // TODO: do we want to delete workspace resource references and save only metadata?
+
+    // This automatically handles access control to the workspace.
+    fireCloudService.deleteWorkspace(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    dbWorkspace = saveWithLastModified(dbWorkspace);
+    maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
   }
 
   @Override

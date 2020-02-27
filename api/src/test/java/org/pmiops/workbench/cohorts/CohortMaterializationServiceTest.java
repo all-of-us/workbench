@@ -175,7 +175,7 @@ public class CohortMaterializationServiceTest {
                 + "person.person_id in (select person_id\n"
                 + "from `project_id.data_set_id.person` p\n"
                 + "where\n"
-                + "p.gender_concept_id in unnest(@p0)\n"
+                + "gender_concept_id in unnest(@p0)\n"
                 + ")\n"
                 + "and person.person_id not in unnest(@person_id_blacklist)\n\n"
                 + "order by person.person_id\n");
@@ -216,7 +216,7 @@ public class CohortMaterializationServiceTest {
                 + "measurement.person_id in (select person_id\n"
                 + "from `project_id.data_set_id.person` p\n"
                 + "where\n"
-                + "p.gender_concept_id in unnest(@p0)\n"
+                + "gender_concept_id in unnest(@p0)\n"
                 + ")\n"
                 + "and measurement.person_id not in unnest(@person_id_blacklist)\n"
                 + "\n"

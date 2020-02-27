@@ -12,6 +12,9 @@
 - change dir: `cd e2e`
 - run cmd `yarn` or `yarn install`
 
+### Run single test in `tests` folder on localhost
+- example: in `e2e` dir, run cmd `yarn test tests/workspace/workspace-ui.spec.ts`
+
 ### Try run all tests in `tests` folder on localhost
 - in `e2e` dir, run cmd `yarn test`
 

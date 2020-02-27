@@ -5,13 +5,13 @@ import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Logging
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Severity
+import org.pmiops.workbench.config.WorkbenchConfig
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 import java.util.HashMap
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.inject.Provider
-import org.pmiops.workbench.config.WorkbenchConfig
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
 
 @Service
 class ActionAuditServiceImpl @Autowired
@@ -47,11 +47,11 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
         jsonValuesByColumn[AuditColumn.ACTION_ID.name] = auditEvent.actionId
         jsonValuesByColumn[AuditColumn.ACTION_TYPE.name] = auditEvent.actionType
         jsonValuesByColumn[AuditColumn.AGENT_TYPE.name] = auditEvent.agentType
-        jsonValuesByColumn[AuditColumn.AGENT_ID.name] = auditEvent.agentId
+        jsonValuesByColumn[AuditColumn.AGENT_ID.name] = auditEvent.agentIdMaybe
         jsonValuesByColumn[AuditColumn.AGENT_EMAIL.name] = auditEvent.agentEmailMaybe
         jsonValuesByColumn[AuditColumn.TARGET_TYPE.name] = auditEvent.targetType
         jsonValuesByColumn[AuditColumn.TARGET_ID.name] = auditEvent.targetIdMaybe
-        jsonValuesByColumn[AuditColumn.AGENT_ID.name] = auditEvent.agentId
+        jsonValuesByColumn[AuditColumn.AGENT_ID.name] = auditEvent.agentIdMaybe
         jsonValuesByColumn[AuditColumn.TARGET_PROPERTY.name] = auditEvent.targetPropertyMaybe
         jsonValuesByColumn[AuditColumn.PREV_VALUE.name] = auditEvent.previousValueMaybe
         jsonValuesByColumn[AuditColumn.NEW_VALUE.name] = auditEvent.newValueMaybe

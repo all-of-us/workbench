@@ -970,8 +970,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         onChange={v => this.updateResearchPurpose('scientificApproach', v)}/>
               <FlexRow style={styles.textBoxCharRemaining}>
                 {this.state.workspace.researchPurpose.scientificApproach &&
-                <div>{1000 - this.state.workspace.researchPurpose.scientificApproach.length}
-                characters remaining</div>}
+                <div>{1000 - this.state.workspace.researchPurpose.scientificApproach.length} characters remaining</div>}
                 {!this.state.workspace.researchPurpose.scientificApproach &&
                 <div>1000 characters remaining</div>}
               </FlexRow>

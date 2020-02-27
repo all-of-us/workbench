@@ -104,41 +104,44 @@ public class ConceptDaoTest {
 
     DbCriteria surveyCriteria =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.SURVEY.toString())
-                .type(CriteriaType.PPI.toString())
-                .subtype(CriteriaSubType.SURVEY.toString())
-                .group(true)
-                .standard(false)
-                .selectable(true)
-                .name("The Basics"));
+            DbCriteria.builder()
+                .addDomainId(DomainType.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addGroup(true)
+                .addStandard(false)
+                .addSelectable(true)
+                .addName("The Basics")
+                .build());
 
     DbCriteria questionCriteria =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.SURVEY.toString())
-                .type(CriteriaType.PPI.toString())
-                .subtype(CriteriaSubType.QUESTION.toString())
-                .group(true)
-                .standard(false)
-                .selectable(true)
-                .parentId(surveyCriteria.getId())
-                .conceptId("4")
-                .synonyms("test")
-                .path(surveyCriteria.getId() + ".1"));
+            DbCriteria.builder()
+                .addDomainId(DomainType.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.QUESTION.toString())
+                .addGroup(true)
+                .addStandard(false)
+                .addSelectable(true)
+                .addParentId(surveyCriteria.getId())
+                .addConceptId("4")
+                .addSynonyms("test")
+                .addPath(surveyCriteria.getId() + ".1")
+                .build());
 
     cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.ANSWER.toString())
-            .group(false)
-            .standard(false)
-            .selectable(true)
-            .parentId(questionCriteria.getId())
-            .conceptId("4")
-            .synonyms("test")
-            .path(questionCriteria.getPath() + ".1"));
+        DbCriteria.builder()
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.ANSWER.toString())
+            .addGroup(false)
+            .addStandard(false)
+            .addSelectable(true)
+            .addParentId(questionCriteria.getId())
+            .addConceptId("4")
+            .addSynonyms("test")
+            .addPath(questionCriteria.getPath() + ".1")
+            .build());
   }
 
   @Test

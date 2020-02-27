@@ -62,7 +62,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     super(props);
     this.state = {
       creatingAccount: false,
-      profile: this.props.profile,
+      profile: {...this.props.profile},
     };
   }
 
@@ -88,21 +88,25 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       });
   }
 
-  updateList(attribute, value) {
+  updateList(key, value) {
     // Toggle Includes removes the element if it already exist and adds if not
-    const attributeList = toggleIncludes(value, this.state.profile.demographicSurvey[attribute]);
-    this.updateDemographicAttribute(attribute, attributeList);
+    const attributeList = toggleIncludes(value, this.state.profile.demographicSurvey[key] || []);
+    this.updateDemographicAttribute(key, attributeList);
   }
 
   updateDemographicAttribute(attribute, value) {
     this.setState(fp.set(['profile', 'demographicSurvey', attribute], value));
   }
 
-  createOptionCheckbox(checkboxLabel: string, optionKey: string, optionValue: any, key: string) {
-    return <CheckBox label={checkboxLabel}
-                     style={styles.checkbox} key={key}
+  createOptionCheckbox(optionKey: string, optionObject: any) {
+    const {profile: {demographicSurvey}} = this.state;
+    const initialValue = demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
+
+    return <CheckBox label={optionObject.label} data-test-id={'checkbox-' + optionObject.value.toString()}
+                     style={styles.checkbox} key={optionObject.value.toString()}
+                     checked={initialValue}
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                     onChange={(value) => this.updateList(optionKey, optionValue)}
+                     onChange={(value) => this.updateList(optionKey, optionObject.value)}
     />;
   }
 
@@ -131,30 +135,31 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <Section header='Race'>
         <FlexColumn style={styles.checkboxAreaContainer}>
           {AccountCreationOptions.race.map((race) => {
-            return this.createOptionCheckbox(race.label, 'race', race.value, race.value.toString());
+            return this.createOptionCheckbox('race', race);
           })}
         </FlexColumn>
       </Section>
 
       {/*Ethnicity section*/}
-      <DropDownSection header='Ethnicity' options={AccountCreationOptions.ethnicity}
+      <DropDownSection data-test-id='dropdown-ethnicity'
+                       header='Ethnicity' options={AccountCreationOptions.ethnicity}
                        value={demographicSurvey.ethnicity}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
       <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
 or another sexual and/or gender minority?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton onChange={
+            <RadioButton data-test-id='radio-lgbtq-yes' id='radio-lgbtq-yes' onChange={
               (e) => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
-                         checked={demographicSurvey.identifiesAsLgbtq}
+                         checked={demographicSurvey.identifiesAsLgbtq === true}
                          style={{marginRight: '0.5rem'}}/>
-            <label style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
+            <label htmlFor='radio-lgbtq-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
-                         checked={!demographicSurvey.identifiesAsLgbtq}
+            <RadioButton data-test-id='radio-lgbtq-no' id='radio-lgbtq-no' onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
+                         checked={demographicSurvey.identifiesAsLgbtq === false}
                          style={{marginRight: '0.5rem'}}/>
-            <label style={{color: colors.primary}}>No</label>
+            <label htmlFor='radio-lgbtq-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
         </FlexColumn>
         <label></label>
@@ -169,8 +174,7 @@ or another sexual and/or gender minority?'>
       <Section header='Gender Identity'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
-            return this.createOptionCheckbox(genderIdentity.label, 'genderIdentityList',
-              genderIdentity.value, genderIdentity.value.toString());
+            return this.createOptionCheckbox('genderIdentityList', genderIdentity);
           })}
         </FlexColumn>
       </Section>
@@ -179,8 +183,7 @@ or another sexual and/or gender minority?'>
       <Section header='Sex at birth'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
-            return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth',
-              sexAtBirth.value, sexAtBirth.value.toString());
+            return this.createOptionCheckbox('sexAtBirth', sexAtBirth);
           })}
         </FlexColumn>
       </Section>
@@ -194,17 +197,17 @@ or another sexual and/or gender minority?'>
       <Section header='Do you have a Physical or Cognitive disability?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton onChange={
+            <RadioButton id='radio-disability-yes' onChange={
               (e) => this.updateDemographicAttribute('disability', true)}
-                         checked={demographicSurvey.disability}
+                         checked={demographicSurvey.disability === true}
                          style={{marginRight: '0.5rem'}}/>
-            <label style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
+            <label htmlFor='radio-disability-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton onChange={(e) => this.updateDemographicAttribute('disability', false)}
-                         checked={!demographicSurvey.disability}
+            <RadioButton id='radio-disability-no' onChange={(e) => this.updateDemographicAttribute('disability', false)}
+                         checked={demographicSurvey.disability === false}
                          style={{marginRight: '0.5rem'}}/>
-            <label style={{color: colors.primary}}>No</label>
+            <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
         </FlexColumn>
       </Section>
