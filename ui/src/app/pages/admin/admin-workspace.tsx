@@ -6,7 +6,10 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {TextInput} from 'app/components/inputs';
+import {
+  Error as ErrorDiv,
+  TextInput
+} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {clusterApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
@@ -45,6 +48,7 @@ interface State {
   loadingData?: boolean;
   clusterToDelete?: ListClusterResponse;
   confirmDeleteCluster?: boolean;
+  dataLoadError?: Response;
 }
 
 class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
@@ -62,14 +66,23 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
       loadingData: true,
     });
 
-    // Fire off both requests in parallel
-    const workspaceDetailsPromise = workspaceAdminApi().getFederatedWorkspaceDetails(this.state.googleProject);
-    const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(this.state.googleProject);
-    // Wait for both promises to complete before updating state.
-    const workspaceDetails = await workspaceDetailsPromise;
-    const cloudStorageTraffic = await cloudStorageTrafficPromise;
+    try {
+      // Fire off both requests in parallel
+      const workspaceDetailsPromise = workspaceAdminApi().getFederatedWorkspaceDetails(this.state.googleProject);
+      const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(this.state.googleProject);
+      // Wait for both promises to complete before updating state.
+      const workspaceDetails = await workspaceDetailsPromise;
+      const cloudStorageTraffic = await cloudStorageTrafficPromise;
+      this.setState({cloudStorageTraffic, workspaceDetails});
+    } catch (error) {
+      if (error instanceof Response) {
+        console.log('error', error, await error.json());
+        this.setState({dataLoadError: error});
+      }
+    } finally {
+      this.setState({loadingData: false});
+    }
 
-    this.setState({cloudStorageTraffic, workspaceDetails, loadingData: false});
   }
 
   maybeGetFederatedWorkspaceInformation(event: KeyboardEvent) {
@@ -177,15 +190,21 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
       clusterToDelete,
       confirmDeleteCluster,
       loadingData,
+      dataLoadError,
       workspaceDetails: {collaborators, resources, workspace},
     } = this.state;
     return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
 
+      {dataLoadError &&
+        <ErrorDiv>
+          Error loading data. Please refresh the page or contact the development team.
+        </ErrorDiv>
+      }
       {loadingData && <SpinnerOverlay />}
 
-      <h2>Workspace</h2>
       {workspace &&
         <div>
+          <h2>Workspace</h2>
           <h3>Basic Information</h3>
           <div className='basic-info' style={{marginTop: '1rem'}}>
             {this.workspaceInfoField('Workspace Name', workspace.name)}
@@ -296,18 +315,22 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
         </div>
       }
 
-      <h2>Cloud Storage Traffic</h2>
       {cloudStorageTraffic && cloudStorageTraffic.receivedBytes &&
         <div>
+          <h2>Cloud Storage Traffic</h2>
           <div>Cloud Storage <i>received_bytes_count</i> over the past 6 hours.</div>
           {this.renderHighChart(cloudStorageTraffic)}
         </div>
       }
 
-      <h2>Clusters</h2>
-      {resources && resources.clusters.length === 0 &&
-      <p>No active clusters exist for this workspace.</p>}
-      {resources && resources.clusters.length > 0 && <FlexColumn>
+      {resources && resources.clusters.length === 0 && <div>
+        <h2>Clusters</h2>
+        <p>No active clusters exist for this workspace.</p>
+      </div>
+      }
+      {resources && resources.clusters.length > 0 && <div>
+        <h2>Clusters</h2>
+        <FlexColumn>
           <FlexRow>
             <PurpleLabel style={styles.narrowWithMargin}>Cluster Name</PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>Google Project</PurpleLabel>
@@ -330,6 +353,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
               </FlexRow>
           )}
         </FlexColumn>
+      </div>
       }
       {confirmDeleteCluster &&
         <Modal onRequestClose={() => this.cancelDeleteCluster()}>

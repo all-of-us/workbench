@@ -171,11 +171,13 @@ public class WorkspaceAdminControllerTest {
                     .setInterval(TimeInterval.newBuilder().setEndTime(Timestamps.fromMillis(1000)))
                     .setValue(TypedValue.newBuilder().setDoubleValue(1234)))
             .build();
+
     when(mockCloudMonitoringService.getCloudStorageReceivedBytes(anyString(), any(Duration.class)))
         .thenReturn(Arrays.asList(timeSeries));
 
     CloudStorageTraffic cloudStorageTraffic =
         workspaceAdminController.getCloudStorageTraffic(WORKSPACE_NAMESPACE).getBody();
+
     assertThat(
             cloudStorageTraffic.getReceivedBytes().stream()
                 .map(timeSeriesPoint -> timeSeriesPoint.getTimestamp())

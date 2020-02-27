@@ -61,7 +61,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     this.workspaceService = workspaceService;
   }
 
-  /** */
   @Override
   @AuthorityRequired({Authority.WORKSPACES_VIEW})
   public ResponseEntity<CloudStorageTraffic> getCloudStorageTraffic(String workspaceNamespace) {
