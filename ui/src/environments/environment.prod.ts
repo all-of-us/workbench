@@ -4,7 +4,7 @@ export const environment: Environment = {
   displayTag: '',
   shouldShowDisplayTag: false,
   allOfUsApiUrl: 'https://api.workbench.researchallofus.org',
-  captchaSiteKey: '6LeELtwUAAAAAKB6KkKHcy1HyCQtX4nJDhmvX9nP',
+  captchaSiteKey: '',
   clientId: '684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com',
   leoApiUrl: 'https://notebooks.firecloud.org',
   publicUiUrl: 'https://databrowser.researchallofus.org',
