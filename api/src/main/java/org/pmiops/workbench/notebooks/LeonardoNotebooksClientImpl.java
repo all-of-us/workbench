@@ -1,7 +1,5 @@
 package org.pmiops.workbench.notebooks;
 
-import static org.pmiops.workbench.exceptions.ExceptionUtils.convertNotebookException;
-
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +15,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
@@ -177,7 +176,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       return retryHandler.runAndThrowChecked(
           (context) -> clusterApi.getCluster(googleProject, clusterName));
     } catch (ApiException e) {
-      throw convertNotebookException(e);
+      throw ExceptionUtils.convertNotebookException(e);
     }
   }
 

@@ -171,7 +171,8 @@ export class ClusterInitializer {
 
   private async createCluster(): Promise<Cluster> {
     if (this.createCount >= this.maxCreateCount) {
-      throw new ExceededActionCountError('Reached max cluster create count', this.currentCluster);
+      throw new ExceededActionCountError(
+        `Reached max cluster create count (${this.maxCreateCount})`, this.currentCluster);
     }
     const cluster = await clusterApi().createCluster(this.workspaceNamespace, {signal: this.abortSignal});
     this.createCount++;
@@ -180,7 +181,8 @@ export class ClusterInitializer {
 
   private async resumeCluster(): Promise<void> {
     if (this.resumeCount >= this.maxResumeCount) {
-      throw new ExceededActionCountError('Reached max cluster resume count', this.currentCluster);
+      throw new ExceededActionCountError(
+        `Reached max cluster resume count (${this.maxResumeCount})`, this.currentCluster);
     }
     await notebooksClusterApi().startCluster(
       this.currentCluster.clusterNamespace, this.currentCluster.clusterName, {signal: this.abortSignal});
@@ -189,7 +191,8 @@ export class ClusterInitializer {
 
   private async deleteCluster(): Promise<void> {
     if (this.deleteCount >= this.maxDeleteCount) {
-      throw new ExceededActionCountError('Reached max cluster delete count', this.currentCluster);
+      throw new ExceededActionCountError(
+        `Reached max cluster delete count (${this.maxDeleteCount})`, this.currentCluster);
     }
     await clusterApi().deleteCluster(this.workspaceNamespace, {signal: this.abortSignal});
     this.deleteCount++;
@@ -261,7 +264,7 @@ export class ClusterInitializer {
     if (Date.now() - this.initializeStartTime > this.overallTimeout) {
       return this.reject(
         new ClusterInitializationFailedError(
-          'Initialization attempt took longer than the max time allowed',
+          `Initialization attempt took longer than the max time allowed (${this.overallTimeout}ms)`,
           this.currentCluster));
     }
 
@@ -284,7 +287,8 @@ export class ClusterInitializer {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
           return this.reject(
-            new ExceededErrorCountError('Reached max server error count', this.currentCluster));
+            new ExceededErrorCountError(
+              `Reached max server error count (${this.maxServerErrorCount})`, this.currentCluster));
         }
       }
     }
@@ -318,7 +322,8 @@ export class ClusterInitializer {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
           return this.reject(
-            new ExceededErrorCountError('Reached max server error count', this.currentCluster));
+            new ExceededErrorCountError(
+              `Reached max server error count (${this.maxServerErrorCount})`, this.currentCluster));
         }
       }
     }
