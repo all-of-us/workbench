@@ -383,7 +383,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   // cannot destructure because verifiedInstitutionalAffiliation may not be defined
-  // todo is this a code smell?
   getVerifiedInstitutionalAffiliationAttribute(attribute: string) {
     const {verifiedInstitutionalAffiliation} = this.state.profile;
     if (!verifiedInstitutionalAffiliation) {
