@@ -335,9 +335,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     // We don't include this check in validateAndCleanProfile since some existing user profiles
     // may have empty addresses. So we only check this on user creation, not update.
-    if (profile.getAddress() == null) {
-      throw new BadRequestException("Address must not be empty");
-    }
+    Optional.ofNullable(profile.getAddress()).orElseThrow(() -> new BadRequestException("Address must not be empty"));
 
     validateAndCleanProfile(profile);
 
