@@ -57,7 +57,7 @@ class MonitoringAssets
         @logger.info("\t#{policy.display_name}, #{policy.name}, #{policy.conditions.count} conditions")
       end
 
-      @logger.info("Total counts for #{env.short_name}: #{counts.to_s}")
+      @logger.info("Total counts for #{env.short_name}: #{counts}")
     end
 
   end

@@ -21,6 +21,9 @@ class Dashboards
       dashboard_client.list_dashboards(env.formatted_project_number).each do |dash|
         @logger.info("#{dash.display_name}\t#{self.class.dashboard_console_link(dash, env.project_id)}")
         @logger.info(dash.to_json)
+        dash.grid_layout.widgets.each do |widget|
+          @logger.info("\tChart \"#{widget.title}\"")
+        end
       end
     end
   end
@@ -130,29 +133,6 @@ class Dashboards
         end
         new_widget
     end
-    # # Adjust the filter on each metric (a.k.a. data_set) so that the correct namespace is set.
-    # result.grid_layout.widgets = source_dashboard.grid_layout.widgets.map do |widget|
-    #   @logger.info("Updating chart/widget #{widget.title}")
-    #
-    #   # new_widget = widget.dup
-    #   new_widget = Google::Monitoring::Dashboard::V1::Widget.new
-    #   new_widget.title = widget.title
-    #   new_widget.xy_chart = Google::Monitoring::Dashboard::V1::XyChart.new
-    #
-    #   widget.xy_chart.data_sets.each do |data_set|
-    #     # @logger.info("\tUpdating metric #{data_set.name}")
-    #     new_data_set = data_set.dup
-    #     old_filter = data_set.time_series_query.time_series_filter.filter
-    #     new_data_set.time_series_query.time_series_filter.filter =
-    #         replace_filter_namespace(namespace, old_filter)
-    #     @logger.info("Metric filter is now #{new_data_set.time_series_query.time_series_filter.filter}")
-    #
-    #     # data_sets is a protobuf repeated field, so we need to use +=
-    #     # https://developers.google.com/protocol-buffers/docs/reference/ruby-generated#repeated-fields
-    #     new_widget.xy_chart.data_sets += new_data_set
-    #   end
-    #   new_widget
-    # end
 
     @logger.info("Replacement dashboard: #{result.to_json}")
     result
