@@ -13,10 +13,7 @@ const component = () => {
   return mount(<AccountCreation {...props}/>);
 };
 
-const defaultConfig = {
-  gsuiteDomain: 'researchallofus.org',
-  enableNewAccountCreation: false,
-};
+const defaultConfig = {gsuiteDomain: 'researchallofus.org'};
 
 beforeEach(() => {
   serverConfigStore.next(defaultConfig);
@@ -45,24 +42,6 @@ it('should handle family name validity', () => {
   expect(wrapper.exists('#familyNameError')).toBeFalsy();
   wrapper.find('input#familyName').simulate('change', {target: {value: testInput}});
   expect(wrapper.exists('#familyNameError')).toBeTruthy();
-});
-
-it('should handle organization validity', () => {
-  const wrapper = component();
-  const testInput = fp.repeat(300, 'a');
-  expect(wrapper.exists('#organization')).toBeTruthy();
-  expect(wrapper.exists('#organizationError')).toBeFalsy();
-  wrapper.find('input#organization').simulate('change', {target: {value: testInput}});
-  expect(wrapper.exists('#organizationError')).toBeTruthy();
-});
-
-it('should handle current position validity', () => {
-  const wrapper = component();
-  const testInput = fp.repeat(300, 'a');
-  expect(wrapper.exists('#currentPosition')).toBeTruthy();
-  expect(wrapper.exists('#currentPositionError')).toBeFalsy();
-  wrapper.find('input#currentPosition').simulate('change', {target: {value: testInput}});
-  expect(wrapper.exists('#currentPositionError')).toBeTruthy();
 });
 
 it('should handle username validity starts with .', () => {
@@ -128,7 +107,7 @@ it('should handle invalid Email', () => {
 
 // TODO remove after we switch to verified institutional affiliation
 it('should display Institution name and role option by default', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
+  serverConfigStore.next({...defaultConfig, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionName = wrapper.find('[data-test-id="institutionname"]');
   expect(institutionName).toBeTruthy();
@@ -140,7 +119,7 @@ it('should display Institution name and role option by default', () => {
 
 // TODO remove after we switch to verified institutional affiliation
 it('should display Affiliation information if No is selected', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
+  serverConfigStore.next({...defaultConfig, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
     .find('input');
@@ -155,7 +134,7 @@ it('should display Affiliation information if No is selected', () => {
 
 // TODO remove after we switch to verified institutional affiliation
 it('should display Affiliation Roles should change as per affiliation', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
+  serverConfigStore.next({...defaultConfig, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
     .find('input');

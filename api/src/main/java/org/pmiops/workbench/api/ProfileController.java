@@ -247,15 +247,25 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void validateProfileFields(Profile profile) {
+  private void validateAndCleanProfile(Profile profile) throws BadRequestException {
+    if (profile.getDemographicSurvey() == null) {
+      profile.setDemographicSurvey(new DemographicSurvey());
+    }
+    if (profile.getInstitutionalAffiliations() == null) {
+      profile.setInstitutionalAffiliations(new ArrayList<>());
+    }
+
+    String userName = profile.getUsername();
+    if (userName == null || userName.length() < 3 || userName.length() > 64) {
+      throw new BadRequestException(
+          "Username should be at least 3 characters and not more than 64 characters");
+    }
+
+    // We always store the username as all lowercase.
+    profile.setUsername(profile.getUsername().toLowerCase());
+
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
-    if (!workbenchConfigProvider.get().featureFlags.enableNewAccountCreation) {
-      // required for old create account flow
-      validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
-      validateStringLength(profile.getOrganization(), "Organization", 255, 1);
-      validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
-    }
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -323,28 +333,22 @@ public class ProfileController implements ProfileApiDelegate {
       verifyInvitationKey(request.getInvitationKey());
     }
 
-    String userName = request.getProfile().getUsername();
-    if (userName == null || userName.length() < 3 || userName.length() > 64)
-      throw new BadRequestException(
-          "Username should be at least 3 characters and not more than 64 characters");
-    request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
-    validateProfileFields(request.getProfile());
-    // This check will be removed once enableNewAccountCreation flag is turned on.
-    if (request.getProfile().getAddress() == null) {
-      request.getProfile().setAddress(new Address());
+    final Profile profile = request.getProfile();
+
+    // We don't include this check in validateAndCleanProfile since some existing user profiles
+    // may have empty addresses. So we only check this on user creation, not update.
+    if (profile.getAddress() == null) {
+      throw new BadRequestException("Address must not be empty");
     }
-    if (request.getProfile().getDemographicSurvey() == null) {
-      request.getProfile().setDemographicSurvey(new DemographicSurvey());
-    }
-    if (request.getProfile().getInstitutionalAffiliations() == null) {
-      request.getProfile().setInstitutionalAffiliations(new ArrayList<>());
-    }
+
+    validateAndCleanProfile(profile);
+
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
-            request.getProfile().getGivenName(),
-            request.getProfile().getFamilyName(),
-            request.getProfile().getUsername(),
-            request.getProfile().getContactEmail());
+            profile.getGivenName(),
+            profile.getFamilyName(),
+            profile.getUsername(),
+            profile.getContactEmail());
 
     // Create a user that has no data access or FC user associated.
     // We create this account before they sign in so we can keep track of which users we have
@@ -360,22 +364,22 @@ public class ProfileController implements ProfileApiDelegate {
 
     DbUser user =
         userService.createUser(
-            request.getProfile().getGivenName(),
-            request.getProfile().getFamilyName(),
+            profile.getGivenName(),
+            profile.getFamilyName(),
             googleUser.getPrimaryEmail(),
-            request.getProfile().getContactEmail(),
-            request.getProfile().getCurrentPosition(),
-            request.getProfile().getOrganization(),
-            request.getProfile().getAreaOfResearch(),
-            request.getProfile().getProfessionalUrl(),
-            request.getProfile().getDegrees(),
-            FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
-            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
-            request.getProfile().getInstitutionalAffiliations().stream()
+            profile.getContactEmail(),
+            profile.getCurrentPosition(),
+            profile.getOrganization(),
+            profile.getAreaOfResearch(),
+            profile.getProfessionalUrl(),
+            profile.getDegrees(),
+            FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
+            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(profile.getDemographicSurvey()),
+            profile.getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
                 .collect(Collectors.toList()),
             verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-                request.getProfile().getVerifiedInstitutionalAffiliation(), institutionService));
+                profile.getVerifiedInstitutionalAffiliation(), institutionService));
 
     if (request.getTermsOfServiceVersion() != null) {
       userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
@@ -384,8 +388,7 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       mailServiceProvider
           .get()
-          .sendWelcomeEmail(
-              request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
+          .sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
@@ -561,7 +564,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
-    validateProfileFields(updatedProfile);
+    validateAndCleanProfile(updatedProfile);
     DbUser user = userProvider.get();
 
     // Save current profile for audit trail. Continue to use the userProvider (instead

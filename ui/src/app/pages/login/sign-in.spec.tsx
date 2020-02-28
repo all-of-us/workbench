@@ -25,7 +25,6 @@ describe('SignInReact', () => {
 
   const defaultConfig = {
     gsuiteDomain: 'researchallofus.org',
-    enableNewAccountCreation: false,
     requireInvitationKey: true
   };
 
@@ -78,58 +77,7 @@ describe('SignInReact', () => {
     const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
   });
 
-  it('should handle sign-up flow for legacy account creation', () => {
-    const wrapper = shallowComponent();
-
-    // To start, the landing page / login component should be shown.
-    expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
-    // Simulate the "create account" button being clicked by firing the callback method.
-    wrapper.find(LoginReactComponent).props().onCreateAccount();
-
-    // Invitation key step is next.
-    expect(wrapper.exists(InvitationKey)).toBeTruthy();
-    wrapper.find(InvitationKey).props().onInvitationKeyVerified('asdf');
-
-    expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
-
-    // Success!
-    expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
-  });
-
-  it('should handle sign-up flow for new account creation without institutional verification', () => {
-    props.serverConfig = {...defaultConfig, enableNewAccountCreation: true};
-    const requireInstitutionalVerification = false;
-
-    const wrapper = shallowComponent();
-
-    // To start, the landing page / login component should be shown.
-    expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
-    // Simulate the "create account" button being clicked by firing the callback method.
-    wrapper.find(LoginReactComponent).props().onCreateAccount();
-
-    // Invitation key step is next.
-    expect(wrapper.exists(InvitationKey)).toBeTruthy();
-    wrapper.find(InvitationKey).props().onInvitationKeyVerified('asdf');
-
-    // Terms of Service is part of the new-style flow.
-    expect(wrapper.exists(AccountCreationTos)).toBeTruthy();
-    wrapper.find(AccountCreationTos).props().onComplete();
-
-    expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
-
-    // Account Creation Survey (e.g. demographics) is part of the new-style flow.
-    expect(wrapper.exists(AccountCreationSurvey)).toBeTruthy();
-    wrapper.find(AccountCreationSurvey).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
-
-    expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
-  });
-
-  it('should handle sign-up flow for new account creation with institutional verification', () => {
-    props.serverConfig = {...defaultConfig, enableNewAccountCreation: true};
-    const requireInstitutionalVerification = true;
-
+  it('should handle sign-up flow', () => {
     const wrapper = shallowComponent();
 
     // To start, the landing page / login component should be shown.
@@ -160,7 +108,7 @@ describe('SignInReact', () => {
     // and step-incrementing logic are wired up correctly. Rather than repeating all of the above
     // boilerplate, this test focuses on the logic of creating the sign-in step order, ensuring
     // that INVITATION_KEY is removed when the flag is false.
-    props.serverConfig = {...defaultConfig, requireInvitationKey: false, enableNewAccountCreation: true};
+    props.serverConfig = {...defaultConfig, requireInvitationKey: false};
 
     const wrapper = shallowComponent();
     const signInImpl = wrapper.instance() as SignInReactImpl;

@@ -206,26 +206,16 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
    * Made visible for ease of unit-testing.
    */
   public getAccountCreationSteps(): Array<SignInStep> {
-    const {enableNewAccountCreation, requireInvitationKey} = this.props.serverConfig;
+    const {requireInvitationKey} = this.props.serverConfig;
 
-    let steps: Array<SignInStep>;
-    if (enableNewAccountCreation) {
-      steps = [
-        SignInStep.LANDING,
-        SignInStep.INVITATION_KEY,
-        SignInStep.TERMS_OF_SERVICE,
-        SignInStep.ACCOUNT_CREATION,
-        SignInStep.DEMOGRAPHIC_SURVEY,
-        SignInStep.SUCCESS_PAGE
-      ];
-    } else {
-      steps = [
-        SignInStep.LANDING,
-        SignInStep.INVITATION_KEY,
-        SignInStep.ACCOUNT_CREATION,
-        SignInStep.SUCCESS_PAGE
-      ];
-    }
+    let steps = [
+      SignInStep.LANDING,
+      SignInStep.INVITATION_KEY,
+      SignInStep.TERMS_OF_SERVICE,
+      SignInStep.ACCOUNT_CREATION,
+      SignInStep.DEMOGRAPHIC_SURVEY,
+      SignInStep.SUCCESS_PAGE
+    ];
 
     if (!requireInvitationKey) {
       steps = fp.remove(step => step === SignInStep.INVITATION_KEY, steps);
