@@ -249,22 +249,22 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private void validateAndCleanProfile(Profile profile) throws BadRequestException {
-    profile.setDemographicSurvey(
-        Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
-    profile.setInstitutionalAffiliations(
-        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList()));
-
+    // Validation steps, which yield a BadRequestException if errors are found.
     String userName = profile.getUsername();
     if (userName == null || userName.length() < 3 || userName.length() > 64) {
       throw new BadRequestException(
           "Username should be at least 3 characters and not more than 64 characters");
     }
-
-    // We always store the username as all lowercase.
-    profile.setUsername(profile.getUsername().toLowerCase());
-
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
+
+    // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
+    profile.setDemographicSurvey(
+        Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
+    profile.setInstitutionalAffiliations(
+        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList()));
+    // We always store the username as all lowercase.
+    profile.setUsername(profile.getUsername().toLowerCase());
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {

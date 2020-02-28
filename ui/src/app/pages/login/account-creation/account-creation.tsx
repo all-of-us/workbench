@@ -249,38 +249,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     return state;
   }
 
-  // This method will be deleted once we enable new account pages
-  createAccount(): void {
-    const {invitationKey, onComplete} = this.props;
-    const profile = this.state.profile;
-    profile.institutionalAffiliations = [];
-    const emailValidRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
-    this.setState({showAllFieldsRequiredError: false});
-    this.setState({invalidEmail: false});
-    const requiredFields =
-      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
-        profile.currentPosition, profile.organization, profile.areaOfResearch];
-    if (requiredFields.some(isBlank)) {
-      this.setState({showAllFieldsRequiredError: true});
-      return;
-    } else if (this.isUsernameValidationError) {
-      return;
-    } else if (!emailValidRegex.test(profile.contactEmail)) {
-      this.setState({invalidEmail: true});
-      return;
-    }
-    this.setState({creatingAccount: true});
-    profileApi().createAccount({profile, invitationKey})
-      .then((savedProfile) => {
-        this.setState({profile: savedProfile, creatingAccount: false});
-        onComplete(savedProfile);
-      })
-      .catch(error => {
-        console.log(error);
-        this.setState({creatingAccount: false});
-      });
-  }
-
   get usernameValid(): boolean {
     if (isBlank(this.state.profile.username) || this.state.usernameCheckInProgress) {
       return undefined;
@@ -420,18 +388,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       this.setState({nonAcademicAffiliationRole: role, showNonAcademicAffiliationOther: false});
     }
     this.updateInstitutionAffiliation('role', role);
-  }
-
-  // This will be deleted once enableAccountPages is set to true for prod
-  validate() {
-    const {profile} = this.state;
-    const requiredFields =
-      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
-        profile.currentPosition, profile.organization, profile.areaOfResearch];
-    if (requiredFields.some(isBlank)) {
-      this.setState({showAllFieldsRequiredError: true});
-      return;
-    }
   }
 
   validateAccountCreation() {
