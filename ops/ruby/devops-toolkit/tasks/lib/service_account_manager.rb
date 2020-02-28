@@ -31,21 +31,13 @@ class ServiceAccountManager
     credentials_path = create_credentials_file
 
     @logger.info("Setting environment variable GOOGLE_APPLICATION_CREDENTIALS to #{credentials_path}")
-<<<<<<< service_account_manager.rb
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
-=======
     ENV[CREDENTIALS_ENV_VAR] = credentials_path
->>>>>>> service_account_manager.rb
 
     begin
       yield self
     ensure
       cleanup_key(credentials_path)
-<<<<<<< service_account_manager.rb
-      ENV["GOOGLE_APPLICATION_CREDENTIALS"] = nil
-=======
       ENV[CREDENTIALS_ENV_VAR] = nil
->>>>>>> service_account_manager.rb
     end
   end
 
@@ -79,19 +71,6 @@ class ServiceAccountManager
   end
 
   def run_process(cmd)
-<<<<<<< service_account_manager.rb
-    pid = spawn(*cmd)
-    Process.wait pid
-    if $?.exited?
-      unless $?.success?
-        exit $?.exitstatus
-      end
-    else
-      error "Command exited abnormally."
-      exit 1
-    end
-=======
-    ProcessRunner.new.run(cmd)
->>>>>>> service_account_manager.rb
+    ProcessRunner.new(@logger).run(cmd)
   end
 end
