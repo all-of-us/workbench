@@ -2,23 +2,26 @@ import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {AccountCreation, AccountCreationProps, AccountCreationState} from './account-creation';
-import {AccountCreationOptions} from './account-creation-options';
 import {serverConfigStore} from 'app/utils/navigation';
-import {getEmptyProfile} from 'app/pages/login/test-utils';
 import {Profile} from 'generated/fetch';
+import {createEmptyProfile} from 'app/pages/login/sign-in';
+import {AccountCreation, AccountCreationProps} from './account-creation';
+import {AccountCreationOptions} from './account-creation-options';
 
 let props: AccountCreationProps;
 const component = () => {
   return mount(<AccountCreation {...props}/>);
 };
 
-const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: false};
+const defaultConfig = {
+  gsuiteDomain: 'researchallofus.org',
+  enableNewAccountCreation: false,
+};
 
 beforeEach(() => {
   serverConfigStore.next(defaultConfig);
   props = {
-    profile: getEmptyProfile(),
+    profile: createEmptyProfile(),
     invitationKey: '',
     onComplete: (profile: Profile) => {},
   };
@@ -123,8 +126,9 @@ it('should handle invalid Email', () => {
   expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
 });
 
+// TODO remove after we switch to verified institutional affiliation
 it('should display Institution name and role option by default', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true});
+  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionName = wrapper.find('[data-test-id="institutionname"]');
   expect(institutionName).toBeTruthy();
@@ -134,8 +138,9 @@ it('should display Institution name and role option by default', () => {
   expect(institutionRole.find('li').get(0).props.children).toBe(AccountCreationOptions.roles[0].label);
 });
 
+// TODO remove after we switch to verified institutional affiliation
 it('should display Affiliation information if No is selected', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true});
+  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
     .find('input');
@@ -148,8 +153,9 @@ it('should display Affiliation information if No is selected', () => {
     .toBe(AccountCreationOptions.nonAcademicAffiliations[0].label);
 });
 
+// TODO remove after we switch to verified institutional affiliation
 it('should display Affiliation Roles should change as per affiliation', () => {
-  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true});
+  serverConfigStore.next({...defaultConfig, enableNewAccountCreation: true, requireInstitutionalVerification: false});
   const wrapper = component();
   const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
     .find('input');

@@ -4,7 +4,7 @@ import * as React from 'react';
 import {TextInput} from 'app/components/inputs';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
-import {Profile, ProfileApi} from 'generated/fetch';
+import {ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
