@@ -249,38 +249,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     return state;
   }
 
-  // This method will be deleted once we enable new account pages
-  createAccount(): void {
-    const {invitationKey, onComplete} = this.props;
-    const profile = this.state.profile;
-    profile.institutionalAffiliations = [];
-    const emailValidRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
-    this.setState({showAllFieldsRequiredError: false});
-    this.setState({invalidEmail: false});
-    const requiredFields =
-      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
-        profile.currentPosition, profile.organization, profile.areaOfResearch];
-    if (requiredFields.some(isBlank)) {
-      this.setState({showAllFieldsRequiredError: true});
-      return;
-    } else if (this.isUsernameValidationError) {
-      return;
-    } else if (!emailValidRegex.test(profile.contactEmail)) {
-      this.setState({invalidEmail: true});
-      return;
-    }
-    this.setState({creatingAccount: true});
-    profileApi().createAccount({profile, invitationKey})
-      .then((savedProfile) => {
-        this.setState({profile: savedProfile, creatingAccount: false});
-        onComplete(savedProfile);
-      })
-      .catch(error => {
-        console.log(error);
-        this.setState({creatingAccount: false});
-      });
-  }
-
   get usernameValid(): boolean {
     if (isBlank(this.state.profile.username) || this.state.usernameCheckInProgress) {
       return undefined;
@@ -422,18 +390,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.updateInstitutionAffiliation('role', role);
   }
 
-  // This will be deleted once enableAccountPages is set to true for prod
-  validate() {
-    const {profile} = this.state;
-    const requiredFields =
-      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
-        profile.currentPosition, profile.organization, profile.areaOfResearch];
-    if (requiredFields.some(isBlank)) {
-      this.setState({showAllFieldsRequiredError: true});
-      return;
-    }
-  }
-
   validateAccountCreation() {
     const {
       showInstitution,
@@ -521,14 +477,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   render() {
     const {
       profile: {
-        givenName, familyName, currentPosition, organization,
+        givenName, familyName,
         contactEmail, username, areaOfResearch, professionalUrl,
         address: {
           streetAddress1, streetAddress2, city, state, zipCode, country
         },
       },
     } = this.state;
-    const {enableNewAccountCreation, gsuiteDomain, requireInstitutionalVerification} = serverConfigStore.getValue();
+    const {gsuiteDomain, requireInstitutionalVerification} = serverConfigStore.getValue();
 
     const usernameLabelText =
       <div>New Username
@@ -693,11 +649,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     };
 
     return <div id='account-creation'
-                style={{paddingTop: enableNewAccountCreation ? '1.5rem' :
-                      '3rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
+                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
       <div style={{fontSize: 28, fontWeight: 400, color: colors.primary}}>Create your account</div>
       {renderVerifiedInstitutionalAffiliation()}
-      {enableNewAccountCreation && <FlexRow>
+      <FlexRow>
         <FlexColumn style={{marginTop: '0.5rem'}}>
           <div style={{...styles.text, fontSize: 16, marginTop: '1rem'}}>
             Please complete Step {requireInstitutionalVerification ? '2 of 3' : '1 of 2'}
@@ -885,123 +840,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </ul>
           </FlexColumn>
         </FlexColumn>
-      </FlexRow>}
-      {/*The following will be deleted once enableAccountPages is set to true in prod*/}
-      {!enableNewAccountCreation && <div>
-        <FormSection>
-          <TextInput id='givenName' name='givenName' autoFocus
-                     placeholder='First Name'
-                     value={givenName}
-                     invalid={String(givenName.length > 80)}
-                     style={{width: '16rem'}}
-                     onChange={v => this.updateProfileToBeDeleted('givenName', v)}/>
-          {givenName.length > 80 &&
-          <ErrorMessage id='givenNameError'>
-            First Name must be 80 characters or less.
-          </ErrorMessage>}
-        </FormSection>
-        <FormSection>
-          <TextInput id='familyName' name='familyName' placeholder='Last Name'
-                     value={familyName}
-                     invalid={String(familyName.length > 80)}
-                     style={{width: '16rem'}}
-                     onChange={v => this.updateProfileToBeDeleted('familyName', v)}/>
-          {familyName.length > 80 &&
-          <ErrorMessage id='familyNameError'>
-            Last Name must be 80 character or less.
-          </ErrorMessage>}
-        </FormSection>
-        <FormSection>
-          <TextInput id='contactEmail' name='contactEmail'
-                     placeholder='Email Address'
-                     value={contactEmail}
-                     style={{width: '16rem'}}
-                     onChange={v => this.updateProfileToBeDeleted('contactEmail', v)}/>
-          {this.state.invalidEmail &&
-          <ErrorDiv id='invalidEmailError'>
-            Contact Email Id is invalid
-          </ErrorDiv>}
-        </FormSection>
-        <FormSection>
-          <TextInput id='currentPosition' name='currentPosition'
-                     placeholder='Your Current Position'
-                     value={currentPosition}
-                     invalid={currentPosition.length > 255}
-                     style={{width: '16rem'}}
-                     onChange={v => this.updateProfileToBeDeleted('currentPosition', v)}/>
-          {currentPosition.length > 255 &&
-          <ErrorMessage id='currentPositionError'>
-            Current Position must be 255 characters or less.
-          </ErrorMessage>}
-        </FormSection>
-        <FormSection>
-          <TextInput id='organization' name='organization'
-                     placeholder='Your Organization'
-                     value={organization}
-                     invalid={organization.length > 255}
-                     style={{width: '16rem'}}
-                     onChange={v => this.updateProfileToBeDeleted('organization', v)}/>
-          {organization.length > 255 &&
-          <ErrorMessage id='organizationError'>
-            Organization must be 255 characters of less.
-          </ErrorMessage>}
-        </FormSection>
-        <FormSection style={{display: 'flex'}}>
-              <TextArea style={{height: '10em', resize: 'none', width: '16rem'}}
-                        id='areaOfResearch'
-                        name='areaOfResearch'
-                        placeholder='Describe Your Current Research'
-                        value={areaOfResearch}
-                        onChange={v => this.updateProfileToBeDeleted('areaOfResearch', v)}/>
-          <TooltipTrigger content={<span>You are required to describe your current research in
-            order to help <i>All of Us</i> improve the Researcher Workbench.</span>}>
-            <InfoIcon style={{
-              'height': '22px',
-              'marginTop': '2.2rem',
-              'paddingLeft': '2px'
-            }}/>
-          </TooltipTrigger>
-        </FormSection>
-        <FormSection>
-          <TextInput id='username' name='username' placeholder='New Username'
-                     value={username}
-                     onChange={v => this.usernameChanged(v)}
-                     invalid={this.state.usernameConflictError || this.usernameInvalidError()}
-                     style={{width: '16rem'}}/>
-          <div style={inputStyles.iconArea}>
-            <ValidationIcon validSuccess={this.usernameValid}/>
-          </div>
-          <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
-            numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
-            (minimum of 3 characters and maximum of 64 characters).<br/>Usernames cannot
-            begin or end with a period (.) and may not contain more than one period (.) in a row.
-          </div>}>
-            <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
-          </TooltipTrigger>
-          <div style={{height: '1.5rem'}}>
-            {this.state.usernameConflictError &&
-            <ErrorDiv id='usernameConflictError'>
-              Username is already taken.
-            </ErrorDiv>}
-            {this.usernameInvalidError() &&
-            <ErrorDiv id='usernameError'>
-              Username is not a valid username.
-            </ErrorDiv>}
-          </div>
-        </FormSection>
-        <FormSection>
-          <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
-          this.isUsernameValidationError}
-                  style={{'height': '2rem', 'width': '10rem'}}
-                  onClick={() => this.createAccount()}>
-            Next
-          </Button>
-        </FormSection>
-      </div>}
-      {!enableNewAccountCreation && this.state.showAllFieldsRequiredError &&
-      <ErrorDiv>
-        All fields are required.
-      </ErrorDiv>}
+      </FlexRow>
     </div>;
   }
 }
