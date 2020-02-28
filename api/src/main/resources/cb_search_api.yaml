@@ -297,7 +297,7 @@ paths:
             type: integer
             format: int64
 
-  /v1/cohortbuilder/{cdrVersionId}/chartinfo:
+  /v1/cohortbuilder/{cdrVersionId}/chartinfo/{genderOrSex}/{age}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     post:
@@ -308,6 +308,16 @@ paths:
       description: Searches for demographic info about subjects.
       operationId: "getDemoChartInfo"
       parameters:
+        - in: path
+          name: genderOrSex
+          type: string
+          required: true
+          description: represents gender or sex at birth
+        - in: path
+          name: age
+          type: string
+          required: true
+          description: represents age, age at consent or age at cdr
         - in: body
           name: request
           description: object of parameters by which to perform the search
@@ -907,6 +917,16 @@ definitions:
     description: Name that descibes the type of attribute
     enum: [ANY, NUM, CAT, AGE, AGE_AT_CONSENT, AGE_AT_CDR]
 
+  AgeType:
+    type: string
+    description: Different age types
+    enum: [AGE, AGE_AT_CONSENT, AGE_AT_CDR]
+
+  GenderOrSexType:
+    type: string
+    description: represents gender or sex at birth
+    enum: [GENDER, SEX_AT_BIRTH]
+
   DemoChartInfoListResponse:
     type: object
     required:
@@ -920,13 +940,13 @@ definitions:
   DemoChartInfo:
     type: object
     required:
-      - gender
+      - name
       - race
       - ageRange
       - count
     properties:
-      gender:
-        description: gender of subject
+      name:
+        description: gender or sex at birth of subject
         type: string
       race:
         description: race of subject
