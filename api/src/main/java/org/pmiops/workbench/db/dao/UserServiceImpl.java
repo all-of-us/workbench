@@ -307,7 +307,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         oAuth2Userinfo.getGivenName(),
         oAuth2Userinfo.getFamilyName(),
         oAuth2Userinfo.getEmail(),
-        null,
+        oAuth2Userinfo.getEmail(),
         null,
         null,
         null,
