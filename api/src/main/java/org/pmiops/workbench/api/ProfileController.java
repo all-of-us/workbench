@@ -249,9 +249,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   private void validateAndCleanProfile(Profile profile) throws BadRequestException {
     profile.setDemographicSurvey(Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
-    if (profile.getInstitutionalAffiliations() == null) {
-      profile.setInstitutionalAffiliations(new ArrayList<>());
-    }
+    profile.setInstitutionalAffiliations(Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList()));
 
     String userName = profile.getUsername();
     if (userName == null || userName.length() < 3 || userName.length() > 64) {
