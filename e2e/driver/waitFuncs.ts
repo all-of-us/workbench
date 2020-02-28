@@ -1,4 +1,4 @@
-import {JSHandle, Page} from 'puppeteer';
+import {Page} from 'puppeteer';
 
 /**
  * Wait until page URL to match a regular expression.

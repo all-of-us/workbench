@@ -1,3 +1,10 @@
+/**
+ * a TEXTAREA element with specified label.
+ * @param label
+ */
+export function selectXpath(label: string) {
+  return `${textXpath(label)}/ancestor::node()[2]//select`;
+}
 
 /**
  * a @role=button element with specified label.
@@ -48,7 +55,7 @@ export function radioButtonXpath(label: string) {
 }
 
 export function inputXpath(label: string, inputType?: string) {
-  if (!!inputType) {
+  if (inputType !== undefined) {
     return `${textXpath(label)}/ancestor::node()[2]//input[@type='${inputType}']`;
   }
   // return all input nodes
@@ -60,7 +67,7 @@ export function inputXpath(label: string, inputType?: string) {
  * @param labelText
  */
 export function textXpath(label: string) {
-  return `//*[contains(normalize-space(text()),'${label}')]`;
+  return `//*[contains(normalize-space(text()),'${label}')  or @placeholder='${label}']`;
 }
 
 /**
@@ -77,4 +84,12 @@ export function plusCircleIconXpath(label: string) {
  */
 export function clickableXpath(label: string) {
   return `(//a | //*[@role='button'])[normalize-space()='${label}' or contains(@aria-label,'${label}')]`;
+}
+
+/**
+ * A clr-icon element with specified label.
+ * @param label
+ */
+export function clrIconXpath(label: string) {
+  return `${textXpath(label)}/ancestor::node()[1]//clr-icon`;
 }

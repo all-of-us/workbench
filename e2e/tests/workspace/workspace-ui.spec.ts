@@ -1,10 +1,10 @@
 import {Browser, Page} from 'puppeteer';
-import Textbox from "../../app/elements/textbox";
-import WebElement from '../../app/elements/web-element';
-import GoogleLoginPage from "../../app/google-login";
-import Home from '../../app/home';
-import WorkspaceEditPage from '../../app/workspace-edit';
-import Workspaces from "../../app/workspaces";
+import select from '../../app/aou-elements/select';
+import Textbox from '../../app/aou-elements/textbox';
+import GoogleLoginPage from '../../app/GoogleLoginPage';
+import HomePage from '../../app/HomePage';
+import WorkspaceEditPage from '../../app/WorkspaceEditPage';
+import WorkspacesPage from '../../app/WorkspacesPage';
 
 const Chrome = require('../../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
@@ -35,9 +35,9 @@ describe('Workspace', () => {
   });
 
   // Click CreateNewWorkspace link on Home page => Open Create Workspace page
-  test('Can create new workspace on Home page', async () => {
+  test('Click on Create New Workspace link on Home page', async () => {
 
-    const home = new Home(page);
+    const home = new HomePage(page);
     await home.getCreateNewWorkspaceLink()
       .then((link) => link.click());
 
@@ -45,36 +45,38 @@ describe('Workspace', () => {
     await workspaceEdit.waitUntilReady();
 
     // expect Workspace-Name Input text field exists and is NOT disabled
-    const nameInput = new WebElement(await workspaceEdit.getWorkspaceNameTextbox());
-    expect(await nameInput.isVisible()).toBe(true);
-    expect(await nameInput.isDisabled()).toBe(false);
+    const workspaceNameTextbox = new Textbox(page, WorkspaceEditPage.selectors.workspaceName);
+    expect(await workspaceNameTextbox.isVisible()).toBe(true);
+    expect(await workspaceNameTextbox.isDisabled()).toBe(false);
 
     // expect DataSet Select field exists and is NOT disabled
-    const dataSetSelect = new WebElement(await workspaceEdit.getDataSetSelectOption());
+    const dataSetSelect = new select(page, WorkspaceEditPage.selectors.syntheticDataSet);
     expect(await dataSetSelect.isVisible()).toBe(true);
-    expect(await nameInput.isDisabled()).toBe(false);
+    expect(await dataSetSelect.isDisabled()).toBe(false);
+    expect(await dataSetSelect.getValue()).toBe('2'); // default value
 
   });
+
 
   // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
-  test('Can create new workspace on My Workspaces page', async () => {
+  test('Click on Create New Workspace link on My Workspaces page', async () => {
 
-    const workspaces = new Workspaces(page);
+    const workspaces = new WorkspacesPage(page);
     const workspaceEdit = await workspaces.createNewWorkspace();
 
-    const nameInput = new WebElement(await workspaceEdit.getWorkspaceNameTextbox());
-    expect(await nameInput.isVisible()).toBe(true);
+    const workspaceNameTextbox = new Textbox(page, WorkspaceEditPage.selectors.workspaceName);
+    expect(await workspaceNameTextbox.isVisible()).toBe(true);
 
   });
 
-
-  // Checking all fields in Research Purpose section
-  test('Checking Research Purpose questions on Create new workspace page', async () => {
+/*
+      // Checking all fields in Research Purpose section
+  test('Checking Research Purpose questions on Create page', async () => {
 
     const workspaces = new Workspaces(page);
     const workspaceEdit = await workspaces.createNewWorkspace();
 
-    // expand Disease purpose section if needed
+        // expand Disease purpose section if needed
     const researchPurpose = workspaceEdit.getResearchPurpose();
     const researchPurposeCheckbox = researchPurpose.asCheckbox();
     if (!await researchPurposeCheckbox.isChecked()) {
@@ -82,7 +84,7 @@ describe('Workspace', () => {
       await page.waitFor(1000);
     }
 
-    // Disease-focused research checkbox
+        // Disease-focused research checkbox
     const diseaseName = workspaceEdit.question1_diseaseFocusedResearch();
     const diseaseNameCheckbox = diseaseName.asCheckbox();
     const diseaseNameElement = await diseaseNameCheckbox.get();
@@ -95,14 +97,14 @@ describe('Workspace', () => {
     expect(await diseaseNameTextboxElement.isVisible()).toBe(true);
     expect(await diseaseNameTextboxElement.isDisabled()).toBe(true);
 
-    // Select the checkbox (checked)
+        // Select the checkbox (checked)
     await diseaseNameCheckbox.check();
-    // TODO wait async after change or test will fail
+        // TODO wait async after change or test will fail
     await page.waitFor(1000);
     expect(await diseaseNameElement.getProperty('checked')).toBe(true);
     expect(await diseaseNameTextboxElement.isDisabled()).toBe(false);
 
-    // check rest fields
+        // check rest fields
     const populationCheckbox = workspaceEdit.question1_populationHealth().asCheckbox();
     expect(await (await populationCheckbox.get()).isVisible()).toBe(true);
     expect(await (await populationCheckbox.get()).isDisabled()).toBe(false);
@@ -144,65 +146,65 @@ describe('Workspace', () => {
 
   });
 
-  /*
-  test('Create Workspace page: Question 2', async () => {
-    const workspace = new WorkspaceEditPage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
 
-    const reasonTextarea = new WebElement(await workspace.question2_scientificQuestionsIntendToStudy());
-    expect(await reasonTextarea.getProp('disabled')).toBe(false);
-    expect(await reasonTextarea.getProp('value')).toEqual('');
+        test('Create Workspace page: Question 2', async () => {
+          const workspace = new WorkspaceEditPage(page);
+          await workspace.goURL();
+          await workspace.click_button_CreateNewWorkspace();
 
-    const approachesTextarea = new WebElement(await workspace.question2_scientificApproaches());
-    expect(await approachesTextarea.getProp('disabled')).toBe(false);
-    expect(await approachesTextarea.getProp('value')).toEqual('');
+          const reasonTextarea = new WebElement(await workspace.question2_scientificQuestionsIntendToStudy());
+          expect(await reasonTextarea.getProp('disabled')).toBe(false);
+          expect(await reasonTextarea.getProp('value')).toEqual('');
 
-    const findingsTextarea = new WebElement(await workspace.question2_anticipatedFindings());
-    expect(await findingsTextarea.getProp('disabled')).toBe(false);
-    expect(await findingsTextarea.getProp('value')).toEqual('');
+          const approachesTextarea = new WebElement(await workspace.question2_scientificApproaches());
+          expect(await approachesTextarea.getProp('disabled')).toBe(false);
+          expect(await approachesTextarea.getProp('value')).toEqual('');
 
-  }, 60 * 1000);
+          const findingsTextarea = new WebElement(await workspace.question2_anticipatedFindings());
+          expect(await findingsTextarea.getProp('disabled')).toBe(false);
+          expect(await findingsTextarea.getProp('value')).toEqual('');
 
-  test.skip('Create Workspace page: Question 3', async () => {
-    const workspace = new WorkspaceEditPage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
+        }, 60 * 1000);
 
-    // TODO
-  }, 60 * 1000);
+        test.skip('Create Workspace page: Question 3', async () => {
+          const workspace = new WorkspaceEditPage(page);
+          await workspace.goURL();
+          await workspace.click_button_CreateNewWorkspace();
 
-  test.skip('Create Workspace page: Question 4', async () => {
-    const workspace = new WorkspaceEditPage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
+          // TODO
+        }, 60 * 1000);
 
-    // TODO
-  }, 60 * 1000);
+        test.skip('Create Workspace page: Question 4', async () => {
+          const workspace = new WorkspaceEditPage(page);
+          await workspace.goURL();
+          await workspace.click_button_CreateNewWorkspace();
 
-  test('Create Workspace page: Question 5 Population of interest', async () => {
-    const workspace = new WorkspaceEditPage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
+          // TODO
+        }, 60 * 1000);
 
-    expect(await (workspace.radioButtonNotCenterOnUnrepresentedPopulation()).isChecked()).toBe(true);
-  }, 60 * 1000);
+        test('Create Workspace page: Question 5 Population of interest', async () => {
+          const workspace = new WorkspaceEditPage(page);
+          await workspace.goURL();
+          await workspace.click_button_CreateNewWorkspace();
 
-  test('Create Workspace page: Question 6 Request for Review of Research Purpose Description', async () => {
-    const workspace = new WorkspaceEditPage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
+          expect(await (workspace.radioButtonNotCenterOnUnrepresentedPopulation()).isChecked()).toBe(true);
+        }, 60 * 1000);
 
-    expect(!! (await (workspace.radioButtonRequestReviewYes()).get())).toBe(true);
-    expect(!! (await (workspace.radioButtonRequestReviewNo()).get())).toBe(true);
-    expect(
-       await (workspace.radioButtonRequestReviewNo()).get()
-       .then(elem => elem.getProperty('checked'))
-       .then(elemhandle => elemhandle.jsonValue())
-    ).toBe(true);
-  }, 60 * 1000);
+        test('Create Workspace page: Question 6 Request for Review of Research Purpose Description', async () => {
+          const workspace = new WorkspaceEditPage(page);
+          await workspace.goURL();
+          await workspace.click_button_CreateNewWorkspace();
+
+          expect(!! (await (workspace.radioButtonRequestReviewYes()).get())).toBe(true);
+          expect(!! (await (workspace.radioButtonRequestReviewNo()).get())).toBe(true);
+          expect(
+             await (workspace.radioButtonRequestReviewNo()).get()
+             .then(elem => elem.getProperty('checked'))
+             .then(elemhandle => elemhandle.jsonValue())
+          ).toBe(true);
+        }, 60 * 1000);
 
 
 
-   */
+         */
 });

@@ -3,7 +3,7 @@ const configs = require('../config');
 
 const newUserName = `aoutestuser${Math.floor(Math.random() * 1000)}${Math.floor(Date.now() / 1000)}`;
 
-const inputFieldsValues = [{
+const defaultFieldValues = [{
   label: 'New Username',
   value: newUserName
 }, {
@@ -40,5 +40,5 @@ const institutionAffiliation = {
 
 module.exports = {
   institutionAffiliation,
-  inputFieldsValues,
+  defaultFieldValues,
 };

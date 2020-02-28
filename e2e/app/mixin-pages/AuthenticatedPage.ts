@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
 import {waitUntilTitleMatch} from '../../driver/waitFuncs';
-import BasePage from './basepage';
-import NavigationMenu from './navigationmenu';
+import BasePage from './BasePage';
+import NavigationMenu from './NavigationMenu';
 
 const selectors = {
   signedInIndicator: 'body#body div',

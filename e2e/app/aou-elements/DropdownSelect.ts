@@ -1,4 +1,4 @@
-import {ElementHandle, Page} from 'puppeteer';
+import {Page} from 'puppeteer';
 
 export default class DropdownSelect {
 
@@ -44,15 +44,11 @@ export default class DropdownSelect {
     }
   }
 
-  private async getComponent(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(this.componentXpath())
-  }
-
   private componentXpath(): string {
     if (this.label === undefined) {
       return '//*[contains(@class,"p-dropdown p-component")]';
     }
-    return `//*[child::*[normalize-space(text())="${this.label}"]]/*[contains(@class,"p-dropdown p-component")]`;
+    return `//*[child::*[normalize-space(text())='${this.label}']]/*[contains(@class,'p-dropdown p-component')]`;
   }
 
 }

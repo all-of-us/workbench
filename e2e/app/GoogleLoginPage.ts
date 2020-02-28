@@ -6,12 +6,13 @@ const configs = require('../resources/config');
 export const selectors = {
   loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In with Google")]',
   emailInput: '//input[@type="email"]',
-  emailNextButton: '//*[@role="button"][@id="identifierNext"]//*[normalize-space(text())="Next"]',
+  emailNextButton: '//*[@id="identifierNext"]//*[normalize-space(text())="Next"]',
   passwordInput: '//input[@type="password"]',
   passwordNextButton: '//*[@role="button"][@id="passwordNext"]//*[normalize-space(text())="Next"]',
 };
 
 export default class GoogleLoginPage {
+
   public page: Page;
 
   constructor(page: Page) {
@@ -44,14 +45,19 @@ export default class GoogleLoginPage {
    * @param email
    */
   public async enterEmail(email: string) : Promise<void> {
+
+    const screenshotFile = `enterEmail.png`;
+    await this.page.screenshot({path: screenshotFile, fullPage: true});
+
     const input = await this.email;
     await input.focus();
     await input.type(email);
 
-    const naviPromise = this.page.waitForNavigation();
-    const element = await this.page.waitForXPath(selectors.emailNextButton);
-    await element.click();
-    await naviPromise;
+    const nextButton = await this.page.waitForXPath(selectors.emailNextButton);
+    await Promise.all([
+      this.page.waitForNavigation(),
+      nextButton.click()
+    ]);
   }
 
   /**

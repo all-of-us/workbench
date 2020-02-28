@@ -1,7 +1,7 @@
-import GoogleLoginPage from '../../app/google-login';
-import Home from '../../app/home';
-import Profile from '../../app/profile';
-import WorkspaceEditPage from '../../app/workspace-edit';
+import GoogleLoginPage from '../../app/GoogleLoginPage';
+import HomePage from '../../app/HomePage';
+import ProfilePage from '../../app/ProfilePage';
+import WorkspaceEditPage from '../../app/WorkspaceEditPage';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);
@@ -36,7 +36,7 @@ describe.skip('Navigation menu tests:', () => {
   });
 
   test('User sign out', async () => {
-    const homePage = new Home(page);
+    const homePage = new HomePage(page);
     await homePage.waitForReady();
 
     await homePage.navigation.signOut();
@@ -44,18 +44,18 @@ describe.skip('Navigation menu tests:', () => {
   });
 
   test('User open Profile page', async () => {
-    const homePage = new Home(page);
+    const homePage = new HomePage(page);
     await homePage.waitForReady();
 
     await homePage.navigation.toProfile();
 
-    const profile = new Profile(page);
+    const profile = new ProfilePage(page);
     await profile.waitForReady();
     expect(await page.url()).toContain('profile');
   });
 
   test('User open all-workspaces page', async () => {
-    const homePage = new Home(page);
+    const homePage = new HomePage(page);
     await homePage.waitForReady();
 
     await homePage.navigation.toAllWorkspaces();

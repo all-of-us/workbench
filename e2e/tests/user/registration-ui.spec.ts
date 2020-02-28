@@ -1,9 +1,9 @@
-import CreateAccountPage from '../../app/create-account-page';
-import WebElement from '../../app/elements/web-element';
-import GoogleLoginPage from '../../app/google-login';
+import WebElement from '../../app/aou-elements/web-element';
+import CreateAccountPage from '../../app/CreateAccountPage';
+import GoogleLoginPage from '../../app/GoogleLoginPage';
 import {findText, getCursorValue} from '../../driver/element-util';
-import {waitForText, waitUntilFindTexts} from '../../driver/waitFuncs';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
+import {waitForText, waitUntilFindTexts} from '../../driver/waitFuncs';
 require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);

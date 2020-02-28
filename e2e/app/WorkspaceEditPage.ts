@@ -1,47 +1,46 @@
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import {ElementHandle, JSHandle} from 'puppeteer';
 import {waitUntilTitleMatch} from '../driver/waitFuncs';
-import DropdownSelect from "./elements/dropdown-select";
-import RadioButton from './elements/radiobutton';
-import WebComponent from "./elements/web-component";
-import {findButton, findTextbox} from "./elements/xpath-finder";
-import AuthenticatedPage from "./mixin/authenticatedpage";
+import DropdownSelect from './aou-elements/DropdownSelect';
+import RadioButton from './aou-elements/radiobutton';
+import WebComponent from './aou-elements/WebComponent';
+import {findButton, findTextBox} from './aou-elements/xpath-finder';
+import AuthenticatedPage from './mixin-pages/AuthenticatedPage';
 require('../driver/waitFuncs');
-
-const configs = require('../resources/config.js');
-
-const selectors = {
-  pageTitleRegex: '/(Create|View) Workspaces?/i',
-  // select - Synthetic DataSet
-  dataSet: 'input[type=text][placeholder="Workspace Name"] + div[id] > select', // css
-  // button CREATE WORKSPACE
-  createWorkspaceButton: 'Create Workspace',
-  // button CANCEL
-  cancelButton: `Cancel`,
-  // input textbox - Workspace Name
-  workspaceName: 'Create a new Workspace',
-};
 
 
 export default class WorkspaceEditPage extends AuthenticatedPage {
 
+  public static selectors = {
+    pageTitleRegex: '/(Create|View) Workspaces?/i',
+    // select - Synthetic DataSet
+    syntheticDataSet: 'Workspace Name',
+    // button CREATE WORKSPACE
+    createWorkspaceButton: 'Create Workspace',
+    // button CANCEL
+    cancelButton: `Cancel`,
+    // input textbox - Workspace Name
+    workspaceName: 'Create a new Workspace',
+  };
+
+
   public async getCreateWorkspaceButton(): Promise<ElementHandle> {
-    return findButton(this.puppeteerPage, selectors.createWorkspaceButton);
+    return findButton(this.puppeteerPage, WorkspaceEditPage.selectors.createWorkspaceButton);
   }
 
   public async getCancelButton(): Promise<ElementHandle> {
-    return findButton(this.puppeteerPage, selectors.cancelButton);
+    return findButton(this.puppeteerPage, WorkspaceEditPage.selectors.cancelButton);
   }
 
   public async getWorkspaceNameTextbox(): Promise<ElementHandle> {
-    return findTextbox(this.puppeteerPage, selectors.workspaceName);
+    return findTextBox(this.puppeteerPage, WorkspaceEditPage.selectors.workspaceName);
   }
 
-  public async getDataSetSelectOption(): Promise<ElementHandle> {
-    return await this.puppeteerPage.waitFor(selectors.dataSet, { visible: true });
+  public getDataSetSelectOption(): WebComponent {
+    return new WebComponent(this.puppeteerPage, WorkspaceEditPage.selectors.syntheticDataSet);
   }
 
   public getResearchPurpose(): WebComponent {
-    return new WebComponent(this.puppeteerPage, "Research purpose");
+    return new WebComponent(this.puppeteerPage, 'Research purpose');
   }
 
   public question1_researchPurpose(): WebComponent {
@@ -118,7 +117,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   public async waitForReady(): Promise<WorkspaceEditPage> {
-    await super.isLoaded(selectors.pageTitleRegex);
+    await super.isLoaded(WorkspaceEditPage.selectors.pageTitleRegex);
     return this;
   }
 
@@ -165,7 +164,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     await this.getWorkspaceNameTextbox();
     await this.getDataSetSelectOption();
     await this.getCreateWorkspaceButton();
-    await new DropdownSelect(this.puppeteerPage, "Select account").getSelectedValue();
+    await new DropdownSelect(this.puppeteerPage, 'Select account').getSelectedValue();
   }
 
 

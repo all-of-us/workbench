@@ -1,7 +1,5 @@
 import * as Puppeteer from 'puppeteer';
-import GoogleLoginPage from '../app/google-login';
-
-const configs = require('../resources/config.js');
+import GoogleLoginPage from '../app/GoogleLoginPage';
 
 export default class ChromeDriver {
 
@@ -48,7 +46,9 @@ export default class ChromeDriver {
       this.page = await br.newPage();
     }
     await this.page.setUserAgent(this.userAgent);
-    await this.page.setDefaultNavigationTimeout(60000);
+    // value 0 means disable timeout
+    await this.page.setDefaultNavigationTimeout(60000); // timeout for all page navigation functions
+    await this.page.setDefaultTimeout(30000); // timeout for all async waitFor functions
     return this.page;
   }
 

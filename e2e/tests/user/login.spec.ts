@@ -1,7 +1,7 @@
-import GoogleLoginPage, {selectors} from '../../app/google-login';
-import BasePage from '../../app/mixin/basepage';
-import {waitUntilFindTexts} from '../../driver/waitFuncs';
+import GoogleLoginPage, {selectors} from '../../app/GoogleLoginPage';
+import BasePage from '../../app/mixin-pages/BasePage';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
+import {waitUntilFindTexts} from '../../driver/waitFuncs';
 require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);

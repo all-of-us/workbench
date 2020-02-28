@@ -1,5 +1,5 @@
 import {waitUntilTitleMatch} from '../driver/waitFuncs';
-import authenticatedpage from './mixin/authenticatedpage';
+import AuthenticatedPage from './mixin-pages/AuthenticatedPage';
 
 const tabsSelector = {
   cohortsTab: '//*[@role="button"][(text()="Cohorts")]',
@@ -10,7 +10,7 @@ const tabsSelector = {
 };
 
 
-export default class DataPage extends authenticatedpage {
+export default class DataPage extends AuthenticatedPage {
 
   public async waitUntilPageReady() {
     await waitUntilTitleMatch(this.puppeteerPage, 'Data Page');

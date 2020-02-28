@@ -1,7 +1,7 @@
-import GoogleLoginPage from '../../app/google-login';
-import Home from '../../app/home';
-import {waitUntilURLMatch} from '../../driver/waitFuncs';
+import GoogleLoginPage from '../../app/GoogleLoginPage';
+import HomePage from '../../app/HomePage';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
+import {waitUntilURLMatch} from '../../driver/waitFuncs';
 require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);
@@ -37,7 +37,7 @@ describe.skip('Logout tests:', () => {
   test('Sign Out', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
-    const homePage = new Home(page);
+    const homePage = new HomePage(page);
     await homePage.waitForReady();
     await homePage.navigation.signOut();
     await waitUntilURLMatch(page, 'login');

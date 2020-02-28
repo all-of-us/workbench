@@ -1,7 +1,7 @@
 import {ElementHandle} from 'puppeteer';
-import * as widgetXpath from './elements/xpath-defaults';
-import BasePage from './mixin/basepage';
-import DropdownSelect from './elements/dropdown-select';
+import DropdownSelect from './aou-elements/DropdownSelect';
+import * as widgetXpath from './aou-elements/xpath-defaults';
+import BasePage from './mixin-pages/BasePage';
 
 const registrationFields = require('../resources/data/user-registration-fields');
 const faker = require('faker/locale/en_US');
@@ -22,16 +22,16 @@ export default class CreateAccountPage extends BasePage {
   }
 
   public async scrollToLastPdfPage(): Promise<ElementHandle> {
-    const selectr = '.react-pdf__Document :last-child.react-pdf__Page.tos-pdf-page';
-    const pdfPage = await this.puppeteerPage.waitForSelector('.react-pdf__Document :last-child.react-pdf__Page.tos-pdf-page');
+    const selector = '.react-pdf__Document :last-child.react-pdf__Page.tos-pdf-page';
+    const pdfPage = await this.puppeteerPage.waitForSelector(selector);
     await this.puppeteerPage.evaluate(el => el.scrollIntoView(), pdfPage);
     await this.puppeteerPage.waitFor(1000);
     return pdfPage;
   }
 
-  // find the second checkbox. it should be for the privacy statement
+  // find the second checkbox. it should be for the privacy statement.
+  // text = 'I have read and understand the All of Us Research Program Privacy Statement.';
   public async getPrivacyStatementCheckbox(): Promise<ElementHandle> {
-    const label = 'I have read and understand the All of Us Research Program Privacy Statement.';
     const selector = '[type="checkbox"]';
     const element = await this.puppeteerPage.waitForSelector(selector, {visible: true});
     return element;
@@ -43,8 +43,8 @@ export default class CreateAccountPage extends BasePage {
   }
 
   // find the second checkbox
+  // text = 'I have read and understand the All of Us Research Program Terms of Use described above.';
   public async getTermsOfUseCheckbox(): Promise<ElementHandle> {
-    const label = 'I have read and understand the All of Us Research Program Terms of Use described above.';
     const selector = '[type="checkbox"]';
     const element = await this.puppeteerPage.waitForSelector(selector, {visible: true});
     return element;
@@ -138,9 +138,9 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 2: Accepting Terms of Use and Privacy statement.
   public async acceptTermsOfUseAgreement() {
-    const privacyStatementCheckbox = await this.getPrivacyStatementCheckbox();
-    const termsOfUseCheckbox = await this.getTermsOfUseCheckbox();
-    const nextButton = await this.getNextButton();
+    await this.getPrivacyStatementCheckbox();
+    await this.getTermsOfUseCheckbox();
+    await this.getNextButton();
 
     await this.scrollToLastPdfPage();
 
@@ -157,7 +157,7 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 3: Enter user default information
   public async fillOutUserInformation() {
-    const newUserName = await this.fillInFormFields(registrationFields.inputFieldsValues);
+    const newUserName = await this.fillInFormFields(registrationFields.defaultFieldValues);
     await (await this.getResearchBackgroundTextarea()).type(faker.lorem.word());
     await (await this.getInstitutionNameInput()).type(faker.company.companyName());
     await this.selectInstitution(registrationFields.institutionAffiliation.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
@@ -167,9 +167,6 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 4: Enter demographic survey default information (All Survey Fields are optional)
   public async fillOutDemographicSurvey() {
-    // SUBMIT button should be enabled and clickable
-    const submitButton = await this.getSubmitButton();
-
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath = '//*[contains(normalize-space(.),"Prefer not to answer")]/ancestor::*/input[@type="checkbox"]';
     await this.puppeteerPage.waitForXPath(targetXpath, { visible: true });

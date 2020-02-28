@@ -1,6 +1,6 @@
-import DataPage from '../../app/data-page';
-import Home from '../../app/home';
-import WorkspaceEditPage from '../../app/workspace-edit';
+import DataPage from '../../app/DataPage';
+import HomePage from '../../app/HomePage';
+import WorkspaceEditPage from '../../app/WorkspaceEditPage';
 import { getCursorValue } from '../../driver/element-util'
 
 const Chrome = require('../../driver/ChromeDriver');
@@ -22,7 +22,7 @@ describe('Workspace create:', () => {
 
   test('Create new workspace with default values', async () => {
 
-    const home = new Home(page);
+    const home = new HomePage(page);
     const link = await home.getCreateNewWorkspaceLink();
     await link.click();
 
@@ -95,7 +95,7 @@ describe('Workspace create:', () => {
 
   // unfinished
   test.skip('Create new workspace with explicit values', async () => {
-    const home = new Home(page);
+    const home = new HomePage(page);
     const link = await home.getCreateNewWorkspaceLink();
     await link.click();
 

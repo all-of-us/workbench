@@ -1,8 +1,7 @@
-import * as Puppeteer from 'puppeteer';
-import {Browser} from 'puppeteer';
+import * as puppeteer from 'puppeteer';
 
 const defaultLaunchOpts = {
-  headless: !!process.env.PUPPETEER_HEADLESS,
+  headless: !process.env.PUPPETEER_HEADLESS,
   slowMo: 10,
   defaultViewport: null,
   devtools: false,
@@ -18,7 +17,7 @@ const defaultLaunchOpts = {
   ]
 };
 
-export default async (opts?): Promise<Browser> => {
+export default async (opts?): Promise<puppeteer.Browser> => {
   const launchOptions = opts || defaultLaunchOpts;
-  return await Puppeteer.launch(launchOptions);
+  return await puppeteer.launch(launchOptions);
 };

@@ -1,25 +1,22 @@
-import GoogleLoginPage from '../../app/google-login';
-import Home from '../../app/home';
-import WorkspaceEditPage from '../../app/workspace-edit';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
+import GoogleLoginPage from '../../app/GoogleLoginPage';
+import HomePage from '../../app/HomePage';
+import launchBrowser from '../../driver/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);
 
 const configs = require('../../resources/config');
 
-describe.skip('Home page tests:', () => {
+describe('Home', () => {
   let browser;
   let page;
-  let cookies;
 
   beforeAll(async () => {
-    browser = await PuppeteerLaunch();
+    browser = await launchBrowser();
   });
 
   beforeEach(async () => {
     page = await browser.newPage();
     await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(60000);
   });
 
   afterEach(async () => {
@@ -30,23 +27,40 @@ describe.skip('Home page tests:', () => {
     await browser.close();
   });
 
-  test('Homepage is the landing page after sign in', async () => {
+  test('Homepage is the landing page after Sign In', async () => {
+
+    const urls = [];
+    await page.setRequestInterception(true);
+    page.on('request', request => {
+      console.log(request.method());
+      if (request.method() === 'GET' && (request.resourceType() === 'xhr' || request.resourceType() === 'fetch')) {
+        urls.push(request.url());
+      }
+      request.continue();
+    });
+
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
-    const homePage = new Home(page);
-    await homePage.waitForReady();
+
+    const home = new HomePage(page);
+    await home.waitForReady();
     const title = await page.title();
     expect(title).toMatch('Homepage');
-    cookies = await page.cookies();
-  });
 
-  test('Sign in with cookies', async () => {
-    await page.setCookie(...cookies);
-    const workspaces = new WorkspaceEditPage(page);
-    await workspaces.goURL();
-    await workspaces.waitForReady();
-    expect(await page.title()).toMatch('Workspaces');
+    console.log(urls);
   });
 
 
 });
+
+/* Check 
+[
+      'https://api-dot-all-of-us-workbench-test.appspot.com/v1/config',
+      'https://api-dot-all-of-us-workbench-test.appspot.com/v1/profile',
+      'https://api-dot-all-of-us-workbench-test.appspot.com/v1/status-alert',
+      'https://api-dot-all-of-us-workbench-test.appspot.com/v1/workspaces',
+      'https://api-dot-all-of-us-workbench-test.appspot.com/v1/cdrVersions',
+      'https://api-dot-all-of-us-workbench-test.appspot.com/v1/workspaces/user-recent-workspaces',
+      'https://api-dot-all-of-us-workbench-test.appspot.com/v1/workspaces/user-recent-resources'
+]
+ */

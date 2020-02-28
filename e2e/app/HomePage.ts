@@ -1,11 +1,11 @@
 import {ElementHandle} from 'puppeteer';
 import * as xpathHandler from '../driver/xpath-handler';
-import {findPlusCircleIcon} from "./elements/xpath-finder";
-import AuthenticatedPage from './mixin/authenticatedpage';
+import {findPlusCircleIcon} from './aou-elements/xpath-finder';
+import AuthenticatedPage from './mixin-pages/AuthenticatedPage';
 
-export default class Home extends AuthenticatedPage {
+export default class HomePage extends AuthenticatedPage {
 
-  public selectors = {
+  public static selectors = {
     pageTitle: 'Homepage',
     header: '//h3[normalize-space(text())="Workspaces"]',
     seeAllWorkspacesLink: '//*[normalize-space()="See all Workspaces"]',
@@ -13,12 +13,12 @@ export default class Home extends AuthenticatedPage {
   };
 
   public async isLoaded(): Promise<void> {
-    await super.isLoaded(this.selectors.pageTitle);
-    await this.puppeteerPage.waitForXPath(this.selectors.seeAllWorkspacesLink, {visible: true});
-    await this.puppeteerPage.waitForXPath(this.selectors.header, {visible: true});
+    await super.isLoaded(HomePage.selectors.pageTitle);
+    await this.puppeteerPage.waitForXPath(HomePage.selectors.seeAllWorkspacesLink, {visible: true});
+    await this.puppeteerPage.waitForXPath(HomePage.selectors.header, {visible: true});
   }
 
-  public async waitForReady(): Promise<Home> {
+  public async waitForReady(): Promise<HomePage> {
     await this.isLoaded();
     await this.waitForSpinner();
     return this;
@@ -27,17 +27,17 @@ export default class Home extends AuthenticatedPage {
   /**
    * Go to Home page.
    */
-  public async goto(): Promise<Home> {
+  public async goto(): Promise<HomePage> {
     await this.navigation.toHome();
     return this;
   }
 
   get seeAllWorkspacesLink(): Promise<ElementHandle> {
-    return xpathHandler.waitForVisible(this.puppeteerPage, this.selectors.seeAllWorkspacesLink);
+    return xpathHandler.waitForVisible(this.puppeteerPage, HomePage.selectors.seeAllWorkspacesLink);
   }
 
   public async getCreateNewWorkspaceLink(): Promise<ElementHandle> {
-    return findPlusCircleIcon(this.puppeteerPage, this.selectors.createNewWorkspaceLink);
+    return findPlusCircleIcon(this.puppeteerPage, HomePage.selectors.createNewWorkspaceLink);
   }
 
   public async toAllWorkspaces() {

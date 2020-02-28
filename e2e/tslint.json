@@ -27,7 +27,7 @@
         "max-classes-per-file": true,
         "max-line-length": [true,
             {
-                "limit": 120,
+                "limit": 130,
                 "ignore-pattern": "^import [^,]+ from |^export | implements"
             }
         ]
