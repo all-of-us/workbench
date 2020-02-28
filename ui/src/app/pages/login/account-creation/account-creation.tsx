@@ -115,7 +115,9 @@ export const Section = (props) => {
 
 export const DropDownSection = (props) => {
   return <Section header={props.header}>
-    <Dropdown placeholder='Select' options={props.options} style={{width: '50%'}}
+    <Dropdown placeholder='Select'
+              options={props.options}
+              style={{width: '50%'}}
               value={props.value}
               onChange={(e) => props.onChange(e.value)}/>
   </Section>;
@@ -125,7 +127,9 @@ export const TextInputWithLabel = (props) => {
   return <FlexColumn style={{width: '12rem', ...props.containerStyle}}>
     <label style={{...styles.text, fontWeight: 600}}>{props.labelText}</label>
     <FlexRow style={{alignItems: 'center', marginTop: '0.1rem'}}>
-      <TextInput id={props.inputId} name={props.inputName} placeholder={props.placeholder}
+      <TextInput id={props.inputId}
+                 name={props.inputName}
+                 placeholder={props.placeholder}
                  value={props.value}
                  disabled={props.disabled}
                  onChange={props.onChange}
@@ -570,12 +574,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             with the program. The institutions listed below have an Institutional Data Use Agreement with the program that
             enables us to provide their researchers with access to the Workbench.
           </div>
-          <div style={{...styles.text, fontSize: 12, marginTop: '0.5rem'}}>All fields required unless indicated as optional</div>
-          <label style={{...styles.text, fontWeight: 600, marginTop: '0.5rem'}}>Select your institution
-            <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>Publicly displayed</i>
+          <div style={{...styles.text, fontSize: 12, marginTop: '0.5rem'}}>
+            All fields required unless indicated as optional
+          </div>
+          <label style={{...styles.text, fontWeight: 600, marginTop: '0.5rem'}}>
+            Select your institution
+            <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
+              Publicly displayed
+            </i>
           </label>
           <div style={{...styles.text, fontSize: 16}}>
-            Your institution will be notified that you have registered using your institutional credentials.</div>
+            Your institution will be notified that you have registered using your institutional credentials.
+          </div>
           <Dropdown options={institutionList.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
                     value={institutionShortName}
                     onChange={(e) => this.updateInstitutionAffiliation('institutionShortName', e.value)}/>
@@ -583,7 +593,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             Don't see your institution listed?
           </a>
           <TextInputWithLabel style={{marginTop: '1rem'}}
-                              value={contactEmail} inputId='contactEmail' inputName='contactEmail'
+                              value={contactEmail}
+                              inputId='contactEmail'
+                              inputName='contactEmail'
                               labelText='Your institutional email address'
                               invalid={this.state.invalidEmail}
                               onChange={v => this.updateProfileObject('contactEmail', v)}/>
@@ -591,17 +603,25 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <ErrorDiv id='invalidEmailError'>
             Contact Email is invalid
           </ErrorDiv>}
-          <label style={{...styles.text, fontWeight: 600, marginTop: '1rem'}}>Which of the following best describes your role?
-            <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>Publicly displayed</i>
+          <label style={{...styles.text, fontWeight: 600, marginTop: '1rem'}}>
+            Which of the following best describes your role?
+            <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
+              Publicly displayed
+            </i>
           </label>
           <Dropdown options={this.roleMapForSelectedInstitution}
                     value={institutionalRoleEnum}
                     onChange={(e) => this.updateInstitutionAffiliation('institutionalRoleEnum', e.value)}/>
           {institutionalRoleEnum === InstitutionalRole.OTHER && <React.Fragment>
-            <label style={{...styles.text, fontWeight: 600, marginTop: '1rem'}}>Please describe your role
-              <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>Publicly displayed</i>
+            <label style={{...styles.text, fontWeight: 600, marginTop: '1rem'}}>
+              Please describe your role
+              <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
+                Publicly displayed
+              </i>
             </label>
-            <TextInputWithLabel value={institutionalRoleOtherText} inputId='institutionalRoleOtherText' inputName='institutionalRoleOtherText'
+            <TextInputWithLabel value={institutionalRoleOtherText}
+                                inputId='institutionalRoleOtherText'
+                                inputName='institutionalRoleOtherText'
                                 onChange={v => this.updateInstitutionAffiliation('institutionalRoleOtherText', v)}/>
           </React.Fragment>}
         </FlexColumn>
@@ -620,24 +640,25 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             Are you affiliated with an Academic Research Institution?
           </label>
           <div style={{paddingTop: '0.5rem'}}>
-            <RadioButton id='show-institution-yes' data-test-id='show-institution-yes'
-                         onChange={() => {clearInstitutionAffiliation();
-                           this.setState({showInstitution: true}); }}
-                         checked={this.state.showInstitution === true} style={{marginRight: '0.5rem'}}/>
+            <RadioButton id='show-institution-yes'
+                         data-test-id='show-institution-yes'
+                         onChange={() => {clearInstitutionAffiliation(); this.setState({showInstitution: true}); }}
+                         checked={this.state.showInstitution === true}
+                         style={{marginRight: '0.5rem'}}/>
             <label htmlFor='show-institution-yes' style={{paddingRight: '3rem', color: colors.primary}}>
               Yes
             </label>
-            <RadioButton id='show-institution-no' data-test-id='show-institution-no'
-                         onChange={() => {clearInstitutionAffiliation();
-                           this.setState({showInstitution: false}); }}
+            <RadioButton id='show-institution-no'
+                         data-test-id='show-institution-no'
+                         onChange={() => {clearInstitutionAffiliation(); this.setState({showInstitution: false}); }}
                          checked={this.state.showInstitution === false} style={{marginRight: '0.5rem'}}/>
             <label htmlFor='show-institution-no' style={{color: colors.primary}}>No</label>
           </div>
         </Section>
         {this.state.showInstitution &&
         <FlexColumn style={{justifyContent: 'space-between'}}>
-          <TextInput data-test-id='institution-name' style={{width: '16rem', marginBottom: '0.5rem',
-            marginTop: '0.5rem'}}
+          <TextInput data-test-id='institution-name'
+                     style={{width: '16rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
                      value={this.state.profile.institutionalAffiliations[0].institution}
                      placeholder='Institution Name'
                      onChange={value => this.updateInstitutionAffiliation('institution', value)}
@@ -657,7 +678,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                     onChange={e => this.updateNonAcademicAffiliationRoles(e.value)}
                     placeholder='Which of the following better describes your affiliation?'/>
           {this.state.showNonAcademicAffiliationRole &&
-          <Dropdown data-test-id='affiliationrole' placeholder='Which of the following describes your role'
+          <Dropdown data-test-id='affiliationrole'
+                    placeholder='Which of the following describes your role'
                     options={this.state.rolesOptions}
                     value={this.state.profile.institutionalAffiliations[0].role}
                     onChange={e => this.selectNonAcademicAffiliationRoles(e.value)}
@@ -710,15 +732,23 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <Section header={<div>About you <i style={styles.publiclyDisplayedText}>Publicly displayed</i></div>}>
             <FlexColumn>
               <FlexRow style={{paddingBottom: '1rem'}}>
-                <TextInputWithLabel value={givenName} inputId='givenName' inputName='givenName' placeholder='First Name'
-                                    invalid={givenName.length > nameLength} labelText='First Name'
+                <TextInputWithLabel value={givenName}
+                                    inputId='givenName'
+                                    inputName='givenName'
+                                    placeholder='First Name'
+                                    invalid={givenName.length > nameLength}
+                                    labelText='First Name'
                                     onChange={value => this.updateProfileObject('givenName', value)} />
                 {givenName.length > nameLength &&
                 <ErrorMessage id='givenNameError'>
                   First Name must be {nameLength} characters or less.
                 </ErrorMessage>}
-                <TextInputWithLabel value={familyName} inputId='familyName' inputName='familyName' placeholder='Last Name'
-                                    invalid={familyName.length > nameLength} containerStyle={styles.multiInputSpacing}
+                <TextInputWithLabel value={familyName}
+                                    inputId='familyName'
+                                    inputName='familyName'
+                                    placeholder='Last Name'
+                                    invalid={familyName.length > nameLength}
+                                    containerStyle={styles.multiInputSpacing}
                                     onChange={v => this.updateProfileObject('familyName', v)}
                                     labelText='Last Name'/>
                 {familyName.length > nameLength &&
@@ -729,16 +759,21 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               <FlexRow style={{alignItems: 'left'}}>
                 {/* TODO remove after we switch to verified institutional affiliation */}
                 {!requireInstitutionalVerification &&
-                  <TextInputWithLabel value={contactEmail} inputId='contactEmail' inputName='contactEmail'
-                                      placeholder='Email Address' labelText='Email Address'
+                  <TextInputWithLabel value={contactEmail}
+                                      inputId='contactEmail'
+                                      inputName='contactEmail'
+                                      placeholder='Email Address'
+                                      labelText='Email Address'
                                       invalid={this.state.invalidEmail}
                                       onChange={v => this.updateProfileObject('contactEmail', v)}/>}
                 {!requireInstitutionalVerification && this.state.invalidEmail &&
                 <ErrorDiv id='invalidEmailError'>
                   Contact Email is invalid
                 </ErrorDiv>}
-                <MultiSelectWithLabel placeholder={'Select one or more'} options={AccountCreationOptions.degree}
-                                      containerStyle={styles.multiInputSpacing} value={this.state.profile.degrees}
+                <MultiSelectWithLabel placeholder={'Select one or more'}
+                                      options={AccountCreationOptions.degree}
+                                      containerStyle={styles.multiInputSpacing}
+                                      value={this.state.profile.degrees}
                                       labelText='Your degrees (optional)'
                                       onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
                                       />

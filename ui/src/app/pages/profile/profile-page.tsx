@@ -187,14 +187,20 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
       const {institutionDisplayName, institutionalRoleEnum, institutionalRoleOtherText} = verifiedInstitutionalAffiliation;
       return <React.Fragment>
-        <div style={{...styles.h1, marginBottom: 24}}>Verified Institutional Affiliation</div>
+        <div style={{...styles.h1, marginBottom: 24}}>
+          Verified Institutional Affiliation
+        </div>
         <FlexRow>
           <FlexColumn>
-            <div style={styles.inputLabel}>Institution</div>
+            <div style={styles.inputLabel}>
+              Institution
+            </div>
             <div style={styles.uneditableProfileElement}>{institutionDisplayName}</div>
           </FlexColumn>
           <FlexColumn>
-            <div style={styles.inputLabel}>Role</div>
+            <div style={styles.inputLabel}>
+              Role
+            </div>
             <div style={styles.uneditableProfileElement}>
             {institutionalRoleEnum === InstitutionalRole.OTHER ? institutionalRoleOtherText : institutionalRoleEnum}
             </div>
@@ -205,7 +211,9 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
     const renderOldInstitutionalAffiliationComponents = () => {
       return <React.Fragment>
-        <div style={{...styles.h1, marginBottom: 24}}>Institution Affiliations</div>
+        <div style={{...styles.h1, marginBottom: 24}}>
+          Institution Affiliations
+        </div>
         {institutionalAffiliations.map((v, i) =>
           <div style={{display: 'flex'}} key={`institution${i}`}>
             {makeProfileInput({
