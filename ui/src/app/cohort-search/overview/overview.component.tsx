@@ -15,7 +15,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
-import {Cohort, ResourceType, TemporalTime} from 'generated/fetch';
+import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
@@ -168,15 +168,16 @@ export const ListOverview = withCurrentWorkspace()(
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = mapRequest(searchRequest);
         if (request.includes.length > 0) {
-          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
-            if (localCheck === this.state.apiCallCheck) {
-              this.setState({
-                chartData: response.items,
-                total: response.items.reduce((sum, data) => sum + data.count, 0),
-                loading: false
-              });
-            }
-          });
+          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER],
+            AgeType[AgeType.AGE], request).then(response => {
+              if (localCheck === this.state.apiCallCheck) {
+                this.setState({
+                  chartData: response.items,
+                  total: response.items.reduce((sum, data) => sum + data.count, 0),
+                  loading: false
+                });
+              }
+            });
         } else {
           this.setState({chartData: [], total: 0, loading: false});
         }
