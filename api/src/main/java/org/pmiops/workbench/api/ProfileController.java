@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -248,8 +249,10 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private void validateAndCleanProfile(Profile profile) throws BadRequestException {
-    profile.setDemographicSurvey(Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
-    profile.setInstitutionalAffiliations(Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList()));
+    profile.setDemographicSurvey(
+        Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
+    profile.setInstitutionalAffiliations(
+        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList()));
 
     String userName = profile.getUsername();
     if (userName == null || userName.length() < 3 || userName.length() > 64) {
@@ -333,7 +336,8 @@ public class ProfileController implements ProfileApiDelegate {
 
     // We don't include this check in validateAndCleanProfile since some existing user profiles
     // may have empty addresses. So we only check this on user creation, not update.
-    Optional.ofNullable(profile.getAddress()).orElseThrow(() -> new BadRequestException("Address must not be empty"));
+    Optional.ofNullable(profile.getAddress())
+        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
 
     validateAndCleanProfile(profile);
 
