@@ -280,7 +280,7 @@ export function mapGroup(group: any) {
   }, []);
   let searchGroup = <SearchGroup>{id, items, temporal};
   if (temporal) {
-    searchGroup = {...searchGroup, mention, time, timeValue};
+    searchGroup = {...searchGroup, mention, time, timeValue: parseInt(timeValue, 10)};
   }
   return searchGroup;
 }

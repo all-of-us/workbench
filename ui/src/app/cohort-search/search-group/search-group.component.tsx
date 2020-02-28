@@ -8,7 +8,7 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
@@ -23,25 +23,25 @@ const styles = reactStyles({
     background: colors.white,
     borderColor: 'rgba(215, 215, 215, 0.5)',
     borderRadius: '0.2rem',
-    boxShadow: '0 0.125rem 0.125rem 0 #d7d7d7',
+    boxShadow: `0 0.125rem 0.125rem 0 ${colorWithWhiteness(colors.black, 0.85)}`,
     margin: '0 0 0.6rem'
   },
   cardBlock: {
-    borderBottom: '1px solid #eee',
+    borderBottom: `1px solid ${colors.light}`,
     padding: '0.5rem 0.75rem'
   },
   cardHeader: {
-    backgroundColor: 'rgb(226, 226, 233)',
-    borderBottom: '1px solid #eee',
-    color: 'rgb(38, 34, 98)',
+    backgroundColor: colors.light,
+    color: colors.primary,
     fontSize: '14px',
     fontWeight: 600,
     minWidth: '100%',
     padding: '0.5rem 0.75rem'
   },
   overlay: {
-    background: 'rgba(255, 255, 255, 0.9)',
+    background: colors.white,
     display: 'table',
+    opacity: 0.9,
     position: 'relative',
     textAlign: 'center',
     verticalAlign: 'middle',
@@ -64,7 +64,7 @@ const styles = reactStyles({
   },
   itemOr: {
     background: colors.white,
-    color: 'rgb(195, 195, 195)',
+    color: colorWithWhiteness(colors.black, 0.75),
     float: 'right',
     marginRight: '46%',
     padding: '0 10px'
@@ -75,14 +75,14 @@ const styles = reactStyles({
     width: 'auto'
   },
   searchItem: {
-    borderBottom: '1px solid rgb(195, 195, 195)',
+    borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
     margin: '0 0.5rem',
     padding: '0.5rem 0.25rem'
   },
   menuButton: {
-    border: '1px solid rgb(195, 195, 195)',
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
     borderRadius: '0.125rem',
-    color: 'rgb(114, 114, 114)',
+    color: colorWithWhiteness(colors.black, 0.45),
     fontSize: '12px',
     fontWeight: 100,
     height: '1.5rem',
@@ -103,19 +103,49 @@ const styles = reactStyles({
     maxWidth: '50%',
     padding: '0 0.5rem',
   },
-  temporalSubCardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '.5rem .75rem'
-  },
   timeInput: {
-    border: '1px solid #9a9a9a',
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
     borderRadius: '0.1rem',
-    padding: '0.6rem',
-    textAlign: 'center',
-    width: '3.4rem'
+    height: '1.4rem',
+    marginLeft: '1rem',
+    width: '2.5rem'
+  },
+  inputError: {
+    background: colorWithWhiteness(colors.danger, 0.85),
+    border: `1px solid ${colorWithWhiteness(colors.danger, 0.6)}`,
+    borderRadius: '3px',
+    color: colorWithWhiteness(colors.dark, .1),
+    fontSize: '11px',
+    lineHeight: '16px',
+    marginBottom: '0.25rem',
+    padding: '5px 3px'
   }
 });
+
+const css = `
+  .p-inputswitch.p-disabled > .p-inputswitch-slider {
+    cursor: not-allowed;
+  }
+  body .p-menuitem > .p-menuitem-link {
+    height: 1.25rem;
+    line-height: 1.25rem;
+    padding: 0 1rem;
+  }
+  body .p-menuitem.menuitem-header > .p-menuitem-link {
+    font-size: 12px;
+    font-weight: 600;
+    height: auto;
+    line-height: 0.75rem;
+    padding-left: 0.5rem;
+  }
+  body .p-tieredmenu .p-menu-separator {
+    margin: 0.25rem 0;
+  }
+  body .p-tieredmenu .p-submenu-list {
+    padding: 0.5rem 0;
+    width: 10rem;
+  }
+`;
 
 const temporalMentions = [
   TemporalMention.ANYMENTION,
@@ -130,7 +160,7 @@ const temporalTimes = [
   TemporalTime.WITHINXDAYSOF
 ];
 
-function formatOption(option) {
+function temporalEnumToText(option) {
   switch (option) {
     case TemporalMention.ANYMENTION:
       return 'Any Mention';
@@ -149,6 +179,18 @@ function formatOption(option) {
   }
 }
 
+function initItem(id: string, type: string, tempGroup: number) {
+  return {
+    id,
+    type,
+    searchParameters: [],
+    modifiers: [],
+    count: null,
+    temporalGroup: tempGroup,
+    status: 'active'
+  };
+}
+
 interface Props {
   group: any;
   index: number;
@@ -164,6 +206,7 @@ interface State {
   demoOpen: boolean;
   demoMenuHover: boolean;
   error: boolean;
+  inputError: boolean;
   loading: boolean;
   overlayStyle: any;
   position: string;
@@ -175,6 +218,7 @@ export const SearchGroup = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
     private criteriaMenu: any;
+    private deleteTimeout: NodeJS.Timeout;
     private groupMenu: any;
     private mentionMenu: any;
     private temporalCriteriaMenu: any;
@@ -188,8 +232,9 @@ export const SearchGroup = withCurrentWorkspace()(
         demoOpen: false,
         demoMenuHover: false,
         error: false,
+        inputError: false,
         loading: false,
-        overlayStyle: {},
+        overlayStyle: undefined,
         position: 'bottom-left',
         preventInputCalculate: false,
         status: undefined
@@ -221,10 +266,13 @@ export const SearchGroup = withCurrentWorkspace()(
 
     componentWillUnmount(): void {
       this.aborter.abort();
+      clearTimeout(this.deleteTimeout);
     }
 
     getGroupCount() {
       try {
+        this.abortPendingCalls();
+        this.setState({error: false, loading: true});
         const {group, role, workspace: {cdrVersionId}} = this.props;
         const mappedGroup = mapGroup(group);
         const request = {
@@ -242,7 +290,7 @@ export const SearchGroup = withCurrentWorkspace()(
       }
     }
 
-    checkPendingCalls() {
+    abortPendingCalls() {
       if (this.state.loading) {
         this.aborter.abort();
         this.aborter = new AbortController();
@@ -251,24 +299,18 @@ export const SearchGroup = withCurrentWorkspace()(
 
     update(recalculate: boolean) {
       const {index, group: {temporal}, updateRequest} = this.props;
-      // timeout prevents Angular 'value changed after checked' error
-      setTimeout(() => {
-        // prevent multiple total count calls when initializing multiple groups simultaneously
-        // (on cohort edit or clone)
-        const init = initExisting.getValue();
-        if (!init || (init && index === 0)) {
-          updateRequest(recalculate);
-          if (init) {
-            this.setState({preventInputCalculate: true});
-            initExisting.next(false);
-          }
+      // prevent multiple total count calls when initializing multiple groups simultaneously (on cohort edit or clone)
+      const init = initExisting.getValue();
+      if (!init || (init && index === 0)) {
+        updateRequest(recalculate);
+        if (init) {
+          this.setState({preventInputCalculate: true});
+          initExisting.next(false);
         }
-        if (recalculate && this.hasActiveItems && (!temporal || !this.temporalError)) {
-          this.checkPendingCalls();
-          this.setState({error: false, loading: true});
-          this.getGroupCount();
-        }
-      });
+      }
+      if (recalculate && this.hasActiveItems && (!temporal || !this.temporalError)) {
+        this.getGroupCount();
+      }
     }
 
     get hasActiveItems() {
@@ -281,8 +323,8 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     get temporalItems() {
-      const {group: {items, temporal}} = this.props;
-      return !temporal ? [] : items.filter(it => it.temporalGroup === 1);
+      const {group: {items}} = this.props;
+      return items.filter(it => it.temporalGroup === 1);
     }
 
     get disableTemporal() {
@@ -292,10 +334,9 @@ export const SearchGroup = withCurrentWorkspace()(
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Group - Cohort Builder');
       this.hide('pending');
-      const timeoutId = setTimeout(() => {
+      this.deleteTimeout = setTimeout(() => {
         this.removeGroup();
       }, 10000);
-      this.setGroupProperty('timeout', timeoutId);
     }
 
     hide(status: string) {
@@ -307,11 +348,12 @@ export const SearchGroup = withCurrentWorkspace()(
     enable() {
       triggerEvent('Enable', 'Click', 'Enable - Suppress Group - Cohort Builder');
       this.setGroupProperty('status', 'active');
+      this.setState({overlayStyle: undefined});
     }
 
     undo() {
       triggerEvent('Undo', 'Click', 'Undo - Delete Group - Cohort Builder');
-      clearTimeout(this.props.group.timeout);
+      clearTimeout(this.deleteTimeout);
       this.enable();
     }
 
@@ -332,10 +374,11 @@ export const SearchGroup = withCurrentWorkspace()(
       }
     }
 
-    launchWizard(criteria: any, tempGroup?: number) {
+    launchWizard(criteria: any, temporalGroup: number) {
+      this.criteriaMenu.hide();
       const {group, role} = this.props;
       const {domain, type, standard} = criteria;
-      if (tempGroup !== undefined) {
+      if (temporalGroup === 1) {
         triggerEvent('Temporal', 'Click', `${domainToTitle(domain)} - Temporal - Cohort Builder`);
       } else {
         const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
@@ -344,24 +387,11 @@ export const SearchGroup = withCurrentWorkspace()(
         triggerEvent(category, 'Click', `${category} - ${label}`);
       }
       const itemId = generateId('items');
-      tempGroup = tempGroup || 0;
-      const item = this.initItem(itemId, domain, tempGroup);
+      const item = initItem(itemId, domain, temporalGroup);
       const fullTree = criteria.fullTree || false;
       const groupId = group.id;
-      const context = {item, domain, type, standard, role, groupId, itemId, fullTree, tempGroup};
+      const context = {item, domain, type, standard, role, groupId, itemId, fullTree, temporalGroup};
       wizardStore.next(context);
-    }
-
-    initItem(id: string, type: string, tempGroup: number) {
-      return {
-        id,
-        type,
-        searchParameters: [],
-        modifiers: [],
-        count: null,
-        temporalGroup: tempGroup,
-        status: 'active'
-      };
     }
 
     setGroupProperty(property: string, value: any) {
@@ -380,46 +410,44 @@ export const SearchGroup = withCurrentWorkspace()(
       triggerEvent('Temporal', 'Click', 'Turn On Off - Temporal - Cohort Builder');
       this.setGroupProperty('temporal', value);
       if ((!value && this.hasActiveItems) || (value && !this.temporalError)) {
-        this.checkPendingCalls();
-        this.setState({error: false, loading: true});
         this.getGroupCount();
       }
     }
 
     setMention(mention: TemporalMention) {
       if (mention !== this.props.group.mention) {
-        triggerEvent('Temporal', 'Click', `${formatOption(mention)} - Temporal - Cohort Builder`);
+        triggerEvent('Temporal', 'Click', `${temporalEnumToText(mention)} - Temporal - Cohort Builder`);
         this.setGroupProperty('mention', mention);
-        this.calculateTemporal();
+        if (!this.temporalError) {
+          this.getGroupCount();
+        }
       }
     }
 
     setTime(time: TemporalTime) {
       const {group} = this.props;
       if (time !== this.props.group.time) {
-        triggerEvent('Temporal', 'Click', `${formatOption(time)} - Temporal - Cohort Builder`);
+        triggerEvent('Temporal', 'Click', `${temporalEnumToText(time)} - Temporal - Cohort Builder`);
         // prevents duplicate group count calls if switching from TemporalTime.DURINGSAMEENCOUNTERAS
         this.setState({preventInputCalculate: group.time === TemporalTime.DURINGSAMEENCOUNTERAS});
         this.setGroupProperty('time', time);
-        this.calculateTemporal();
+        if (!this.temporalError) {
+          this.getGroupCount();
+        }
       }
     }
 
-    setTimeValue(timeValue: number) {
-      // prevents duplicate group count calls if changes is triggered by rendering of input
+    setTimeValue(timeValue: string) {
+      const timeValueInt = parseInt(timeValue, 10);
+      this.setState({inputError: isNaN(timeValueInt) || timeValueInt < 0});
+      this.setGroupProperty('timeValue', timeValue);
+      // prevents duplicate group count calls if changes is triggered by rendering of input on init
       if (!this.state.preventInputCalculate) {
-        this.setGroupProperty('timeValue', timeValue);
-        this.calculateTemporal();
+        if (!this.temporalError) {
+          this.getGroupCount();
+        }
       } else {
         this.setState({preventInputCalculate: false});
-      }
-    }
-
-    calculateTemporal() {
-      if (!this.temporalError) {
-        this.checkPendingCalls();
-        this.setState({error: false, loading: true});
-        this.getGroupCount();
       }
     }
 
@@ -431,75 +459,39 @@ export const SearchGroup = withCurrentWorkspace()(
         }
         return acc;
       }, [0, 0]);
-      const inputError = time !== TemporalTime.DURINGSAMEENCOUNTERAS && (timeValue === null || timeValue < 0);
+      const inputError = time !== TemporalTime.DURINGSAMEENCOUNTERAS && this.state.inputError;
       return counts.includes(0) || inputError;
-    }
-
-    get validateInput() {
-      const {group: {temporal, time}} = this.props;
-      return temporal && time !== TemporalTime.DURINGSAMEENCOUNTERAS;
-    }
-
-    setMenuPosition() {
-      const {index, role} = this.props;
-      const id = role + index + '-button';
-      const dropdown = document.getElementById(id).getBoundingClientRect();
-      const position = (window.innerHeight - dropdown.bottom < 315) ? 'top-left' : 'bottom-left';
-      this.setState({position});
     }
 
     render() {
       const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
-      const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, loading, overlayStyle} = this.state;
-      const domainMap = (domain) => {
+      const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, inputError, loading, overlayStyle} = this.state;
+      const domainMap = (domain: any, temporalGroup: number) => {
         if (!!domain.children) {
-          return {label: domain.name, items: domain.children.map(child => ({label: child.name, command: () => this.launchWizard(child)}))};
-        } else {
-          return {label: domain.name, command: () => this.launchWizard(domain)};
+          return {label: domain.name, items: domain.children.map((dt) => domainMap(dt, temporalGroup))};
         }
+        return {label: domain.name, command: () => this.launchWizard(domain, temporalGroup)};
       };
       const criteriaMenuItems = temporal
-        ? domainTypes.map(domainMap)
+        ? domainTypes.map((dt) => domainMap(dt, 0))
         : [
           {label: 'Program Data', className: 'menuitem-header'},
-          ...programTypes.map(domainMap),
+          ...programTypes.map((dt) => domainMap(dt, 0)),
           {separator: true},
           {label: 'Domains', className: 'menuitem-header'},
-          ...domainTypes.map(domainMap)
+          ...domainTypes.map((dt) => domainMap(dt, 0))
         ];
+      const temporalCriteriaMenuItems = domainTypes.map((dt) => domainMap(dt, 1));
       const groupMenuItems = [
         {label: 'Suppress group from total count', command: () => this.hide('hidden')},
         {label: 'Delete group', command: () => this.remove()},
       ];
-      const mentionMenuItems = temporalMentions.map(tm => ({label: formatOption(tm), command: () => this.setMention(tm)}));
-      const timeMenuItems = temporalTimes.map(tt => ({label: formatOption(tt), command: () => this.setTime(tt)}));
+      const mentionMenuItems = temporalMentions.map(tm => ({label: temporalEnumToText(tm), command: () => this.setMention(tm)}));
+      const timeMenuItems = temporalTimes.map(tt => ({label: temporalEnumToText(tt), command: () => this.setTime(tt)}));
       return <React.Fragment>
-        <style>
-          {`
-          .p-inputswitch.p-disabled > .p-inputswitch-slider {
-            cursor: not-allowed;
-          }
-          body .p-menuitem > .p-menuitem-link {
-            height: 1.25rem;
-            line-height: 1.25rem;
-            padding: 0 1rem;
-          }
-          body .p-menuitem.menuitem-header > .p-menuitem-link {
-            font-size: 12px;
-            font-weight: 600;
-            height: auto;
-            line-height: 0.75rem;
-            padding-left: 0.5rem;
-          }
-          body .p-tieredmenu .p-menu-separator {
-            margin: 0.25rem 0;
-          }
-          body .p-tieredmenu .p-submenu-list {
-            width: 10rem;
-          }
-        `}
-        </style>
+        <style>{css}</style>
         <div id={id} style={styles.card}>
+          {/* Group Header */}
           <div style={styles.cardHeader}>
             <Menu style={styles.menu} appendTo={document.body} model={groupMenuItems} popup ref={el => this.groupMenu = el} />
             <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(e) => this.groupMenu.toggle(e)}>
@@ -507,17 +499,21 @@ export const SearchGroup = withCurrentWorkspace()(
             </Clickable>
             Group {index + 1}
           </div>
+          {/* Temporal mention dropdown */}
           {temporal && <div style={styles.cardBlock}>
             <Menu style={styles.menu} appendTo={document.body} model={mentionMenuItems} popup ref={el => this.mentionMenu = el} />
             <button style={styles.menuButton} onClick={(e) => this.mentionMenu.toggle(e)}>
-              {formatOption(mention)} <ClrIcon shape='caret down' size={12}/>
+              {temporalEnumToText(mention)} <ClrIcon shape='caret down' size={12}/>
             </button>
             <span style={{fontSize: '14px', padding: '0.2rem 0.25rem 0'}}> of </span>
           </div>}
-          {this.items.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='item-list'>
+          {/* Main search item list/temporal group 0 items */}
+          {items.map((item, i) => <div key={i} data-test-id='item-list'
+            style={{...styles.searchItem, ...((temporal && item.temporalGroup === 1) ? {display: 'none'} : {})}}>
             <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
+          {/* Criteria menu for main search item list/temporal group 0 items */}
           <div style={styles.cardBlock}>
             <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}} appendTo={document.body}
               model={criteriaMenuItems} popup ref={el => this.criteriaMenu = el} />
@@ -525,29 +521,36 @@ export const SearchGroup = withCurrentWorkspace()(
               Add Criteria <ClrIcon shape='caret down' size={12}/>
             </button>
           </div>
-          {temporal && <React.Fragment>
-            <div style={styles.temporalSubCardHeader}>
+          <div style={{display: temporal ? 'block' : 'none'}}>
+            {/* Temporal time dropdown */}
+            <div style={styles.cardBlock}>
+              {time !== TemporalTime.DURINGSAMEENCOUNTERAS && inputError && <div style={styles.inputError}>
+                Please enter a positive number
+              </div>}
               <Menu style={styles.menu} appendTo={document.body} model={timeMenuItems} popup ref={el => this.timeMenu = el} />
               <button style={styles.menuButton} onClick={(e) => this.timeMenu.toggle(e)}>
-                {formatOption(time)} <ClrIcon shape='caret down' size={12}/>
+                {temporalEnumToText(time)} <ClrIcon shape='caret down' size={12}/>
               </button>
               {time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
-                <input style={styles.timeInput} type='number' value={timeValue}
-                  onChange={(v) => this.setTimeValue(parseInt(v.target.value, 10))}/>
+                <input style={styles.timeInput} type='number' value={timeValue} min={0}
+                  onChange={(v) => this.setTimeValue(v.target.value)}/>
               }
             </div>
-            {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
+            {/* Temporal group 1 items */}
+            {items.filter(item => item.temporalGroup === 1).map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
               <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
-            <div style={styles.temporalSubCardHeader}>
-              <Menu style={styles.menu} appendTo={document.body} model={criteriaMenuItems}
+            {/* Criteria menu for temporal group 1 items */}
+            <div style={styles.cardBlock}>
+              <Menu style={styles.menu} appendTo={document.body} model={temporalCriteriaMenuItems}
                 popup ref={el => this.temporalCriteriaMenu = el} />
               <button style={styles.menuButton} onClick={(e) => this.temporalCriteriaMenu.toggle(e)}>
                 Add Criteria <ClrIcon shape='caret down' size={12}/>
               </button>
             </div>
-          </React.Fragment>}
+          </div>
+          {/* Group footer */}
           {!!items.length && <div style={styles.cardHeader}>
             <div style={this.disableTemporal ? {...styles.row, cursor: 'not-allowed'} : styles.row}>
               <div style={{...styles.col6, display: 'flex'}}>
@@ -575,7 +578,8 @@ export const SearchGroup = withCurrentWorkspace()(
             </div>
           </div>}
         </div>
-        {status !== 'active' && <div style={{...styles.overlay, ...overlayStyle}} data-test-id='disabled-overlay'>
+        {/* Overlay for deleted and suppressed groups */}
+        {!!overlayStyle && <div style={{...styles.overlay, ...overlayStyle}} data-test-id='disabled-overlay'>
           <div style={styles.overlayInner}>
             {status === 'pending' && <React.Fragment>
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={56}/>
