@@ -1,34 +1,38 @@
 package org.pmiops.workbench.captcha;
 
-import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
+import org.pmiops.workbench.captcha.api.CaptchaApi;
+import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 /** Service to verify Captcha */
 @Service
 public class CaptchaVerificationService {
 
-  final String captchaVerificationUrl =
-      "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s";
+  final String urlPattern = "https://%s/login";
+
+  final String localHostUrlPattern = "http://%s:4200/login";
 
   private CloudStorageService cloudStorageService;
-  final javax.inject.Provider<WorkbenchConfig> configProvider;
+  final Provider<WorkbenchConfig> configProvider;
+  private Provider<CaptchaApi> captchaApiProvider;
 
-  @Bean
-  public RestTemplate restTemplate() {
-    return new RestTemplate();
-  }
+  private static final Logger log = Logger.getLogger(CaptchaVerificationService.class.getName());
 
   @Autowired
   public CaptchaVerificationService(
       CloudStorageService cloudStorageService,
-      javax.inject.Provider<WorkbenchConfig> configProvider) {
+      javax.inject.Provider<WorkbenchConfig> configProvider,
+      javax.inject.Provider<CaptchaApi> captchaApiProvider) {
     this.cloudStorageService = cloudStorageService;
     this.configProvider = configProvider;
+    this.captchaApiProvider = captchaApiProvider;
   }
 
   /**
@@ -39,15 +43,30 @@ public class CaptchaVerificationService {
    * @param responseToken
    * @return if Captcha is valid
    */
-  public boolean verifyCaptcha(String responseToken) {
-    URI verifyUri =
-        URI.create(
-            String.format(
-                captchaVerificationUrl, cloudStorageService.getCaptchaServerKey(), responseToken));
-    CaptchaServerVerificationResponse response =
-        restTemplate().getForObject(verifyUri, CaptchaServerVerificationResponse.class);
-
+  public boolean verifyCaptcha(String responseToken) throws ApiException {
+    CaptchaVerificationResponse response =
+        captchaApiProvider.get().verify(cloudStorageService.getCaptchaServerKey(), responseToken);
+    if (!response.getSuccess()) {
+      log.log(
+          Level.WARNING,
+          String.format(
+              "Exception while verifying captcha%s",
+              response.getErrorCodes().stream()
+                  .map(errorCodes -> errorCodes.getValue())
+                  .collect(Collectors.joining(","))));
+      return false;
+    }
+    String captchaHostname = response.getHostname();
     String uiUrl = configProvider.get().admin.loginUrl;
-    return response.isSuccess() && uiUrl.contains(response.getHostname());
+
+    // check if the UI URL has the host as send by Captcha Response
+    boolean captchaHostNameMatchUI =
+        String.format(urlPattern, captchaHostname).equals(uiUrl)
+            || String.format(localHostUrlPattern, captchaHostname).equals(uiUrl);
+    if (!captchaHostNameMatchUI) {
+      log.log(
+          Level.SEVERE, String.format("Captcha Host Name %s does not match UI", captchaHostname));
+    }
+    return response.getSuccess() && captchaHostNameMatchUI;
   }
 }

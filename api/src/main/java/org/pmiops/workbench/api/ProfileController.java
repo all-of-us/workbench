@@ -484,9 +484,14 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private void verifyCaptcha(String captchaToken) {
-    boolean isValidCaptcha = captchaVerificationService.verifyCaptcha(captchaToken);
-    if (!isValidCaptcha) {
-      throw new BadRequestException("Missing or incorrect Captcha Token");
+    boolean isValidCaptcha = false;
+    try {
+      isValidCaptcha = captchaVerificationService.verifyCaptcha(captchaToken);
+      if (!isValidCaptcha) {
+        throw new BadRequestException("Missing or incorrect Captcha Token");
+      }
+    } catch (org.pmiops.workbench.captcha.ApiException e) {
+      throw new ServerErrorException("Exception while verifying Captcha");
     }
   }
 

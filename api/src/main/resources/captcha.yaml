@@ -1,0 +1,55 @@
+swagger: '2.0'
+info:
+  title: Captcha
+  version: '0.1'
+
+host: 'google.com/recaptcha/api'
+schemes:
+  - 'https'
+basePath: /
+
+produces:
+  - application/json
+
+paths:
+  /siteverify?secret={secret}&response={responseToken}:
+    get:
+      tags:
+        - captcha
+      operationId: verify
+      parameters:
+        - in: path
+          name: secret
+          description: secret server key
+          required: true
+          type: string
+        - in: path
+          name: responseToken
+          description: Token generated from Captcha
+          required: true
+          type: string
+      responses:
+        200:
+          description: Email sent successfully
+          schema:
+            $ref: '#/definitions/CaptchaVerificationResponse'
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+  CaptchaVerificationResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      hostname:
+        type: string
+      error-codes:
+        type: array
+        items:
+          $ref: '#/definitions/ErrorCodes'
+
+  ErrorCodes:
+    type: string
+    enum: [MissingSecret,InvalidSecret,MissingResponse,InvalidResponse]
