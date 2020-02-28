@@ -32,6 +32,7 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -204,8 +205,12 @@ public class ProfileControllerTest extends BaseControllerTest {
       e.printStackTrace();
     }
     when(cloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
-    when(captchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
-    when(captchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
+    try {
+      when(captchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
+      when(captchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
+    } catch (ApiException e) {
+      e.printStackTrace();
+    }
   }
 
   @Test(expected = BadRequestException.class)
