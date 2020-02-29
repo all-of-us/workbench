@@ -1,5 +1,5 @@
 const faker = require('faker/locale/en_US');
-const configs = require('../config');
+const configs = require('../workbench-config');
 
 const newUserName = `aoutestuser${Math.floor(Math.random() * 1000)}${Math.floor(Date.now() / 1000)}`;
 

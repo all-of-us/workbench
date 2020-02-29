@@ -105,15 +105,15 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
 
 
   public radioButtonRequestReviewYes(): RadioButton {
-    return new RadioButton(this.puppeteerPage, 'Yes, I would like to request a review');
+    return new RadioButton(this.puppeteerPage); // 'Yes, I would like to request a review')
   }
 
   public radioButtonRequestReviewNo(): RadioButton {
-    return new RadioButton(this.puppeteerPage, 'No, I have no concerns at this time');
+    return new RadioButton(this.puppeteerPage); // 'No, I have no concerns at this time'
   }
 
   public radioButtonNotCenterOnUnrepresentedPopulation(): RadioButton {
-    return new RadioButton(this.puppeteerPage, 'No, my study will not center on underrepresented populations.');
+    return new RadioButton(this.puppeteerPage); // 'No, my study will not center on underrepresented populations.')
   }
 
   public async waitForReady(): Promise<WorkspaceEditPage> {

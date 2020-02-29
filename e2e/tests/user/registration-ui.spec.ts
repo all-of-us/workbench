@@ -1,4 +1,4 @@
-import WebElement from '../../app/aou-elements/web-element';
+import WebElement from '../../app/aou-elements/WebElement';
 import CreateAccountPage from '../../app/CreateAccountPage';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import {findText, getCursorValue} from '../../driver/element-util';
@@ -8,7 +8,7 @@ require('../../driver/waitFuncs');
 
 jest.setTimeout(60 * 1000);
 
-const configs = require('../../resources/config');
+const configs = require('../../resources/workbench-config');
 
 describe('User registration tests:', () => {
 

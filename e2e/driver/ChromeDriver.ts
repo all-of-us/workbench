@@ -3,6 +3,8 @@ import GoogleLoginPage from '../app/GoogleLoginPage';
 
 export default class ChromeDriver {
 
+  public static userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36';
+
   public chromeSwitches = [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -21,8 +23,6 @@ export default class ChromeDriver {
     args: this.chromeSwitches,
     ignoreDefaultArgs: ['--disable-extensions'],
   };
-
-  public userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36';
 
   public browser: Puppeteer.Browser;
   public page;
@@ -45,7 +45,7 @@ export default class ChromeDriver {
     } else {
       this.page = await br.newPage();
     }
-    await this.page.setUserAgent(this.userAgent);
+    await this.page.setUserAgent(ChromeDriver.userAgent);
     // value 0 means disable timeout
     await this.page.setDefaultNavigationTimeout(60000); // timeout for all page navigation functions
     await this.page.setDefaultTimeout(30000); // timeout for all async waitFor functions

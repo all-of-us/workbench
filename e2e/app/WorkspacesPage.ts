@@ -1,9 +1,9 @@
-import {waitUntilTitleIs} from '../driver/waitFuncs';
+import {waitUntilTitleMatch} from '../driver/waitFuncs';
 import {findButton} from './aou-elements/xpath-finder';
 import AuthenticatedPage from './mixin-pages/AuthenticatedPage';
 import WorkspaceEditPage from './WorkspaceEditPage';
 
-const configs = require('../resources/config.js');
+const configs = require('../resources/workbench-config.js');
 
 export default class WorkspacesPage extends AuthenticatedPage {
 
@@ -16,16 +16,17 @@ export default class WorkspacesPage extends AuthenticatedPage {
    /**
     * navigate to My Workspaces URL
     */
-  public async navigateGoToURL(): Promise<void> {
+  public async navigateToURL(): Promise<void> {
     const pageUrl = configs.uiBaseUrl + configs.workspacesUrlPath;
     await this.puppeteerPage.goto(pageUrl, {waitUntil: ['domcontentloaded','networkidle0']});
     await this.waitForSpinner();
   }
 
-  public async isLoaded() {
-    await waitUntilTitleIs(this.puppeteerPage, this.selectors.pageTitle);
+  public async isLoaded(): Promise<boolean> {
+    await waitUntilTitleMatch(this.puppeteerPage, this.selectors.pageTitle);
     await this.puppeteerPage.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true});
     await this.waitForSpinner();
+    return true;
   }
 
   public async getCreateNewWorkspaceLink() {
@@ -45,7 +46,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     * 4: return
     */
   public async createNewWorkspace(): Promise<WorkspaceEditPage> {
-    await this.navigateGoToURL();
+    await this.navigateToURL();
     const link = await this.getCreateNewWorkspaceLink();
     await Promise.all([
       this.puppeteerPage.waitForNavigation( { waitUntil: 'networkidle0' } ),

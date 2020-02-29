@@ -1,7 +1,7 @@
 import { ElementHandle, Page } from 'puppeteer';
 import { waitForNavigation } from '../driver/page-wait';
 
-const configs = require('../resources/config');
+const configs = require('../resources/workbench-config');
 
 export const selectors = {
   loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In with Google")]',
@@ -45,10 +45,6 @@ export default class GoogleLoginPage {
    * @param email
    */
   public async enterEmail(email: string) : Promise<void> {
-
-    const screenshotFile = `enterEmail.png`;
-    await this.page.screenshot({path: screenshotFile, fullPage: true});
-
     const input = await this.email;
     await input.focus();
     await input.type(email);

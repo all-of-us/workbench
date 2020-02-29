@@ -1,95 +1,96 @@
 /**
  * a TEXTAREA element with specified label.
- * @param label
+ * @param name
  */
-export function selectXpath(label: string) {
-  return `${textXpath(label)}/ancestor::node()[2]//select`;
+export function selectXpath(name: string) {
+  return `${textXpath(name)}/ancestor::node()[2]//select`;
 }
 
 /**
  * a @role=button element with specified label.
- * @param label
+ * @param name
  */
-export function buttonXpath(label: string) {
-  return `//*[(normalize-space(text())='${label}' or normalize-space(.)='${label}') and @role='button']`;
+export function buttonXpath(name: string) {
+  return `//*[(normalize-space(text())='${name}' or normalize-space(.)='${name}') and @role='button']`;
 }
 
 /**
  * a TEXTAREA element with specified label.
- * @param label
+ * @param name
  */
-export function textareaXpath(label: string) {
-  return `${textXpath(label)}/ancestor::node()[2]//textarea`;
+export function textareaXpath(name: string) {
+  return `${textXpath(name)}/ancestor::node()[2]//textarea`;
 }
 
   /**
    * a textbox element with specified label.
-   * @param label
+   * @param name
    */
-export function textboxXpath(label: string) {
-  return `${inputXpath(label, 'text')}`;
+export function textboxXpath(name: string) {
+  return `${inputXpath(name, 'text')}`;
 }
 
 /**
  * a IMAGE element with specified label.
- * @param label
+ * @param name
  */
-export function imageXpath(label: string) {
-  return `//*[normalize-space(text())='${label}']//*[@role='img']`
+export function imageXpath(name: string) {
+  return `//*[normalize-space(text())='${name}']//*[@role='img']`
 }
 
 /**
  * a CHECKBOX element with specified label.
- * @param label
+ * @param name
  */
-export function checkboxXpath(label: string) {
-  return `${inputXpath(label, 'checkbox')}`;
+export function checkboxXpath(name: string) {
+  return `${inputXpath(name, 'checkbox')}`;
 }
 
 /**
  * a RADIOBUTTON element with specified label.
- * @param label
+ * @param name
  */
-export function radioButtonXpath(label: string) {
-  return `${inputXpath(label, 'radio')}`;
+export function radioButtonXpath(name: string) {
+  return `${inputXpath(name, 'radio')}`;
 }
 
-export function inputXpath(label: string, inputType?: string) {
+export function inputXpath(name: string, inputType?: string) {
   if (inputType !== undefined) {
-    return `${textXpath(label)}/ancestor::node()[2]//input[@type='${inputType}']`;
+    return `${textXpath(name)}/ancestor::node()[2]//input[@type='${inputType}']`;
   }
   // return all input nodes
-  return `${textXpath(label)}/ancestor::node()[2]//input`;
+  return `${textXpath(name)}/ancestor::node()[2]//input`;
 }
 
 /**
  * Texts or label. It can be partial or full string.
- * @param labelText
+ * @param name
  */
-export function textXpath(label: string) {
-  return `//*[contains(normalize-space(text()),'${label}')  or @placeholder='${label}']`;
+export function textXpath(name: string) {
+  return `//*[contains(normalize-space(text()),'${name}')  or @placeholder='${name}']`;
 }
 
 /**
  * Finds element that match xpath selector: //clr-icon[@shape="plus-circle"]
- * @param label
+ * @param name
  */
-export function plusCircleIconXpath(label: string) {
-  return `//*[*[normalize-space(text())='${label}' or normalize-space(.)='${label}']]//clr-icon[@shape='plus-circle']/*[@role='img']`;
+export function plusCircleIconXpath(name: string) {
+  return `//*[*[normalize-space(text())='${name}' or normalize-space(.)='${name}']]//clr-icon[@shape='plus-circle']/*[@role='img']`;
 }
 
 /**
  * Clickable element with label.
- * @param label
+ * @param name
  */
-export function clickableXpath(label: string) {
-  return `(//a | //*[@role='button'])[normalize-space()='${label}' or contains(@aria-label,'${label}')]`;
+export function clickableXpath(name: string) {
+  return `(//a | //span | //*[@role='button'])[normalize-space()='${name}' or contains(@aria-label,'${name}')]`;
 }
 
 /**
  * A clr-icon element with specified label.
- * @param label
+ * @param name
  */
-export function clrIconXpath(label: string) {
-  return `${textXpath(label)}/ancestor::node()[1]//clr-icon`;
+export function clrIconXpath(name: string) {
+  return `${textXpath(name)}/ancestor::node()[1]//clr-icon`;
 }
+

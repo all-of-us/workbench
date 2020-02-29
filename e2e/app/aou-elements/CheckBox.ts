@@ -8,14 +8,14 @@ export default class CheckBox extends WebElement {
     super(aPage);
   }
    
-  public async withLabel(aElementLabel: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    this.labelText = aElementLabel;
+  public async withLabel(aElementName: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+    this.name = aElementName;
     throwErr = throwErr || true;
     try {
-      this.element = await findCheckBox(this.page, this.labelText, options);
+      this.element = await findCheckBox(this.page, this.name, options);
     } catch (e) {
       if (throwErr) {
-        console.error(`FAILED finding CheckBox: "${this.labelText}".`);
+        console.error(`FAILED finding CheckBox: "${this.name}".`);
         throw e;
       }
     }
@@ -55,7 +55,7 @@ export default class CheckBox extends WebElement {
   }
 
   private async text(): Promise<ElementHandle> {
-    return await findText(this.page, this.labelText);
+    return await findText(this.page, this.name);
   }
 
 }

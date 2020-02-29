@@ -3,7 +3,7 @@ import CreateAccountPage from '../../app/CreateAccountPage';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
 import {waitForText} from '../../driver/waitFuncs';
-const configs = require('../../resources/config');
+const configs = require('../../resources/workbench-config');
 
 jest.setTimeout(60 * 1000);
 

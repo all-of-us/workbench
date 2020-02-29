@@ -3,13 +3,14 @@ import {ElementInterface} from './ElementInterface';
 
 export default class WebElement implements ElementInterface {
   protected readonly page: Page;
-  protected labelText: string;
+  protected name: string;
   protected css: string;
   protected xpath: string;
   protected element: ElementHandle;
 
-  constructor(aPage: Page) {
+  constructor(aPage: Page, aElement?: ElementHandle) {
     this.page = aPage;
+    this.element = aElement || undefined;
   }
 
   public async withCss(aCssSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
@@ -25,13 +26,13 @@ export default class WebElement implements ElementInterface {
   }
 
   public async waitForXpath(options?: WaitForSelectorOptions): Promise<ElementHandle> {
-    if (this.xpath === undefined) { throw new Error('Xpath selector is undefined.'); }
+    if (this.xpath == null) { throw new Error('Xpath selector is undefined.'); }
     this.element = await this.page.waitForXPath(this.xpath, options);
     return this.element
   }
 
   public async waitForCss(options?: WaitForSelectorOptions): Promise<ElementHandle> {
-    if (this.css === undefined) { throw new Error('CSS selector is undefined.'); }
+    if (this.css == null) { throw new Error('CSS selector is undefined.'); }
     this.element = await this.page.waitForSelector(this.css, options);
     return this.element;
   }
@@ -40,7 +41,7 @@ export default class WebElement implements ElementInterface {
     * Find element without waiting for.
     */
   public async findByCss(): Promise<ElementHandle | null> {
-    if (this.css === undefined) { throw new Error('CSS selector is undefined.'); }
+    if (this.css == null) { throw new Error('CSS selector is undefined.'); }
     this.element = await this.page.$(this.css);
     return this.element;
   }
@@ -49,7 +50,7 @@ export default class WebElement implements ElementInterface {
     * Find element without waiting for.
     */
   public async findByXpath(): Promise<ElementHandle> {
-    if (this.xpath === undefined) { throw new Error('Xpath selector is undefined.'); }
+    if (this.xpath == null) { throw new Error('Xpath selector is undefined.'); }
     this.element = (await this.page.$x(this.xpath))[0];
     return this.element;
   }
@@ -58,7 +59,7 @@ export default class WebElement implements ElementInterface {
    * Finds the value of a property
    */
   public async getProperty(propertyName: string): Promise<unknown> {
-    if (this.element === undefined) { throw new Error('The element is undefined.'); }
+    if (this.element == null) { throw new Error('The element is undefined.'); }
     const p = await this.element.asElement().getProperty(propertyName);
     return await p.jsonValue();
   }
@@ -67,7 +68,7 @@ export default class WebElement implements ElementInterface {
    * Finds the value of an attribute
    */
   public async getAttribute(attributeName: string): Promise<string | null> {
-    if (this.element === undefined) { throw new Error('The element is undefined.'); }
+    if (this.element == null) { throw new Error('The element is undefined.'); }
     const elem = this.element.asElement();
     const attributeValue = await this.page.evaluate(
        (link, attr) => link.getAttribute(attr), elem, attributeName
@@ -82,8 +83,9 @@ export default class WebElement implements ElementInterface {
    * @param attributeName
    */
   public async hasAttribute(attributeName: string): Promise<boolean> {
-    if (this.element === undefined) { throw new Error('The element is undefined.'); }
-    return await this.getAttribute(attributeName) !== null;
+    if (this.element == null) { throw new Error('The element is undefined.'); }
+    const value = await this.getAttribute(attributeName);
+    return value !== null;
   }
 
   /**
@@ -95,9 +97,8 @@ export default class WebElement implements ElementInterface {
   }
 
   public async isVisible(): Promise<boolean> {
-    const eHandle = this.element.asElement();
-    if (eHandle === null) { return false; }
-    return await eHandle.boundingBox() !== null;
+    const boxModel = await this.element.boxModel();
+    return boxModel !== null;
   }
 
   public async click(options?: ClickOptions): Promise<void> {
@@ -145,15 +146,30 @@ export default class WebElement implements ElementInterface {
     return (await attrStyle.getProperty(styleName)).jsonValue()
   }
 
+  /**
+   * Finds element's size.
+   */
+  public async size(): Promise<{ width: number; height: number }> {
+    const box = await this.element.boundingBox();
+    if (!box) { return { width: 0, height: 0 }; }
+    const { width, height } = box;
+    return { width, height };
+  }
+
   public async reloadPage(): Promise<Response> {
     return await this.page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
   }
 
-  /**
-   * non-async..
-   */
-  public exists(): boolean {
-    return this.element.asElement() !== null;
+  public getElementName(): string {
+    return this.name;
   }
+
+  public async dispose(): Promise<void> {
+    this.xpath = undefined;
+    this.css = undefined;
+    this.name = undefined;
+    return this.element.dispose();
+  }
+
 
 }

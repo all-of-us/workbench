@@ -6,8 +6,6 @@ export interface ElementInterface {
 
   getAttribute(attributeName: string): Promise<unknown>;
 
-  exists(): boolean;
-
   isVisible(): Promise<boolean>;
 
   hasAttribute(attr: string): Promise<boolean>;

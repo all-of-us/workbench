@@ -3,6 +3,8 @@ import * as xpathHandler from '../driver/xpath-handler';
 import {findPlusCircleIcon} from './aou-elements/xpath-finder';
 import AuthenticatedPage from './mixin-pages/AuthenticatedPage';
 
+const configs = require('../resources/workbench-config.js');
+
 export default class HomePage extends AuthenticatedPage {
 
   public static selectors = {
@@ -12,10 +14,11 @@ export default class HomePage extends AuthenticatedPage {
     createNewWorkspaceLink: 'Workspaces',
   };
 
-  public async isLoaded(): Promise<void> {
+  public async isLoaded(): Promise<boolean> {
     await super.isLoaded(HomePage.selectors.pageTitle);
     await this.puppeteerPage.waitForXPath(HomePage.selectors.seeAllWorkspacesLink, {visible: true});
     await this.puppeteerPage.waitForXPath(HomePage.selectors.header, {visible: true});
+    return true;
   }
 
   public async waitForReady(): Promise<HomePage> {
@@ -25,10 +28,20 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   /**
+   * navigate to Home page URL
+   */
+  public async navigateToURL(): Promise<void> {
+    const pageUrl = configs.uiBaseUrl;
+    await this.puppeteerPage.goto(pageUrl, {waitUntil: ['domcontentloaded','networkidle0']});
+    await this.waitForReady();
+  }
+
+
+  /**
    * Go to Home page.
    */
-  public async goto(): Promise<HomePage> {
-    await this.navigation.toHome();
+  public async navigateToHome(): Promise<HomePage> {
+    await this.navigation.navToHome();
     return this;
   }
 

@@ -1,8 +1,8 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import WebElement from './WebElement';
-import {findButton} from './xpath-finder';
+import {findClickable} from './xpath-finder';
 
-export default class Button extends WebElement {
+export default class Link extends WebElement {
 
   constructor(aPage: Page) {
     super(aPage);
@@ -12,7 +12,7 @@ export default class Button extends WebElement {
     this.name = aElementName;
     throwErr = throwErr || true;
     try {
-      this.element = await findButton(this.page, this.name, options);
+      this.element = await findClickable(this.page, this.name, options);
     } catch (e) {
       if (throwErr) {
         console.error(`FAILED finding Button: "${this.name}".`);

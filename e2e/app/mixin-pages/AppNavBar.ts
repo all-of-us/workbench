@@ -7,7 +7,7 @@ const selectors = {
   subMenuExpandLink: '//div[div[contains(@style,"transform: rotate(90deg)")]]//*[@role="button"]//clr-icon[@shape="angle"]'
 };
 
-export default class NavigationMenu {
+export default class AppNavBar {
   public puppeteerPage: Page;
 
   constructor(page: Page) {
@@ -80,7 +80,7 @@ export default class NavigationMenu {
     * 2. find "Home" link and click it
     * </pre>
     */
-  public async toHome() {
+  public async navToHome() {
     await this.open();
     const link = await this.homeLink;
     await this.clickAndWait(link);
@@ -95,7 +95,7 @@ export default class NavigationMenu {
     * 2. find "Your Workspaces" link and click it
     * </pre>
     */
-  public async toAllWorkspaces() {
+  public async navToMyWorkspaces() {
     await this.open();
     const link = await this.allWorkspacesLink;
     await this.clickAndWait(link);
@@ -127,7 +127,7 @@ export default class NavigationMenu {
     * 3. find "Profile" link and click it
     * </pre>
     */
-  public async toProfile() {
+  public async navToProfile() {
     await this.openUserSubmenu();
     const link = await this.profileLink;
     await this.clickAndWait(link);

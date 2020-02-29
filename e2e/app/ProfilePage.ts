@@ -7,9 +7,10 @@ const selectors = {
 
 export default class ProfilePage extends AuthenticatedPage {
 
-  public async isLoaded(): Promise<void> {
+  public async isLoaded(): Promise<boolean> {
     await super.isLoaded(selectors.pageTitle);
     await this.puppeteerPage.waitForXPath(selectors.header, {visible: true});
+    return true;
   }
 
   public async waitForReady(): Promise<ProfilePage> {
@@ -22,7 +23,7 @@ export default class ProfilePage extends AuthenticatedPage {
    * Go to Profile page.
    */
   public async goto(): Promise<ProfilePage> {
-    await this.navigation.toProfile();
+    await this.navigation.navToProfile();
     return this;
   }
 

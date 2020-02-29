@@ -6,7 +6,7 @@ import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);
 
-const configs = require('../../resources/config');
+const configs = require('../../resources/workbench-config');
 
 describe.skip('Navigation menu tests:', () => {
 
@@ -47,7 +47,7 @@ describe.skip('Navigation menu tests:', () => {
     const homePage = new HomePage(page);
     await homePage.waitForReady();
 
-    await homePage.navigation.toProfile();
+    await homePage.navigation.navToProfile();
 
     const profile = new ProfilePage(page);
     await profile.waitForReady();
@@ -58,7 +58,7 @@ describe.skip('Navigation menu tests:', () => {
     const homePage = new HomePage(page);
     await homePage.waitForReady();
 
-    await homePage.navigation.toAllWorkspaces();
+    await homePage.navigation.navToMyWorkspaces();
 
     const workspaces = new WorkspaceEditPage(page);
     await workspaces.waitForReady();

@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
 import {waitUntilTitleMatch} from '../../driver/waitFuncs';
+import AppNavBar from './AppNavBar';
 import BasePage from './BasePage';
-import NavigationMenu from './NavigationMenu';
 
 const selectors = {
   signedInIndicator: 'body#body div',
@@ -12,11 +12,12 @@ const selectors = {
  * AoU basepage class for extending.
  */
 export default abstract class AuthenticatedPage extends BasePage {
-  public navigation: NavigationMenu;
+
+  public navigation: AppNavBar;
 
   constructor(page: Page) {
     super(page);
-    this.navigation = new NavigationMenu(page);
+    this.navigation = new AppNavBar(page);
   }
 
   /**
@@ -29,10 +30,11 @@ export default abstract class AuthenticatedPage extends BasePage {
     await this.puppeteerPage.screenshot({path: screenshotFile, fullPage: true});
   }
 
-  protected async isLoaded(documentTitle: string) {
+  public async isLoaded(documentTitle: string): Promise<boolean> {
     await this.puppeteerPage.waitForSelector(selectors.signedInIndicator);
     await this.puppeteerPage.waitForSelector(selectors.logo, {visible: true});
     await waitUntilTitleMatch(this.puppeteerPage, documentTitle);
+    return true;
   }
 
   /**

@@ -3,11 +3,11 @@ import {Page} from 'puppeteer';
 export default class DropdownSelect {
 
   private readonly page: Page;
-  private readonly label: string;
+  private readonly name: string;
 
-  constructor(page: Page, label?: string) {
+  constructor(page: Page, name?: string) {
     this.page = page;
-    this.label = label || undefined;
+    this.name = name || undefined;
   }
 
   public async select(textValue: string) {
@@ -45,10 +45,10 @@ export default class DropdownSelect {
   }
 
   private componentXpath(): string {
-    if (this.label === undefined) {
+    if (this.name === undefined) {
       return '//*[contains(@class,"p-dropdown p-component")]';
     }
-    return `//*[child::*[normalize-space(text())='${this.label}']]/*[contains(@class,'p-dropdown p-component')]`;
+    return `//*[child::*[normalize-space(text())='${this.name}']]/*[contains(@class,'p-dropdown p-component')]`;
   }
 
 }
