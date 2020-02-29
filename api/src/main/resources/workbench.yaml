@@ -625,11 +625,12 @@ paths:
         Creates a new cluster for the current user in the given billing project. If a cluster already
         exists for the user in this billing project, a 409 conflict error is returned (even if the cluster
         is still initializing or is not in a ready state).
+
+        TODO(RW-3697): Custom cluster creation params should be added as a body param here.
       operationId: createCluster
       tags:
         - cluster
       parameters:
-        # TODO(RW-3697): Custom cluster creation params should be added as a body param here.
         - $ref: '#/parameters/workspaceNamespace'
       responses:
         200:
@@ -640,9 +641,10 @@ paths:
           description: A cluster for this user and workspace already exists.
           schema:
             $ref: "#/definitions/EmptyResponse"
-    # TODO(RW-3695): updateCluster should be added as a PATCH endpoint here.
     delete:
       summary: Delete a workspace cluster.
+      description: >
+        TODO(RW-3695): updateCluster should be added as a PATCH endpoint here.
       operationId: deleteCluster
       tags:
         - cluster
@@ -2318,9 +2320,8 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
 
-# Institution endpoints, for Verified Institutional Affiliation
-
   /v1/institutions:
+    x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
       tags:
         - institution
