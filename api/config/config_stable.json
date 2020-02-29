@@ -12,21 +12,19 @@
     "xAppIdValue": "stable-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.9",
-    "welderDockerImage": "broadinstitute/welder-server:60e28bc"
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.11",
+    "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
-    "accountId": "014D91-FCB792-33D2C0",
+    "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-stable-",
-    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
+    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
     "bufferCapacity": 10,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsLimit": 100.0,
     "defaultFreeCreditsDollarLimit": 100.0,
-    "defaultFreeCreditsDaysLimit": 180,
     "freeTierCostAlertThresholds": [0.5, 0.75],
-    "freeTierTimeAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-stable-1@all-of-us-rw-stable.iam.gserviceaccount.com"
@@ -65,6 +63,9 @@
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
   },
+  "zendesk": {
+    "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
+  },
   "elasticsearch": {
     "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
     "enableBasicAuth": true,
@@ -81,19 +82,22 @@
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
-    "unsafeAllowSelfBypass": false
+    "unsafeAllowSelfBypass": false,
+    "requireInvitationKey": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false,
+    "enableNewAccountCreation": true,
     "enableRdrExport": false,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
     "useKeylessDelegatedCredentials": false,
     "sendFreeTierAlertEmails": false,
-    "enableMoodleV2Api": false
+    "enableMoodleV2Api": false,
+    "requireInstitutionalVerification": false,
+    "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-stable"

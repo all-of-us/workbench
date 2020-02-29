@@ -408,5 +408,25 @@
         "Edit or Delete an Annotation Field across all Review Sets created in this set."
       ]
     }
+  ],
+  "preview": [
+    {
+      "title": "What is a workspace bucket?",
+      "content": [
+        "The All of Us Researcher Workbench is a cloud application. Each workspace has a permanent storage area called the 'workspace bucket'. Notebooks are loaded into an ephemeral virtual machine and are synced to the 'workspace bucket'. Users can also use the workspace bucket to save files needed for analysis."
+      ]
+    },
+    {
+      "title": "How can I access the workspace bucket?",
+      "content": [
+        "Currently the workspace bucket can only be accesed from Notebooks by using an environment variable os.getenv(\"WORKSPACE_BUCKET\")."
+      ]
+    },
+    {
+      "title": "How can I copy data from Notebooks to the workspace bucket and vice versa?",
+      "content": [
+        "There are code snippets available under the snippets menu that can be used to copy a dataframe to a file in the workspace bucket and vice versa."
+      ]
+    }
   ]
 }

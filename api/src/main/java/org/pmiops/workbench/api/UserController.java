@@ -162,7 +162,9 @@ public class UserController implements UserApiDelegate {
                                 .isFreeTier(false)
                                 .displayName(googleBillingAccount.getDisplayName())
                                 .name(googleBillingAccount.getName())
-                                .isOpen(googleBillingAccount.getOpen())))
+                                .isOpen(
+                                    Optional.ofNullable(googleBillingAccount.getOpen())
+                                        .orElse(false))))
             .collect(Collectors.toList());
 
     return ResponseEntity.ok(

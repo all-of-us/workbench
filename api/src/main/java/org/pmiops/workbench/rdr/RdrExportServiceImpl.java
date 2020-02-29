@@ -1,5 +1,7 @@
 package org.pmiops.workbench.rdr;
 
+import com.google.common.annotations.VisibleForTesting;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -7,24 +9,33 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.rdr.api.RdrApi;
-import org.pmiops.workbench.rdr.model.*;
+import org.pmiops.workbench.rdr.model.RdrResearcher;
+import org.pmiops.workbench.rdr.model.RdrWorkspace;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
+import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
+import org.pmiops.workbench.rdr.model.ResearcherVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,11 +48,12 @@ import org.springframework.stereotype.Service;
 public class RdrExportServiceImpl implements RdrExportService {
 
   private Clock clock;
-  private FireCloudService fireCloudService;
   private Provider<RdrApi> rdrApiProvider;
   private RdrExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
   private UserDao userDao;
+  private WorkspaceService workspaceService;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
@@ -49,17 +61,19 @@ public class RdrExportServiceImpl implements RdrExportService {
   @Autowired
   public RdrExportServiceImpl(
       Clock clock,
-      FireCloudService fireCloudService,
-      Provider<RdrApi> RdrApiProvider,
+      Provider<RdrApi> rdrApiProvider,
       RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
-      UserDao userDao) {
+      WorkspaceService workspaceService,
+      UserDao userDao,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.clock = clock;
-    this.fireCloudService = fireCloudService;
     this.rdrExportDao = rdrExportDao;
-    this.rdrApiProvider = RdrApiProvider;
+    this.rdrApiProvider = rdrApiProvider;
     this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
     this.userDao = userDao;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
   /**
@@ -74,7 +88,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     try {
       userIdList =
           rdrExportDao.findDbUserIdsToExport().stream()
-              .map(user -> user.longValue())
+              .map(BigInteger::longValue)
               .collect(Collectors.toList());
     } catch (Exception ex) {
       log.severe(
@@ -96,7 +110,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     try {
       workspaceListToExport =
           rdrExportDao.findDbWorkspaceIdsToExport().stream()
-              .map(workspaceId -> workspaceId.longValue())
+              .map(BigInteger::longValue)
               .collect(Collectors.toList());
     } catch (Exception ex) {
       log.severe(
@@ -114,16 +128,16 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public void exportUsers(List<Long> userIds) {
-    List<RdrResearcher> RdrResearchersList;
+    List<RdrResearcher> rdrResearchersList;
     try {
-      RdrResearchersList =
+      rdrResearchersList =
           userIds.stream()
               .map(userId -> toRdrResearcher(userDao.findUserByUserId(userId)))
               .collect(Collectors.toList());
       rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().exportResearcheres(RdrResearchersList);
+      rdrApiProvider.get().exportResearchers(rdrResearchersList);
 
-      updateDBRdrExport(RdrEntity.USER, userIds);
+      updateDbRdrExport(RdrEntity.USER, userIds);
     } catch (ApiException ex) {
       log.severe("Error while sending researcher data to RDR");
     }
@@ -137,17 +151,20 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public void exportWorkspaces(List<Long> workspaceIds) {
-    List<RdrWorkspace> RdrWorkspacesList;
+    List<RdrWorkspace> rdrWorkspacesList;
     try {
-      RdrWorkspacesList =
+      rdrWorkspacesList =
           workspaceIds.stream()
               .map(
                   workspaceId ->
                       toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
+              .filter(Objects::nonNull)
               .collect(Collectors.toList());
-      rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().exportWorkspaces(RdrWorkspacesList);
-      updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+      if (!rdrWorkspacesList.isEmpty()) {
+        rdrApiProvider.get().getApiClient().setDebugging(true);
+        rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
+        updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+      }
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
     }
@@ -167,6 +184,15 @@ public class RdrExportServiceImpl implements RdrExportService {
 
     researcher.setGivenName(dbUser.getGivenName());
     researcher.setFamilyName(dbUser.getFamilyName());
+    researcher.setDegrees(
+        dbUser.getDegreesEnum().stream()
+            .map(RdrExportEnums::degreeToRdrDegree)
+            .collect(Collectors.toList()));
+
+    if (dbUser.getContactEmail() != null) {
+      researcher.setEmail(dbUser.getContactEmail());
+    }
+
     if (dbUser.getAddress() != null) {
       researcher.setStreetAddress1(dbUser.getAddress().getStreetAddress1());
       researcher.setStreetAddress2(dbUser.getAddress().getStreetAddress2());
@@ -181,39 +207,62 @@ public class RdrExportServiceImpl implements RdrExportService {
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
       researcher.setEducation(
           RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
-      if (dbDemographicSurvey.getEthnicityEnum() != null) {
-        researcher.setEthnicity(
-            new ArrayList<Ethnicity>(
-                Arrays.asList(
-                    RdrExportEnums.ethnicityToRdrEthnicity(
-                        dbDemographicSurvey.getEthnicityEnum()))));
-      }
-      if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
-        researcher.setSexAtBirth(
-            RdrExportEnums.sexAtBirthToRdrSexAtBirth(
-                dbDemographicSurvey.getSexAtBirthEnum().get(0)));
-      }
+      researcher.setEthnicity(
+          Optional.ofNullable(dbDemographicSurvey.getEthnicityEnum())
+              .map(RdrExportEnums::ethnicityToRdrEthnicity)
+              .orElse(null));
+
+      researcher.setSexAtBirth(
+          Optional.ofNullable(
+                  dbDemographicSurvey.getSexAtBirthEnum().stream()
+                      .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<>()));
+      researcher.setGender(
+          Optional.ofNullable(
+                  dbDemographicSurvey.getGenderIdentityEnumList().stream()
+                      .map(RdrExportEnums::genderToRdrGender)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<>()));
+
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-    }
 
-    if (null != dbDemographicSurvey && dbDemographicSurvey.getRaceEnum() != null) {
       researcher.setRace(
-          dbDemographicSurvey.getRaceEnum().stream()
-              .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
-              .collect(Collectors.toList()));
-    } else {
-      researcher.setRace(new ArrayList<>());
+          Optional.ofNullable(
+                  dbDemographicSurvey.getRaceEnum().stream()
+                      .map(RdrExportEnums::raceToRdrRace)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<>()));
+
+      researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
+      researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
     }
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()
             .map(
-                inst -> {
-                  return new ResearcherAffiliation()
-                      .institution(inst.getInstitution())
-                      .role(inst.getRole());
-                })
+                inst ->
+                    new ResearcherAffiliation()
+                        .institution(inst.getInstitution())
+                        .role(inst.getRole()))
             .collect(Collectors.toList()));
+
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(dbUser)
+        .ifPresent(
+            verifiedInstitutionalAffiliation -> {
+              final InstitutionalRole roleEnum =
+                  verifiedInstitutionalAffiliation.getInstitutionalRoleEnum();
+              final String role =
+                  (roleEnum == InstitutionalRole.OTHER)
+                      ? verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText()
+                      : roleEnum.toString();
+
+              new ResearcherVerifiedInstitutionalAffiliation()
+                  .institutionShortName(
+                      verifiedInstitutionalAffiliation.getInstitution().getShortName())
+                  .institutionalRole(role);
+            });
     return researcher;
   }
 
@@ -241,28 +290,114 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setDrugDevelopment(dbWorkspace.getDrugDevelopment());
     rdrWorkspace.setCommercialPurpose(dbWorkspace.getCommercialPurpose());
     rdrWorkspace.setEducational(dbWorkspace.getEducational());
-    rdrWorkspace.setReasonForInvestigation(dbWorkspace.getReasonForAllOfUs());
+    rdrWorkspace.setEthicalLegalSocialImplications(dbWorkspace.getEthics());
+    rdrWorkspace.setScientificApproaches(dbWorkspace.getScientificApproach());
     rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
 
-    // Call Firecloud to get a list of Collaborators
-    FirecloudWorkspaceACL firecloudResponse =
-        fireCloudService.getWorkspaceAcl(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    Map<String, FirecloudWorkspaceAccessEntry> aclMap = firecloudResponse.getAcl();
+    rdrWorkspace.setWorkspaceDemographic(
+        toRdrWorkspaceDemographics(dbWorkspace.getSpecificPopulationsEnum()));
 
-    // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
-    // COLLABORATOR as ACTIVE
-    aclMap.forEach(
-        (email, access) -> {
-          RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
-          workspaceUserMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
-          workspaceUserMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
-          workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
-          rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
-        });
+    if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
+      rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
+    }
+
+    try {
+      // Call Firecloud to get a list of Collaborators
+      List<UserRole> collaboratorsMap =
+          workspaceService.getFirecloudUserRoles(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+      // Initializing it to empty array if for any reason firecloud sends an empty array
+      rdrWorkspace.setWorkspaceUsers(new ArrayList<RdrWorkspaceUser>());
+      // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
+      // COLLABORATOR as ACTIVE
+      collaboratorsMap.forEach(
+          (userRole) -> {
+            RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
+            workspaceUserMap.setUserId(
+                (int) userDao.findUserByUsername(userRole.getEmail()).getUserId());
+            workspaceUserMap.setRole(
+                RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()));
+            workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
+            rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
+          });
+    } catch (Exception ex) {
+      log.warning(
+          String.format(
+              "Exception while retrieving workspace collaborators for workspace id %s, skipping this workspace for RDR Export",
+              rdrWorkspace.getWorkspaceId()));
+      return null;
+    }
 
     return rdrWorkspace;
+  }
+
+  RdrWorkspaceDemographic toRdrWorkspaceDemographics(
+      Set<SpecificPopulationEnum> dbPopulationEnumSet) {
+    RdrWorkspaceDemographic rdrDemographic = new RdrWorkspaceDemographic();
+
+    rdrDemographic.setAccessToCare(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.ACCESS_TO_CARE)
+            ? RdrWorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
+            : RdrWorkspaceDemographic.AccessToCareEnum.UNSET);
+
+    rdrDemographic.setDisabilityStatus(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.DISABILITY_STATUS)
+            ? RdrWorkspaceDemographic.DisabilityStatusEnum.DISABILITY
+            : RdrWorkspaceDemographic.DisabilityStatusEnum.UNSET);
+
+    rdrDemographic.setEducationLevel(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.EDUCATION_LEVEL)
+            ? RdrWorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
+            : RdrWorkspaceDemographic.EducationLevelEnum.UNSET);
+
+    rdrDemographic.setIncomeLevel(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.INCOME_LEVEL)
+            ? RdrWorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
+            : RdrWorkspaceDemographic.IncomeLevelEnum.UNSET);
+
+    rdrDemographic.setGeography(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.GEOGRAPHY)
+            ? RdrWorkspaceDemographic.GeographyEnum.RURAL
+            : RdrWorkspaceDemographic.GeographyEnum.UNSET);
+
+    rdrDemographic.setSexualOrientation(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.SEXUAL_ORIENTATION)
+            ? RdrWorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
+            : RdrWorkspaceDemographic.SexualOrientationEnum.UNSET);
+
+    rdrDemographic.setGenderIdentity(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.GENDER_IDENTITY)
+            ? RdrWorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
+            : RdrWorkspaceDemographic.GenderIdentityEnum.UNSET);
+
+    rdrDemographic.setSexAtBirth(
+        dbPopulationEnumSet.contains(SpecificPopulationEnum.SEX)
+            ? RdrWorkspaceDemographic.SexAtBirthEnum.INTERSEX
+            : RdrWorkspaceDemographic.SexAtBirthEnum.UNSET);
+
+    rdrDemographic.setRaceEthnicity(
+        dbPopulationEnumSet.stream()
+            .map(RdrExportEnums::specificPopulationToRaceEthnicity)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()));
+
+    if (rdrDemographic.getRaceEthnicity().isEmpty()) {
+      rdrDemographic.setRaceEthnicity(
+          Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.UNSET));
+    }
+
+    rdrDemographic.setAge(
+        dbPopulationEnumSet.stream()
+            .map(RdrExportEnums::specificPopulationToAge)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()));
+
+    if (rdrDemographic.getAge().isEmpty()) {
+      rdrDemographic.setAge(Arrays.asList(RdrWorkspaceDemographic.AgeEnum.UNSET));
+    }
+
+    return rdrDemographic;
   }
 
   /**
@@ -272,7 +407,8 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param entity
    * @param idList
    */
-  private void updateDBRdrExport(RdrEntity entity, List<Long> idList) {
+  @VisibleForTesting
+  public void updateDbRdrExport(RdrEntity entity, List<Long> idList) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     List<DbRdrExport> exportList =

@@ -7,7 +7,7 @@ import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EducationalRole;
 import org.pmiops.workbench.model.Ethnicity;
-import org.pmiops.workbench.model.Gender;
+import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.IndustryRole;
 import org.pmiops.workbench.model.NonAcademicAffiliation;
 import org.pmiops.workbench.model.Race;
@@ -52,15 +52,14 @@ public class DemographicSurveyEnum {
           .put(Ethnicity.PREFER_NO_ANSWER, (short) 3)
           .build();
 
-  private static final BiMap<Gender, Short> CLIENT_TO_STORAGE_GENDER =
-      ImmutableBiMap.<Gender, Short>builder()
-          .put(Gender.MALE, (short) 1)
-          .put(Gender.FEMALE, (short) 2)
-          .put(Gender.NON_BINARY, (short) 3)
-          .put(Gender.TRANSGENDER, (short) 4)
-          .put(Gender.INTERSEX, (short) 5)
-          .put(Gender.NONE, (short) 6)
-          .put(Gender.PREFER_NO_ANSWER, (short) 7)
+  private static final BiMap<GenderIdentity, Short> CLIENT_TO_STORAGE_GENDER_IDENTITY =
+      ImmutableBiMap.<GenderIdentity, Short>builder()
+          .put(GenderIdentity.MAN, (short) 1)
+          .put(GenderIdentity.WOMAN, (short) 2)
+          .put(GenderIdentity.NON_BINARY, (short) 3)
+          .put(GenderIdentity.TRANSGENDER, (short) 4)
+          .put(GenderIdentity.NONE_DESCRIBE_ME, (short) 5)
+          .put(GenderIdentity.PREFER_NO_ANSWER, (short) 6)
           .build();
 
   private static final BiMap<Education, Short> CLIENT_TO_STORAGE_EDUCATION =
@@ -149,12 +148,12 @@ public class DemographicSurveyEnum {
     return CLIENT_TO_STORAGE_ETHNICITY.get(ethnicity);
   }
 
-  public static Short genderToStorage(Gender gender) {
-    return CLIENT_TO_STORAGE_GENDER.get(gender);
+  public static Short genderIdentityToStorage(GenderIdentity genderIdentity) {
+    return CLIENT_TO_STORAGE_GENDER_IDENTITY.get(genderIdentity);
   }
 
-  public static Gender genderFromStorage(Short gender) {
-    return CLIENT_TO_STORAGE_GENDER.inverse().get(gender);
+  public static GenderIdentity genderIdentityFromStorage(Short genderIdentity) {
+    return CLIENT_TO_STORAGE_GENDER_IDENTITY.inverse().get(genderIdentity);
   }
 
   public static Short educationToStorage(Education education) {

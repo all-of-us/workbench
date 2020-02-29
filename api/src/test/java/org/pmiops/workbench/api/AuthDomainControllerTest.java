@@ -20,10 +20,13 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.test.FakeClock;
@@ -58,6 +61,9 @@ public class AuthDomainControllerTest {
   @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Autowired private UserDao userDao;
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Mock private UserTermsOfServiceDao userTermsOfServiceDao;
+  @Mock private InstitutionService institutionService;
+  @Mock private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private AuthDomainController authDomainController;
 
@@ -78,6 +84,7 @@ public class AuthDomainControllerTest {
             userProvider,
             userDao,
             adminActionHistoryDao,
+            userTermsOfServiceDao,
             userDataUseAgreementDao,
             clock,
             new FakeLongRandom(12345),
@@ -85,7 +92,9 @@ public class AuthDomainControllerTest {
             Providers.of(config),
             complianceService,
             directoryService,
-            mockUserServiceAuditAdapter);
+            mockUserServiceAuditAdapter,
+            institutionService,
+            verifiedInstitutionalAffiliationDao);
     this.authDomainController =
         new AuthDomainController(
             fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);

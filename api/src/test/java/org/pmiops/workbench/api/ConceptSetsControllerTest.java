@@ -22,12 +22,15 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
@@ -51,6 +54,9 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionMapperImpl;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
@@ -62,6 +68,7 @@ import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -181,6 +188,10 @@ public class ConceptSetsControllerTest {
 
   @Autowired ConceptDao conceptDao;
 
+  @Autowired ConceptSetService conceptSetService;
+
+  @Autowired ConceptService conceptService;
+
   @Autowired DataSetService dataSetService;
 
   @Autowired WorkspaceDao workspaceDao;
@@ -212,26 +223,32 @@ public class ConceptSetsControllerTest {
     WorkspaceServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
+    ConceptSetMapperImpl.class,
     UserServiceImpl.class,
     ConceptSetsController.class,
+    ConceptService.class,
     WorkspacesController.class,
     ConceptSetService.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class,
+    InstitutionServiceImpl.class,
+    InstitutionMapperImpl.class,
+    PublicInstitutionDetailsMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
     CloudStorageService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    ConceptSetService.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
 

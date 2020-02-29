@@ -1,7 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
-import com.google.common.collect.ImmutableSet;
+import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -18,12 +19,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.hibernate.exception.GenericJDBCException;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -31,6 +33,8 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -39,12 +43,13 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -71,18 +76,23 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<DbUser> userProvider;
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
+  private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final Clock clock;
   private final Random random;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final UserServiceAuditor userServiceAuditAdapter;
+  private final UserServiceAuditor userServiceAuditor;
+  private final InstitutionService institutionService;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
@@ -90,6 +100,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<DbUser> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
+      UserTermsOfServiceDao userTermsOfServiceDao,
       UserDataUseAgreementDao userDataUseAgreementDao,
       Clock clock,
       Random random,
@@ -97,10 +108,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditAdapter) {
+      UserServiceAuditor userServiceAuditor,
+      InstitutionService institutionService,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
+    this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.clock = clock;
     this.random = random;
@@ -108,7 +122,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.userServiceAuditAdapter = userServiceAuditAdapter;
+    this.userServiceAuditor = userServiceAuditor;
+    this.institutionService = institutionService;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
   /**
@@ -119,7 +135,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    */
   private DbUser updateUserWithRetries(Function<DbUser, DbUser> modifyUser) {
     DbUser user = userProvider.get();
-    return updateUserWithRetries(modifyUser, user);
+    return updateUserWithRetries(modifyUser, user, Agent.asUser(user));
   }
 
   /**
@@ -129,12 +145,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * user; handles conflicts with concurrent updates by retrying.
    */
   @Override
-  public DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser) {
+  public DbUser updateUserWithRetries(
+      Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent) {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
     while (true) {
       dbUser = userModifier.apply(dbUser);
-      updateDataAccessLevel(dbUser);
+      updateDataAccessLevel(dbUser, agent);
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       dbUser.setLastModifiedTime(now);
       try {
@@ -171,7 +188,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  private void updateDataAccessLevel(DbUser dbUser) {
+  private void updateDataAccessLevel(DbUser dbUser, Agent agent) {
     final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
     final DataAccessLevel newDataAccessLevel;
     if (shouldUserBeRegistered(dbUser)) {
@@ -189,8 +206,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-      userServiceAuditAdapter.fireUpdateDataAccessAction(
-          dbUser, newDataAccessLevel, previousDataAccessLevel);
+      userServiceAuditor.fireUpdateDataAccessAction(
+          dbUser, newDataAccessLevel, previousDataAccessLevel, agent);
     }
   }
 
@@ -285,22 +302,16 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser createUser(
-      String givenName,
-      String familyName,
-      String userName,
-      String contactEmail,
-      String currentPosition,
-      String organization,
-      String areaOfResearch) {
+  public DbUser createUser(final Userinfoplus oAuth2Userinfo) {
     return createUser(
-        givenName,
-        familyName,
-        userName,
-        contactEmail,
-        currentPosition,
-        organization,
-        areaOfResearch,
+        oAuth2Userinfo.getGivenName(),
+        oAuth2Userinfo.getFamilyName(),
+        oAuth2Userinfo.getEmail(),
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -319,9 +330,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       String areaOfResearch,
       String professionalUrl,
       List<Degree> degrees,
-      DbAddress address,
-      DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations) {
+      DbAddress dbAddress,
+      DbDemographicSurvey dbDemographicSurvey,
+      List<DbInstitutionalAffiliation> dbAffiliations,
+      DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -336,33 +348,56 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setDisabled(false);
     dbUser.setAboutYou(null);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    dbUser.setAddress(address);
+    dbUser.setAddress(dbAddress);
     if (degrees != null) {
       dbUser.setDegreesEnum(degrees);
     }
-    dbUser.setDemographicSurvey(demographicSurvey);
+    dbUser.setDemographicSurvey(dbDemographicSurvey);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbUser.setCreationTime(now);
     dbUser.setLastModifiedTime(now);
 
-    DbUser user = new DbUser();
     // For existing user that do not have address
-    if (address != null) {
-      address.setUser(dbUser);
+    if (dbAddress != null) {
+      dbAddress.setUser(dbUser);
     }
-    if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
-    if (institutionalAffiliations != null) {
+    if (dbDemographicSurvey != null) dbDemographicSurvey.setUser(dbUser);
+    // set via the older Institutional Affiliation flow, from the Demographic Survey
+    if (dbAffiliations != null) {
       // We need an "effectively final" variable to be captured in the lambda
       // to pass to forEach.
       final DbUser finalDbUserReference = dbUser;
-      institutionalAffiliations.forEach(
+      dbAffiliations.forEach(
           affiliation -> {
             affiliation.setUser(finalDbUserReference);
             finalDbUserReference.addInstitutionalAffiliation(affiliation);
           });
     }
+    // set via the newer Verified Institutional Affiliation flow
+    boolean requireInstitutionalVerification =
+        configProvider.get().featureFlags.requireInstitutionalVerification;
+    if (requireInstitutionalVerification
+        && !institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
+      final String msg =
+          Optional.ofNullable(dbVerifiedAffiliation)
+              .map(
+                  affiliation ->
+                      String.format(
+                          "Cannot create user %s: contact email %s is not a valid member of institution '%s'",
+                          userName, contactEmail, affiliation.getInstitution().getShortName()))
+              .orElse(
+                  String.format(
+                      "Cannot create user %s: contact email %s does not have a valid institutional affiliation",
+                      userName, contactEmail));
+      throw new BadRequestException(msg);
+    }
+
     try {
       dbUser = userDao.save(dbUser);
+      if (requireInstitutionalVerification) {
+        dbVerifiedAffiliation.setUser(dbUser);
+        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
+      }
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(userName);
       if (dbUser == null) {
@@ -397,7 +432,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
           return user;
         },
-        dbUser);
+        dbUser,
+        Agent.asUser(dbUser));
   }
 
   @Override
@@ -412,6 +448,21 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
     userDataUseAgreementDao.save(dataUseAgreements);
+  }
+
+  @Override
+  @Transactional
+  public void submitTermsOfService(DbUser dbUser, Integer tosVersion) {
+    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
+      throw new BadRequestException("Terms of Service version is not up to date");
+    }
+
+    DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
+    userTermsOfService.setTosVersion(tosVersion);
+    userTermsOfService.setUserId(dbUser.getUserId());
+    userTermsOfServiceDao.save(userTermsOfService);
+
+    userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
   }
 
   @Override
@@ -486,8 +537,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           setter.accept(u, bypassTime);
           return u;
         },
-        dbUser);
-    userServiceAuditAdapter.fireAdministrativeBypassTime(
+        dbUser,
+        Agent.asAdmin(userProvider.get()));
+    userServiceAuditor.fireAdministrativeBypassTime(
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
@@ -510,7 +562,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           u.setDisabled(disabled);
           return u;
         },
-        user);
+        user,
+        Agent.asAdmin(userProvider.get()));
   }
 
   @Override
@@ -562,7 +615,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Deprecated
   public DbUser syncComplianceTrainingStatusV1()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    return syncComplianceTrainingStatusV1(userProvider.get());
+    DbUser user = userProvider.get();
+    return syncComplianceTrainingStatusV1(user, Agent.asUser(user));
   }
 
   /**
@@ -579,7 +633,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    */
   @Override
   @Deprecated
-  public DbUser syncComplianceTrainingStatusV1(DbUser dbUser)
+  public DbUser syncComplianceTrainingStatusV1(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     if (isServiceAccount(dbUser)) {
       // Skip sync for service account user rows.
@@ -633,7 +687,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             u.setComplianceTrainingCompletionTime(u.getComplianceTrainingCompletionTime());
             return u;
           },
-          dbUser);
+          dbUser,
+          agent);
 
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
@@ -653,7 +708,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   /** Syncs the current user's training status from Moodle. */
   public DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    return syncComplianceTrainingStatusV2(userProvider.get());
+    DbUser user = userProvider.get();
+    return syncComplianceTrainingStatusV2(user, Agent.asUser(user));
   }
 
   /**
@@ -667,7 +723,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * we clear the completion/expiration dates from the database as the user will need to complete a
    * new training.
    */
-  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser)
+  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Skip sync for service account user rows.
     if (isServiceAccount(dbUser)) {
@@ -717,7 +773,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
             return u;
           },
-          dbUser);
+          dbUser,
+          agent);
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
       throw e;
@@ -740,7 +797,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    *
    * <p>This method saves the updated user object to the database and returns it.
    */
-  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus) {
+  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus, Agent agent) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     return updateUserWithRetries(
@@ -782,7 +839,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           }
           return user;
         },
-        targetUser);
+        targetUser,
+        agent);
   }
 
   /** Syncs the eraCommons access module status for the current user. */
@@ -790,7 +848,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser syncEraCommonsStatus() {
     DbUser user = userProvider.get();
     FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
-    return setEraCommonsStatus(user, nihStatus);
+    return setEraCommonsStatus(user, nihStatus, Agent.asUser(user));
   }
 
   /**
@@ -802,7 +860,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * <p>Returns the updated User object.
    */
   @Override
-  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user)
+  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
       throws IOException, org.pmiops.workbench.firecloud.ApiException {
     if (isServiceAccount(user)) {
       // Skip sync for service account user rows.
@@ -813,7 +871,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     NihApi api = new NihApi(apiClient);
     try {
       FirecloudNihStatus nihStatus = api.nihStatus();
-      return setEraCommonsStatus(user, nihStatus);
+      return setEraCommonsStatus(user, nihStatus, agent);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
         // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
@@ -828,12 +886,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public void syncTwoFactorAuthStatus() {
-    syncTwoFactorAuthStatus(userProvider.get());
+    DbUser user = userProvider.get();
+    syncTwoFactorAuthStatus(user, Agent.asUser(user));
   }
 
   /** */
   @Override
-  public DbUser syncTwoFactorAuthStatus(DbUser targetUser) {
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
       return targetUser;
@@ -852,43 +911,26 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           }
           return user;
         },
-        targetUser);
+        targetUser,
+        agent);
   }
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    // TODO(jaycarlton): replace this findAll/MultiKeyMap implementation
-    //   wtih JdbcTemplate method. I'm told we can't currently do things like this
-    //   with our JPA/Spring/MySQL versions.
 
-    List<DbUser> allUsers = userDao.findUsers();
-    MultiKeyMap<String, Long> keysToCount = new MultiKeyMap<>();
-    // keys will be { accessLevel, disabled }
-    for (DbUser user : allUsers) {
-      // get keys
-      final String dataAccessLevel = user.getDataAccessLevelEnum().toString();
-      final String isDisabled = Boolean.valueOf(user.getDisabled()).toString();
-      final String isBetaBypassed =
-          Boolean.valueOf(user.getBetaAccessBypassTime() != null).toString();
-
-      // find count
-      final long count =
-          Optional.ofNullable(keysToCount.get(dataAccessLevel, isDisabled, isBetaBypassed))
-              .orElse(0L);
-      // increment count
-      keysToCount.put(dataAccessLevel, isDisabled, isBetaBypassed, count + 1);
-    }
-
-    // build bundles for each entry in the map
-    return keysToCount.entrySet().stream()
+    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    return rows.stream()
         .map(
-            e ->
+            row ->
                 MeasurementBundle.builder()
-                    .addMeasurement(GaugeMetric.USER_COUNT, e.getValue())
-                    .addTag(MetricLabel.DATA_ACCESS_LEVEL, e.getKey().getKey(0))
-                    .addTag(MetricLabel.USER_DISABLED, e.getKey().getKey(1))
-                    .addTag(MetricLabel.USER_BYPASSED_BETA, e.getKey().getKey(2))
+                    .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
+                    .addTag(
+                        MetricLabel.DATA_ACCESS_LEVEL,
+                        CommonStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                            .toString())
+                    .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
+                    .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())
                     .build())
-        .collect(ImmutableSet.toImmutableSet());
+        .collect(ImmutableList.toImmutableList());
   }
 }

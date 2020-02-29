@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
@@ -26,6 +25,7 @@ import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLI
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
@@ -68,6 +68,7 @@ import org.pmiops.workbench.api.CohortsController;
 import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -80,6 +81,7 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -131,6 +133,7 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
@@ -140,6 +143,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -151,6 +155,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -173,6 +178,8 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.zendesk.client.v2.Zendesk;
+import org.zendesk.client.v2.model.Request;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -243,6 +250,9 @@ public class WorkspacesControllerTest {
   @Autowired
   private Provider<Cloudbilling> serviceAccountCloudbillingProvider;
 
+  private static Cloudbilling endUserCloudbilling;
+  private static Cloudbilling serviceAccountCloudbilling;
+
   @TestConfiguration
   @Import({
     CdrVersionService.class,
@@ -259,10 +269,13 @@ public class WorkspacesControllerTest {
     ReviewQueryBuilder.class,
     ConceptSetService.class,
     ConceptSetsController.class,
+    ConceptSetMapperImpl.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
+    FreeTierBillingService.class,
     BillingProjectBufferService.class,
     CohortMaterializationService.class,
     ConceptBigQueryService.class,
@@ -275,23 +288,21 @@ public class WorkspacesControllerTest {
     UserRecentResourceService.class,
     ConceptService.class,
     MonitoringService.class,
-    WorkspaceAuditor.class
+    WorkspaceAuditor.class,
+    Zendesk.class
   })
   static class Configuration {
 
     @Bean(END_USER_CLOUD_BILLING)
+    @Scope("prototype")
     Cloudbilling endUserCloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
+      return endUserCloudbilling;
     }
 
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
+    @Scope("prototype")
     Cloudbilling serviceAccountCloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
-    }
-
-    @Bean
-    Cloudbilling cloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
+      return serviceAccountCloudbilling;
     }
 
     @Bean
@@ -334,6 +345,8 @@ public class WorkspacesControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
+  @Autowired Zendesk mockZendesk;
+  @Autowired FreeTierBillingService freeTierBillingService;
 
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
@@ -379,6 +392,11 @@ public class WorkspacesControllerTest {
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
+
+    when(mockZendesk.createRequest(any())).thenReturn(new Request());
+
+    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
+    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
   }
 
   private DbUser createUser(String email) {
@@ -516,42 +534,7 @@ public class WorkspacesControllerTest {
   }
 
   private Workspace createWorkspace() {
-    return createWorkspace("namespace", "name");
-  }
-
-  // TODO(calbach): Clean up this test file to make better use of chained builders.
-  private Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
-    ResearchPurpose researchPurpose = new ResearchPurpose();
-    researchPurpose.setDiseaseFocusedResearch(true);
-    researchPurpose.setDiseaseOfFocus("cancer");
-    researchPurpose.setMethodsDevelopment(true);
-    researchPurpose.setControlSet(true);
-    researchPurpose.setAncestry(true);
-    researchPurpose.setCommercialPurpose(true);
-    researchPurpose.setSocialBehavioral(true);
-    researchPurpose.setPopulationHealth(true);
-    researchPurpose.setEducational(true);
-    researchPurpose.setDrugDevelopment(true);
-    researchPurpose.setPopulation(false);
-    researchPurpose.setPopulationDetails(Collections.emptyList());
-    researchPurpose.setAdditionalNotes("additional notes");
-    researchPurpose.setReasonForAllOfUs("reason for aou");
-    researchPurpose.setIntendedStudy("intended study");
-    researchPurpose.setAnticipatedFindings("anticipated findings");
-    researchPurpose.setTimeRequested(1000L);
-    researchPurpose.setTimeReviewed(1500L);
-    researchPurpose.setReviewRequested(true);
-    researchPurpose.setApproved(false);
-    Workspace workspace = new Workspace();
-    workspace.setId(workspaceName);
-    workspace.setName(workspaceName);
-    workspace.setNamespace(workspaceNameSpace);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
-    workspace.setResearchPurpose(researchPurpose);
-    workspace.setCdrVersionId(cdrVersionId);
-    workspace.setGoogleBucketName(BUCKET_NAME);
-    workspace.setBillingAccountName("billing-account");
-    return workspace;
+    return testMockFactory.createWorkspace("namespace", "name");
   }
 
   public Cohort createDefaultCohort(String name) {
@@ -636,6 +619,8 @@ public class WorkspacesControllerTest {
             "projects/" + workspace.getNamespace(),
             new ProjectBillingInfo().setBillingAccountName("billing-account"));
     assertThat(workspace2.getBillingAccountName()).isEqualTo("billing-account");
+
+    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
@@ -779,43 +764,184 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspace_freeTierBilling() throws Exception {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
+  public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() throws Exception {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    verify(endUserCloudbillingProvider.get()).projects();
-    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
+    // Creating the workspace with a user provided billing account
+    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
+    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    request.setWorkspace(ws);
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    request.setWorkspace(workspace);
+    workspacesController.updateWorkspace(workspace.getNamespace(), workspace.getId(), request);
 
-    verifyNoMoreInteractions(endUserCloudbillingProvider.get());
+    verifyZeroInteractions(endUserCloudbillingProvider.get());
     verify(serviceAccountCloudbillingProvider.get()).projects();
   }
 
   @Test
-  public void testUpdateWorkspace_resetBillingOnFailedSave() throws Exception {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-    final String originalBillingAccountName = ws.getBillingAccountName();
+  public void testUpdateWorkspace_freeTierBilling_noCreditsRemaining() throws Exception {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    doReturn(false)
+        .when(freeTierBillingService)
+        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    ws.setBillingAccountName("update-billing-account");
-    request.setWorkspace(ws);
+    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    request.setWorkspace(workspace);
+    Workspace response =
+        workspacesController
+            .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
+            .getBody();
+
+    assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+  }
+
+  @Test
+  public void testUpdateWorkspace_freeTierBilling_hasCreditsRemaining() throws Exception {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    DbWorkspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            workspace.getNamespace(),
+            workspace.getId(),
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    doReturn(true)
+        .when(freeTierBillingService)
+        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    workspace.setEtag("\"2\"");
+    request.setWorkspace(workspace);
+    Workspace response =
+        workspacesController
+            .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
+            .getBody();
+
+    assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+  }
+
+  @Test
+  public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount()
+      throws Exception {
+    final String closedBillingAccountName = "closed-billing-account";
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    final String namespace = workspace.getNamespace();
+    final String firecloudName = workspace.getId();
+
+    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
+    doReturn(new BillingAccount().setName(closedBillingAccountName).setOpen(false))
+        .when(getRequest)
+        .execute();
+    when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName))
+        .thenReturn(getRequest);
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    workspace.setBillingAccountName(closedBillingAccountName);
+    request.setWorkspace(workspace);
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
+    assertThat(exception.getErrorResponse().getMessage())
+        .contains("Provided billing account is closed. Please provide an open account.");
+  }
+
+  @Test
+  public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount_nullIsOpen()
+      throws Exception {
+    final String closedBillingAccountName = "closed-billing-account";
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    final String namespace = workspace.getNamespace();
+    final String firecloudName = workspace.getId();
+
+    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
+    doReturn(new BillingAccount().setName(closedBillingAccountName).setOpen(null))
+        .when(getRequest)
+        .execute();
+    when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName))
+        .thenReturn(getRequest);
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    workspace.setBillingAccountName(closedBillingAccountName);
+    request.setWorkspace(workspace);
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
+    assertThat(exception.getErrorResponse().getMessage())
+        .contains("Provided billing account is closed. Please provide an open account.");
+  }
+
+  @Test
+  public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount()
+      throws Exception {
+    final String openBillingAccountName = "open-billing-account";
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    DbWorkspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            workspace.getNamespace(),
+            workspace.getId(),
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
+    doReturn(new BillingAccount().setOpen(true)).when(getRequest).execute();
+    when(endUserCloudbillingProvider.get().billingAccounts().get(openBillingAccountName))
+        .thenReturn(getRequest);
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    workspace.setBillingAccountName("active-billing-account");
+    workspace.setEtag("\"2\"");
+    request.setWorkspace(workspace);
+    workspacesController.updateWorkspace(workspace.getNamespace(), workspace.getId(), request);
+
+    assertThat(workspaceDao.findOne(dbWorkspace.getWorkspaceId()).getBillingStatus())
+        .isEqualTo(BillingStatus.ACTIVE);
+  }
+
+  @Test
+  public void testUpdateWorkspace_resetBillingOnFailedSave() throws Exception {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    final String originalBillingAccountName = workspace.getBillingAccountName();
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    workspace.setBillingAccountName("update-billing-account");
+    request.setWorkspace(workspace);
 
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
 
     try {
-      workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+      workspacesController
+          .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
+          .getBody();
     } catch (Exception e) {
       ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<ProjectBillingInfo> billingCaptor =
           ArgumentCaptor.forClass(ProjectBillingInfo.class);
       verify(endUserCloudbillingProvider.get().projects(), times(3))
           .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-      assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(2));
+      assertThat("projects/" + workspace.getNamespace())
+          .isEqualTo(projectCaptor.getAllValues().get(2));
       assertThat(new ProjectBillingInfo().setBillingAccountName(originalBillingAccountName))
           .isEqualTo(billingCaptor.getAllValues().get(2));
       return;
@@ -1018,6 +1144,10 @@ public class WorkspacesControllerTest {
     modPurpose.setPopulationDetails(
         ImmutableList.of(
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
+    modPurpose.setDisseminateResearchFindingList(
+        ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
+    modPurpose.setResearchOutcomeList(
+        ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -1066,7 +1196,6 @@ public class WorkspacesControllerTest {
     sortPopulationDetails(clonedWorkspace.getResearchPurpose());
     sortPopulationDetails(retrievedWorkspace.getResearchPurpose());
     sortPopulationDetails(modPurpose);
-
     assertWithMessage("get and clone responses are inconsistent")
         .that(clonedWorkspace)
         .isEqualTo(retrievedWorkspace);
@@ -1075,6 +1204,8 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
+
+    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
@@ -1128,7 +1259,8 @@ public class WorkspacesControllerTest {
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
-    verify(endUserCloudbillingProvider.get()).projects();
+    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
+    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -2430,7 +2562,7 @@ public class WorkspacesControllerTest {
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
     String expectedNotebookName = newNotebookName + NotebooksService.NOTEBOOK_EXTENSION;
@@ -2464,7 +2596,7 @@ public class WorkspacesControllerTest {
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 
@@ -2494,7 +2626,7 @@ public class WorkspacesControllerTest {
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     stubGetWorkspace(
         toWorkspace.getNamespace(),
@@ -2518,7 +2650,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void copyNotebook_noAccessOnSource() {
-    Workspace fromWorkspace = createWorkspace("fromWorkspaceNs", "fromworkspace");
+    Workspace fromWorkspace = testMockFactory.createWorkspace("fromWorkspaceNs", "fromworkspace");
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     stubGetWorkspace(
         fromWorkspace.getNamespace(),
@@ -2527,7 +2659,7 @@ public class WorkspacesControllerTest {
         WorkspaceAccessLevel.NO_ACCESS);
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     stubGetWorkspace(
         toWorkspace.getNamespace(),
@@ -2555,7 +2687,7 @@ public class WorkspacesControllerTest {
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 

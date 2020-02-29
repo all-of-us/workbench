@@ -11,7 +11,16 @@
       "snippet": "library(tidyverse)  # Data wrangling packages.\n\n"
     },
     {
-      "name": "(2) Copy file to or from Workspace Bucket",
+      "name": "(2) List objects in Workspace Bucket",
+      "sub-menu": [
+        {
+          "name": "list_objects_in_bucket.R",
+          "snippet": "# This snippet assumes that you run setup first\n\n# This code lists objects in your Google Bucket\n\n# Get the bucket name\nmy_bucket <- Sys.getenv('WORKSPACE_BUCKET')\n\n# List objects in the bucket\nsystem(paste0(\"gsutil ls \", my_bucket), intern=T)\n\n\n"
+        }
+      ]
+    },
+    {
+      "name": "(3) Copy file to or from Workspace Bucket",
       "sub-menu": [
         {
           "name": "copy_data_to_workspace_bucket.R",

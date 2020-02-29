@@ -16,9 +16,9 @@
       "id": "featuredworkspaceworkingwithallofussurveydatav1",
       "category": "TUTORIAL_WORKSPACES"
     }, {
-      "name": "Working with All of Us Physical Measurements Data v1",
-      "namespace": "aou-rw-274bb61a",
-      "id": "featuredworkspaceworkingwithphysicalmeasurementdatav1",
+      "name": "Working with All of Us Physical Measurements Data v2",
+      "namespace": "aou-rw-53569ac7",
+      "id": "featuredworkspaceworkingwithallofusphysicalmeasurementsdatav2",
       "category": "TUTORIAL_WORKSPACES"
     }, {
       "name": "Versioning notebooks and intermediate results",
@@ -34,6 +34,16 @@
       "name": "Major Depressive Disorders Phenotype",
       "namespace": "aou-rw-edae682b",
       "id": "masterdepressionphenotype",
+      "category": "PHENOTYPE_LIBRARY"
+    }, {
+      "name": "Dementia Phenotype",
+      "namespace": "aou-rw-76176da6",
+      "id": "featuredworkspacedementia",
+      "category": "PHENOTYPE_LIBRARY"
+    }, {
+      "name": "Ischemic Heart Disease Phenotype",
+      "namespace": "aou-rw-ec93e304",
+      "id": "featuredworkspaceischemicheartdisease",
       "category": "PHENOTYPE_LIBRARY"
     }
   ]

@@ -112,8 +112,9 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           </CardButton>
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {notebookList.map(notebook => {
+          {notebookList.map((notebook, index) => {
             return <NotebookResourceCard
+              key={index}
               resource={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
               existingNameList={notebookNameList}
               onUpdate={() => this.loadNotebooks()}

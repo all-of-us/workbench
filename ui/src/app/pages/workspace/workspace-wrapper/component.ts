@@ -16,6 +16,8 @@ import {
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
+const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
+
 @Component({
   styleUrls: ['../../../styles/buttons.css',
     '../../../styles/headers.css'],
@@ -38,7 +40,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
   helpContent = 'data';
-  sidebarOpen = true;
+  sidebarOpen = false;
+  notebookStyles = false;
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -58,14 +61,24 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const sidebarState = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+    if (!!sidebarState) {
+      this.sidebarOpen = sidebarState === 'open';
+    } else {
+      // Default the sidebar to open if no localStorage value is set
+      this.setSidebarState(true);
+    }
     this.tabPath = this.getTabPath();
-    this.setHelpContent();
+    this.setHelpContentAndMaybeSetNotebookStyles();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe(event => {
+        .subscribe(() => {
           this.tabPath = this.getTabPath();
-          this.setHelpContent();
-          this.sidebarOpen = false;
+          this.setHelpContentAndMaybeSetNotebookStyles();
+          // Close sidebar on route change unless navigating between participants in cohort review
+          if (this.helpContent !== 'reviewParticipantDetail') {
+            this.setSidebarState(false);
+          }
         }));
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.displayNavBar = !minimizeChrome;
@@ -198,9 +211,15 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.bugReportOpen = false;
   }
 
-  setHelpContent() {
+  // This function does multiple things so we don't have to have two separate'
+  // where loops on the route.
+  setHelpContentAndMaybeSetNotebookStyles() {
     let child = this.route.firstChild;
     while (child) {
+      if (child.snapshot.data.notebookHelpSidebarStyles) {
+        this.notebookStyles = true;
+      }
+
       if (child.firstChild) {
         child = child.firstChild;
       } else if (child.snapshot.data && child.snapshot.data.helpContent) {
@@ -215,5 +234,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   setSidebarState = (sidebarOpen: boolean) => {
     this.sidebarOpen = sidebarOpen;
+    const sidebarState = sidebarOpen ? 'open' : 'closed';
+    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, sidebarState);
   }
 }

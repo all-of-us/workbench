@@ -13,7 +13,7 @@ services:
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/ui/sa-key.json
     ports:
-      - 4200:4200
+      - 127.0.0.1:4200:4200
   tests:
     build:
       context: ./src/dev/server
@@ -23,4 +23,4 @@ services:
       - ..:/w:cached
     command: yarn test
     ports:
-      - 9876:9876
+      - 127.0.0.1:9876:9876

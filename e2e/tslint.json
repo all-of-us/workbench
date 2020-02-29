@@ -5,8 +5,18 @@
         "tslint-eslint-rules",
         "tslint-config-prettier"
     ],
-    "jsRules": {},
+    "jsRules": {
+        "object-literal-sort-keys": false
+    },
     "rules": {
+        "object-literal-sort-keys": false,
+        "no-duplicate-imports": {
+            "severity": "error",
+            "options": {
+                "allow-namespace-imports": true
+            }
+        },
+        "no-console": false,
         "no-require-imports": false,
         "no-var-requires": false,
         "interface-name": false,
@@ -14,6 +24,7 @@
         "object-literal-sort-keys": false,
         "quotemark": [true, "single", "jsx-double"],
         "ter-indent": [true, 2],
+        "max-classes-per-file": true,
         "max-line-length": [true,
             {
                 "limit": 120,

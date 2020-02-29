@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -266,7 +267,8 @@ public class ConceptsControllerTest {
     ConceptSetService.class,
     ConceptBigQueryService.class,
     Clock.class,
-    DataSetService.class
+    DataSetService.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
     @Bean
@@ -335,41 +337,43 @@ public class ConceptsControllerTest {
 
     DbCriteria parentSurvey =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .ancestorData(false)
-                .attribute(false)
-                .code("c")
-                .conceptId("1")
-                .count("20")
-                .domainId("SURVEY")
-                .group(true)
-                .hierarchy(true)
-                .name("The Basics")
-                .parentId(0L)
-                .selectable(true)
-                .standard(true)
-                .subtype("QUESTION")
-                .type("PPI")
-                .path("0"));
+            DbCriteria.builder()
+                .addAncestorData(false)
+                .addAttribute(false)
+                .addCode("c")
+                .addConceptId("1")
+                .addCount("20")
+                .addDomainId("SURVEY")
+                .addGroup(true)
+                .addHierarchy(true)
+                .addName("The Basics")
+                .addParentId(0L)
+                .addSelectable(true)
+                .addStandard(true)
+                .addSubtype("QUESTION")
+                .addType("PPI")
+                .addPath("0")
+                .build());
 
     cbCriteriaDao.save(
-        new DbCriteria()
-            .ancestorData(false)
-            .attribute(false)
-            .code("c")
-            .conceptId("1")
-            .count("20")
-            .domainId("SURVEY")
-            .group(true)
-            .hierarchy(true)
-            .name("question")
-            .parentId(parentSurvey.getId())
-            .selectable(true)
-            .standard(true)
-            .subtype("QUESTION")
-            .type("PPI")
-            .synonyms("test")
-            .path(parentSurvey.getId() + ".1"));
+        DbCriteria.builder()
+            .addAncestorData(false)
+            .addAttribute(false)
+            .addCode("c")
+            .addConceptId("1")
+            .addCount("20")
+            .addDomainId("SURVEY")
+            .addGroup(true)
+            .addHierarchy(true)
+            .addName("question")
+            .addParentId(parentSurvey.getId())
+            .addSelectable(true)
+            .addStandard(true)
+            .addSubtype("QUESTION")
+            .addType("PPI")
+            .addSynonyms("test")
+            .addPath(parentSurvey.getId() + ".1")
+            .build());
   }
 
   @Test
@@ -418,28 +422,6 @@ public class ConceptsControllerTest {
             toDomainCount(MEASUREMENT_DOMAIN, false),
             toDomainCount(OBSERVATION_DOMAIN, false),
             toDomainCount(PROCEDURE_DOMAIN, false),
-            toDomainCount(SURVEY_DOMAIN, false)));
-  }
-
-  @Test
-  public void testDomainCountSourceAndStandardWithSearchTerm() {
-    saveConcepts();
-    saveDomains();
-    ResponseEntity<DomainCountsListResponse> response =
-        conceptsController.domainCounts(
-            "ns",
-            "name",
-            new DomainCountsRequest()
-                .query("conceptA")
-                .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
-    assertCounts(
-        response,
-        ImmutableList.of(
-            toDomainCount(CONDITION_DOMAIN, 1),
-            toDomainCount(DRUG_DOMAIN, 0),
-            toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(OBSERVATION_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0),
             toDomainCount(SURVEY_DOMAIN, 0)));
   }
 
@@ -487,28 +469,6 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSurveyCountSourceAndStandardWithSearchTerm() {
-    saveConcepts();
-    saveDomains();
-    ResponseEntity<DomainCountsListResponse> response =
-        conceptsController.domainCounts(
-            "ns",
-            "name",
-            new DomainCountsRequest()
-                .query("test")
-                .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
-    assertCounts(
-        response,
-        ImmutableList.of(
-            toDomainCount(CONDITION_DOMAIN, 2),
-            toDomainCount(DRUG_DOMAIN, 0),
-            toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(OBSERVATION_DOMAIN, 1),
-            toDomainCount(PROCEDURE_DOMAIN, 0),
-            toDomainCount(SURVEY_DOMAIN, 1)));
-  }
-
-  @Test
   public void testSurveyCountSourceAndStandardWithSurveyName() {
     saveConcepts();
     saveDomains();
@@ -527,7 +487,7 @@ public class ConceptsControllerTest {
             toDomainCount(MEASUREMENT_DOMAIN, false),
             toDomainCount(OBSERVATION_DOMAIN, false),
             toDomainCount(PROCEDURE_DOMAIN, false),
-            toDomainCount(SURVEY_DOMAIN, 1)));
+            toDomainCount(SURVEY_DOMAIN, 0)));
   }
 
   @Test
@@ -816,6 +776,7 @@ public class ConceptsControllerTest {
     result.setVocabularyId(concept.getVocabularyId());
     result.setDomainId(concept.getDomainId());
     result.setCountValue(concept.getCountValue());
+    result.setSourceCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
     result.setSynonymsStr(
         String.valueOf(concept.getConceptId())

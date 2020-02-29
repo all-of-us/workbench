@@ -2,51 +2,15 @@
 
 # This generates big query count databases cdr that get put in cloudsql for workbench
 
-set -xeuo pipefail
-IFS=$'\n\t'
+set -ex
 
-# get options
-# --project=all-of-us-workbench-test *required
-
-# --cdr=cdr_version ... *optional
-USAGE="./generate-clousql-cdr/make-bq-data.sh --bq-project <PROJECT> --bq-dataset <DATASET> --output-project <PROJECT> --output-dataset <DATASET>"
-USAGE="$USAGE --cdr-version=YYYYMMDD"
-
-while [ $# -gt 0 ]; do
-  echo "1 is $1"
-
-  case "$1" in
-    --bq-project) BQ_PROJECT=$2; shift 2;;
-    --bq-dataset) BQ_DATASET=$2; shift 2;;
-    --output-project) OUTPUT_PROJECT=$2; shift 2;;
-    --output-dataset) OUTPUT_DATASET=$2; shift 2;;
-    --cdr-version) CDR_VERSION=$2; shift 2;;
-    -- ) shift; break ;;
-    * ) break ;;
-  esac
-done
-
-
-if [ -z "${BQ_PROJECT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-if [ -z "${BQ_DATASET}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-if [ -z "${OUTPUT_PROJECT}" ] || [ -z "${OUTPUT_DATASET}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
+export BQ_PROJECT=$1  # project
+export BQ_DATASET=$2  # dataset
+export OUTPUT_PROJECT=$3 # output project
+export OUTPUT_DATASET=$4 # output dataset
 
 # Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
+datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -61,7 +25,7 @@ else
 fi
 
 # Make dataset for cdr cloudsql tables
-datasets=$(bq --project=$OUTPUT_PROJECT ls --max_results=150)
+datasets=$(bq --project=$OUTPUT_PROJECT ls --max_results=1000)
 re=\\b$OUTPUT_DATASET\\b
 if [[ $datasets =~ $re ]]; then
   echo "$OUTPUT_DATASET exists"
@@ -71,7 +35,7 @@ else
 fi
 
 #Check if tables to be copied over exists in bq project dataset
-tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls --max_results=150)
+tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls --max_results=1000)
 cb_cri_table_check=\\bcb_criteria\\b
 cb_cri_attr_table_check=\\bcb_criteria_attribute\\b
 cb_cri_rel_table_check=\\bcb_criteria_relationship\\b
@@ -79,7 +43,7 @@ cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(concept concept_relationship cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor domain_info survey_module domain vocabulary concept_synonym)
+create_tables=(concept concept_relationship cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor domain_info survey_module domain vocabulary concept_synonym cb_person)
 
 for t in "${create_tables[@]}"
 do
@@ -118,6 +82,14 @@ VALUES
 (43529712,'Personal Medical History','This survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
 (43528895,'Healthcare Access & Utilization','Survey includes information about a participants access to and use of health care.',0,0,5),
 (43528698,'Family History','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6)"
+
+# Populate cb_person table
+echo "Inserting cb_person"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_person\`
+(person_id, dob, age_at_consent, age_at_cdr)
+SELECT person_id, dob, age_at_consent, age_at_cdr
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`"
 
 # Populate some tables from cdr data
 ###############
@@ -443,7 +415,7 @@ where d.domain_id = c.domain_id"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
-(SELECT count(distinct concept_id) as all_concept_count, SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count
+(SELECT count(distinct concept_id) as all_concept_count, SUM(CASE WHEN standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE vocabulary_id = 'PPI'
 AND domain_id = 'Measurement'

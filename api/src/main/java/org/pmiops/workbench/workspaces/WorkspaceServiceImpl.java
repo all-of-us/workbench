@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -43,6 +44,8 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusAndDataAccessLevelToCountResult;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -69,7 +72,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -102,6 +105,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
   private final ManualWorkspaceMapper manualWorkspaceMapper;
+  private final FreeTierBillingService freeTierBillingService;
 
   private FireCloudService fireCloudService;
   private Clock clock;
@@ -121,7 +125,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
-      ManualWorkspaceMapper manualWorkspaceMapper) {
+      ManualWorkspaceMapper manualWorkspaceMapper,
+      FreeTierBillingService freeTierBillingService) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
@@ -135,6 +140,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.manualWorkspaceMapper = manualWorkspaceMapper;
+    this.freeTierBillingService = freeTierBillingService;
   }
 
   /**
@@ -200,16 +206,30 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Transactional
   @Override
+  public WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException {
+    DbWorkspace dbWorkspace =
+        getByNamespace(workspaceNamespace)
+            .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
+    return getWorkspaceImpl(dbWorkspace);
+  }
+
+  @Transactional
+  @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+    return getWorkspaceImpl(dbWorkspace);
+  }
 
+  private WorkspaceResponse getWorkspaceImpl(DbWorkspace dbWorkspace) {
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspace fcWorkspace;
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.
-    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    fcResponse =
+        fireCloudService.getWorkspace(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     fcWorkspace = fcResponse.getWorkspace();
 
     if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
@@ -276,6 +296,21 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;
+  }
+
+  @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+    // This deletes all Firecloud and google resources, however saves all references
+    // to the workspace and its resources in the Workbench database.
+    // This is for auditing purposes and potentially workspace restore.
+    // TODO: do we want to delete workspace resource references and save only metadata?
+
+    // This automatically handles access control to the workspace.
+    fireCloudService.deleteWorkspace(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    dbWorkspace = saveWithLastModified(dbWorkspace);
+    maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
   }
 
   @Override
@@ -694,6 +729,18 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       cloudbilling = serviceAccountCloudbillingProvider.get();
     } else {
       cloudbilling = endUserCloudbillingProvider.get();
+      try {
+        Optional<Boolean> isOpenMaybe =
+            Optional.ofNullable(
+                cloudbilling.billingAccounts().get(newBillingAccountName).execute().getOpen());
+        boolean isOpen = isOpenMaybe.orElse(false);
+        if (!isOpen) {
+          throw new BadRequestException(
+              "Provided billing account is closed. Please provide an open account.");
+        }
+      } catch (IOException e) {
+        throw new ServerErrorException("Could not fetch user provided billing account.", e);
+      }
     }
 
     UpdateBillingInfo request;
@@ -705,39 +752,56 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                   "projects/" + workspace.getWorkspaceNamespace(),
                   new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
     } catch (IOException e) {
-      throw new RuntimeException("Could not create Google Cloud updateBillingInfo request", e);
+      throw new ServerErrorException("Could not create Google Cloud updateBillingInfo request", e);
     }
 
     ProjectBillingInfo response;
     try {
       response = cloudBillingRetryer.call(request::execute);
     } catch (RetryException | ExecutionException e) {
-      throw new RuntimeException("Google Cloud updateBillingInfo call failed", e);
+      throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
     }
 
     if (!newBillingAccountName.equals(response.getBillingAccountName())) {
-      throw new RuntimeException(
+      throw new ServerErrorException(
           "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
     }
 
     workspace.setBillingAccountName(response.getBillingAccountName());
+
+    if (newBillingAccountName.equals(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
+      workspace.setBillingStatus(
+          freeTierBillingService.userHasFreeTierCredits(workspace.getCreator())
+              ? BillingStatus.ACTIVE
+              : BillingStatus.INACTIVE);
+    } else {
+      // At this point, we can assume that a user provided billing account is open since we
+      // throw a BadRequestException if a closed one is provided
+      workspace.setBillingStatus(BillingStatus.ACTIVE);
+    }
   }
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
 
-    // TODO(jaycarlton): fetch both active status and data access level crossed counts
-    final Map<WorkspaceActiveStatus, Long> activeStatusToCount =
-        workspaceDao.getActiveStatusToCountMap();
-    for (WorkspaceActiveStatus status : WorkspaceActiveStatus.values()) {
-      final long count = activeStatusToCount.getOrDefault(status, 0L);
-      resultBuilder.add(
-          MeasurementBundle.builder()
-              .addMeasurement(GaugeMetric.WORKSPACE_COUNT, count)
-              .addTag(MetricLabel.WORKSPACE_ACTIVE_STATUS, status.toString())
-              .build());
-    }
-    return resultBuilder.build();
+    final List<ActiveStatusAndDataAccessLevelToCountResult> rows =
+        workspaceDao.getActiveStatusAndDataAccessLevelToCount();
+    return rows.stream()
+        .map(
+            row ->
+                MeasurementBundle.builder()
+                    .addTag(
+                        MetricLabel.WORKSPACE_ACTIVE_STATUS,
+                        DbStorageEnums.workspaceActiveStatusFromStorage(
+                                row.getWorkspaceActiveStatus())
+                            .toString())
+                    .addTag(
+                        MetricLabel.DATA_ACCESS_LEVEL,
+                        CommonStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                            .toString())
+                    .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
+                    .build())
+        .collect(ImmutableList.toImmutableList());
   }
 }

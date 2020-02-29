@@ -1,45 +1,110 @@
-import GoogleLoginPage from '../../pages/google-login';
-import Home from '../../pages/home';
-import PuppeteerLaunch from '../../services/puppeteer-launch';
+import DataPage from '../../app/data-page';
+import Home from '../../app/home';
+import WorkspacePage from '../../app/workspace-page';
+import { getCursorValue } from '../../driver/elementHandle-util'
 
-jest.setTimeout(60 * 1000);
+const Chrome = require('../../driver/ChromeDriver');
+const faker = require('faker/locale/en_US');
 
-const configs = require('../../config/config');
+jest.setTimeout(300000);
 
-describe.skip('Workspace creation tests:', () => {
+describe('Workspace create:', () => {
 
-  let browser;
-  let incognitoContext;
   let page;
 
-  beforeAll(async () =>  {
-    browser = await PuppeteerLaunch();
-  });
-
   beforeEach(async () => {
-    incognitoContext = await browser.createIncognitoBrowserContext();
-    page = await incognitoContext.newPage();
-    await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(60000);
+    page = await Chrome.setup();
   });
 
   afterEach(async () => {
-    await incognitoContext.close();
+    await Chrome.teardown();
   });
 
-  afterAll(async () => {
-    await browser.close();
-  });
-
-  test('Create a new workspace from the Home page', async () => {
-    const loginPage = new GoogleLoginPage(page);
-    await loginPage.login();
+  test('Create new workspace with default values', async () => {
 
     const home = new Home(page);
     const link = await home.getCreateNewWorkspaceLink();
     await link.click();
 
-    // TODO
-  });
+    const workspace = new WorkspacePage(page);
+    await workspace.waitUntilPageReady();
+
+    // wait for auto-selected value in Select billing account
+    await page.waitForXPath('//label[contains(normalize-space(text()),"Use All of Us free credits")]', {visible: true});
+
+    // CREATE WORKSPACE button should be disabled
+    const createButton = await workspace.createWorkspaceButton();
+    let cursor = await getCursorValue(page, createButton);
+    expect(cursor).toEqual('not-allowed');
+
+    const workspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
+    await (await workspace.inputTextWorkspaceName()).type(workspaceName);
+    await (await workspace.inputTextWorkspaceName()).press('Tab', { delay: 100 }); // tab out
+
+    // CREATE WORKSPACE button should be disabled
+    cursor = await getCursorValue(page, createButton);
+    expect(cursor).toEqual('not-allowed');
+
+    // Enter value in 'Disease-focused research'
+    const diseaseName = workspace.diseaseName();
+    await (await diseaseName.label()).click(); // click on text to set toggle checkbox
+    await (await diseaseName.textfield()).type('diabetes');
+    await (await diseaseName.textfield()).press('Tab');
+
+    // CREATE WORKSPACE button should be disabled
+    cursor = await getCursorValue(page, createButton);
+    expect(cursor).toEqual('not-allowed');
+
+    const drugTherapeuticsDevelopment = workspace.question1DrugTherapeuticsDevelopment();
+    await (await drugTherapeuticsDevelopment.label()).click();
+
+    // CREATE WORKSPACE button should be disabled
+    cursor = await getCursorValue(page, createButton);
+    expect(cursor).toEqual('not-allowed');
+
+    const words = faker.lorem.word();
+    const q2 = await workspace.question2ScientificReason();
+    await q2.type(words);
+
+    // CREATE WORKSPACE button should be disabled
+    cursor = await getCursorValue(page, createButton);
+    expect(cursor).toEqual('not-allowed');
+
+    const q3 = await workspace.question3ScienficQuestionsToStudy();
+    await q3.type(words);
+
+    // CREATE WORKSPACE button should be disabled
+    cursor = await getCursorValue(page, createButton);
+    expect(cursor).toEqual('not-allowed');
+
+    const q4 = await workspace.question4AnticipatedFindingsFromStudy();
+    await q4.type(words);
+
+    // Leave all other questions/fields unchanged
+
+    // CREATE WORKSPACE button is enabled ONLY after all required fields are set
+    await createButton.focus(); // bring into viewport
+    await createButton.hover();
+
+    cursor = await getCursorValue(page, createButton);
+    expect(cursor).toEqual('pointer');
+
+    await createButton.click();
+    await (new DataPage(page)).waitUntilPageReady();
+  }, 2 * 60 * 1000);
+
+  // unfinished
+  test.skip('Create new workspace with explicit values', async () => {
+    const home = new Home(page);
+    const link = await home.getCreateNewWorkspaceLink();
+    await link.click();
+
+    const workspace = new WorkspacePage(page);
+    const workspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
+    await (await workspace.inputTextWorkspaceName()).type(workspaceName);
+    await (await workspace.select_dataSet()).select('2');
+    await page.waitFor(30000);
+
+  }, 2 * 60 * 1000);
 
 });

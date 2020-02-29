@@ -92,7 +92,7 @@ interface SideNavItemState {
   subItemsOpen: boolean;
 }
 
-class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
+export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -144,7 +144,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
       style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
       onClick={() => {
-        if (this.props.parentOnClick) {
+        if (this.props.parentOnClick && !this.props.disabled) {
           this.props.parentOnClick();
         }
         this.onClick();
@@ -200,6 +200,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
 export interface SideNavProps {
   profile: Profile;
   bannerAdminActive: boolean;
+  workspaceAdminActive: boolean;
   homeActive: boolean;
   libraryActive: boolean;
   onToggleSideNav: Function;
@@ -210,10 +211,8 @@ export interface SideNavProps {
 
 export interface SideNavState {
   showAdminOptions: boolean;
-  showHelpOptions: boolean;
   showUserOptions: boolean;
   adminRef: React.RefObject<SideNavItem>;
-  helpRef: React.RefObject<SideNavItem>;
   userRef: React.RefObject<SideNavItem>;
 }
 
@@ -222,29 +221,17 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     super(props);
     this.state = {
       showAdminOptions: false,
-      showHelpOptions: false,
       showUserOptions: false,
       adminRef: React.createRef(),
-      helpRef: React.createRef(),
       userRef: React.createRef(),
     };
   }
 
   onToggleUser() {
-    this.setState({showHelpOptions: false});
-    this.state.helpRef.current.closeSubItems();
     this.setState(previousState => ({showUserOptions: !previousState.showUserOptions}));
   }
 
-  onToggleHelp() {
-    this.setState({showUserOptions: false});
-    this.state.userRef.current.closeSubItems();
-    this.setState(previousState => ({showHelpOptions: !previousState.showHelpOptions}));
-  }
-
   onToggleAdmin() {
-    this.setState({showAdminOptions: false});
-    this.state.adminRef.current.closeSubItems();
     this.setState(previousState => ({showAdminOptions: !previousState.showAdminOptions}));
   }
 
@@ -313,32 +300,25 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={'/library'}
         active={this.props.libraryActive}
+        disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
       />
       <SideNavItem
         icon='help'
-        content='User Support'
-        parentOnClick={() => this.onToggleHelp()}
+        content={'User Support'}
         onToggleSideNav={() => this.props.onToggleSideNav()}
-        containsSubItems={true}
-        ref={this.state.helpRef}
+        parentOnClick={() => this.redirectToZendesk()}
+        disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
+      />
+      <SideNavItem
+        icon='envelope'
+        content={'Contact Us'}
+        onToggleSideNav={() => this.props.onToggleSideNav()}
+        parentOnClick={() => this.openContactWidget()}
       />
       {
-        this.state.showHelpOptions && <SideNavItem
-          content={'User Forum'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
-          parentOnClick={() => this.redirectToZendesk()}
-        />
-      }
-      {
-        this.state.showHelpOptions && <SideNavItem
-          content={'Contact Us'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
-          parentOnClick={() => this.openContactWidget()}
-        />
-      }
-      {
         (profile.authorities.includes(Authority.ACCESSCONTROLADMIN)
-          || profile.authorities.includes(Authority.COMMUNICATIONSADMIN)) && <SideNavItem
+          || profile.authorities.includes(Authority.COMMUNICATIONSADMIN)
+          || profile.authorities.includes(Authority.WORKSPACESVIEW)) && <SideNavItem
                 icon='user'
                 content='Admin'
                 parentOnClick={() => this.onToggleAdmin()}
@@ -350,7 +330,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
           content={'User Admin'}
-          onToggleSideNav={() => this.props.onToggleSideNav}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
           href={'/admin/user'}
           active={this.props.userAdminActive}
         />
@@ -358,9 +338,17 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         profile.authorities.includes(Authority.COMMUNICATIONSADMIN) && this.state.showAdminOptions && <SideNavItem
             content={'Service Banners'}
-            onToggleSideNav={() => this.props.onToggleSideNav}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/banner'}
             active={this.props.bannerAdminActive}
+        />
+      }
+      {
+        profile.authorities.includes(Authority.WORKSPACESVIEW) && this.state.showAdminOptions && <SideNavItem
+            content={'Workspaces'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href={'admin/workspaces'}
+            active={this.props.workspaceAdminActive}
         />
       }
     </div>;

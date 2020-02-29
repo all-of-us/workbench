@@ -175,7 +175,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       try {
         this.setState({editSaving: true});
         await conceptSetsApi().updateConceptSet(ns, wsid, csid,
-          {...conceptSet, name: editName, description: editDescription});
+          {...conceptSet, name: editName, description: editDescription, concepts: null});
         await this.getConceptSet();
       } catch (error) {
         console.log(error);
@@ -324,7 +324,8 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                           reactKey={conceptSet.domain.toString()}
                           onSelectConcepts={this.onSelectConcepts.bind(this)}
                           placeholderValue={'No Concepts Found'}
-                          selectedConcepts={selectedConcepts}/> :
+                          selectedConcepts={selectedConcepts}
+                          error={false}/> :
             <Button type='secondaryLight' data-test-id='add-concepts'
                     style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
                     onClick={() => navigateByUrl('workspaces/' + ns + '/' +

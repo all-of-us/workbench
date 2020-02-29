@@ -260,6 +260,20 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaAttributeListResponse"
 
+  /v1/cohortbuilder/{cdrVersionId}/age/counts:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Return counts for age type and age
+      operationId: "findAgeTypeCounts"
+      responses:
+        200:
+          description: A collection age type counts
+          schema:
+            $ref: "#/definitions/AgeTypeCountListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/search:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -322,6 +336,34 @@ paths:
             $ref: "#/definitions/ParticipantDemographics"
 
 definitions:
+
+  AgeTypeCountListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/AgeTypeCount"
+
+  AgeTypeCount:
+    type: object
+    required:
+      - ageType
+      - age
+      - count
+    properties:
+      ageType:
+        description: type of age
+        type: string
+      age:
+        description: age
+        type: integer
+      count:
+        description: count
+        type: integer
+        format: int64
 
   CriteriaListResponse:
     type: object
@@ -459,6 +501,7 @@ definitions:
         description: Reveals if this criteria is standard or source.
         type: boolean
         default: false
+
   CriteriaMenuOption:
     type: object
     required:
@@ -619,6 +662,9 @@ definitions:
     properties:
       id:
         description: Unique within the cohort definition
+        type: string
+      name:
+        description: optional custom name set by user
         type: string
       type:
         description: type of criteria
@@ -857,7 +903,7 @@ definitions:
   AttrName:
     type: string
     description: Name that descibes the type of attribute
-    enum: [ANY, NUM, CAT, AGE]
+    enum: [ANY, NUM, CAT, AGE, AGE_AT_CONSENT, AGE_AT_CDR]
 
   DemoChartInfoListResponse:
     type: object

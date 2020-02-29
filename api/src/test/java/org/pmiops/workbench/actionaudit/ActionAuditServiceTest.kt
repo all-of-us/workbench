@@ -1,20 +1,17 @@
 package org.pmiops.workbench.actionaudit
 
-import com.google.common.truth.Truth.assertThat
-
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Logging
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Payload.Type
 import com.google.common.collect.ImmutableList
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import java.util.Arrays
-import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,6 +19,8 @@ import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.Arrays
+import javax.inject.Provider
 
 @RunWith(SpringRunner::class)
 class ActionAuditServiceTest {
@@ -34,14 +33,14 @@ class ActionAuditServiceTest {
     @Before
     fun setUp() {
         val actionAuditConfig = ActionAuditConfig()
-            .apply { logName = "log_path_1" }
+                .apply { logName = "log_path_1" }
 
         val serverConfig = ServerConfig()
-            .apply { projectId = "gcp-project-id" }
+                .apply { projectId = "gcp-project-id" }
 
         val workbenchConfig = WorkbenchConfig()
-            .apply { actionAudit = actionAuditConfig }
-            .apply { server = serverConfig }
+                .apply { actionAudit = actionAuditConfig }
+                .apply { server = serverConfig }
         whenever(mockConfigProvider.get()).thenReturn(workbenchConfig)
 
         actionAuditService = ActionAuditServiceImpl(mockConfigProvider, mockLogging)
@@ -125,7 +124,7 @@ class ActionAuditServiceTest {
                 targetType = TargetType.DATASET,
                 targetIdMaybe = 1L,
                 agentType = AgentType.USER,
-                agentId = AGENT_ID_1,
+                agentIdMaybe = AGENT_ID_1,
                 actionId = ACTION_ID,
                 actionType = ActionType.EDIT,
                 targetPropertyMaybe = "foot",
@@ -138,7 +137,7 @@ class ActionAuditServiceTest {
                 targetType = TargetType.DATASET,
                 targetIdMaybe = 2L,
                 agentType = AgentType.USER,
-                agentId = AGENT_ID_2,
+                agentIdMaybe = AGENT_ID_2,
                 actionId = ACTION_ID,
                 actionType = ActionType.EDIT,
                 targetPropertyMaybe = "height",

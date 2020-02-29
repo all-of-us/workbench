@@ -1,7 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,10 +25,14 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionMapperImpl;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -60,22 +66,22 @@ public class UserServiceTest {
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 
-  @Autowired private FireCloudService mockFireCloudService;
-  @Autowired private ComplianceService mockComplianceService;
-  @Autowired private DirectoryService mockDirectoryService;
-  @Autowired private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private ComplianceService mockComplianceService;
+  @MockBean private DirectoryService mockDirectoryService;
+  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private AdminActionHistoryDao mockAdminActionHistoryDao;
+  @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
 
   @TestConfiguration
-  @Import({UserServiceImpl.class})
-  @MockBean({
-    AdminActionHistoryDao.class,
-    FireCloudService.class,
-    ComplianceService.class,
-    DirectoryService.class,
-    UserServiceAuditor.class
+  @Import({
+    UserServiceImpl.class,
+    InstitutionServiceImpl.class,
+    InstitutionMapperImpl.class,
+    PublicInstitutionDetailsMapperImpl.class
   })
   static class Configuration {
     @Bean
@@ -450,5 +456,13 @@ public class UserServiceTest {
   private Optional<Instant> nullableTimestampToOptionalInstant(
       @Nullable Timestamp complianceTrainingBypassTime) {
     return Optional.ofNullable(complianceTrainingBypassTime).map(Timestamp::toInstant);
+  }
+
+  @Test
+  public void testSubmitTermsOfService() {
+    userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
+
+    verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
+    verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
   }
 }

@@ -27,7 +27,7 @@ public class ActionAuditEventTest {
             .agentType(AgentType.USER)
             .actionId(ACTION_ID)
             .actionType(ActionType.EDIT)
-            .agentId(USER_ID)
+            .agentIdMaybe(USER_ID)
             .agentEmailMaybe(USER_EMAIL)
             .targetType(TargetType.COHORT)
             .targetPropertyMaybe(TARGET_PROPERTY)
@@ -37,7 +37,7 @@ public class ActionAuditEventTest {
     assertThat(event.getAgentType()).isEqualTo(AgentType.USER);
     assertThat(event.getActionId()).isEqualTo(ACTION_ID);
     assertThat(event.getActionType()).isEqualTo(ActionType.EDIT);
-    assertThat(event.getAgentId()).isEqualTo(USER_ID);
+    assertThat(event.getAgentIdMaybe()).isEqualTo(USER_ID);
     assertThat(event.getAgentEmailMaybe()).isEqualTo(USER_EMAIL);
     assertThat(event.getTargetType()).isEqualTo(TargetType.COHORT);
     assertThat(event.getTargetPropertyMaybe()).isEqualTo(TARGET_PROPERTY);

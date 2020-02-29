@@ -1,13 +1,12 @@
-import * as chromePaths from 'chrome-paths';
-import * as Puppeteer from 'puppeteer-core';
-import {Browser} from 'puppeteer-core';
+import * as Puppeteer from 'puppeteer';
+import {Browser} from 'puppeteer';
 
 const defaultLaunchOpts = {
-  headless: true,
+  headless: !!process.env.PUPPETEER_HEADLESS,
   slowMo: 10,
-  executablePath: chromePaths.chrome,
   defaultViewport: null,
   devtools: false,
+  ignoreDefaultArgs: ['--disable-extensions'],
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',

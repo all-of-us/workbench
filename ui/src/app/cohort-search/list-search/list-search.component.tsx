@@ -176,7 +176,7 @@ export const ListSearch = withCurrentWorkspace()(
 
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
-      if (key === Key.Enter) {
+      if (key === Key.Enter && value !== '') {
         const {wizard: {domain}} = this.props;
         triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
         this.getResults(value);

@@ -1,7 +1,5 @@
 package org.pmiops.workbench.actionaudit.auditors
 
-import java.time.Clock
-import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
@@ -14,6 +12,8 @@ import org.pmiops.workbench.model.Profile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import java.time.Clock
+import javax.inject.Provider
 
 @Service
 class ProfileAuditorImpl @Autowired
@@ -33,17 +33,17 @@ constructor(
         val createEvents = propertiesByName.entries
                 .map {
                     ActionAuditEvent(
-                        timestamp = clock.millis(),
-                        actionId = actionId,
-                        actionType = ActionType.CREATE,
-                        agentType = AgentType.USER,
-                        agentId = createdProfile.userId,
-                        agentEmailMaybe = createdProfile.contactEmail,
-                        targetType = TargetType.PROFILE,
-                        targetIdMaybe = createdProfile.userId,
-                        targetPropertyMaybe = it.key,
-                        previousValueMaybe = null,
-                        newValueMaybe = it.value)
+                            timestamp = clock.millis(),
+                            actionId = actionId,
+                            actionType = ActionType.CREATE,
+                            agentType = AgentType.USER,
+                            agentIdMaybe = createdProfile.userId,
+                            agentEmailMaybe = createdProfile.contactEmail,
+                            targetType = TargetType.PROFILE,
+                            targetIdMaybe = createdProfile.userId,
+                            targetPropertyMaybe = it.key,
+                            previousValueMaybe = null,
+                            newValueMaybe = it.value)
                 }
         actionAuditService.send(createEvents)
     }
@@ -61,7 +61,7 @@ constructor(
                             actionId = actionIdProvider.get(),
                             actionType = ActionType.EDIT,
                             agentType = AgentType.USER,
-                            agentId = userProvider.get().userId,
+                            agentIdMaybe = userProvider.get().userId,
                             agentEmailMaybe = userProvider.get().username,
                             targetType = TargetType.PROFILE,
                             targetIdMaybe = userProvider.get().userId,
@@ -80,7 +80,7 @@ constructor(
                 actionId = actionIdProvider.get(),
                 actionType = ActionType.DELETE,
                 agentType = AgentType.USER,
-                agentId = userId,
+                agentIdMaybe = userId,
                 agentEmailMaybe = userEmail,
                 targetType = TargetType.PROFILE,
                 targetIdMaybe = userId,
@@ -96,7 +96,7 @@ constructor(
                 actionId = actionIdProvider.get(),
                 actionType = ActionType.LOGIN,
                 agentType = AgentType.USER,
-                agentId = dbUser.userId,
+                agentIdMaybe = dbUser.userId,
                 agentEmailMaybe = dbUser.username,
                 targetType = TargetType.WORKBENCH,
                 targetIdMaybe = null,

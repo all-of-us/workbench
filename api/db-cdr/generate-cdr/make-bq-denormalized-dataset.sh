@@ -2,38 +2,10 @@
 
 # This generates the big query de-normalized tables for dataset builder.
 
-set -xeuo pipefail
-IFS=$'\n\t'
+set -ex
 
-
-# get options
-
-# --cdr=cdr_version ... *optional
-USAGE="./generate-clousql-cdr/make-bq-denormalized-dataset.sh --bq-project <PROJECT> --bq-dataset <DATASET>"
-
-while [ $# -gt 0 ]; do
-  echo "1 is $1"
-  case "$1" in
-    --bq-project) BQ_PROJECT=$2; shift 2;;
-    --bq-dataset) BQ_DATASET=$2; shift 2;;
-    -- ) shift; break ;;
-    * ) break ;;
-  esac
-done
-
-
-if [ -z "${BQ_PROJECT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-if [ -z "${BQ_DATASET}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
+export BQ_PROJECT=$1  # project
+export BQ_DATASET=$2  # dataset
 
 # Check that bq_dataset exists and exit if not
 datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
@@ -48,7 +20,6 @@ else
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
   exit 1
 fi
-
 
 ################################################
 # CREATE TABLES

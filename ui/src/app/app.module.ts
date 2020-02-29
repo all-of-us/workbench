@@ -25,9 +25,11 @@ import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
+import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
+import {CookiePolicyComponent} from './pages/cookie-policy';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {CreateReviewModalComponent} from './pages/data/cohort-review/create-review-modal';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -69,6 +71,7 @@ import {
 } from 'notebooks-generated';
 
 import {TextModalComponent} from 'app/components/text-modal';
+import {AdminWorkspaceSearchComponent} from 'app/pages/admin/admin-workspace-search';
 import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-notebook';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
@@ -127,6 +130,8 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AdminBannerComponent,
+    AdminWorkspaceComponent,
+    AdminWorkspaceSearchComponent,
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
     AppComponent,
@@ -136,6 +141,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
+    CookiePolicyComponent,
     CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,

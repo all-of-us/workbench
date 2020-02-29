@@ -24,6 +24,8 @@ import javax.persistence.Version;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
@@ -101,6 +103,7 @@ public class DbWorkspace {
   private Set<Short> populationDetailsSet = new HashSet<>();
   private boolean socialBehavioral;
   private boolean populationHealth;
+  private boolean ethics;
   private boolean educational;
   private boolean drugDevelopment;
   private boolean otherPurpose;
@@ -110,6 +113,11 @@ public class DbWorkspace {
   private String reasonForAllOfUs;
   private String intendedStudy;
   private String anticipatedFindings;
+  private String scientificApproach;
+
+  private Set<Short> disseminateResearchSet = new HashSet<Short>();
+  private String disseminateResearchOther;
+  private Set<Short> researchOutcomeSet = new HashSet<>();
 
   private Boolean reviewRequested;
   private Boolean approved;
@@ -317,6 +325,15 @@ public class DbWorkspace {
     this.populationHealth = populationHealth;
   }
 
+  @Column(name = "rp_ethics")
+  public boolean getEthics() {
+    return ethics;
+  }
+
+  public void setEthics(boolean ethics) {
+    this.ethics = ethics;
+  }
+
   @Column(name = "rp_educational")
   public boolean getEducational() {
     return this.educational;
@@ -391,6 +408,78 @@ public class DbWorkspace {
             .collect(Collectors.toSet()));
   }
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "workspace_disseminate_research",
+      joinColumns = @JoinColumn(name = "workspace_id"))
+  @Column(name = "disseminate")
+  public Set<Short> getDisseminateResearchSet() {
+    return disseminateResearchSet;
+  }
+
+  public void setDisseminateResearchSet(Set<Short> disseminateResearchSet) {
+    this.disseminateResearchSet = disseminateResearchSet;
+  }
+
+  @Transient
+  public Set<DisseminateResearchEnum> getDisseminateResearchEnumSet() {
+    Set<Short> from = getDisseminateResearchSet();
+    if (from == null) {
+      return new HashSet<DisseminateResearchEnum>();
+    }
+    return from.stream()
+        .map(DbStorageEnums::disseminateResearchEnumFromStorage)
+        .collect(Collectors.toSet());
+  }
+
+  public void setDisseminateResearchEnumSet(
+      Set<DisseminateResearchEnum> disseminateResearchEnumEnum) {
+    setDisseminateResearchSet(
+        disseminateResearchEnumEnum.stream()
+            .map(DbStorageEnums::disseminateResearchToStorage)
+            .collect(Collectors.toSet()));
+  }
+
+  @Column(name = "disseminate_research_other")
+  public String getDisseminateResearchOther() {
+    return disseminateResearchOther;
+  }
+
+  public void setDisseminateResearchOther(String disseminateResearchOther) {
+    this.disseminateResearchOther = disseminateResearchOther;
+  }
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "workspace_research_outcomes",
+      joinColumns = @JoinColumn(name = "workspace_id"))
+  @Column(name = "research_outcome")
+  public Set<Short> getResearchOutcomeSet() {
+    return researchOutcomeSet;
+  }
+
+  public void setResearchOutcomeSet(Set<Short> researchOutcomeSet) {
+    this.researchOutcomeSet = researchOutcomeSet;
+  }
+
+  @Transient
+  public Set<ResearchOutcomeEnum> getResearchOutcomeEnumSet() {
+    Set<Short> from = getResearchOutcomeSet();
+    if (from == null) {
+      return new HashSet<ResearchOutcomeEnum>();
+    }
+    return from.stream()
+        .map(DbStorageEnums::researchOutcomeEnumFromStorage)
+        .collect(Collectors.toSet());
+  }
+
+  public void setResearchOutcomeEnumSet(Set<ResearchOutcomeEnum> researchOutcomeEnum) {
+    setResearchOutcomeSet(
+        researchOutcomeEnum.stream()
+            .map(DbStorageEnums::researchOutcomeToStorage)
+            .collect(Collectors.toSet()));
+  }
+
   @Column(name = "rp_other_population_details")
   public String getOtherPopulationDetails() {
     return this.otherPopulationDetails;
@@ -434,6 +523,15 @@ public class DbWorkspace {
 
   public void setAnticipatedFindings(String anticipatedFindings) {
     this.anticipatedFindings = anticipatedFindings;
+  }
+
+  @Column(name = "rp_scientific_approach")
+  public String getScientificApproach() {
+    return scientificApproach;
+  }
+
+  public void setScientificApproach(String scientificApproach) {
+    this.scientificApproach = scientificApproach;
   }
 
   @Column(name = "rp_review_requested")

@@ -3,14 +3,16 @@ package org.pmiops.workbench.cdr.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
@@ -27,9 +29,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ConceptDaoTest {
 
   @Autowired ConceptDao conceptDao;
+  @Autowired CBCriteriaDao cbCriteriaDao;
   private DbConcept concept1;
   private DbConcept concept2;
   private DbConcept physicalMeasurement;
+  private DbConcept surveyConcept;
 
   @Before
   public void setUp() {
@@ -82,12 +86,74 @@ public class ConceptDaoTest {
                 .prevalence(0.0F)
                 .sourceCountValue(2400L)
                 .synonyms(ImmutableList.of("020202", "Height")));
+
+    surveyConcept =
+        conceptDao.save(
+            new DbConcept()
+                .conceptId(4L)
+                .domainId(CommonStorageEnums.domainToDomainId(Domain.OBSERVATION))
+                .conceptName("survey")
+                .vocabularyId(CriteriaType.PPI.toString())
+                .conceptClassId("Question")
+                .conceptCode("Income_AnnualIncome")
+                .standardConcept("")
+                .count(200L)
+                .prevalence(0.0F)
+                .sourceCountValue(200L)
+                .synonyms(ImmutableList.of("4", "question")));
+
+    DbCriteria surveyCriteria =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(DomainType.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addGroup(true)
+                .addStandard(false)
+                .addSelectable(true)
+                .addName("The Basics")
+                .build());
+
+    DbCriteria questionCriteria =
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(DomainType.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.QUESTION.toString())
+                .addGroup(true)
+                .addStandard(false)
+                .addSelectable(true)
+                .addParentId(surveyCriteria.getId())
+                .addConceptId("4")
+                .addSynonyms("test")
+                .addPath(surveyCriteria.getId() + ".1")
+                .build());
+
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(DomainType.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.ANSWER.toString())
+            .addGroup(false)
+            .addStandard(false)
+            .addSelectable(true)
+            .addParentId(questionCriteria.getId())
+            .addConceptId("4")
+            .addSynonyms("test")
+            .addPath(questionCriteria.getPath() + ".1")
+            .build());
+  }
+
+  @Test
+  public void findAllEmptyResult() {
+    Iterable concepts = conceptDao.findAll(ImmutableList.of(9999L, 8888L));
+    assertThat(concepts).isEmpty();
   }
 
   @Test
   public void findAll() {
-    List<DbConcept> concepts = (List<DbConcept>) conceptDao.findAll();
-    assertThat(concepts).containsExactly(concept1, concept2, physicalMeasurement);
+    Iterable concepts = conceptDao.findAll();
+    assertThat(concepts).containsExactly(concept1, concept2, physicalMeasurement, surveyConcept);
   }
 
   @Test
@@ -161,5 +227,16 @@ public class ConceptDaoTest {
         .containsExactly(
             physicalMeasurement.domainId(
                 CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
+  }
+
+  @Test
+  public void countSurveyByName() {
+    assertThat(conceptDao.countSurveyByName("The Basics")).isEqualTo(1);
+  }
+
+  @Test
+  public void findSurveysByName() {
+    PageRequest page = new PageRequest(0, 10);
+    assertThat(conceptDao.findSurveys(null, "The Basics", page)).containsExactly(surveyConcept);
   }
 }

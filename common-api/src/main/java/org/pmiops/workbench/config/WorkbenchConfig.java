@@ -19,6 +19,7 @@ public class WorkbenchConfig {
   public MandrillConfig mandrill;
   public ElasticsearchConfig elasticsearch;
   public MoodleConfig moodle;
+  public ZendeskConfig zendesk;
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
@@ -42,6 +43,7 @@ public class WorkbenchConfig {
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
     config.moodle = new MoodleConfig();
+    config.zendesk = new ZendeskConfig();
     config.server = new ServerConfig();
     config.billing = new BillingConfig();
     config.actionAudit = new ActionAuditConfig();
@@ -85,12 +87,8 @@ public class WorkbenchConfig {
     @Deprecated public Double defaultFreeCreditsLimit;
     // The default dollar limit to apply to free-credit usage in this environment.
     public Double defaultFreeCreditsDollarLimit;
-    // The default time limit in days to apply to free-credit usage in this environment.
-    public Short defaultFreeCreditsDaysLimit;
     // Thresholds for email alerting based on free tier usage, by cost
     public ArrayList<Double> freeTierCostAlertThresholds;
-    // Thresholds for email alerting based on free tier usage, by time
-    public ArrayList<Double> freeTierTimeAlertThresholds;
     // For project garbage collection, the max # of projects allowed to be associated with each
     // garbage-collection service account.
     public Integer garbageCollectionUserCapacity;
@@ -178,16 +176,25 @@ public class WorkbenchConfig {
     public String credentialsKeyV2;
   }
 
-  // The access object specifies whether each of the following access requirements block access
-  // to the workbench.
+  public static class ZendeskConfig {
+    public String host;
+  }
+
+  // Config related to user sign-up and registration, including access modules and controls around
+  // the sign-up flow.
   public static class AccessConfig {
     // Allows a user to bypass their own access modules. This is used for testing purposes so that
     // We can give control over 3rd party access modules
     public boolean unsafeAllowSelfBypass;
+    // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
+    // Controls whether an invitation key is required for user creation. When true, the account
+    // creation UI will show an invitation key form and the server will validate the key before
+    // proceeding.
+    public boolean requireInvitationKey;
   }
 
   public static class CohortBuilderConfig {
@@ -226,6 +233,12 @@ public class WorkbenchConfig {
     // Flag to indicate whether to use the new Moodle badges API
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-2957
     public boolean enableMoodleV2Api;
+    // Do we require new users to have a contact email with a verified institutional affiliation,
+    // enforced by pattern-matching the user's contact email against the institution's
+    // set of whitelisted email domains or addresses
+    public boolean requireInstitutionalVerification;
+    // Flag to indicate whether to use the new age type options in cohort builder age wizard
+    public boolean enableCBAgeTypeOptions;
   }
 
   public static class ActionAuditConfig {

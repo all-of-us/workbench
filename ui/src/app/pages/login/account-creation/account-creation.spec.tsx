@@ -2,22 +2,15 @@ import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {
-  AccountCreation,
-  AccountCreationProps,
-  AccountCreationState
-} from './account-creation';
-import {DataAccessLevel} from 'generated/fetch';
+import {AccountCreation, AccountCreationProps, AccountCreationState} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
-import {environment} from 'environments/environment';
 import {serverConfigStore} from 'app/utils/navigation';
-
+import {getEmptyProfile} from 'app/pages/login/test-utils';
+import {Profile} from 'generated/fetch';
 
 let props: AccountCreationProps;
 const component = () => {
-  return mount<AccountCreation,
-    AccountCreationProps,
-    AccountCreationState>(<AccountCreation {...props}/>);
+  return mount(<AccountCreation {...props}/>);
 };
 
 const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: false};
@@ -25,31 +18,9 @@ const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCrea
 beforeEach(() => {
   serverConfigStore.next(defaultConfig);
   props = {
-    profile: {username: '',
-      dataAccessLevel: DataAccessLevel.Unregistered,
-      givenName: '',
-      familyName: '',
-      contactEmail: '',
-      currentPosition: '',
-      organization: '',
-      areaOfResearch: '',
-      address: {
-        streetAddress1: '',
-        streetAddress2: '',
-        city: '',
-        state: '',
-        country: '',
-        zipCode: '',
-      },
-      institutionalAffiliations: [
-        {
-          institution: "institution",
-          nonAcademicAffiliation: undefined,
-          role: undefined
-        }
-      ]},
+    profile: getEmptyProfile(),
     invitationKey: '',
-    setProfile: () => {},
+    onComplete: (profile: Profile) => {},
   };
 });
 

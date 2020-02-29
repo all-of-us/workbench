@@ -43,6 +43,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.Cr
 import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Address;
@@ -155,6 +157,9 @@ public class ProfileController implements ProfileApiDelegate {
               if (demographicSurvey.getDisability() != null)
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getGenderIdentityList() != null) {
+                result.setGenderIdentityEnumList(demographicSurvey.getGenderIdentityList());
+              }
               if (demographicSurvey.getSexAtBirth() != null)
                 result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
               if (demographicSurvey.getYearOfBirth() != null)
@@ -179,6 +184,8 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<MailService> mailServiceProvider;
   private final ProfileAuditor profileAuditor;
+  private final InstitutionService institutionService;
+  private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   @Autowired
   ProfileController(
@@ -193,7 +200,9 @@ public class ProfileController implements ProfileApiDelegate {
       CloudStorageService cloudStorageService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<MailService> mailServiceProvider,
-      ProfileAuditor profileAuditor) {
+      ProfileAuditor profileAuditor,
+      InstitutionService institutionService,
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -206,6 +215,8 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
+    this.institutionService = institutionService;
+    this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
   }
 
   @Override
@@ -310,7 +321,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-    verifyInvitationKey(request.getInvitationKey());
+    if (workbenchConfigProvider.get().access.requireInvitationKey) {
+      verifyInvitationKey(request.getInvitationKey());
+    }
+
     String userName = request.getProfile().getUsername();
     if (userName == null || userName.length() < 3 || userName.length() > 64)
       throw new BadRequestException(
@@ -325,7 +339,7 @@ public class ProfileController implements ProfileApiDelegate {
       request.getProfile().setDemographicSurvey(new DemographicSurvey());
     }
     if (request.getProfile().getInstitutionalAffiliations() == null) {
-      request.getProfile().setInstitutionalAffiliations(new ArrayList<InstitutionalAffiliation>());
+      request.getProfile().setInstitutionalAffiliations(new ArrayList<>());
     }
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
@@ -361,7 +375,13 @@ public class ProfileController implements ProfileApiDelegate {
             FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
             request.getProfile().getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()),
+            verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+                request.getProfile().getVerifiedInstitutionalAffiliation(), institutionService));
+
+    if (request.getTermsOfServiceVersion() != null) {
+      userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
+    }
 
     try {
       mailServiceProvider
@@ -572,6 +592,18 @@ public class ProfileController implements ProfileApiDelegate {
       // See RW-1488.
       throw new BadRequestException("Changing email is not currently supported");
     }
+    updateInstitutionalAffiliations(updatedProfile, user);
+
+    // This does not update the name in Google.
+    saveUserWithConflictHandling(user);
+
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
     List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()
             .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
@@ -606,14 +638,6 @@ public class ProfileController implements ProfileApiDelegate {
         user.addInstitutionalAffiliation(affiliation);
       }
     }
-
-    // This does not update the name in Google.
-    saveUserWithConflictHandling(user);
-
-    final Profile appliedUpdatedProfile = profileService.getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
-
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

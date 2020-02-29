@@ -276,7 +276,7 @@ class NewDataSetModal extends React.Component<Props, State> {
                      })}/>
         </div>
         <TooltipTrigger content={this.props.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-          <div style={{display: 'inline-flex', alignItems: 'center', marginTop: '1rem', ...(this.props.billingLocked && {opacity: 0.5})}}>
+          <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem', ...(this.props.billingLocked && {opacity: 0.5})}}>
             <CheckBox style={{height: 17, width: 17}}
                       disabled={this.props.billingLocked}
                       data-test-id='export-to-notebook'

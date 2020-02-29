@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.Etags;
@@ -17,7 +18,9 @@ import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.RecentWorkspace;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
@@ -91,7 +94,8 @@ public class ManualWorkspaceMapper {
             .published(workspace.getPublished())
             .googleBucketName(fcWorkspace.getBucketName())
             .billingStatus(workspace.getBillingStatus())
-            .billingAccountName(workspace.getBillingAccountName());
+            .billingAccountName(workspace.getBillingAccountName())
+            .billingAccountType(workspace.getBillingAccountType());
 
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       result.billingStatus(BillingStatus.ACTIVE);
@@ -155,6 +159,7 @@ public class ManualWorkspaceMapper {
     }
     dbWorkspace.setSocialBehavioral(purpose.getSocialBehavioral());
     dbWorkspace.setPopulationHealth(purpose.getPopulationHealth());
+    dbWorkspace.setEthics(purpose.getEthics());
     dbWorkspace.setEducational(purpose.getEducational());
     dbWorkspace.setDrugDevelopment(purpose.getDrugDevelopment());
     dbWorkspace.setOtherPurpose(purpose.getOtherPurpose());
@@ -162,8 +167,22 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
     dbWorkspace.setReasonForAllOfUs(purpose.getReasonForAllOfUs());
     dbWorkspace.setIntendedStudy(purpose.getIntendedStudy());
+    dbWorkspace.setScientificApproach(purpose.getScientificApproach());
     dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
+    dbWorkspace.setDisseminateResearchEnumSet(
+        Optional.ofNullable(purpose.getDisseminateResearchFindingList())
+            .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toSet()))
+            .orElse(new HashSet<DisseminateResearchEnum>()));
+
+    if (dbWorkspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
+      dbWorkspace.setDisseminateResearchOther(purpose.getOtherDisseminateResearchFindings());
+    }
+
+    dbWorkspace.setResearchOutcomeEnumSet(
+        Optional.ofNullable(purpose.getResearchOutcomeList())
+            .map(researchOutcoming -> researchOutcoming.stream().collect(Collectors.toSet()))
+            .orElse(new HashSet<ResearchOutcomeEnum>()));
   }
 
   private ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
@@ -182,17 +201,36 @@ public class ManualWorkspaceMapper {
             .otherPurpose(workspace.getOtherPurpose())
             .otherPurposeDetails(workspace.getOtherPurposeDetails())
             .population(workspace.getPopulation())
+            .ethics(workspace.getEthics())
             .reasonForAllOfUs(workspace.getReasonForAllOfUs())
             .intendedStudy(workspace.getIntendedStudy())
+            .scientificApproach(workspace.getScientificApproach())
             .anticipatedFindings(workspace.getAnticipatedFindings())
             .additionalNotes(workspace.getAdditionalNotes())
             .reviewRequested(workspace.getReviewRequested())
             .approved(workspace.getApproved())
             .otherPopulationDetails(workspace.getOtherPopulationDetails())
+            .disseminateResearchFindingList(
+                Optional.ofNullable(workspace.getDisseminateResearchEnumSet())
+                    .map(
+                        disseminateResearchEnums ->
+                            disseminateResearchEnums.stream().collect(Collectors.toList()))
+                    .orElse(new ArrayList<DisseminateResearchEnum>()))
+            .researchOutcomeList(
+                Optional.ofNullable(workspace.getResearchOutcomeEnumSet())
+                    .map(
+                        researchOutcomeEnums ->
+                            researchOutcomeEnums.stream().collect(Collectors.toList()))
+                    .orElse(new ArrayList<ResearchOutcomeEnum>()))
             .populationDetails(
                 workspace.getPopulationDetails().stream()
                     .map(DbStorageEnums::specificPopulationFromStorage)
                     .collect(Collectors.toList()));
+
+    if (workspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
+      researchPurpose.setOtherDisseminateResearchFindings(workspace.getDisseminateResearchOther());
+    }
+
     if (workspace.getTimeRequested() != null) {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
