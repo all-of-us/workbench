@@ -8,7 +8,7 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 // templates we may be using.
 def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
 def swaggerTargetFolder = 'src/generated/java'
-def workbenchApiSourceFile = 'src/main/resources/workbench.yaml'
+def workbenchApiSourceFile = 'foo/src/main/resources/workbench.yaml'
 
 task generateApi {
   inputs.file("$projectDir/$workbenchApiSourceFile")
@@ -329,7 +329,6 @@ sourceSets {
   }
 }
 
-validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
