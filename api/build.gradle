@@ -225,7 +225,7 @@ buildscript {    // Configuration for building
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
-    classpath 'io.swagger:swagger-codegen:2.2.3'
+    classpath 'io.swagger:swagger-codegen:3.0.18'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
     classpath "org.jetbrains.kotlin:kotlin-noarg:$KOTLIN_VERSION"
     classpath 'org.owasp:dependency-check-gradle:5.1.0'
