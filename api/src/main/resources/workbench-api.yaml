@@ -2728,47 +2728,47 @@ paths:
           description: A collection of ParticipantConditions.
           schema:
             "$ref": "#/definitions/ParticipantDataListResponse"
-  ? "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}"
-    : parameters:
-        - "$ref": "#/parameters/workspaceNamespace"
-        - "$ref": "#/parameters/workspaceId"
-        - "$ref": "#/parameters/cohortReviewId"
-        - "$ref": "#/parameters/participantId"
-        - in: path
-          name: annotationId
-          type: integer
-          format: int64
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortReviewId"
+      - "$ref": "#/parameters/participantId"
+      - in: path
+        name: annotationId
+        type: integer
+        format: int64
+        required: true
+        description: specifies which annotation
+    put:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: This endpoint will modify a ParticipantCohortAnnotation.
+      operationId: updateParticipantCohortAnnotation
+      parameters:
+        - in: body
+          name: request
           required: true
-          description: specifies which annotation
-      put:
-        tags:
-          - cohortReview
-        consumes:
-          - application/json
-        description: This endpoint will modify a ParticipantCohortAnnotation.
-        operationId: updateParticipantCohortAnnotation
-        parameters:
-          - in: body
-            name: request
-            required: true
-            description: ParticipantCohortAnnotation modification request body
-            schema:
-              "$ref": "#/definitions/ModifyParticipantCohortAnnotationRequest"
-        responses:
-          200:
-            description: A ParticipantCohortAnnotation.
-            schema:
-              "$ref": "#/definitions/ParticipantCohortAnnotation"
-      delete:
-        tags:
-          - cohortReview
-        description: Deletes the ParticipantCohortAnnotation with the specified ID
-        operationId: deleteParticipantCohortAnnotation
-        responses:
-          202:
-            description: ParticipantCohortAnnotation deletion request accepted
-            schema:
-              "$ref": "#/definitions/EmptyResponse"
+          description: ParticipantCohortAnnotation modification request body
+          schema:
+            "$ref": "#/definitions/ModifyParticipantCohortAnnotationRequest"
+      responses:
+        200:
+          description: A ParticipantCohortAnnotation.
+          schema:
+            "$ref": "#/definitions/ParticipantCohortAnnotation"
+    delete:
+      tags:
+        - cohortReview
+      description: Deletes the ParticipantCohortAnnotation with the specified ID
+      operationId: deleteParticipantCohortAnnotation
+      responses:
+        202:
+          description: ParticipantCohortAnnotation deletion request accepted
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/vocabularies":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"

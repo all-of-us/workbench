@@ -22,7 +22,7 @@ class GenerateAPIListingTask extends DefaultTask {
 
     @TaskAction
     void defaultAction() {
-        String apiYaml = "src/main/resources/workbench.yaml"
+        String apiYaml = "src/main/resources/workbench-api.yaml"
         printPaths(getApisFromYamlFile(apiYaml))
     }
 
