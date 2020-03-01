@@ -1,6 +1,5 @@
 import {Page} from 'puppeteer';
 import {waitUntilTitleMatch} from '../../driver/waitFuncs';
-import AppNavBar from './AppNavBar';
 import BasePage from './BasePage';
 
 const selectors = {
@@ -8,16 +7,14 @@ const selectors = {
   logo: 'img[src="/assets/images/all-of-us-logo.svg"]'
 };
 
+
 /**
  * AoU basepage class for extending.
  */
 export default abstract class AuthenticatedPage extends BasePage {
 
-  public navigation: AppNavBar;
-
   constructor(page: Page) {
     super(page);
-    this.navigation = new AppNavBar(page);
   }
 
   /**

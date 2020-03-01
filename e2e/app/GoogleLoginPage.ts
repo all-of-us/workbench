@@ -8,7 +8,7 @@ export const selectors = {
   emailInput: '//input[@type="email"]',
   emailNextButton: '//*[@id="identifierNext"]//*[normalize-space(text())="Next"]',
   passwordInput: '//input[@type="password"]',
-  passwordNextButton: '//*[@role="button"][@id="passwordNext"]//*[normalize-space(text())="Next"]',
+  passwordNextButton: '//*[@id="passwordNext"]//*[normalize-space(text())="Next"]',
 };
 
 export default class GoogleLoginPage {
@@ -80,7 +80,7 @@ export default class GoogleLoginPage {
    * Open All-of-Us Google login page.
    */
   public async goto(): Promise<void> {
-    await this.page.goto(configs.uiBaseUrl + configs.loginUrlPath, {waitUntil: 'networkidle0'});
+    await this.page.goto(configs.uiBaseUrl + configs.loginUrlPath, {waitUntil: ['networkidle0', 'domcontentloaded']});
   }
 
   /**
@@ -95,7 +95,7 @@ export default class GoogleLoginPage {
 
     await this.goto();
 
-    const naviPromise = this.page.waitForNavigation({waitUntil: 'networkidle0'});
+    const naviPromise = this.page.waitForNavigation({waitUntil: ['networkidle0', 'domcontentloaded']});
     const googleButton = await this.loginButton;
     await googleButton.click();
     await naviPromise;
@@ -114,7 +114,7 @@ export default class GoogleLoginPage {
   }
 
   public async createAccountButton(): Promise<ElementHandle> {
-    return await this.page.waitForXPath('//*[@role=\'button\'][(text()=\'Create Account\')]', {visible:true})
+    return await this.page.waitForXPath('//*[@role="button"][(text()="Create Account")]', {visible:true})
   }
 
 }

@@ -8,14 +8,15 @@ export default class Link extends WebElement {
     super(aPage);
   }
    
-  public async withLabel(aElementName: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    this.name = aElementName;
+  public async withLabel(
+     aElementName: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+
     throwErr = throwErr || true;
     try {
-      this.element = await findClickable(this.page, this.name, options);
+      this.element = await findClickable(this.page, aElementName, options);
     } catch (e) {
       if (throwErr) {
-        console.error(`FAILED finding Button: "${this.name}".`);
+        console.error(`FAILED finding Button: "${aElementName}".`);
         throw e;
       }
     }

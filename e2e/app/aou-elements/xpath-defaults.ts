@@ -1,96 +1,121 @@
+import TextOptions from './TextOptions';
+
+
 /**
- * a TEXTAREA element with specified label.
- * @param name
+ * a SELECT element with specified label.
+ * @param label
  */
-export function selectXpath(name: string) {
-  return `${textXpath(name)}/ancestor::node()[2]//select`;
+export function selectXpath(textOptions?: TextOptions) {
+  return `${textXpath(textOptions)}/ancestor::node()[2]//select`;
 }
 
 /**
- * a @role=button element with specified label.
- * @param name
+ * any [@role=button] element with specified label.
+ * @param label
  */
-export function buttonXpath(name: string) {
-  return `//*[(normalize-space(text())='${name}' or normalize-space(.)='${name}') and @role='button']`;
+export function buttonXpath(textOptions?: TextOptions) {
+  if (textOptions.text) {
+    return `(//button[text()='${textOptions.text}'] | //*[text()='${textOptions.text}' and @role='button'])`;
+  } else if (textOptions.normalizeSpace) {
+    return `(//button[normalize-space()='${textOptions.normalizeSpace}'] | //*[normalize-space()='${textOptions.normalizeSpace}' and @role='button'])`;
+  } else if (textOptions.textContains) {
+    return `(//button[contains(text(), '${textOptions.textContains}'] | //*[contains(text(),'${textOptions.textContains}') and @role='button'])`;
+  }
 }
 
 /**
  * a TEXTAREA element with specified label.
- * @param name
+ * @param label
  */
-export function textareaXpath(name: string) {
-  return `${textXpath(name)}/ancestor::node()[2]//textarea`;
+export function textAreaXpath(textOptions?: TextOptions) {
+  return `${textXpath(textOptions)}/ancestor::node()[2]//textarea`;
 }
 
   /**
    * a textbox element with specified label.
-   * @param name
+   * @param label
    */
-export function textboxXpath(name: string) {
-  return `${inputXpath(name, 'text')}`;
+export function textBoxXpath(textOptions?: TextOptions) {
+  return `${inputXpath(textOptions, 'text')}`;
 }
 
 /**
  * a IMAGE element with specified label.
- * @param name
+ * @param label
  */
-export function imageXpath(name: string) {
-  return `//*[normalize-space(text())='${name}']//*[@role='img']`
+export function imageXpath(label: string) {
+  return `//*[normalize-space(text())='${label}']//*[@role='img']`
 }
 
 /**
  * a CHECKBOX element with specified label.
- * @param name
+ * @param label
  */
-export function checkboxXpath(name: string) {
-  return `${inputXpath(name, 'checkbox')}`;
+export function checkBoxXpath(textOptions?: TextOptions) {
+  return `${inputXpath(textOptions, 'checkbox')}`;
 }
 
 /**
  * a RADIOBUTTON element with specified label.
- * @param name
+ * @param label
  */
-export function radioButtonXpath(name: string) {
-  return `${inputXpath(name, 'radio')}`;
+export function radioButtonXpath(options?: TextOptions) {
+  return `${inputXpath(options, 'radio')}`;
 }
 
-export function inputXpath(name: string, inputType?: string) {
+export function inputXpath(options?: TextOptions, inputType?: string) {
   if (inputType !== undefined) {
-    return `${textXpath(name)}/ancestor::node()[2]//input[@type='${inputType}']`;
+    return `${textXpath(options)}/ancestor::node()[1]//input[@type='${inputType}']`;
   }
   // return all input nodes
-  return `${textXpath(name)}/ancestor::node()[2]//input`;
+  return `${textXpath(options)}/ancestor::node()[1]//input`;
 }
 
 /**
  * Texts or label. It can be partial or full string.
- * @param name
+ * @param label
  */
-export function textXpath(name: string) {
-  return `//*[contains(normalize-space(text()),'${name}')  or @placeholder='${name}']`;
+export function textXpath(options?: TextOptions) {
+  if (options.text) {
+    return `//*[text()='${options.text}' or @placeholder='${options.text}']`;
+  } else if (options.textContains) {
+    return `//*[contains(text(),'${options.textContains}') or contains(@aria-label,"${options.textContains}") or contains(@placeholder,'${options.textContains}')]`;
+  } else if (options.normalizeSpace) {
+    return `//*[contains(normalize-space(),'${options.normalizeSpace}')]`;
+  }
 }
 
 /**
- * Finds element that match xpath selector: //clr-icon[@shape="plus-circle"]
- * @param name
+ * Label. It can be partial or full string.
+ * @param label
  */
-export function plusCircleIconXpath(name: string) {
-  return `//*[*[normalize-space(text())='${name}' or normalize-space(.)='${name}']]//clr-icon[@shape='plus-circle']/*[@role='img']`;
+export function labelXpath(options?: TextOptions) {
+  if (options.text) {
+    return `//label[text()='${options.text}']`;
+  } else if (options.textContains) {
+    return `//label[(contains(text(),'${options.textContains}') or contains(@aria-label,'${options.textContains}'))]`;
+  } else if (options.normalizeSpace) {
+    return `//label[contains(normalize-space(),'${options.normalizeSpace}')]`;
+  }
 }
 
 /**
- * Clickable element with label.
- * @param name
+ * Clickable element with label. It can be a link or button.
+ * @param label
  */
-export function clickableXpath(name: string) {
-  return `(//a | //span | //*[@role='button'])[normalize-space()='${name}' or contains(@aria-label,'${name}')]`;
+export function clickableXpath(label: string) {
+  return `(//a | //span | //*[@role='button'])[normalize-space(text())='${label}' or contains(@aria-label,'${label}')]`;
 }
 
 /**
- * A clr-icon element with specified label.
- * @param name
+ * clr-icon element with specified label.
+ * @param label:
+ * @param shapeValue:
  */
-export function clrIconXpath(name: string) {
-  return `${textXpath(name)}/ancestor::node()[1]//clr-icon`;
+export function iconXpath(label: string, shapeValue: string) {
+  if (label === '') {
+    return `//clr-icon[@shape='${shapeValue}'][*[@role='img']]`; // anywhere on page
+  }
+  // next to a label
+  return `//*[normalize-space()='${label}']/ancestor::node()[1]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
 }
-

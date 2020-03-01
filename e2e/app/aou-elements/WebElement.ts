@@ -2,8 +2,8 @@ import {ClickOptions, ElementHandle, Page, Response, WaitForSelectorOptions} fro
 import {ElementInterface} from './ElementInterface';
 
 export default class WebElement implements ElementInterface {
+
   protected readonly page: Page;
-  protected name: string;
   protected css: string;
   protected xpath: string;
   protected element: ElementHandle;
@@ -160,14 +160,9 @@ export default class WebElement implements ElementInterface {
     return await this.page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
   }
 
-  public getElementName(): string {
-    return this.name;
-  }
-
   public async dispose(): Promise<void> {
     this.xpath = undefined;
     this.css = undefined;
-    this.name = undefined;
     return this.element.dispose();
   }
 

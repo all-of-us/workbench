@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 
-export default class DropdownSelect {
+export default class SelectComponent {
 
   private readonly page: Page;
   private readonly name: string;
@@ -48,7 +48,7 @@ export default class DropdownSelect {
     if (this.name === undefined) {
       return '//*[contains(@class,"p-dropdown p-component")]';
     }
-    return `//*[child::*[normalize-space(text())='${this.name}']]/*[contains(@class,'p-dropdown p-component')]`;
+    return `//*[child::*[normalize-space()='${this.name}']]/*[contains(@class,'p-dropdown p-component')]`;
   }
 
 }

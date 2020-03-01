@@ -2,7 +2,8 @@ import {ElementHandle} from 'puppeteer';
 import CreateAccountPage from '../../app/CreateAccountPage';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
-import {waitForText} from '../../driver/waitFuncs';
+import {waitUntilFindTexts} from '../../driver/waitFuncs';
+
 const configs = require('../../resources/workbench-config');
 
 jest.setTimeout(60 * 1000);
@@ -35,9 +36,7 @@ describe('User registration tests:', () => {
 
   test('Can register new user', async () => {
     // Load the landing page for login.
-    const url = configs.uiBaseUrl + configs.workspacesUrlPath;
     const loginPage = new GoogleLoginPage(page);
-
     await loginPage.goto();
 
     // Click the create account button to start new-user-registration flow.
@@ -48,7 +47,7 @@ describe('User registration tests:', () => {
     const createAccountPage = new CreateAccountPage(page);
 
     const header = 'Enter your Invitation Key:';
-    const headerDisplayed = await waitForText(page, 'h2', header);
+    await waitUntilFindTexts(page, header);
 
     await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
     await page.waitFor(1000);
@@ -73,16 +72,16 @@ describe('User registration tests:', () => {
     // Step 4: Enter demographic survey (All Survey Fields are optional)
     // Should be on Demongraphic Survey page
     const demograpicsPageHeader = 'Demographics Survey (All Survey Fields are optional)';
-    expect(await waitForText(page, 'h3', demograpicsPageHeader)).toBeTruthy();
+    await waitUntilFindTexts(page, demograpicsPageHeader);
 
     await createAccountPage.fillOutDemographicSurvey();
     const submitButton = await createAccountPage.getSubmitButton();
     await submitButton.click();
-    await page.waitFor(1000);
+    await page.waitFor(2000);
 
     // Step 5: New account created successfully page.
-    const congratHeader = 'Congratulations!';
-    await page.waitForSelector('h1', { visible: true });
+    const congratMessage = 'Congratulations!';
+    await waitUntilFindTexts(page, congratMessage);
 
     const h4List = [];
     const h4Headers: ElementHandle[] = await page.$$('h4');

@@ -84,7 +84,7 @@ export async function isVisible(page: Page, element: ElementHandle) {
   }, element);
 }
 
-async function isLocatorVisible(element, page) {
+export async function isElementVisible(element, page) {
   const isVisibleHandle = await page.evaluateHandle((e) =>
   {
     const style = window.getComputedStyle(e);

@@ -1,18 +1,16 @@
 import {waitUntilTitleMatch} from '../driver/waitFuncs';
 import {findButton} from './aou-elements/xpath-finder';
-import AuthenticatedPage from './mixin-pages/AuthenticatedPage';
+import AuthenticatedPage from './page-mixin/AuthenticatedPage';
 import WorkspaceEditPage from './WorkspaceEditPage';
 
 const configs = require('../resources/workbench-config.js');
 
+export const FIELD_LABEL = {
+  TITLE: 'View Workspaces',
+  CREATE_NEW_WORKSPACE: 'Create a New Workspace',
+};
+
 export default class WorkspacesPage extends AuthenticatedPage {
-
-  public selectors = {
-    pageTitle: 'View Workspaces',
-      // button/link "Create a New Workspace"
-    createNewWorkspaceButton: 'Create a New Workspace',
-  };
-
    /**
     * navigate to My Workspaces URL
     */
@@ -23,14 +21,20 @@ export default class WorkspacesPage extends AuthenticatedPage {
   }
 
   public async isLoaded(): Promise<boolean> {
-    await waitUntilTitleMatch(this.puppeteerPage, this.selectors.pageTitle);
+    await waitUntilTitleMatch(this.puppeteerPage, FIELD_LABEL.TITLE);
     await this.puppeteerPage.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true});
     await this.waitForSpinner();
     return true;
   }
 
+  public async waitForReady(): Promise<WorkspacesPage> {
+    await this.isLoaded();
+    await this.waitForSpinner();
+    return this;
+  }
+
   public async getCreateNewWorkspaceLink() {
-    return findButton(this.puppeteerPage, this.selectors.createNewWorkspaceButton);
+    return findButton(this.puppeteerPage, {text: FIELD_LABEL.CREATE_NEW_WORKSPACE});
   }
 
 

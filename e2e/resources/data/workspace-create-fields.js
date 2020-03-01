@@ -1,7 +1,8 @@
+const faker = require('faker/locale/en_US');
 
 const defaultFields = [{
   label: 'Disease-focused research',
-  value: newUserName
+  value: faker.random.word()
 }, {
   label: 'Methods development/validation study',
   value: 'tester1'

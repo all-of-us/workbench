@@ -1,5 +1,4 @@
 import GoogleLoginPage, {selectors} from '../../app/GoogleLoginPage';
-import BasePage from '../../app/mixin-pages/BasePage';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
 import {waitUntilFindTexts} from '../../driver/waitFuncs';
 require('../../driver/waitFuncs');
@@ -8,7 +7,7 @@ jest.setTimeout(60 * 1000);
 
 const configs = require('../../resources/workbench-config');
 
-describe.skip('Login tests:', () => {
+describe('Login tests:', () => {
 
   let browser;
   let incognitoContext;
@@ -33,7 +32,7 @@ describe.skip('Login tests:', () => {
     await browser.close();
   });
 
-  test('Open \'/workspaces\' page before login redirects to login', async () => {
+  test('Open Workspaces page before login redirects to login', async () => {
     const url = configs.uiBaseUrl + configs.workspacesUrlPath;
     const loginPage = new GoogleLoginPage(page);
     await page.goto(url, {waitUntil: 'networkidle0'});
@@ -56,9 +55,9 @@ describe.skip('Login tests:', () => {
     const button = await page.waitForXPath(selectors.passwordNextButton);
     await button.click();
 
-    const passwordPage = new BasePage(page);
     const err = await waitUntilFindTexts(page, 'Wrong password. Try again');
     expect(err).toBeTruthy();
+
   });
 
 });

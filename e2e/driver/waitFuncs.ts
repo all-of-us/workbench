@@ -1,5 +1,6 @@
 import {Page} from 'puppeteer';
 
+
 /**
  * Wait until page URL to match a regular expression.
  * @param {string} text - URL regular expression
@@ -86,7 +87,7 @@ export async function waitForNumberElementsIsBiggerThan(page: Page, cssSelector:
 export async function waitUntilFindTexts(page: Page, texts: string) {
   return await page.waitForFunction(matchText => {
     const bodyText = document.querySelector('body').innerText;
-    return bodyText.match(matchText)
+    return bodyText.includes(matchText)
   }, {timeout: this.timeout}, texts);
 }
 
@@ -110,11 +111,12 @@ export async function waitUntilContainsAttributeValue(page: Page, cssSelector, a
  * @param expectedText
  */
 export async function waitForText(page: Page, cssSelector: string, expectedText: string) {
-  return  await page.waitForFunction( (css, expText) => {
+  await page.waitForFunction( (css, expText) => {
     const t = document.querySelector(css);
     if (t !== undefined) {
       return t.innerText === expText;
     }
-    return false;
   }, {timeout: 50000}, cssSelector, expectedText);
+
+  await page.waitForSelector(cssSelector, { visible: true });
 }

@@ -8,7 +8,7 @@ const faker = require('faker/locale/en_US');
 
 jest.setTimeout(300000);
 
-describe('Workspace create:', () => {
+describe.skip('Workspace create:', () => {
 
   let page;
 

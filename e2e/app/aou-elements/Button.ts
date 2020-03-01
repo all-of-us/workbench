@@ -1,4 +1,5 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import TextOptions from './TextOptions';
 import WebElement from './WebElement';
 import {findButton} from './xpath-finder';
 
@@ -8,14 +9,15 @@ export default class Button extends WebElement {
     super(aPage);
   }
    
-  public async withLabel(aElementName: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    this.name = aElementName;
+  public async withLabel(
+     textOptions?: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+
     throwErr = throwErr || true;
     try {
-      this.element = await findButton(this.page, this.name, options);
+      this.element = await findButton(this.page, textOptions, waitOptions);
     } catch (e) {
       if (throwErr) {
-        console.error(`FAILED finding Button: "${this.name}".`);
+        console.error(`FAILED finding Button: "${textOptions}".`);
         throw e;
       }
     }
@@ -25,7 +27,7 @@ export default class Button extends WebElement {
   /**
    * Determine if button is disabled by checking style 'cursor'.
    */
-  public async isCursorAllowed(): Promise<boolean> {
+  public async isCursorNotAllowed(): Promise<boolean> {
     const cursor = await this.getComputedStyle('cursor');
     return cursor === 'not-allowed';
   }

@@ -1,6 +1,7 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import WebElement from './WebElement';
-import {findClrIcon} from './xpath-finder';
+import {findIcon} from './xpath-finder';
+
 
 export default class ClrIconLink extends WebElement {
 
@@ -8,14 +9,15 @@ export default class ClrIconLink extends WebElement {
     super(aPage);
   }
    
-  public async withLabel(aElementName: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    this.name = aElementName;
+  public async withLabel(
+     aElementName: string, shape: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+
     throwErr = throwErr || true;
     try {
-      this.element = await findClrIcon(this.page, this.name, options);
+      this.element = await findIcon(this.page, aElementName, shape, options);
     } catch (e) {
       if (throwErr) {
-        console.error(`FAILED finding a 'clr-icon' link: "${this.name}".`);
+        console.error(`FAILED finding a 'clr-icon': "${aElementName}".`);
         throw e;
       }
     }

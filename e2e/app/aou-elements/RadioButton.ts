@@ -1,4 +1,5 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import TextOptions from './TextOptions';
 import WebElement from './WebElement';
 import {findRadioButton} from './xpath-finder';
 
@@ -8,14 +9,15 @@ export default class RadioButton extends WebElement {
     super(aPage);
   }
    
-  public async withLabel(aElementName: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    this.name = aElementName;
+  public async withLabel(
+     textOptions?: TextOptions, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+
     throwErr = throwErr || true;
     try {
-      this.element = await findRadioButton(this.page, this.name, options);
+      this.element = await findRadioButton(this.page, textOptions, options);
     } catch (e) {
       if (throwErr) {
-        console.error(`FAILED finding RadioButton: "${this.name}".`);
+        console.error(`FAILED finding RadioButton: "${textOptions}".`);
         throw e;
       }
     }

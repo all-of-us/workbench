@@ -2,7 +2,7 @@ import Link from '../../app/aou-elements/Link';
 import WebElement from '../../app/aou-elements/WebElement';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import HomePage from '../../app/HomePage';
-import WorkspaceResourceCard from '../../app/mixin-pages/WorkspaceCard';
+import WorkspaceResourceCard from '../../app/page-mixin/WorkspaceCard';
 import WorkspacesPage from '../../app/WorkspacesPage';
 import launchBrowser from '../../driver/puppeteer-launch';
 
@@ -111,6 +111,7 @@ describe('Home', () => {
         expect(size.height).toEqual(height);
         expect(size.width).toEqual(width);
       }
+      await card.dispose();
     }
 
   });
@@ -128,22 +129,10 @@ describe('Home', () => {
     await seeAllWorkspacesLink.click();
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.isLoaded();
+    await seeAllWorkspacesLink.dispose();
 
   });
 
-  test('Application NavBar links works', async () => {
 
-    const home = new HomePage(page);
-    await home.navigateToURL();
-
-    // Verify app-nav-bar link works
-    await home.navigation.navToMyWorkspaces();
-    const workspacesPage = new WorkspacesPage(page);
-    expect(await workspacesPage.isLoaded()).toBe(true);
-
-    await home.navigation.navToHome();
-    expect(await home.isLoaded()).toBe(true);
-
-  });
 
 });

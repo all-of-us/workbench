@@ -1,23 +1,25 @@
 import {ElementHandle} from 'puppeteer';
-import * as xpathHandler from '../driver/xpath-handler';
-import {findPlusCircleIcon} from './aou-elements/xpath-finder';
-import AuthenticatedPage from './mixin-pages/AuthenticatedPage';
+import {waitUntilFindTexts} from '../driver/waitFuncs';
+import Link from './aou-elements/Link';
+import {findIcon} from './aou-elements/xpath-finder';
+import AuthenticatedPage from './page-mixin/AuthenticatedPage';
 
 const configs = require('../resources/workbench-config.js');
 
+export const FIELD_LABEL = {
+  TITLE: 'Homepage',
+  HEADER: 'Workspaces',
+  SEE_ALL_WORKSPACES: 'See all Workspaces',
+  CREATE_NEW_WORKSPACE: 'Workspaces',
+};
+
+
 export default class HomePage extends AuthenticatedPage {
 
-  public static selectors = {
-    pageTitle: 'Homepage',
-    header: '//h3[normalize-space(text())="Workspaces"]',
-    seeAllWorkspacesLink: '//*[normalize-space()="See all Workspaces"]',
-    createNewWorkspaceLink: 'Workspaces',
-  };
-
   public async isLoaded(): Promise<boolean> {
-    await super.isLoaded(HomePage.selectors.pageTitle);
-    await this.puppeteerPage.waitForXPath(HomePage.selectors.seeAllWorkspacesLink, {visible: true});
-    await this.puppeteerPage.waitForXPath(HomePage.selectors.header, {visible: true});
+    await super.isLoaded(FIELD_LABEL.TITLE);
+    await new Link(this.puppeteerPage).withLabel(FIELD_LABEL.SEE_ALL_WORKSPACES);
+    await waitUntilFindTexts(this.puppeteerPage, FIELD_LABEL.HEADER);
     return true;
   }
 
@@ -36,27 +38,8 @@ export default class HomePage extends AuthenticatedPage {
     await this.waitForReady();
   }
 
-
-  /**
-   * Go to Home page.
-   */
-  public async navigateToHome(): Promise<HomePage> {
-    await this.navigation.navToHome();
-    return this;
-  }
-
-  get seeAllWorkspacesLink(): Promise<ElementHandle> {
-    return xpathHandler.waitForVisible(this.puppeteerPage, HomePage.selectors.seeAllWorkspacesLink);
-  }
-
   public async getCreateNewWorkspaceLink(): Promise<ElementHandle> {
-    return findPlusCircleIcon(this.puppeteerPage, HomePage.selectors.createNewWorkspaceLink);
-  }
-
-  public async toAllWorkspaces() {
-    const navigPromise = this.puppeteerPage.waitForNavigation({waitUntil: 'networkidle0'});
-    await this.seeAllWorkspacesLink;
-    await navigPromise;
+    return findIcon(this.puppeteerPage, FIELD_LABEL.CREATE_NEW_WORKSPACE, 'plus-circle');
   }
 
 }

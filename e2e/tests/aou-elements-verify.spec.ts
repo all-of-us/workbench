@@ -1,12 +1,14 @@
 import {Browser, Page} from 'puppeteer';
 import NewClrIconLink from '../app/aou-elements/ClrIconLink';
 import GoogleLoginPage from '../app/GoogleLoginPage';
-import HomePage from '../app/HomePage';
+import {FIELD_LABEL} from '../app/HomePage';
+import NaviBar, {LINK} from '../app/page-mixin/NaviBar';
+import ProfilePage from '../app/ProfilePage';
 
 const Chrome = require('../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
 
-describe('aou-elements', () => {
+describe.skip('aou-elements', () => {
 
   let chromeBrowser: Browser;
   let page: Page;
@@ -38,7 +40,7 @@ describe('aou-elements', () => {
   test('Click on Create New Workspace link on Home page', async () => {
 
     const anyLink = new NewClrIconLink(page);
-    const linkHandle = await anyLink.withLabel(HomePage.selectors.createNewWorkspaceLink);
+    const linkHandle = await anyLink.withLabel(FIELD_LABEL.CREATE_NEW_WORKSPACE, 'plus-circle');
     expect(linkHandle).toBeTruthy();
     const classname = await anyLink.getProperty('className');
     expect(classname).toBe('is-solid');
@@ -53,8 +55,15 @@ describe('aou-elements', () => {
     expect(await anyLink.isVisible()).toBe(true);
 
     await anyLink.dispose();
-    expect(await anyLink.getElementName()).toBeFalsy();
     expect(await anyLink.isVisible()).toBe(false);
+
+    await NaviBar.go(page, LINK.PROFILE);
+    const profilePage = new ProfilePage(page);
+    const fname = await (await profilePage.getFirstName()).getValue();
+    const lname = await (await profilePage.getLastName()).getValue();
+    expect(fname).toMatch(new RegExp(/^[a-zA-Z]+$/));
+    expect(lname).toMatch(new RegExp(/^[a-zA-Z]+$/));
+    expect(lname).not.toEqual(fname); // check widgetxpath.textBoxXpath finds the right last and first name textbox
 
   });
 

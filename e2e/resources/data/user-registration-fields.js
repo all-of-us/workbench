@@ -33,12 +33,7 @@ const defaultFieldValues = [{
 },
 ];
 
-const institutionAffiliation = {
-  EARLY_CAREER_TENURE_TRACK_RESEARCHER: "Early career tenure-track researcher",
-  UNDERGRADUATE_STUDENT: "Undergraduate (Bachelor level) student",
-};
 
 module.exports = {
-  institutionAffiliation,
   defaultFieldValues,
 };

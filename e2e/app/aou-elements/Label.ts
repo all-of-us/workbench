@@ -1,9 +1,9 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './TextOptions';
 import WebElement from './WebElement';
-import {findTextArea} from './xpath-finder';
+import {findLabel} from './xpath-finder';
 
-export default class TextArea extends WebElement {
+export default class Label extends WebElement {
 
   constructor(aPage: Page) {
     super(aPage);
@@ -14,10 +14,10 @@ export default class TextArea extends WebElement {
 
     throwErr = throwErr || true;
     try {
-      this.element = await findTextArea(this.page, textOptions, options);
+      this.element = await findLabel(this.page, textOptions, options);
     } catch (e) {
       if (throwErr) {
-        console.error(`FAILED finding TextArea: "${textOptions}".`);
+        console.error(`FAILED finding Text: "${textOptions}".`);
         throw e;
       }
     }

@@ -7,12 +7,11 @@
   "license": "BSD",
   "scripts": {
     "test": "WORKBENCH_ENV=test jest --detectOpenHandles",
-    "test:debug": "WORKBENCH_ENV=test PUPPETEER_HEADLESS=false jest --detectOpenHandles --runInBand",
+    "test:debug": "WORKBENCH_ENV=test PUPPETEER_HEADLESS=false jest --detectOpenHandles",
     "test-local": "WORKBENCH_ENV=local jest --runInBand",
-    "build": "tsc --build --clean",
     "lint": "tslint --project tsconfig.json",
-    "lint:err": "yarn run lint --quiet",
     "lint:fix": "yarn run lint --fix",
+    "build": "tsc --build --clean",
     "compile": "rimraf tsc-out/ && yarn run lint && yarn run build"
   },
   "jest": {

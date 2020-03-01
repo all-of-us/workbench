@@ -9,7 +9,7 @@ import WorkspacesPage from '../../app/WorkspacesPage';
 const Chrome = require('../../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
 
-describe('Workspace', () => {
+describe.skip('Workspace', () => {
 
   let chromeBrowser: Browser;
   let page: Page;
