@@ -47,8 +47,8 @@ securityDefinitions:
       The aou_auth entry under security (below) serves to establish the fact
       that all endpoints are protected: this annotation ensures that client
       libraries know to send bearer tokens when calling
-    authorizationUrl: ''
-    tokenUrl: ''
+    authorizationUrl: 'https://mother-may-i.pmi-ops.org'
+    tokenUrl: 'https://jrr-token.pmi-ops.org'
     type: oauth2
     flow: accessCode
 schemes:
