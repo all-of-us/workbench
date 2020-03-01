@@ -49,7 +49,7 @@ export default class WebComponent {
     return button;
   }
 
-  public async asText(): Promise<Label> {
+  public async asLabel(): Promise<Label> {
     const txt = new Label(this.page);
     await txt.withLabel(this.label);
     return txt;

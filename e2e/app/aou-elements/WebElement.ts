@@ -166,5 +166,27 @@ export default class WebElement implements ElementInterface {
     return this.element.dispose();
   }
 
+  public async clickWithRetry(retries: number) {
+    const click = () => {
+      return this.element!.hover()
+        .then(() => {
+          return this.element!.click();
+        })
+        .catch(async err => {
+          if (retries <= 0) {
+            throw err;
+          }
+          retries -= 1;
+          await this.page.waitFor(1000).then(click);
+        });
+    };
+    return click();
+  }
+
+  // try this method when click() is not working
+  public async clickWithEval() {
+    await this.page.evaluate(elem =>
+       elem.click(), this.element );
+  }
 
 }

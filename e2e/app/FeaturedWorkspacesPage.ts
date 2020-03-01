@@ -1,16 +1,16 @@
+import {waitUntilFindTexts} from '../driver/waitFuncs';
 import AuthenticatedPage from './page-mixin/AuthenticatedPage';
 
-const selectors = {
-  pageTitle: 'Workspace Library',
-  header: '//*[normalize-space(text())="Profile"]', // Researcher Workbench Workspace Library
+export const FIELD_LABEL = {
+  TITLE: 'Workspace Library',
+  HEADER: 'Researcher Workbench Workspace Library',
 };
 
 export default class FeaturedWorkspacesPage extends AuthenticatedPage {
 
   public async isLoaded(): Promise<boolean> {
-    await super.isLoaded(selectors.pageTitle);
-    // change to waitfortext
-    await this.puppeteerPage.waitForXPath(selectors.header, {visible: true});
+    await super.isLoaded(FIELD_LABEL.TITLE);
+    await waitUntilFindTexts(this.puppeteerPage, FIELD_LABEL.HEADER);
     return true;
   }
 

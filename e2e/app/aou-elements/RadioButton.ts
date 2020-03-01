@@ -36,6 +36,7 @@ export default class RadioButton extends WebElement {
     const is = await this.isSelected();
     if (!is) {
       await this.click();
+      await this.page.waitFor(500);
     }
   }
 
@@ -46,6 +47,7 @@ export default class RadioButton extends WebElement {
     const is = await this.isSelected();
     if (is) {
       await this.click();
+      await this.page.waitFor(500);
     }
   }
 

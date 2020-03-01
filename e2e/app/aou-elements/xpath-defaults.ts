@@ -28,7 +28,10 @@ export function buttonXpath(textOptions?: TextOptions) {
  * @param label
  */
 export function textAreaXpath(textOptions?: TextOptions) {
-  return `${textXpath(textOptions)}/ancestor::node()[2]//textarea`;
+  if (textOptions.ancestorNodeLevel === undefined) {
+    textOptions.ancestorNodeLevel = 2;
+  }
+  return `${textXpath(textOptions)}/ancestor::node()[${textOptions.ancestorNodeLevel}]//textarea`;
 }
 
   /**
@@ -64,11 +67,15 @@ export function radioButtonXpath(options?: TextOptions) {
 }
 
 export function inputXpath(options?: TextOptions, inputType?: string) {
+  if (options.ancestorNodeLevel === undefined) {
+    options.ancestorNodeLevel = 1;
+  }
+
   if (inputType !== undefined) {
-    return `${textXpath(options)}/ancestor::node()[1]//input[@type='${inputType}']`;
+    return `${textXpath(options)}/ancestor::node()[${options.ancestorNodeLevel}]//input[@type='${inputType}']`;
   }
   // return all input nodes
-  return `${textXpath(options)}/ancestor::node()[1]//input`;
+  return `${textXpath(options)}/ancestor::node()[${options.ancestorNodeLevel}]//input`;
 }
 
 /**
@@ -79,7 +86,7 @@ export function textXpath(options?: TextOptions) {
   if (options.text) {
     return `//*[text()='${options.text}' or @placeholder='${options.text}']`;
   } else if (options.textContains) {
-    return `//*[contains(text(),'${options.textContains}') or contains(@aria-label,"${options.textContains}") or contains(@placeholder,'${options.textContains}')]`;
+    return `//*[contains(text(),'${options.textContains}') or contains(@aria-label,'${options.textContains}') or contains(@placeholder,'${options.textContains}')]`;
   } else if (options.normalizeSpace) {
     return `//*[contains(normalize-space(),'${options.normalizeSpace}')]`;
   }

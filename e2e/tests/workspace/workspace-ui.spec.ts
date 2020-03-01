@@ -3,7 +3,7 @@ import select from '../../app/aou-elements/select';
 import Textbox from '../../app/aou-elements/textbox';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import HomePage from '../../app/HomePage';
-import WorkspaceEditPage from '../../app/WorkspaceEditPage';
+import WorkspaceEditPage, {FIELD_LABEL} from '../../app/WorkspaceEditPage';
 import WorkspacesPage from '../../app/WorkspacesPage';
 
 const Chrome = require('../../driver/ChromeDriver');
@@ -42,15 +42,17 @@ describe.skip('Workspace', () => {
       .then((link) => link.click());
 
     const workspaceEdit = new WorkspaceEditPage(page);
-    await workspaceEdit.waitUntilReady();
+    await workspaceEdit.waitForReady();
 
     // expect Workspace-Name Input text field exists and is NOT disabled
-    const workspaceNameTextbox = new Textbox(page, WorkspaceEditPage.selectors.workspaceName);
+    const workspaceNameTextbox = new Textbox(page);
+    await workspaceNameTextbox.withLabel({text: FIELD_LABEL.NEW_WORKSPACE_NAME});
     expect(await workspaceNameTextbox.isVisible()).toBe(true);
     expect(await workspaceNameTextbox.isDisabled()).toBe(false);
 
     // expect DataSet Select field exists and is NOT disabled
-    const dataSetSelect = new select(page, WorkspaceEditPage.selectors.syntheticDataSet);
+    const dataSetSelect = new select(page);
+    await dataSetSelect.withLabel({text: FIELD_LABEL.SYNTHETIC_DATASET});
     expect(await dataSetSelect.isVisible()).toBe(true);
     expect(await dataSetSelect.isDisabled()).toBe(false);
     expect(await dataSetSelect.getValue()).toBe('2'); // default value
@@ -60,13 +62,11 @@ describe.skip('Workspace', () => {
 
   // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
   test('Click on Create New Workspace link on My Workspaces page', async () => {
-
     const workspaces = new WorkspacesPage(page);
-    const workspaceEdit = await workspaces.createNewWorkspace();
-
-    const workspaceNameTextbox = new Textbox(page, WorkspaceEditPage.selectors.workspaceName);
+    await workspaces.clickCreateNewWorkspace();
+    const workspaceNameTextbox = new Textbox(page);
+    await workspaceNameTextbox.withLabel({text: FIELD_LABEL.NEW_WORKSPACE_NAME});
     expect(await workspaceNameTextbox.isVisible()).toBe(true);
-
   });
 
 /*

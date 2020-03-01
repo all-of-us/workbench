@@ -28,7 +28,7 @@ export const FIELD_LABEL = {
   READ_UNDERSTAND_TERMS_OF_USE: 'I have read and understand the All of Us Research Program Terms of Use described above',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
-  DESCRIBE_RESEARCH_BACKGROUND_EXPERIENCE_INTERESTS: 'Please describe your research background, experience and research interests',
+  RESEARCH_BACKGROUND: 'Please describe your research background, experience and research interests',
   EDUCATION_LEVEL: 'Highest Level of Education Completed',
   YEAR_OF_BIRTH: 'Year of Birth',
 };
@@ -117,7 +117,7 @@ export default class CreateAccountPage extends BasePage {
 
   public async getResearchBackgroundTextarea(): Promise<TextArea> {
     const textarea = new TextArea(this.puppeteerPage);
-    await textarea.withLabel({text: FIELD_LABEL.DESCRIBE_RESEARCH_BACKGROUND_EXPERIENCE_INTERESTS});
+    await textarea.withLabel({text: FIELD_LABEL.RESEARCH_BACKGROUND});
     return textarea;
   }
 

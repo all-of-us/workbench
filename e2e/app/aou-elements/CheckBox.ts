@@ -1,7 +1,7 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './TextOptions';
 import WebElement from './WebElement';
-import {findCheckBox, findText} from './xpath-finder';
+import {findCheckBox} from './xpath-finder';
 
 export default class CheckBox extends WebElement {
 
@@ -55,10 +55,11 @@ export default class CheckBox extends WebElement {
   public async check(): Promise<void> {
     const is = await this.isChecked();
     if (!is) {
-      // click on text will check the checkbox
-      const txt = await this.text();
-      await txt.click();
+      await this.focus();
+      await this.clickWithEval();
+      await this.page.waitFor(500);
     }
+    // check and retry ??
   }
 
   /**
@@ -67,14 +68,10 @@ export default class CheckBox extends WebElement {
   public async unCheck() {
     const is = await this.isChecked();
     if (!is) {
-      // click on text will uncheck the checkbox
-      const txt = await this.text();
-      await txt.click();
+      await this.focus();
+      await this.clickWithEval();
+      await this.page.waitFor(500);
     }
-  }
-
-  private async text(): Promise<ElementHandle> {
-    return await findText(this.page, this.textOptions);
   }
 
 }
