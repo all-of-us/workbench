@@ -2,8 +2,8 @@ import Link from '../../app/aou-elements/Link';
 import WebElement from '../../app/aou-elements/WebElement';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import HomePage, {FIELD_LABEL as editPageFieldLabel} from '../../app/HomePage';
-import WorkspaceResourceCard from '../../app/page-mixin/WorkspaceCard';
-import WorkspaceEditPage from "../../app/WorkspaceEditPage";
+import WorkspaceEditPage from '../../app/WorkspaceEditPage';
+import WorkspaceResourceCard from '../../app/WorkspaceResourceCard';
 import WorkspacesPage from '../../app/WorkspacesPage';
 import launchBrowser from '../../driver/puppeteer-launch';
 
@@ -98,7 +98,7 @@ describe('Home', () => {
     let width;
     let height;
     for (const card of cards) {
-      const cardElem = new WebElement(page, card);
+      const cardElem = new WebElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.size();
       if (width === undefined) {
@@ -108,7 +108,6 @@ describe('Home', () => {
         expect(size.height).toEqual(height);
         expect(size.width).toEqual(width);
       }
-      await card.dispose();
     }
   });
 

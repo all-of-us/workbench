@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
-import WebElement from "../../app/aou-elements/WebElement";
-import WorkspaceResourceCard from "../../app/page-mixin/WorkspaceCard";
+import WebElement from '../../app/aou-elements/WebElement';
+import WorkspaceResourceCard from '../../app/WorkspaceResourceCard';
 import WorkspacesPage from '../../app/WorkspacesPage';
 
 const Chrome = require('../../driver/ChromeDriver');
@@ -24,7 +24,7 @@ describe('Workspace', () => {
     let width;
     let height;
     for (const card of cards) {
-      const cardElem = new WebElement(page, card);
+      const cardElem = new WebElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.size();
       if (width === undefined) {
@@ -34,7 +34,6 @@ describe('Workspace', () => {
         expect(size.height).toEqual(height);
         expect(size.width).toEqual(width);
       }
-      await card.dispose();
     }
   });
 

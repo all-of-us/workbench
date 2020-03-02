@@ -1,7 +1,11 @@
-import {ClickOptions, ElementHandle, Page, Response, WaitForSelectorOptions} from 'puppeteer';
+import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import {ElementInterface} from './ElementInterface';
 
 export default class WebElement implements ElementInterface {
+
+  public static asWebElement(page: Page, elem: ElementHandle): WebElement {
+    return new WebElement(page, elem);
+  }
 
   protected readonly page: Page;
   protected css: string;
@@ -154,10 +158,6 @@ export default class WebElement implements ElementInterface {
     if (!box) { return { width: 0, height: 0 }; }
     const { width, height } = box;
     return { width, height };
-  }
-
-  public async reloadPage(): Promise<Response> {
-    return await this.page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
   }
 
   public async dispose(): Promise<void> {

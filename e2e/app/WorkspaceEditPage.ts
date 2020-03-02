@@ -157,7 +157,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   public async expandResearchPurposeSection() {
     // expand Disease purpose section if needed
     const researchPurpose = this.question1_researchPurpose();
-    const researchPurposeCheckbox = await researchPurpose.asCheckbox();
+    const researchPurposeCheckbox = await researchPurpose.asCheckBox();
     if (!await researchPurposeCheckbox.isChecked()) {
       await researchPurposeCheckbox.check();
       await this.puppeteerPage.waitFor(1000);

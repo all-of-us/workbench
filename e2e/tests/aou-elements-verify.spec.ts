@@ -3,8 +3,8 @@ import NewClrIconLink from '../app/aou-elements/ClrIconLink';
 import GoogleLoginPage from '../app/GoogleLoginPage';
 import HomePage, {FIELD_LABEL} from '../app/HomePage';
 import PageNavigation, {LINK} from '../app/page-mixin/PageNavigation';
-import WorkspaceResourceCard from "../app/page-mixin/WorkspaceCard";
 import ProfilePage from '../app/ProfilePage';
+import WorkspaceResourceCard from '../app/WorkspaceResourceCard';
 
 const Chrome = require('../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
@@ -39,9 +39,9 @@ describe('aou-elements', () => {
     await home.waitForReady();
     const workspacesCards = new WorkspaceResourceCard(page);
     await workspacesCards.getAllCardsElements();
-    const any = await workspacesCards.getAnyResourceCard();
-    console.log("any card name = " + await any.getCardName());
-    
+    const anyCard = await workspacesCards.getAnyResourceCard();
+    console.log('any card name = ' + await anyCard.getCardName());
+
   });
 
   /**

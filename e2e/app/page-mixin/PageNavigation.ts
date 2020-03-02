@@ -90,6 +90,6 @@ export default class PageNavigation {
     return value;
   }
 
-  private static angleIconXpath = iconXpath('', 'angle'); // `//*[normalize-space(.)]//clr-icon[@shape='angle'][*[@role='img']]`;
+  private static angleIconXpath = iconXpath('', 'angle');
 
 }

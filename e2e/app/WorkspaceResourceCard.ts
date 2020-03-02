@@ -1,6 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
-import ClrIconLink from "../aou-elements/ClrIconLink";
-import AuthenticatedPage from './AuthenticatedPage';
+import ClrIconLink from './aou-elements/ClrIconLink';
+import AuthenticatedPage from './page-mixin/AuthenticatedPage';
 const _ = require('lodash');
 
 export default class WorkspaceResourceCard extends AuthenticatedPage {
@@ -23,7 +23,7 @@ export default class WorkspaceResourceCard extends AuthenticatedPage {
     const xpath = '//*[*[@data-test-id="workspace-card"]]';
     const cards = await this.puppeteerPage.$x(xpath);
     const resourceCards = cards.map(card => new WorkspaceResourceCard(this.puppeteerPage, card));
-    console.log("all resource cards");
+    console.log('all resource cards');
     console.log(resourceCards);
     return resourceCards;
   }
@@ -31,15 +31,15 @@ export default class WorkspaceResourceCard extends AuthenticatedPage {
   public async getAnyResourceCard(): Promise<WorkspaceResourceCard> {
     const cards = await this.getAllCardsElements();
     const anyCard = _.shuffle(cards)[0];
-    console.log("any resource card");
+    console.log('any resource card');
     console.log(anyCard);
     return anyCard;
   }
 
   public async getCardName(): Promise<unknown> {
     const cardNameElem = await this.element.$('[data-test-id="workspace-card-name"]');
-    const cardName = await (await cardNameElem.getProperty("innerText")).jsonValue();
-    console.log("cardName = " + cardName);
+    const cardName = await (await cardNameElem.getProperty('innerText')).jsonValue();
+    console.log('cardName = ' + cardName);
     return cardName;
   }
 
@@ -47,6 +47,10 @@ export default class WorkspaceResourceCard extends AuthenticatedPage {
     const clrIcon = new ClrIconLink(this.puppeteerPage);
     console.log(clrIcon);
 
+  }
+
+  public asElementHandle(): ElementHandle {
+    return this.element.asElement();
   }
 
 }

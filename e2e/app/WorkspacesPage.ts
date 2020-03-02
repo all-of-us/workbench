@@ -96,17 +96,17 @@ export default class WorkspacesPage extends AuthenticatedPage {
     // Enter value in 'Disease-focused research'
     const diseaseName = workspaceEditPage.question1_diseaseFocusedResearch();
     await (await diseaseName.asLabel()).click(); // click on label to toggle checkbox
-    await (await diseaseName.asTextbox()).type('diabetes');
-    await (await diseaseName.asTextbox()).pressKeyboard('Tab', { delay: 100 });
+    await (await diseaseName.asTextBox()).type('diabetes');
+    await (await diseaseName.asTextBox()).pressKeyboard('Tab', { delay: 100 });
 
     const educationPurpose = workspaceEditPage.question1_educationalPurpose();
-    await (await educationPurpose.asCheckbox()).check();
+    await (await educationPurpose.asCheckBox()).check();
 
     const forProfitPurpose = workspaceEditPage.question1_forProfitPurpose();
-    await (await forProfitPurpose.asCheckbox()).check();
+    await (await forProfitPurpose.asCheckBox()).check();
 
     const otherPurpose = workspaceEditPage.question1_otherPurpose();
-    await (await otherPurpose.asCheckbox()).check(); // enables textarea
+    await (await otherPurpose.asCheckBox()).check(); // enables textarea
     await (await otherPurpose.asTextArea()).type(faker.lorem.word());
 
     // 2. Please provide a summary of your research purpose by responding to the questions below.
@@ -121,11 +121,11 @@ export default class WorkspacesPage extends AuthenticatedPage {
 
     // 3. The All of Us Research Program encourages researchers to disseminate ....
     const publicationInPeerReviewedJournal = workspaceEditPage.publicationInJournal();
-    await (await publicationInPeerReviewedJournal.asCheckbox()).check();
+    await (await publicationInPeerReviewedJournal.asCheckBox()).check();
 
     // 4. The All of Us Research Program would like to understand how ....
     const increaseWellness = workspaceEditPage.increaseWellnessResilience();
-    await (await increaseWellness.asCheckbox()).check();
+    await (await increaseWellness.asCheckBox()).check();
 
     // 5. Population of interest: use default values
     // Leave alone default values

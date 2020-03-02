@@ -1,4 +1,4 @@
-import {Page} from 'puppeteer';
+import {Page, Response} from 'puppeteer';
 import {waitUntilTitleMatch} from '../../driver/waitFuncs';
 import BasePage from './BasePage';
 
@@ -32,6 +32,10 @@ export default abstract class AuthenticatedPage extends BasePage {
     await this.puppeteerPage.waitForSelector(selectors.logo, {visible: true});
     await waitUntilTitleMatch(this.puppeteerPage, documentTitle);
     return true;
+  }
+
+  public async reloadPage(): Promise<Response> {
+    return await this.puppeteerPage.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
   }
 
   /**

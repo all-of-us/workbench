@@ -10,20 +10,6 @@ export function selectXpath(textOptions?: TextOptions) {
 }
 
 /**
- * any [@role=button] element with specified label.
- * @param label
- */
-export function buttonXpath(textOptions?: TextOptions) {
-  if (textOptions.text) {
-    return `(//button[text()='${textOptions.text}'] | //*[text()='${textOptions.text}' and @role='button'])`;
-  } else if (textOptions.normalizeSpace) {
-    return `(//button[normalize-space()='${textOptions.normalizeSpace}'] | //*[normalize-space()='${textOptions.normalizeSpace}' and @role='button'])`;
-  } else if (textOptions.textContains) {
-    return `(//button[contains(text(), '${textOptions.textContains}'] | //*[contains(text(),'${textOptions.textContains}') and @role='button'])`;
-  }
-}
-
-/**
  * a TEXTAREA element with specified label.
  * @param label
  */
@@ -103,6 +89,20 @@ export function labelXpath(options?: TextOptions) {
     return `//label[(contains(text(),'${options.textContains}') or contains(@aria-label,'${options.textContains}'))]`;
   } else if (options.normalizeSpace) {
     return `//label[contains(normalize-space(),'${options.normalizeSpace}')]`;
+  }
+}
+
+/**
+ * any [@role=button] element with specified label.
+ * @param label
+ */
+export function buttonXpath(textOptions?: TextOptions) {
+  if (textOptions.text) {
+    return `(//button[text()='${textOptions.text}'] | //*[text()='${textOptions.text}' and @role='button'])`;
+  } else if (textOptions.normalizeSpace) {
+    return `(//button[contains(normalize-space(text()),'${textOptions.normalizeSpace}')] | //*[normalize-space()='${textOptions.normalizeSpace}' and @role='button'])`;
+  } else if (textOptions.textContains) {
+    return `(//button[contains(text(), '${textOptions.textContains}')] | //*[contains(text(),'${textOptions.textContains}') and @role='button'])`;
   }
 }
 

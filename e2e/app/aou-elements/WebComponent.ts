@@ -19,13 +19,13 @@ export default class WebComponent {
     this.label = textOptions;
   }
 
-  public async asCheckbox(): Promise<CheckBox> {
+  public async asCheckBox(): Promise<CheckBox> {
     const checkbox = new CheckBox(this.page);
     await checkbox.withLabel(this.label);
     return checkbox;
   }
 
-  public async asTextbox(): Promise<TextBox> {
+  public async asTextBox(): Promise<TextBox> {
     const textbox = new TextBox(this.page);
     await textbox.withLabel(this.label);
     return textbox;
