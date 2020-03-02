@@ -11,6 +11,11 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "sex_at_birth",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "race",
     "type": "string"
   },

@@ -9,7 +9,14 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Cohort, CohortReview, DomainType, SearchRequest} from 'generated/fetch';
+import {
+  AgeType,
+  Cohort,
+  CohortReview,
+  DomainType,
+  GenderOrSexType,
+  SearchRequest
+} from 'generated/fetch';
 import * as moment from 'moment';
 import * as React from 'react';
 
@@ -212,7 +219,7 @@ export const QueryReport = withCurrentWorkspace()(
         this.setState({cdrName});
       });
       const request = (JSON.parse(review.cohortDefinition)) as SearchRequest;
-      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request)
+      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
         .then(response => {
           this.groupChartData(response.items);
           this.setState({data: response.items, loading: false});

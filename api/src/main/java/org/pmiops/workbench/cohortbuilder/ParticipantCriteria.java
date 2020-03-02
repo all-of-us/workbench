@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.SearchRequest;
 
 /**
@@ -25,21 +27,36 @@ public class ParticipantCriteria {
   private final SearchRequest searchRequest;
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
+  private final GenderOrSexType genderOrSexType;
+  private final AgeType ageType;
 
   public ParticipantCriteria(SearchRequest searchRequest) {
     this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE);
+  }
+
+  public ParticipantCriteria(
+      SearchRequest searchRequest, GenderOrSexType genderOrSexType, AgeType ageType) {
+    this.searchRequest = searchRequest;
+    this.participantIdsToExclude = NO_PARTICIPANTS_TO_EXCLUDE;
+    this.participantIdsToInclude = null;
+    this.genderOrSexType = genderOrSexType;
+    this.ageType = ageType;
   }
 
   public ParticipantCriteria(SearchRequest searchRequest, Set<Long> participantIdsToExclude) {
     this.searchRequest = searchRequest;
     this.participantIdsToExclude = participantIdsToExclude;
     this.participantIdsToInclude = null;
+    this.genderOrSexType = null;
+    this.ageType = null;
   }
 
   public ParticipantCriteria(Set<Long> participantIdsToInclude) {
     this.participantIdsToInclude = participantIdsToInclude;
     this.searchRequest = null;
     this.participantIdsToExclude = null;
+    this.genderOrSexType = null;
+    this.ageType = null;
   }
 
   @Nullable
@@ -57,9 +74,20 @@ public class ParticipantCriteria {
     return participantIdsToExclude;
   }
 
+  @Nullable
+  public GenderOrSexType getGenderOrSexType() {
+    return genderOrSexType;
+  }
+
+  @Nullable
+  public AgeType getAgeType() {
+    return ageType;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(searchRequest, participantIdsToExclude, participantIdsToExclude);
+    return Objects.hash(
+        searchRequest, participantIdsToExclude, participantIdsToExclude, genderOrSexType, ageType);
   }
 
   @Override
@@ -70,6 +98,8 @@ public class ParticipantCriteria {
     ParticipantCriteria that = (ParticipantCriteria) obj;
     return Objects.equals(this.searchRequest, that.searchRequest)
         && Objects.equals(this.participantIdsToExclude, that.participantIdsToExclude)
-        && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude);
+        && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude)
+        && Objects.equals(this.genderOrSexType, that.genderOrSexType)
+        && Objects.equals(this.ageType, that.ageType);
   }
 }

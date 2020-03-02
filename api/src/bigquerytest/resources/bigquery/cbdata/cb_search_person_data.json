@@ -2,6 +2,7 @@
   {
     "person_id": 1,
     "gender": "MALE",
+    "sex_at_birth": "MALE",
     "race": "Caucasian",
     "dob": "1980-08-01",
     "age_at_consent": 30,
@@ -10,6 +11,7 @@
   {
     "person_id": 2,
     "gender": "MALE",
+    "sex_at_birth": "MALE",
     "race": "African American",
     "dob": "1980-08-01",
     "age_at_consent": 30,
@@ -18,6 +20,7 @@
   {
     "person_id": 102246,
     "gender": "FEMALE",
+    "sex_at_birth": "FEMALE",
     "race": "African American",
     "dob": "1980-02-17",
     "age_at_consent": 30,
@@ -26,6 +29,7 @@
   {
     "person_id": 99,
     "gender": "MALE",
+    "sex_at_birth": "MALE",
     "race": "Asian",
     "dob": "1970-02-17",
     "age_at_consent": 55,
