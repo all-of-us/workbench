@@ -4,27 +4,31 @@ import GoogleLoginPage from '../app/GoogleLoginPage';
 import HomePage, {FIELD_LABEL} from '../app/HomePage';
 import PageNavigation, {LINK} from '../app/page-mixin/PageNavigation';
 import ProfilePage from '../app/ProfilePage';
-import WorkspaceResourceCard from '../app/WorkspaceResourceCard';
+import WorkspaceCard from '../app/WorkspaceCard';
+import WorkspacesPage from '../app/WorkspacesPage';
+import launchBrowser from '../driver/puppeteer-launch';
 
-const Chrome = require('../driver/ChromeDriver');
+const configs = require('../resources/workbench-config');
+
 jest.setTimeout(60 * 1000);
 
-describe('aou-elements', () => {
+describe.skip('aou-elements', () => {
 
-  let chromeBrowser: Browser;
+  let browser: Browser;
   let page: Page;
 
   beforeAll(async () => {
-    chromeBrowser = await Chrome.newBrowser();
+    browser = await launchBrowser();
   });
 
   afterAll(async () => {
-    await chromeBrowser.close();
+    await browser.close();
   });
 
   beforeEach(async () => {
-    const incognitoContext = await chromeBrowser.createIncognitoBrowserContext();
+    const incognitoContext = await browser.createIncognitoBrowserContext();
     page = await incognitoContext.newPage();
+    await page.setUserAgent(configs.puppeteerUserAgent);
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
   });
@@ -37,18 +41,28 @@ describe('aou-elements', () => {
   test('Workspace card', async () => {
     const home = new HomePage(page);
     await home.waitForReady();
-    const workspacesCards = new WorkspaceResourceCard(page);
-    await workspacesCards.getAllCardsElements();
-    const anyCard = await workspacesCards.getAnyResourceCard();
-    console.log('any card name = ' + await anyCard.getCardName());
 
+    await WorkspaceCard.getAllCards(page);
+    await WorkspaceCard.getAnyCard(page);
+
+    await PageNavigation.goTo(page, LINK.YOUR_WORKSPACES);
+    await new WorkspacesPage(page).waitForReady();
+
+    const n = 'aoutest-70-1583167646';
+    const myCard = await WorkspaceCard.findCard(page, n);
+    const myCardName = await myCard.getResourceCardName();
+    expect(myCardName).toEqual(n);
+    expect(await myCard.getEllipsisIcon()).toBeTruthy();
+
+    const linTexts = await myCard.getPopupLinkTextsArray();
+    expect(linTexts).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 
   /**
    * This is not a Puppeteer test for AoU application. It is for framework functions testing.
    * If you make any change in aou-elements classes, you want to run this test to verify changes.
    */
-  test.skip('Click on Create New Workspace link on Home page', async () => {
+  test('Click on Create New Workspace link on Home page', async () => {
 
     const anyLink = new NewClrIconLink(page);
     const linkHandle = await anyLink.withLabel(FIELD_LABEL.CREATE_NEW_WORKSPACE, 'plus-circle');

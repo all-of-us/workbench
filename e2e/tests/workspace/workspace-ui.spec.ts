@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 import WebElement from '../../app/aou-elements/WebElement';
-import WorkspaceResourceCard from '../../app/WorkspaceResourceCard';
+import WorkspaceCard from '../../app/WorkspaceCard';
 import WorkspacesPage from '../../app/WorkspacesPage';
 
 const Chrome = require('../../driver/ChromeDriver');
@@ -19,8 +19,7 @@ describe('Workspace', () => {
   });
 
   test('Workspace cards have same UI size', async () => {
-    const workspaceCards = new WorkspaceResourceCard(page);
-    const cards = await workspaceCards.getAllCardsElements();
+    const cards = await WorkspaceCard.getAllCards(page);
     let width;
     let height;
     for (const card of cards) {
