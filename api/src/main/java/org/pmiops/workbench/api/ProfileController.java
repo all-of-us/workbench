@@ -262,7 +262,7 @@ public class ProfileController implements ProfileApiDelegate {
     profile.setDemographicSurvey(
         Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
     profile.setInstitutionalAffiliations(
-        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList()));
+        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
     // We always store the username as all lowercase.
     profile.setUsername(profile.getUsername().toLowerCase());
   }
