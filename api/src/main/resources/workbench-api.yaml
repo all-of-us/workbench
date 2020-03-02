@@ -3228,11 +3228,6 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for billing lockout and upgrade
-      enableNewAccountCreation:
-        type: boolean
-        default: false
-        description: Feature flag for collecting new demographics & TOS acknowledgement
-          on user creation.
       requireInvitationKey:
         type: boolean
         default: false
