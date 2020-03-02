@@ -25,7 +25,7 @@ export const LINK_ICON = {
 };
 
 
-export default class NaviBar {
+export default class PageNavigation {
 
   /**
    * Is nav menu dropdown open or closed?
@@ -45,12 +45,12 @@ export default class NaviBar {
     * Open dropdown.
     */
   public static async openDropdown(page: Page) {
-    const is = await NaviBar.isOpen(page);
+    const is = await PageNavigation.isOpen(page);
     if (!is) {
       // click bars icon to open dropdown
       const icon = await findIcon(page, '', 'bars');
       await icon.click();
-      await page.waitForXPath(NaviBar.angleIconXpath, {timeout: 2000});
+      await page.waitForXPath(PageNavigation.angleIconXpath, {timeout: 2000});
     }
   }
 
@@ -59,12 +59,12 @@ export default class NaviBar {
    * @param page
    * @param app
    */
-  public static async go(page: Page, app: string) {
-    await NaviBar.openDropdown(page);
+  public static async goTo(page: Page, app: string) {
+    await PageNavigation.openDropdown(page);
     const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${app}")]`;
     const [applink] = await page.$x(appLinkXpath);
     if (!applink) {
-      const [username, admin] = await page.$x(NaviBar.angleIconXpath);
+      const [username, admin] = await page.$x(PageNavigation.angleIconXpath);
       if (app === 'Profile' || app === 'Sign Out') {
         // Open User submenu if needed
         if (!applink) {

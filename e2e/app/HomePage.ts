@@ -1,4 +1,4 @@
-import {ElementHandle} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import {waitUntilFindTexts} from '../driver/waitFuncs';
 import Link from './aou-elements/Link';
 import {findIcon} from './aou-elements/xpath-finder';
@@ -16,6 +16,10 @@ export const FIELD_LABEL = {
 
 export default class HomePage extends AuthenticatedPage {
 
+  constructor(page: Page) {
+    super(page);
+  }
+
   public async isLoaded(): Promise<boolean> {
     await super.isLoaded(FIELD_LABEL.TITLE);
     await new Link(this.puppeteerPage).withLabel(FIELD_LABEL.SEE_ALL_WORKSPACES);
@@ -32,7 +36,7 @@ export default class HomePage extends AuthenticatedPage {
   /**
    * navigate to Home page URL
    */
-  public async navigateToURL(): Promise<void> {
+  public async goToURL(): Promise<void> {
     const pageUrl = configs.uiBaseUrl;
     await this.puppeteerPage.goto(pageUrl, {waitUntil: ['domcontentloaded','networkidle0']});
     await this.waitForReady();

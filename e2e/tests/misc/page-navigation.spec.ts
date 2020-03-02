@@ -1,7 +1,7 @@
 import Button from '../../app/aou-elements/Button';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import HomePage from '../../app/HomePage';
-import NaviBar, {LINK} from '../../app/page-mixin/NaviBar';
+import PageNavigation, {LINK} from '../../app/page-mixin/PageNavigation';
 import ProfilePage from '../../app/ProfilePage';
 import WorkspacesPage from '../../app/WorkspacesPage';
 import launchBrowser from '../../driver/puppeteer-launch';
@@ -51,7 +51,7 @@ describe('Navigation', () => {
     expect(await homePage.isLoaded()).toBe(true);
 
     // Select Profile link
-    await NaviBar.go(page, LINK.PROFILE);
+    await PageNavigation.goTo(page, LINK.PROFILE);
     const profilePage = new ProfilePage(page);
     await profilePage.waitForReady();
     expect(await profilePage.isLoaded()).toBe(true);
@@ -59,18 +59,18 @@ describe('Navigation', () => {
     // check user name in dropdown matches names on Profile page
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();
-    await NaviBar.openDropdown(page);
-    const displayedUsername = await NaviBar.getUserName(page);
+    await PageNavigation.openDropdown(page);
+    const displayedUsername = await PageNavigation.getUserName(page);
     expect(displayedUsername).toBe(`${fname} ${lname}`);
 
     // Select Your Workspaces link
-    await NaviBar.go(page, LINK.YOUR_WORKSPACES);
+    await PageNavigation.goTo(page, LINK.YOUR_WORKSPACES);
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForReady();
     expect(await workspacesPage.isLoaded()).toBe(true);
 
     // Select Home link
-    await NaviBar.go(page, LINK.HOME);
+    await PageNavigation.goTo(page, LINK.HOME);
     await homePage.waitForReady();
     expect(await homePage.isLoaded()).toBe(true);
     
@@ -79,13 +79,13 @@ describe('Navigation', () => {
   test('Check Contact Us form', async () => {
 
     const home = new HomePage(page);
-    await home.navigateToURL();
+    await home.goToURL();
 
     const iframeTitle = 'Find more information here';
     let iframeHandle = await page.$(`iframe[title='${iframeTitle}']`);
 
     // Select Contact Us
-    await NaviBar.go(page, LINK.CONTACT_US);
+    await PageNavigation.goTo(page, LINK.CONTACT_US);
 
     iframeHandle = await page.waitForSelector(`iframe[title='${iframeTitle}']`);
     const newIframe = await iframeHandle.contentFrame();
@@ -120,10 +120,10 @@ describe('Navigation', () => {
   test('Sign Out', async () => {
 
     const home = new HomePage(page);
-    await home.navigateToURL();
+    await home.goToURL();
 
     // Select Sign Out link
-    await NaviBar.go(page, LINK.SIGN_OUT);
+    await PageNavigation.goTo(page, LINK.SIGN_OUT);
     expect(await page.url()).toContain('login');
 
   });

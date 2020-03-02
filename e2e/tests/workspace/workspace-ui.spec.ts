@@ -1,73 +1,52 @@
-import {Browser, Page} from 'puppeteer';
-import select from '../../app/aou-elements/select';
-import Textbox from '../../app/aou-elements/textbox';
-import GoogleLoginPage from '../../app/GoogleLoginPage';
-import HomePage from '../../app/HomePage';
-import WorkspaceEditPage, {FIELD_LABEL} from '../../app/WorkspaceEditPage';
+import {Page} from 'puppeteer';
+import WebElement from "../../app/aou-elements/WebElement";
+import WorkspaceResourceCard from "../../app/page-mixin/WorkspaceCard";
 import WorkspacesPage from '../../app/WorkspacesPage';
 
 const Chrome = require('../../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
 
-describe.skip('Workspace', () => {
+describe('Workspace', () => {
 
-  let chromeBrowser: Browser;
   let page: Page;
 
-  beforeAll(async () => {
-    chromeBrowser = await Chrome.newBrowser();
-  });
-
-  afterAll(async () => {
-    await chromeBrowser.close();
-  });
-
   beforeEach(async () => {
-    const incognitoContext = await chromeBrowser.createIncognitoBrowserContext();
-    page = await incognitoContext.newPage();
-    const loginPage = new GoogleLoginPage(page);
-    await loginPage.login();
+    page = await Chrome.setup();
   });
 
   afterEach(async () => {
-    await page.close();
-    await page.waitFor(1000);
+    await Chrome.teardown();
   });
 
-  // Click CreateNewWorkspace link on Home page => Open Create Workspace page
-  test('Click on Create New Workspace link on Home page', async () => {
-
-    const home = new HomePage(page);
-    await home.getCreateNewWorkspaceLink()
-      .then((link) => link.click());
-
-    const workspaceEdit = new WorkspaceEditPage(page);
-    await workspaceEdit.waitForReady();
-
-    // expect Workspace-Name Input text field exists and is NOT disabled
-    const workspaceNameTextbox = new Textbox(page);
-    await workspaceNameTextbox.withLabel({text: FIELD_LABEL.NEW_WORKSPACE_NAME});
-    expect(await workspaceNameTextbox.isVisible()).toBe(true);
-    expect(await workspaceNameTextbox.isDisabled()).toBe(false);
-
-    // expect DataSet Select field exists and is NOT disabled
-    const dataSetSelect = new select(page);
-    await dataSetSelect.withLabel({text: FIELD_LABEL.SYNTHETIC_DATASET});
-    expect(await dataSetSelect.isVisible()).toBe(true);
-    expect(await dataSetSelect.isDisabled()).toBe(false);
-    expect(await dataSetSelect.getValue()).toBe('2'); // default value
-
+  test('Workspace cards have same UI size', async () => {
+    const workspaceCards = new WorkspaceResourceCard(page);
+    const cards = await workspaceCards.getAllCardsElements();
+    let width;
+    let height;
+    for (const card of cards) {
+      const cardElem = new WebElement(page, card);
+      expect(await cardElem.isVisible()).toBe(true);
+      const size = await cardElem.size();
+      if (width === undefined) {
+        width = size.width; // Initialize width and height with first card element's size, compare with rest cards
+        height = size.height;
+      } else {
+        expect(size.height).toEqual(height);
+        expect(size.width).toEqual(width);
+      }
+      await card.dispose();
+    }
   });
-
 
   // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
-  test('Click on Create New Workspace link on My Workspaces page', async () => {
+  test('Click Create New Workspace link on My Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
-    await workspaces.clickCreateNewWorkspace();
-    const workspaceNameTextbox = new Textbox(page);
-    await workspaceNameTextbox.withLabel({text: FIELD_LABEL.NEW_WORKSPACE_NAME});
+    await workspaces.goToURL();
+    const workspaceEdit = await workspaces.clickCreateNewWorkspace();
+    const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
     expect(await workspaceNameTextbox.isVisible()).toBe(true);
   });
+
 
 /*
       // Checking all fields in Research Purpose section

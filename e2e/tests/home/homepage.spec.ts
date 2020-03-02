@@ -1,8 +1,9 @@
 import Link from '../../app/aou-elements/Link';
 import WebElement from '../../app/aou-elements/WebElement';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
-import HomePage from '../../app/HomePage';
+import HomePage, {FIELD_LABEL as editPageFieldLabel} from '../../app/HomePage';
 import WorkspaceResourceCard from '../../app/page-mixin/WorkspaceCard';
+import WorkspaceEditPage from "../../app/WorkspaceEditPage";
 import WorkspacesPage from '../../app/WorkspacesPage';
 import launchBrowser from '../../driver/puppeteer-launch';
 
@@ -33,8 +34,7 @@ describe('Home', () => {
   });
 
   test('Homepage is the landing page after Sign In', async () => {
-
-    // Inspect some important api
+    // Enable networks requests inspection
     await page.setRequestInterception(true);
 
     // Following network requests expected to happen
@@ -87,17 +87,14 @@ describe('Home', () => {
     expect(requestsFailed.length).toEqual(0);
     // Expect zero page error
     expect(pageErrors.length).toEqual(0);
-
   });
 
-  test('Workspace cards have same size on page', async () => {
-
-    await page.goto(configs.uiBaseUrl, {waitUntil: 'networkidle0'});
+  test('Workspace cards have same UI size', async () => {
     const home = new HomePage(page);
-    await home.waitForReady();
+    await home.goToURL();
 
     const workspaceCards = new WorkspaceResourceCard(page);
-    const cards = await workspaceCards.getAllCards();
+    const cards = await workspaceCards.getAllCardsElements();
     let width;
     let height;
     for (const card of cards) {
@@ -113,26 +110,36 @@ describe('Home', () => {
       }
       await card.dispose();
     }
-
   });
 
-  test('See All Workspace link works', async () => {
-
+  // Click See All Workspaces link => Opens Your Workspaces page
+  test('Click See All Workspace link', async () => {
     const home = new HomePage(page);
-    await home.navigateToURL();
+    await home.goToURL();
 
-    // Verify See all Workspaces link
     const seeAllWorkspacesLink = new Link(page);
-    await seeAllWorkspacesLink.withLabel('See all Workspaces');
-    expect(await seeAllWorkspacesLink.isVisible()).toBe(true);
-    // Click it to verify works
+    await seeAllWorkspacesLink.withLabel(editPageFieldLabel.SEE_ALL_WORKSPACES);
     await seeAllWorkspacesLink.click();
-    const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.isLoaded();
+    const workspaces = new WorkspacesPage(page);
+    await workspaces.waitForReady();
+    expect(await workspaces.isLoaded()).toBe(true);
     await seeAllWorkspacesLink.dispose();
-
   });
 
+  // Click Create New Workspace link => Opens Create Workspace page
+  test('Click Create New Workspace link', async () => {
+    const home = new HomePage(page);
+    await home.goToURL();
+
+    await home.getCreateNewWorkspaceLink()
+      .then((link) => link.click());
+
+    const workspaceEdit = new WorkspaceEditPage(page);
+    await workspaceEdit.waitForReady();
+    // expect Workspace name Input textfield exists and NOT disabled
+    const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
+    expect(await workspaceNameTextbox.isVisible()).toBe(true);
+  });
 
 
 });

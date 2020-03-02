@@ -23,7 +23,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    /**
     * navigate to My Workspaces URL
     */
-  public async navigateToURL(): Promise<void> {
+  public async goToURL(): Promise<void> {
     const pageUrl = configs.uiBaseUrl + configs.workspacesUrlPath;
     await this.puppeteerPage.goto(pageUrl, {waitUntil: ['domcontentloaded','networkidle0']});
     await this.waitForSpinner();
@@ -58,7 +58,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     * 4: return
     */
   public async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    await this.navigateToURL();
+    await this.goToURL();
     const link = await this.getCreateNewWorkspaceLink();
     await Promise.all([
       this.puppeteerPage.waitForNavigation( { waitUntil: ['domcontentloaded','networkidle0']} ),
@@ -92,7 +92,6 @@ export default class WorkspacesPage extends AuthenticatedPage {
 
     // expand Disease purpose section
     await workspaceEditPage.expandResearchPurposeSection();
-    console.log('exxpand resreach pupose');
 
     // Enter value in 'Disease-focused research'
     const diseaseName = workspaceEditPage.question1_diseaseFocusedResearch();
@@ -104,7 +103,6 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await (await educationPurpose.asCheckbox()).check();
 
     const forProfitPurpose = workspaceEditPage.question1_forProfitPurpose();
-    console.log('for-profit purpose checkbox begins');
     await (await forProfitPurpose.asCheckbox()).check();
 
     const otherPurpose = workspaceEditPage.question1_otherPurpose();

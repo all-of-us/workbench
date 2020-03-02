@@ -63,9 +63,6 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   public async getWorkspaceNameTextbox(): Promise<TextBox> {
-    // Do not remove, custom selector
-    // const selector = `//*[text()='${FIELD_LABEL.NEW_WORKSPACE_NAME}']/ancestor::node()[2]//input`;
-    // await textbox.withXpath(selector);
     const textbox = new TextBox(this.puppeteerPage);
     await textbox.withLabel({text: FIELD_LABEL.NEW_WORKSPACE_NAME, ancestorNodeLevel: 2});
     return textbox;
@@ -161,13 +158,10 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     // expand Disease purpose section if needed
     const researchPurpose = this.question1_researchPurpose();
     const researchPurposeCheckbox = await researchPurpose.asCheckbox();
-    console.log('about to isChecked');
     if (!await researchPurposeCheckbox.isChecked()) {
-      console.log('expandResearchPurposeSection check box');
       await researchPurposeCheckbox.check();
       await this.puppeteerPage.waitFor(1000);
     }
-    console.log('outside expandResearchPurposeSection if');
   }
 
   /**
