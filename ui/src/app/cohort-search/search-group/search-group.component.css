@@ -13,7 +13,6 @@
 
 .temporal-sub-card-header {
   display: flex;
-  justify-content: space-between;
   padding: .5rem .75rem;
 }
 
@@ -50,7 +49,8 @@
   color: rgb(114, 114, 114);
   border-color: rgb(195, 195, 195);
   font-weight: 100 !important;
-  width:12rem;
+  margin-right: 0.5rem;
+  width: auto;
   text-align: start;
 }
 .time-selection-button:hover {
@@ -129,11 +129,12 @@
 }
 
 .time-inputBox {
-  width: 3.4rem;
-  border: 1px solid #9a9a9a;
+  height: 1.25rem;
+  width: 2.5rem;
+  border: 1px solid rgb(195, 195, 195);
+  margin-top: 2px;
   padding: 0.6rem;
   border-radius: 0.1rem;
-  text-align: center;
 }
 
 .of-text{
