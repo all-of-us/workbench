@@ -207,6 +207,7 @@ interface State {
   demoMenuHover: boolean;
   error: boolean;
   inputError: boolean;
+  inputTouched: boolean;
   loading: boolean;
   overlayStyle: any;
   position: string;
@@ -233,6 +234,7 @@ export const SearchGroup = withCurrentWorkspace()(
         demoMenuHover: false,
         error: false,
         inputError: false,
+        inputTouched: false,
         loading: false,
         overlayStyle: undefined,
         position: 'bottom-left',
@@ -270,24 +272,23 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     getGroupCount() {
-      try {
-        this.abortPendingCalls();
-        this.setState({error: false, loading: true});
-        const {group, role, workspace: {cdrVersionId}} = this.props;
-        const mappedGroup = mapGroup(group);
-        const request = {
-          includes: [],
-          excludes: [],
-          [role]: [mappedGroup]
-        };
-        cohortBuilderApi().countParticipants(+cdrVersionId, request, {signal: this.aborter.signal})
-          .then(count => this.setState({count, loading: false}));
-      } catch (error) {
-        if (!isAbortError(error)) {
-          console.error(error);
-          this.setState({error: true, loading: false});
-        }
-      }
+      this.abortPendingCalls();
+      this.setState({error: false, loading: true});
+      const {group, role, workspace: {cdrVersionId}} = this.props;
+      const mappedGroup = mapGroup(group);
+      const request = {
+        includes: [],
+        excludes: [],
+        [role]: [mappedGroup]
+      };
+      cohortBuilderApi().countParticipants(+cdrVersionId, request, {signal: this.aborter.signal})
+        .then(count => this.setState({count, loading: false}))
+        .catch(error => {
+          if (!isAbortError(error)) {
+            console.error(error);
+            this.setState({error: true, loading: false});
+          }
+        });
     }
 
     abortPendingCalls() {
@@ -406,6 +407,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     handleTemporalChange(e: any) {
+      this.setState({inputTouched: true});
       const {value} = e.target;
       triggerEvent('Temporal', 'Click', 'Turn On Off - Temporal - Cohort Builder');
       this.setGroupProperty('temporal', value);
@@ -465,7 +467,7 @@ export const SearchGroup = withCurrentWorkspace()(
 
     render() {
       const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
-      const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, inputError, loading, overlayStyle} = this.state;
+      const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, inputError, inputTouched, loading, overlayStyle} = this.state;
       const domainMap = (domain: any, temporalGroup: number) => {
         if (!!domain.children) {
           return {label: domain.name, items: domain.children.map((dt) => domainMap(dt, temporalGroup))};
@@ -524,7 +526,7 @@ export const SearchGroup = withCurrentWorkspace()(
           <div style={{display: temporal ? 'block' : 'none'}}>
             {/* Temporal time dropdown */}
             <div style={styles.cardBlock}>
-              {time !== TemporalTime.DURINGSAMEENCOUNTERAS && inputError && <div style={styles.inputError}>
+              {time !== TemporalTime.DURINGSAMEENCOUNTERAS && inputError && inputTouched && <div style={styles.inputError}>
                 Please enter a positive number
               </div>}
               <Menu style={styles.menu} appendTo={document.body} model={timeMenuItems} popup ref={el => this.timeMenu = el} />

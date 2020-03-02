@@ -169,6 +169,12 @@ export const SearchGroupItem = withCurrentWorkspace()(
       }
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      if (prevProps.item !== this.props.item) {
+        this.setState({loading: true}, () => this.getItemCount());
+      }
+    }
+
     async getItemCount() {
       const {index, item, role, updateGroup} = this.props;
       // prevent multiple group count calls when initializing multiple items simultaneously (on cohort edit or clone)
