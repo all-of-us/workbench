@@ -17,6 +17,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
@@ -293,7 +297,7 @@ public class ConceptsControllerTest {
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
     ConceptService conceptService =
-        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao, cbCriteriaDao);
+        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptsController = new ConceptsController(conceptService, workspaceService);
 
     DbUser user = new DbUser();
