@@ -3,8 +3,9 @@ import {waitUntilFindTexts, waitUntilTitleMatch} from '../driver/waitFuncs';
 import Link from './aou-elements/Link';
 import select from './aou-elements/Select';
 import {findButton} from './aou-elements/xpath-finder';
-import DataPage from './DataPage';
+import {DataPage} from './DataPage';
 import AuthenticatedPage from './page-mixin/AuthenticatedPage';
+import {SideNav} from './page-mixin/SideNav';
 import WorkspaceEditPage, {FIELD_LABEL as EditPageFieldLabel} from './WorkspaceEditPage';
 const configs = require('../resources/workbench-config.js');
 const faker = require('faker/locale/en_US');
@@ -14,10 +15,12 @@ export const FIELD_LABEL = {
   CREATE_NEW_WORKSPACE: 'Create a New Workspace',
 };
 
-export default class WorkspacesPage extends AuthenticatedPage {
+class Workspaces extends AuthenticatedPage {
 
+  public page: Page;
   constructor(page: Page) {
     super(page);
+    this.page = page;
   }
 
    /**
@@ -36,7 +39,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     return true;
   }
 
-  public async waitForReady(): Promise<WorkspacesPage> {
+  public async waitForReady(): Promise<Workspaces> {
     await this.isLoaded();
     await this.waitForSpinner();
     return this;
@@ -142,5 +145,6 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await new Link(this.puppeteerPage).withXpath(`//a[.='${workspaceName}' and @href]`, {visible: true})
   }
 
-
 }
+
+export const WorkspacesPage = SideNav(Workspaces);

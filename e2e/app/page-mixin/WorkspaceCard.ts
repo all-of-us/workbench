@@ -1,5 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
-import WebElement from './aou-elements/WebElement';
+import WebElement from '../aou-elements/WebElement';
 const _ = require('lodash');
 
 
@@ -16,6 +16,7 @@ export const LINK_LABEL = {
  */
 export default class WorkspaceCard extends WebElement {
 
+  // TODO make this class a mixin
 
   public static readonly popupRootXpath = '//*[@id="popup-root"]'; // element is not a child of workspace-card
   public static readonly cardRootXpath = '//*[child::*[@data-test-id="workspace-card"]]';

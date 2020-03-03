@@ -1,9 +1,9 @@
 import Button from '../../app/aou-elements/Button';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
-import HomePage from '../../app/HomePage';
-import PageNavigation, {LINK} from '../../app/page-mixin/PageNavigation';
-import ProfilePage from '../../app/ProfilePage';
-import WorkspacesPage from '../../app/WorkspacesPage';
+import {HomePage} from '../../app/HomePage';
+import {LINK} from '../../app/page-mixin/PageNavigation';
+import Profile from '../../app/ProfilePage';
+import {WorkspacesPage} from '../../app/WorkspacesPage';
 import launchBrowser from '../../driver/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);
@@ -42,7 +42,6 @@ describe('Navigation', () => {
 
 
   test('App navigation links work', async () => {
-
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
 
@@ -51,41 +50,39 @@ describe('Navigation', () => {
     expect(await homePage.isLoaded()).toBe(true);
 
     // Select Profile link
-    await PageNavigation.goTo(page, LINK.PROFILE);
-    const profilePage = new ProfilePage(page);
+    await homePage.goTo(LINK.PROFILE);
+    const profilePage = new Profile(page);
     await profilePage.waitForReady();
     expect(await profilePage.isLoaded()).toBe(true);
 
     // check user name in dropdown matches names on Profile page
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();
-    await PageNavigation.openDropdown(page);
-    const displayedUsername = await PageNavigation.getUserName(page);
+    await homePage.openDropdown();
+    const displayedUsername = await homePage.getUserName();
     expect(displayedUsername).toBe(`${fname} ${lname}`);
 
     // Select Your Workspaces link
-    await PageNavigation.goTo(page, LINK.YOUR_WORKSPACES);
+    await homePage.goTo(LINK.YOUR_WORKSPACES);
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForReady();
     expect(await workspacesPage.isLoaded()).toBe(true);
 
     // Select Home link
-    await PageNavigation.goTo(page, LINK.HOME);
+    await homePage.goTo(LINK.HOME);
     await homePage.waitForReady();
     expect(await homePage.isLoaded()).toBe(true);
-    
   });
 
   test('Check Contact Us form', async () => {
-
-    const home = new HomePage(page);
-    await home.goToURL();
+    const homePage = new HomePage(page);
+    await homePage.goToURL();
 
     const iframeTitle = 'Find more information here';
     let iframeHandle = await page.$(`iframe[title='${iframeTitle}']`);
 
     // Select Contact Us
-    await PageNavigation.goTo(page, LINK.CONTACT_US);
+    await homePage.goTo(LINK.CONTACT_US);
 
     iframeHandle = await page.waitForSelector(`iframe[title='${iframeTitle}']`);
     const newIframe = await iframeHandle.contentFrame();
@@ -114,18 +111,15 @@ describe('Navigation', () => {
 
     expect(await askQuestionAboutButton.isVisible()).toBe(false);
     await askQuestionAboutButton.dispose();
-
   });
 
   test('Sign Out', async () => {
-
-    const home = new HomePage(page);
-    await home.goToURL();
+    const homePage = new HomePage(page);
+    await homePage.goToURL();
 
     // Select Sign Out link
-    await PageNavigation.goTo(page, LINK.SIGN_OUT);
-    expect(await page.url()).toContain('/login');
-
+    await homePage.goTo(LINK.SIGN_OUT);
+    expect(await page.url()).toEqual(expect.stringMatching(/\/login$/));
   });
 
 });

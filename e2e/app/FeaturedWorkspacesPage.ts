@@ -1,12 +1,20 @@
+import {Page} from 'puppeteer';
 import {waitUntilFindTexts} from '../driver/waitFuncs';
 import AuthenticatedPage from './page-mixin/AuthenticatedPage';
+import {SideNav} from './page-mixin/SideNav';
 
 export const FIELD_LABEL = {
   TITLE: 'Workspace Library',
   HEADER: 'Researcher Workbench Workspace Library',
 };
 
-export default class FeaturedWorkspacesPage extends AuthenticatedPage {
+export default class FeaturedWorkspaces extends AuthenticatedPage {
+
+  public page: Page;
+  constructor(page: Page) {
+    super(page);
+    this.page = page;
+  }
 
   public async isLoaded(): Promise<boolean> {
     await super.isLoaded(FIELD_LABEL.TITLE);
@@ -14,7 +22,7 @@ export default class FeaturedWorkspacesPage extends AuthenticatedPage {
     return true;
   }
 
-  public async waitForReady(): Promise<FeaturedWorkspacesPage> {
+  public async waitForReady(): Promise<FeaturedWorkspaces> {
     await this.isLoaded();
     await this.waitForSpinner();
     return this;
@@ -22,3 +30,5 @@ export default class FeaturedWorkspacesPage extends AuthenticatedPage {
   
 
 }
+
+export const FeaturedWorkspacesPage = SideNav(FeaturedWorkspaces);

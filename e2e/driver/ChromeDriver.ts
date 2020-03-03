@@ -1,6 +1,6 @@
 import * as Puppeteer from 'puppeteer';
 import GoogleLoginPage from '../app/GoogleLoginPage';
-import HomePage from '../app/HomePage';
+import {HomePage} from '../app/HomePage';
 
 export default class ChromeDriver {
 

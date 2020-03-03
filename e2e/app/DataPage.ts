@@ -1,5 +1,7 @@
+import {Page} from 'puppeteer';
 import {waitUntilTitleMatch} from '../driver/waitFuncs';
 import AuthenticatedPage from './page-mixin/AuthenticatedPage';
+import {SideNav} from './page-mixin/SideNav';
 
 export const TAB_SELECTOR = {
   cohortsTab: '//*[@role="button"][(text()="Cohorts")]',
@@ -9,7 +11,13 @@ export const TAB_SELECTOR = {
   showAllTab: '//*[@role="button"][(text()="Show All")]',
 };
 
-export default class DataPage extends AuthenticatedPage {
+class Data extends AuthenticatedPage {
+
+  public page: Page;
+  constructor(page: Page) {
+    super(page);
+    this.page = page;
+  }
 
   public async waitUntilPageReady() {
     await waitUntilTitleMatch(this.puppeteerPage, 'Data Page');
@@ -18,3 +26,5 @@ export default class DataPage extends AuthenticatedPage {
   }
 
 }
+
+export const DataPage = SideNav(Data);

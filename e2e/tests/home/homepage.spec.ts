@@ -1,10 +1,10 @@
 import Link from '../../app/aou-elements/Link';
 import WebElement from '../../app/aou-elements/WebElement';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
-import HomePage, {FIELD_LABEL as editPageFieldLabel} from '../../app/HomePage';
-import WorkspaceCard from '../../app/WorkspaceCard';
+import {FIELD_LABEL as editPageFieldLabel, HomePage} from '../../app/HomePage';
+import WorkspaceCard from '../../app/page-mixin/WorkspaceCard';
 import WorkspaceEditPage from '../../app/WorkspaceEditPage';
-import WorkspacesPage from '../../app/WorkspacesPage';
+import {WorkspacesPage} from '../../app/WorkspacesPage';
 import launchBrowser from '../../driver/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);

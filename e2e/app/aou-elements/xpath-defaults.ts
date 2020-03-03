@@ -70,7 +70,7 @@ export function inputXpath(options?: TextOptions, inputType?: string) {
  */
 export function textXpath(options?: TextOptions) {
   if (options.text) {
-    return `//*[text()='${options.text}' or @placeholder='${options.text}']`;
+    return `//*[text()='${options.text}' or @aria-label='${options.text}' or @placeholder='${options.text}']`;
   } else if (options.textContains) {
     return `//*[contains(text(),'${options.textContains}') or contains(@aria-label,'${options.textContains}') or contains(@placeholder,'${options.textContains}')]`;
   } else if (options.normalizeSpace) {
@@ -125,4 +125,21 @@ export function iconXpath(label: string, shapeValue: string) {
   }
   // next to a label
   return `//*[normalize-space()='${label}']/ancestor::node()[1]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
+}
+
+export function buildXpath(options: TextOptions) {
+  if (options.tagName === undefined) {
+    options.tagName = '*'; // TODO ??
+  }
+  if (options.tagName === 'text' || options.tagName === 'label') {
+    if (options.text) {
+      return `//${options.tagName}[text()='${options.text}' or @aria-label='${options.text}' or @placeholder='${options.text}']`;
+    } else if (options.textContains) {
+      return `//${options.tagName}[contains(text(),'${options.textContains}') or contains(@aria-label,'${options.textContains}')\
+        or contains(@placeholder,'${options.textContains}')]`;
+    } else if (options.normalizeSpace) {
+      return `//${options.tagName}[contains(normalize-space(),'${options.normalizeSpace}')]`;
+    }
+  }
+
 }

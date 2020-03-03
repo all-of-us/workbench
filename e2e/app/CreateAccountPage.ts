@@ -1,4 +1,5 @@
-import {ElementHandle} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
+import {waitUntilFindTexts} from '../driver/waitFuncs';
 import Button from './aou-elements/Button';
 import CheckBox from './aou-elements/CheckBox';
 import ClrIconLink from './aou-elements/ClrIconLink';
@@ -10,6 +11,7 @@ import TextBox from './aou-elements/TextBox';
 import BasePage from './page-mixin/BasePage';
 
 import {defaultFieldValues} from '../resources/data/user-registration-fields';
+import {SideNav} from './page-mixin/SideNav';
 
 const faker = require('faker/locale/en_US');
 
@@ -28,12 +30,18 @@ export const FIELD_LABEL = {
   READ_UNDERSTAND_TERMS_OF_USE: 'I have read and understand the All of Us Research Program Terms of Use described above',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
-  RESEARCH_BACKGROUND: 'Please describe your research background, experience and research interests',
-  EDUCATION_LEVEL: 'Highest Level of Education Completed',
+  RESEARCH_BACKGROUND: 'describe your research background, experience, and research interests',
+  EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YEAR_OF_BIRTH: 'Year of Birth',
 };
 
-export default class CreateAccountPage extends BasePage {
+export default class CreateAccount extends BasePage {
+
+  public page: Page;
+  constructor(page: Page) {
+    super(page);
+    this.page = page;
+  }
 
   public async getInvitationKeyInput(): Promise<TextBox> {
     const textbox = new TextBox(this.puppeteerPage);
@@ -115,7 +123,7 @@ export default class CreateAccountPage extends BasePage {
 
   public async getResearchBackgroundTextarea(): Promise<TextArea> {
     const textarea = new TextArea(this.puppeteerPage);
-    await textarea.withLabel({text: FIELD_LABEL.RESEARCH_BACKGROUND});
+    await textarea.withLabel({normalizeSpace: FIELD_LABEL.RESEARCH_BACKGROUND});
     return textarea;
   }
 
@@ -199,6 +207,8 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 4: Enter demographic survey default information (All Survey Fields are optional)
   public async fillOutDemographicSurvey() {
+    const demograpicsSurveyPageHeader = 'Optional Demographics Survey';
+    await waitUntilFindTexts(this.puppeteerPage, demograpicsSurveyPageHeader);
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox"]';
     await this.puppeteerPage.waitForXPath(targetXpath, { visible: true });
@@ -212,3 +222,5 @@ export default class CreateAccountPage extends BasePage {
   }
 
 }
+
+export const CreateAccountPage = SideNav(CreateAccount);

@@ -4,5 +4,5 @@ export default class TextOptions {
   public textContains?: string;
   public normalizeSpace?: string;
   public ancestorNodeLevel?: number;
-
+  public tagName?: string
 }

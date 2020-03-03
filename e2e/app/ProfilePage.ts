@@ -1,6 +1,8 @@
+import {Page} from 'puppeteer';
 import {waitUntilFindTexts} from '../driver/waitFuncs';
 import TextBox from './aou-elements/TextBox';
 import AuthenticatedPage from './page-mixin/AuthenticatedPage';
+import {SideNav} from './page-mixin/SideNav';
 
 
 export const FIELD_LABEL = {
@@ -18,7 +20,13 @@ export const FIELD_LABEL = {
   SAVE_PROFILE: 'Save Profile',
 };
 
-export default class ProfilePage extends AuthenticatedPage {
+export default class Profile extends AuthenticatedPage {
+
+  public page: Page;
+  constructor(page: Page) {
+    super(page);
+    this.page = page;
+  }
 
   public async isLoaded(): Promise<boolean> {
     await super.isLoaded(FIELD_LABEL.TITLE);
@@ -26,7 +34,7 @@ export default class ProfilePage extends AuthenticatedPage {
     return true;
   }
 
-  public async waitForReady(): Promise<ProfilePage> {
+  public async waitForReady(): Promise<Profile> {
     await this.isLoaded();
     await this.waitForSpinner();
     return this;
@@ -45,3 +53,6 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
 }
+
+export const ProfilePage = SideNav(Profile);
+

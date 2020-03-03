@@ -1,5 +1,5 @@
 import WebElement from '../../app/aou-elements/WebElement';
-import CreateAccountPage, {INSTITUTION_AFFILIATION} from '../../app/CreateAccountPage';
+import {CreateAccountPage, INSTITUTION_AFFILIATION} from '../../app/CreateAccountPage';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import {findText} from '../../driver/element-util';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';

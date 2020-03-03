@@ -1,18 +1,26 @@
+import {Page} from 'puppeteer';
 import AuthenticatedPage from './page-mixin/AuthenticatedPage';
+import {SideNav} from './page-mixin/SideNav';
 const configs = require('../resources/workbench-config.js');
 
 export const FIELD_LABEL = {
   TITLE: 'User Admin Table',
 };
 
-export default class UserAdminPage extends AuthenticatedPage {
+export default class UserAdmin extends AuthenticatedPage {
+
+  public page: Page;
+  constructor(page: Page) {
+    super(page);
+    this.page = page;
+  }
 
   public async isLoaded(): Promise<boolean> {
     await super.isLoaded(FIELD_LABEL.TITLE);
     return true;
   }
 
-  public async waitForReady(): Promise<UserAdminPage> {
+  public async waitForReady(): Promise<UserAdmin> {
     await this.isLoaded();
     await this.waitForSpinner();
     return this;
@@ -28,3 +36,5 @@ export default class UserAdminPage extends AuthenticatedPage {
   }
 
 }
+
+export const UserAdminPage = SideNav(UserAdmin);

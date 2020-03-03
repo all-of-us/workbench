@@ -1,11 +1,11 @@
 import {Browser, Page} from 'puppeteer';
 import NewClrIconLink from '../app/aou-elements/ClrIconLink';
 import GoogleLoginPage from '../app/GoogleLoginPage';
-import HomePage, {FIELD_LABEL} from '../app/HomePage';
+import {FIELD_LABEL, HomePage} from '../app/HomePage';
 import PageNavigation, {LINK} from '../app/page-mixin/PageNavigation';
-import ProfilePage from '../app/ProfilePage';
-import WorkspaceCard from '../app/WorkspaceCard';
-import WorkspacesPage from '../app/WorkspacesPage';
+import WorkspaceCard from '../app/page-mixin/WorkspaceCard';
+import Profile from '../app/ProfilePage';
+import {WorkspacesPage} from '../app/WorkspacesPage';
 import launchBrowser from '../driver/puppeteer-launch';
 
 const configs = require('../resources/workbench-config');
@@ -83,7 +83,7 @@ describe.skip('aou-elements', () => {
     expect(await anyLink.isVisible()).toBe(false);
 
     await PageNavigation.goTo(page, LINK.PROFILE);
-    const profilePage = new ProfilePage(page);
+    const profilePage = new Profile(page);
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();
     expect(fname).toMatch(new RegExp(/^[a-zA-Z]+$/));

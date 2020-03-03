@@ -1,4 +1,4 @@
-import WorkspacesPage from '../../app/WorkspacesPage';
+import {WorkspacesPage} from '../../app/WorkspacesPage';
 
 const Chrome = require('../../driver/ChromeDriver');
 

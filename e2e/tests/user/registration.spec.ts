@@ -1,12 +1,12 @@
-import {ElementHandle} from 'puppeteer';
-import CreateAccountPage from '../../app/CreateAccountPage';
+import {findClickable} from '../../app/aou-elements/xpath-finder';
+import {CreateAccountPage} from '../../app/CreateAccountPage';
 import GoogleLoginPage from '../../app/GoogleLoginPage';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
 import {waitUntilFindTexts} from '../../driver/waitFuncs';
 
 const configs = require('../../resources/workbench-config');
 
-jest.setTimeout(60 * 1000);
+jest.setTimeout(5 * 60 * 1000);
 
 describe('User registration tests:', () => {
 
@@ -71,10 +71,9 @@ describe('User registration tests:', () => {
 
     // Step 4: Enter demographic survey (All Survey Fields are optional)
     // Should be on Demongraphic Survey page
-    const demograpicsPageHeader = 'Demographics Survey (All Survey Fields are optional)';
-    await waitUntilFindTexts(page, demograpicsPageHeader);
-
     await createAccountPage.fillOutDemographicSurvey();
+    await page.waitFor(3000);
+
     const submitButton = await createAccountPage.getSubmitButton();
     await submitButton.click();
     await page.waitFor(2000);
@@ -82,33 +81,10 @@ describe('User registration tests:', () => {
     // Step 5: New account created successfully page.
     const congratMessage = 'Congratulations!';
     await waitUntilFindTexts(page, congratMessage);
+    await waitUntilFindTexts(page, 'Your new research workbench account');
 
-    const h4List = [];
-    const h4Headers: ElementHandle[] = await page.$$('h4');
-    for (const h4Header of h4Headers) {
-      const txt = await (await h4Header.getProperty('innerText')).jsonValue();
-      h4List.push(txt);
-    }
-    const expectedH4Headers = [
-      'Your All of Us research account has been created!',
-      'Check your contact email for instructions on getting started.',
-      `Your contact email is: ${process.env.CONTACT_EMAIL}`
-    ];
-    expect(h4List).toEqual(expectedH4Headers);
-
-    const resendButton = await page.waitForXPath('//button[.="Resend Instructions"]');
+    const resendButton = await findClickable(page, 'Resend Instructions');
     expect(resendButton).toBeTruthy();
-
-    const changeEmailButton = await page.waitForXPath('//button[.="Change contact email"]');
-    expect(changeEmailButton).toBeTruthy();
-
-    const h3List = [];
-    const h3Headers: ElementHandle[] = await page.$$('h3');
-    for (const h3Header of h3Headers) {
-      const txt = await (await h3Header.getProperty('innerText')).jsonValue();
-      h3List.push(txt);
-    }
-    console.log(h3List);
 
   });
 

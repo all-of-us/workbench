@@ -3,6 +3,7 @@ import {waitUntilFindTexts} from '../driver/waitFuncs';
 import Link from './aou-elements/Link';
 import {findIcon} from './aou-elements/xpath-finder';
 import AuthenticatedPage from './page-mixin/AuthenticatedPage';
+import {SideNav} from './page-mixin/SideNav';
 
 const configs = require('../resources/workbench-config.js');
 
@@ -14,10 +15,12 @@ export const FIELD_LABEL = {
 };
 
 
-export default class HomePage extends AuthenticatedPage {
+class Home extends AuthenticatedPage {
 
+  public page: Page;
   constructor(page: Page) {
     super(page);
+    this.page = page;
   }
 
   public async isLoaded(): Promise<boolean> {
@@ -27,7 +30,7 @@ export default class HomePage extends AuthenticatedPage {
     return true;
   }
 
-  public async waitForReady(): Promise<HomePage> {
+  public async waitForReady(): Promise<Home> {
     await this.isLoaded();
     await this.waitForSpinner();
     return this;
@@ -47,3 +50,6 @@ export default class HomePage extends AuthenticatedPage {
   }
 
 }
+
+export const HomePage = SideNav(Home);
+

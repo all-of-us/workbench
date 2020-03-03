@@ -25,7 +25,7 @@ const defaultFieldValues = [{
   label: 'State',
   value: faker.address.stateAbbr()
 }, {
-  label: 'Zip Code',
+  label: 'Zip code',
   value: faker.address.zipCode()
 }, {
   label: 'Country',

@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
 import WebElement from '../../app/aou-elements/WebElement';
-import WorkspaceCard from '../../app/WorkspaceCard';
-import WorkspacesPage from '../../app/WorkspacesPage';
+import WorkspaceCard from '../../app/page-mixin/WorkspaceCard';
+import {WorkspacesPage} from '../../app/WorkspacesPage';
 
 const Chrome = require('../../driver/ChromeDriver');
 jest.setTimeout(60 * 1000);
