@@ -22,7 +22,6 @@
     "retryCount": 2,
     "bufferCapacity": 100,
     "bufferRefillProjectsPerTask": 1,
-    "defaultFreeCreditsLimit": 300.0,
     "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
