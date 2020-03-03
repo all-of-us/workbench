@@ -5,10 +5,11 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {ListPageHeader} from 'app/components/headers';
 import {CheckBox, RadioButton} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {TextColumn} from 'app/components/text-column';
+import {AouTitle} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {toggleIncludes} from 'app/utils';
@@ -116,16 +117,20 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     const {requireInstitutionalVerification} = serverConfigStore.getValue();
 
     return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '26rem'}}>
-      <label style={{color: colors.primary, fontSize: 16}}>
-        Please complete Step {requireInstitutionalVerification ? '3 of 3' : '2 of 2'}
-      </label>
-      <ListPageHeader>
-        Demographics Survey <label style={{fontSize: '12px', fontWeight: 400}}>
-        (All Survey Fields are optional)</label>
-      </ListPageHeader>
+      <TextColumn>
+        <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Optional Demographics Survey</div>
+        <div style={{fontSize: 16, marginBottom: '.5rem'}}>
+          Please complete Step {requireInstitutionalVerification ? '3 of 3' : '2 of 2'}
+        </div>
+        <div>
+          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> <AouTitle/> will
+          use this information to measure our success at reaching diverse researchers.
+          We will not share your individual answers.
+        </div>
+      </TextColumn>
 
       {/*Race section*/}
-      <Section header='Race'>
+      <Section header='Race' subHeader='Select all that apply'>
         <FlexColumn style={styles.checkboxAreaContainer}>
           {AccountCreationOptions.race.map((race) => {
             return this.createOptionCheckbox('race', race);
@@ -138,6 +143,16 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
                        header='Ethnicity' options={AccountCreationOptions.ethnicity}
                        value={demographicSurvey.ethnicity}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
+
+      {/*Gender Identity section*/}
+      <Section header='Gender Identity' subHeader='Select all that apply'>
+        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
+          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
+            return this.createOptionCheckbox('genderIdentityList', genderIdentity);
+          })}
+        </FlexColumn>
+      </Section>
+
       <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
 or another sexual and/or gender minority?'>
         <FlexColumn>
@@ -163,17 +178,8 @@ or another sexual and/or gender minority?'>
                             disabled={!demographicSurvey.identifiesAsLgbtq}/>
       </Section>
 
-      {/*Gender Identity section*/}
-      <Section header='Gender Identity'>
-        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
-            return this.createOptionCheckbox('genderIdentityList', genderIdentity);
-          })}
-        </FlexColumn>
-      </Section>
-
       {/*Sex at birth section*/}
-      <Section header='Sex at birth'>
+      <Section header='Sex at birth' subHeader='Select all that apply'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox('sexAtBirth', sexAtBirth);
@@ -187,7 +193,7 @@ or another sexual and/or gender minority?'>
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
       {/*Disability section*/}
-      <Section header='Do you have a Physical or Cognitive disability?'>
+      <Section header='Do you have a physical or cognitive disability?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes' onChange={

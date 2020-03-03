@@ -33,6 +33,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {Divider} from 'app/components/divider';
 import {AouTitle} from 'app/components/text-wrappers';
 import {reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
@@ -75,11 +76,9 @@ const styles = reactStyles({
   },
   sectionHeader: {
     width: '26rem',
-    borderBottom: `1px solid ${colors.primary}`,
     color: colors.primary,
     fontWeight: 600,
     fontSize: 18,
-    marginBottom: '1rem',
   },
   sectionInput: {
     width: '12rem',
@@ -94,9 +93,9 @@ const styles = reactStyles({
 
 const researchPurposeList = [
   <span>Your research training and background</span>,
-  <span>How you hope to use <i>All of Us</i> data for your research.</span>,
+  <span>How you hope to use <i>All of Us</i> data for your research</span>,
   <span>Your research approach and the tools you use for answering your research questions (eg: Large datasets
-     of phenotypes and genotypes, Community engagement and community-based participatory research methods, etc)</span>,
+     of phenotypes and genotypes, community engagement and community-based participatory research methods, etc.)</span>,
   <span>Your experience working with underrepresented populations as a scientist or outside of research, and how that
      experience may inform your work with <i>All of Us</i> data</span>
 ];
@@ -106,9 +105,13 @@ const nameLength = 80;
 export const Section = (props) => {
   return <FormSection
       style={{...flexStyle.column, ...props.style}}>
-    <label style={{...styles.sectionHeader, ...props.sectionHeaderStyles}}>
-      {props.header}
-    </label>
+    <div>
+      <label style={{...styles.sectionHeader, ...props.sectionHeaderStyles}}>
+        {props.header}
+      </label>
+      <label style={{color: colors.primary, fontSize: '12px', marginLeft: '.25rem'}}> {props.subHeader} </label>
+    </div>
+    <Divider style={{marginTop: '.25rem'}}/>
     {props.children}
   </FormSection>;
 };
@@ -737,8 +740,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </Section>
           <Section header={<React.Fragment>
             <div>Your institutional mailing address</div>
-            <div style={styles.asideText}>We use your address if we need to send correspondence about the program;
-              your information will not be shared or displayed publicly</div>
+            <div style={styles.asideText}>We will use your address if we need to send correspondence about the program;
+              your information will not be shared or displayed publicly.</div>
           </React.Fragment>}>
             <FlexColumn style={{lineHeight: '1rem'}}>
               <FlexRow>
@@ -758,8 +761,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                     onChange={value => this.updateAddress('state', value)}/>
               </FlexRow>
               <FlexRow style={{marginTop: '0.75rem'}}>
-                <TextInputWithLabel dataTestId='zip' inputName='zip' placeholder='Zip Code'
-                                    value={zipCode} labelText='Zip Code'
+                <TextInputWithLabel dataTestId='zip' inputName='zip' placeholder='Zip code'
+                                    value={zipCode} labelText='Zip code'
                                     onChange={value => this.updateAddress('zipCode', value)}/>
                 <TextInputWithLabel dataTestId='country' inputName='country' placeholder='Country' value={country}
                                     labelText='Country' containerStyle={styles.multiInputSpacing}
@@ -768,9 +771,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </FlexColumn>
           </Section>
           <Section sectionHeaderStyles={{borderBottom: null}} header={<React.Fragment>
-            <div>Please describe your research background, experience and research interests</div>
-            <div style={styles.asideText}>This information will be posted publicly on the <i>All of Us</i> Research Hub Website
-              to inform the <i>All of Us</i> Research Participants. <span  style={{marginLeft: 2,
+            <div>Please describe your research background, experience, and research interests</div>
+            <div style={styles.asideText}>This information will be posted publicly on the <i>All of Us</i> Research Hub website
+              to inform program participants. <span  style={{marginLeft: 2,
                 fontSize: 12}}>(2000 character limit)</span>
               <i style={{...styles.publiclyDisplayedText, marginLeft: 2}}>
                 Publicly displayed
@@ -792,10 +795,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </Section>
           {renderOldInstitutionalAffiliation()}
           <Section header={<React.Fragment>
-            <div>Please your professional profile or bio page below, if available</div>
-            <div style={styles.asideText}>You could provide link to your faculty bio page from your institution's
+            <div>Please link to your professional profile or bio page below, if available</div>
+            <div style={styles.asideText}>You could provide a link to your faculty bio page from your institution's
               website, your LinkedIn profile page, or another webpage featuring your work. This will
-              allow <i>All of Us</i> Researchers and Participants to learn more about your work and publications.</div>
+              allow <i>All of Us</i> researchers and participants to learn more about your work and publications.</div>
           </React.Fragment>}>
               <TextInputWithLabel dataTestId='professionalUrl' inputName='professionalUrl'
                                   placeholder='Professional Url' value={professionalUrl}
