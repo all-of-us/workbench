@@ -12,6 +12,10 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.BigQueryTestService;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -40,8 +44,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired private SurveyModuleDao surveyModuleDao;
 
-  @Autowired private CBCriteriaDao cbCriteriaDao;
-
   @Autowired private BigQueryService bigQueryService;
 
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
@@ -56,7 +58,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     ConceptService conceptService =
-        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao, cbCriteriaDao);
+        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptBigQueryService =
         new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService, conceptService);
 
