@@ -86,14 +86,12 @@ export default class CreateAccountPage extends BasePage {
     const label = new Label(this.puppeteerPage);
     await label.withLabel({normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_PRIVACY_STATEMENT});
     return label;
-    // return this.getCheckboxLabel(FIELD_LABEL.READ_UNDERSTAND_PRIVACY_STATEMENT);
   }
 
   public async getTermsOfUseLabel(): Promise<Label> {
     const label = new Label(this.puppeteerPage);
     await label.withLabel({normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_TERMS_OF_USE});
     return label;
-    // return this.getCheckboxLabel(FIELD_LABEL.READ_UNDERSTAND_TERMS_OF_USE);
   }
 
   public async getInstitutionNameInput(): Promise<TextBox> {
@@ -102,7 +100,7 @@ export default class CreateAccountPage extends BasePage {
     return textbox;
   }
 
-  // true for Yes radiobutton. false for No.
+  // true for select Yes radiobutton. false for select No radiobutton.
   public async areYouAffiliatedRadioButton(yesOrNo: boolean): Promise<RadioButton> {
     let selector;
     if (yesOrNo) {
@@ -204,13 +202,11 @@ export default class CreateAccountPage extends BasePage {
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox"]';
     await this.puppeteerPage.waitForXPath(targetXpath, { visible: true });
-    const checkboxs = await this.puppeteerPage.$x(targetXpath);
-    for (const ck of checkboxs) {
+    const checkboxes = await this.puppeteerPage.$x(targetXpath);
+    for (const ck of checkboxes) {
       await ck.click();
     }
-    // Select year of birth 1955
     await this.selectYearOfBirth('1955');
-    // Select Highest Education completed
     await this.selectEducationLevel(EDUCATION_LEVEL.DOCTORATE);
     await this.puppeteerPage.waitFor(1000);
   }

@@ -16,7 +16,7 @@ export const LINK_LABEL = {
  */
 export default class WorkspaceCard extends WebElement {
 
-  // private element: ElementHandle;
+
   public static readonly popupRootXpath = '//*[@id="popup-root"]'; // element is not a child of workspace-card
   public static readonly cardRootXpath = '//*[child::*[@data-test-id="workspace-card"]]';
 
@@ -42,16 +42,9 @@ export default class WorkspaceCard extends WebElement {
 
   public static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
     const cards = await page.$x(WorkspaceCard.cardRootXpath);
-    console.log('cards count = ' + cards.length);
     for (let i = 0; i < cards.length; i++) {
-      console.log('cards i = ' + i);
       const children = await cards[i].$x(`.//*[@data-test-id="workspace-card-name" and text()="${workspaceName}"]`);
       if (children.length > 0) {
-        for (let j = 0; j < children.length; j++) {
-          const value = await children[j].getProperty('innerText');
-          console.log('j = ' + j + ' value = ' + value );
-        }
-        console.log('return card i = ' + i + ' ' + await (await cards[i].getProperty('innerText')).jsonValue());
         return new WorkspaceCard(page).asCardElement(cards[i]);
       }
     }
@@ -65,12 +58,7 @@ export default class WorkspaceCard extends WebElement {
   }
 
   public async getResourceCardName(): Promise<unknown> {
-    console.log('this.element');
-    console.log(await (await this.element.getProperty('innerText')).jsonValue());
     const cardNameElem = await this.element.$x('.//*[@data-test-id="workspace-card-name"]');
-    console.log('cardNameElem');
-    console.log(cardNameElem);
-
     const jHandle = await cardNameElem[0].getProperty('innerText');
     const name = await jHandle.jsonValue();
     await jHandle.dispose();

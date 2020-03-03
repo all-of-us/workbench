@@ -124,7 +124,7 @@ describe('Navigation', () => {
 
     // Select Sign Out link
     await PageNavigation.goTo(page, LINK.SIGN_OUT);
-    expect(await page.url()).toContain('login');
+    expect(await page.url()).toContain('/login');
 
   });
 
