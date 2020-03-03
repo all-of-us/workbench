@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.ConceptsController;
-import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -73,9 +72,7 @@ public class ConceptService {
 
   @Autowired
   public ConceptService(
-      ConceptDao conceptDao,
-      DomainInfoDao domainInfoDao,
-      SurveyModuleDao surveyModuleDao) {
+      ConceptDao conceptDao, DomainInfoDao domainInfoDao, SurveyModuleDao surveyModuleDao) {
     this.conceptDao = conceptDao;
     this.domainInfoDao = domainInfoDao;
     this.surveyModuleDao = surveyModuleDao;

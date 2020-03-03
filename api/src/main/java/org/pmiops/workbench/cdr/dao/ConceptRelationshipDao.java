@@ -1,9 +1,8 @@
 package org.pmiops.workbench.cdr.dao;
 
+import java.util.List;
 import org.pmiops.workbench.cdr.model.DbConceptRelationship;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.List;
 
 public interface ConceptRelationshipDao extends CrudRepository<DbConceptRelationship, Long> {
 

@@ -1,11 +1,10 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Embeddable
 public class DbConceptRelationshipId implements Serializable {

@@ -1,13 +1,12 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 @Table(name = "concept_relationship")

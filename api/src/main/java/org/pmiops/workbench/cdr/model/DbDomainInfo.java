@@ -1,32 +1,30 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainInfo;
-
+import java.util.Objects;
+import java.util.function.Function;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.Objects;
-import java.util.function.Function;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainInfo;
 
 @Entity
 @Table(name = "domain_info")
 public class DbDomainInfo {
 
-  public static final Function<DbDomainInfo, DomainInfo>
-      TO_CLIENT_DOMAIN_INFO =
-          (domain) ->
-              new DomainInfo()
-                  .domain(domain.getDomainEnum())
-                  .name(domain.getName())
-                  .description(domain.getDescription())
-                  .allConceptCount(domain.getAllConceptCount())
-                  .standardConceptCount(domain.getStandardConceptCount())
-                  .participantCount(domain.getParticipantCount());
+  public static final Function<DbDomainInfo, DomainInfo> TO_CLIENT_DOMAIN_INFO =
+      (domain) ->
+          new DomainInfo()
+              .domain(domain.getDomainEnum())
+              .name(domain.getName())
+              .description(domain.getDescription())
+              .allConceptCount(domain.getAllConceptCount())
+              .standardConceptCount(domain.getStandardConceptCount())
+              .participantCount(domain.getParticipantCount());
 
   private long conceptId;
   private short domain;

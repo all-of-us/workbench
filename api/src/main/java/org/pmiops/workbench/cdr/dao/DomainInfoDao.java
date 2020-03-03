@@ -1,10 +1,9 @@
 package org.pmiops.workbench.cdr.dao;
 
+import java.util.List;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.List;
 
 public interface DomainInfoDao extends CrudRepository<DbDomainInfo, Long> {
 
