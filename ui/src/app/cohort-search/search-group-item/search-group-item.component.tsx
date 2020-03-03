@@ -121,22 +121,20 @@ class SearchGroupItemParameter extends React.Component<{parameter: any}, {toolti
 }
 
 interface Props {
-  role: keyof SearchRequest;
   groupId: string;
   item: any;
   index: number;
+  role: keyof SearchRequest;
   updateGroup: Function;
   workspace: WorkspaceData;
 }
 
 interface State {
-  count: number;
   encounters: any;
   error: boolean;
   loading: boolean;
   paramListOpen: boolean;
   renaming: boolean;
-  status: string;
   timeout: Timeout;
 }
 
@@ -146,13 +144,11 @@ export const SearchGroupItem = withCurrentWorkspace()(
     constructor(props: Props) {
       super(props);
       this.state = {
-        count: null,
         encounters: encountersStore.getValue(),
         error: false,
         loading: true,
         paramListOpen: false,
         renaming: false,
-        status: props.item.status,
         timeout: null
       };
     }
@@ -174,8 +170,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      const {item, updateGroup} = this.props;
-      if (prevProps.item !== item) {
+      const {item: {searchParameters}, updateGroup} = this.props;
+      if (prevProps.item.searchParameters !== searchParameters) {
         updateGroup(true);
         this.setState({loading: true}, () => this.getItemCount());
       }
@@ -191,9 +187,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
           excludes: [],
           [role]: [{items: [mappedItem], temporal: false}]
         };
-        await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
-          this.props.item.count = count;
-        });
+        await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.updateSearchRequest('count', count, false));
       } catch (error) {
         console.error(error);
         this.setState({error: true});
@@ -204,25 +198,19 @@ export const SearchGroupItem = withCurrentWorkspace()(
 
     enable() {
       triggerEvent('Enable', 'Click', 'Enable - Suppress Criteria - Cohort Builder');
-      this.setState({status: 'active'});
-      this.props.item.status = 'active';
-      this.updateSearchRequest(true);
+      this.updateSearchRequest('status', 'active', true);
     }
 
     suppress() {
       triggerEvent('Suppress', 'Click', 'Snowman - Suppress Criteria - Cohort Builder');
-      this.setState({status: 'hidden'});
-      this.props.item.status = 'hidden';
-      this.updateSearchRequest(true);
+      this.updateSearchRequest('status', 'hidden', true);
     }
 
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
-      this.setState({status: 'pending'});
-      this.props.item.status = 'pending';
-      this.updateSearchRequest(true);
+      this.updateSearchRequest('status', 'pending', true);
       const timeout = setTimeout(() => {
-        this.updateSearchRequest(false, true);
+        this.updateSearchRequest(null, null, false, true);
       }, 10000);
       this.setState({timeout});
     }
@@ -230,18 +218,15 @@ export const SearchGroupItem = withCurrentWorkspace()(
     undo() {
       triggerEvent('Undo', 'Click', 'Undo - Delete Criteria - Cohort Builder');
       clearTimeout(this.state.timeout);
-      this.setState({status: 'active'});
-      this.props.item.status = 'active';
-      this.updateSearchRequest(true);
+      this.updateSearchRequest('status', 'active', true);
     }
 
     rename(newName: string) {
-      this.props.item.name = newName;
-      this.updateSearchRequest(false);
+      this.updateSearchRequest('name', newName, false);
       this.setState({renaming: false});
     }
 
-    updateSearchRequest(recalculate: boolean, remove?: boolean) {
+    updateSearchRequest(property: string, value: any, recalculate: boolean, remove?: boolean) {
       const sr = searchRequestStore.getValue();
       const {item, groupId, role, updateGroup} = this.props;
       const groupIndex = sr[role].findIndex(grp => grp.id === groupId);
@@ -252,7 +237,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
             sr[role][groupIndex].items = sr[role][groupIndex].items.filter(it => it.id !== item.id);
             searchRequestStore.next(sr);
           } else {
-            sr[role][groupIndex].items[itemIndex] = item;
+            sr[role][groupIndex].items[itemIndex] = {...item, [property]: value};
             searchRequestStore.next(sr);
             updateGroup(recalculate);
           }
@@ -262,14 +247,14 @@ export const SearchGroupItem = withCurrentWorkspace()(
 
     launchWizard() {
       triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
-      const {groupId, item, item: {count}, role} = this.props;
+      const {groupId, item, role} = this.props;
       const _item = JSON.parse(JSON.stringify(item));
       const {fullTree, id, searchParameters} = _item;
       const selections = searchParameters.map(sp => sp.parameterId);
       selectionsStore.next(selections);
       const domain = _item.type;
       const {type, standard} = getTypeAndStandard(searchParameters, domain);
-      const context = {item: _item, domain, type, role, groupId, itemId: id, fullTree, standard, count};
+      const context = {item: _item, domain, type, role, groupId, itemId: id, fullTree, standard, count: item.count};
       wizardStore.next(context);
     }
 
@@ -288,12 +273,12 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     render() {
-      const {item: {count, modifiers, name, searchParameters, type}} = this.props;
-      const {paramListOpen, error, loading, renaming, status} = this.state;
+      const {item: {count, modifiers, name, searchParameters, status, type}} = this.props;
+      const {error, loading, paramListOpen, renaming} = this.state;
       const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
       const titleDisplay = type === DomainType.PERSON ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
       const itemName = !!name ? name : `Contains ${titleDisplay} ${codeDisplay}`;
-      const showCount = !loading && status !== 'hidden' && count !== null;
+      const showCount = !loading && status !== 'hidden' && count !== undefined;
       const actionItems = [
         {label: 'Edit criteria name', command: () => this.setState({renaming: true})},
         {label: 'Edit criteria', command: () => this.launchWizard()},

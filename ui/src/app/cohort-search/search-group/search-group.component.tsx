@@ -185,7 +185,6 @@ function initItem(id: string, type: string, tempGroup: number) {
     type,
     searchParameters: [],
     modifiers: [],
-    count: null,
     temporalGroup: tempGroup,
     status: 'active'
   };
@@ -446,7 +445,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     render() {
-      const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
+      const {group: {id, items, mention, status, temporal, time, timeValue}, index, role, updated} = this.props;
       const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, inputError, inputTouched, loading, overlayStyle} = this.state;
       const domainMap = (domain: any, temporalGroup: number) => {
         if (!!domain.children) {
@@ -491,7 +490,8 @@ export const SearchGroup = withCurrentWorkspace()(
           </div>}
           {/* Main search item list/temporal group 0 items */}
           {this.items.map((item, i) => <div key={i} data-test-id='item-list' style={styles.searchItem}>
-            <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
+            <SearchGroupItem role={role} groupId={id} item={item} index={i}
+              updateGroup={(recalculate) => this.update(recalculate)}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
           {/* Criteria menu for main search item list/temporal group 0 items */}
@@ -519,7 +519,8 @@ export const SearchGroup = withCurrentWorkspace()(
             </div>
             {/* Temporal group 1 items */}
             {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
-              <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
+              <SearchGroupItem role={role} groupId={id} item={item} index={i}
+                updateGroup={(recalculate) => this.update(recalculate)}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
             {/* Criteria menu for temporal group 1 items */}
