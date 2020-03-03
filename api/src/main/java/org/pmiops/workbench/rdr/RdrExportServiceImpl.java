@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
+import org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;

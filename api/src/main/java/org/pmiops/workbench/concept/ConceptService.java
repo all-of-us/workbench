@@ -68,7 +68,6 @@ public class ConceptService {
   private ConceptDao conceptDao;
   private DomainInfoDao domainInfoDao;
   private SurveyModuleDao surveyModuleDao;
-  private CBCriteriaDao cbCriteriaDao;
 
   public ConceptService() {}
 
@@ -76,12 +75,10 @@ public class ConceptService {
   public ConceptService(
       ConceptDao conceptDao,
       DomainInfoDao domainInfoDao,
-      SurveyModuleDao surveyModuleDao,
-      CBCriteriaDao cbCriteriaDao) {
+      SurveyModuleDao surveyModuleDao) {
     this.conceptDao = conceptDao;
     this.domainInfoDao = domainInfoDao;
     this.surveyModuleDao = surveyModuleDao;
-    this.cbCriteriaDao = cbCriteriaDao;
   }
 
   private static String modifyMultipleMatchKeyword(String query) {

@@ -1,5 +1,2 @@
-include ':common-api'
-project(':common-api').projectDir = new File(settingsDir, '../common-api')
-
 include ':appengine-cron-emulator'
 project(':appengine-cron-emulator').projectDir = new File(settingsDir, '../appengine-cron-emulator')

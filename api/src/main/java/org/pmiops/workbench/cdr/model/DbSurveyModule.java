@@ -1,13 +1,14 @@
 package org.pmiops.workbench.cdr.model;
 
-import java.util.Objects;
-import java.util.function.Function;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.model.SurveyModule;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.model.SurveyModule;
+import java.util.Objects;
+import java.util.function.Function;
 
 @Entity
 @Table(name = "survey_module")
@@ -15,7 +16,7 @@ public class DbSurveyModule {
 
   public static final Function<DbSurveyModule, SurveyModule> TO_CLIENT_SURVEY_MODULE =
       (surveyModule) ->
-          new org.pmiops.workbench.model.SurveyModule()
+          new SurveyModule()
               .conceptId(surveyModule.getConceptId())
               .name(surveyModule.getName())
               .description(surveyModule.getDescription())

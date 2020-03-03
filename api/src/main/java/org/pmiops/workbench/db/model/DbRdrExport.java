@@ -8,7 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
+
 import org.pmiops.workbench.model.RdrEntity;
 
 @Entity

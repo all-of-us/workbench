@@ -8,7 +8,7 @@ require_relative "../aou-utils/swagger"
 def merge_yaml()
   Workbench::Swagger.merge_yaml('src/main/resources/workbench.yaml',
     ['src/main/resources/client_api.yaml', 'src/main/resources/cb_review_api.yaml',
-     'src/main/resources/cb_search_api.yaml', '../common-api/src/main/resources/common_api.yaml'],
+     'src/main/resources/cb_search_api.yaml'],
      'src/main/resources/merged.yaml')
 end
 

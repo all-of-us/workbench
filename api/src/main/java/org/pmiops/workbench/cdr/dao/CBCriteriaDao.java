@@ -1,7 +1,5 @@
 package org.pmiops.workbench.cdr.dao;
 
-import java.util.List;
-import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Some of our trees are polyhierarchical(Snomed and drug). Since a node may exist multiple times in

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.model;
 
-import java.util.Objects;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import java.util.Objects;
 
 @Entity
 // NOTE: This class and ConceptSynonymDao exist only to make CriteriaDao work in tests;
