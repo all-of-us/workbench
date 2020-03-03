@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {SearchGroupItem} from 'app/cohort-search/search-group-item/search-group-item.component';
-import {criteriaMenuOptionsStore, initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {criteriaMenuOptionsStore, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -211,7 +211,6 @@ interface State {
   loading: boolean;
   overlayStyle: any;
   position: string;
-  preventInputCalculate: boolean;
   status: string;
 }
 
@@ -238,7 +237,6 @@ export const SearchGroup = withCurrentWorkspace()(
         loading: false,
         overlayStyle: undefined,
         position: 'bottom-left',
-        preventInputCalculate: false,
         status: undefined
       };
     }
@@ -264,6 +262,7 @@ export const SearchGroup = withCurrentWorkspace()(
           ro.observe(groupDiv);
         }
       }
+      this.getGroupCount();
     }
 
     componentWillUnmount(): void {
@@ -299,16 +298,8 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     update(recalculate: boolean) {
-      const {index, group: {temporal}, updateRequest} = this.props;
-      // prevent multiple total count calls when initializing multiple groups simultaneously (on cohort edit or clone)
-      const init = initExisting.getValue();
-      if (!init || (init && index === 0)) {
-        updateRequest(recalculate);
-        if (init) {
-          this.setState({preventInputCalculate: true});
-          initExisting.next(false);
-        }
-      }
+      const {group: {temporal}, updateRequest} = this.props;
+      updateRequest(recalculate);
       if (recalculate && this.hasActiveItems && (!temporal || !this.temporalError)) {
         this.getGroupCount();
       }
@@ -407,7 +398,6 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     handleTemporalChange(e: any) {
-      this.setState({inputTouched: true});
       const {value} = e.target;
       triggerEvent('Temporal', 'Click', 'Turn On Off - Temporal - Cohort Builder');
       this.setGroupProperty('temporal', value);
@@ -427,29 +417,19 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     setTime(time: TemporalTime) {
-      const {group} = this.props;
-      if (time !== this.props.group.time) {
-        triggerEvent('Temporal', 'Click', `${temporalEnumToText(time)} - Temporal - Cohort Builder`);
-        // prevents duplicate group count calls if switching from TemporalTime.DURINGSAMEENCOUNTERAS
-        this.setState({preventInputCalculate: group.time === TemporalTime.DURINGSAMEENCOUNTERAS});
-        this.setGroupProperty('time', time);
-        if (!this.temporalError) {
-          this.getGroupCount();
-        }
+      triggerEvent('Temporal', 'Click', `${temporalEnumToText(time)} - Temporal - Cohort Builder`);
+      this.setGroupProperty('time', time);
+      if (!this.temporalError) {
+        this.getGroupCount();
       }
     }
 
     setTimeValue(timeValue: string) {
       const timeValueInt = parseInt(timeValue, 10);
-      this.setState({inputError: isNaN(timeValueInt) || timeValueInt < 0});
+      this.setState({inputError: isNaN(timeValueInt) || timeValueInt < 0, inputTouched: true});
       this.setGroupProperty('timeValue', timeValue);
-      // prevents duplicate group count calls if changes is triggered by rendering of input on init
-      if (!this.state.preventInputCalculate) {
-        if (!this.temporalError) {
-          this.getGroupCount();
-        }
-      } else {
-        this.setState({preventInputCalculate: false});
+      if (!this.temporalError) {
+        this.getGroupCount();
       }
     }
 
@@ -461,7 +441,7 @@ export const SearchGroup = withCurrentWorkspace()(
         }
         return acc;
       }, [0, 0]);
-      const inputError = time !== TemporalTime.DURINGSAMEENCOUNTERAS && this.state.inputError;
+      const inputError = time !== TemporalTime.DURINGSAMEENCOUNTERAS && isNaN(parseInt(timeValue, 10));
       return counts.includes(0) || inputError;
     }
 
@@ -510,8 +490,7 @@ export const SearchGroup = withCurrentWorkspace()(
             <span style={{fontSize: '14px', padding: '0.2rem 0.25rem 0'}}> of </span>
           </div>}
           {/* Main search item list/temporal group 0 items */}
-          {items.map((item, i) => <div key={i} data-test-id='item-list'
-            style={{...styles.searchItem, ...((temporal && item.temporalGroup === 1) ? {display: 'none'} : {})}}>
+          {this.items.map((item, i) => <div key={i} data-test-id='item-list' style={styles.searchItem}>
             <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
@@ -523,7 +502,7 @@ export const SearchGroup = withCurrentWorkspace()(
               Add Criteria <ClrIcon shape='caret down' size={12}/>
             </button>
           </div>
-          <div style={{display: temporal ? 'block' : 'none'}}>
+          {temporal && <React.Fragment>
             {/* Temporal time dropdown */}
             <div style={styles.cardBlock}>
               {time !== TemporalTime.DURINGSAMEENCOUNTERAS && inputError && inputTouched && <div style={styles.inputError}>
@@ -539,7 +518,7 @@ export const SearchGroup = withCurrentWorkspace()(
               }
             </div>
             {/* Temporal group 1 items */}
-            {items.filter(item => item.temporalGroup === 1).map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
+            {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
               <SearchGroupItem role={role} groupId={id} item={item} index={i} updateGroup={(recalculate) => this.update(recalculate)}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
@@ -551,7 +530,7 @@ export const SearchGroup = withCurrentWorkspace()(
                 Add Criteria <ClrIcon shape='caret down' size={12}/>
               </button>
             </div>
-          </div>
+          </React.Fragment>}
           {/* Group footer */}
           {!!items.length && <div style={styles.cardHeader}>
             <div style={this.disableTemporal ? {...styles.row, cursor: 'not-allowed'} : styles.row}>
@@ -564,7 +543,7 @@ export const SearchGroup = withCurrentWorkspace()(
                   Group Count:&nbsp;
                   {loading && (!temporal || !this.temporalError) && <Spinner size={16}/>}
                   {!loading && <span>
-                    {(!temporal || !this.temporalError) && this.hasActiveItems && !!count && count.toLocaleString()}
+                    {(!temporal || !this.temporalError) && this.hasActiveItems && count !== undefined && count.toLocaleString()}
                     {(count === null || !this.hasActiveItems) && !temporal && <span>
                       -- <ClrIcon style={{color: colors.warning}} shape='warning-standard' size={21}/>
                     </span>}

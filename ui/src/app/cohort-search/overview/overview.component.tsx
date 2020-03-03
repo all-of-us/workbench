@@ -150,6 +150,7 @@ export const ListOverview = withCurrentWorkspace()(
       if (currentCohortStore.getValue()) {
         this.setState({cohort: currentCohortStore.getValue()});
       }
+      this.getTotalCount();
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {

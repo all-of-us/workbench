@@ -1,14 +1,14 @@
 import * as React from 'react';
 
 import {MODIFIERS_MAP} from 'app/cohort-search/constant';
-import {encountersStore, initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {encountersStore, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getTypeAndStandard, mapGroupItem, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {RenameModal} from 'app/components/rename-modal';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -158,9 +158,13 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
-      const {item: {modifiers}, workspace: {cdrVersionId}} = this.props;
+      const {item: {count, modifiers}, workspace: {cdrVersionId}} = this.props;
       const {encounters} = this.state;
-      this.getItemCount();
+      if (count !== undefined) {
+        this.setState({loading: false});
+      } else {
+        this.getItemCount();
+      }
       if (!!modifiers && modifiers.some(mod => mod.name === ModifierType.ENCOUNTERS) && !encounters) {
         cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]).then(res => {
           encountersStore.next(res.items);
@@ -170,18 +174,15 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (prevProps.item !== this.props.item) {
+      const {item, updateGroup} = this.props;
+      if (prevProps.item !== item) {
+        updateGroup(true);
         this.setState({loading: true}, () => this.getItemCount());
       }
     }
 
     async getItemCount() {
-      const {index, item, role, updateGroup} = this.props;
-      // prevent multiple group count calls when initializing multiple items simultaneously (on cohort edit or clone)
-      const init = initExisting.getValue();
-      if (!init || (init && index === 0)) {
-        updateGroup(true);
-      }
+      const {item, role} = this.props;
       try {
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const mappedItem = mapGroupItem(item, false);
@@ -190,7 +191,9 @@ export const SearchGroupItem = withCurrentWorkspace()(
           excludes: [],
           [role]: [{items: [mappedItem], temporal: false}]
         };
-        await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.setState({count}));
+        await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
+          this.props.item.count = count;
+        });
       } catch (error) {
         console.error(error);
         this.setState({error: true});
@@ -259,8 +262,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
 
     launchWizard() {
       triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
-      const {groupId, item, role} = this.props;
-      const {count} = this.state;
+      const {groupId, item, item: {count}, role} = this.props;
       const _item = JSON.parse(JSON.stringify(item));
       const {fullTree, id, searchParameters} = _item;
       const selections = searchParameters.map(sp => sp.parameterId);
@@ -286,8 +288,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     render() {
-      const {item: {modifiers, name, searchParameters, type}} = this.props;
-      const {count, paramListOpen, error, loading, renaming, status} = this.state;
+      const {item: {count, modifiers, name, searchParameters, type}} = this.props;
+      const {paramListOpen, error, loading, renaming, status} = this.state;
       const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
       const titleDisplay = type === DomainType.PERSON ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
       const itemName = !!name ? name : `Contains ${titleDisplay} ${codeDisplay}`;
