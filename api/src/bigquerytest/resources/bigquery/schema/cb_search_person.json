@@ -10,6 +10,11 @@
     "mode": "nullable"
   },
   {
+    "mode": "NULLABLE",
+    "name": "sex_at_birth",
+    "type": "string"
+  },
+  {
     "type": "string",
     "name": "race",
     "mode": "nullable"
@@ -20,8 +25,33 @@
     "mode": "NULLABLE"
   },
   {
-    "type": "timestamp",
+    "type": "date",
     "name": "dob",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "age_at_consent",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "age_at_cdr",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "has_ehr_data",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "has_ppi_survey_data",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "has_physical_measurement_data",
     "mode": "nullable"
   }
 ]

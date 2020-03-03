@@ -12,7 +12,8 @@ import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase, ServerConfigProps,
+  ReactWrapperBase,
+  ServerConfigProps,
   WindowSizeProps,
   withServerConfig,
   withWindowSize,
@@ -128,6 +129,47 @@ interface SignInState {
   termsOfServiceVersion?: number;
 }
 
+export const createEmptyProfile = (requireInstitutionalVerification: boolean = false): Profile => {
+  const profile: Profile = {
+    // Note: We abuse the "username" field here by omitting "@domain.org". After
+    // profile creation, this field is populated with the full email address.
+    username: '',
+    dataAccessLevel: DataAccessLevel.Unregistered,
+    givenName: '',
+    familyName: '',
+    contactEmail: '',
+    currentPosition: '',
+    organization: '',
+    areaOfResearch: '',
+    address: {
+      streetAddress1: '',
+      streetAddress2: '',
+      city: '',
+      state: '',
+      country: '',
+      zipCode: '',
+    },
+    demographicSurvey: {},
+    degrees: [] as Degree[],
+  };
+
+  if (!requireInstitutionalVerification) {
+    // initialize the institutional affiliations from the old unverified flow
+    // (the new flow does not require it)
+    profile.institutionalAffiliations = [
+      // We only allow entering a single institutional affiliation from the create account
+      // page, so we pre-fill a single empty entry which will be bound to the AccountCreation
+      // form.
+      {
+        institution: undefined,
+        nonAcademicAffiliation: undefined,
+        role: undefined,
+      },
+    ];
+  }
+  return profile;
+};
+
 /**
  * The inner / implementation SignIn component. This class should only be rendered via the
  * SignInReact method, which wraps this with the expected higher-order components.
@@ -143,42 +185,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
       // This defines the profile state for a new user flow. This will get passed to each
       // step component as a prop. When each sub-step completes, it will pass the updated Profile
       // data in its onComplete callback.
-      profile: this.createEmptyProfile()
-    };
-  }
-
-  private createEmptyProfile(): Profile {
-    return {
-      // Note: We abuse the "username" field here by omitting "@domain.org". After
-      // profile creation, this field is populated with the full email address.
-      username: '',
-      dataAccessLevel: DataAccessLevel.Unregistered,
-      givenName: '',
-      familyName: '',
-      contactEmail: '',
-      currentPosition: '',
-      organization: '',
-      areaOfResearch: '',
-      address: {
-        streetAddress1: '',
-        streetAddress2: '',
-        city: '',
-        state: '',
-        country: '',
-        zipCode: '',
-      },
-      institutionalAffiliations: [
-        // We only allow entering a single institutional affiliation from the create account
-        // page, so we pre-fill a single empty entry which will be bound to the AccountCreation
-        // form.
-        {
-          institution: undefined,
-          nonAcademicAffiliation: undefined,
-          role: undefined,
-        },
-      ],
-      demographicSurvey: {},
-      degrees: [] as Degree[],
+      profile: createEmptyProfile(this.props.serverConfig.requireInstitutionalVerification)
     };
   }
 
@@ -199,26 +206,16 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
    * Made visible for ease of unit-testing.
    */
   public getAccountCreationSteps(): Array<SignInStep> {
-    const {enableNewAccountCreation, requireInvitationKey} = this.props.serverConfig;
+    const {requireInvitationKey} = this.props.serverConfig;
 
-    let steps: Array<SignInStep>;
-    if (enableNewAccountCreation) {
-      steps = [
-        SignInStep.LANDING,
-        SignInStep.INVITATION_KEY,
-        SignInStep.TERMS_OF_SERVICE,
-        SignInStep.ACCOUNT_CREATION,
-        SignInStep.DEMOGRAPHIC_SURVEY,
-        SignInStep.SUCCESS_PAGE
-      ];
-    } else {
-      steps = [
-        SignInStep.LANDING,
-        SignInStep.INVITATION_KEY,
-        SignInStep.ACCOUNT_CREATION,
-        SignInStep.SUCCESS_PAGE
-      ];
-    }
+    let steps = [
+      SignInStep.LANDING,
+      SignInStep.INVITATION_KEY,
+      SignInStep.TERMS_OF_SERVICE,
+      SignInStep.ACCOUNT_CREATION,
+      SignInStep.DEMOGRAPHIC_SURVEY,
+      SignInStep.SUCCESS_PAGE
+    ];
 
     if (!requireInvitationKey) {
       steps = fp.remove(step => step === SignInStep.INVITATION_KEY, steps);

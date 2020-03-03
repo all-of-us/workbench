@@ -89,14 +89,14 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": true,
     "enableRdrExport": false,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
     "useKeylessDelegatedCredentials": false,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false
+    "requireInstitutionalVerification": false,
+    "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-prod"

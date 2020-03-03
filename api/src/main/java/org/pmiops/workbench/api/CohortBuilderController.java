@@ -39,6 +39,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -53,6 +54,7 @@ import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.FilterColumns;
+import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
@@ -333,7 +335,21 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(
-      Long cdrVersionId, SearchRequest request) {
+      Long cdrVersionId, String genderOrSex, String age, SearchRequest request) {
+    GenderOrSexType genderOrSexType =
+        Optional.ofNullable(genderOrSex)
+            .map(GenderOrSexType::fromValue)
+            .orElseThrow(
+                () ->
+                    new BadRequestException(
+                        "Bad Request: Please provide a valid gender or sex at birth parameter"));
+    AgeType ageType =
+        Optional.ofNullable(age)
+            .map(AgeType::fromValue)
+            .orElseThrow(
+                () ->
+                    new BadRequestException(
+                        "Bad Request: Please provide a valid age type parameter"));
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     if (request.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
@@ -350,14 +366,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     QueryJobConfiguration qjc =
         bigQueryService.filterBigQueryConfig(
-            cohortQueryBuilder.buildDemoChartInfoCounterQuery(new ParticipantCriteria(request)));
+            cohortQueryBuilder.buildDemoChartInfoCounterQuery(
+                new ParticipantCriteria(request, genderOrSexType, ageType)));
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     for (List<FieldValue> row : result.iterateAll()) {
       response.addItemsItem(
           new DemoChartInfo()
-              .gender(bigQueryService.getString(row, rm.get("gender")))
+              .name(bigQueryService.getString(row, rm.get("name")))
               .race(bigQueryService.getString(row, rm.get("race")))
               .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
               .count(bigQueryService.getLong(row, rm.get("count"))));

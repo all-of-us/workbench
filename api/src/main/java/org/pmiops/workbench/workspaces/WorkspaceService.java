@@ -8,6 +8,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -32,6 +33,8 @@ public interface WorkspaceService {
   Optional<DbWorkspace> getByNamespace(String workspaceNamespace);
 
   List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
+
+  WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException;
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
 

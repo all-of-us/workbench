@@ -56,6 +56,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
@@ -232,7 +233,8 @@ public class ConceptSetsControllerTest {
     ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class,
     InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class
+    InstitutionMapperImpl.class,
+    PublicInstitutionDetailsMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,

@@ -5,7 +5,8 @@ import {
   ClusterLocalizeRequest,
   ClusterLocalizeResponse,
   ClusterStatus,
-  DefaultClusterResponse,
+  CreateClusterResponse,
+  GetClusterResponse,
 } from 'generated';
 
 export class ClusterServiceStub {
@@ -21,16 +22,25 @@ export class ClusterServiceStub {
     };
   }
 
-  listClusters(extraHttpRequestParams?: any): Observable<DefaultClusterResponse> {
-    return new Observable<DefaultClusterResponse>(observer => {
+  getCluster(extraHttpRequestParams?: any): Observable<GetClusterResponse> {
+    return new Observable<GetClusterResponse>(observer => {
       setTimeout(() => {
-        observer.next({defaultCluster: this.cluster});
+        observer.next({cluster: this.cluster});
         observer.complete();
       }, 0);
     });
   }
 
-  localize(projectName: string, clusterName: string, req: ClusterLocalizeRequest,
+  createCluster(extraHttpRequestParams?: any): Observable<CreateClusterResponse> {
+    return new Observable<CreateClusterResponse>(observer => {
+      setTimeout(() => {
+        observer.next({cluster: this.cluster});
+        observer.complete();
+      }, 0);
+    });
+  }
+
+  localize(projectName: string, req: ClusterLocalizeRequest,
     extraHttpRequestParams?: any): Observable<{}> {
     return new Observable<ClusterLocalizeResponse>(observer => {
       setTimeout(() => {
@@ -42,8 +52,7 @@ export class ClusterServiceStub {
     });
   }
 
-  deleteCluster(projectName: string, clusterName: string,
-    extraHttpRequestParams?: any): Observable<{}> {
+  deleteCluster(projectName: string, extraHttpRequestParams?: any): Observable<{}> {
     return new Observable<{}>(observer => {
       setTimeout(() => {
         observer.next({});

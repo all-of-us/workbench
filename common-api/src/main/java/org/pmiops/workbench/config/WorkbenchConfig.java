@@ -211,9 +211,6 @@ public class WorkbenchConfig {
     // Whether or not AoU should request Terra to create GCP projects inside a VPC
     // security perimeter.
     public boolean enableVpcServicePerimeter;
-    // Flag to indicate whether to enable the new Create Account flow
-    // See RW-3284.
-    public boolean enableNewAccountCreation;
     // Flag to indicate if USER/WORKSPACE data is exported to RDR
     public boolean enableRdrExport;
     // Setting this to true will prevent users from making compute increasing operations on
@@ -237,6 +234,8 @@ public class WorkbenchConfig {
     // enforced by pattern-matching the user's contact email against the institution's
     // set of whitelisted email domains or addresses
     public boolean requireInstitutionalVerification;
+    // Flag to indicate whether to use the new age type options in cohort builder age wizard
+    public boolean enableCBAgeTypeOptions;
   }
 
   public static class ActionAuditConfig {

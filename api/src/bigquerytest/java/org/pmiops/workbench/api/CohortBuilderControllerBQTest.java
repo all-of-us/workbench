@@ -45,6 +45,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
+import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CriteriaMenuOption;
@@ -54,6 +55,7 @@ import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -1329,7 +1331,39 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+  }
+
+  @Test
+  public void countSubjectsDemoAgeAtConsent() {
+    SearchParameter demo = age();
+    demo.attributes(
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.AGE_AT_CONSENT)
+                .operator(Operator.BETWEEN)
+                .operands(ImmutableList.of("29", "30"))));
+    SearchRequest searchRequests =
+        createSearchRequests(
+            DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+  }
+
+  @Test
+  public void countSubjectsDemoAgeAtCdr() {
+    SearchParameter demo = age();
+    demo.attributes(
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.AGE_AT_CDR)
+                .operator(Operator.BETWEEN)
+                .operands(ImmutableList.of("29", "30"))));
+    SearchRequest searchRequests =
+        createSearchRequests(
+            DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
   }
 
   @Test
@@ -1341,6 +1375,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     demoAgeSearchParam.attributes(
         ImmutableList.of(
             new Attribute()
+                .name(AttrName.AGE)
                 .operator(Operator.BETWEEN)
                 .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
 
@@ -1364,7 +1399,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
   }
 
   @Test
@@ -1890,13 +1925,67 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     DemoChartInfoListResponse response =
-        controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
+        controller
+            .getDemoChartInfo(
+                cdrVersion.getCdrVersionId(),
+                GenderOrSexType.GENDER.toString(),
+                AgeType.AGE.toString(),
+                searchRequest)
+            .getBody();
     assertEquals(2, response.getItems().size());
     assertEquals(
-        new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),
+        new DemoChartInfo().name("MALE").race("Asian").ageRange("45-64").count(1L),
         response.getItems().get(0));
     assertEquals(
-        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("18-44").count(1L),
+        new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L),
+        response.getItems().get(1));
+  }
+
+  @Test
+  public void getDemoChartInfoGenderAgeAtConsent() {
+    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+
+    DemoChartInfoListResponse response =
+        controller
+            .getDemoChartInfo(
+                cdrVersion.getCdrVersionId(),
+                GenderOrSexType.GENDER.toString(),
+                AgeType.AGE_AT_CONSENT.toString(),
+                searchRequest)
+            .getBody();
+    assertEquals(2, response.getItems().size());
+    assertEquals(
+        new DemoChartInfo().name("MALE").race("Asian").ageRange("45-64").count(1L),
+        response.getItems().get(0));
+    assertEquals(
+        new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L),
+        response.getItems().get(1));
+  }
+
+  @Test
+  public void getDemoChartInfoSexAtBirthAgeAtCdr() {
+    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+
+    DemoChartInfoListResponse response =
+        controller
+            .getDemoChartInfo(
+                cdrVersion.getCdrVersionId(),
+                GenderOrSexType.SEX_AT_BIRTH.toString(),
+                AgeType.AGE_AT_CDR.toString(),
+                searchRequest)
+            .getBody();
+    assertEquals(2, response.getItems().size());
+    assertEquals(
+        new DemoChartInfo().name("MALE").race("Asian").ageRange("45-64").count(1L),
+        response.getItems().get(0));
+    assertEquals(
+        new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L),
         response.getItems().get(1));
   }
 

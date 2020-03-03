@@ -2,6 +2,7 @@ import {
   AccessBypassRequest,
   AccessModule,
   DataAccessLevel,
+  InstitutionalRole,
   InvitationVerificationRequest,
   NihToken,
   Profile,
@@ -30,7 +31,12 @@ export class ProfileStubVariables {
     eraCommonsBypassTime: null,
     authorities: [],
     freeTierUsage: 1.23,
-    freeTierDollarQuota: 34.56
+    freeTierDollarQuota: 34.56,
+    verifiedInstitutionalAffiliation: {
+      institutionShortName: 'Broad',
+      institutionDisplayName: 'The Broad Institute',
+      institutionalRoleEnum: InstitutionalRole.FELLOW
+    }
   };
 }
 

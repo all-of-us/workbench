@@ -1,33 +1,54 @@
-# This file is for endpoints we do NOT intend to generate client libraries for
-# and advertise to notebook developers. Endpoints we DO want notebook developers to use should
-# go in client_api.yaml.
-
-# This file references parameters, paths, and definitions specified in
-# client_api.yaml; the two files get merged together into a merged.yaml file at build time.
-
-# If validation fails, gradle:generateApi fails claiming this file does not exist.
-# For separate validation (with some false positives), do:
-#     ./project.rb validate-swagger
 swagger: '2.0'
+x-aou-note: |
+  This file is for endpoints we do NOT intend to generate client libraries for
+  and advertise to notebook developers. Endpoints we DO want notebook developers to use should
+  go in client_api.yaml.
+
+  This file references parameters, paths, and definitions specified in
+  client_api.yaml; the two files get merged together into a merged.yaml file at build time.
+
+  If validation fails, gradle:generateApi fails claiming this file does not exist.
+
+  For separate validation (with some false positives), do:
+  ./project.rb validate-swagger
+
 info:
   version: "0.1.0"
   title: "AllOfUs Workbench API"
-  description: "The API for the AllOfUs workbench."
+  description: |
+    The API for the AllOfUs workbench.
+
+    Throughout, we use integer/int64 in preference to string/date-time because Swagger's
+    date formatting is inconsistent between server and client. Time values are stored as
+    milliseconds since the UNIX epoch.
+
+    Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
+    true, which app engine itself only sets when invoking as a cronjob.
+    See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+    and o.p.w.interceptors.CronInterceptor which implements the header check.
+
   termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
   contact:
     name: "developer_help@pmi-ops.org"
   license:
     name: "BSD"
+
 host: "api.pmi-ops.org"
 securityDefinitions:
-  # Establish the fact that *some endpoints* are OAuth protected
-  # by defining an `aou_oauth` security mode, which we'll assing
-  # to any protected endpoints below.
   aou_oauth:
-    # TODO: Vet/fix this token and/or authorization URL to work in practice.
-    # These are currently included simply to satisfy the Swagger specification,
-    # as this is not directly used to dictate oauth details (just used to
-    # annotate which methods require oauth).
+    x-aou-note: |
+      Establish the fact that *some endpoints* are OAuth protected
+      by defining an `aou_oauth` security mode, which we'll assigning
+      to any protected endpoints below.
+
+      TODO: Vet/fix this token and/or authorization URL to work in practice.
+      These are currently included simply to satisfy the Swagger specification,
+      as this is not directly used to dictate oauth details (just used to
+      annotate which methods require oauth).
+
+      The aou_auth entry under security (below) serves to establish the fact
+      that all endpoints are protected: this annotation ensures that client
+      libraries know to send bearer tokens when calling
     authorizationUrl: ""
     tokenUrl: ""
     type: oauth2
@@ -36,20 +57,9 @@ schemes:
   - "https"
 produces:
   - "application/json"
-# Establish the fact that all endpoints are protected: this annotation
-# ensures that client libraries know to send bearer tokens when calling
 security:
   - aou_oauth: []
 
-# Throughout, we use integer/int64 in preference to string/date-time because Swagger's
-# date formatting is inconsistent between server and client. Time values are stored as
-# milliseconds since the UNIX epoch.
-
-##########################################################################################
-## PATHS
-##########################################################################################
-
-## Common Path Parameters
 parameters:
   userId:
     in: path
@@ -71,6 +81,21 @@ parameters:
     format: int64
     required: true
     description: Data set ID
+  workspaceNamespace:
+    in: path
+    name: workspaceNamespace
+    type: string
+    required: true
+    description: The workspace namespace, aka Google Cloud project ID.
+  workspaceId:
+    in: path
+    name: workspaceId
+    type: string
+    required: true
+    description: >
+      The workspace ID, aka the Firecloud workspace ID. This is actually an immutable string,
+      which in AoU looks like a lower-cased concatenation of the workspace name when it was first
+      created.
 
 paths:
   /v1/status:
@@ -142,9 +167,6 @@ paths:
             A status alert information object.
           schema:
             $ref: "#/definitions/StatusAlert"
-
-    # User methods ########################################################################
-
   /v1/profile:
     get:
       tags:
@@ -186,8 +208,6 @@ paths:
           description: Request Received.
 
 
-  # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
-  # Error. It should respond with 400 Bad Request.
   /v1/is-username-taken:
     get:
       tags:
@@ -440,7 +460,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:
     post:
       tags:
@@ -548,8 +567,6 @@ paths:
           schema:
             $ref: "#/definitions/WorkbenchListBillingAccountsResponse"
 
-  # Notebook clusters ####################################################################
-
   /v1/admin/security/clusters/{billingProjectId}/delete-clusters:
     post:
       summary: Delete specified (or all if no specified list) clusters in a project
@@ -583,88 +600,79 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/clusters/{billingProjectId}/{workspaceFirecloudName}:
+  /v1/clusters/{workspaceNamespace}:
     get:
-      summary: List available notebook clusters
+      summary: Get the user's workspace cluster.
       description: >
-        Returns the clusters available to the current user in the given billing project.
-        Currently there is a single default cluster supported per billing project
-        and this cluster should always either exist or be in the process of being
-        initialized. In a future where researchers have more control over cluster
-        creation, this endpoint would be extended to return all clusters.
-      operationId: listClusters
+        Returns the current user's cluster, if any, which has been created for the given workspace.
+      operationId: getCluster
       tags:
         - cluster
       parameters:
-        - in: path
-          name: billingProjectId
-          description: The unique identifier of the Google Billing Project containing the clusters
-          required: true
-          type: string
-        - in: path
-          name: workspaceFirecloudName
-          description: The firecloudName of the workspace whose notebook we're looking at
-          required: true
-          type: string
+        - $ref: '#/parameters/workspaceNamespace'
       responses:
         200:
-          description: The users cluster
+          description: The cluster for this user and workspace.
           schema:
-            $ref: '#/definitions/DefaultClusterResponse'
-        500:
-          description: Internal Error
+            $ref: '#/definitions/Cluster'
+        404:
+          description: No cluster exists for this user and workspace.
           schema:
             $ref: '#/definitions/ErrorResponse'
+    post:
+      summary: Create a workspace cluster.
+      description: >
+        Creates a new cluster for the current user in the given billing project. If a cluster already
+        exists for the user in this billing project, a 409 conflict error is returned (even if the cluster
+        is still initializing or is not in a ready state).
 
-  /v1/clusters/{clusterNamespace}/{clusterName}:
+        TODO(RW-3697): Custom cluster creation params should be added as a body param here.
+      operationId: createCluster
+      tags:
+        - cluster
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+      responses:
+        200:
+          description: Returns the cluster that was created for this user and workspace.
+          schema:
+            $ref: '#/definitions/Cluster'
+        409:
+          description: A cluster for this user and workspace already exists.
+          schema:
+            $ref: "#/definitions/EmptyResponse"
     delete:
-      summary: Delete a cluster by name.
+      summary: Delete a workspace cluster.
+      description: >
+        TODO(RW-3695): updateCluster should be added as a PATCH endpoint here.
       operationId: deleteCluster
       tags:
         - cluster
       parameters:
-        - in: path
-          name: clusterNamespace
-          description: clusterNamespace
-          required: true
-          type: string
-        - in: path
-          name: clusterName
-          description: clusterName
-          required: true
-          type: string
+        - $ref: '#/parameters/workspaceNamespace'
       responses:
         200:
-          description: Deletion success
+          description: Success
           schema:
             $ref: '#/definitions/EmptyResponse'
-        500:
-          description: Internal Error
+        404:
+          description: No cluster exists for this user and workspace.
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: "#/definitions/ErrorResponse"
 
-  /v1/clusters/{clusterNamespace}/{clusterName}/localize:
+  /v1/clusters/{workspaceNamespace}/localize:
     post:
-      summary: >
-        Localize files from a workspace to notebook cluster. As a side-effect,
+      summary: Localize files to the user's cluster.
+      description: >
+        Localizes files to the cluster for the current user and given workspace. As a side-effect,
         JSON workspace environment files will also be localized to the cluster.
-      description: Localize notebook files to the corresponding notebook cluster.
       operationId: localize
       tags:
         - cluster
       consumes:
         - application/json
       parameters:
-        - in: path
-          name: clusterNamespace
-          description: clusterNamespace
-          required: true
-          type: string
-        - in: path
-          name: clusterName
-          description: clusterName
-          required: true
-          type: string
+        - $ref: '#/parameters/workspaceNamespace'
         - in: body
           name: body
           description: Localization request.
@@ -684,8 +692,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  # Billing projects #####################################################################
-
   /v1/billingProjects:
     get:
       tags:
@@ -703,8 +709,6 @@ paths:
           description: User Not Found
         500:
           description: Internal Server Error
-
-  # Workspaces ###########################################################################
 
   /v1/workspaces:
     get:
@@ -1081,7 +1085,7 @@ paths:
         - workspaceAdmin
       description: >
         Given a workspace namespace (Google Cloud Platform  Project ID), returns workspace details.
-        Only accessible to privileged admin users.
+        Requires the WORKSPACES_VIEW authority.
       operationId: getFederatedWorkspaceDetails
       responses:
         200:
@@ -1092,6 +1096,22 @@ paths:
           description: Workspace not found for namespace
           schema:
             $ref: '#/definitions/ErrorResponse'
+
+  /v1/admin/workspaces/{workspaceNamespace}/cloudStorageTraffic:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+    get:
+      tags:
+        - workspaceAdmin
+      description: >
+        Returns a time series of cloud storage traffic for the given project.
+        Requires the WORKSPACES_VIEW authority.
+      operationId: getCloudStorageTraffic
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/CloudStorageTraffic"
 
   /v1/admin/clusters/updateConfig:
     post:
@@ -1143,14 +1163,13 @@ paths:
         204:
           description: The egress event was successfully handled.
 
-  # Cron ############################################################################
-
-  # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
-  # true, which app engine itself only sets when invoking as a cronjob.
-  # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
-  # and o.p.w.interceptors.CronInterceptor which implements the header check.
-
   /v1/cron/auditBigQuery:
+    x-aou-note: |
+      Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
+      true, which app engine itself only sets when invoking as a cronjob.
+      See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+      and o.p.w.interceptors.CronInterceptor which implements the header check.
+
     get:
       security: []
       tags:
@@ -1265,8 +1284,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  # Billing ##############################################################################
-
   /v1/cron/bufferBillingProjects:
     get:
       security: []
@@ -1378,8 +1395,6 @@ paths:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
     parameters:
@@ -1520,9 +1535,6 @@ paths:
           description: The locking metadata fields for the notebook
           schema:
             $ref: '#/definitions/NotebookLockingMetadataResponse'
-
-  # Cohort Reviews #######################################################################
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -1578,8 +1590,6 @@ paths:
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
-
-  # Cohorts ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
     parameters:
@@ -1709,7 +1719,6 @@ paths:
           schema:
             $ref: "#/definitions/MaterializeCohortResponse"
 
-  ######### USER RECENT RESOURCES ########################################
   /v1/workspaces/user-recent-resources:
     get:
       tags:
@@ -1739,10 +1748,11 @@ paths:
           description: request object for updating recent resource
           required: true
           schema:
-            # this is currently only ever used by Notebooks because other
-            # resources are stored in our db, and therefore cache ops are
-            # done for them in the backend
             $ref: "#/definitions/RecentResourceRequest"
+      x-aou-note: |
+        this response type is currently only ever used by Notebooks because other
+        resources are stored in our db, and therefore cache ops are
+        done for them in the backend
       responses:
         200:
           description: Successfully added/updated
@@ -1771,7 +1781,6 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  ######### USER RECENT WORKSPACES ############################################################
   /v1/workspaces/user-recent-workspaces:
     get:
       tags:
@@ -1799,8 +1808,6 @@ paths:
           schema:
             $ref: "#/definitions/RecentWorkspaceResponse"
 
-
-  # Concept sets ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:
     parameters:
@@ -1950,8 +1957,6 @@ paths:
           schema:
             $ref: "#/definitions/ConceptSet"
 
-  # Concepts ###############################################################################
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainInfo:
     get:
       tags:
@@ -1969,7 +1974,6 @@ paths:
           schema:
             $ref: "#/definitions/DomainInfoResponse"
 
-  ### Surveys #############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo:
     get:
       tags:
@@ -2010,7 +2014,6 @@ paths:
             items:
               $ref: "#/definitions/SurveyQuestions"
 
-  ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
     post:
       tags:
@@ -2263,18 +2266,17 @@ paths:
             $ref: "#/definitions/DomainValuesResponse"
 
 
-  ##########################################################################################
-  # Endpoints for task in cloud task queue
-  # Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
-  # to the queue name, which app engine itself only sets (and overrides internally) when invoking
-  # cloud task. See
-  # https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
-  # and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
-  #########################################################################################
-
-  # Using body parameter ref ArrayOfLong instead of defining array of type long here because of
-  # bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
   /v1/cloudTask/exportResearcherData:
+    x-aou-note: |
+      Endpoints for task in cloud task queue
+      Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
+      to the queue name, which app engine itself only sets (and overrides internally) when invoking
+      cloud task. See
+      https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
+      and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
+
+      Using body parameter ref ArrayOfLong instead of defining array of type long here because of
+      bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
     post:
       tags:
         - cloudTaskRdrExport
@@ -2318,14 +2320,14 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
 
-# Institution endpoints, for Verified Institutional Affiliation
-
   /v1/institutions:
+    x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
       tags:
         - institution
       description: >
-        Gets a list of all Institutions.
+        Gets the list of all Institutions.
+        Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitutions"
       responses:
         200:
@@ -2354,6 +2356,21 @@ paths:
           schema:
             $ref: "#/definitions/Institution"
 
+  /v1/institutions/publicDetails:
+    get:
+      tags:
+        - institution
+      description: >
+        Gets the public details for the list of all Institutions.
+      operationId: "getPublicInstitutionDetails"
+      security: []
+      responses:
+        200:
+          description: >
+            A list of all Institutions
+          schema:
+            $ref: "#/definitions/GetPublicInstitutionDetailsResponse"
+
   /v1/institutions/{shortName}:
     parameters:
       - in: path
@@ -2366,6 +2383,7 @@ paths:
         - institution
       description: >
         Gets the Institution corresponding to the shortName ID.
+        Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitution"
       responses:
         200:
@@ -2406,10 +2424,6 @@ paths:
             The updated Institution.
           schema:
             $ref: "#/definitions/Institution"
-
-##########################################################################################
-## DEFINITIONS
-##########################################################################################
 definitions:
   StatusResponse:
     type: object
@@ -2429,9 +2443,10 @@ definitions:
     required:
       - gsuiteDomain
     properties:
-      # This should be gSuiteDomain, but the Swagger-Codegen-generated server code causes the JSON
-      # response to have the keys "gsuiteDomain" and "gSuiteDomain". This weirdness is a workaround.
       gsuiteDomain:
+        x-aou-note: |
+          This should be gSuiteDomain, but the Swagger-Codegen-generated server code causes the JSON
+          response to have the keys "gsuiteDomain" and "gSuiteDomain". This weirdness is a workaround.
         type: string
         description: G-Suite domain containing user accounts.
       projectId:
@@ -2469,10 +2484,6 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for billing lockout and upgrade
-      enableNewAccountCreation:
-        type: boolean
-        default: false
-        description: Feature flag for collecting new demographics & TOS acknowledgement on user creation.
       requireInvitationKey:
         type: boolean
         default: false
@@ -2483,6 +2494,10 @@ definitions:
         description: >
           Feature flag for verifying the institutional affiliation of new users by validating their
           contact emails.
+      enableCBAgeTypeOptions:
+        type: boolean
+        default: false
+        description: Whether to use the new age type options in cohort builder age wizard
 
 
   FeaturedWorkspacesConfigResponse:
@@ -2493,8 +2508,8 @@ definitions:
         items:
           $ref: "#/definitions/FeaturedWorkspace"
 
-  # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
+    x-aou-note: Mirrors BillingProjectMembership from fireCloud.yaml
     description: ''
     required:
       - projectName
@@ -2563,26 +2578,29 @@ definitions:
       username:
         type: string
 
-  # Authorities are a tool used to add discrete permissions to users. We currently
-  # define the following authorities:
-  #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
-  #      the user has requested review to approve or reject.
-  #   2) DEVELOPER: *Grants all other authorities* as well as some internal-only
-  #      administrative endpoints, including group management and cluster
-  #      management. Intended to be granted for devops needs, e.g. for oncall.
-  #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
-  #      to perform actions on a user's enabled status and manual verification.
-  #   4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
-  #   5) COMMUNICATIONS_ADMIN: Allows a user to post a Status Alert banner
-  #   6) SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all clusters in a project
-  #   7) INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
   Authority:
+    x-aou-note: |
+      Authorities are a tool used to add discrete permissions to users. We currently
+      define the following authorities:
+       1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
+          the user has requested review to approve or reject.
+       2) DEVELOPER: *Grants all other authorities* as well as some internal-only
+          administrative endpoints, including group management and cluster
+          management. Intended to be granted for devops needs, e.g. for oncall.
+       3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
+          to perform actions on a user's enabled status and manual verification.
+       4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
+       5) COMMUNICATIONS_ADMIN: Allows a user to post a Status Alert banner
+       6) SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all clusters in a project
+       7) INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
+
+      Note on enum names: Swagger trims any common prefix from enum values' corresponding
+      Java fields by default; this has no side-effect currently as there is
+      no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
+
     type: string
     description: actions a user can have authority/permission to perform
     enum: [
-      # Note: Swagger trims any common prefix from enum values' corresponding
-      # Java fields by default; this has no side-effect currently as there is
-      # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
       REVIEW_RESEARCH_PURPOSE,
       DEVELOPER,
       ACCESS_CONTROL_ADMIN,
@@ -3941,7 +3959,6 @@ definitions:
         $ref: '#/definitions/Education'
       disability:
         type: boolean
-        default: false
 
   Address:
     type: object
@@ -4031,12 +4048,20 @@ definitions:
         format: int64
         description: Milliseconds since the UNIX epoch.
 
-  DefaultClusterResponse:
+  GetClusterResponse:
+    type: object
+    properties:
+      cluster:
+        description: The cluster associated with a given user and workspace. May be empty.
+        $ref: "#/definitions/Cluster"
+
+  CreateClusterResponse:
     type: object
     required:
-      - defaultCluster
+      - cluster
     properties:
-      defaultCluster:
+      cluster:
+        description: The cluster that was created.
         $ref: "#/definitions/Cluster"
 
   ListClusterResponse:
@@ -4080,17 +4105,9 @@ definitions:
   ClusterLocalizeRequest:
     type: object
     required:
-      - workspaceNamespace
-      - workspaceId
       - notebookNames
       - playgroundMode
     properties:
-      workspaceNamespace:
-        type: string
-        description: Workspace namespace from which to source notebooks
-      workspaceId:
-        type: string
-        description: Workspace from which to source notebooks
       notebookNames:
         type: array
         description: >
@@ -4374,7 +4391,9 @@ definitions:
 
   Institution:
     type: object
-    description: Represents an institution which has been approved to validate researchers who wish to use the system
+    description: >
+      Represents an institution which has been approved to validate researchers who wish to use the system,
+      including the email patterns which we use to validate users.
     required:
       - shortName
       - displayName
@@ -4407,6 +4426,28 @@ definitions:
         items:
           type: string
 
+  PublicInstitutionDetails:
+    type: object
+    description: >
+      Represents an institution which has been approved to validate researchers who wish to use the system.
+      Does not include the sensitive email patterns used to validate users.
+    required:
+      - shortName
+      - displayName
+      - organizationTypeEnum
+    properties:
+      shortName:
+        type: string
+        description: A short unique name for the Institution used as an identifier, such as 'VUMC'
+      displayName:
+        type: string
+        description: A more descriptive name for the Institution, such as 'Vanderbilt University Medical Center'
+      organizationTypeEnum:
+        $ref: '#/definitions/OrganizationType'
+        description: >
+          The Organization Type of this institution if it is one of the enumerated
+          OrganizationTypes, or OrganizationType.OTHER if it is not
+
   GetInstitutionsResponse:
     type: object
     required:
@@ -4416,6 +4457,16 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Institution"
+
+  GetPublicInstitutionDetailsResponse:
+    type: object
+    required:
+      - institutions
+    properties:
+      institutions:
+        type: "array"
+        items:
+          $ref: "#/definitions/PublicInstitutionDetails"
 
   OrganizationType:
     type: string
@@ -4429,7 +4480,7 @@ definitions:
       derived from CAPS requirements.
     enum: [
       UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, MID_CAREER, LATE_CAREER,
-      PRE_DOCTORAL, POST_DOCTORAL, PI,
+      PRE_DOCTORAL, POST_DOCTORAL, SENIOR_RESEARCHER,
       TEACHER, STUDENT, ADMIN,
       PROJECT_PERSONNEL, OTHER
     ]
@@ -4443,6 +4494,11 @@ definitions:
       institutionShortName:
         type: string
         description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'VUMC'
+      institutionDisplayName:
+        type: string
+        description: >
+          The longer, more descriptive name of the Institution where the user has a Verified Affiliation,
+          such as 'Vanderbilt University Medical Center'
       institutionalRoleEnum:
         $ref: '#/definitions/InstitutionalRole'
         description: >
@@ -4502,3 +4558,25 @@ definitions:
       storageBytesUsed:
         type: integer
         format: int64
+
+  CloudStorageTraffic:
+    type: object
+    properties:
+      receivedBytes:
+        type: array
+        items:
+          $ref: "#/definitions/TimeSeriesPoint"
+
+  TimeSeriesPoint:
+    type: object
+    description: Represents a floating-point valued time series point.
+    properties:
+      timestamp:
+        type: integer
+        format: int64
+        description: >
+          Timestamp, in milliseconds since Unix epoch, of the end point of the time window
+          covered by this time series point.
+      value:
+        type: number
+        format: double
