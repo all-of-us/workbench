@@ -1182,7 +1182,7 @@ def fetch_firecloud_user_profile(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--user=[user]",
+      "--user [user]",
       String,
       ->(opts, v) { opts.user = v},
       "The AoU user to fetch FireCloud data for (e.g. 'gjordan@fake-research-aou.org'")
@@ -1214,9 +1214,9 @@ def fetch_workspace_details(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--projectId=[projectId]",
+      "--workspace-project-id [workspace-project-id]",
       String,
-      ->(opts, v) { opts.projectId = v},
+      ->(opts, v) { opts.workspace_project_id = v},
       "Fetches details for workspace(s) that match the given project ID / namespace (e.g. 'aou-rw-231823128'")
 
   # Create a cloud context and apply the DB connection variables to the environment.
@@ -1229,7 +1229,7 @@ def fetch_workspace_details(cmd_name, *args)
 
   flags = ([
       ["--fc-base-url", fc_config["baseUrl"]],
-      ["--projectId", op.opts.projectId]
+      ["--workspace-project-id", op.opts.workspace_project_id]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
@@ -1256,7 +1256,7 @@ def export_workspace_data(cmd_name, *args)
   op.add_typed_option(
       "--export-filename [export-filename]",
       String,
-      ->(opts, v) { opts.exportFilename = v},
+      ->(opts, v) { opts.export_filename = v},
       "Filename of export file to write to")
 
   # Create a cloud context and apply the DB connection variables to the environment.
@@ -1266,7 +1266,7 @@ def export_workspace_data(cmd_name, *args)
   gcc.validate()
 
   flags = ([
-      ["--export-filename", op.opts.exportFilename]
+      ["--export-filename", op.opts.export_filename]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 

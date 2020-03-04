@@ -35,10 +35,16 @@ public class FetchWorkspaceDetails {
           .hasArg()
           .build();
 
-  private static Option projectIdOpt =
-      Option.builder().longOpt("projectId").desc("Billing project ID").required().hasArg().build();
+  private static Option workspaceProjectIdOpt =
+      Option.builder()
+          .longOpt("workspace-project-id")
+          .desc("Workspace billing project ID to fetch details for")
+          .required()
+          .hasArg()
+          .build();
 
-  private static Options options = new Options().addOption(fcBaseUrlOpt).addOption(projectIdOpt);
+  private static Options options =
+      new Options().addOption(fcBaseUrlOpt).addOption(workspaceProjectIdOpt);
 
   @Bean
   public CommandLineRunner run(WorkspaceDao workspaceDao) {
@@ -54,7 +60,7 @@ public class FetchWorkspaceDetails {
 
       for (DbWorkspace workspace :
           workspaceDao.findAllByWorkspaceNamespace(
-              opts.getOptionValue(projectIdOpt.getLongOpt()))) {
+              opts.getOptionValue(workspaceProjectIdOpt.getLongOpt()))) {
         Map<String, FirecloudWorkspaceAccessEntry> acl =
             FirecloudTransforms.extractAclResponse(
                 workspacesApi.getWorkspaceAcl(
