@@ -60,6 +60,9 @@ const libraryTabs = {
   },
   PHENOTYPE_LIBRARY: {
     title: 'Phenotype Library',
+    description: <div>These workspaces demonstrate how computable electronic phenotypes can be implemented within
+      the <i>All of Us</i> data using examples of previously published phenotype algorithms. You can open the
+      workspaces to view them or “duplicate” the workspaces to edit and execute the algorithms.</div>,
     icon: 'dna',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
@@ -70,6 +73,9 @@ const libraryTabs = {
   },
   TUTORIAL_WORKSPACES: {
     title: 'Tutorial Workspaces',
+    description: <div>These workspaces provide instructions for key Researcher Workbench components and representation
+      of <i>All of Us</i> data. You can open the workspaces to view them or “duplicate” the workspaces to edit and
+      execute.</div>,
     icon: 'library',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
@@ -97,9 +103,10 @@ interface ReloadableProfile {
 }
 
 interface CurrentTab {
-  title: string;
-  icon: string;
+  description?: string | JSX.Element;
   filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => WorkspacePermissions[];
+  icon: string;
+  title: string;
 }
 
 class Props {
@@ -233,8 +240,11 @@ export const WorkspaceLibrary = withUserProfile()
                      class='is-solid' size={24}/>
             <div style={{color: colors.primary, fontSize: 18, fontWeight: 600}}>
               {currentTab.title}
+              {currentTab.description && <div style={{color: colors.primary, fontWeight: 400,
+                fontSize: 14, paddingTop: '0.25rem'}}>{currentTab.description}</div>}
             </div>
           </FlexRow>
+
           <hr style={styles.divider}/>
           {errorText && <AlertDanger>{errorText}</AlertDanger>}
 
