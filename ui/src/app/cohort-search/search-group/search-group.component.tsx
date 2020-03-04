@@ -450,7 +450,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     render() {
-      const {group: {id, items, mention, status, temporal, time, timeValue}, index, role, updated} = this.props;
+      const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
       const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, inputError, inputTouched, loading, overlayStyle} = this.state;
       const domainMap = (domain: any, temporalGroup: number) => {
         if (!!domain.children) {

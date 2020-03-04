@@ -1,8 +1,10 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {DomainType} from 'generated/fetch';
+import {CohortBuilderApi, DomainType} from 'generated/fetch';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {SearchGroup} from './search-group.component';
 
@@ -12,7 +14,7 @@ const itemsStub = [
     type: DomainType.MEASUREMENT,
     searchParameters: [],
     modifiers: [],
-    count: null,
+    count: 1,
     temporalGroup: 0,
     isRequesting: false,
     status: 'active'
@@ -22,7 +24,7 @@ const itemsStub = [
     type: DomainType.MEASUREMENT,
     searchParameters: [],
     modifiers: [],
-    count: null,
+    count: 2,
     temporalGroup: 0,
     isRequesting: false,
     status: 'active'
@@ -32,7 +34,7 @@ const itemsStub = [
     type: DomainType.MEASUREMENT,
     searchParameters: [],
     modifiers: [],
-    count: null,
+    count: 3,
     temporalGroup: 1,
     isRequesting: false,
     status: 'active'
@@ -41,6 +43,7 @@ const itemsStub = [
 const groupStub = {id: 'group_id', items: itemsStub, status: 'active', type: DomainType.CONDITION};
 describe('SearchGroup', () => {
   beforeEach(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       cdrVersionId: '1',
@@ -59,12 +62,5 @@ describe('SearchGroup', () => {
     // Should split the items by temporalGroup when temporal is true
     expect(wrapper.find('[data-test-id="item-list"]').length).toBe(itemsStub.filter(it => it.temporalGroup === 0).length);
     expect(wrapper.find('[data-test-id="temporal-item-list"]').length).toBe(itemsStub.filter(it => it.temporalGroup === 1).length);
-  });
-
-  it('Should render an overlay when disabled', async() => {
-    const wrapper = mount(<SearchGroup role='includes' group={groupStub} index={0} updateRequest={() => {}}/>);
-    expect(wrapper.find('[data-test-id="disabled-overlay"]').length).toBe(0);
-    wrapper.setProps({group: {...groupStub, status: 'hidden'}});
-    expect(wrapper.find('[data-test-id="disabled-overlay"]').length).toBe(1);
   });
 });
