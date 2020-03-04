@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -45,11 +45,11 @@ public class ConceptSetDaoTest {
                 .addCreationTime(now)
                 .addCreator(creator)
                 .addDescription("descr")
-                .addDomain(CommonStorageEnums.domainToStorage(Domain.CONDITION))
+                .addDomain(DbStorageEnums.domainToStorage(Domain.CONDITION))
                 .addLastModifiedTime(now)
                 .addName("conceptSet")
                 .addParticipantCount(200)
-                .addSurvey(CommonStorageEnums.surveysToStorage(Surveys.THE_BASICS))
+                .addSurvey(DbStorageEnums.surveysToStorage(Surveys.THE_BASICS))
                 .addVersion(1)
                 .addWorkspaceId(ws.getWorkspaceId())
                 .build());

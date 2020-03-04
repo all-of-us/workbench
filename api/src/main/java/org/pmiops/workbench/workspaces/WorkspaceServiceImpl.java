@@ -45,7 +45,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusAndDataAccessLevelToCountResult;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -798,7 +798,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                             .toString())
                     .addTag(
                         MetricLabel.DATA_ACCESS_LEVEL,
-                        CommonStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                        DbStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
                             .toString())
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .build())

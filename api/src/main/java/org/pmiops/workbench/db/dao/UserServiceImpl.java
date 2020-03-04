@@ -26,7 +26,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -605,7 +605,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
     List<Short> dataAccessLevels =
         Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-            .map(CommonStorageEnums::dataAccessLevelToStorage)
+            .map(DbStorageEnums::dataAccessLevelToStorage)
             .collect(Collectors.toList());
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
   }
@@ -926,7 +926,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
                     .addTag(
                         MetricLabel.DATA_ACCESS_LEVEL,
-                        CommonStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                        DbStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
                             .toString())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
                     .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())

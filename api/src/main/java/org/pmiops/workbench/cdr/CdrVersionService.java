@@ -7,7 +7,7 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -20,12 +20,12 @@ import org.springframework.stereotype.Service;
 public class CdrVersionService {
 
   private static final ImmutableSet<Short> REGISTERED_ONLY =
-      ImmutableSet.of(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      ImmutableSet.of(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
 
   private static final ImmutableSet<Short> REGISTERED_AND_PROTECTED =
       ImmutableSet.of(
-          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED),
-          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
+          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED),
+          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
 
   private static final ImmutableMap<DataAccessLevel, ImmutableSet<Short>>
       DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES =

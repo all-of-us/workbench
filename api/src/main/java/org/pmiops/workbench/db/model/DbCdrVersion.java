@@ -70,11 +70,11 @@ public class DbCdrVersion {
 
   @Transient
   public DataAccessLevel getDataAccessLevelEnum() {
-    return CommonStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @Column(name = "archival_status")
@@ -88,11 +88,11 @@ public class DbCdrVersion {
 
   @Transient
   public ArchivalStatus getArchivalStatusEnum() {
-    return CommonStorageEnums.archivalStatusFromStorage(getArchivalStatus());
+    return DbStorageEnums.archivalStatusFromStorage(getArchivalStatus());
   }
 
   public void setArchivalStatusEnum(ArchivalStatus archivalStatus) {
-    setArchivalStatus(CommonStorageEnums.archivalStatusToStorage(archivalStatus));
+    setArchivalStatus(DbStorageEnums.archivalStatusToStorage(archivalStatus));
   }
 
   @Column(name = "release_number")

@@ -44,12 +44,12 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -183,7 +183,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
     return new DbDatasetValue(
-        CommonStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
+        DbStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
         domainValuePair.getValue());
   }
 
