@@ -1229,7 +1229,7 @@ def fetch_workspace_details(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--workspace-project-id [project-id]",
+      "--workspace-project-id [workspace-project-id]",
       String,
       ->(opts, v) { opts.workspace_project_id = v},
       "Fetches details for workspace(s) that match the given project ID / namespace (e.g. 'aou-rw-231823128'")
