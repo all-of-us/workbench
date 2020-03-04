@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.ConceptsController;
-import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -68,20 +67,15 @@ public class ConceptService {
   private ConceptDao conceptDao;
   private DomainInfoDao domainInfoDao;
   private SurveyModuleDao surveyModuleDao;
-  private CBCriteriaDao cbCriteriaDao;
 
   public ConceptService() {}
 
   @Autowired
   public ConceptService(
-      ConceptDao conceptDao,
-      DomainInfoDao domainInfoDao,
-      SurveyModuleDao surveyModuleDao,
-      CBCriteriaDao cbCriteriaDao) {
+      ConceptDao conceptDao, DomainInfoDao domainInfoDao, SurveyModuleDao surveyModuleDao) {
     this.conceptDao = conceptDao;
     this.domainInfoDao = domainInfoDao;
     this.surveyModuleDao = surveyModuleDao;
-    this.cbCriteriaDao = cbCriteriaDao;
   }
 
   private static String modifyMultipleMatchKeyword(String query) {

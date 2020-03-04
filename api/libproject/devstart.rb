@@ -412,22 +412,7 @@ Common.register_command({
   :fn => ->(*args) { run_api_tests("test-api", args) }
 })
 
-def run_common_api_tests(cmd_name, args)
-  ensure_docker cmd_name, args
-  Dir.chdir('../common-api') do
-    Common.new.run_inline %W{gradle :test} + args
-  end
-end
-
-Common.register_command({
-  :invocation => "test-common-api",
-  :description => "Runs common API tests. To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => ->(*args) { run_common_api_tests("test-common-api", args) }
-})
-
 def run_all_tests(cmd_name, args)
-  run_common_api_tests(cmd_name, args)
   run_api_tests(cmd_name, args)
 end
 
