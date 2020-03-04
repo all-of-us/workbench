@@ -25,7 +25,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   error = false;
   overview = false;
   criteria = {includes: [], excludes: []};
-  updateCriteria = {update: 0, recalculate: true};
+  updateCount = 0;
   cohort: any;
   resolve: Function;
   modalPromise: Promise<boolean> | null = null;
@@ -100,8 +100,8 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 
-  updateRequest = (recalculate: boolean) => {
-    this.updateCriteria = {update: this.updateCriteria.update + 1, recalculate};
+  updateRequest = () => {
+    this.updateCount++;
   }
 
   updateSaving = (flag: boolean) => {

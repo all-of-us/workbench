@@ -170,16 +170,16 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      const {item: {searchParameters}, updateGroup} = this.props;
+      const {item: {searchParameters}} = this.props;
       if (prevProps.item.searchParameters !== searchParameters) {
-        updateGroup(true);
         this.setState({loading: true}, () => this.getItemCount());
       }
     }
 
     async getItemCount() {
-      const {item, role} = this.props;
+      const {item, role, updateGroup} = this.props;
       try {
+        updateGroup();
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const mappedItem = mapGroupItem(item, false);
         const request = {
@@ -239,7 +239,9 @@ export const SearchGroupItem = withCurrentWorkspace()(
           } else {
             sr[role][groupIndex].items[itemIndex] = {...item, [property]: value};
             searchRequestStore.next(sr);
-            updateGroup(recalculate);
+            if (recalculate) {
+              updateGroup();
+            }
           }
         }
       }

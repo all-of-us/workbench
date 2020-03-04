@@ -163,19 +163,19 @@ const temporalTimes = [
 function temporalEnumToText(option) {
   switch (option) {
     case TemporalMention.ANYMENTION:
-      return 'Any Mention';
+      return 'Any mention of';
     case TemporalMention.FIRSTMENTION:
-      return 'First Mention';
+      return 'First mention of';
     case TemporalMention.LASTMENTION:
-      return 'Last Mention';
+      return 'Last mention of';
     case TemporalTime.DURINGSAMEENCOUNTERAS:
       return 'During same encounter as';
     case TemporalTime.XDAYSBEFORE:
-      return 'X Days before';
+      return 'X or more days before';
     case TemporalTime.XDAYSAFTER:
-      return 'X Days after';
+      return 'X or more days after';
     case TemporalTime.WITHINXDAYSOF:
-      return 'Within X Days of';
+      return 'On or within X days of';
   }
 }
 
@@ -205,6 +205,7 @@ interface State {
   demoOpen: boolean;
   demoMenuHover: boolean;
   error: boolean;
+  initializing: boolean;
   inputError: boolean;
   inputTouched: boolean;
   loading: boolean;
@@ -231,6 +232,7 @@ export const SearchGroup = withCurrentWorkspace()(
         demoOpen: false,
         demoMenuHover: false,
         error: false,
+        initializing: true,
         inputError: false,
         inputTouched: false,
         loading: false,
@@ -280,7 +282,7 @@ export const SearchGroup = withCurrentWorkspace()(
         [role]: [mappedGroup]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request, {signal: this.aborter.signal})
-        .then(count => this.setState({count, loading: false}))
+        .then(count => this.setState({count, initializing: false, loading: false}))
         .catch(error => {
           if (!isAbortError(error)) {
             console.error(error);
@@ -296,11 +298,14 @@ export const SearchGroup = withCurrentWorkspace()(
       }
     }
 
-    update(recalculate: boolean) {
+    update() {
       const {group: {temporal}, updateRequest} = this.props;
-      updateRequest(recalculate);
-      if (recalculate && this.hasActiveItems && (!temporal || !this.temporalError)) {
-        this.getGroupCount();
+      // Prevent multiple group count calls when loading an existing cohort
+      if (!this.state.initializing) {
+        updateRequest();
+        if (this.hasActiveItems && (!temporal || !this.temporalError)) {
+          this.getGroupCount();
+        }
       }
     }
 
@@ -392,7 +397,7 @@ export const SearchGroup = withCurrentWorkspace()(
       if (groupIndex > -1) {
         searchRequest[role][groupIndex][property] = value;
         searchRequestStore.next(searchRequest);
-        updateRequest(true);
+        updateRequest();
       }
     }
 
@@ -486,12 +491,11 @@ export const SearchGroup = withCurrentWorkspace()(
             <button style={styles.menuButton} onClick={(e) => this.mentionMenu.toggle(e)}>
               {temporalEnumToText(mention)} <ClrIcon shape='caret down' size={12}/>
             </button>
-            <span style={{fontSize: '14px', padding: '0.2rem 0.25rem 0'}}> of </span>
           </div>}
           {/* Main search item list/temporal group 0 items */}
           {this.items.map((item, i) => <div key={i} data-test-id='item-list' style={styles.searchItem}>
             <SearchGroupItem role={role} groupId={id} item={item} index={i}
-              updateGroup={(recalculate) => this.update(recalculate)}/>
+              updateGroup={() => this.update()}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
           {/* Criteria menu for main search item list/temporal group 0 items */}
@@ -520,7 +524,7 @@ export const SearchGroup = withCurrentWorkspace()(
             {/* Temporal group 1 items */}
             {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
               <SearchGroupItem role={role} groupId={id} item={item} index={i}
-                updateGroup={(recalculate) => this.update(recalculate)}/>
+                updateGroup={() => this.update()}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
             {/* Criteria menu for temporal group 1 items */}
