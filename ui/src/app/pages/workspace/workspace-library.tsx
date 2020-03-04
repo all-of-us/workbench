@@ -61,7 +61,7 @@ const libraryTabs = {
   PHENOTYPE_LIBRARY: {
     title: 'Phenotype Library',
     description: <div>These workspaces demonstrate how computable electronic phenotypes can be implemented within
-      the <i>All of Us</i> data using examples of previously published phenotype algorithms. You can open the
+      the <i>All of Us</i> dataset using examples of previously published phenotype algorithms. You can open the
       workspaces to view them or “duplicate” the workspaces to edit and execute the algorithms.</div>,
     icon: 'dna',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
@@ -73,9 +73,9 @@ const libraryTabs = {
   },
   TUTORIAL_WORKSPACES: {
     title: 'Tutorial Workspaces',
-    description: <div>These workspaces provide instructions for key Researcher Workbench components and representation
-      of <i>All of Us</i> data. You can open the workspaces to view them or “duplicate” the workspaces to edit and
-      execute.</div>,
+    description: <div>These workspaces provide instructions for key Researcher Workbench components and representations
+      of <i>All of Us</i> dataset. You can open the workspaces to view them or “duplicate” the workspaces to edit and
+      execute them.</div>,
     icon: 'library',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
