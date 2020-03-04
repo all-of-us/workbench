@@ -103,7 +103,7 @@ interface ReloadableProfile {
 }
 
 interface CurrentTab {
-  description?: string | JSX.Element;
+  description?: JSX.Element;
   filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => WorkspacePermissions[];
   icon: string;
   title: string;
