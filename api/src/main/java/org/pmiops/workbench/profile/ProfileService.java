@@ -1,4 +1,4 @@
-package org.pmiops.workbench.auth;
+package org.pmiops.workbench.profile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

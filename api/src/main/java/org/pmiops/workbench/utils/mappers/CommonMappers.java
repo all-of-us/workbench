@@ -8,7 +8,10 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Mapper(componentModel = "spring")
 public class CommonMappers {
@@ -40,10 +43,6 @@ public class CommonMappers {
         .orElse(null);
   }
 
-  public static Short dataAccessLevelToStorageEnum(DataAccessLevel dataAccessLevel) {
-    return DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
-  }
-
   @Named("cdrVersionToEtag")
   public static String cdrVersionToEtag(int cdrVersion) {
     return Etags.fromVersion(cdrVersion);
@@ -52,5 +51,41 @@ public class CommonMappers {
   @Named("etagToCdrVersion")
   public static int etagToCdrVersion(String etag) {
     return Etags.toVersion(etag);
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  //                                  ENUMS                                  //
+  /////////////////////////////////////////////////////////////////////////////
+
+  public static Short dataAccessLevelToStorage(DataAccessLevel dataAccessLevel) {
+    return DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
+  }
+
+  public static DataAccessLevel dataAccessLevelFromStorage(Short dataAccessLevel) {
+    return DbStorageEnums.dataAccessLevelFromStorage(dataAccessLevel);
+  }
+
+  public static Short degreeToStorage(Degree degree) {
+    return DbStorageEnums.degreeToStorage(degree);
+  }
+
+  public static Degree degreeFromStorage(Short degree) {
+    return DbStorageEnums.degreeFromStorage(degree);
+  }
+
+  public static Short authorityToStorage(Authority authority) {
+    return DbStorageEnums.authorityToStorage(authority);
+  }
+
+  public static Authority authorityFromStorage(Short authority) {
+    return DbStorageEnums.authorityFromStorage(authority);
+  }
+
+  public static Short emailVerificationStatusToStorage(EmailVerificationStatus emailVerificationStatus) {
+    return DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus);
+  }
+
+  public static EmailVerificationStatus emailVerificationStatusFromStorage(Short emailVerificationStatus) {
+    return DbStorageEnums.emailVerificationStatusFromStorage(emailVerificationStatus);
   }
 }

@@ -22,8 +22,4 @@ public interface CohortMapper {
   @Mapping(target = "id", source = "cohortId")
   @Mapping(target = "etag", ignore = true)
   Cohort dbModelToClient(DbCohort destination);
-
-  public static DataAccessLevel storageEnumToDataAccessLevel(Short ordinal) {
-    return DbStorageEnums.dataAccessLevelFromStorage(ordinal);
-  }
 }

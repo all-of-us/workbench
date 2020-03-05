@@ -1,4 +1,4 @@
-package org.pmiops.workbench.auth;
+package org.pmiops.workbench.profile;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -29,7 +30,8 @@ public class ProfileServiceTest {
 
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
-  @Autowired ProfileService profileService;
+  @Autowired
+  ProfileService profileService;
   @Autowired UserDao userDao;
   @Autowired VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
