@@ -74,8 +74,8 @@ const libraryTabs = {
   TUTORIAL_WORKSPACES: {
     title: 'Tutorial Workspaces',
     description: <div>These workspaces provide instructions for key Researcher Workbench components and representations
-      of <i>All of Us</i> dataset. You can open the workspaces to view them or “duplicate” the workspaces to edit and
-      execute them.</div>,
+      of the <i>All of Us</i> dataset. You can open the workspaces to view them or “duplicate” the workspaces to edit
+      and execute them.</div>,
     icon: 'library',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
