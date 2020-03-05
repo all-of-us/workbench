@@ -97,7 +97,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String INVITATION_KEY = "secretpassword";
   private static final String CAPTCHA_TOKEN = "captchaToken";
-  private static final String WRONG_CAPTCHA_TOKEN = "WrongcaptchaToken";
+  private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";

@@ -90,13 +90,13 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
         this.setState({profile: savedProfile, creatingAccount: false});
         onComplete(savedProfile);
       }).catch(error => {
+        // TODO: we need to show some user-facing error message when create account fails.
         console.log(error);
         if (environment.enableCaptcha) {
           // Reset captcha
           this.captchaRef.current.reset();
           this.setState({captcha: false});
         }
-        // TODO: we need to show some user-facing error message when this fails.
         this.setState({creatingAccount: false});
 
       });

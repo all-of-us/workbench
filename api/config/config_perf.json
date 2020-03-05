@@ -110,7 +110,6 @@
     "exportObjectsPerTask" : 10
   },
   "captcha": {
-    "enableCaptcha": false,
-    "serverKeyFileName": "captcha-server-key.txt"
+    "enableCaptcha": false
   }
 }

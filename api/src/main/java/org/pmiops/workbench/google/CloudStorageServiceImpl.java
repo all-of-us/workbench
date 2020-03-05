@@ -197,6 +197,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public String getCaptchaServerKey() {
-    return getCredentialsBucketString(configProvider.get().captcha.serverKeyFileName);
+    return getCredentialsBucketString("captcha-server-key.txt");
   }
 }
