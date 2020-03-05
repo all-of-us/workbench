@@ -23,7 +23,8 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
   final Provider<WorkbenchConfig> configProvider;
   private Provider<CaptchaApi> captchaApiProvider;
 
-  private static final Logger log = Logger.getLogger(CaptchaVerificationServiceImpl.class.getName());
+  private static final Logger log =
+      Logger.getLogger(CaptchaVerificationServiceImpl.class.getName());
 
   @Autowired
   public CaptchaVerificationServiceImpl(
