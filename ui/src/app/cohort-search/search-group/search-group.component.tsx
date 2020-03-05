@@ -203,16 +203,12 @@ interface Props {
 interface State {
   count: number;
   criteriaMenuOptions: any;
-  demoOpen: boolean;
-  demoMenuHover: boolean;
   error: boolean;
   initializing: boolean;
   inputError: boolean;
   inputTouched: boolean;
   loading: boolean;
   overlayStyle: any;
-  position: string;
-  status: string;
 }
 
 export const SearchGroup = withCurrentWorkspace()(
@@ -230,16 +226,12 @@ export const SearchGroup = withCurrentWorkspace()(
       this.state = {
         count: undefined,
         criteriaMenuOptions: {programTypes: [], domainTypes: []},
-        demoOpen: false,
-        demoMenuHover: false,
         error: false,
         initializing: true,
         inputError: false,
         inputTouched: false,
         loading: false,
-        overlayStyle: undefined,
-        position: 'bottom-left',
-        status: undefined
+        overlayStyle: undefined
       };
     }
 
