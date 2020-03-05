@@ -6,6 +6,7 @@ import {criteriaMenuOptionsStore, searchRequestStore, wizardStore} from 'app/coh
 import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -31,7 +32,7 @@ const styles = reactStyles({
     padding: '0.5rem 0.75rem'
   },
   cardHeader: {
-    backgroundColor: colors.light,
+    backgroundColor: colorWithWhiteness(colors.light, -0.3),
     color: colors.primary,
     fontSize: '14px',
     fontWeight: 600,
@@ -453,6 +454,10 @@ export const SearchGroup = withCurrentWorkspace()(
     render() {
       const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
       const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, inputError, inputTouched, loading, overlayStyle} = this.state;
+      const showGroupError = error || (temporal && this.temporalError);
+      const groupError = temporal && this.temporalError
+        ? 'Please complete criteria selections before saving temporal relationship.'
+        : 'Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.';
       const domainMap = (domain: any, temporalGroup: number) => {
         if (!!domain.children) {
           return {label: domain.name, items: domain.children.map((dt) => domainMap(dt, temporalGroup))};
@@ -557,8 +562,11 @@ export const SearchGroup = withCurrentWorkspace()(
                   {!temporal && error &&
                     <ClrIcon className='is-solid' style={{color: colors.white}} shape='exclamation-triangle' size={22}/>
                   }
-                  {temporal && this.temporalError && <span>
-                    -- <ClrIcon style={{color: colors.warning}} shape='warning-standard' size={18}/>
+                  {showGroupError && <span>
+                    -- &nbsp;
+                    <TooltipTrigger content={groupError}>
+                      <ClrIcon style={{color: colors.warning}} shape='warning-standard' size={18}/>
+                    </TooltipTrigger>
                   </span>}
                 </div>
               </div>

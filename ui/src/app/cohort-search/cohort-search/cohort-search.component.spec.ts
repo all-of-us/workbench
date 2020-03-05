@@ -16,7 +16,6 @@ import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.com
 import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
-import {SearchGroupItemComponent} from 'app/cohort-search/search-group-item/search-group-item.component';
 import {SearchGroupListComponent} from 'app/cohort-search/search-group-list/search-group-list.component';
 import {SearchGroupSelectComponent} from 'app/cohort-search/search-group-select/search-group-select.component';
 import {SearchGroupComponent} from 'app/cohort-search/search-group/search-group.component';
@@ -59,7 +58,6 @@ describe('CohortSearchComponent', () => {
         OptionInfoComponent,
         OverviewComponent,
         SearchBarComponent,
-        SearchGroupItemComponent,
         SearchGroupListComponent,
         SearchGroupComponent,
         ListSearchComponent,
