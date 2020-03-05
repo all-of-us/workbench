@@ -112,6 +112,7 @@ interface State {
   deleting: boolean;
   description: string;
   existingCohorts: Array<string>;
+  initializing: boolean;
   loading: boolean;
   name: string;
   nameTouched: boolean;
@@ -135,6 +136,7 @@ export const ListOverview = withCurrentWorkspace()(
         deleting: false,
         description: undefined,
         existingCohorts: [],
+        initializing: true,
         loading: true,
         name: undefined,
         nameTouched: false,
@@ -154,7 +156,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
+      if (!this.state.initializing && this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
         this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
@@ -174,12 +176,13 @@ export const ListOverview = withCurrentWorkspace()(
                 this.setState({
                   chartData: response.items,
                   total: response.items.reduce((sum, data) => sum + data.count, 0),
-                  loading: false
+                  loading: false,
+                  initializing: false
                 });
               }
             });
         } else {
-          this.setState({chartData: [], total: 0, loading: false});
+          this.setState({chartData: [], total: 0, loading: false, initializing: false});
         }
       } catch (error) {
         console.error(error);
