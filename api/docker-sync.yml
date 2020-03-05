@@ -1,21 +1,20 @@
 version: "2"
 options:
   compose-file-path: 'docker-compose.yml'
-  # optional, activate this if you need to debug something, default is false
+  # Turn this on if you need to debug something and see verbose logs.
   verbose: false
-  # optional, default: pwd, root directory to be used when transforming sync src into absolute path, accepted values: pwd (current working directory), config_path (the directory where docker-sync.yml is found)
+  # The root directory to be used when transforming sync src into absolute path.
+  # accepted values: pwd (current working directory), config_path (the directory where docker-sync.yml is found)
   project_root: 'pwd'
 
 syncs:
   src-sync:
-    # enable terminal_notifier. On every sync sends a Terminal Notification regarding files being synced. ( Mac Only ).
-    # good thing in case you are developing and want to know exactly when your changes took effect.
-    # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
+    # This can / should be set to false for most purposes, but may be useful to turn on when debugging / fixing our
+    # docker-sync machinery.
     notify_terminal: false
     src: '..'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
-    # optional, a list of excludes. These patterns will not be synced
-    # see http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#ignore for the possible syntax and see sync_excludes_type below
+    # See http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#ignore for the excludes syntax.
     sync_excludes: [
       '.gradle',
       '.idea',
