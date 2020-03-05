@@ -61,21 +61,23 @@ def publish_cdr(cmd_name, args)
   op.add_option(
     "--bq-dataset [dataset]",
     ->(opts, v) { opts.bq_dataset = v},
-    "Dataset for the CDR version. Required."
+    "BigQuery dataset name for the CDR version (project not included), e.g. " +
+    "'2019Q4R3'. Required."
   )
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
-    "The Google Cloud project associated with this environment."
+    "The Google Cloud project associated with this workbench environment, " +
+    "e.g. all-of-us-rw-staging. Required."
   )
   op.add_option(
     "--table-prefixes [prefix1,prefix2,...]",
     ->(opts, v) { opts.table_prefixes = v},
-    "Comma-delimited table prefixes to filter the publish by, e.g. cb_,ds_. " +
-    "This should only be used in special situations e.g. when the auxilliary " +
-    "cb_ or ds_ tables need to be updated, or if there was an issue with the " +
-    "publish. In general, CDRs should be treated as immutable after the " +
-    "initial publish."
+    "Optional comma-delimited list of table prefixes to filter the publish " +
+    "by, e.g. cb_,ds_. This should only be used in special situations e.g. " +
+    "when the auxilliary cb_ or ds_ tables need to be updated, or if there " +
+    "was an issue with the publish. In general, CDRs should be treated as " +
+    "immutable after the initial publish."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
@@ -95,6 +97,9 @@ def publish_cdr(cmd_name, args)
   key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
     op.opts.project, account, key_file.path).run do
+    # TODO(RW-3768): This currently leaves the user session with an activated service
+    # account user. Ideally the activation would be hermetic within the docker
+    # session, or else we would revert the active account after running.
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
 
     source_dataset = "#{env.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
@@ -103,14 +108,13 @@ def publish_cdr(cmd_name, args)
     common.status "Copying from '#{source_dataset}' -> '#{ingest_dataset}' -> '#{dest_dataset}' as #{account}"
 
     # If you receive an error from "bq" like "Invalid JWT Signature", you may
-    # need to delete cached BigQuery creds on your local machine. Try deleting
-    # files matching ~/.config/gcloud/legacy_credentials/*/singlestore_bq.json
-    # (verify the file location on your machine first).
-    # TODO: Find a better solution for Google credentials in docker.
+    # need to delete cached BigQuery creds on your local machine. Try running
+    # bq init --delete_credentials as recommended in the output.
+    # TODO(RW-3768): Find a better solution for Google credentials in docker.
 
     # If you receive a prompt from "bq" for selecting a default project ID, just
     # hit enter.
-    # TODO: Figure out how to prepopulate this value or disable interactivity.
+    # TODO(RW-3768): Figure out how to prepopulate this value or disable interactivity.
 
     # Copy through an intermediate project and delete after (2h TTL), per
     # https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit

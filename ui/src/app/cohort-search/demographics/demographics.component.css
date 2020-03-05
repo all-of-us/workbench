@@ -85,7 +85,11 @@ h3 {
   border-radius: 5px;
 }
 .form-container.age clr-checkbox {
+  margin-top: 1rem;
   padding-left: 1rem;
+}
+.form-container .radio-inline {
+  margin-right: 0.75rem;
 }
 .ds-wrapper {
   display: flex;

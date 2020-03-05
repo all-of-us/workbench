@@ -1,13 +1,11 @@
-# Endpoints in this API are intended to be used by researchers in notebooks; make sure they
-# are extra-well documented and designed and that we do not break backwards compatibility!
-
-# For separate validation (with some false positives), do:
-#     ./project.rb validate-swagger
 swagger: '2.0'
 info:
   version: "0.1.0"
   title: "AllOfUs Client API"
-  description: "The API used by AllOfUs workbench clients (including both notebooks and our UI.)"
+  description: |
+    The API used by AllOfUs workbench clients (including both notebooks and our UI.)
+    Endpoints in this API are intended to be used by researchers in notebooks; make sure they
+    are extra-well documented and designed and that we do not break backwards compatibility!
   termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
   contact:
     name: "developer_help@pmi-ops.org"
@@ -15,14 +13,19 @@ info:
     name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
-  # Establish the fact that *some endpoints* are OAuth protected
-  # by defining an `aou_oauth` security mode, which we'll assing
-  # to any protected endpoints below.
   aou_oauth:
-    # TODO: Vet/fix this token and/or authorization URL to work in practice.
-    # These are currently included simply to satisfy the Swagger specification,
-    # as this is not directly used to dictate oauth details (just used to
-    # annotate which methods require oauth).
+    x-aou-note: |
+      Establish the fact that *some endpoints* are OAuth protected
+      by defining an `aou_oauth` security mode, which we'll assing
+      to any protected endpoints below.
+
+      TODO: Vet/fix this token and/or authorization URL to work in practice.
+      These are currently included simply to satisfy the Swagger specification,
+      as this is not directly used to dictate oauth details (just used to
+      annotate which methods require oauth).
+
+      Establish the fact that all endpoints are protected: this annotation
+      ensures that client libraries know to send bearer tokens when calling
     authorizationUrl: ""
     tokenUrl: ""
     type: oauth2
@@ -31,8 +34,6 @@ schemes:
   - "https"
 produces:
   - "application/json"
-# Establish the fact that all endpoints are protected: this annotation
-# ensures that client libraries know to send bearer tokens when calling
 security:
   - aou_oauth: []
 
@@ -297,7 +298,7 @@ paths:
             type: integer
             format: int64
 
-  /v1/cohortbuilder/{cdrVersionId}/chartinfo:
+  /v1/cohortbuilder/{cdrVersionId}/chartinfo/{genderOrSex}/{age}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     post:
@@ -308,6 +309,16 @@ paths:
       description: Searches for demographic info about subjects.
       operationId: "getDemoChartInfo"
       parameters:
+        - in: path
+          name: genderOrSex
+          type: string
+          required: true
+          description: represents gender or sex at birth
+        - in: path
+          name: age
+          type: string
+          required: true
+          description: represents age, age at consent or age at cdr
         - in: body
           name: request
           description: object of parameters by which to perform the search
@@ -334,9 +345,6 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantDemographics"
 
-##########################################################################################
-## DEFINITIONS
-##########################################################################################
 definitions:
 
   AgeTypeCountListResponse:
@@ -907,6 +915,16 @@ definitions:
     description: Name that descibes the type of attribute
     enum: [ANY, NUM, CAT, AGE, AGE_AT_CONSENT, AGE_AT_CDR]
 
+  AgeType:
+    type: string
+    description: Different age types
+    enum: [AGE, AGE_AT_CONSENT, AGE_AT_CDR]
+
+  GenderOrSexType:
+    type: string
+    description: represents gender or sex at birth
+    enum: [GENDER, SEX_AT_BIRTH]
+
   DemoChartInfoListResponse:
     type: object
     required:
@@ -920,13 +938,13 @@ definitions:
   DemoChartInfo:
     type: object
     required:
-      - gender
+      - name
       - race
       - ageRange
       - count
     properties:
-      gender:
-        description: gender of subject
+      name:
+        description: gender or sex at birth of subject
         type: string
       race:
         description: race of subject

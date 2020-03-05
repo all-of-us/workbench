@@ -241,8 +241,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
               fp.capitalize(workspace.dataAccessLevel.toString()) : 'Loading...'}</div>
           </div>
           {!!this.workspaceClusterBillingProjectId() &&
-            <ResetClusterButton billingProjectId={this.workspaceClusterBillingProjectId()}
-                                workspaceFirecloudName={this.state.workspace.id}/>}
+            <ResetClusterButton workspaceNamespace={this.workspaceClusterBillingProjectId()}/>}
         </div>
       </div>
       {sharing && <WorkspaceShare workspace={workspace}

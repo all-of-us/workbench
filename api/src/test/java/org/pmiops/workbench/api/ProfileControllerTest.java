@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.mail.MessagingException;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,6 +56,7 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperIm
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -99,6 +99,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String CAPTCHA_TOKEN = "captchaToken";
   private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
+  private static final String STREET_ADDRESS = "1 Example Lane";
+  private static final String CITY = "Exampletown";
+  private static final String STATE = "EX";
+  private static final String COUNTRY = "Example";
+  private static final String ZIP_CODE = "12345";
+
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
@@ -183,6 +189,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setCurrentPosition(CURRENT_POSITION);
     profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
+    profile.setAddress(
+        new Address()
+            .streetAddress1(STREET_ADDRESS)
+            .city(CITY)
+            .state(STATE)
+            .country(COUNTRY)
+            .zipCode(ZIP_CODE));
 
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
@@ -618,26 +631,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
     profile.setFamilyName(newName);
-    profileController.updateProfile(profile);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void updateCurrentPosition_badRequest() {
-    // Server-side verification for this field is only used for old-style account creation.
-    config.featureFlags.enableNewAccountCreation = false;
-    createUser();
-    Profile profile = profileController.getMe().getBody();
-    profile.setCurrentPosition(RandomStringUtils.random(256));
-    profileController.updateProfile(profile);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void updateOrganization_badRequest() {
-    // Server-side verification for this field is only used for old-style account creation.
-    config.featureFlags.enableNewAccountCreation = false;
-    createUser();
-    Profile profile = profileController.getMe().getBody();
-    profile.setOrganization(RandomStringUtils.random(256));
     profileController.updateProfile(profile);
   }
 

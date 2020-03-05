@@ -19,7 +19,7 @@ services:
     ports:
       - 127.0.0.1:3306:3306
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.3
     ports:
       - 127.0.0.1:9200:9200
     environment:
@@ -110,22 +110,22 @@ services:
       - db-cdr/vars.env
 
   db-make-bq-tables:
-      depends_on:
-        - db
-      build:
-        context: ./src/dev/server
-      user: ${UID}
-      working_dir: /w/db-cdr
-      volumes:
-        - gradle-cache:/.gradle
-        - .:/w:cached
-        - ~/.config:/.config:cached
-        - ~/.gsutil:/.gsutil:cached
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
 
-      environment:
-        - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
-      env_file:
-        - db-cdr/vars.env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db-cdr/vars.env
 
   db-cloudsql-import:
     build:

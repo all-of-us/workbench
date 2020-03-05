@@ -10,6 +10,11 @@
     "mode": "nullable"
   },
   {
+    "mode": "NULLABLE",
+    "name": "sex_at_birth",
+    "type": "string"
+  },
+  {
     "type": "string",
     "name": "race",
     "mode": "nullable"
@@ -20,7 +25,7 @@
     "mode": "NULLABLE"
   },
   {
-    "type": "timestamp",
+    "type": "date",
     "name": "dob",
     "mode": "nullable"
   },

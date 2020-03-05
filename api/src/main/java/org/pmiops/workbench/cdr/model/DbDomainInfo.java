@@ -16,16 +16,15 @@ import org.pmiops.workbench.model.DomainInfo;
 @Table(name = "domain_info")
 public class DbDomainInfo {
 
-  public static final Function<DbDomainInfo, org.pmiops.workbench.model.DomainInfo>
-      TO_CLIENT_DOMAIN_INFO =
-          (domain) ->
-              new DomainInfo()
-                  .domain(domain.getDomainEnum())
-                  .name(domain.getName())
-                  .description(domain.getDescription())
-                  .allConceptCount(domain.getAllConceptCount())
-                  .standardConceptCount(domain.getStandardConceptCount())
-                  .participantCount(domain.getParticipantCount());
+  public static final Function<DbDomainInfo, DomainInfo> TO_CLIENT_DOMAIN_INFO =
+      (domain) ->
+          new DomainInfo()
+              .domain(domain.getDomainEnum())
+              .name(domain.getName())
+              .description(domain.getDescription())
+              .allConceptCount(domain.getAllConceptCount())
+              .standardConceptCount(domain.getStandardConceptCount())
+              .participantCount(domain.getParticipantCount());
 
   private long conceptId;
   private short domain;

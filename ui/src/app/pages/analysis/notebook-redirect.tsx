@@ -3,7 +3,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {isAbortError, reportError} from 'app/utils/errors';
 import {urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 
@@ -13,7 +12,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {NotebookIcon} from 'app/icons/notebook-icon';
 import {ReminderIcon} from 'app/icons/reminder';
-import {jupyterApi, notebooksApi, notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
+import {jupyterApi, notebooksApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -23,6 +22,7 @@ import {
   withQueryParams,
   withUserProfile
 } from 'app/utils';
+import {ClusterInitializer} from 'app/utils/cluster-initializer';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
@@ -217,7 +217,6 @@ interface Props {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
-const clusterPollingTimeoutMillis = 15000;
 const clusterApiRetryTimeoutMillis = 10000;
 const clusterApiRetryAttempts = 5;
 const redirectMillis = 1000;
@@ -239,10 +238,10 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       };
     }
 
-    private isClusterInProgress(cluster: Cluster): boolean {
-      return cluster.status === ClusterStatus.Starting ||
-        cluster.status === ClusterStatus.Stopping ||
-        cluster.status === ClusterStatus.Stopped;
+    private isClusterInProgress(status: ClusterStatus): boolean {
+      return status === ClusterStatus.Starting ||
+        status === ClusterStatus.Stopping ||
+        status === ClusterStatus.Stopped;
     }
 
     private isCreatingNewNotebook() {
@@ -251,12 +250,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
     private isPlaygroundMode() {
       return this.props.queryParams.playgroundMode === 'true';
-    }
-
-    private async getDefaultCluster(billingProjectId) {
-      const resp = await this.clusterRetry(() => clusterApi().listClusters(
-        billingProjectId, this.props.workspace.id, {signal: this.aborter.signal}));
-      return resp.defaultCluster;
     }
 
     private async clusterRetry<T>(f: () => Promise<T>): Promise<T> {
@@ -308,54 +301,25 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       this.aborter.abort();
     }
 
+    onClusterStatusUpdate(status: ClusterStatus) {
+      if (this.isClusterInProgress(status)) {
+        this.incrementProgress(Progress.Resuming);
+      } else {
+        this.incrementProgress(Progress.Initializing);
+      }
+    }
+
     // check the cluster's status: if it's Running we can connect the notebook to it
     // otherwise we need to start polling
     private async initializeClusterStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
-      try {
-        const cluster = await this.getDefaultCluster(billingProjectId);
-        if (cluster.status === ClusterStatus.Running) {
-          await this.connectToRunningCluster(cluster);
-        } else {
-          if (this.isClusterInProgress(cluster)) {
-            this.incrementProgress(Progress.Resuming);
-          } else {
-            this.incrementProgress(Progress.Initializing);
-          }
 
-          this.pollTimer = setTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingTimeoutMillis);
-        }
-      } catch (error) {
-        if (!isAbortError(error)) {
-          reportError(error);
-          this.setState({showErrorModal: true});
-          throw error;
-        }
-      }
-    }
-
-    private async pollForRunningCluster(billingProjectId) {
-      try {
-        const cluster = await this.getDefaultCluster(billingProjectId);
-        if (cluster.status === ClusterStatus.Running) {
-          await this.connectToRunningCluster(cluster);
-        } else {
-          // re-start cluster if stopped, and try again in the next polling interval
-          if (cluster.status === ClusterStatus.Stopped) {
-            await this.clusterRetry(() => notebooksClusterApi().startCluster(
-              cluster.clusterNamespace, cluster.clusterName, {signal: this.aborter.signal}));
-          }
-
-          // TODO(RW-3097): Backoff, or don't retry forever.
-          this.pollTimer = setTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingTimeoutMillis);
-        }
-      } catch (error) {
-        if (!isAbortError(error)) {
-          reportError(error);
-          this.setState({showErrorModal: true});
-          throw error;
-        }
-      }
+      const cluster = await ClusterInitializer.initialize({
+        workspaceNamespace: billingProjectId,
+        onStatusUpdate: (status) => this.onClusterStatusUpdate(status),
+        abortSignal: this.aborter.signal
+      });
+      await this.connectToRunningCluster(cluster);
     }
 
     private async connectToRunningCluster(cluster) {
@@ -416,8 +380,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     private async localizeNotebooks(cluster: Cluster, notebookNames: Array<string>) {
       const {workspace} = this.props;
       const resp = await this.clusterRetry(() => clusterApi().localize(
-        cluster.clusterNamespace, cluster.clusterName, {
-          workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
+        workspace.namespace, {
           notebookNames, playgroundMode: this.isPlaygroundMode()
         },
         {signal: this.aborter.signal}));

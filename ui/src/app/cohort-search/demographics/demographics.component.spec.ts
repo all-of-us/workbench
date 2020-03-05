@@ -6,7 +6,7 @@ import {NgxPopperModule} from 'ngx-popper';
 
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {CohortBuilderApi, CriteriaType, DomainType} from 'generated/fetch';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
@@ -30,6 +30,7 @@ describe('DemographicsComponent', () => {
     })
       .compileComponents();
     currentWorkspaceStore.next(workspaceDataStub);
+    serverConfigStore.next({gsuiteDomain: 'fake-research-aou.org', enableCBAgeTypeOptions: false});
     wizardStore.next({
       domain: DomainType.PERSON,
       type: CriteriaType.GENDER,
