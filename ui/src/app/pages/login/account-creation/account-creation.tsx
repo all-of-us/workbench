@@ -33,12 +33,12 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {StyledAnchorTag} from 'app/components/buttons';
 import {Divider} from 'app/components/divider';
 import {AouTitle} from 'app/components/text-wrappers';
 import {reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {AccountCreationOptions} from './account-creation-options';
-import {StyledAnchorTag} from 'app/components/buttons';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));

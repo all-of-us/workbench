@@ -1,10 +1,10 @@
 import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {StyledAnchorTag} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {cookiesEnabled, reactStyles} from 'app/utils';
 import * as React from 'react';
-import {StyledAnchorTag} from 'app/components/buttons';
 
 const styles = reactStyles({
   cookiePolicyMessage: {

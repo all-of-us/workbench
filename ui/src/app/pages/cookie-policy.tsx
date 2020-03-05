@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SmallHeader} from 'app/components/headers';
@@ -7,7 +8,6 @@ import {SIGNED_OUT_HEADER_IMAGE} from 'app/pages/login/sign-in';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
-import {StyledAnchorTag} from "../components/buttons";
 
 const styles = {
   tableItem: {

@@ -1,3 +1,4 @@
+import {StyledAnchorTag} from 'app/components/buttons';
 import {BolderHeader, BoldHeader} from 'app/components/headers';
 import {AouTitle} from 'app/components/text-wrappers';
 import * as React from 'react';
@@ -7,7 +8,6 @@ import {
   IndentedUnorderedList,
   SecondHeader
 } from './data-use-agreement-styles';
-import {StyledAnchorTag} from 'app/components/buttons';
 
 const AOU_DEFINITION_URL = 'https://allofus.nih.gov/about/about-all-us-research-program';
 const CORE_VALUES_URL = 'https://allofus.nih.gov/about/core-values';

@@ -4,10 +4,10 @@ import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
-import {navigateAndPreventDefaultIfNoKeysPressed} from "../utils/navigation";
 
 export const styles = reactStyles({
   baseNew: {
