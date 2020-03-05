@@ -4,6 +4,7 @@ import {FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {cookiesEnabled, reactStyles} from 'app/utils';
 import * as React from 'react';
+import {StyledAnchorTag} from 'app/components/buttons';
 
 const styles = reactStyles({
   cookiePolicyMessage: {
@@ -61,8 +62,7 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
                 <img src='assets/images/cookies.png'/>
                 <div style={{paddingLeft: '1rem', color: colors.primary}}>
                     We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
-                    to our <a href='/cookie-policy' target='_blank'
-                              style={{display: 'inline-block'}}>Cookie Policy</a>.
+                    to our <StyledAnchorTag href='/cookie-policy' target='_blank'>Cookie Policy</StyledAnchorTag>.
                 </div>
             </FlexRow>
             <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.handleCloseCookies()} />
