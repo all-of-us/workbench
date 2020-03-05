@@ -267,8 +267,7 @@ public class UserControllerTest {
     user.setFamilyName(familyName);
     user.setFirstSignInTime(new Timestamp(CLOCK.instant().toEpochMilli()));
     if (registered) {
-      user.setDataAccessLevel(
-          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     } else {
       user.setDataAccessLevel(
           DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
@@ -285,8 +284,7 @@ public class UserControllerTest {
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
     if (registered) {
-      user.setDataAccessLevel(
-          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     } else {
       user.setDataAccessLevel(
           DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));

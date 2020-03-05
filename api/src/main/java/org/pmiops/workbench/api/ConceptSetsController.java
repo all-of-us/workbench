@@ -22,8 +22,8 @@ import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -157,8 +157,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    short surveyId =
-        DbStorageEnums.surveysToStorage(Surveys.fromValue(surveyName.toUpperCase()));
+    short surveyId = DbStorageEnums.surveysToStorage(Surveys.fromValue(surveyName.toUpperCase()));
     List<DbConceptSet> conceptSets =
         conceptSetService.findByWorkspaceIdAndSurvey(workspace.getWorkspaceId(), surveyId);
     ConceptSetListResponse response = new ConceptSetListResponse();
