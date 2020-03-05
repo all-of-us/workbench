@@ -53,7 +53,7 @@ jobs:
           command: ./gradlew spotlessCheck
       - save_cache:
           paths:
-            - ~/.gradle
+            - /.gradle
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -103,7 +103,7 @@ jobs:
           command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
       - save_cache:
           paths:
-            - ~/.gradle
+            - /.gradle
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -176,7 +176,7 @@ jobs:
           command: ./project.rb integration
       - save_cache:
           paths:
-            - ~/.gradle
+            - /.gradle
             - ~/.m2
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
@@ -207,7 +207,7 @@ jobs:
           command: ./project.rb bigquerytest
       - save_cache:
           paths:
-            - ~/.gradle
+            - /.gradle
             - ~/.m2
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
