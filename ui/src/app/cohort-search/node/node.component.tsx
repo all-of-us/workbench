@@ -1,19 +1,63 @@
 import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
-import {autocompleteStore, ppiQuestions, scrollStore, selectionsStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
+import {
+  attributesStore,
+  autocompleteStore,
+  groupSelectionsStore,
+  ppiQuestions,
+  scrollStore,
+  selectionsStore,
+  subtreePathStore,
+  subtreeSelectedStore,
+  wizardStore
+} from 'app/cohort-search/search-state.service';
 import {domainToTitle, highlightMatches, stripHtml, subTypeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
-import {Spinner} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import colors from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
+const styles = reactStyles({
+  icon: {},
+  iconContainer: {
+    cursor: 'pointer',
+    display: 'inline-block',
+    flex: '0 0 1.25rem',
+    height: '1.25rem',
+    width: '1.25rem',
+  },
+});
+
+const iconStyles = reactStyles({
+  attributesIcon: {
+    ...styles.icon,
+    color: colors.accent
+  },
+  caretIcon: {
+    ...styles.icon,
+    color: colors.disabled
+  },
+  selectIcon: {
+    ...styles.icon,
+    color: colors.success
+  },
+  selectedIcon: {
+    ...styles.icon,
+    color: colors.success,
+    cursor: 'not-allowed',
+    opacity: 0.4
+  },
+});
+
 interface TreeNodeProps {
-  node: any;
+  node: Criteria;
 }
 
 interface TreeNodeState {
@@ -41,26 +85,37 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   componentDidMount(): void {
     const {node} = this.props;
-    const {children, error} = this.state;
+    const {error} = this.state;
     this.subscription = selectionsStore.subscribe(selections => {
       this.setState({selected: selections.includes(this.paramId)});
     });
+
+    this.subscription.add(subtreeSelectedStore.subscribe(id => {
+      const selected = id === node.id;
+      this.setState({selected});
+      if (selected) {
+        setTimeout(() => scrollStore.next(node.id));
+      }
+      if (error && id !== undefined) {
+        subtreeSelectedStore.next(undefined);
+      }
+    }));
   }
 
   loadChildren() {
     const {node: {count, domainId, id, isStandard, name, type}} = this.props;
     const {empty} = this.state;
     // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
-    if (domainId === DomainType.SURVEY) {
+    if (domainId === DomainType.SURVEY.toString()) {
       this.trackEvent();
     }
     this.setState({loading: true});
-    const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const criteriaType = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : type;
+    const {cdrVersionId} = (currentWorkspaceStore.getValue());
+    const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
     try {
       cohortBuilderApi().findCriteriaBy(cdrId, domainId, criteriaType, isStandard, id)
         .then(resp => {
-          if (resp.items.length === 0 && domainId === DomainType.DRUG) {
+          if (resp.items.length === 0 && domainId === DomainType.DRUG.toString()) {
             cohortBuilderApi()
               .findCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
               .then(rxResp => {
@@ -68,7 +123,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               }, () => this.setState({error: true}));
           } else {
             this.setState({empty: resp.items.length === 0, children: resp.items, loading: false});
-            if (!empty && domainId === DomainType.SURVEY && !resp.items[0].group) {
+            if (!empty && domainId === DomainType.SURVEY.toString() && !resp.items[0].group) {
               // save questions in the store so we can display them along with answers if selected
               const questions = ppiQuestions.getValue();
               questions[id] = {count, name};
@@ -86,7 +141,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   trackEvent() {
     const {node: {domainId, name, parentId, subtype}} = this.props;
     if (parentId === 0 && this.state.expanded) {
-      const formattedName = domainId === DomainType.SURVEY ? name : subTypeToTitle(subtype);
+      const formattedName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
       triggerEvent(
         'Cohort Builder Search',
         'Click',
@@ -96,31 +151,109 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   toggleExpanded() {
-    const {expanded} = this.state;
-    this.setState({expanded: !expanded});
+    if (this.props.node.group) {
+      const {children, expanded} = this.state;
+      if (!expanded && !children) {
+        this.loadChildren();
+      }
+      this.setState({expanded: !expanded});
+    }
   }
 
   get paramId() {
     const {node: {code, conceptId, domainId, id}} = this.props;
-    return `param${conceptId && !(domainId === DomainType.SURVEY) ? (conceptId + code) : id}`;
+    return `param${conceptId && !(domainId === DomainType.SURVEY.toString()) ? (conceptId + code) : id}`;
+  }
+
+  get isPMCat() {
+    return [CriteriaSubType.WHEEL, CriteriaSubType.PREG, CriteriaSubType.HRIRR, CriteriaSubType.HRNOIRR]
+      .map(st => st.toString())
+      .includes(this.props.node.subtype);
   }
 
   select() {
-    // select node
+    const {node, node: {conceptId, domainId, group, id, name, parentId, subtype, value}} = this.props;
+    let selections = selectionsStore.getValue();
+    if (!selections.includes(this.paramId)) {
+      if (group) {
+        const groups = [...groupSelectionsStore.getValue(), id];
+        groupSelectionsStore.next(groups);
+      }
+      let modifiedName = name;
+      if (domainId === DomainType.SURVEY.toString()) {
+        // get PPI question from store
+        const question = ppiQuestions.getValue()[parentId];
+        if (question) {
+          modifiedName = question.name + ' - ' + modifiedName;
+        }
+      }
+      let attributes = [];
+      if (subtype === CriteriaSubType.BP.toString()) {
+        Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
+          if (name.indexOf(key) === 0) {
+            attributes = PREDEFINED_ATTRIBUTES[key];
+          }
+        });
+      } else if (this.isPMCat) {
+        attributes.push({
+          name: AttrName.CAT,
+          operator: Operator.IN,
+          operands: [value]
+        });
+      } else if (domainId === DomainType.SURVEY.toString() && !group) {
+        if (conceptId === 1585747) {
+          attributes.push({
+            name: AttrName.NUM,
+            operator: Operator.EQUAL,
+            operands: [value]
+          });
+        } else {
+          attributes.push({
+            name: AttrName.CAT,
+            operator: Operator.IN,
+            operands: [value]
+          });
+        }
+      }
+      const param = {
+        ...node as Object,
+        parameterId: this.paramId,
+        attributes: attributes,
+        name: modifiedName
+      };
+      const wizard = wizardStore.getValue();
+      wizard.item.searchParameters.push(param);
+      selections = [this.paramId, ...selections];
+      selectionsStore.next(selections);
+      wizardStore.next(wizard);
+    }
   }
 
   render() {
-    const {node} = this.props;
-    const {children, expanded, loading} = this.state;
+    const {node, node: {id, group, hasAttributes, name, selectable}} = this.props;
+    const {children, expanded, loading, selected} = this.state;
     return <React.Fragment>
-      <div id={`node${node.id}`} className='clr-treenode-link container' onClick={() => this.toggleExpanded()}>
+      <div id={`node${id}`} className='clr-treenode-link container' onClick={() => this.toggleExpanded()}>
         {/*  node-info */}
-        {loading && <Spinner size={16}/>}
-        {node.group && <ClrIcon shape={'angle ' + (expanded ? 'down' : 'right')} size='20' onClick={() => this.loadChildren()}/>}
-        {node.selectable && <ClrIcon shape='plus-circle' size='20' onClick={() => this.select()}/>}
+        {group && <div style={styles.iconContainer}>
+          {loading
+            ? <Spinner size={16}/>
+            : <ClrIcon style={iconStyles.caretIcon} shape={'angle ' + (expanded ? 'down' : 'right')}
+              size='20' onClick={() => this.toggleExpanded()}/>}
+        </div>}
+        {selectable && <div style={styles.iconContainer}>
+          {hasAttributes
+            ? <ClrIcon style={iconStyles.attributesIcon} shape='slider' dir='right' size='20' onClick={() => attributesStore.next(node)}/>
+            : <React.Fragment>
+              {!selected && <ClrIcon style={iconStyles.selectIcon} shape='plus-circle' size='20' onClick={() => this.select()}/>}
+              {selected && <ClrIcon style={iconStyles.selectedIcon} shape='check-circle' size='20'/>}
+            </React.Fragment>
+          }
+        </div>}
+        <span>{name}</span>
       </div>
-      {node.group && <div className='node-list'>
-        {node.children.map((child, c) => <TreeNode key={c} node={child}/>)}
+      {expanded && !!children && <div style={{marginLeft: '1rem'}} className='node-list'>
+        {children.map((child, c) => <TreeNode key={c} node={child}/>)}
       </div>}
     </React.Fragment>;
   }
@@ -128,7 +261,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
 interface Props {
   back: Function;
-  node: any;
+  node: Criteria;
   selections: Array<string>;
   wizard: any;
 }
@@ -154,7 +287,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       error: false,
       expanded: false,
       ingredients: undefined,
-      loading: false,
+      loading: true,
       searchTerms: undefined,
       selected: false
     };
@@ -162,34 +295,19 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
   componentDidMount(): void {
     const {node, wizard} = this.props;
-    const {children, error} = this.state;
-    if (!wizard.fullTree || node.id === 0) {
-      this.subscription = subtreePathStore.subscribe(path => {
-        this.setState({expanded: path.includes(node.id.toString())});
-      });
+    const {children} = this.state;
+    this.loadRootNodes();
+    this.subscription = subtreePathStore.subscribe(path => {
+      this.setState({expanded: path.includes(node.id.toString())});
+    });
 
-      this.subscription.add(subtreeSelectedStore.subscribe(id => {
-        const selected = id === node.id;
-        this.setState({selected});
-        if (selected) {
-          setTimeout(() => scrollStore.next(node.id));
-        }
-        if (error && id !== undefined) {
-          subtreeSelectedStore.next(undefined);
-        }
-      }));
-
-      this.subscription.add(autocompleteStore.subscribe(searchTerms => {
-        this.setState({searchTerms});
-        if (wizard.fullTree && children) {
-          const filteredChildren = this.filterTree(JSON.parse(JSON.stringify(children)), () => {});
-          this.setState({children: filteredChildren});
-        }
-      }));
-    }
-    if (wizard && wizard.fullTree) {
-      this.setState({expanded: node.expanded || false});
-    }
+    this.subscription.add(autocompleteStore.subscribe(searchTerms => {
+      this.setState({searchTerms});
+      if (wizard.fullTree && children) {
+        const filteredChildren = this.filterTree(JSON.parse(JSON.stringify(children)), () => {});
+        this.setState({children: filteredChildren});
+      }
+    }));
   }
 
   componentWillUnmount(): void {
@@ -202,41 +320,22 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     }
   }
 
-  loadChildren(event) {
-    const {node: {count, domainId, id, isStandard, name, type}, wizard} = this.props;
-    const {children, empty} = this.state;
+  loadRootNodes() {
+    const {node: {domainId, id, isStandard, name, type}, wizard} = this.props;
     // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
-    if (domainId === DomainType.SURVEY) {
+    if (domainId === DomainType.SURVEY.toString()) {
       this.trackEvent();
     }
-    if (!event || (id !== 0 && !!children)) { return; }
     this.setState({loading: true});
-    const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const criteriaType = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : type;
-    try {
-      cohortBuilderApi().findCriteriaBy(cdrId, domainId, criteriaType, isStandard, id)
-        .then(resp => {
-          if (resp.items.length === 0 && domainId === DomainType.DRUG) {
-            cohortBuilderApi()
-              .findCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
-              .then(rxResp => {
-                this.setState({empty: rxResp.items.length === 0, children: rxResp.items, loading: false});
-              }, () => this.setState({error: true}));
-          } else {
-            this.setState({empty: resp.items.length === 0, children: resp.items, loading: false});
-            if (!empty && domainId === DomainType.SURVEY && !resp.items[0].group) {
-              // save questions in the store so we can display them along with answers if selected
-              const questions = ppiQuestions.getValue();
-              questions[id] = {count, name};
-              ppiQuestions.next(questions);
-            }
-          }
-        });
-    } catch (error) {
-      console.error(error);
-      this.setState({error: true, loading: false});
-      subtreeSelectedStore.next(undefined);
-    }
+    const {cdrVersionId} = (currentWorkspaceStore.getValue());
+    const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+    cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, id)
+      .then(resp => this.setState({children: resp.items, loading: false}))
+      .catch(error => {
+        console.error(error);
+        this.setState({error: true, loading: false});
+        subtreeSelectedStore.next(undefined);
+      });
   }
 
   addChildToParent(child, itemList) {
@@ -261,7 +360,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   trackEvent() {
     const {node: {domainId, name, parentId, subtype}} = this.props;
     if (parentId === 0 && this.state.expanded) {
-      const formattedName = domainId === DomainType.SURVEY ? name : subTypeToTitle(subtype);
+      const formattedName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
       triggerEvent(
         'Cohort Builder Search',
         'Click',
@@ -299,15 +398,14 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   get showSearch() {
-    const {node: {domainId}} = this.props;
-    return domainId !== DomainType[DomainType.PERSON] && domainId !== DomainType.VISIT;
+    return this.props.node.domainId !== DomainType.VISIT.toString();
   }
 
   get showHeader() {
     const {node: {domainId}} = this.props;
-    return domainId !== DomainType.PHYSICALMEASUREMENT
-      && domainId !== DomainType.SURVEY
-      && domainId !== DomainType.VISIT;
+    return domainId !== DomainType.PHYSICALMEASUREMENT.toString()
+      && domainId !== DomainType.SURVEY.toString()
+      && domainId !== DomainType.VISIT.toString();
   }
 
   get isEmpty() {
@@ -317,7 +415,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
   render() {
     const {back} = this.props;
-    const {children, ingredients} = this.state;
+    const {children, ingredients, loading} = this.state;
     return <React.Fragment>
       <div className='dropdown-search-container'>
         <div className='search-container'>
@@ -335,11 +433,9 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           <ClrIcon className='alert-icon is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
-        {children.map((child, c) => <TreeNode key={c} node={child}/>)}
+        {!loading && !!children && children.map((child, c) => <TreeNode key={c} node={child}/>)}
     </div>
-    <div className='spinner root-spinner'>
-      Loading...
-    </div>
+      {loading && <SpinnerOverlay/>}
     </React.Fragment>;
   }
 });

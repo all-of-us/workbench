@@ -70,10 +70,10 @@
                   [class.show]="['tree', 'list', 'modifiers', 'attributes'].includes(mode)">
                   <!-- Tree View -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
-                    <crit-list-tree *ngIf="hierarchyNode" [node]="hierarchyNode"
+                    <crit-tree *ngIf="hierarchyNode" [node]="hierarchyNode"
                       [selections]="selectionIds"
                       [wizard]="wizard"
-                      [back]="back"></crit-list-tree>
+                      [back]="back"></crit-tree>
                   </div>
                   <!-- List View -->
                   <div class="panel-left" [class.show]="mode === 'list'">

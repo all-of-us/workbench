@@ -16,7 +16,7 @@ import {ListSearchComponent} from './list-search/list-search.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {NodeInfoComponent} from './node-info/node-info.component';
-import {NodeComponent} from './node/node.component';
+import {CriteriaTreeComponent} from './node/node.component';
 import {OptionInfoComponent} from './option-info/option-info.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchBarComponent} from './search-bar/search-bar.component';
@@ -59,11 +59,11 @@ const routes: Routes = [{
   declarations: [
     AttributesPageComponent,
     CohortSearchComponent,
+    CriteriaTreeComponent,
     GenderChartComponent,
     DemographicsComponent,
     ModalComponent,
     ModifierPageComponent,
-    NodeComponent,
     NodeInfoComponent,
     OptionInfoComponent,
     OverviewComponent,
