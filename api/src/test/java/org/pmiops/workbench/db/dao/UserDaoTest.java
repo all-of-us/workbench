@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class UserDaoTest {
     user1.setDisabled(false);
     user1.setBetaAccessBypassTime(NOW);
     final Short dataAccessLevelStorage =
-        CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
+        DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
     user1.setDataAccessLevel(dataAccessLevelStorage);
     user1 = userDao.save(user1);
 
@@ -74,7 +74,7 @@ public class UserDaoTest {
                     r ->
                         r.getDataAccessLevel()
                             .equals(
-                                CommonStorageEnums.dataAccessLevelToStorage(
+                                DbStorageEnums.dataAccessLevelToStorage(
                                     DataAccessLevel.REGISTERED)))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
@@ -89,7 +89,7 @@ public class UserDaoTest {
                     r ->
                         r.getDataAccessLevel()
                             .equals(
-                                CommonStorageEnums.dataAccessLevelToStorage(
+                                DbStorageEnums.dataAccessLevelToStorage(
                                     DataAccessLevel.UNREGISTERED)))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
@@ -107,7 +107,7 @@ public class UserDaoTest {
       if (isBetaBypassed) {
         user.setBetaAccessBypassTime(NOW);
       }
-      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
       resultList.add(userDao.save(user));
     }
     return resultList.build();

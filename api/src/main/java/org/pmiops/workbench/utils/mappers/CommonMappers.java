@@ -5,8 +5,8 @@ import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 
@@ -41,7 +41,7 @@ public class CommonMappers {
   }
 
   public static Short dataAccessLevelToStorageEnum(DataAccessLevel dataAccessLevel) {
-    return CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
+    return DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
   }
 
   @Named("cdrVersionToEtag")

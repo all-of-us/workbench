@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
@@ -42,7 +42,7 @@ public class ConceptDaoTest {
         conceptDao.save(
             new DbConcept()
                 .conceptId(1L)
-                .domainId(CommonStorageEnums.domainToDomainId(Domain.CONDITION))
+                .domainId(DbStorageEnums.domainToDomainId(Domain.CONDITION))
                 .conceptName("Personal history of malignant neoplasm of breast")
                 .vocabularyId(CriteriaType.ICD9CM.toString())
                 .conceptClassId("4-char billing code")
@@ -59,7 +59,7 @@ public class ConceptDaoTest {
         conceptDao.save(
             new DbConcept()
                 .conceptId(2L)
-                .domainId(CommonStorageEnums.domainToDomainId(Domain.CONDITION))
+                .domainId(DbStorageEnums.domainToDomainId(Domain.CONDITION))
                 .conceptName("Personal history of malignant neoplasm")
                 .vocabularyId(CriteriaType.SNOMED.toString())
                 .conceptClassId("4-char billing code")
@@ -76,7 +76,7 @@ public class ConceptDaoTest {
         conceptDao.save(
             new DbConcept()
                 .conceptId(3L)
-                .domainId(CommonStorageEnums.domainToDomainId(Domain.MEASUREMENT))
+                .domainId(DbStorageEnums.domainToDomainId(Domain.MEASUREMENT))
                 .conceptName("Height")
                 .vocabularyId(CriteriaType.PPI.toString())
                 .conceptClassId("Clinical Observation")
@@ -91,7 +91,7 @@ public class ConceptDaoTest {
         conceptDao.save(
             new DbConcept()
                 .conceptId(4L)
-                .domainId(CommonStorageEnums.domainToDomainId(Domain.OBSERVATION))
+                .domainId(DbStorageEnums.domainToDomainId(Domain.OBSERVATION))
                 .conceptName("survey")
                 .vocabularyId(CriteriaType.PPI.toString())
                 .conceptClassId("Question")
@@ -214,7 +214,7 @@ public class ConceptDaoTest {
     assertThat(concepts)
         .containsExactly(
             physicalMeasurement.domainId(
-                CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
+                DbStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
   }
 
   @Test
@@ -226,7 +226,7 @@ public class ConceptDaoTest {
     assertThat(concepts)
         .containsExactly(
             physicalMeasurement.domainId(
-                CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
+                DbStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
   }
 
   @Test

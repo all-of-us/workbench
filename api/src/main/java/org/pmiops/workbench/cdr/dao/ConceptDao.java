@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.model.DbConcept;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -102,7 +102,7 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
           ? findPhysicalMeasurementConcepts(conceptTypes, pageable)
           : findPhysicalMeasurementConcepts(keyword, conceptTypes, pageable);
     }
-    String toDomainId = CommonStorageEnums.domainToDomainId(domainId);
+    String toDomainId = DbStorageEnums.domainToDomainId(domainId);
     return StringUtils.isBlank(keyword)
         ? findConcepts(conceptTypes, toDomainId, pageable)
         : findConcepts(keyword, conceptTypes, toDomainId, pageable);
