@@ -104,5 +104,8 @@
     "host": "all-of-us-rdr-staging.appspot.com",
     "queueName": "rdrQueue",
     "exportObjectsPerTask" : 10
+  },
+  "captcha": {
+    "enableCaptcha": false
   }
 }

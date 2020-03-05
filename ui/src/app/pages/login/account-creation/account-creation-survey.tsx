@@ -14,7 +14,9 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {toggleIncludes} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
+import ReCAPTCHA from 'react-google-recaptcha';
 import {DropDownSection, Section, TextInputWithLabel} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
 
@@ -46,14 +48,19 @@ export interface AccountCreationSurveyProps {
 }
 
 export interface AccountCreationState {
+  captcha: boolean;
+  captchaToken: string;
   creatingAccount: boolean;
   profile: Profile;
 }
 
 export class AccountCreationSurvey extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
+  private captchaRef = React.createRef<ReCAPTCHA>();
   constructor(props: any) {
     super(props);
     this.state = {
+      captcha: !environment.enableCaptcha,
+      captchaToken: '',
       creatingAccount: false,
       profile: {...this.props.profile},
     };
@@ -68,6 +75,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     this.setState({creatingAccount: true});
     profileApi().createAccount({
       profile: this.state.profile,
+      captchaVerificationToken: this.state.captchaToken,
       invitationKey: invitationKey,
       termsOfServiceVersion: termsOfServiceVersion
     })
@@ -75,10 +83,20 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
         this.setState({profile: savedProfile, creatingAccount: false});
         onComplete(savedProfile);
       }).catch(error => {
+        // TODO: we need to show some user-facing error message when create account fails.
         console.log(error);
+        if (environment.enableCaptcha) {
+          // Reset captcha
+          this.captchaRef.current.reset();
+          this.setState({captcha: false});
+        }
         this.setState({creatingAccount: false});
-        // TODO: we need to show some user-facing error message when this fails.
+
       });
+  }
+
+  captureCaptchaResponse(token) {
+    this.setState({captchaToken: token, captcha: true});
   }
 
   updateList(key, value) {
@@ -104,7 +122,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   render() {
-    const {profile: {demographicSurvey}, creatingAccount} = this.state;
+    const {profile: {demographicSurvey}, creatingAccount, captcha} = this.state;
     const validationCheck = {
       lgbtqIdentity: {
         length: {
@@ -216,6 +234,12 @@ or another sexual and/or gender minority?'>
                        value={demographicSurvey.education}
                        onChange={
                          (e) => this.updateDemographicAttribute('education', e)}/>
+
+      {environment.enableCaptcha && <div style={{paddingTop: '1rem'}}>
+        <ReCAPTCHA sitekey={environment.captchaSiteKey}
+                   ref = {this.captchaRef}
+                   onChange={(value) => this.captureCaptchaResponse(value)}/>
+      </div>}
       <FormSection style={{paddingBottom: '1rem'}}>
         <Button type='secondary' style={{marginRight: '1rem'}} disabled={creatingAccount}
                 onClick={() => this.props.onPreviousClick(this.state.profile)}>
@@ -227,7 +251,7 @@ or another sexual and/or gender minority?'>
               {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
             </ul>
         </React.Fragment>}>
-          <Button type='primary' disabled={creatingAccount || creatingAccount || errors}
+          <Button type='primary' disabled={creatingAccount || creatingAccount || errors || !captcha}
                   onClick={() => this.createAccount()}>
             Submit
           </Button>
