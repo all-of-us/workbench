@@ -75,9 +75,9 @@ public class StorageEnumsTest {
   }
 
   /**
-   * Retrieve all Enum classes in DbStorageEnums and DbStorageEnums
+   * Retrieve all Enum classes in DbStorageEnums
    *
-   * <p>our convention for BiMaps in DbStorageEnums/DbStorageEnums is <Enum, Short> so we retrieve
+   * <p>our convention for BiMaps in DbStorageEnums is <Enum, Short> so we retrieve
    * the first parameterized type
    *
    * @return
