@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
+import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {
   attributesStore,
   autocompleteStore,
@@ -414,12 +415,12 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   render() {
-    const {back} = this.props;
+    const {back, node} = this.props;
     const {children, ingredients, loading} = this.state;
     return <React.Fragment>
       <div className='dropdown-search-container'>
         <div className='search-container'>
-          <input />
+          <SearchBar node={node} setIngredients={(i) => this.setState({ingredients: i})}/>
         </div>
       </div>
       <div className='tree-container'>

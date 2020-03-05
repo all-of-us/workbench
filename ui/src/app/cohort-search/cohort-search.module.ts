@@ -19,7 +19,6 @@ import {NodeInfoComponent} from './node-info/node-info.component';
 import {CriteriaTreeComponent} from './node/node.component';
 import {OptionInfoComponent} from './option-info/option-info.component';
 import {OverviewComponent} from './overview/overview.component';
-import {SearchBarComponent} from './search-bar/search-bar.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {SelectionInfoComponent} from './selection-info/selection-info.component';
 import {TreeComponent} from './tree/tree.component';
@@ -67,7 +66,6 @@ const routes: Routes = [{
     NodeInfoComponent,
     OptionInfoComponent,
     OverviewComponent,
-    SearchBarComponent,
     SearchGroupListComponent,
     ListSearchComponent,
     SelectionInfoComponent,
