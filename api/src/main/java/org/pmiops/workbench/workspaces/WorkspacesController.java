@@ -5,6 +5,7 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -26,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -83,12 +85,20 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.zendesk.ZendeskRequests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.zendesk.client.v2.Zendesk;
+import org.zendesk.client.v2.ZendeskException;
+import org.zendesk.client.v2.model.Request;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
@@ -99,27 +109,32 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final int NUM_RANDOM_CHARS = 20;
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_CLONE_FILE_SIZE_MB = 100;
+  private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
 
   private Retryer<Boolean> retryer =
       RetryerBuilder.<Boolean>newBuilder()
           .retryIfExceptionOfType(StorageException.class)
-          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
-          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .withWaitStrategy(WaitStrategies.exponentialWait())
+          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
           .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final UserDao userDao;
-  private Provider<DbUser> userProvider;
+  private final Provider<DbUser> userProvider;
   private final FireCloudService fireCloudService;
+  private final Provider<Cloudbilling> cloudbillingProvider;
+  private final Provider<Zendesk> zendeskProvider;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceAuditor workspaceAuditor;
-  private WorkspaceMapper workspaceMapper;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final WorkspaceAuditor workspaceAuditor;
+  private final WorkspaceMapper workspaceMapper;
+  private final ManualWorkspaceMapper manualWorkspaceMapper;
+  private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
   public WorkspacesController(
@@ -130,12 +145,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
+      Provider<Cloudbilling> cloudBillingProvider,
+      Provider<Zendesk> zendeskProvider,
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceMapper workspaceMapper,
+      ManualWorkspaceMapper manualWorkspaceMapper,
+      LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -143,12 +162,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
+    this.cloudbillingProvider = cloudBillingProvider;
+    this.zendeskProvider = zendeskProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
+    this.manualWorkspaceMapper = manualWorkspaceMapper;
+    this.logsBasedMetricService = logsBasedMetricService;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -204,8 +227,42 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
   }
 
+  private void maybeFileZendeskReviewRequest(Workspace workspace) {
+    if (!workspace.getResearchPurpose().getReviewRequested()) {
+      return;
+    }
+
+    final Request zdReq;
+    try {
+      zdReq =
+          zendeskProvider
+              .get()
+              .createRequest(
+                  ZendeskRequests.workspaceToReviewRequest(userProvider.get(), workspace));
+    } catch (ZendeskException e) {
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Failed to file Zendesk review ticket for workspace %s/%s",
+              workspace.getNamespace(), workspace.getId()),
+          e);
+      return;
+    }
+    log.info(
+        String.format(
+            "filed Zendesk review request ticket with title %s, ID %s",
+            zdReq.getSubject(), zdReq.getId()));
+  }
+
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
+    return ResponseEntity.ok(
+        recordOperationTime(() -> createWorkspaceImpl(workspace), "createWorkspace"));
+  }
+
+  // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService &
+  // WorkspaceServiceImpl
+  private Workspace createWorkspaceImpl(Workspace workspace) {
     validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
@@ -225,17 +282,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspace dbWorkspace = new DbWorkspace();
+    // A little unintuitive but setting this here reflects the current state of the workspace
+    // while it was in the billing buffer. Setting this value will inform the update billing
+    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
+    // tier
+    dbWorkspace.setBillingAccountName(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
     setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    DbWorkspace reqWorkspace = WorkspaceConversionUtils.toDbWorkspace(workspace);
+    DbWorkspace reqWorkspace = manualWorkspaceMapper.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
     dbWorkspace.setName(reqWorkspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
     if (reqWorkspace.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -244,10 +307,34 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workspace.getBillingAccountName());
+    } catch (ServerErrorException e) {
+      // Will be addressed with RW-4440
+      throw new ServerErrorException(
+          "This message is going to be swallowed due to a bug in ExceptionAdvice. ",
+          new ServerErrorException("Could not update the workspace's billing account", e));
+    }
+    try {
+      dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google to set the billing account back to the free tier if the workspace
+      // creation fails
+      log.log(
+          Level.SEVERE,
+          "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
+          e);
+
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+      throw e;
+    }
+
+    Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(createdWorkspace);
+    maybeFileZendeskReviewRequest(createdWorkspace);
+    return createdWorkspace;
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -281,30 +368,28 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
-    // This deletes all Firecloud and google resources, however saves all references
-    // to the workspace and its resources in the Workbench database.
-    // This is for auditing purposes and potentially workspace restore.
-    // TODO: do we want to delete workspace resource references and save only metadata?
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    // This automatically handles access control to the workspace.
-    fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-    workspaceAuditor.fireDeleteAction(dbWorkspace);
+    recordOperationTime(
+        () -> {
+          DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+          workspaceService.deleteWorkspace(dbWorkspace);
+          workspaceAuditor.fireDeleteAction(dbWorkspace);
+        },
+        "deleteWorkspace");
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceId));
+    return ResponseEntity.ok(
+        recordOperationTime(
+            () -> workspaceService.getWorkspace(workspaceNamespace, workspaceId), "getWorkspace"));
   }
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    response.setItems(workspaceService.getWorkspaces());
+    final WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+    response.setItems(recordOperationTime(workspaceService::getWorkspaces, "getWorkspaces"));
     return ResponseEntity.ok(response);
   }
 
@@ -312,7 +397,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
       throws NotFoundException {
+    final Workspace result =
+        recordOperationTime(
+            () -> updateWorkspaceImpl(workspaceNamespace, workspaceId, request), "updateWorkspace");
+    return ResponseEntity.ok(result);
+  }
 
+  private Workspace updateWorkspaceImpl(
+      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
@@ -341,28 +433,52 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
-      WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
-      if (researchPurpose.getReviewRequested()) {
-        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-        dbWorkspace.setTimeRequested(now);
-      }
-      dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
+      // Note: this utility does not set the "review requested" bit or time. This is currently
+      // immutable on a workspace, see RW-4132.
+      manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     }
-    // The version asserted on save is the same as the one we read via
-    // getRequired() above, see RW-215 for details.
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
+    if (workspace.getBillingAccountName() != null) {
+      try {
+        workspaceService.updateWorkspaceBillingAccount(
+            dbWorkspace, request.getWorkspace().getBillingAccountName());
+      } catch (ServerErrorException e) {
+        // Will be addressed with RW-4440
+        throw new ServerErrorException(
+            "This message is going to be swallowed due to a bug in ExceptionAdvice.",
+            new ServerErrorException("Could not update the workspace's billing account", e));
+      }
+    }
+
+    try {
+      // The version asserted on save is the same as the one we read via
+      // getRequired() above, see RW-215 for details.
+      dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google Cloud to set the billing account back to the original one since our
+      // update database call failed
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, originalWorkspace.getBillingAccountName());
+      throw e;
+    }
 
     final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
   }
 
   @Override
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
       throws BadRequestException, TooManyRequestsException {
+    return recordOperationTime(
+        () -> cloneWorkspaceImpl(fromWorkspaceNamespace, fromWorkspaceId, body), "cloneWorkspace");
+  }
+
+  private ResponseEntity<CloneWorkspaceResponse> cloneWorkspaceImpl(
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
     Workspace toWorkspace = body.getWorkspace();
     if (Strings.isNullOrEmpty(toWorkspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");
@@ -434,13 +550,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // half-way cloned workspaces via AoU - so it will just appear as a
     // transient failure.
     DbWorkspace dbWorkspace = new DbWorkspace();
-
+    // A little unintuitive but setting this here reflects the current state of the workspace
+    // while it was in the billing buffer. Setting this value will inform the update billing code to
+    // skip an unnecessary GCP API call if the billing account is being kept at the free tier
+    dbWorkspace.setBillingAccountName(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     setDbWorkspaceFields(dbWorkspace, user, toFcWorkspaceId, toFcWorkspace, now);
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -460,9 +580,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    DbWorkspace savedDbWorkspace =
-        workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, body.getWorkspace().getBillingAccountName());
+    } catch (ServerErrorException e) {
+      // Will be addressed with RW-4440
+      throw new ServerErrorException(
+          "This message is going to be swallowed due to a bug in ExceptionAdvice.",
+          new ServerErrorException("Could not update the workspace's billing account", e));
+    }
 
+    try {
+      dbWorkspace =
+          workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google to set the billing account back to the free tier if our clone fails
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+      throw e;
+    }
+
+    // Note: It is possible for a workspace to be (partially) created and return
+    // a 500 to the user if this block of code fails since the workspace is already
+    // committed to the database in an earlier call
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceService.getFirecloudWorkspaceAcls(
@@ -477,15 +617,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedDbWorkspace =
+      dbWorkspace =
           workspaceService.updateWorkspaceAcls(
-              savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+              dbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
-    final Workspace savedWorkspace =
-        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
+    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
 
     workspaceAuditor.fireDuplicateAction(
-        fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);
+        fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
+    maybeFileZendeskReviewRequest(savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
@@ -539,11 +682,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
-    Map<String, FirecloudWorkspaceAccessEntry> updatedWsAcls =
-        workspaceService.getFirecloudWorkspaceAcls(
-            workspaceNamespace, dbWorkspace.getFirecloudName());
     List<UserRole> updatedUserRoles =
-        workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     resp.setItems(updatedUserRoles);
 
     workspaceAuditor.fireCollaborateAction(
@@ -580,7 +720,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<DbWorkspace> workspaces = workspaceService.findForReview();
     response.setItems(
         workspaces.stream()
-            .map(WorkspaceConversionUtils::toApiWorkspace)
+            .map(ws -> manualWorkspaceMapper.toApiWorkspace(ws))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
@@ -588,19 +728,36 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(
       String workspaceNamespace, String workspaceId) {
-    List<FileDetail> fileList = notebooksService.getNotebooks(workspaceNamespace, workspaceId);
-    return ResponseEntity.ok(fileList);
+    return ResponseEntity.ok(
+        recordOperationTime(
+            () -> notebooksService.getNotebooks(workspaceNamespace, workspaceId),
+            "getNoteBookList"));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(
       String workspace, String workspaceName, String notebookName) {
-    notebooksService.deleteNotebook(workspace, workspaceName, notebookName);
+    recordOperationTime(
+        () -> notebooksService.deleteNotebook(workspace, workspaceName, notebookName),
+        "deleteNotebook");
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<FileDetail> copyNotebook(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      String fromNotebookName,
+      CopyRequest copyRequest) {
+    return ResponseEntity.ok(
+        recordOperationTime(
+            () ->
+                copyNotebookImpl(
+                    fromWorkspaceNamespace, fromWorkspaceId, fromNotebookName, copyRequest),
+            "copyNotebook"));
+  }
+
+  private FileDetail copyNotebookImpl(
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
       String fromNotebookName,
@@ -618,8 +775,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
-
-    return ResponseEntity.ok(fileDetail);
+    return fileDetail;
   }
 
   @Override
@@ -703,6 +859,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
+    // If a lock is held by another user, log this to establish a rough estimate of how often
+    // locked notebooks are encountered. Note that this only covers locks encountered from the
+    // Workbench - any Jupyter UI-based lock detection does not touch this code path.
+    String currentUsername = userProvider.get().getUsername();
+    if (response.getLockExpirationTime() == null
+        || response.getLastLockedBy() == null
+        || response.getLockExpirationTime() < clock.millis()
+        || response.getLastLockedBy().equals(currentUsername)) {
+      log.info(String.format("user '%s' observed notebook available for editing", currentUsername));
+    } else {
+      log.info(
+          String.format(
+              "user '%s' observed notebook locked by '%s'",
+              currentUsername, response.getLastLockedBy()));
+    }
+
     return ResponseEntity.ok(response);
   }
 
@@ -731,10 +903,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    Map<String, FirecloudWorkspaceAccessEntry> firecloudAcls =
-        workspaceService.getFirecloudWorkspaceAcls(
-            workspaceNamespace, dbWorkspace.getFirecloudName());
-    List<UserRole> userRoles = workspaceService.convertWorkspaceAclsToUserRoles(firecloudAcls);
+    List<UserRole> userRoles =
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setItems(userRoles);
     return ResponseEntity.ok(resp);
@@ -796,7 +966,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        WorkspaceConversionUtils.buildRecentWorkspaceList(
+        manualWorkspaceMapper.buildRecentWorkspaceList(
             userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
@@ -819,9 +989,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        WorkspaceConversionUtils.buildRecentWorkspace(
+        manualWorkspaceMapper.buildRecentWorkspace(
             userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  private <T> T recordOperationTime(Supplier<T> operation, String operationName) {
+    log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
+    return logsBasedMetricService.recordElapsedTime(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        operation);
+  }
+
+  private void recordOperationTime(Runnable operation, String operationName) {
+    log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
+    logsBasedMetricService.recordElapsedTime(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        operation);
   }
 }

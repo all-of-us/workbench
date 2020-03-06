@@ -15,7 +15,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
-import {Cohort, ResourceType, TemporalTime} from 'generated/fetch';
+import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
@@ -100,7 +100,7 @@ const styles = reactStyles({
 
 interface Props {
   searchRequest: any;
-  updateCount: number;
+  updateCriteria: any;
   updateSaving: Function;
 }
 
@@ -153,7 +153,8 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
+      const {updateCriteria: {update, recalculate}} = this.props;
+      if (update > prevProps.updateCriteria.update && recalculate && !this.definitionErrors) {
         this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
@@ -167,15 +168,16 @@ export const ListOverview = withCurrentWorkspace()(
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = mapRequest(searchRequest);
         if (request.includes.length > 0) {
-          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
-            if (localCheck === this.state.apiCallCheck) {
-              this.setState({
-                chartData: response.items,
-                total: response.items.reduce((sum, data) => sum + data.count, 0),
-                loading: false
-              });
-            }
-          });
+          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER],
+            AgeType[AgeType.AGE], request).then(response => {
+              if (localCheck === this.state.apiCallCheck) {
+                this.setState({
+                  chartData: response.items,
+                  total: response.items.reduce((sum, data) => sum + data.count, 0),
+                  loading: false
+                });
+              }
+            });
         } else {
           this.setState({chartData: [], total: 0, loading: false});
         }
@@ -441,10 +443,10 @@ export const ListOverview = withCurrentWorkspace()(
 })
 export class OverviewComponent extends ReactWrapperBase {
   @Input('searchRequest') searchRequest: Props['searchRequest'];
-  @Input('updateCount') updateCount: Props['updateCount'];
+  @Input('updateCriteria') updateCriteria: Props['updateCriteria'];
   @Input('updateSaving') updateSaving: Props['updateSaving'];
 
   constructor() {
-    super(ListOverview, ['searchRequest', 'updateCount', 'updateSaving']);
+    super(ListOverview, ['searchRequest', 'updateCriteria', 'updateSaving']);
   }
 }

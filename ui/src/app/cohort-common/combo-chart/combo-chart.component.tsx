@@ -87,7 +87,7 @@ export class ComboChart extends React.Component<Props, State> {
       'No matching concept': 'Unknown'
     };
     const getKey = (dat) => {
-      const gender = !!codeMap[dat.gender] ? codeMap[dat.gender] : dat.gender;
+      const gender = !!codeMap[dat.name] ? codeMap[dat.name] : dat.name;
       return `${gender} ${dat.ageRange || 'Unknown'}`;
     };
     const categories = data.reduce((acc, datum) => {

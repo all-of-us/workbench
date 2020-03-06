@@ -1,8 +1,10 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.http.HttpStatusCodes;
-import com.google.auth.oauth2.GoogleCredentials;
+import com.google.api.client.http.HttpTransport;
+import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -14,6 +16,7 @@ import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -61,11 +64,14 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
   private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
+  private final IamCredentialsClient iamCredentialsClient;
+  private final HttpTransport httpTransport;
+
+  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
-  private static final String USER_FC_ROLE = "user";
   private static final String OWNER_FC_ROLE = "owner";
   private static final String THURLOE_STATUS_NAME = "Thurloe";
   private static final String SAM_STATUS_NAME = "Sam";
@@ -107,7 +113,9 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
       @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> fcAdminCredsProvider) {
+          Provider<ServiceAccountCredentials> fcAdminCredsProvider,
+      IamCredentialsClient iamCredentialsClient,
+      HttpTransport httpTransport) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -119,6 +127,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
     this.staticNotebooksApiProvider = staticNotebooksApiProvider;
+    this.iamCredentialsClient = iamCredentialsClient;
+    this.httpTransport = httpTransport;
   }
 
   /**
@@ -132,14 +142,27 @@ public class FireCloudServiceImpl implements FireCloudService {
    * @return
    */
   public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
-    // Load credentials for the firecloud-admin Service Account. This account has been granted
-    // domain-wide delegation for the OAuth scopes required by FireCloud.
-    GoogleCredentials impersonatedUserCredentials =
-        ServiceAccounts.getImpersonatedCredentials(
-            fcAdminCredsProvider.get(), userEmail, FIRECLOUD_API_OAUTH_SCOPES);
+    final OAuth2Credentials delegatedCreds;
+    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
+      delegatedCreds =
+          new DelegatedUserCredentials(
+              ServiceAccounts.getServiceAccountEmail(
+                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
+              userEmail,
+              FIRECLOUD_API_OAUTH_SCOPES,
+              iamCredentialsClient,
+              httpTransport);
+    } else {
+      delegatedCreds =
+          fcAdminCredsProvider
+              .get()
+              .createScoped(FIRECLOUD_API_OAUTH_SCOPES)
+              .createDelegated(userEmail);
+    }
+    delegatedCreds.refreshIfExpired();
 
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    apiClient.setAccessToken(impersonatedUserCredentials.getAccessToken().getTokenValue());
+    apiClient.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
     return apiClient;
   }
 
@@ -226,7 +249,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     boolean enableVpcFlowLogs = configProvider.get().featureFlags.enableVpcFlowLogs;
     FirecloudCreateRawlsBillingProjectFullRequest request =
         new FirecloudCreateRawlsBillingProjectFullRequest()
-            .billingAccount("billingAccounts/" + configProvider.get().billing.accountId)
+            .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
             .projectName(projectName)
             .highSecurityNetwork(enableVpcFlowLogs)
             .enableFlowLogs(enableVpcFlowLogs);
@@ -260,39 +283,31 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void addUserToBillingProject(String email, String projectName) {
-    addRoleToBillingProject(email, projectName, USER_FC_ROLE);
-  }
-
-  @Override
-  public void removeUserFromBillingProject(String email, String projectName) {
-    BillingApi billingApi = billingApiProvider.get();
-    retryHandler.run(
-        (context) -> {
-          billingApi.removeUserFromBillingProject(projectName, USER_FC_ROLE, email);
-          return null;
-        });
-  }
-
-  @Override
   public void addOwnerToBillingProject(String ownerEmail, String projectName) {
     addRoleToBillingProject(ownerEmail, projectName, OWNER_FC_ROLE);
   }
 
   @Override
   public void removeOwnerFromBillingProject(
-      String projectName, String ownerEmailToRemove, String callerAccessToken) {
+      String projectName, String ownerEmailToRemove, Optional<String> callerAccessToken) {
+    final BillingApi scopedBillingApi;
 
-    final ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    apiClient.setAccessToken(callerAccessToken);
+    if (callerAccessToken.isPresent()) {
+      // use a private instance of BillingApi instead of the provider
+      // b/c we don't want to modify its ApiClient globally
 
-    // use a private instance of BillingApi instead of the provider
-    // b/c we don't want to modify its ApiClient globally
-    final BillingApi billingApi = new BillingApi();
-    billingApi.setApiClient(apiClient);
+      final ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
+      apiClient.setAccessToken(callerAccessToken.get());
+      scopedBillingApi = new BillingApi();
+      scopedBillingApi.setApiClient(apiClient);
+    } else {
+      scopedBillingApi = billingApiProvider.get();
+    }
+
     retryHandler.run(
         (context) -> {
-          billingApi.removeUserFromBillingProject(projectName, OWNER_FC_ROLE, ownerEmailToRemove);
+          scopedBillingApi.removeUserFromBillingProject(
+              projectName, OWNER_FC_ROLE, ownerEmailToRemove);
           return null;
         });
   }

@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -19,8 +20,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
@@ -36,6 +39,8 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -43,19 +48,33 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceServiceTest {
+
   @TestConfiguration
-  static class Configuration {}
+  @Import({ManualWorkspaceMapper.class})
+  static class Configuration {
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.enableBillingLockout = true;
+      return workbenchConfig;
+    }
+  }
 
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private UserDao userDao;
   @Autowired private UserRecentWorkspaceDao userRecentWorkspaceDao;
+  @Autowired private ManualWorkspaceMapper manualWorkspaceMapper;
+  @Autowired private Provider<WorkbenchConfig> mockWorkbenchConfigProvider;
 
   @Mock private CohortCloningService mockCohortCloningService;
   @Mock private ConceptSetService mockConceptSetService;
   @Mock private DataSetService mockDataSetService;
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
+  @Mock private Provider<Cloudbilling> mockCloudbillingProvider;
   @Mock private Clock mockClock;
+  @Mock private FreeTierBillingService freeTierBillingService;
 
   private WorkspaceService workspaceService;
 
@@ -72,6 +91,8 @@ public class WorkspaceServiceTest {
     MockitoAnnotations.initMocks(this);
     workspaceService =
         new WorkspaceServiceImpl(
+            mockCloudbillingProvider,
+            mockCloudbillingProvider,
             mockClock,
             mockCohortCloningService,
             mockConceptSetService,
@@ -80,7 +101,10 @@ public class WorkspaceServiceTest {
             userDao,
             mockUserProvider,
             userRecentWorkspaceDao,
-            workspaceDao);
+            mockWorkbenchConfigProvider,
+            workspaceDao,
+            manualWorkspaceMapper,
+            freeTierBillingService);
 
     mockWorkspaceResponses.clear();
     mockWorkspaces.clear();

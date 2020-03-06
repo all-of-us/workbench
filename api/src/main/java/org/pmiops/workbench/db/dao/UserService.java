@@ -1,46 +1,48 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.function.Function;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
-  DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser);
+  DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
 
   DbUser createServiceAccountUser(String email);
 
-  DbUser createUser(
-      String givenName,
-      String familyName,
-      String email,
-      String contactEmail,
-      String currentPosition,
-      String organization,
-      String areaOfResearch);
+  // version used by AuthInterceptor
+  DbUser createUser(Userinfoplus oAuth2Userinfo);
 
   DbUser createUser(
       String givenName,
       String familyName,
-      String email,
+      String userName,
       String contactEmail,
       String currentPosition,
       String organization,
       String areaOfResearch,
+      String professionalUrl,
       List<Degree> degrees,
-      DbAddress address,
-      DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations);
+      DbAddress dbAddress,
+      DbDemographicSurvey dbDemographicSurvey,
+      List<DbInstitutionalAffiliation> dbAffiliations,
+      DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);
+
+  // Registers that a user has agreed to a given version of the Terms of Service.
+  void submitTermsOfService(DbUser dbUser, Integer tosVersion);
 
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
 
@@ -67,18 +69,26 @@ public interface UserService {
 
   List<DbUser> findUsersBySearchString(String term, Sort sort);
 
-  DbUser syncComplianceTrainingStatus()
+  @Deprecated
+  DbUser syncComplianceTrainingStatusV1()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
-  DbUser syncComplianceTrainingStatus(DbUser user)
+  @Deprecated
+  DbUser syncComplianceTrainingStatusV1(DbUser user, Agent agent)
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
+
+  DbUser syncComplianceTrainingStatusV2()
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
+
+  DbUser syncComplianceTrainingStatusV2(DbUser user, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   DbUser syncEraCommonsStatus();
 
-  DbUser syncEraCommonsStatusUsingImpersonation(DbUser user)
+  DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
       throws IOException, org.pmiops.workbench.firecloud.ApiException;
 
   void syncTwoFactorAuthStatus();
 
-  DbUser syncTwoFactorAuthStatus(DbUser targetUser);
+  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
 }

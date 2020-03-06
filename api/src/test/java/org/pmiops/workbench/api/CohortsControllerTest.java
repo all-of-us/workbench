@@ -5,6 +5,7 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -24,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -33,8 +35,10 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -57,6 +61,9 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionMapperImpl;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Concept;
@@ -74,6 +81,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -82,6 +90,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -176,12 +185,20 @@ public class CohortsControllerTest {
     WorkspaceServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
+    ConceptSetMapperImpl.class,
+    ConceptSetService.class,
+    ConceptService.class,
     NotebooksServiceImpl.class,
     UserServiceImpl.class,
     WorkspacesController.class,
     CohortsController.class,
     ConceptSetsController.class,
-    WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class,
+    ManualWorkspaceMapper.class,
+    LogsBasedMetricServiceFakeImpl.class,
+    InstitutionServiceImpl.class,
+    InstitutionMapperImpl.class,
+    PublicInstitutionDetailsMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -190,8 +207,6 @@ public class CohortsControllerTest {
     CohortMaterializationService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    ConceptService.class,
-    ConceptSetService.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
@@ -199,9 +214,15 @@ public class CohortsControllerTest {
     MonitoringService.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    FreeTierBillingService.class
   })
   static class Configuration {
+
+    @Bean
+    Cloudbilling cloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
 
     @Bean
     Clock clock() {
@@ -223,6 +244,8 @@ public class CohortsControllerTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.billing = new BillingConfig();
+      workbenchConfig.billing.accountId = "free-tier";
       return workbenchConfig;
     }
   }
@@ -253,6 +276,7 @@ public class CohortsControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace.setBillingAccountName("billing-account");
 
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
@@ -260,6 +284,7 @@ public class CohortsControllerTest {
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace2.setBillingAccountName("billing-account");
 
     CLOCK.setInstant(NOW);
 

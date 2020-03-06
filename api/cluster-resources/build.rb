@@ -39,6 +39,7 @@ def generate_static_files()
   static_files_directory = "../src/main/webapp/static"
   FileUtils.cp("activity-checker-extension.js", static_files_directory)
   FileUtils.cp("aou-download-policy-extension.js", static_files_directory)
+  FileUtils.cp("aou-upload-policy-extension.js", static_files_directory)
   FileUtils.cp("initialize_notebook_cluster.sh", static_files_directory)
   FileUtils.cp("start_notebook_cluster.sh", static_files_directory)
   build_snippets_menu()

@@ -35,8 +35,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -44,12 +44,12 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -106,13 +106,14 @@ public class DataSetController implements DataSetApiDelegate {
 
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
-  private final ConceptDao conceptDao;
+  private final ConceptService conceptService;
   private final ConceptSetDao conceptSetDao;
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
   private final DataSetDao dataSetDao;
   private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
+  private final ConceptSetMapper conceptSetMapper;
 
   @Autowired
   DataSetController(
@@ -120,7 +121,7 @@ public class DataSetController implements DataSetApiDelegate {
       Clock clock,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
-      ConceptDao conceptDao,
+      ConceptService conceptService,
       ConceptSetDao conceptSetDao,
       DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetDao dataSetDao,
@@ -129,12 +130,13 @@ public class DataSetController implements DataSetApiDelegate {
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      ConceptSetMapper conceptSetMapper) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
-    this.conceptDao = conceptDao;
+    this.conceptService = conceptService;
     this.conceptSetDao = conceptSetDao;
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetDao = dataSetDao;
@@ -144,6 +146,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
+    this.conceptSetMapper = conceptSetMapper;
   }
 
   @Override
@@ -180,7 +183,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
     return new DbDatasetValue(
-        CommonStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
+        DbStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
         domainValuePair.getValue());
   }
 
@@ -240,16 +243,11 @@ public class DataSetController implements DataSetApiDelegate {
         }
       };
 
-  private ConceptSet toClientConceptSet(DbConceptSet conceptSet) {
-    ConceptSet result = ConceptSetsController.TO_CLIENT_CONCEPT_SET.apply(conceptSet);
-    if (!conceptSet.getConceptIds().isEmpty()) {
-      Iterable<DbConcept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
-      result.setConcepts(
-          StreamSupport.stream(concepts.spliterator(), false)
-              .map(ConceptsController.TO_CLIENT_CONCEPT)
-              .collect(Collectors.toList()));
-    }
-    return result;
+  private ConceptSet toClientConceptSet(DbConceptSet dbConceptSet) {
+    ConceptSet result = conceptSetMapper.dbModelToClient(dbConceptSet);
+    return result.concepts(
+        conceptService.findAll(
+            dbConceptSet.getConceptIds(), ConceptSetsController.CONCEPT_NAME_ORDERING));
   }
 
   // TODO(jaycarlton): move into helper methods in one or both of these classes
@@ -279,7 +277,7 @@ public class DataSetController implements DataSetApiDelegate {
     // TODO(jaycarlton): return better error information form this function for common validation
     // scenarios
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+        dataSetService.domainToBigQueryConfig(dataSetRequest);
 
     if (bigQueryJobConfigsByDomain.isEmpty()) {
       log.warning("Empty query map generated for this DataSetRequest");
@@ -323,8 +321,9 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
+    // Generate a query for the preview.
     Map<String, QueryJobConfiguration> bigQueryJobConfig =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+        dataSetService.domainToBigQueryConfig(dataSetRequest);
 
     if (bigQueryJobConfig.size() > 1) {
       throw new BadRequestException(
@@ -440,6 +439,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    workspaceService.validateActiveBilling(workspaceNamespace, workspaceId);
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();
@@ -492,8 +492,7 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     Map<String, QueryJobConfiguration> queriesByDomain =
-        dataSetService.generateQueryJobConfigurationsByDomainName(
-            dataSetExportRequest.getDataSetRequest());
+        dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
     String qualifier = generateRandomEightCharacterQualifier();
 

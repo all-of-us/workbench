@@ -2,8 +2,6 @@ package org.pmiops.workbench.billing;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -22,16 +20,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Doubles;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import javax.mail.MessagingException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +38,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -67,7 +61,7 @@ public class FreeTierBillingServiceTest {
 
   @Autowired BigQueryService bigQueryService;
   @Autowired FreeTierBillingService freeTierBillingService;
-  @Autowired NotificationService notificationService;
+  @Autowired MailService mailService;
 
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
@@ -77,6 +71,7 @@ public class FreeTierBillingServiceTest {
 
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
+  private static final String FREE_TIER_BILLING_ACCOUNT_NAME = "free-tier";
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
@@ -84,7 +79,7 @@ public class FreeTierBillingServiceTest {
 
   @TestConfiguration
   @Import({FreeTierBillingService.class})
-  @MockBean({BigQueryService.class, NotificationService.class})
+  @MockBean({BigQueryService.class, MailService.class})
   static class Configuration {
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -103,7 +98,11 @@ public class FreeTierBillingServiceTest {
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
-    workbenchConfig.billing.freeTierTimeAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
+    workbenchConfig.billing.accountId = FREE_TIER_BILLING_ACCOUNT_NAME;
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
+
+    // by default we have 0 spend
+    doReturn(mockBQTableSingleResult(0.0)).when(bigQueryService).executeQuery(any());
   }
 
   @After
@@ -112,7 +111,7 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_exceedsDollarThresholds() {
+  public void checkFreeTierBillingUsage_exceedsDollarThresholds() throws MessagingException {
     final double limit = 100.0;
     final double costUnderThreshold = 49.5;
 
@@ -125,17 +124,23 @@ public class FreeTierBillingServiceTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
+    // set an arbitrary registration time
+
+    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(100));
+    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
+    userDao.save(user);
+
     // check that we have not alerted before the threshold
 
     doReturn(mockBQTableSingleResult(costUnderThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     // check that we alert for the 50% threshold
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService)
+    verify(mailService)
         .alertUserFreeTierDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
@@ -143,7 +148,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     // check that we alert for the 75% threshold
 
@@ -153,7 +158,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService)
+    verify(mailService)
         .alertUserFreeTierDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
@@ -161,7 +166,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
 
@@ -171,7 +176,7 @@ public class FreeTierBillingServiceTest {
         .when(bigQueryService)
         .executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
 
     // check that we do not alert twice for 100%
 
@@ -179,11 +184,11 @@ public class FreeTierBillingServiceTest {
         .when(bigQueryService)
         .executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
   }
 
   @Test
-  public void checkFreeTierBillingUsage_altDollarThresholds() {
+  public void checkFreeTierBillingUsage_altDollarThresholds() throws MessagingException {
 
     // set alert thresholds at 30% and 65% instead
 
@@ -205,13 +210,13 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costUnderThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     // check that we alert for the 30% threshold
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService)
+    verify(mailService)
         .alertUserFreeTierDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
@@ -219,7 +224,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     // check that we alert for the 65% threshold
 
@@ -229,7 +234,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService)
+    verify(mailService)
         .alertUserFreeTierDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
@@ -237,7 +242,7 @@ public class FreeTierBillingServiceTest {
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
 
@@ -247,7 +252,7 @@ public class FreeTierBillingServiceTest {
         .when(bigQueryService)
         .executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
 
     // check that we do not alert twice for 100%
 
@@ -255,302 +260,11 @@ public class FreeTierBillingServiceTest {
         .when(bigQueryService)
         .executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
   }
 
   @Test
-  public void checkFreeTierBillingUsage_doesNotExceedDayThresholds() {
-
-    // set cost values to ensure we don't alert from cost
-
-    final double dollarLimit = 100.0;
-    final double spent = 0.0;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = dollarLimit;
-    doReturn(mockBQTableSingleResult(spent)).when(bigQueryService).executeQuery(any());
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    final short limit = 1000;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = limit;
-
-    // set an arbitrary registration time
-
-    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(2000));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
-    userDao.save(user);
-
-    // check that we do not alert below the 50% threshold
-
-    final Instant checkTime =
-        registrationTime.plus(Period.ofDays(limit / 2)).minus(Period.ofDays(1));
-    CLOCK.setInstant(checkTime);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_exceedsDayThresholds() {
-
-    // set cost values to ensure we don't alert from cost
-
-    final double dollarLimit = 100.0;
-    final double spent = 0.0;
-    final double dollarBalance = dollarLimit - spent;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = dollarLimit;
-    doReturn(mockBQTableSingleResult(spent)).when(bigQueryService).executeQuery(any());
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    final short limit = 1000;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = limit;
-
-    // set an arbitrary registration time
-
-    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(2000));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
-    userDao.save(user);
-    final Instant expirationTime = registrationTime.plus(Period.ofDays(limit));
-    final LocalDate expirationDate = expirationTime.atZone(ZoneId.systemDefault()).toLocalDate();
-
-    // check that we alert for the 50% threshold
-
-    Instant checkTime = registrationTime.plus(Period.ofDays(limit / 2)).plus(Period.ofDays(1));
-    CLOCK.setInstant(checkTime);
-    long daysRemaining = Duration.between(checkTime, expirationTime).toDays();
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService)
-        .alertUserFreeTierTimeThreshold(
-            eq(user), eq(daysRemaining), eq(expirationDate), eq(dollarBalance));
-
-    // check that we do not alert twice for the 50% threshold
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-
-    // check that we alert for the 75% threshold
-
-    checkTime = registrationTime.plus(Period.ofDays(limit * 3 / 4)).plus(Period.ofDays(1));
-    CLOCK.setInstant(checkTime);
-    daysRemaining = Duration.between(checkTime, expirationTime).toDays();
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService)
-        .alertUserFreeTierTimeThreshold(
-            eq(user), eq(daysRemaining), eq(expirationDate), eq(dollarBalance));
-
-    // check that we do not alert twice for the 75% threshold
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-
-    // check that we alert for the 100% threshold
-
-    checkTime = registrationTime.plus(Period.ofDays(limit)).plus(Period.ofDays(1));
-    CLOCK.setInstant(checkTime);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, spent);
-
-    // check that we do not alert twice
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_exceedsBothLimitsConcurrently() {
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    // expire due to cost
-
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
-
-    // expire due to time
-
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant tooLongAgo = START_INSTANT.minus(Period.ofDays(11));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
-    userDao.save(user);
-
-    // check that we do not alert twice
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService, times(1)).alertUserFreeTierExpiration(eq(user));
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_exceedsBoth50PctThresholds() {
-    final double dollarLimit = 100.0;
-    final double spent = 50.1;
-    final double dollarBalance = dollarLimit - spent;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = dollarLimit;
-    doReturn(mockBQTableSingleResult(spent)).when(bigQueryService).executeQuery(any());
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    final short daysLimit = 1000;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = daysLimit;
-
-    // set an arbitrary registration time
-
-    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(2000));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
-    userDao.save(user);
-    final Instant expirationTime = registrationTime.plus(Period.ofDays(daysLimit));
-    final LocalDate expirationDate = expirationTime.atZone(ZoneId.systemDefault()).toLocalDate();
-
-    // check that we alert for both 50% thresholds
-
-    final Instant checkTime =
-        registrationTime.plus(Period.ofDays(daysLimit / 2)).plus(Period.ofDays(1));
-    CLOCK.setInstant(checkTime);
-    final long daysRemaining = Duration.between(checkTime, expirationTime).toDays();
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService)
-        .alertUserFreeTierDollarThreshold(eq(user), eq(0.5), eq(spent), eq(dollarBalance));
-    verify(notificationService)
-        .alertUserFreeTierTimeThreshold(
-            eq(user), eq(daysRemaining), eq(expirationDate), eq(dollarBalance));
-
-    // check that we do not alert twice for the 50% threshold
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_exceedsBothLimitsCostFirst() {
-    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    // expire due to cost
-
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
-
-    // expire due to time
-
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant tooLongAgo = START_INSTANT.minus(Period.ofDays(11));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
-    userDao.save(user);
-
-    // check that we do not alert twice
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_exceedsBothLimitsTimeFirst() {
-    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(0.0)).when(bigQueryService).executeQuery(any());
-
-    // expire due to time
-
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant tooLongAgo = START_INSTANT.minus(Period.ofDays(11));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
-    userDao.save(user);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 0.0);
-
-    // expire due to cost
-
-    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
-
-    // check that we do not alert twice
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_timeExpirationAndCostThreshold() {
-
-    // test the behavior when the user exceeds the free credit time limit
-    // and also crosses the 50% cost threshold
-
-    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(50.1)).when(bigQueryService).executeQuery(any());
-
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant tooLongAgo = START_INSTANT.minus(Period.ofDays(11));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
-    userDao.save(user);
-
-    // we expect to see ONE alert due to time expiration
-    // and NO alert for crossing the 50% cost threshold
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService, times(1)).alertUserFreeTierExpiration(eq(user));
-    verify(notificationService, times(0))
-        .alertUserFreeTierDollarThreshold(eq(user), anyDouble(), anyDouble(), anyDouble());
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 50.1);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_costExpirationAndTimeThreshold() {
-
-    // test the behavior when the user exceeds the free credit cost
-    // and also crosses the 50% time threshold
-
-    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(100.1)).when(bigQueryService).executeQuery(any());
-
-    final short daysLimit = 10;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = daysLimit;
-
-    // set an arbitrary registration time
-
-    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(2000));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
-    userDao.save(user);
-
-    // set check time to trigger the 50% time threshold
-    // but the 100% cost threshold will supersede this
-
-    final Instant checkTime =
-        registrationTime.plus(Period.ofDays(daysLimit / 2)).plus(Period.ofDays(1));
-    CLOCK.setInstant(checkTime);
-
-    // we expect to see ONE alert due to cost expiration
-    // and NO alert for crossing the 50% time threshold
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService, times(1)).alertUserFreeTierExpiration(eq(user));
-    verify(notificationService, times(0))
-        .alertUserFreeTierTimeThreshold(eq(user), anyLong(), any(), anyDouble());
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.1);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_disabledUserNotIgnored() {
+  public void checkFreeTierBillingUsage_disabledUserNotIgnored() throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
 
@@ -560,13 +274,13 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
   }
 
   @Test
-  public void checkFreeTierBillingUsage_deletedWorkspaceNotIgnored() {
+  public void checkFreeTierBillingUsage_deletedWorkspaceNotIgnored() throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
 
@@ -576,7 +290,7 @@ public class FreeTierBillingServiceTest {
     workspaceDao.save(workspace);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
   }
@@ -591,7 +305,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 49.99);
   }
@@ -607,13 +321,13 @@ public class FreeTierBillingServiceTest {
     createWorkspace(null, "rumney");
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 49.99);
   }
 
   @Test
-  public void checkFreeTierBillingUsage_override() {
+  public void checkFreeTierBillingUsage_override() throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
 
@@ -621,7 +335,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
 
@@ -629,7 +343,7 @@ public class FreeTierBillingServiceTest {
     userDao.save(user);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
 
     // we do not reset the workspace's state to ACTIVE
     // that will be done by the override endpoint (TODO)
@@ -637,7 +351,7 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_combinedProjectsExceedsLimit() {
+  public void checkFreeTierBillingUsage_combinedProjectsExceedsLimit() throws MessagingException {
     final String ns1 = "namespace-1";
     final String ns2 = "namespace-2";
     final double cost1 = 123.45;
@@ -655,7 +369,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace ws2 = createWorkspace(user, ns2);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
 
     // confirm DB updates after checkFreeTierBillingUsage()
@@ -677,7 +391,7 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_twoUsers() {
+  public void checkFreeTierBillingUsage_twoUsers() throws MessagingException {
     final String ns1 = "namespace-1";
     final String ns2 = "namespace-2";
     final double cost1 = 123.45;
@@ -694,8 +408,8 @@ public class FreeTierBillingServiceTest {
     DbUser user2 = createUser("more@test.com");
     DbWorkspace ws2 = createWorkspace(user2, ns2);
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user1));
-    verify(notificationService).alertUserFreeTierExpiration(eq(user2));
+    verify(mailService).alertUserFreeTierExpiration(eq(user1));
+    verify(mailService).alertUserFreeTierExpiration(eq(user2));
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
 
@@ -727,7 +441,7 @@ public class FreeTierBillingServiceTest {
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.OLD);
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
   }
 
@@ -740,12 +454,12 @@ public class FreeTierBillingServiceTest {
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.MIGRATED);
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    verifyZeroInteractions(notificationService);
+    verifyZeroInteractions(mailService);
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
   }
 
   @Test
-  public void checkFreeTierBillingUsage_dbUpdate() {
+  public void checkFreeTierBillingUsage_dbUpdate() throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
 
@@ -753,7 +467,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUserFreeTierExpiration(eq(user));
+    verify(mailService).alertUserFreeTierExpiration(eq(user));
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
 
     Timestamp t0 = workspaceFreeTierUsageDao.findAll().iterator().next().getLastUpdateTime();
@@ -766,7 +480,7 @@ public class FreeTierBillingServiceTest {
     // we do not alert again, but the cost field is updated in the DB
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService, times(1)).alertUserFreeTierExpiration(eq(user));
+    verify(mailService, times(1)).alertUserFreeTierExpiration(eq(user));
 
     // retrieve from DB again to reflect update after cron
     DbWorkspace dbWorkspace = workspaceDao.findOne(workspace.getWorkspaceId());
@@ -816,40 +530,6 @@ public class FreeTierBillingServiceTest {
     assertWithinBillingTolerance(
         freeTierBillingService.getUserFreeTierDollarLimit(user),
         doubleFreeTierCreditsDollarLimitOverride);
-  }
-
-  @Test
-  public void getUserFreeTierDaysLimit_default() {
-    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    final short initialFreeCreditsDaysLimit = 1;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = initialFreeCreditsDaysLimit;
-    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
-        .isEqualTo(initialFreeCreditsDaysLimit);
-
-    final short freeCreditsDaysLimitNew = 100;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = freeCreditsDaysLimitNew;
-    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
-        .isEqualTo(freeCreditsDaysLimitNew);
-  }
-
-  @Test
-  public void getUserFreeTierDaysLimit_override() {
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 123;
-
-    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-
-    final short freeTierCreditsDaysLimitOverride = 100;
-    user.setFreeTierCreditsLimitDaysOverride(freeTierCreditsDaysLimitOverride);
-    user = userDao.save(user);
-    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
-        .isEqualTo(freeTierCreditsDaysLimitOverride);
-
-    final short freeTierCreditsDaysLimitNew = 200;
-    user.setFreeTierCreditsLimitDaysOverride(freeTierCreditsDaysLimitNew);
-    user = userDao.save(user);
-
-    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
-        .isEqualTo(freeTierCreditsDaysLimitNew);
   }
 
   @Test
@@ -936,6 +616,7 @@ public class FreeTierBillingServiceTest {
   private DbUser createUser(String email) {
     DbUser user = new DbUser();
     user.setUsername(email);
+    user.setFirstRegistrationCompletionTime(Timestamp.from(START_INSTANT));
     return userDao.save(user);
   }
 
@@ -950,6 +631,7 @@ public class FreeTierBillingServiceTest {
     workspace.setCreator(creator);
     workspace.setWorkspaceNamespace(namespace);
     workspace.setBillingMigrationStatusEnum(billingMigrationStatus);
+    workspace.setBillingAccountName(FREE_TIER_BILLING_ACCOUNT_NAME);
     return workspaceDao.save(workspace);
   }
 

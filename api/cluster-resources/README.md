@@ -6,28 +6,30 @@ https://github.com/DataBiosphere/leonardo/blob/cfdbff2448b9cff73ad658ba028d1feaf
 
 ## Local testing
 
-To manually test updates to this script locally:
+To manually test updates to any notebook server assets (initialization script, UI extensions, etc):
 
-- Push the script to GCS (username-suffixed):
+- Push a personal API server to test:
 
   ```
-  api$ gsutil cp cluster-resources/initialize_notebook_cluster.sh "gs://all-of-us-workbench-test-cluster-resources/initialize_notebook_cluster-${USER}.sh"
+  api$ ./project.rb deploy-api --no-promote --version "${USER}" --project all-of-us-workbench-test"
   ```
+  
+  **Note**: This deployed API server will ONLY be used for serving your static assets. This approach
+  does not interact with any API methods on this deployed server. If you subsequently change your
+  static assets being tested, you'll need to rerun this step. This step is necessary because Leo
+  cannot make requests to your local workstation to fetch updated static assets.
 
 - (**Disclaimer**: local code change, do not submit) Temporarily update your
-  local server config to use your custom script:
+  local server config to use your deployed API server for static asset serving:
 
   ```
-  api$ sed -i "s,initialize_notebook_cluster\.sh,initialize_notebook_cluster-${USER}.sh," src/main/java/org/pmiops/workbench/notebooks/LeonardoNotebooksClientImpl.java
+  api$ sed -i "s/api-dot-all-of-us-workbench-test.appspot.com/${USER}-dot-\0/" config/config_local.json
   ```
 
-- Ensure the change is picked up by your API server and point a local UI to it
+- Run a **local** API server with this config update and point a local UI to it
 - Open your local Workbench UI, go to the workspace 'About' tab, and click 'Reset notebook server'.
 - Wait for the notebook cluster to be created.
-  - Cluster creation will fail with 500s if the user script is not accessible to your pet SA,
-    this should be granted by the registered tier group on the bucket ACL [cloud console UI](
-    https://console.cloud.google.com/storage/browser/all-of-us-workbench-test-cluster-resources?project=all-of-us-workbench-test)
-- Revert changes to `LeonardoNotebooksClientImpl.java`
+- Revert changes to `config_local.json` before sending a PR
 
 ## Debugging Script Issues
 
@@ -112,5 +114,5 @@ To test the menu contents JSON alone:
 
 # Releasing
 
-Resources are pushed to the appropriate GCS environment as part of our normal
-release process.
+Resources are pushed as static assets on the API GAE server as part of our
+normal release process.

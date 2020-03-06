@@ -2,15 +2,20 @@ package org.pmiops.workbench.auth;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
@@ -58,10 +63,11 @@ public class ProfileService {
               }
               result.setEducation(demographicSurvey.getEducationEnum());
               result.setEthnicity(demographicSurvey.getEthnicityEnum());
-              result.setGender(demographicSurvey.getGenderEnum());
+              result.setIdentifiesAsLgbtq(demographicSurvey.getIdentifiesAsLgbtq());
+              result.setLgbtqIdentity(demographicSurvey.getLgbtqIdentity());
               result.setRace(demographicSurvey.getRaceEnum());
+              result.setGenderIdentityList(demographicSurvey.getGenderIdentityEnumList());
               result.setSexAtBirth(demographicSurvey.getSexAtBirthEnum());
-              result.setSexualOrientation(demographicSurvey.getSexualOrientationEnum());
               result.setYearOfBirth(BigDecimal.valueOf(demographicSurvey.getYear_of_birth()));
 
               return result;
@@ -88,11 +94,22 @@ public class ProfileService {
 
   private final UserDao userDao;
   private final FreeTierBillingService freeTierBillingService;
+  private final UserTermsOfServiceDao userTermsOfServiceDao;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   @Autowired
-  public ProfileService(UserDao userDao, FreeTierBillingService freeTierBillingService) {
+  public ProfileService(
+      UserDao userDao,
+      FreeTierBillingService freeTierBillingService,
+      UserTermsOfServiceDao userTermsOfServiceDao,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.userDao = userDao;
     this.freeTierBillingService = freeTierBillingService;
+    this.userTermsOfServiceDao = userTermsOfServiceDao;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
+    this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
   }
 
   public Profile getProfile(DbUser user) {
@@ -121,7 +138,7 @@ public class ProfileService {
     profile.setAreaOfResearch(user.getAreaOfResearch());
     profile.setDisabled(user.getDisabled());
     profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
-
+    profile.setProfessionalUrl(user.getProfessionalUrl());
     if (user.getComplianceTrainingCompletionTime() != null) {
       profile.setComplianceTrainingCompletionTime(
           user.getComplianceTrainingCompletionTime().getTime());
@@ -202,10 +219,27 @@ public class ProfileService {
         user.getInstitutionalAffiliations().stream()
             .map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList()));
+
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(user)
+        .ifPresent(
+            verifiedInstitutionalAffiliation ->
+                profile.setVerifiedInstitutionalAffiliation(
+                    verifiedInstitutionalAffiliationMapper.dbToModel(
+                        verifiedInstitutionalAffiliation)));
+
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
 
     profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));
     profile.setFreeTierDollarQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
+
+    Optional<DbUserTermsOfService> latestTermsOfServiceMaybe =
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
+    if (latestTermsOfServiceMaybe.isPresent()) {
+      profile.setLatestTermsOfServiceVersion(latestTermsOfServiceMaybe.get().getTosVersion());
+      profile.setLatestTermsOfServiceTime(
+          latestTermsOfServiceMaybe.get().getAgreementTime().getTime());
+    }
 
     return profile;
   }

@@ -17,9 +17,11 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -48,9 +50,9 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -130,11 +132,7 @@ public class BillingProjectBufferServiceTest {
 
     billingProjectBufferService =
         new BillingProjectBufferService(
-            billingProjectBufferEntryDao,
-            clock,
-            mockFireCloudService,
-            mockMonitoringService,
-            workbenchConfigProvider);
+            billingProjectBufferEntryDao, clock, mockFireCloudService, workbenchConfigProvider);
   }
 
   @Test
@@ -443,7 +441,7 @@ public class BillingProjectBufferServiceTest {
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).addUserToBillingProject(captor.capture(), secondCaptor.capture());
+    verify(mockFireCloudService).addOwnerToBillingProject(captor.capture(), secondCaptor.capture());
     String invokedEmail = captor.getValue();
     String invokedProjectName = secondCaptor.getValue();
 
@@ -671,9 +669,34 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void testGetGaugeData() {
-    final Map<OpenCensusStatsViewInfo, Number> result = billingProjectBufferService.getGaugeData();
-    assertThat(result.size()).isGreaterThan(0);
-    assertThat(result.get(MonitoringViews.BILLING_BUFFER_SIZE)).isEqualTo(0);
+    final Collection<MeasurementBundle> bundles = billingProjectBufferService.getGaugeData();
+    assertThat(bundles.size()).isGreaterThan(0);
+    Optional<MeasurementBundle> entryStatusBundle =
+        bundles.stream()
+            .filter(b -> b.getMeasurements().containsKey(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT))
+            .findFirst();
+    assertThat(entryStatusBundle.isPresent()).isTrue();
+    assertThat(entryStatusBundle.get().getTags()).isNotEmpty();
+  }
+
+  @Test
+  public void testGetProjectCountByStatus() {
+    DbBillingProjectBufferEntry creatingEntry1 = makeSimpleEntry(BufferEntryStatus.CREATING);
+    DbBillingProjectBufferEntry creatingEntry2 = makeSimpleEntry(BufferEntryStatus.CREATING);
+    DbBillingProjectBufferEntry errorEntry1 = makeSimpleEntry(BufferEntryStatus.ERROR);
+    final Map<BufferEntryStatus, Long> statusToCount =
+        billingProjectBufferEntryDao.getCountByStatusMap();
+
+    assertThat(statusToCount.getOrDefault(BufferEntryStatus.ASSIGNING, 0L)).isEqualTo(0);
+    assertThat(statusToCount.getOrDefault(BufferEntryStatus.ERROR, 0L)).isEqualTo(1);
+    assertThat(statusToCount.getOrDefault(BufferEntryStatus.CREATING, 0L)).isEqualTo(2);
+    assertThat(statusToCount).hasSize(2);
+  }
+
+  private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus bufferEntryStatus) {
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setStatusEnum(bufferEntryStatus, () -> Timestamp.from(CLOCK.instant()));
+    return billingProjectBufferEntryDao.save(entry);
   }
 
   private Timestamp getCurrentTimestamp() {

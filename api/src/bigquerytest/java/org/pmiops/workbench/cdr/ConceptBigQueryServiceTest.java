@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.BigQueryTestService;
-import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -20,6 +19,7 @@ import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -43,8 +43,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired private SurveyModuleDao surveyModuleDao;
 
-  @Autowired private CBCriteriaDao cbCriteriaDao;
-
   @Autowired private BigQueryService bigQueryService;
 
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
@@ -58,8 +56,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    ConceptService conceptService =
-        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao, cbCriteriaDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptBigQueryService =
         new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService, conceptService);
 
@@ -70,7 +67,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   public void testGetConceptCountNoConceptsSaved() {
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
-                "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
+                Domain.CONDITION, "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
         .isEqualTo(0);
   }
 
@@ -83,7 +80,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
-                "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
+                Domain.CONDITION, "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
         .isEqualTo(2);
   }
 

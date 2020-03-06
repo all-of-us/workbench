@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -11,6 +12,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,17 +23,18 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -43,13 +46,22 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
+  private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
+  private static final String PYTHON_CDR_ENV_VARIABLE =
+      "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
+  // This is implicitly handled by bigrquery, so we don't need this variable.
+  private static final String R_CDR_ENV_VARIABLE = "";
+  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
+      ImmutableMap.of(
+          KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
@@ -62,8 +74,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final int DATA_SET_VERSION = 1;
 
   @Override
-  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
-    return ImmutableMap.of(MonitoringViews.DATASET_COUNT, dataSetDao.count());
+  public Collection<MeasurementBundle> getGaugeData() {
+    Map<Boolean, Long> invalidToCount = dataSetDao.getInvalidToCountMap();
+    return ImmutableSet.of(
+        MeasurementBundle.builder()
+            .addMeasurement(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(false, 0L))
+            .addTag(MetricLabel.DATASET_INVALID, Boolean.valueOf(false).toString())
+            .build(),
+        MeasurementBundle.builder()
+            .addMeasurement(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(true, 0L))
+            .addTag(MetricLabel.DATASET_INVALID, Boolean.valueOf(true).toString())
+            .build());
   }
 
   /*
@@ -215,8 +236,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .build();
 
   @Override
-  public Map<String, QueryJobConfiguration> generateQueryJobConfigurationsByDomainName(
-      DataSetRequest dataSetRequest) {
+  public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     final boolean includesAllParticipants =
         getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
     final ImmutableList<DbCohort> cohortsSelected =
@@ -485,11 +505,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private QueryJobConfiguration buildQueryJobConfiguration(
       Map<String, QueryParameterValue> namedCohortParameters, String query) {
+    return QueryJobConfiguration.newBuilder(query)
+        .setNamedParameters(namedCohortParameters)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  private QueryJobConfiguration buildAndFilterQueryJobConfiguration(
+      Map<String, QueryParameterValue> namedCohortParameters, String query) {
+    // This runs filterBigQueryConfig as well, to make a runnable query.
     return bigQueryService.filterBigQueryConfig(
-        QueryJobConfiguration.newBuilder(query)
-            .setNamedParameters(namedCohortParameters)
-            .setUseLegacySql(false)
-            .build());
+        buildQueryJobConfiguration(namedCohortParameters, query));
   }
 
   @VisibleForTesting
@@ -522,13 +548,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String prerequisites;
     switch (kernelTypeEnum) {
       case R:
-        prerequisites =
-            "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
-                + "library(reticulate)\n"
-                + "pd <- reticulate::import(\"pandas\")";
+        prerequisites = "library(bigrquery)";
         break;
       case PYTHON:
-        prerequisites = "import pandas";
+        prerequisites = "import pandas\n" + "import os";
         break;
       default:
         throw new BadRequestException(
@@ -622,7 +645,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     final TableResult valuesLinkingTableResult =
         bigQueryService.executeQuery(
-            buildQueryJobConfiguration(
+            buildAndFilterQueryJobConfiguration(
                 queryParameterValuesByDomain,
                 SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
 
@@ -650,6 +673,56 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return StringUtils.capitalize(text.toLowerCase());
   }
 
+  private static String generateSqlWithEnvironmentVariables(
+      String query, KernelTypeEnum kernelTypeEnum) {
+    return query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum));
+  }
+
+  // This takes the query, and string replaces in the values for each of the named
+  // parameters generated. For example:
+  //    SELECT * FROM cdr.dataset.person WHERE criteria IN unnest(@p1_1)
+  // becomes:
+  //    SELECT * FROM cdr.dataset.person WHERE criteria IN (1, 2, 3)
+  private static String fillInQueryParams(
+      String query, Map<String, QueryParameterValue> queryParameterValueMap) {
+    StringBuilder stringBuilder = new StringBuilder(query);
+    queryParameterValueMap.forEach(
+        (key, value) -> {
+          if (StandardSQLTypeName.ARRAY.equals(value.getType())) {
+            // This handles the replacement of array parameters.
+            // It finds the parameter (specified by `unnest(NAME)`)
+            String stringToReplace = "unnest(@".concat(key.concat(")"));
+            int startingIndex = stringBuilder.indexOf(stringToReplace);
+            stringBuilder.replace(
+                startingIndex,
+                startingIndex + stringToReplace.length(),
+                arraySqlFromQueryParameter(value));
+          } else {
+            // This handles the replacement of non-array parameters.
+            // getValue should always work, because it handles all value types except arrays and
+            // structs.
+            // We do not use structs.
+            String stringToReplace = "@".concat(key);
+            int startingIndex = stringBuilder.indexOf(stringToReplace);
+            Optional.ofNullable(value.getValue())
+                .ifPresent(
+                    v ->
+                        stringBuilder.replace(
+                            startingIndex, startingIndex + stringToReplace.length(), v));
+          }
+        });
+    return stringBuilder.toString();
+  }
+
+  @NotNull
+  private static String arraySqlFromQueryParameter(QueryParameterValue value) {
+    return String.format(
+        "(%s)",
+        nullableListToEmpty(value.getArrayValues()).stream()
+            .map(QueryParameterValue::getValue)
+            .collect(Collectors.joining(", ")));
+  }
+
   private static String generateNotebookUserCode(
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
@@ -657,7 +730,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String qualifier,
       KernelTypeEnum kernelTypeEnum) {
 
-    // Define [namespace]_sql, [namespace]_query_config, and [namespace]_df variables
+    // Define [namespace]_sql, query parameters (as either [namespace]_query_config
+    // or [namespace]_query_parameters), and [namespace]_df variables
     String domainAsString = domain.toString().toLowerCase();
     String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
     // Comments in R and Python have the same syntax
@@ -668,15 +742,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .append(domainAsString)
             .append("\"")
             .toString();
-    String sqlLimitSection =
-        new StringBuilder(
-                "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n")
-            .append(
-                "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n")
-            .append("max_number_of_rows = '1000000'")
-            .toString();
     String sqlSection;
-    String namedParamsSection;
     String dataFrameSection;
     String displayHeadSection;
 
@@ -685,152 +751,42 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         sqlSection =
             namespace
                 + "sql = \"\"\""
-                + queryJobConfiguration.getQuery()
-                + " \nLIMIT \"\"\" + max_number_of_rows";
-        namedParamsSection =
-            namespace
-                + "query_config = {\n"
-                + "  \'query\': {\n"
-                + "  \'parameterMode\': \'NAMED\',\n"
-                + "  \'queryParameters\': [\n"
-                + queryJobConfiguration.getNamedParameters().entrySet().stream()
-                    .map(
-                        entry ->
-                            convertNamedParameterToString(
-                                entry.getKey(), entry.getValue(), KernelTypeEnum.PYTHON))
-                    .collect(Collectors.joining(",\n"))
-                + "\n"
-                + "    ]\n"
-                + "  }\n"
-                + "}\n\n";
+                + fillInQueryParams(
+                    generateSqlWithEnvironmentVariables(
+                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                    queryJobConfiguration.getNamedParameters())
+                + "\"\"\"";
         dataFrameSection =
-            namespace
-                + "df = pandas.read_gbq("
-                + namespace
-                + "sql, dialect=\"standard\", configuration="
-                + namespace
-                + "query_config)";
+            namespace + "df = pandas.read_gbq(" + namespace + "sql, dialect=\"standard\")";
         displayHeadSection = namespace + "df.head(5)";
         break;
       case R:
         sqlSection =
             namespace
                 + "sql <- paste(\""
-                + queryJobConfiguration.getQuery()
-                + " \nLIMIT \", max_number_of_rows)";
-        namedParamsSection =
-            namespace
-                + "query_config <- list(\n"
-                + "  query = list(\n"
-                + "    parameterMode = 'NAMED',\n"
-                + "    queryParameters = list(\n"
-                + queryJobConfiguration.getNamedParameters().entrySet().stream()
-                    .map(
-                        entry ->
-                            convertNamedParameterToString(
-                                entry.getKey(), entry.getValue(), KernelTypeEnum.R))
-                    .collect(Collectors.joining(",\n"))
-                + "\n"
-                + "    )\n"
-                + "  )\n"
-                + ")";
+                + fillInQueryParams(
+                    generateSqlWithEnvironmentVariables(
+                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                    queryJobConfiguration.getNamedParameters())
+                + "\", sep=\"\")";
         dataFrameSection =
             namespace
-                + "df <- pd$read_gbq("
+                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
                 + namespace
-                + "sql, dialect=\"standard\", configuration="
-                + namespace
-                + "query_config)";
+                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")";
         displayHeadSection = "head(" + namespace + "df, 5)";
         break;
       default:
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
     }
 
-    return sqlLimitSection
-        + "\n\n"
-        + descriptiveComment
+    return descriptiveComment
         + "\n"
         + sqlSection
-        + "\n\n"
-        + namedParamsSection
         + "\n\n"
         + dataFrameSection
         + "\n\n"
         + displayHeadSection;
-  }
-
-  // BigQuery api returns parameter values either as a list or an object.
-  // To avoid warnings on our cast to list, we suppress those warnings here,
-  // as they are expected.
-  @SuppressWarnings("unchecked")
-  private static String convertNamedParameterToString(
-      String key, QueryParameterValue namedParameterValue, KernelTypeEnum kernelTypeEnum) {
-    if (namedParameterValue == null) {
-      return "";
-    }
-    final boolean isArrayParameter = namedParameterValue.getArrayType() != null;
-
-    final List<QueryParameterValue> arrayValues =
-        nullableListToEmpty(namedParameterValue.getArrayValues());
-
-    switch (kernelTypeEnum) {
-      case PYTHON:
-        return buildPythonNamedParameterQuery(
-            key, namedParameterValue, isArrayParameter, arrayValues);
-      case R:
-        return "      list(\n"
-            + "        name = \""
-            + key
-            + "\",\n"
-            + "        parameterType = list(type = \""
-            + namedParameterValue.getType().toString()
-            + "\""
-            + (isArrayParameter
-                ? ", arrayType = list(type = \"" + namedParameterValue.getArrayType() + "\")"
-                : "")
-            + "),\n"
-            + "        parameterValue = list("
-            + (isArrayParameter
-                ? "arrayValues = list("
-                    + arrayValues.stream()
-                        .map(arrayValue -> "list(value = " + arrayValue.getValue() + ")")
-                        .collect(Collectors.joining(","))
-                    + ")"
-                : "value = \"" + namedParameterValue.getValue() + "\"")
-            + ")\n"
-            + "      )";
-      default:
-        throw new BadRequestException("Language not supported");
-    }
-  }
-
-  private static String buildPythonNamedParameterQuery(
-      String key,
-      QueryParameterValue namedParameterValue,
-      boolean isArrayParameter,
-      List<QueryParameterValue> arrayValues) {
-    return "      {\n"
-        + "        'name': \""
-        + key
-        + "\",\n"
-        + "        'parameterType': {'type': \""
-        + namedParameterValue.getType().toString()
-        + "\""
-        + (isArrayParameter
-            ? ",'arrayType': {'type': \"" + namedParameterValue.getArrayType() + "\"},"
-            : "")
-        + "},\n"
-        + "        \'parameterValue\': {"
-        + (isArrayParameter
-            ? "\'arrayValues\': ["
-                + arrayValues.stream()
-                    .map(arrayValue -> "{\'value\': " + arrayValue.getValue() + "}")
-                    .collect(Collectors.joining(","))
-                + "]"
-            : "'value': \"" + namedParameterValue.getValue() + "\"")
-        + "}\n"
-        + "      }";
   }
 
   private static <T> List<T> nullableListToEmpty(List<T> nullableList) {
@@ -846,7 +802,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         ImmutableList.copyOf(conceptBigQueryService.getSurveyQuestionConceptIds());
     final DbConceptSet surveyConceptSet = new DbConceptSet();
     surveyConceptSet.setName("All Surveys");
-    surveyConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.SURVEY));
+    surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
     surveyConceptSet.setConceptIds(ImmutableSet.copyOf(conceptIds));
     return surveyConceptSet;
   }

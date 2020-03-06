@@ -36,7 +36,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public String readInvitationKey() {
-    return readCredentialsBucketString("invitation-key.txt");
+    return getCredentialsBucketString("invitation-key.txt");
   }
 
   @Override
@@ -47,7 +47,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public String getMoodleApiKey() {
-    return readCredentialsBucketString("moodle-key.txt");
+    if (configProvider.get().featureFlags.enableMoodleV2Api) {
+      return getCredentialsBucketString(configProvider.get().moodle.credentialsKeyV2);
+    } else {
+      return getCredentialsBucketString(configProvider.get().moodle.credentialsKeyV1);
+    }
   }
 
   @Override
@@ -108,8 +112,13 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     storage.create(blobInfo, bytes);
   }
 
+  @Override
+  public String getCredentialsBucketString(String objectPath) {
+    return readBlobAsString(getBlob(getCredentialsBucketName(), objectPath));
+  }
+
   private JSONObject getCredentialsBucketJSON(final String objectPath) {
-    return new JSONObject(readCredentialsBucketString(objectPath));
+    return new JSONObject(getCredentialsBucketString(objectPath));
   }
 
   @Override
@@ -126,12 +135,8 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return new String(blob.getContent()).trim();
   }
 
-  private String readCredentialsBucketString(String objectPath) {
-    return readBlobAsString(getBlob(getCredentialsBucketName(), objectPath));
-  }
-
   private ServiceAccountCredentials getCredentials(final String objectPath) throws IOException {
-    final String json = readCredentialsBucketString(objectPath);
+    final String json = getCredentialsBucketString(objectPath);
     return ServiceAccountCredentials.fromStream(new ByteArrayInputStream(json.getBytes()));
   }
 
@@ -188,5 +193,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
         // Clear the "generation" of the blob ID for better symmetry to the input.
         .map(b -> BlobId.of(b.getBucket(), b.getName()))
         .collect(Collectors.toSet());
+  }
+
+  @Override
+  public String getCaptchaServerKey() {
+    return getCredentialsBucketString("captcha-server-key.txt");
   }
 }

@@ -1,7 +1,5 @@
 import {
-  BolderHeader,
-  Header,
-  SmallHeader
+  PageHeader,
 } from 'app/components/headers';
 import {
   AccountCreationResendModal,
@@ -9,6 +7,8 @@ import {
 } from 'app/pages/login/account-creation/account-creation-modals';
 import colors from 'app/styles/colors';
 
+import {Divider} from 'app/components/divider';
+import {TextColumn} from 'app/components/text-column';
 import {Profile} from 'generated/fetch/api';
 import * as React from 'react';
 
@@ -54,51 +54,49 @@ export class AccountCreationSuccess
 
   render() {
     return <React.Fragment>
-      <div style={{padding: '3rem 3rem 0 3rem', marginLeft: '-0.5rem', marginRight: '-0.5'}}>
-        <BolderHeader>
+      <div style={{padding: '3rem 3rem 0 3rem', marginLeft: '-0.5rem', marginRight: '-0.5', width: '25rem'}}>
+        <PageHeader>
           Congratulations!
-        </BolderHeader>
-        <div>
-          <SmallHeader style={{color: colors.primary}}>
-            Your All of Us research account has been created!
-          </SmallHeader>
-        </div>
-        <div>
-          <Header style={{fontWeight: 400, textColor: colors.primary}}>
-            Your new account
-          </Header>
-        </div>
-        <div style={{whiteSpace: 'nowrap'}}>
-          <Header style={{fontWeight: 400, marginTop: '0.5rem'}}>
+        </PageHeader>
+
+        <TextColumn>
+          <div style={{fontSize: '16px', marginTop: '.25rem'}}>
+            Your <i>All of Us</i> research account has been created!
+          </div>
+        </TextColumn>
+
+        <Divider verticalMargin='1rem' style={{width: '100%'}}/>
+
+        <TextColumn style={{fontSize: '20px', lineHeight: '30px'}}>
+          <div>
+            Your new research workbench account
+          </div>
+          <div>
             {this.props.profile.username}
-          </Header>
-        </div>
-        <div>
-          <Header style={{marginTop: '.5rem', fontWeight: 400}}>
+          </div>
+          <div>
             is hosted by Google.
-          </Header>
-        </div>
-        <div>
-          <SmallHeader style={{color: colors.primary}}>
-            Check your contact email for instructions on getting started.
-          </SmallHeader>
-        </div>
-        <div>
-          <SmallHeader style={{color: colors.primary}}>
-            Your contact email is: {this.state.contactEmail}
-          </SmallHeader>
-        </div>
-        <div style={{paddingTop: '0.5rem'}}>
-          <button style={styles.buttonLinkStyling}
+          </div>
+          <div style={{marginTop: '1rem'}}>
+            Check your contact email for
+          </div>
+          <div>
+            instructions on getting started.
+          </div>
+        </TextColumn>
+
+        <Divider verticalMargin='1rem' style={{width: '100%'}}/>
+
+        <TextColumn style={{fontSize: '14px'}}>
+          <div>
+            Your contact email is: {this.props.profile.contactEmail}
+          </div>
+          <a style={{marginTop: '.25rem'}}
                   onClick={() => this.setState({resendModal: true})}>
             Resend Instructions
-          </button>
-          |
-          <button style={styles.buttonLinkStyling}
-                  onClick={() => this.setState({updateModal: true})}>
-            Change contact email
-          </button>
-        </div>
+          </a>
+        </TextColumn>
+
       </div>
       {this.state.resendModal && <AccountCreationResendModal
           username={this.props.profile.username}
@@ -113,10 +111,10 @@ export class AccountCreationSuccess
           }}
           onClose={() => this.setState({updateModal: false})}
       />}
-      <div style={{paddingTop: '1.5rem'}}>
+      <div style={{paddingTop: '1rem'}}>
         <div style={styles.borderStyle}>
           Please note: For full access to the Research Workbench data and tools, you'll be required
-          to complete the necessary registration steps
+          to complete the necessary registration steps.
         </div>
       </div>
     </React.Fragment>;

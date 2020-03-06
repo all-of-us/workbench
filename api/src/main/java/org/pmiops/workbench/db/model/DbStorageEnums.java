@@ -5,14 +5,23 @@ import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
+import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
@@ -45,6 +54,9 @@ public final class DbStorageEnums {
           .put(Authority.ACCESS_CONTROL_ADMIN, (short) 2)
           .put(Authority.FEATURED_WORKSPACE_ADMIN, (short) 3)
           .put(Authority.COMMUNICATIONS_ADMIN, (short) 4)
+          .put(Authority.SECURITY_ADMIN, (short) 5)
+          .put(Authority.INSTITUTION_ADMIN, (short) 6)
+          .put(Authority.WORKSPACES_VIEW, (short) 7)
           .build();
 
   public static Authority authorityFromStorage(Short authority) {
@@ -198,6 +210,17 @@ public final class DbStorageEnums {
           .put(SpecificPopulationEnum.EDUCATION_LEVEL, (short) 8)
           .put(SpecificPopulationEnum.INCOME_LEVEL, (short) 9)
           .put(SpecificPopulationEnum.OTHER, (short) 10)
+          .put(SpecificPopulationEnum.RACE_ASIAN, (short) 11)
+          .put(SpecificPopulationEnum.RACE_AA, (short) 12)
+          .put(SpecificPopulationEnum.RACE_HISPANIC, (short) 13)
+          .put(SpecificPopulationEnum.RACE_AIAN, (short) 14)
+          .put(SpecificPopulationEnum.RACE_MENA, (short) 15)
+          .put(SpecificPopulationEnum.RACE_NHPI, (short) 16)
+          .put(SpecificPopulationEnum.RACE_MORE_THAN_ONE, (short) 17)
+          .put(SpecificPopulationEnum.AGE_CHILDREN, (short) 18)
+          .put(SpecificPopulationEnum.AGE_ADOLESCENTS, (short) 19)
+          .put(SpecificPopulationEnum.AGE_OLDER, (short) 20)
+          .put(SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75, (short) 21)
           .build();
 
   public static SpecificPopulationEnum specificPopulationFromStorage(Short s) {
@@ -206,6 +229,44 @@ public final class DbStorageEnums {
 
   public static Short specificPopulationToStorage(SpecificPopulationEnum s) {
     return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.get(s);
+  }
+
+  public static final BiMap<DisseminateResearchEnum, Short> CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
+      ImmutableBiMap.<DisseminateResearchEnum, Short>builder()
+          .put(DisseminateResearchEnum.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
+          .put(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
+          .put(DisseminateResearchEnum.PRESS_RELEASE, (short) 2)
+          .put(DisseminateResearchEnum.PUBLICATION_COMMUNITY_BASED_BLOG, (short) 3)
+          .put(DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG, (short) 4)
+          .put(DisseminateResearchEnum.SOCIAL_MEDIA, (short) 5)
+          .put(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS, (short) 6)
+          .put(DisseminateResearchEnum.OTHER, (short) 7)
+          .build();
+
+  public static DisseminateResearchEnum disseminateResearchEnumFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.inverse().get(s);
+  }
+
+  public static Short disseminateResearchToStorage(DisseminateResearchEnum s) {
+    return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.get(s);
+  }
+
+  public static final BiMap<ResearchOutcomeEnum, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
+      ImmutableBiMap.<ResearchOutcomeEnum, Short>builder()
+          .put(ResearchOutcomeEnum.PROMOTE_HEALTHY_LIVING, (short) 0)
+          .put(ResearchOutcomeEnum.IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS, (short) 1)
+          .put(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT, (short) 2)
+          .put(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN, (short) 3)
+          .put(ResearchOutcomeEnum.PRECISION_INTERVENTION, (short) 4)
+          .put(ResearchOutcomeEnum.NONE_APPLY, (short) 5)
+          .build();
+
+  public static ResearchOutcomeEnum researchOutcomeEnumFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_RESEARCH_OUTCOME.inverse().get(s);
+  }
+
+  public static Short researchOutcomeToStorage(ResearchOutcomeEnum s) {
+    return CLIENT_TO_STORAGE_RESEARCH_OUTCOME.get(s);
   }
 
   public static final BiMap<BillingStatus, Short> CLIENT_TO_STORAGE_BILLING_STATUS =
@@ -259,6 +320,164 @@ public final class DbStorageEnums {
 
   public static Short degreeToStorage(Degree degree) {
     return CLIENT_TO_STORAGE_DEGREE.get(degree);
+  }
+
+  private static final BiMap<OrganizationType, Short> CLIENT_TO_STORAGE_ORGANIZATION_TYPE =
+      ImmutableBiMap.<OrganizationType, Short>builder()
+          .put(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION, (short) 0)
+          .put(OrganizationType.INDUSTRY, (short) 1)
+          .put(OrganizationType.EDUCATIONAL_INSTITUTION, (short) 2)
+          .put(OrganizationType.HEALTH_CENTER_NON_PROFIT, (short) 3)
+          .put(OrganizationType.OTHER, (short) 4)
+          .build();
+
+  public static OrganizationType organizationTypeFromStorage(Short organizationType) {
+    return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.inverse().get(organizationType);
+  }
+
+  public static Short organizationTypeToStorage(OrganizationType organizationType) {
+    return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.get(organizationType);
+  }
+
+  private static final BiMap<InstitutionalRole, Short> CLIENT_TO_STORAGE_INSTITUTIONAL_ROLE =
+      ImmutableBiMap.<InstitutionalRole, Short>builder()
+          .put(InstitutionalRole.UNDERGRADUATE, (short) 0)
+          .put(InstitutionalRole.TRAINEE, (short) 1)
+          .put(InstitutionalRole.FELLOW, (short) 2)
+          .put(InstitutionalRole.EARLY_CAREER, (short) 3)
+          .put(InstitutionalRole.MID_CAREER, (short) 4)
+          .put(InstitutionalRole.LATE_CAREER, (short) 5)
+          .put(InstitutionalRole.PRE_DOCTORAL, (short) 6)
+          .put(InstitutionalRole.POST_DOCTORAL, (short) 7)
+          .put(InstitutionalRole.SENIOR_RESEARCHER, (short) 8)
+          .put(InstitutionalRole.TEACHER, (short) 9)
+          .put(InstitutionalRole.STUDENT, (short) 10)
+          .put(InstitutionalRole.ADMIN, (short) 11)
+          .put(InstitutionalRole.PROJECT_PERSONNEL, (short) 12)
+          .put(InstitutionalRole.OTHER, (short) 13)
+          .build();
+
+  public static InstitutionalRole institutionalRoleFromStorage(Short institutionalRole) {
+    return CLIENT_TO_STORAGE_INSTITUTIONAL_ROLE.inverse().get(institutionalRole);
+  }
+
+  public static Short institutionalRoleToStorage(InstitutionalRole institutionalRole) {
+    return CLIENT_TO_STORAGE_INSTITUTIONAL_ROLE.get(institutionalRole);
+  }
+
+  private static final BiMap<Domain, Short> CLIENT_TO_STORAGE_DOMAIN =
+      ImmutableBiMap.<Domain, Short>builder()
+          .put(Domain.CONDITION, (short) 0)
+          .put(Domain.DEATH, (short) 1)
+          .put(Domain.DEVICE, (short) 2)
+          .put(Domain.DRUG, (short) 3)
+          .put(Domain.MEASUREMENT, (short) 4)
+          .put(Domain.OBSERVATION, (short) 5)
+          .put(Domain.PROCEDURE, (short) 6)
+          .put(Domain.VISIT, (short) 7)
+          .put(Domain.SURVEY, (short) 8)
+          .put(Domain.PERSON, (short) 9)
+          .put(Domain.PHYSICALMEASUREMENT, (short) 10)
+          .build();
+
+  // A mapping from our Domain enum to OMOP domain ID values.
+  private static final BiMap<Domain, String> DOMAIN_ID_MAP =
+      ImmutableBiMap.<Domain, String>builder()
+          .put(Domain.CONDITION, "Condition")
+          .put(Domain.DEATH, "Death")
+          .put(Domain.DEVICE, "Device")
+          .put(Domain.DRUG, "Drug")
+          .put(Domain.MEASUREMENT, "Measurement")
+          .put(Domain.OBSERVATION, "Observation")
+          .put(Domain.PROCEDURE, "Procedure")
+          .put(Domain.VISIT, "Visit")
+          .put(Domain.SURVEY, "Survey")
+          .put(Domain.PERSON, "Person")
+          .put(Domain.PHYSICALMEASUREMENT, "Physical Measurement")
+          .build();
+
+  public static Domain domainFromStorage(Short domain) {
+    return CLIENT_TO_STORAGE_DOMAIN.inverse().get(domain);
+  }
+
+  public static Short domainToStorage(Domain domain) {
+    return CLIENT_TO_STORAGE_DOMAIN.get(domain);
+  }
+
+  public static String domainToDomainId(Domain domain) {
+    return DOMAIN_ID_MAP.get(domain);
+  }
+
+  public static Domain domainIdToDomain(String domainId) {
+    return DOMAIN_ID_MAP.inverse().get(domainId);
+  }
+
+  private static final BiMap<DataAccessLevel, Short> CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL =
+      ImmutableBiMap.<DataAccessLevel, Short>builder()
+          .put(DataAccessLevel.UNREGISTERED, (short) 0)
+          .put(DataAccessLevel.REGISTERED, (short) 1)
+          .put(DataAccessLevel.PROTECTED, (short) 2)
+          .build();
+
+  public static DataAccessLevel dataAccessLevelFromStorage(Short level) {
+    return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.inverse().get(level);
+  }
+
+  public static Short dataAccessLevelToStorage(DataAccessLevel level) {
+    return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
+  }
+
+  private static final BiMap<ArchivalStatus, Short> CLIENT_TO_STORAGE_ARCHIVAL_STATUS =
+      ImmutableBiMap.<ArchivalStatus, Short>builder()
+          .put(ArchivalStatus.LIVE, (short) 0)
+          .put(ArchivalStatus.ARCHIVED, (short) 1)
+          .build();
+
+  public static ArchivalStatus archivalStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_ARCHIVAL_STATUS.inverse().get(s);
+  }
+
+  public static Short archivalStatusToStorage(ArchivalStatus s) {
+    return CLIENT_TO_STORAGE_ARCHIVAL_STATUS.get(s);
+  }
+
+  private static final BiMap<Surveys, Short> CLIENT_TO_STORAGE_SURVEY =
+      ImmutableBiMap.<Surveys, Short>builder()
+          .put(Surveys.THE_BASICS, (short) 0)
+          .put(Surveys.LIFESTYLE, (short) 1)
+          .put(Surveys.OVERALL_HEALTH, (short) 2)
+          .build();
+
+  private static final BiMap<Surveys, String> SURVEY_ID_MAP =
+      ImmutableBiMap.<Surveys, String>builder()
+          .put(Surveys.THE_BASICS, "THE BASICS")
+          .put(Surveys.LIFESTYLE, "LIFESTYLE")
+          .put(Surveys.OVERALL_HEALTH, "OVERALL HEALTH")
+          .build();
+
+  public static Surveys surveysFromStorage(Short survey) {
+    return CLIENT_TO_STORAGE_SURVEY.inverse().get(survey);
+  }
+
+  public static Short surveysToStorage(Surveys survey) {
+    return CLIENT_TO_STORAGE_SURVEY.get(survey);
+  }
+
+  private static final BiMap<PrePackagedConceptSetEnum, Short>
+      CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =
+          ImmutableBiMap.<PrePackagedConceptSetEnum, Short>builder()
+              .put(PrePackagedConceptSetEnum.NONE, (short) 0)
+              .put(PrePackagedConceptSetEnum.DEMOGRAPHICS, (short) 1)
+              .put(PrePackagedConceptSetEnum.SURVEY, (short) 2)
+              .put(PrePackagedConceptSetEnum.BOTH, (short) 3)
+              .build();
+
+  public static PrePackagedConceptSetEnum prePackageConceptSetsFromStorage(Short conceptSet) {
+    return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET.inverse().get(conceptSet);
+  }
+
+  public static Short prePackageConceptSetsToStorage(PrePackagedConceptSetEnum conceptSet) {
+    return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET.get(conceptSet);
   }
 
   /** Utility class. */

@@ -1,13 +1,16 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.util.Optional;
 import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
+import org.pmiops.workbench.interceptors.CloudTaskInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
+import org.pmiops.workbench.interceptors.ElapsedTimeDistributionInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.pmiops.workbench.interceptors.TracingInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -36,7 +40,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
 
+  @Autowired private CloudTaskInterceptor cloudTaskInterceptor;
+
   @Autowired private CronInterceptor cronInterceptor;
+
+  @Autowired private ElapsedTimeDistributionInterceptor elapsedTimeDistributionInterceptor;
 
   @Autowired private SecurityHeadersInterceptor securityHeadersInterceptor;
 
@@ -45,27 +53,33 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public UserAuthentication userAuthentication() {
-    return (UserAuthentication) SecurityContextHolder.getContext().getAuthentication();
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null) {
+      return null;
+    }
+    return (UserAuthentication) auth;
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public Userinfoplus userInfo(UserAuthentication userAuthentication) {
-    return userAuthentication.getPrincipal();
+  public Userinfoplus userInfo(Optional<UserAuthentication> userAuthentication) {
+    return userAuthentication.map(UserAuthentication::getPrincipal).orElse(null);
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public DbUser user(UserAuthentication userAuthentication) {
-    return userAuthentication.getUser();
+  public DbUser user(Optional<UserAuthentication> userAuthentication) {
+    return userAuthentication.map(UserAuthentication::getUser).orElse(null);
   }
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
+    registry.addInterceptor(elapsedTimeDistributionInterceptor);
     registry.addInterceptor(tracingInterceptor);
     registry.addInterceptor(cronInterceptor);
+    registry.addInterceptor(cloudTaskInterceptor);
     registry.addInterceptor(clearCdrVersionInterceptor);
     registry.addInterceptor(securityHeadersInterceptor);
   }

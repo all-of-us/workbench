@@ -17,7 +17,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import {Profile} from 'generated/fetch';
+import {InstitutionalAffiliation, InstitutionalRole, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   h1: {
@@ -43,6 +43,13 @@ const styles = reactStyles({
     backgroundColor: colors.white,
     borderRadius: 8,
     padding: 21
+  },
+  uneditableProfileElement: {
+    paddingLeft: '0.5rem',
+    marginRight: 20,
+    marginBottom: 20,
+    height: '1.5rem',
+    color: colors.primary
   }
 });
 
@@ -108,6 +115,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   render() {
     const {profileState: {profile}} = this.props;
     const {profileEdits, updating} = this.state;
+    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, requireInstitutionalVerification} =
+      serverConfigStore.getValue();
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
       institutionalAffiliations = []
@@ -157,11 +166,106 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       </div>;
     };
 
+    const removeOldInstitutionalAffiliation = (affiliation: InstitutionalAffiliation) => {
+      this.setState(fp.update(
+        ['profileEdits', 'institutionalAffiliations'],
+        fp.pull(affiliation)
+      ));
+    };
+
+    const addEmptyOldInstitutionalAffiliation = () => {
+      this.setState(fp.update(
+        ['profileEdits', 'institutionalAffiliations'],
+        affiliation => fp.concat(affiliation, {institution: '', role: ''})));
+    };
+
+    const renderVerifiedInstitutionalAffiliationComponents = () => {
+      const {verifiedInstitutionalAffiliation} = profile;
+      if (!verifiedInstitutionalAffiliation) {
+        return;
+      }
+
+      const {institutionDisplayName, institutionalRoleEnum, institutionalRoleOtherText} = verifiedInstitutionalAffiliation;
+      return <React.Fragment>
+        <div style={{...styles.h1, marginBottom: 24}}>
+          Verified Institutional Affiliation
+        </div>
+        <FlexRow>
+          <FlexColumn>
+            <div style={styles.inputLabel}>
+              Institution
+            </div>
+            <div style={styles.uneditableProfileElement}>{institutionDisplayName}</div>
+          </FlexColumn>
+          <FlexColumn>
+            <div style={styles.inputLabel}>
+              Role
+            </div>
+            <div style={styles.uneditableProfileElement}>
+            {institutionalRoleEnum === InstitutionalRole.OTHER ? institutionalRoleOtherText : institutionalRoleEnum}
+            </div>
+          </FlexColumn>
+        </FlexRow>
+      </React.Fragment>;
+    };
+
+    const renderOldInstitutionalAffiliationComponents = () => {
+      return <React.Fragment>
+        <div style={{...styles.h1, marginBottom: 24}}>
+          Institution Affiliations
+        </div>
+        {institutionalAffiliations.map((v, i) =>
+          <div style={{display: 'flex'}} key={`institution${i}`}>
+            {makeProfileInput({
+              title: 'Institution',
+              valueKey: ['institutionalAffiliations', i, 'institution']
+            })}
+            {makeProfileInput({
+              title: 'Role',
+              valueKey: ['institutionalAffiliations', i, 'role']
+            })}
+            <Clickable
+              style={{alignSelf: 'center'}}
+              onClick={() => removeOldInstitutionalAffiliation(v)}
+            >
+              <ClrIcon
+                shape='times'
+                size='24'
+                style={{color: colors.accent, marginBottom: 17}}
+              />
+            </Clickable>
+          </div>
+        )}
+        <div style={{display: 'flex', width: 520, alignItems: 'center'}}>
+          <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
+          <Clickable onClick={() => addEmptyOldInstitutionalAffiliation()}>
+            <ClrIcon
+              shape='plus-circle'
+              size='19'
+              style={{
+                color: colors.accent,
+                margin: '0 14px',
+                flex: 'none', verticalAlign: 'text-bottom' // text-bottom makes it centered...?
+              }}
+            />
+          </Clickable>
+          <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
+        </div>
+      </React.Fragment>;
+    };
+
+    const renderInstitutionalAffiliationComponents = () => {
+      if (requireInstitutionalVerification) {
+        return renderVerifiedInstitutionalAffiliationComponents();
+      } else {
+        return renderOldInstitutionalAffiliationComponents();
+      }
+    };
+
     return <div style={{margin: '35px 35px 100px 45px'}}>
       {(!profile || updating) && <SpinnerOverlay/>}
       <div style={{...styles.h1, marginBottom: 30}}>Profile</div>
       <div style={{display: 'flex'}}>
-
         <div style={{flex: '1 0 520px', paddingRight: 26}}>
           <div style={{display: 'flex'}}>
             {makeProfileInput({
@@ -179,11 +283,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             disabled: true
           })}
           <div style={styles.inputLabel}>Username</div>
-          <div style={{
-            paddingLeft: '0.5rem', marginBottom: 20,
-            height: '1.5rem',
-            color: colors.primary
-          }}>
+          <div style={styles.uneditableProfileElement}>
             {profile && profile.username}
           </div>
           {makeProfileInput({
@@ -199,8 +299,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               Current Research Work
               <TooltipTrigger
                 side='right'
-                content='You are required to describe your current research in order to help
-                  All of Us improve the Researcher Workbench.'
+                content={<span>You are required to describe your current research in order to help
+                  <i>All of Us</i> improve the Researcher Workbench.</span>}
               >
                 <ClrIcon
                   shape='info-standard'
@@ -217,52 +317,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             valueKey: 'aboutYou',
             isLong: true
           })}
-          <div style={{...styles.h1, marginBottom: 24}}>Institution Affiliations</div>
-          {institutionalAffiliations.map((v, i) =>
-            <div style={{display: 'flex'}} key={`institution${i}`}>
-              {makeProfileInput({
-                title: 'Institution',
-                valueKey: ['institutionalAffiliations', i, 'institution']
-              })}
-              {makeProfileInput({
-                title: 'Role',
-                valueKey: ['institutionalAffiliations', i, 'role']
-              })}
-              <Clickable
-                style={{alignSelf: 'center'}}
-                onClick={() => this.setState(fp.update(
-                  ['profileEdits', 'institutionalAffiliations'],
-                  fp.pull(v)
-                ))}
-              >
-                <ClrIcon
-                  shape='times'
-                  size='24'
-                  style={{color: colors.accent, marginBottom: 17}}
-                />
-              </Clickable>
-            </div>
-          )}
-          <div style={{display: 'flex', width: 520, alignItems: 'center'}}>
-            <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
-            <Clickable
-              onClick={() => this.setState(fp.update(
-                ['profileEdits', 'institutionalAffiliations'],
-                v => fp.concat(v, {institution: '', role: ''})
-              ))}
-            >
-              <ClrIcon
-                shape='plus-circle'
-                size='19'
-                style={{
-                  color: colors.accent,
-                  margin: '0 14px',
-                  flex: 'none', verticalAlign: 'text-bottom' // text-bottom makes it centered...?
-                }}
-              />
-            </Clickable>
-            <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
-          </div>
+          {renderInstitutionalAffiliationComponents()}
           <div style={{marginTop: 100, display: 'flex'}}>
             <Button type='link'
               onClick={() => this.setState({profileEdits: profile})}
@@ -290,8 +345,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             color: colors.primary, paddingRight: '0.5rem', justifyContent: 'flex-end'
           }}>
             <FlexColumn style={{alignItems: 'flex-end'}}>
-              <div>All of Us FREE credits used:</div>
-              <div>Remaining All of Us FREE credits:</div>
+              <div><i>All of Us</i> FREE credits used:</div>
+              <div>Remaining <i>All of Us</i> FREE credits:</div>
             </FlexColumn>
             <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
               {usdElement(profile.freeTierUsage)}
@@ -307,7 +362,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
             completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
-          {serverConfigStore.getValue().enableComplianceTraining && <ProfileRegistrationStepStatus
+          {enableComplianceTraining && <ProfileRegistrationStepStatus
             title='Access Training'
             wasBypassed={!!profile.complianceTrainingBypassTime}
             incompleteButtonText='Access Training'
@@ -316,7 +371,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
             completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />}
 
-          {serverConfigStore.getValue().enableEraCommons && <ProfileRegistrationStepStatus
+          {enableEraCommons && <ProfileRegistrationStepStatus
             title='eRA Commons Account'
             wasBypassed={!!profile.eraCommonsBypassTime}
             incompleteButtonText='Link'
@@ -341,7 +396,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               </React.Fragment>}
             </div>
           </ProfileRegistrationStepStatus>}
-          {serverConfigStore.getValue().enableDataUseAgreement && <ProfileRegistrationStepStatus
+
+          {enableDataUseAgreement && <ProfileRegistrationStepStatus
             title='Data Use Agreement'
             wasBypassed={!!profile.dataUseAgreementBypassTime}
             incompleteButtonText='Sign'

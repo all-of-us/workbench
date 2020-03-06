@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
+import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -43,6 +45,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.Cr
 import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Address;
@@ -150,15 +154,16 @@ public class ProfileController implements ProfileApiDelegate {
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
               if (demographicSurvey.getEducation() != null)
                 result.setEducationEnum(demographicSurvey.getEducation());
-              if (demographicSurvey.getGender() != null)
-                result.setGenderEnum(demographicSurvey.getGender());
+              result.setIdentifiesAsLgbtq(demographicSurvey.getIdentifiesAsLgbtq());
+              result.setLgbtqIdentity(demographicSurvey.getLgbtqIdentity());
               if (demographicSurvey.getDisability() != null)
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getGenderIdentityList() != null) {
+                result.setGenderIdentityEnumList(demographicSurvey.getGenderIdentityList());
+              }
               if (demographicSurvey.getSexAtBirth() != null)
                 result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
-              if (demographicSurvey.getSexualOrientation() != null)
-                result.setSexualOrientationEnum(demographicSurvey.getSexualOrientation());
               if (demographicSurvey.getYearOfBirth() != null)
                 result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
               return result;
@@ -181,6 +186,9 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<MailService> mailServiceProvider;
   private final ProfileAuditor profileAuditor;
+  private final InstitutionService institutionService;
+  private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
+  private final CaptchaVerificationService captchaVerificationService;
 
   @Autowired
   ProfileController(
@@ -195,7 +203,10 @@ public class ProfileController implements ProfileApiDelegate {
       CloudStorageService cloudStorageService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<MailService> mailServiceProvider,
-      ProfileAuditor profileAuditor) {
+      ProfileAuditor profileAuditor,
+      InstitutionService institutionService,
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
+      CaptchaVerificationService captchaVerificationService) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -208,6 +219,9 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
+    this.institutionService = institutionService;
+    this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
+    this.captchaVerificationService = captchaVerificationService;
   }
 
   @Override
@@ -238,15 +252,23 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void validateProfileFields(Profile profile) {
+  private void validateAndCleanProfile(Profile profile) throws BadRequestException {
+    // Validation steps, which yield a BadRequestException if errors are found.
+    String userName = profile.getUsername();
+    if (userName == null || userName.length() < 3 || userName.length() > 64) {
+      throw new BadRequestException(
+          "Username should be at least 3 characters and not more than 64 characters");
+    }
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
-    if (!workbenchConfigProvider.get().featureFlags.enableNewAccountCreation) {
-      // required for old create account flow
-      validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
-      validateStringLength(profile.getOrganization(), "Organization", 255, 1);
-      validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
-    }
+
+    // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
+    profile.setDemographicSurvey(
+        Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
+    profile.setInstitutionalAffiliations(
+        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
+    // We always store the username as all lowercase.
+    profile.setUsername(profile.getUsername().toLowerCase());
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -310,29 +332,29 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-    verifyInvitationKey(request.getInvitationKey());
-    String userName = request.getProfile().getUsername();
-    if (userName == null || userName.length() < 3 || userName.length() > 64)
-      throw new BadRequestException(
-          "Username should be at least 3 characters and not more than 64 characters");
-    request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
-    validateProfileFields(request.getProfile());
-    // This check will be removed once enableNewAccountCreation flag is turned on.
-    if (request.getProfile().getAddress() == null) {
-      request.getProfile().setAddress(new Address());
+    if (workbenchConfigProvider.get().captcha.enableCaptcha) {
+      verifyCaptcha(request.getCaptchaVerificationToken());
     }
-    if (request.getProfile().getDemographicSurvey() == null) {
-      request.getProfile().setDemographicSurvey(new DemographicSurvey());
+
+    if (workbenchConfigProvider.get().access.requireInvitationKey) {
+      verifyInvitationKey(request.getInvitationKey());
     }
-    if (request.getProfile().getInstitutionalAffiliations() == null) {
-      request.getProfile().setInstitutionalAffiliations(new ArrayList<InstitutionalAffiliation>());
-    }
+
+    final Profile profile = request.getProfile();
+
+    // We don't include this check in validateAndCleanProfile since some existing user profiles
+    // may have empty addresses. So we only check this on user creation, not update.
+    Optional.ofNullable(profile.getAddress())
+        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
+
+    validateAndCleanProfile(profile);
+
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
-            request.getProfile().getGivenName(),
-            request.getProfile().getFamilyName(),
-            request.getProfile().getUsername(),
-            request.getProfile().getContactEmail());
+            profile.getGivenName(),
+            profile.getFamilyName(),
+            profile.getUsername(),
+            profile.getContactEmail());
 
     // Create a user that has no data access or FC user associated.
     // We create this account before they sign in so we can keep track of which users we have
@@ -348,25 +370,31 @@ public class ProfileController implements ProfileApiDelegate {
 
     DbUser user =
         userService.createUser(
-            request.getProfile().getGivenName(),
-            request.getProfile().getFamilyName(),
+            profile.getGivenName(),
+            profile.getFamilyName(),
             googleUser.getPrimaryEmail(),
-            request.getProfile().getContactEmail(),
-            request.getProfile().getCurrentPosition(),
-            request.getProfile().getOrganization(),
-            request.getProfile().getAreaOfResearch(),
-            request.getProfile().getDegrees(),
-            FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
-            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
-            request.getProfile().getInstitutionalAffiliations().stream()
+            profile.getContactEmail(),
+            profile.getCurrentPosition(),
+            profile.getOrganization(),
+            profile.getAreaOfResearch(),
+            profile.getProfessionalUrl(),
+            profile.getDegrees(),
+            FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
+            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(profile.getDemographicSurvey()),
+            profile.getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()),
+            verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+                profile.getVerifiedInstitutionalAffiliation(), institutionService));
+
+    if (request.getTermsOfServiceVersion() != null) {
+      userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
+    }
 
     try {
       mailServiceProvider
           .get()
-          .sendWelcomeEmail(
-              request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
+          .sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
@@ -415,7 +443,11 @@ public class ProfileController implements ProfileApiDelegate {
    */
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
-      userService.syncComplianceTrainingStatus();
+      if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
+        userService.syncComplianceTrainingStatusV2();
+      } else {
+        userService.syncComplianceTrainingStatusV1();
+      }
     } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
@@ -449,6 +481,18 @@ public class ProfileController implements ProfileApiDelegate {
         || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
       throw new BadRequestException(
           "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+    }
+  }
+
+  private void verifyCaptcha(String captchaToken) {
+    boolean isValidCaptcha = false;
+    try {
+      isValidCaptcha = captchaVerificationService.verifyCaptcha(captchaToken);
+      if (!isValidCaptcha) {
+        throw new BadRequestException("Missing or incorrect Captcha Token");
+      }
+    } catch (org.pmiops.workbench.captcha.ApiException e) {
+      throw new ServerErrorException("Exception while verifying Captcha");
     }
   }
 
@@ -538,7 +582,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
-    validateProfileFields(updatedProfile);
+    validateAndCleanProfile(updatedProfile);
     DbUser user = userProvider.get();
 
     // Save current profile for audit trail. Continue to use the userProvider (instead
@@ -552,6 +596,7 @@ public class ProfileController implements ProfileApiDelegate {
       userService.setDataUseAgreementNameOutOfDate(
           updatedProfile.getGivenName(), updatedProfile.getFamilyName());
     }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
@@ -559,12 +604,25 @@ public class ProfileController implements ProfileApiDelegate {
     user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
-
+    user.setLastModifiedTime(now);
+    user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.
       throw new BadRequestException("Changing email is not currently supported");
     }
+    updateInstitutionalAffiliations(updatedProfile, user);
+
+    // This does not update the name in Google.
+    saveUserWithConflictHandling(user);
+
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
     List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()
             .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
@@ -599,14 +657,6 @@ public class ProfileController implements ProfileApiDelegate {
         user.addInstitutionalAffiliation(affiliation);
       }
     }
-
-    // This does not update the name in Google.
-    saveUserWithConflictHandling(user);
-
-    final Profile appliedUpdatedProfile = profileService.getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
-
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

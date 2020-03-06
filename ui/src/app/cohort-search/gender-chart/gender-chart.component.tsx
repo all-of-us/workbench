@@ -87,7 +87,7 @@ export class GenderChart extends React.Component<Props, State> {
     };
     const colors = ['#a8385d', '#7aa3e5', '#a27ea8', '#aae3f5'];
     const chartData = data.reduce((acc, datum) => {
-      const gender = !!genderCodes[datum.gender] ? genderCodes[datum.gender] : datum.gender;
+      const gender = !!genderCodes[datum.name] ? genderCodes[datum.name] : datum.name;
       if (!acc.categories.includes(gender)) {
         acc.categories.push(gender);
       }

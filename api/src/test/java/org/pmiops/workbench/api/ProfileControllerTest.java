@@ -6,25 +6,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
-import javax.inject.Provider;
+import java.util.Random;
 import javax.mail.MessagingException;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -32,49 +31,61 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.captcha.ApiException;
+import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionMapperImpl;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
+import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
+import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ProfileControllerTest {
+public class ProfileControllerTest extends BaseControllerTest {
 
   private static final Instant NOW = Instant.now();
   private static final Timestamp TIMESTAMP = new Timestamp(NOW.toEpochMilli());
@@ -85,44 +96,91 @@ public class ProfileControllerTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String INVITATION_KEY = "secretpassword";
+  private static final String CAPTCHA_TOKEN = "captchaToken";
+  private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
-  private static final String BILLING_PROJECT_PREFIX = "all-of-us-free-";
+  private static final String STREET_ADDRESS = "1 Example Lane";
+  private static final String CITY = "Exampletown";
+  private static final String STATE = "EX";
+  private static final String COUNTRY = "Example";
+  private static final String ZIP_CODE = "12345";
+
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
-  @Mock private Provider<DbUser> userProvider;
-  @Mock private Provider<UserAuthentication> userAuthenticationProvider;
-  @Autowired private UserDao userDao;
-  @Autowired private AdminActionHistoryDao adminActionHistoryDao;
-  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
-  @Mock private FireCloudService fireCloudService;
-  @Mock private LeonardoNotebooksClient leonardoNotebooksClient;
-  @Mock private DirectoryService directoryService;
-  @Mock private CloudStorageService cloudStorageService;
-  @Mock private FreeTierBillingService freeTierBillingService;
-  @Mock private ComplianceService complianceTrainingService;
-  @Mock private MailService mailService;
-  private UserService userService;
-  @Mock private ProfileAuditor mockProfileAuditor;
-  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private FireCloudService fireCloudService;
+  @MockBean private DirectoryService directoryService;
+  @MockBean private CloudStorageService cloudStorageService;
+  @MockBean private FreeTierBillingService freeTierBillingService;
+  @MockBean private ComplianceService complianceTrainingService;
+  @MockBean private MailService mailService;
+  @MockBean private ProfileAuditor mockProfileAuditor;
+  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private CaptchaVerificationService captchaVerificationService;
 
-  private ProfileController profileController;
+  @Autowired private UserDao userDao;
+  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
+  @Autowired private ProfileService profileService;
+  @Autowired private ProfileController profileController;
+  @Autowired private InstitutionService institutionService;
+
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
-  private FakeClock clock;
-  private DbUser dbUser;
+  private static FakeClock fakeClock = new FakeClock(NOW);
+
+  private static DbUser dbUser;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
-  @Before
-  public void setUp() throws MessagingException {
-    WorkbenchConfig config = generateConfig();
+  @TestConfiguration
+  @Import({
+    UserServiceImpl.class,
+    ProfileService.class,
+    ProfileController.class,
+    InstitutionServiceImpl.class,
+    InstitutionMapperImpl.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class,
+    CaptchaVerificationService.class,
+    PublicInstitutionDetailsMapperImpl.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class
+  })
+  static class Configuration {
+    @Bean
+    @Primary
+    Clock clock() {
+      return fakeClock;
+    }
 
-    createAccountRequest = new CreateAccountRequest();
-    invitationVerificationRequest = new InvitationVerificationRequest();
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    DbUser dbUser() {
+      return dbUser;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    UserAuthentication userAuthentication() {
+      return new UserAuthentication(dbUser, null, null, UserType.RESEARCHER);
+    }
+
+    @Bean
+    @Primary
+    Random getRandom() {
+      return new FakeLongRandom(NONCE_LONG);
+    }
+  }
+
+  @Before
+  @Override
+  public void setUp() throws IOException {
+    super.setUp();
+
+    fakeClock.setInstant(NOW);
+
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -131,62 +189,76 @@ public class ProfileControllerTest {
     profile.setCurrentPosition(CURRENT_POSITION);
     profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
+    profile.setAddress(
+        new Address()
+            .streetAddress1(STREET_ADDRESS)
+            .city(CITY)
+            .state(STATE)
+            .country(COUNTRY)
+            .zipCode(ZIP_CODE));
+
+    createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
+    createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
+
+    invitationVerificationRequest = new InvitationVerificationRequest();
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
+
     googleUser = new com.google.api.services.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
-
-    clock = new FakeClock(NOW);
-
-    doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
-    userService =
-        new UserServiceImpl(
-            userProvider,
-            userDao,
-            adminActionHistoryDao,
-            userDataUseAgreementDao,
-            clock,
-            new FakeLongRandom(NONCE_LONG),
-            fireCloudService,
-            Providers.of(config),
-            complianceTrainingService,
-            directoryService,
-            mockUserServiceAuditAdapter);
-    ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
-    this.profileController =
-        new ProfileController(
-            profileService,
-            userProvider,
-            userAuthenticationProvider,
-            userDao,
-            clock,
-            userService,
-            fireCloudService,
-            directoryService,
-            cloudStorageService,
-            Providers.of(config),
-            Providers.of(mailService),
-            mockProfileAuditor);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+
+    try {
+      doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
+    } catch (MessagingException e) {
+      e.printStackTrace();
+    }
+    when(cloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
+    try {
+      when(captchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
+      when(captchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
+    } catch (ApiException e) {
+      e.printStackTrace();
+    }
   }
 
   @Test(expected = BadRequestException.class)
-  public void testCreateAccount_invitationKeyMismatch() throws Exception {
+  public void testCreateAccount_invitationKeyMismatch() {
+    createUser();
+
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
 
   @Test(expected = BadRequestException.class)
-  public void testInvitationKeyVerification_invitationKeyMismatch() throws Exception {
+  public void testCreateAccount_invalidCaptchaToken() {
+    createUser();
+    createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test
+  public void testCreateAccount_noRequireInvitationKey() {
+    createUser();
+
+    // When invitation key verification is turned off, even a bad invitation key should
+    // allow a user to be created.
+    config.access.requireInvitationKey = false;
+    when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testInvitationKeyVerification_invitationKeyMismatch() {
     profileController.invitationKeyVerification(invitationVerificationRequest);
   }
 
   @Test
-  public void testCreateAccount_success() throws Exception {
+  public void testCreateAccount_success() {
     createUser();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
@@ -195,10 +267,32 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testCreateAccount_invalidUser() throws Exception {
+  public void testCreateAccount_withTosVersion() {
+    createAccountRequest.setTermsOfServiceVersion(1);
+    createUser();
+
+    final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
+    assertThat(tosRows.size()).isEqualTo(1);
+    assertThat(tosRows.get(0).getTosVersion()).isEqualTo(1);
+    assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
+    assertThat(tosRows.get(0).getAgreementTime()).isNotNull();
+    Profile profile = profileService.getProfile(dbUser);
+    assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCreateAccount_withBadTosVersion() {
+    createAccountRequest.setTermsOfServiceVersion(999);
+    createUser();
+  }
+
+  @Test
+  public void testCreateAccount_invalidUser() {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     CreateAccountRequest accountRequest = new CreateAccountRequest();
     accountRequest.setInvitationKey(INVITATION_KEY);
+    accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
     createAccountRequest.getProfile().setUsername("12");
     accountRequest.setProfile(createAccountRequest.getProfile());
     exception.expect(BadRequestException.class);
@@ -209,16 +303,15 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testSubmitDemographicSurvey_success() throws Exception {
+  public void testSubmitDemographicSurvey_success() {
     createUser();
     assertThat(profileController.submitDemographicsSurvey().getStatusCode())
         .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @Test
-  public void testSubmitDataUseAgreement_success() throws Exception {
+  public void testSubmitDataUseAgreement_success() {
     createUser();
-    DbUser dbUser = userProvider.get();
     String duaInitials = "NIH";
     assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
@@ -233,9 +326,10 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_success() throws Exception {
-    createUser();
+  public void testMe_success() {
+    config.featureFlags.requireInstitutionalVerification = false;
 
+    createUser();
     Profile profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -248,10 +342,13 @@ public class ProfileControllerTest {
         false);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(mockProfileAuditor).fireLoginAction(dbUser);
+
+    // feature flag is off: Verified InstitutionalAffiliation is not saved
+    assertThat(profile.getVerifiedInstitutionalAffiliation()).isNull();
   }
 
   @Test
-  public void testMe_userBeforeNotLoggedInSuccess() throws Exception {
+  public void testMe_userBeforeNotLoggedInSuccess() {
     createUser();
     Profile profile = profileController.getMe().getBody();
     assertProfile(
@@ -266,7 +363,7 @@ public class ProfileControllerTest {
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
-    clock.increment(1);
+    fakeClock.increment(1);
     profile = profileController.getMe().getBody();
     assertProfile(
         profile,
@@ -280,7 +377,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_institutionalAffiliationsAlphabetical() throws Exception {
+  public void testMe_institutionalAffiliationsAlphabetical() {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
@@ -303,7 +400,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_institutionalAffiliationsNotAlphabetical() throws Exception {
+  public void testMe_institutionalAffiliationsNotAlphabetical() {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
@@ -326,7 +423,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_removeSingleInstitutionalAffiliation() throws Exception {
+  public void testMe_removeSingleInstitutionalAffiliation() {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
@@ -351,7 +448,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_removeAllInstitutionalAffiliations() throws Exception {
+  public void testMe_removeAllInstitutionalAffiliations() {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
@@ -374,9 +471,88 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void updateContactEmail_forbidden() throws Exception {
+  public void testMe_verifiedInstitutionalAffiliation() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(broad.getShortName())
+            .institutionDisplayName(broad.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
     createUser();
-    dbUser.setFirstSignInTime(new Timestamp(new Date().getTime()));
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getVerifiedInstitutionalAffiliation())
+        .isEqualTo(verifiedInstitutionalAffiliation);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testMe_verifiedInstitutionalAffiliation_missing() {
+    config.featureFlags.requireInstitutionalVerification = true;
+    createUser();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testMe_verifiedInstitutionalAffiliation_invalidInstitution() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+    institutionService.createInstitution(broad);
+
+    // "Broad" is the only institution
+    final String invalidInst = "Not the Broad";
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(invalidInst)
+            .institutionalRoleEnum(InstitutionalRole.STUDENT);
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    createUser();
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testMe_verifiedInstitutionalAffiliation_invalidEmail() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.emptyList());
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(broad.getShortName())
+            .institutionalRoleEnum(InstitutionalRole.ADMIN);
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    createUser();
+  }
+
+  @Test
+  public void updateContactEmail_forbidden() {
+    createUser();
+    dbUser.setFirstSignInTime(TIMESTAMP);
     String originalEmail = dbUser.getContactEmail();
 
     ResponseEntity<Void> response =
@@ -390,7 +566,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void updateContactEmail_badRequest() throws Exception {
+  public void updateContactEmail_badRequest() {
     createUser();
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     dbUser.setFirstSignInTime(null);
@@ -407,7 +583,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void updateContactEmail_OK() throws Exception {
+  public void updateContactEmail_OK() {
     createUser();
     dbUser.setFirstSignInTime(null);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
@@ -423,7 +599,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void updateName_alsoUpdatesDua() throws Exception {
+  public void updateName_alsoUpdatesDua() {
     createUser();
     Profile profile = profileController.getMe().getBody();
     profile.setGivenName("OldGivenName");
@@ -439,7 +615,7 @@ public class ProfileControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateGivenName_badRequest() throws Exception {
+  public void updateGivenName_badRequest() {
     createUser();
     Profile profile = profileController.getMe().getBody();
     String newName =
@@ -449,7 +625,7 @@ public class ProfileControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateFamilyName_badRequest() throws Exception {
+  public void updateFamilyName_badRequest() {
     createUser();
     Profile profile = profileController.getMe().getBody();
     String newName =
@@ -458,24 +634,8 @@ public class ProfileControllerTest {
     profileController.updateProfile(profile);
   }
 
-  @Test(expected = BadRequestException.class)
-  public void updateCurrentPosition_badRequest() throws Exception {
-    createUser();
-    Profile profile = profileController.getMe().getBody();
-    profile.setCurrentPosition(RandomStringUtils.random(256));
-    profileController.updateProfile(profile);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void updateOrganization_badRequest() throws Exception {
-    createUser();
-    Profile profile = profileController.getMe().getBody();
-    profile.setOrganization(RandomStringUtils.random(256));
-    profileController.updateProfile(profile);
-  }
-
   @Test
-  public void resendWelcomeEmail_messagingException() throws Exception {
+  public void resendWelcomeEmail_messagingException() throws MessagingException {
     createUser();
     dbUser.setFirstSignInTime(null);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
@@ -493,7 +653,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void resendWelcomeEmail_OK() throws Exception {
+  public void resendWelcomeEmail_OK() throws MessagingException {
     createUser();
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doNothing().when(mailService).sendWelcomeEmail(any(), any(), any());
@@ -536,7 +696,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testSyncEraCommons() throws Exception {
+  public void testSyncEraCommons() {
     FirecloudNihStatus nihStatus = new FirecloudNihStatus();
     String linkedUsername = "linked";
     nihStatus.setLinkedNihUsername(linkedUsername);
@@ -553,40 +713,25 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testBypassAccessModule() throws Exception {
+  public void testBypassAccessModule() {
     Profile profile = createUser();
-    userService = spy(userService);
-    WorkbenchConfig config = generateConfig();
-    ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
-    this.profileController =
-        new ProfileController(
-            profileService,
-            userProvider,
-            userAuthenticationProvider,
-            userDao,
-            clock,
-            userService,
-            fireCloudService,
-            directoryService,
-            cloudStorageService,
-            Providers.of(config),
-            Providers.of(mailService),
-            mockProfileAuditor);
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
-    verify(userService, times(1)).setDataUseAgreementBypassTime(any(), any());
+
+    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
   }
 
   @Test
-  public void testDeleteProfile() throws Exception {
+  public void testDeleteProfile() {
     createUser();
 
     profileController.deleteProfile();
     verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
   }
 
-  private Profile createUser() throws Exception {
+  private Profile createUser() {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
@@ -594,9 +739,6 @@ public class ProfileControllerTest {
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     userDao.save(dbUser);
-    when(userProvider.get()).thenReturn(dbUser);
-    when(userAuthenticationProvider.get())
-        .thenReturn(new UserAuthentication(dbUser, null, null, UserType.RESEARCHER));
     return result;
   }
 
@@ -633,22 +775,5 @@ public class ProfileControllerTest {
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
-  }
-
-  private WorkbenchConfig generateConfig() {
-    WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billing.projectNamePrefix = BILLING_PROJECT_PREFIX;
-    config.billing.retryCount = 2;
-    config.firecloud.registeredDomainName = "";
-    config.access.enableComplianceTraining = false;
-    config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
-    // All access modules are enabled for these tests. So completing any one module should maintain
-    // UNREGISTERED status.
-    config.access.enableComplianceTraining = true;
-    config.access.enableBetaAccess = true;
-    config.access.enableEraCommons = true;
-    config.access.enableDataUseAgreement = true;
-    config.featureFlags.unsafeAllowDeleteUser = true;
-    return config;
   }
 }

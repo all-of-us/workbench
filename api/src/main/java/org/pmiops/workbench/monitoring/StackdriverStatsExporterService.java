@@ -4,9 +4,12 @@ import com.google.api.MonitoredResource;
 import com.google.appengine.api.modules.ModulesException;
 import com.google.appengine.api.modules.ModulesService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,22 +27,26 @@ public class StackdriverStatsExporterService {
 
   private static final Logger logger =
       Logger.getLogger(StackdriverStatsExporterService.class.getName());
-  private static final String STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME = "custom.googleapis.com";
+  private static final String STACKDRIVER_CUSTOM_METRICS_PREFIX = "custom.googleapis.com/";
   private static final String MONITORED_RESOURCE_TYPE = "generic_node";
-  private static final String PROJECT_ID_LABEL = "project_id";
-  private static final String LOCATION_LABEL = "location";
-  private static final String NAMESPACE_LABEL = "namespace";
-  private static final String NODE_ID_LABEL = "node_id";
-
+  public static final String PROJECT_ID_LABEL = "project_id";
+  public static final String LOCATION_LABEL = "location";
+  public static final String NAMESPACE_LABEL = "namespace";
+  public static final String NODE_ID_LABEL = "node_id";
+  public static final String UNKNOWN_INSTANCE_PREFIX = "unknown-";
+  public static final Set<String> MONITORED_RESOURCE_LABELS =
+      ImmutableSet.of(PROJECT_ID_LABEL, LOCATION_LABEL, NAMESPACE_LABEL, NODE_ID_LABEL);
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private ModulesService modulesService;
+  private Optional<String> spoofedNodeId;
 
   public StackdriverStatsExporterService(
       Provider<WorkbenchConfig> workbenchConfigProvider, ModulesService modulesService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.modulesService = modulesService;
     this.initialized = false;
+    this.spoofedNodeId = Optional.empty();
   }
 
   /**
@@ -65,22 +72,44 @@ public class StackdriverStatsExporterService {
   @VisibleForTesting
   public StackdriverStatsConfiguration makeStackdriverStatsConfiguration() {
     return StackdriverStatsConfiguration.builder()
-        .setMetricNamePrefix(buildMetricNamePrefix())
+        .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
         .setProjectId(getProjectId())
-        .setMonitoredResource(makeMonitoredResource())
+        .setMonitoredResource(getMonitoringMonitoredResource())
         .build();
   }
 
-  private MonitoredResource makeMonitoredResource() {
-    final MonitoredResource.Builder resultBuilder =
-        MonitoredResource.newBuilder()
-            .setType(MONITORED_RESOURCE_TYPE)
-            .putLabels(PROJECT_ID_LABEL, getProjectId())
-            .putLabels(LOCATION_LABEL, getLocation())
-            .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
-            .putLabels(NODE_ID_LABEL, getNodeId());
+  private MonitoredResource getMonitoringMonitoredResource() {
+    return MonitoredResource.newBuilder()
+        .setType(MONITORED_RESOURCE_TYPE)
+        .putLabels(PROJECT_ID_LABEL, getProjectId())
+        .putLabels(LOCATION_LABEL, getLocation())
+        .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
+        .putLabels(NODE_ID_LABEL, getNodeId())
+        .build();
+  }
 
-    return resultBuilder.build();
+  /**
+   * Make a MonitoredResource to idenfity the log. Note that this is nearly identical, but a
+   * different, unrelated class, from com.google.api.MonitoredResource used in Stackdriver
+   * Monitoring. They both have the same type and label inputs though, which is helpful.
+   *
+   * <p>The MonitoredResource should be constant for all execution time for the application.
+   */
+  public com.google.cloud.MonitoredResource getLoggingMonitoredResource() {
+    final MonitoredResource monitoringMonitoredResource = getMonitoringMonitoredResource();
+    com.google.cloud.MonitoredResource.Builder builder =
+        com.google.cloud.MonitoredResource.newBuilder(monitoringMonitoredResource.getType());
+
+    MONITORED_RESOURCE_LABELS.forEach(
+        label -> addLabelAndValue(builder, monitoringMonitoredResource, label));
+    return builder.build();
+  }
+
+  private com.google.cloud.MonitoredResource.Builder addLabelAndValue(
+      com.google.cloud.MonitoredResource.Builder builder,
+      com.google.api.MonitoredResource otherResource,
+      String label) {
+    return builder.addLabel(label, otherResource.getLabelsOrThrow(label));
   }
 
   private String getProjectId() {
@@ -95,18 +124,31 @@ public class StackdriverStatsExporterService {
     try {
       return modulesService.getCurrentInstanceId();
     } catch (ModulesException e) {
-      logger.log(Level.INFO, "Failed to retrieve instance ID from ModulesService");
-      return makeRandomNodeId();
+      final String newNodeId = getSpoofedNodeId();
+      if (workbenchConfigProvider.get().server.shortName.equals("Local")) {
+        logger.log(Level.INFO, String.format("Spoofed nodeID for local process is %s.", newNodeId));
+      } else {
+        logger.warning(
+            String.format(
+                "Failed to retrieve instance ID from ModulesService. Using %s instead.",
+                newNodeId));
+      }
+      return getSpoofedNodeId();
     }
   }
 
-  private String makeRandomNodeId() {
-    return UUID.randomUUID().toString();
-  }
-
-  private String buildMetricNamePrefix() {
-    return String.format(
-        "%s/%s/", STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME, getEnvironmentShortName());
+  /**
+   * Stackdriver instances have very long, random ID strings. When running locally, however, the
+   * ModulesService throws an exception, so we need to assign non-conflicting and non-repeating ID
+   * strings.
+   *
+   * @return
+   */
+  private String getSpoofedNodeId() {
+    if (!spoofedNodeId.isPresent()) {
+      spoofedNodeId = Optional.of(UNKNOWN_INSTANCE_PREFIX + UUID.randomUUID().toString());
+    }
+    return spoofedNodeId.get();
   }
 
   @NotNull

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.firecloud;
 
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -141,5 +143,11 @@ public class FireCloudConfig {
         .getHttpClient()
         .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
     return apiClient;
+  }
+
+  @Bean
+  @Lazy
+  public IamCredentialsClient getIamCredentialsClient() throws IOException {
+    return IamCredentialsClient.create();
   }
 }

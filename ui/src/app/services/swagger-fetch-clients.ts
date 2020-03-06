@@ -35,11 +35,13 @@ import {
   DataSetApi,
   FeaturedWorkspacesConfigApi,
   FetchAPI, // internal
+  InstitutionApi,
   ProfileApi,
   StatusAlertApi,
   StatusApi,
   UserApi,
   UserMetricsApi,
+  WorkspaceAdminApi,
   WorkspacesApi,
 } from 'generated/fetch';
 
@@ -90,11 +92,13 @@ export const conceptsApi = bindCtor(ConceptsApi);
 export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const dataSetApi = bindCtor(DataSetApi);
 export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
+export const institutionApi = bindCtor(InstitutionApi);
 export const profileApi = bindCtor(ProfileApi);
 export const statusApi = bindCtor(StatusApi);
 export const statusAlertApi = bindCtor(StatusAlertApi);
 export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
+export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 
 /**

@@ -9,7 +9,7 @@
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "synth_r_2019q3_2"
+    "cdrDbName": "synth_r_2020q1_1"
   },
   {
     "cdrVersionId": 2,
@@ -56,7 +56,7 @@
     "bigqueryDataset": "R2019Q4R3",
     "creationTime": "2019-10-21 00:00:00Z",
     "releaseNumber": 3,
-    "numParticipants": 242299,
-    "cdrDbName": "r_2019q4_3"
+    "numParticipants": 224350,
+    "cdrDbName": "r_2020q1_2"
   }
 ]

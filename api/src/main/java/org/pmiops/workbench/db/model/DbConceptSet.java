@@ -37,6 +37,21 @@ public class DbConceptSet {
   private int participantCount;
   private Set<Long> conceptIds = new HashSet<>();
 
+  private DbConceptSet(Builder builder) {
+    setConceptSetId(builder.conceptSetId);
+    setVersion(builder.version);
+    setName(builder.name);
+    setDomain(builder.domain);
+    setSurvey(builder.survey);
+    setDescription(builder.description);
+    setWorkspaceId(builder.workspaceId);
+    setCreator(builder.creator);
+    setCreationTime(builder.creationTime);
+    setLastModifiedTime(builder.lastModifiedTime);
+    setParticipantCount(builder.participantCount);
+    setConceptIds(builder.conceptIds);
+  }
+
   public DbConceptSet() {
     setVersion(DbConceptSet.INITIAL_VERSION);
   }
@@ -96,11 +111,11 @@ public class DbConceptSet {
 
   @Transient
   public Domain getDomainEnum() {
-    return CommonStorageEnums.domainFromStorage(domain);
+    return DbStorageEnums.domainFromStorage(domain);
   }
 
   public void setDomainEnum(Domain domain) {
-    this.domain = CommonStorageEnums.domainToStorage(domain);
+    this.domain = DbStorageEnums.domainToStorage(domain);
   }
 
   @Column(name = "survey")
@@ -114,11 +129,11 @@ public class DbConceptSet {
 
   @Transient
   public Surveys getSurveysEnum() {
-    return CommonStorageEnums.surveysFromStorage(survey);
+    return DbStorageEnums.surveysFromStorage(survey);
   }
 
   public void setSurveysEnum(Surveys survey) {
-    this.survey = CommonStorageEnums.surveysToStorage(survey);
+    this.survey = DbStorageEnums.surveysToStorage(survey);
   }
 
   @Column(name = "description")
@@ -187,5 +202,90 @@ public class DbConceptSet {
 
   public void setConceptIds(Set<Long> conceptIds) {
     this.conceptIds = conceptIds;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    private long conceptSetId;
+    private int version;
+    private String name;
+    private short domain;
+    private Short survey;
+    private String description;
+    private long workspaceId;
+    private DbUser creator;
+    private Timestamp creationTime;
+    private Timestamp lastModifiedTime;
+    private int participantCount;
+    private Set<Long> conceptIds = new HashSet<>();
+
+    private Builder() {}
+
+    public DbConceptSet.Builder addConceptSetId(long conceptSetId) {
+      this.conceptSetId = conceptSetId;
+      return this;
+    }
+
+    public DbConceptSet.Builder addVersion(int version) {
+      this.version = version;
+      return this;
+    }
+
+    public DbConceptSet.Builder addName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public DbConceptSet.Builder addDomain(Short domain) {
+      this.domain = domain;
+      return this;
+    }
+
+    public DbConceptSet.Builder addSurvey(Short survey) {
+      this.survey = survey;
+      return this;
+    }
+
+    public DbConceptSet.Builder addDescription(String description) {
+      this.description = description;
+      return this;
+    }
+
+    public DbConceptSet.Builder addWorkspaceId(long workspaceId) {
+      this.workspaceId = workspaceId;
+      return this;
+    }
+
+    public DbConceptSet.Builder addCreator(DbUser creator) {
+      this.creator = creator;
+      return this;
+    }
+
+    public DbConceptSet.Builder addCreationTime(Timestamp creationTime) {
+      this.creationTime = creationTime;
+      return this;
+    }
+
+    public DbConceptSet.Builder addLastModifiedTime(Timestamp lastModifiedTime) {
+      this.lastModifiedTime = lastModifiedTime;
+      return this;
+    }
+
+    public DbConceptSet.Builder addParticipantCount(int participantCount) {
+      this.participantCount = participantCount;
+      return this;
+    }
+
+    public DbConceptSet.Builder addConceptIds(Set<Long> conceptIds) {
+      this.conceptIds = conceptIds;
+      return this;
+    }
+
+    public DbConceptSet build() {
+      return new DbConceptSet(this);
+    }
   }
 }

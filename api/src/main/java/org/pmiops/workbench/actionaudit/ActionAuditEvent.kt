@@ -1,11 +1,9 @@
 package org.pmiops.workbench.actionaudit
 
-import java.lang.IllegalArgumentException
-
 data class ActionAuditEvent constructor(
     val timestamp: Long,
     val agentType: AgentType,
-    val agentId: Long,
+    val agentIdMaybe: Long?,
     val agentEmailMaybe: String?,
     val actionId: String,
     val actionType: ActionType,
@@ -22,7 +20,7 @@ data class ActionAuditEvent constructor(
     data class Builder internal constructor(
         var timestamp: Long? = null,
         var agentType: AgentType? = null,
-        var agentId: Long? = null,
+        var agentIdMaybe: Long? = null,
         var agentEmailMaybe: String? = null,
         var actionId: String? = null,
         var actionType: ActionType? = null,
@@ -34,7 +32,7 @@ data class ActionAuditEvent constructor(
     ) {
         fun timestamp(timestamp: Long) = apply { this.timestamp = timestamp }
         fun agentType(agentType: AgentType) = apply { this.agentType = agentType }
-        fun agentId(agentId: Long) = apply { this.agentId = agentId }
+        fun agentIdMaybe(agentIdMaybe: Long?) = apply { this.agentIdMaybe = agentIdMaybe }
         fun agentEmailMaybe(agentEmailMaybe: String?) = apply { this.agentEmailMaybe = agentEmailMaybe }
         fun actionId(actionId: String) = apply { this.actionId = actionId }
         fun actionType(actionType: ActionType) = apply { this.actionType = actionType }
@@ -46,11 +44,10 @@ data class ActionAuditEvent constructor(
 
         private fun verifyRequiredFields() {
             if (timestamp == null ||
-                agentType == null ||
-                agentId == null ||
-                actionId == null ||
-                actionType == null ||
-                targetType == null) {
+                    agentType == null ||
+                    actionId == null ||
+                    actionType == null ||
+                    targetType == null) {
                 throw IllegalArgumentException("Missing required arguments.")
             }
         }
@@ -60,7 +57,7 @@ data class ActionAuditEvent constructor(
             return ActionAuditEvent(
                     timestamp = this.timestamp!!,
                     agentType = agentType!!,
-                    agentId = agentId!!,
+                    agentIdMaybe = agentIdMaybe,
                     agentEmailMaybe = agentEmailMaybe,
                     actionId = actionId!!,
                     actionType = actionType!!,
@@ -71,6 +68,7 @@ data class ActionAuditEvent constructor(
                     newValueMaybe = newValueMaybe)
         }
     }
+
     companion object {
         @JvmStatic
         fun builder(): Builder {

@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -26,7 +28,13 @@ public interface WorkspaceService {
 
   DbWorkspace get(String ns, String firecloudName);
 
+  // Returns the requested workspace looked up by workspace namespace (aka billing project name).
+  // Only active workspaces are searched. Returns null if no active workspace is found.
+  Optional<DbWorkspace> getByNamespace(String workspaceNamespace);
+
   List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
+
+  WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException;
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
 
@@ -39,6 +47,27 @@ public interface WorkspaceService {
   DbWorkspace getRequiredWithCohorts(String ns, String firecloudName);
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
+
+  void deleteWorkspace(DbWorkspace dbWorkspace);
+
+  /*
+   * This function will call the Google Cloud Billing API to set the given billing
+   * account name to the given workspace. It will also update the billingAccountName
+   * field on the workspace model.
+   */
+  void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
+
+  /*
+   * This function will check the workspace's billing status and throw a ForbiddenException
+   * if it is inactive.
+   *
+   * There is no hard and fast rule on what operations should require active billing but
+   * the general idea is that we should prevent operations that can either incur a non trivial
+   * amount of Google Cloud computation costs (starting a notebook cluster) or increase the
+   * monthly cost of the workspace (ex. creating GCS objects).
+   */
+  void validateActiveBilling(String workspaceNamespace, String workspaceId)
+      throws ForbiddenException;
 
   List<DbWorkspace> findForReview();
 
@@ -62,8 +91,7 @@ public interface WorkspaceService {
   Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName);
 
-  List<UserRole> convertWorkspaceAclsToUserRoles(
-      Map<String, FirecloudWorkspaceAccessEntry> rolesMap);
+  List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
 
   FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate);

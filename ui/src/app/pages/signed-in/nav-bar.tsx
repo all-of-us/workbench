@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {Breadcrumb} from 'app/components/breadcrumb';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
@@ -48,7 +49,7 @@ const styles = reactStyles({
   displayTag: {
     marginLeft: '1rem',
     height: '12px',
-    width: '126px',
+    width: '155px',
     borderRadius: '2px',
     backgroundColor: colors.primary,
     color: colors.white,
@@ -62,6 +63,7 @@ const styles = reactStyles({
 export interface Props {
   profile: Profile;
   bannerAdminActive: boolean;
+  workspaceAdminActive: boolean;
   headerImg: string;
   displayTag: string;
   shouldShowDisplayTag: boolean;
@@ -166,6 +168,10 @@ export const NavBar = withUserProfile()(
       }
     }
 
+    navigateToLink(link) {
+      window.open(link, '_blank');
+    }
+
     handleStatusAlertBannerUnmount() {
       if (cookiesEnabled()) {
         localStorage.setItem(cookieKey, `${this.state.statusAlertDetails.statusAlertId}`);
@@ -212,10 +218,15 @@ export const NavBar = withUserProfile()(
         <Breadcrumb/>
         {
           this.state.statusAlertVisible && <StatusAlertBanner
-              statusAlertId={this.state.statusAlertDetails.statusAlertId}
               title={this.state.statusAlertDetails.title}
               message={this.state.statusAlertDetails.message}
-              link={this.state.statusAlertDetails.link}
+              footer={
+                  this.state.statusAlertDetails.link &&
+                  <Button data-test-id='status-banner-read-more-button'
+                          onClick={() => this.navigateToLink(this.state.statusAlertDetails.link)}>
+                    READ MORE
+                  </Button>
+              }
               onClose={this.handleStatusAlertBannerUnmount}
           />
         }
@@ -231,6 +242,7 @@ export const NavBar = withUserProfile()(
             onToggleSideNav={this.onToggleSideNav}
             profileActive={this.props.profileActive}
             userAdminActive={this.props.userAdminActive}
+            workspaceAdminActive={this.props.workspaceAdminActive}
             workspacesActive={this.props.workspacesActive}
           />
         }
@@ -249,6 +261,7 @@ export class NavBarComponent extends ReactWrapperBase {
   @Input('displayTag') displayTag: Props['displayTag'];
   @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
   @Input('bannerAdminActive') bannerAdminActive: Props['bannerAdminActive'];
+  @Input('workspaceAdminActive') workspaceAdminActive: Props['workspaceAdminActive'];
   @Input('homeActive') homeActive: Props['homeActive'];
   @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
   @Input('libraryActive') libraryActive: Props['libraryActive'];
@@ -261,6 +274,7 @@ export class NavBarComponent extends ReactWrapperBase {
       'displayTag',
       'shouldShowDisplayTag',
       'bannerAdminActive',
+      'workspaceAdminActive',
       'homeActive',
       'workspacesActive',
       'libraryActive',

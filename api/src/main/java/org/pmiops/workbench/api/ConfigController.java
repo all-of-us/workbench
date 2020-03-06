@@ -28,7 +28,12 @@ public class ConfigController implements ConfigApiDelegate {
             .enableComplianceTraining(config.access.enableComplianceTraining)
             .enableDataUseAgreement(config.access.enableDataUseAgreement)
             .enableEraCommons(config.access.enableEraCommons)
+            .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
+            .enableBillingLockout(config.featureFlags.enableBillingLockout)
             .firecloudURL(config.firecloud.baseUrl)
-            .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass));
+            .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
+            .requireInvitationKey(config.access.requireInvitationKey)
+            .requireInstitutionalVerification(config.featureFlags.requireInstitutionalVerification)
+            .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions));
   }
 }

@@ -1,11 +1,15 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
@@ -16,17 +20,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -35,10 +43,16 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.moodle.model.BadgeDetails;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
+import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
@@ -58,22 +72,27 @@ import org.springframework.transaction.annotation.Transactional;
  * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
  */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<DbUser> userProvider;
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
+  private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final Clock clock;
   private final Random random;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final UserServiceAuditor userServiceAuditAdapter;
+  private final UserServiceAuditor userServiceAuditor;
+  private final InstitutionService institutionService;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
@@ -81,6 +100,7 @@ public class UserServiceImpl implements UserService {
       Provider<DbUser> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
+      UserTermsOfServiceDao userTermsOfServiceDao,
       UserDataUseAgreementDao userDataUseAgreementDao,
       Clock clock,
       Random random,
@@ -88,10 +108,13 @@ public class UserServiceImpl implements UserService {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditAdapter) {
+      UserServiceAuditor userServiceAuditor,
+      InstitutionService institutionService,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
+    this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.clock = clock;
     this.random = random;
@@ -99,7 +122,9 @@ public class UserServiceImpl implements UserService {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.userServiceAuditAdapter = userServiceAuditAdapter;
+    this.userServiceAuditor = userServiceAuditor;
+    this.institutionService = institutionService;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
   /**
@@ -110,7 +135,7 @@ public class UserServiceImpl implements UserService {
    */
   private DbUser updateUserWithRetries(Function<DbUser, DbUser> modifyUser) {
     DbUser user = userProvider.get();
-    return updateUserWithRetries(modifyUser, user);
+    return updateUserWithRetries(modifyUser, user, Agent.asUser(user));
   }
 
   /**
@@ -120,12 +145,15 @@ public class UserServiceImpl implements UserService {
    * user; handles conflicts with concurrent updates by retrying.
    */
   @Override
-  public DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser) {
+  public DbUser updateUserWithRetries(
+      Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent) {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
     while (true) {
       dbUser = userModifier.apply(dbUser);
-      updateDataAccessLevel(dbUser);
+      updateDataAccessLevel(dbUser, agent);
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      dbUser.setLastModifiedTime(now);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -160,7 +188,7 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  private void updateDataAccessLevel(DbUser dbUser) {
+  private void updateDataAccessLevel(DbUser dbUser, Agent agent) {
     final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
     final DataAccessLevel newDataAccessLevel;
     if (shouldUserBeRegistered(dbUser)) {
@@ -178,8 +206,8 @@ public class UserServiceImpl implements UserService {
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-      userServiceAuditAdapter.fireUpdateDataAccessAction(
-          dbUser, newDataAccessLevel, previousDataAccessLevel);
+      userServiceAuditor.fireUpdateDataAccessAction(
+          dbUser, newDataAccessLevel, previousDataAccessLevel, agent);
     }
   }
 
@@ -274,22 +302,17 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public DbUser createUser(
-      String givenName,
-      String familyName,
-      String userName,
-      String contactEmail,
-      String currentPosition,
-      String organization,
-      String areaOfResearch) {
+  public DbUser createUser(final Userinfoplus oAuth2Userinfo) {
     return createUser(
-        givenName,
-        familyName,
-        userName,
-        contactEmail,
-        currentPosition,
-        organization,
-        areaOfResearch,
+        oAuth2Userinfo.getGivenName(),
+        oAuth2Userinfo.getFamilyName(),
+        oAuth2Userinfo.getEmail(),
+        oAuth2Userinfo.getEmail(),
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -305,10 +328,12 @@ public class UserServiceImpl implements UserService {
       String currentPosition,
       String organization,
       String areaOfResearch,
+      String professionalUrl,
       List<Degree> degrees,
-      DbAddress address,
-      DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations) {
+      DbAddress dbAddress,
+      DbDemographicSurvey dbDemographicSurvey,
+      List<DbInstitutionalAffiliation> dbAffiliations,
+      DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -319,31 +344,60 @@ public class UserServiceImpl implements UserService {
     dbUser.setAreaOfResearch(areaOfResearch);
     dbUser.setFamilyName(familyName);
     dbUser.setGivenName(givenName);
+    dbUser.setProfessionalUrl(professionalUrl);
     dbUser.setDisabled(false);
     dbUser.setAboutYou(null);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    dbUser.setAddress(address);
+    dbUser.setAddress(dbAddress);
     if (degrees != null) {
       dbUser.setDegreesEnum(degrees);
     }
-    dbUser.setDemographicSurvey(demographicSurvey);
+    dbUser.setDemographicSurvey(dbDemographicSurvey);
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    dbUser.setCreationTime(now);
+    dbUser.setLastModifiedTime(now);
+
     // For existing user that do not have address
-    if (address != null) {
-      address.setUser(dbUser);
+    if (dbAddress != null) {
+      dbAddress.setUser(dbUser);
     }
-    if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
-    if (institutionalAffiliations != null) {
+    if (dbDemographicSurvey != null) dbDemographicSurvey.setUser(dbUser);
+    // set via the older Institutional Affiliation flow, from the Demographic Survey
+    if (dbAffiliations != null) {
       // We need an "effectively final" variable to be captured in the lambda
       // to pass to forEach.
       final DbUser finalDbUserReference = dbUser;
-      institutionalAffiliations.forEach(
+      dbAffiliations.forEach(
           affiliation -> {
             affiliation.setUser(finalDbUserReference);
             finalDbUserReference.addInstitutionalAffiliation(affiliation);
           });
     }
+    // set via the newer Verified Institutional Affiliation flow
+    boolean requireInstitutionalVerification =
+        configProvider.get().featureFlags.requireInstitutionalVerification;
+    if (requireInstitutionalVerification
+        && !institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
+      final String msg =
+          Optional.ofNullable(dbVerifiedAffiliation)
+              .map(
+                  affiliation ->
+                      String.format(
+                          "Cannot create user %s: contact email %s is not a valid member of institution '%s'",
+                          userName, contactEmail, affiliation.getInstitution().getShortName()))
+              .orElse(
+                  String.format(
+                      "Cannot create user %s: contact email %s does not have a valid institutional affiliation",
+                      userName, contactEmail));
+      throw new BadRequestException(msg);
+    }
+
     try {
       dbUser = userDao.save(dbUser);
+      if (requireInstitutionalVerification) {
+        dbVerifiedAffiliation.setUser(dbUser);
+        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
+      }
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(userName);
       if (dbUser == null) {
@@ -371,10 +425,15 @@ public class UserServiceImpl implements UserService {
     dataUseAgreement.setUserInitials(initials);
     dataUseAgreement.setCompletionTime(timestamp);
     userDataUseAgreementDao.save(dataUseAgreement);
-    // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
-    dbUser.setDataUseAgreementCompletionTime(timestamp);
-    dbUser.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    return userDao.save(dbUser);
+    return updateUserWithRetries(
+        (user) -> {
+          // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
+          user.setDataUseAgreementCompletionTime(timestamp);
+          user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+          return user;
+        },
+        dbUser,
+        Agent.asUser(dbUser));
   }
 
   @Override
@@ -389,6 +448,21 @@ public class UserServiceImpl implements UserService {
                 !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
     userDataUseAgreementDao.save(dataUseAgreements);
+  }
+
+  @Override
+  @Transactional
+  public void submitTermsOfService(DbUser dbUser, Integer tosVersion) {
+    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
+      throw new BadRequestException("Terms of Service version is not up to date");
+    }
+
+    DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
+    userTermsOfService.setTosVersion(tosVersion);
+    userTermsOfService.setUserId(dbUser.getUserId());
+    userTermsOfServiceDao.save(userTermsOfService);
+
+    userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
   }
 
   @Override
@@ -463,8 +537,9 @@ public class UserServiceImpl implements UserService {
           setter.accept(u, bypassTime);
           return u;
         },
-        dbUser);
-    userServiceAuditAdapter.fireAdministrativeBypassTime(
+        dbUser,
+        Agent.asAdmin(userProvider.get()));
+    userServiceAuditor.fireAdministrativeBypassTime(
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
@@ -487,7 +562,8 @@ public class UserServiceImpl implements UserService {
           u.setDisabled(disabled);
           return u;
         },
-        user);
+        user,
+        Agent.asAdmin(userProvider.get()));
   }
 
   @Override
@@ -529,16 +605,18 @@ public class UserServiceImpl implements UserService {
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
     List<Short> dataAccessLevels =
         Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-            .map(CommonStorageEnums::dataAccessLevelToStorage)
+            .map(DbStorageEnums::dataAccessLevelToStorage)
             .collect(Collectors.toList());
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
   }
 
   /** Syncs the current user's training status from Moodle. */
   @Override
-  public DbUser syncComplianceTrainingStatus()
+  @Deprecated
+  public DbUser syncComplianceTrainingStatusV1()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    return syncComplianceTrainingStatus(userProvider.get());
+    DbUser user = userProvider.get();
+    return syncComplianceTrainingStatusV1(user, Agent.asUser(user));
   }
 
   /**
@@ -554,7 +632,8 @@ public class UserServiceImpl implements UserService {
    * as null
    */
   @Override
-  public DbUser syncComplianceTrainingStatus(DbUser dbUser)
+  @Deprecated
+  public DbUser syncComplianceTrainingStatusV1(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     if (isServiceAccount(dbUser)) {
       // Skip sync for service account user rows.
@@ -573,10 +652,10 @@ public class UserServiceImpl implements UserService {
         dbUser.setMoodleId(moodleId);
       }
 
-      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
+      List<BadgeDetailsV1> badgeResponse = complianceService.getUserBadgeV1(moodleId);
       // The assumption here is that the User will always get 1 badge which will be AoU
       if (badgeResponse != null && badgeResponse.size() > 0) {
-        BadgeDetails badge = badgeResponse.get(0);
+        BadgeDetailsV1 badge = badgeResponse.get(0);
         Timestamp badgeExpiration =
             badge.getDateexpire() == null
                 ? null
@@ -608,7 +687,8 @@ public class UserServiceImpl implements UserService {
             u.setComplianceTrainingCompletionTime(u.getComplianceTrainingCompletionTime());
             return u;
           },
-          dbUser);
+          dbUser,
+          agent);
 
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
@@ -625,12 +705,99 @@ public class UserServiceImpl implements UserService {
     }
   }
 
+  /** Syncs the current user's training status from Moodle. */
+  public DbUser syncComplianceTrainingStatusV2()
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    DbUser user = userProvider.get();
+    return syncComplianceTrainingStatusV2(user, Agent.asUser(user));
+  }
+
+  /**
+   * Updates the given user's training status from Moodle.
+   *
+   * <p>We can fetch Moodle data for arbitrary users since we use an API key to access Moodle,
+   * rather than user-specific OAuth tokens.
+   *
+   * <p>Using the user's email, we can get their badges from Moodle's APIs. If the badges are marked
+   * valid, we store their completion/expiration dates in the database. If they are marked invalid,
+   * we clear the completion/expiration dates from the database as the user will need to complete a
+   * new training.
+   */
+  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    // Skip sync for service account user rows.
+    if (isServiceAccount(dbUser)) {
+      return dbUser;
+    }
+
+    try {
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      final Timestamp newComplianceTrainingCompletionTime;
+      final Timestamp newComplianceTrainingExpirationTime;
+      Map<String, BadgeDetailsV2> userBadgesByName =
+          complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
+      if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
+        BadgeDetailsV2 complianceBadge =
+            userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
+        if (complianceBadge.getValid()) {
+          if (dbUser.getComplianceTrainingCompletionTime() == null) {
+            // The badge was previously invalid and is now valid.
+            newComplianceTrainingCompletionTime = now;
+          } else if (!dbUser
+              .getComplianceTrainingExpirationTime()
+              .equals(Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire())))) {
+            // The badge was previously valid, but has a new expiration date (and so is a new
+            // training)
+            newComplianceTrainingCompletionTime = now;
+          } else {
+            // The badge status has not changed since the last time the status was synced.
+            newComplianceTrainingCompletionTime = dbUser.getComplianceTrainingCompletionTime();
+          }
+          // Always update the expiration time if the training badge is valid
+          newComplianceTrainingExpirationTime =
+              Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire()));
+        } else {
+          // The current badge is invalid or expired, the training must be completed or retaken.
+          newComplianceTrainingCompletionTime = null;
+          newComplianceTrainingExpirationTime = null;
+        }
+      } else {
+        // There is no record of this person having taken the training.
+        newComplianceTrainingCompletionTime = null;
+        newComplianceTrainingExpirationTime = null;
+      }
+
+      return updateUserWithRetries(
+          u -> {
+            u.setComplianceTrainingCompletionTime(newComplianceTrainingCompletionTime);
+            u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
+            return u;
+          },
+          dbUser,
+          agent);
+    } catch (NumberFormatException e) {
+      log.severe("Incorrect date expire format from Moodle");
+      throw e;
+    } catch (org.pmiops.workbench.moodle.ApiException ex) {
+      if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
+        log.severe(
+            String.format(
+                "Error while querying Moodle for badges for %s: %s ",
+                dbUser.getUsername(), ex.getMessage()));
+        throw new NotFoundException(ex.getMessage());
+      } else {
+        log.severe(String.format("Error while syncing compliance training: %s", ex.getMessage()));
+      }
+      throw ex;
+    }
+  }
+
   /**
    * Updates the given user's eraCommons-related fields with the NihStatus object returned from FC.
    *
    * <p>This method saves the updated user object to the database and returns it.
    */
-  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus) {
+  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus, Agent agent) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     return updateUserWithRetries(
@@ -672,7 +839,8 @@ public class UserServiceImpl implements UserService {
           }
           return user;
         },
-        targetUser);
+        targetUser,
+        agent);
   }
 
   /** Syncs the eraCommons access module status for the current user. */
@@ -680,7 +848,7 @@ public class UserServiceImpl implements UserService {
   public DbUser syncEraCommonsStatus() {
     DbUser user = userProvider.get();
     FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
-    return setEraCommonsStatus(user, nihStatus);
+    return setEraCommonsStatus(user, nihStatus, Agent.asUser(user));
   }
 
   /**
@@ -692,7 +860,7 @@ public class UserServiceImpl implements UserService {
    * <p>Returns the updated User object.
    */
   @Override
-  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user)
+  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
       throws IOException, org.pmiops.workbench.firecloud.ApiException {
     if (isServiceAccount(user)) {
       // Skip sync for service account user rows.
@@ -703,7 +871,7 @@ public class UserServiceImpl implements UserService {
     NihApi api = new NihApi(apiClient);
     try {
       FirecloudNihStatus nihStatus = api.nihStatus();
-      return setEraCommonsStatus(user, nihStatus);
+      return setEraCommonsStatus(user, nihStatus, agent);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
         // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
@@ -718,12 +886,13 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void syncTwoFactorAuthStatus() {
-    syncTwoFactorAuthStatus(userProvider.get());
+    DbUser user = userProvider.get();
+    syncTwoFactorAuthStatus(user, Agent.asUser(user));
   }
 
   /** */
   @Override
-  public DbUser syncTwoFactorAuthStatus(DbUser targetUser) {
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
       return targetUser;
@@ -742,6 +911,26 @@ public class UserServiceImpl implements UserService {
           }
           return user;
         },
-        targetUser);
+        targetUser,
+        agent);
+  }
+
+  @Override
+  public Collection<MeasurementBundle> getGaugeData() {
+
+    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    return rows.stream()
+        .map(
+            row ->
+                MeasurementBundle.builder()
+                    .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
+                    .addTag(
+                        MetricLabel.DATA_ACCESS_LEVEL,
+                        DbStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                            .toString())
+                    .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
+                    .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())
+                    .build())
+        .collect(ImmutableList.toImmutableList());
   }
 }

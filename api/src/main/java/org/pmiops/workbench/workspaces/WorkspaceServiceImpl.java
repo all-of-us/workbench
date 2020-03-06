@@ -1,14 +1,27 @@
 package org.pmiops.workbench.workspaces;
 
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
+
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -16,17 +29,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusAndDataAccessLevelToCountResult;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -46,14 +64,17 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,21 +93,27 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
-  // Note: Cannot use an @Autowired constructor with this version of Spring
-  // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
-  private CohortCloningService cohortCloningService;
-  private ConceptSetService conceptSetService;
-  private DataSetService dataSetService;
-  private UserDao userDao;
-  private Provider<DbUser> userProvider;
-  private UserRecentWorkspaceDao userRecentWorkspaceDao;
-  private WorkspaceDao workspaceDao;
+  private final Provider<Cloudbilling> endUserCloudbillingProvider;
+  private final Provider<Cloudbilling> serviceAccountCloudbillingProvider;
+  private final CohortCloningService cohortCloningService;
+  private final ConceptSetService conceptSetService;
+  private final DataSetService dataSetService;
+  private final UserDao userDao;
+  private final Provider<DbUser> userProvider;
+  private final UserRecentWorkspaceDao userRecentWorkspaceDao;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final WorkspaceDao workspaceDao;
+  private final ManualWorkspaceMapper manualWorkspaceMapper;
+  private final FreeTierBillingService freeTierBillingService;
 
   private FireCloudService fireCloudService;
   private Clock clock;
 
   @Autowired
   public WorkspaceServiceImpl(
+      @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> endUserCloudbillingProvider,
+      @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
+          Provider<Cloudbilling> serviceAccountCloudbillingProvider,
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
@@ -95,7 +122,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserDao userDao,
       Provider<DbUser> userProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      WorkspaceDao workspaceDao) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceDao workspaceDao,
+      ManualWorkspaceMapper manualWorkspaceMapper,
+      FreeTierBillingService freeTierBillingService) {
+    this.endUserCloudbillingProvider = endUserCloudbillingProvider;
+    this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
@@ -104,7 +136,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
+    this.manualWorkspaceMapper = manualWorkspaceMapper;
+    this.freeTierBillingService = freeTierBillingService;
   }
 
   /**
@@ -160,9 +195,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setWorkspace(manualWorkspaceMapper.toApiWorkspace(dbWorkspace));
               currentWorkspace.setAccessLevel(
-                  WorkspaceConversionUtils.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+                  ManualWorkspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
         .collect(Collectors.toList());
@@ -170,16 +205,30 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Transactional
   @Override
+  public WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException {
+    DbWorkspace dbWorkspace =
+        getByNamespace(workspaceNamespace)
+            .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
+    return getWorkspaceImpl(dbWorkspace);
+  }
+
+  @Transactional
+  @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+    return getWorkspaceImpl(dbWorkspace);
+  }
 
+  private WorkspaceResponse getWorkspaceImpl(DbWorkspace dbWorkspace) {
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspace fcWorkspace;
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.
-    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    fcResponse =
+        fireCloudService.getWorkspace(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     fcWorkspace = fcResponse.getWorkspace();
 
     if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
@@ -191,8 +240,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    workspaceResponse.setWorkspace(
-        WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
   }
@@ -230,6 +278,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
+  public Optional<DbWorkspace> getByNamespace(String ns) {
+    return workspaceDao.findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
+        ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
+
+  @Override
   @Transactional
   public DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
     DbWorkspace workspace =
@@ -241,6 +295,35 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;
+  }
+
+  @Override
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {
+    // This deletes all Firecloud and google resources, however saves all references
+    // to the workspace and its resources in the Workbench database.
+    // This is for auditing purposes and potentially workspace restore.
+    // TODO: do we want to delete workspace resource references and save only metadata?
+
+    // This automatically handles access control to the workspace.
+    fireCloudService.deleteWorkspace(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    dbWorkspace = saveWithLastModified(dbWorkspace);
+    maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
+  }
+
+  @Override
+  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
+      throws ForbiddenException {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      return;
+    }
+
+    if (BillingStatus.INACTIVE.equals(
+        getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
+      throw new ForbiddenException(
+          "Workspace (" + workspaceNamespace + ") is in an inactive billing state");
+    }
   }
 
   @Override
@@ -375,13 +458,14 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             String.format(
                 "removing user '%s' from billing project '%s'",
                 email, workspace.getWorkspaceNamespace()));
-        fireCloudService.removeUserFromBillingProject(email, workspace.getWorkspaceNamespace());
+        fireCloudService.removeOwnerFromBillingProject(
+            email, workspace.getWorkspaceNamespace(), Optional.empty());
       } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
         log.info(
             String.format(
                 "adding user '%s' to billing project '%s'",
                 email, workspace.getWorkspaceNamespace()));
-        fireCloudService.addUserToBillingProject(email, workspace.getWorkspaceNamespace());
+        fireCloudService.addOwnerToBillingProject(email, workspace.getWorkspaceNamespace());
       }
     }
 
@@ -480,16 +564,18 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public List<UserRole> convertWorkspaceAclsToUserRoles(
-      Map<String, FirecloudWorkspaceAccessEntry> rolesMap) {
+  public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
+    Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
+        getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
+
     List<UserRole> userRoles = new ArrayList<>();
-    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : rolesMap.entrySet()) {
+    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
       // Filter out groups
       DbUser user = userDao.findUserByUsername(entry.getKey());
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(WorkspaceConversionUtils.toApiUserRole(user, entry.getValue()));
+        userRoles.add(manualWorkspaceMapper.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()
@@ -616,9 +702,105 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
   }
 
+  // this is necessary because the grant ownership call in create/clone
+  // may not have propagated. Adding a few retries drastically reduces
+  // the likely of failing due to slow propagation
+  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
+      RetryerBuilder.<ProjectBillingInfo>newBuilder()
+          .retryIfException(
+              e ->
+                  e instanceof GoogleJsonResponseException
+                      && ((GoogleJsonResponseException) e).getStatusCode() == 403)
+          .withWaitStrategy(WaitStrategies.exponentialWait())
+          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
+          .build();
+
   @Override
-  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
-    long totalWorkspaceCount = workspaceDao.count();
-    return ImmutableMap.of(MonitoringViews.WORKSPACE_TOTAL_COUNT, totalWorkspaceCount);
+  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout
+        || newBillingAccountName.equals(workspace.getBillingAccountName())) {
+      return;
+    }
+
+    Cloudbilling cloudbilling;
+    if (newBillingAccountName.equals(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
+      cloudbilling = serviceAccountCloudbillingProvider.get();
+    } else {
+      cloudbilling = endUserCloudbillingProvider.get();
+      try {
+        Optional<Boolean> isOpenMaybe =
+            Optional.ofNullable(
+                cloudbilling.billingAccounts().get(newBillingAccountName).execute().getOpen());
+        boolean isOpen = isOpenMaybe.orElse(false);
+        if (!isOpen) {
+          throw new BadRequestException(
+              "Provided billing account is closed. Please provide an open account.");
+        }
+      } catch (IOException e) {
+        throw new ServerErrorException("Could not fetch user provided billing account.", e);
+      }
+    }
+
+    UpdateBillingInfo request;
+    try {
+      request =
+          cloudbilling
+              .projects()
+              .updateBillingInfo(
+                  "projects/" + workspace.getWorkspaceNamespace(),
+                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
+    } catch (IOException e) {
+      throw new ServerErrorException("Could not create Google Cloud updateBillingInfo request", e);
+    }
+
+    ProjectBillingInfo response;
+    try {
+      response = cloudBillingRetryer.call(request::execute);
+    } catch (RetryException | ExecutionException e) {
+      throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
+    }
+
+    if (!newBillingAccountName.equals(response.getBillingAccountName())) {
+      throw new ServerErrorException(
+          "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
+    }
+
+    workspace.setBillingAccountName(response.getBillingAccountName());
+
+    if (newBillingAccountName.equals(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
+      workspace.setBillingStatus(
+          freeTierBillingService.userHasFreeTierCredits(workspace.getCreator())
+              ? BillingStatus.ACTIVE
+              : BillingStatus.INACTIVE);
+    } else {
+      // At this point, we can assume that a user provided billing account is open since we
+      // throw a BadRequestException if a closed one is provided
+      workspace.setBillingStatus(BillingStatus.ACTIVE);
+    }
+  }
+
+  @Override
+  public Collection<MeasurementBundle> getGaugeData() {
+
+    final List<ActiveStatusAndDataAccessLevelToCountResult> rows =
+        workspaceDao.getActiveStatusAndDataAccessLevelToCount();
+    return rows.stream()
+        .map(
+            row ->
+                MeasurementBundle.builder()
+                    .addTag(
+                        MetricLabel.WORKSPACE_ACTIVE_STATUS,
+                        DbStorageEnums.workspaceActiveStatusFromStorage(
+                                row.getWorkspaceActiveStatus())
+                            .toString())
+                    .addTag(
+                        MetricLabel.DATA_ACCESS_LEVEL,
+                        DbStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                            .toString())
+                    .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
+                    .build())
+        .collect(ImmutableList.toImmutableList());
   }
 }

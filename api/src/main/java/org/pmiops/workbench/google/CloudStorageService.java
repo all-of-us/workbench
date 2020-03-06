@@ -28,6 +28,8 @@ public interface CloudStorageService {
 
   void copyBlob(BlobId from, BlobId to);
 
+  String getCredentialsBucketString(String objectPath);
+
   JSONObject getJiraCredentials();
 
   JSONObject getElasticCredentials();
@@ -52,4 +54,6 @@ public interface CloudStorageService {
   void deleteBlob(BlobId blobId);
 
   String getMoodleApiKey();
+
+  String getCaptchaServerKey();
 }

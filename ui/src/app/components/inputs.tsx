@@ -57,7 +57,8 @@ export const styles = {
   iconArea: {
     display: 'inline-block',
     marginLeft: '-30px',
-    minWidth: '30px'
+    minWidth: '30px',
+    minHeight: '28px',
   }
 };
 

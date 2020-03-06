@@ -9,7 +9,7 @@
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "synth_r_2019q3_3",
+    "cdrDbName": "synth_r_2020q1_3",
     "elasticIndexBaseName": "synth_r_2019q1_1"
   },
   {
@@ -22,7 +22,7 @@
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "synth_r_2019q3_3",
+    "cdrDbName": "synth_r_2020q1_3",
     "elasticIndexBaseName": "synth_r_2019q1_1"
   },
   {
@@ -34,7 +34,7 @@
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "synth_r_2019q3_3",
+    "cdrDbName": "synth_r_2020q1_3",
     "elasticIndexBaseName": "synth_r_2019q1_1"
   },
   {
@@ -47,7 +47,7 @@
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "synth_r_2019q3_3",
+    "cdrDbName": "synth_r_2020q1_3",
     "elasticIndexBaseName": "synth_r_2019q1_1"
   }
 ]

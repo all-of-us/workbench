@@ -3,21 +3,19 @@ package org.pmiops.workbench.billing;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Sets;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import javax.mail.MessagingException;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -26,15 +24,17 @@ import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/** Methods relating to Free Tier credit usage and limits */
 @Service
 public class FreeTierBillingService {
 
   private final BigQueryService bigQueryService;
-  private final NotificationService notificationService;
+  private final MailService mailService;
 
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
@@ -42,24 +42,26 @@ public class FreeTierBillingService {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private final Clock clock;
+  private static final Logger logger = Logger.getLogger(FreeTierBillingService.class.getName());
 
   @Autowired
   public FreeTierBillingService(
       BigQueryService bigQueryService,
-      NotificationService notificationService,
+      MailService mailService,
       UserDao userDao,
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      Clock clock) {
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
-    this.notificationService = notificationService;
+    this.mailService = mailService;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.clock = clock;
+  }
+
+  public boolean userHasFreeTierCredits(DbUser user) {
+    return getUserFreeTierDollarLimit(user) > workspaceFreeTierUsageDao.totalCostByUser(user);
   }
 
   /**
@@ -90,39 +92,32 @@ public class FreeTierBillingService {
 
     final Set<DbUser> previouslyExpiredUsers = getExpiredUsersFromDb();
 
-    final Set<DbUser> costExpiredUsers =
+    final Set<DbUser> expiredUsers =
         userCosts.entrySet().stream()
             .filter(e -> expiredByCost(e.getKey(), e.getValue()))
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
-    final Set<DbUser> timeExpiredUsers =
-        userDao.findByFirstRegistrationCompletionTimeNotNull().stream()
-            .filter(this::expiredByTime)
-            .collect(Collectors.toSet());
-
-    final Set<DbUser> currentExpiredUsers = Sets.union(costExpiredUsers, timeExpiredUsers);
-
-    final Set<DbUser> newlyExpiredUsers =
-        Sets.difference(currentExpiredUsers, previouslyExpiredUsers);
+    final Set<DbUser> newlyExpiredUsers = Sets.difference(expiredUsers, previouslyExpiredUsers);
     for (final DbUser user : newlyExpiredUsers) {
-      notificationService.alertUserFreeTierExpiration(user);
+      try {
+        mailService.alertUserFreeTierExpiration(user);
+      } catch (final MessagingException e) {
+        logger.log(Level.WARNING, e.getMessage());
+      }
       deactivateUserWorkspaces(user);
     }
 
-    sendAlertsForCostThresholds(previousUserCosts, userCosts, currentExpiredUsers);
-    sendAlertsForTimeThresholds(userCosts, currentExpiredUsers);
+    final Set<DbUser> usersWithNonNullRegistration =
+        userDao.findByFirstRegistrationCompletionTimeNotNull();
+    final Set<DbUser> usersToThresholdCheck =
+        Sets.difference(usersWithNonNullRegistration, expiredUsers);
+
+    sendAlertsForCostThresholds(usersToThresholdCheck, previousUserCosts, userCosts);
   }
 
   private boolean expiredByCost(final DbUser user, final double currentCost) {
     return currentCost > getUserFreeTierDollarLimit(user);
-  }
-
-  private boolean expiredByTime(final DbUser user) {
-    final Instant userFreeCreditStartTime = user.getFirstRegistrationCompletionTime().toInstant();
-    final Instant userFreeCreditExpirationTime =
-        userFreeCreditStartTime.plus(Duration.ofDays(getUserFreeTierDaysLimit(user)));
-    return clock.instant().isAfter(userFreeCreditExpirationTime);
   }
 
   private void deactivateUserWorkspaces(final DbUser user) {
@@ -133,39 +128,20 @@ public class FreeTierBillingService {
   }
 
   private void sendAlertsForCostThresholds(
+      Set<DbUser> usersToCheck,
       Map<DbUser, Double> previousUserCosts,
-      Map<DbUser, Double> userCosts,
-      Set<DbUser> currentExpiredUsers) {
+      Map<DbUser, Double> userCosts) {
     final List<Double> costThresholdsInDescOrder =
         workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
     userCosts.forEach(
         (user, currentCost) -> {
-          if (!currentExpiredUsers.contains(user)) {
+          if (usersToCheck.contains(user)) {
             final double previousCost = previousUserCosts.getOrDefault(user, 0.0);
             maybeAlertOnCostThresholds(user, currentCost, previousCost, costThresholdsInDescOrder);
           }
         });
-  }
-
-  private void sendAlertsForTimeThresholds(
-      Map<DbUser, Double> userCosts, Set<DbUser> currentExpiredUsers) {
-    final List<Double> timeThresholdsInDescOrder =
-        workbenchConfigProvider.get().billing.freeTierTimeAlertThresholds;
-    timeThresholdsInDescOrder.sort(Comparator.reverseOrder());
-
-    for (final DbUser user : userDao.findByFirstRegistrationCompletionTimeNotNull()) {
-      if (!currentExpiredUsers.contains(user)) {
-        final double currentCost = userCosts.getOrDefault(user, 0.0);
-        final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
-        maybeAlertOnTimeThresholds(user, remainingDollarBalance, timeThresholdsInDescOrder);
-
-        // save current check time
-        user.setLastFreeTierCreditsTimeCheck(Timestamp.from(clock.instant()));
-        userDao.save(user);
-      }
-    }
   }
 
   /**
@@ -192,58 +168,12 @@ public class FreeTierBillingService {
       if (currentFraction > threshold) {
         // only alert if we have not done so previously
         if (previousFraction <= threshold) {
-          notificationService.alertUserFreeTierDollarThreshold(
-              user, threshold, currentCost, remainingBalance);
-        }
-
-        // break out here to ensure we don't alert for lower thresholds
-        break;
-      }
-    }
-  }
-
-  /**
-   * Has this user passed a time threshold between this check and the previous run?
-   *
-   * <p>Compare this user's free credits timespan with that of the previous run, and trigger an
-   * alert if this is the run which pushed it over a threshold.
-   *
-   * @param user The user to check
-   * @param remainingDollarBalance The remaining dollar balance to this user, for reporting purposes
-   * @param thresholdsInDescOrder the time alerting thresholds, in descending order
-   */
-  private void maybeAlertOnTimeThresholds(
-      DbUser user, double remainingDollarBalance, List<Double> thresholdsInDescOrder) {
-    final Instant userFreeCreditStartTime = user.getFirstRegistrationCompletionTime().toInstant();
-
-    final Instant previousCheckTime =
-        Optional.ofNullable(user.getLastFreeTierCreditsTimeCheck())
-            .map(Timestamp::toInstant)
-            .orElse(userFreeCreditStartTime);
-
-    final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(user));
-    final Duration currentTimeElapsed = Duration.between(userFreeCreditStartTime, clock.instant());
-    final Duration previousTimeElapsed =
-        Duration.between(userFreeCreditStartTime, previousCheckTime);
-
-    // can't use toDays() here because it truncates and we need sub-day resolution
-    final double currentFraction =
-        (double) currentTimeElapsed.toMillis() / userFreeCreditDays.toMillis();
-    final double previousFraction =
-        (double) previousTimeElapsed.toMillis() / userFreeCreditDays.toMillis();
-
-    final Instant userFreeCreditExpirationTime = userFreeCreditStartTime.plus(userFreeCreditDays);
-    final Duration timeRemaining = Duration.between(clock.instant(), userFreeCreditExpirationTime);
-
-    for (final double threshold : thresholdsInDescOrder) {
-      if (currentFraction > threshold) {
-        // only alert if we have not done so previously
-        if (previousFraction <= threshold) {
-          notificationService.alertUserFreeTierTimeThreshold(
-              user,
-              timeRemaining.toDays(),
-              userFreeCreditExpirationTime.atZone(ZoneId.systemDefault()).toLocalDate(),
-              remainingDollarBalance);
+          try {
+            mailService.alertUserFreeTierDollarThreshold(
+                user, threshold, currentCost, remainingBalance);
+          } catch (final MessagingException e) {
+            logger.log(Level.WARNING, e.getMessage());
+          }
         }
 
         // break out here to ensure we don't alert for lower thresholds
@@ -285,13 +215,25 @@ public class FreeTierBillingService {
     return workspaceCosts;
   }
 
-  // Retrieve the user's total free tier usage from the DB by summing across Workspaces.
-  // This is not live BigQuery data: it is only as recent as the last
-  // checkFreeTierBillingUsage cron job, recorded as last_update_time in the DB.
+  /**
+   * Retrieve the user's total free tier usage from the DB by summing across the Workspaces they
+   * have created. This is NOT live BigQuery data: it is only as recent as the last
+   * checkFreeTierBillingUsage cron job, recorded as last_update_time in the DB.
+   *
+   * @param user the user as represented in our database
+   * @return the total USD amount spent in workspaces created by this user, represented as a double
+   */
   public Double getUserCachedFreeTierUsage(DbUser user) {
     return workspaceFreeTierUsageDao.totalCostByUser(user);
   }
 
+  /**
+   * Retrieve the Free Tier dollar limit actually applicable to this user: this user's override if
+   * present, the environment's default if not
+   *
+   * @param user the user as represented in our database
+   * @return the US dollar amount, represented as a double
+   */
   public double getUserFreeTierDollarLimit(DbUser user) {
     final Double override = user.getFreeTierCreditsLimitDollarsOverride();
     if (override != null) {
@@ -299,14 +241,5 @@ public class FreeTierBillingService {
     }
 
     return workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit;
-  }
-
-  public short getUserFreeTierDaysLimit(DbUser user) {
-    final Short override = user.getFreeTierCreditsLimitDaysOverride();
-    if (override != null) {
-      return override;
-    }
-
-    return workbenchConfigProvider.get().billing.defaultFreeCreditsDaysLimit;
   }
 }

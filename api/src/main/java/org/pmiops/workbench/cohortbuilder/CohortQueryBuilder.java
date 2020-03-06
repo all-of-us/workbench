@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cohortbuilder.util.CriteriaLookupUtil;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
@@ -23,38 +24,31 @@ import org.springframework.stereotype.Service;
 @Service
 public class CohortQueryBuilder {
   private static final String REVIEW_TABLE = "cb_review_all_events";
-  private static final String COUNT_SQL_TEMPLATE =
-      "select count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.${table}` ${table}\n"
-          + "where\n";
-
   private static final String SEARCH_PERSON_TABLE = "cb_search_person";
   private static final String PERSON_TABLE = "person";
 
+  private static final String COUNT_SQL_TEMPLATE =
+      "select count(*) as count\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "where\n";
+
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
-      "select gender, \n"
-          + "race, \n"
-          + "case "
-          + getAgeRangeSql(18, 44)
-          + "\n"
-          + getAgeRangeSql(45, 64)
-          + "\n"
+      "select ${genderOrSex} as name,\n"
+          + "race,\n"
+          + "case ${ageRange1}\n"
+          + "${ageRange2}\n"
           + "else '> 65'\n"
           + "end as ageRange,\n"
           + "count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.${table}` ${table}\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
           + "where\n";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
-      "group by gender, race, ageRange\n" + "order by gender, race, ageRange\n";
+      "group by name, race, ageRange\n" + "order by name, race, ageRange\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n"
-          + "from `${projectId}.${dataSetId}."
-          + REVIEW_TABLE
-          + "` "
-          + REVIEW_TABLE
-          + "\n"
+          + "from `${projectId}.${dataSetId}.cb_review_all_events` cb_review_all_events\n"
           + "where\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
@@ -65,9 +59,9 @@ public class CohortQueryBuilder {
           + "limit ${limit}\n";
 
   private static final String RANDOM_SQL_TEMPLATE =
-      "select rand() as x, ${table}.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n"
-          + "from `${projectId}.${dataSetId}.${table}` ${table}\n"
-          + "left join `${projectId}.${dataSetId}.death` death on (${table}.person_id = death.person_id)\n"
+      "select rand() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n"
+          + "from `${projectId}.${dataSetId}.person` person\n"
+          + "left join `${projectId}.${dataSetId}.death` death on (person.person_id = death.person_id)\n"
           + "where\n";
 
   private static final String RANDOM_SQL_ORDER_BY = "order by x\nlimit";
@@ -75,7 +69,7 @@ public class CohortQueryBuilder {
   private static final String OFFSET_SUFFIX = " offset ";
 
   private static final String ID_SQL_TEMPLATE =
-      "select person_id\n" + "from `${projectId}.${dataSetId}.${table}` ${table}\n" + "where\n";
+      "select person_id\n from `${projectId}.${dataSetId}.person` person\n where\n";
 
   private static final String UNION_TEMPLATE = "union all\n";
 
@@ -103,10 +97,8 @@ public class CohortQueryBuilder {
   /** Provides counts of unique subjects defined by the provided {@link ParticipantCriteria}. */
   public QueryJobConfiguration buildParticipantCounterQuery(
       ParticipantCriteria participantCriteria) {
-    String sqlTemplate = COUNT_SQL_TEMPLATE.replace("${table}", SEARCH_PERSON_TABLE);
     Map<String, QueryParameterValue> params = new HashMap<>();
-    StringBuilder queryBuilder =
-        new StringBuilder(sqlTemplate.replace("${mainTable}", SEARCH_PERSON_TABLE));
+    StringBuilder queryBuilder = new StringBuilder(COUNT_SQL_TEMPLATE);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
@@ -121,12 +113,15 @@ public class CohortQueryBuilder {
    */
   public QueryJobConfiguration buildDemoChartInfoCounterQuery(
       ParticipantCriteria participantCriteria) {
-    String sqlTemplate = DEMO_CHART_INFO_SQL_TEMPLATE.replace("${table}", SEARCH_PERSON_TABLE);
     Map<String, QueryParameterValue> params = new HashMap<>();
-    StringBuilder queryBuilder =
-        new StringBuilder(sqlTemplate.replace("${mainTable}", SEARCH_PERSON_TABLE));
+    String sqlTemplate =
+        DEMO_CHART_INFO_SQL_TEMPLATE
+            .replace("${genderOrSex}", participantCriteria.getGenderOrSexType().toString())
+            .replace("${ageRange1}", getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
+            .replace("${ageRange2}", getAgeRangeSql(45, 64, participantCriteria.getAgeType()));
+    StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
-    queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY.replace("${mainTable}", SEARCH_PERSON_TABLE));
+    queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -145,11 +140,10 @@ public class CohortQueryBuilder {
             .replace("${limit}", Integer.toString(chartLimit))
             .replace("${tableId}", "standard_concept_id")
             .replace("${domain}", domainType.name());
-    StringBuilder queryBuilder =
-        new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE.replace("${mainTable}", REVIEW_TABLE));
+    StringBuilder queryBuilder = new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE);
     Map<String, QueryParameterValue> params = new HashMap<>();
     addWhereClause(participantCriteria, REVIEW_TABLE, queryBuilder, params);
-    queryBuilder.append(endSqlTemplate.replace("${mainTable}", REVIEW_TABLE));
+    queryBuilder.append(endSqlTemplate);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -163,10 +157,8 @@ public class CohortQueryBuilder {
     if (offset > 0) {
       endSql += OFFSET_SUFFIX + offset;
     }
-    String sqlTemplate = RANDOM_SQL_TEMPLATE.replace("${table}", PERSON_TABLE);
     Map<String, QueryParameterValue> params = new HashMap<>();
-    StringBuilder queryBuilder =
-        new StringBuilder(sqlTemplate.replace("${mainTable}", PERSON_TABLE));
+    StringBuilder queryBuilder = new StringBuilder(RANDOM_SQL_TEMPLATE);
     addWhereClause(participantCriteria, PERSON_TABLE, queryBuilder, params);
     queryBuilder.append(endSql.replace("${mainTable}", PERSON_TABLE));
 
@@ -180,10 +172,8 @@ public class CohortQueryBuilder {
   // preferred solution
   // https://docs.google.com/document/d/1-wzSCHDM_LSaBRARyLFbsTGcBaKi5giRs-eDmaMBr0Y/edit#
   public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria) {
-    String sqlTemplate = ID_SQL_TEMPLATE.replace("${table}", PERSON_TABLE);
     Map<String, QueryParameterValue> params = new HashMap<>();
-    StringBuilder queryBuilder =
-        new StringBuilder(sqlTemplate.replace("${mainTable}", PERSON_TABLE));
+    StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
     addWhereClause(participantCriteria, PERSON_TABLE, queryBuilder, params);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
@@ -274,21 +264,15 @@ public class CohortQueryBuilder {
    *
    * @param lo - lower bound of the age range
    * @param hi - upper bound of the age range
+   * @param ageType - age type enum
    * @return
    */
-  private static String getAgeRangeSql(int lo, int hi) {
-    return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE("
-        + SEARCH_PERSON_TABLE
-        + ".dob), MONTH)/12) as INT64) >= "
-        + lo
-        + " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE("
-        + SEARCH_PERSON_TABLE
-        + ".dob), MONTH)/12) as INT64) <= "
-        + hi
-        + " then '"
-        + lo
-        + "-"
-        + hi
-        + "'";
+  private static String getAgeRangeSql(int lo, int hi, AgeType ageType) {
+    String ageSql =
+        AgeType.AGE.equals(ageType)
+            ? "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, cb_search_person.dob, MONTH)/12) as INT64)"
+            : ageType.toString();
+    return "when " + ageSql + " >= " + lo + " and " + ageSql + " <= " + hi + " then '" + lo + "-"
+        + hi + "'";
   }
 }

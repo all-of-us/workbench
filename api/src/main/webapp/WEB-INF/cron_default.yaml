@@ -54,3 +54,8 @@ cron:
   schedule: every 1 minutes
   timezone: UTC
   target: api
+- description: 'Export user and workspace data to RDR'
+  url: /v1/cron/exportToRdr
+  schedule: every 24 hours
+  timezone: UTC
+  target: api

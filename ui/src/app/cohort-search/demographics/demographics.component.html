@@ -13,10 +13,17 @@
           class="number-display"
           (blur)="checkMin()">
         <div class="slider">
+          <div *ngIf="enableCBAgeTypeOptions" id="count-wrapper">
+            <span *ngIf="calculating" class="spinner spinner-inline"></span>
+            <span *ngIf="!calculating" id="age-count" class="badge badge-info">
+              {{ageCount | number}}
+            </span>
+          </div>
           <nouislider
             [min]="minAge" [max]="maxAge" [step]="1"
             [behaviour]="'drag'"
             [connect]="true"
+            (slide)="centerAgeCount()"
             [formControl]="demoForm.controls.ageRange">
           </nouislider>
         </div>
@@ -27,9 +34,18 @@
           class="number-display"
           (blur)="checkMax()">
       </div>
+      <div *ngIf="enableCBAgeTypeOptions" style="margin-left: 1rem" [class.disabled]="deceased.value">
+        <div *ngFor="let ageType of ageTypes; let i = index;" class="radio-inline">
+          <input type="radio" [id]="'age_' + i" [value]="ageType.type" formControlName="ageType">
+          <label [for]="'age_' + i">{{ageType.label}}</label>
+        </div>
+      </div>
 
       <clr-checkbox formControlName="deceased" [clrDisabled]="!ageNode || !deceasedNode">
         Is Deceased
+        <span *ngIf="enableCBAgeTypeOptions && deceasedNode" class="badge badge-info">
+          {{deceasedNode.count | number}}
+        </span>
       </clr-checkbox>
     </ng-container>
     <div *ngIf="loading" class="spinner" style="left: 45%"></div>

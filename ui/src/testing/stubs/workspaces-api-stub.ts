@@ -43,22 +43,27 @@ function buildWorkspaceStub(suffix): Workspace {
       anticipatedFindings: '',
       commercialPurpose: false,
       controlSet: false,
+      disseminateResearchFindingList: [],
       diseaseFocusedResearch: false,
       drugDevelopment: false,
       educational: false,
       intendedStudy: '',
+      scientificApproach: '',
       methodsDevelopment: false,
       otherPurpose: false,
       otherPurposeDetails: '',
       population: false,
       populationDetails: [],
       populationHealth: false,
+      researchOutcomeList: [],
+      ethics: false,
       reviewRequested: false,
       socialBehavioral: false,
       reasonForAllOfUs: '',
     },
     published: false,
-    dataAccessLevel: DataAccessLevel.Registered
+    dataAccessLevel: DataAccessLevel.Registered,
+    billingAccountName: 'billing-account'
   };
 }
 

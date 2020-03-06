@@ -1,0 +1,399 @@
+#This file provide the end points for interaction with RDR
+
+
+swagger: '2.0'
+
+info:
+  title: RDR
+  description: |
+    Service for RDR Interactions.
+  version: "0.1"
+#The host will get updated as per the environment it will be pmi-drc-api-test for dev and test
+host: "pmi-drc-api-test.appspot.com"
+schemes:
+  - "https"
+basePath: /
+
+securityDefinitions:
+  googleoauth:
+    type: oauth2
+    authorizationUrl: 'https://accounts.google.com/o/oauth2/auth'
+    flow: implicit
+    scopes:
+      openid: open id authorization
+      email: email authorization
+      profile: profile authorization
+
+security:
+  - googleoauth:
+    - openid
+    - email
+    - profile
+    - https://www.googleapis.com/auth/devstorage.full_control
+
+produces:
+  - application/json
+
+##########################################################################################
+## PATHS
+##########################################################################################
+
+paths:
+  /rdr/v1/workbench/directory/workspaces:
+    post:
+      description: Submits one or more workspace snapshots for storage in the RDR.
+      tags:
+        - Rdr
+      consumes:
+        - application/json
+      operationId: exportWorkspaces
+      parameters:
+        - in: body
+          required: true
+          name: workspaces
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/RdrWorkspace"
+      responses:
+        200:
+          description: successful operation
+
+  /rdr/v1/workbench/directory/researchers:
+    post:
+      description: Submits one or more researcher snapshots for storage in the RDR.
+      tags:
+        - Rdr
+      operationId: exportResearchers
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          required: true
+          name: researchers
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/RdrResearcher"
+      responses:
+        200:
+          description: successful operation
+
+
+
+definitions:
+  RdrWorkspace:
+    type: object
+    properties:
+      workspaceId:
+        type: integer
+      name:
+        type: string
+      creationTime:
+        type: string
+        format: date-time
+      modifiedTime:
+        type: string
+        format: date-time
+      status:
+        type: string
+        description: Workspace Status
+        enum:
+          - ACTIVE
+          - INACTIVE
+      workspaceUsers:
+        type: array
+        items:
+          $ref: '#/definitions/RdrWorkspaceUser'
+      excludeFromPublicDirectory:
+        type: boolean
+      diseaseFocusedResearch:
+        type: boolean
+      diseaseFocusedResearchName:
+        type: string
+      methodsDevelopment:
+        type: boolean
+      controlSet:
+        type: boolean
+      ancestry:
+        type: boolean
+      socialBehavioral:
+        type: boolean
+      populationHealth:
+        type: boolean
+      drugDevelopment:
+        type: boolean
+      commercialPurpose:
+        type: boolean
+      educational:
+        type: boolean
+      ethicalLegalSocialImplications:
+        type: boolean
+      otherPurpose:
+        type: boolean
+      otherPurposeDetails:
+        type: string
+      scientificApproaches:
+        type: string
+      intendToStudy:
+        type: string
+      findingsFromStudy:
+        type: string
+      focusOnUnderrepresentedPopulations:
+        type: boolean
+      workspaceDemographic:
+        $ref: '#/definitions/RdrWorkspaceDemographic'
+
+
+  RdrWorkspaceDemographic:
+    type: object
+    properties:
+      raceEthnicity:
+        type: array
+        items:
+          type: string
+          enum:
+            - UNSET
+            - AIAN
+            - ASIAN
+            - HISPANIC
+            - NHPI
+            - MENA
+            - AA
+            - MULTI
+      age:
+        type: array
+        items:
+          type: string
+          enum:
+            - UNSET
+            - AGE_0_11
+            - AGE_12_17
+            - AGE_65_74
+            - AGE_75_AND_MORE
+      sexAtBirth:
+        type: string
+        enum:
+          - UNSET
+          - INTERSEX
+      genderIdentity:
+        type: string
+        enum:
+          - UNSET
+          - OTHER_THAN_MAN_WOMAN
+      sexualOrientation:
+        type: string
+        enum:
+          - UNSET
+          - OTHER_THAN_STRAIGHT
+      geography:
+        type: string
+        enum:
+          - UNSET
+          - RURAL
+      disabilityStatus:
+        type: string
+        enum:
+          - UNSET
+          - DISABILITY
+      accessToCare:
+        type: string
+        enum:
+          - UNSET
+          - NOT_EASILY_ACCESS_CARE
+      educationLevel:
+        type: string
+        enum:
+          - UNSET
+          - LESS_THAN_HIGH_SCHOOL
+      incomeLevel:
+        type: string
+        enum:
+          - UNSET
+          - BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
+      others:
+        type: string
+
+  RdrWorkspaceUser:
+    type: object
+    properties:
+      userId:
+        type: integer
+      role:
+        type: string
+        enum:
+          - READER
+          - WRITER
+          - OWNER
+      status:
+        type: string
+        description: Workspace User Status
+        enum:
+          - ACTIVE
+          - INACTIVE
+
+  RdrResearcher:
+    type: object
+    properties:
+      userId:
+        type: integer
+      creationTime:
+        type: string
+        format: date-time
+      modifiedTime:
+        type: string
+        format: date-time
+      givenName:
+        type: string
+      familyName:
+        type: string
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      zipCode:
+        type: string
+      country:
+        type: string
+      ethnicity:
+        $ref: '#/definitions/Ethnicity'
+      gender:
+        type: array
+        items:
+          $ref: '#/definitions/Gender'
+      race:
+        type: array
+        items:
+          $ref: '#/definitions/Race'
+      sexAtBirth:
+        type: array
+        items:
+          $ref: '#/definitions/SexAtBirth'
+      identifiesAsLgbtq:
+        type: boolean
+      lgbtqIdentity:
+        type: string
+      education:
+        $ref: '#/definitions/Education'
+      disability:
+        $ref: '#/definitions/Disability'
+      degrees:
+        type: array
+        items:
+          $ref: '#/definitions/Degree'
+      affiliations:
+        type: array
+        items:
+          $ref: '#/definitions/ResearcherAffiliation'
+      verifiedInstitutionalAffiliation:
+        $ref: '#/definitions/ResearcherVerifiedInstitutionalAffiliation'
+      email:
+        type: string
+
+  ResearcherAffiliation:
+    type: object
+    properties:
+      institution:
+        type: string
+      role:
+        type: string
+      nonAcademicAffiliation:
+        type: boolean
+
+  ResearcherVerifiedInstitutionalAffiliation:
+    type: object
+    required:
+      - institutionShortName
+      - institutionalRole
+    properties:
+      institutionShortName:
+        type: string
+        description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'VUMC'
+      institutionalRole:
+        type: string
+        description: The user's Institutional Role at this Institution, as text
+
+  Ethnicity:
+    type: string
+    enum:
+      - HISPANIC
+      - NOT_HISPANIC
+      - PREFER_NOT_TO_ANSWER
+
+  Gender:
+    type: string
+    enum:
+      - MAN
+      - WOMAN
+      - NON_BINARY
+      - TRANSGENDER
+      - NONE_DESCRIBE_ME
+      - PREFER_NOT_TO_ANSWER
+
+  Race:
+    type: string
+    enum:
+      - AIAN
+      - ASIAN
+      - AA
+      - NHOPI
+      - WHITE
+      - NONE
+      - PREFER_NOT_TO_ANSWER
+
+  SexAtBirth:
+    type: string
+    enum:
+      - FEMALE
+      - INTERSEX
+      - MALE
+      - NONE_OF_THESE_DESCRIBE_ME
+      - PREFER_NOT_TO_ANSWER
+
+  SexualOrientation:
+    type: string
+    enum:
+      - BISEXUAL
+      - GAY
+      - LESBIAN
+      - STRAIGHT
+      - NONE_OF_THESE_DESCRIBE_ME
+      - PREFER_NOT_TO_ANSWER
+
+  Education:
+    type: string
+    enum:
+      - NO_EDUCATION
+      - GRADES_1_12
+      - COLLEGE_GRADUATE
+      - UNDERGRADUATE
+      - MASTER
+      - DOCTORATE
+
+  Disability:
+    type: string
+    enum:
+      - "YES"
+      - "NO"
+      - PREFER_NOT_TO_ANSWER
+
+  Degree:
+    type: string
+    enum:
+      - UNSET
+      - PHD
+      - MD
+      - JD
+      - EDD
+      - MSN
+      - MS
+      - MA
+      - MBA
+      - ME
+      - BA
+      - BS
+      - BSN

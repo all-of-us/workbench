@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.db.model.CommonStorageEnums.domainToStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.domainToStorage;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -125,7 +125,7 @@ public class DataSetServiceTest {
   @Test(expected = BadRequestException.class)
   public void testThrowsForNoCohortOrConcept() {
     final DataSetRequest invalidRequest = buildEmptyRequest();
-    dataSetServiceImpl.generateQueryJobConfigurationsByDomainName(invalidRequest);
+    dataSetServiceImpl.domainToBigQueryConfig(invalidRequest);
   }
 
   @Test

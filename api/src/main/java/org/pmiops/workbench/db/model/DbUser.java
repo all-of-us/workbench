@@ -61,6 +61,7 @@ public class DbUser {
   private String givenName;
   private String familyName;
   private String phoneNumber;
+  private String professionalUrl;
   private String currentPosition;
   private String organization;
   private Double freeTierCreditsLimitDollarsOverride = null;
@@ -102,6 +103,8 @@ public class DbUser {
   private Timestamp idVerificationCompletionTime;
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
+  private Timestamp creationTime;
+  private Timestamp lastModifiedTime;
   private Timestamp twoFactorAuthBypassTime;
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
@@ -177,11 +180,11 @@ public class DbUser {
 
   @Transient
   public DataAccessLevel getDataAccessLevelEnum() {
-    return CommonStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @Column(name = "given_name")
@@ -239,6 +242,7 @@ public class DbUser {
     this.freeTierCreditsLimitDollarsOverride = freeTierCreditsLimitDollarsOverride;
   }
 
+  @Deprecated
   @Column(name = "free_tier_credits_limit_days_override")
   public Short getFreeTierCreditsLimitDaysOverride() {
     return freeTierCreditsLimitDaysOverride;
@@ -248,6 +252,7 @@ public class DbUser {
     this.freeTierCreditsLimitDaysOverride = freeTierCreditsLimitDaysOverride;
   }
 
+  @Deprecated
   @Column(name = "last_free_tier_credits_time_check")
   public Timestamp getLastFreeTierCreditsTimeCheck() {
     return lastFreeTierCreditsTimeCheck;
@@ -565,6 +570,10 @@ public class DbUser {
     this.complianceTrainingCompletionTime = complianceTrainingCompletionTime;
   }
 
+  public void clearComplianceTrainingCompletionTime() {
+    this.complianceTrainingCompletionTime = null;
+  }
+
   @Column(name = "compliance_training_bypass_time")
   public Timestamp getComplianceTrainingBypassTime() {
     return complianceTrainingBypassTime;
@@ -581,6 +590,10 @@ public class DbUser {
 
   public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
     this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
+  }
+
+  public void clearComplianceTrainingExpirationTime() {
+    this.complianceTrainingExpirationTime = null;
   }
 
   @Column(name = "beta_access_bypass_time")
@@ -666,6 +679,33 @@ public class DbUser {
 
   public void setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
     this.demographicSurvey = demographicSurvey;
+  }
+
+  @Column(name = "last_modified_time")
+  public Timestamp getLastModifiedTime() {
+    return lastModifiedTime;
+  }
+
+  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+    this.lastModifiedTime = lastModifiedTime;
+  }
+
+  @Column(name = "creation_time")
+  public Timestamp getCreationTime() {
+    return creationTime;
+  }
+
+  public void setCreationTime(Timestamp creationTime) {
+    this.creationTime = creationTime;
+  }
+
+  @Column(name = "professional_url")
+  public String getProfessionalUrl() {
+    return professionalUrl;
+  }
+
+  public void setProfessionalUrl(String professionalUrl) {
+    this.professionalUrl = professionalUrl;
   }
 
   @OneToOne(

@@ -68,7 +68,7 @@ public class AggregationUtils {
           for (Terms.Bucket raceBucket : race.getBuckets()) {
             demoInformation.add(
                 new DemoChartInfo()
-                    .gender(genderBucket.getKeyAsString().substring(0, 1))
+                    .name(genderBucket.getKeyAsString().substring(0, 1))
                     .race(raceBucket.getKeyAsString())
                     .ageRange(RANGE_GT_65.equals(ageRange) ? "> " + ageRange : ageRange)
                     .count(raceBucket.getDocCount()));

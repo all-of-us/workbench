@@ -1,10 +1,9 @@
 import {
   Cluster,
   ClusterApi,
-  ClusterListResponse,
   ClusterLocalizeRequest,
   ClusterLocalizeResponse,
-  ClusterStatus,
+  ClusterStatus
 } from 'generated/fetch';
 
 export class ClusterApiStub extends ClusterApi {
@@ -20,22 +19,26 @@ export class ClusterApiStub extends ClusterApi {
     };
   }
 
-  listClusters(extraHttpRequestParams?: any): Promise<ClusterListResponse> {
-    return new Promise<ClusterListResponse>(resolve => {
-      console.log(this.cluster);
-      resolve({defaultCluster: this.cluster});
+  getCluster(workspaceNamespace: string, options?: any): Promise<Cluster> {
+    return new Promise<Cluster>(resolve => {
+      resolve(this.cluster);
     });
   }
 
-  deleteCluster(projectName: string, clusterName: string,
-    extraHttpRequestParams?: any): Promise<{}> {
+  createCluster(workspaceNamespace: string, options?: any): Promise<Cluster> {
+    return new Promise<Cluster>(resolve => {
+      resolve(this.cluster);
+    });
+  }
+
+  deleteCluster(workspaceNamespace: string, options?: any): Promise<{}> {
     return new Promise<{}>(resolve => {
       this.cluster.status = ClusterStatus.Deleting;
       resolve({});
     });
   }
 
-  localize(projectName: string, clusterName: string, req: ClusterLocalizeRequest,
+  localize(projectName: string, req: ClusterLocalizeRequest,
     extraHttpRequestParams?: any): Promise<ClusterLocalizeResponse> {
     return new Promise<ClusterLocalizeResponse>(resolve => {
       resolve({clusterLocalDirectory: 'workspaces/${req.workspaceId}'});

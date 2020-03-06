@@ -5,6 +5,7 @@ import {TextInput} from 'app/components/inputs';
 
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
+import {SpinnerOverlay} from 'app/components/spinners';
 import * as React from 'react';
 
 function isBlank(s: string) {
@@ -16,12 +17,13 @@ function isValidKeyFormat(k: string): boolean {
 }
 
 export interface InvitationKeyProps {
-  onInvitationKeyVerify: (invitationKey: any) => void;
+  onInvitationKeyVerified: (invitationKey: any) => void;
 }
 
 interface InvitationKeyState {
   invitationKey: string;
-  invitationKeyReq: boolean;
+  loading: boolean;
+  invitationKeyRequired: boolean;
   invitationKeyInvalid: boolean;
 }
 
@@ -34,14 +36,16 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
     super(props);
     this.state = {
       invitationKey: '',
-      invitationKeyReq: false,
+      loading: false,
+      invitationKeyRequired: false,
       invitationKeyInvalid: false
     };
   }
 
-  next() {
+  checkInvitationKey() {
     this.setState({
-      invitationKeyReq: false,
+      loading: true,
+      invitationKeyRequired: false,
       invitationKeyInvalid: false
     });
     const input = this.inputElement.current;
@@ -50,7 +54,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
     }
     if (isBlank(this.state.invitationKey)) {
       this.setState({
-        invitationKeyReq: true
+        invitationKeyRequired: true
       });
       return;
     }
@@ -68,32 +72,42 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
     profileApi()
       .invitationKeyVerification({invitationKey: this.state.invitationKey})
       .then(response => {
-        this.props.onInvitationKeyVerify(this.state.invitationKey);
+        this.setState({loading: false});
+        this.props.onInvitationKeyVerified(this.state.invitationKey);
       })
       .catch(error => {
         this.setState({
+          loading: false,
           invitationKeyInvalid: true
         });
       });
   }
 
+  keyPressed(key) {
+    if (key === 'Enter') {
+      this.checkInvitationKey();
+    }
+  }
+
   render() {
+    const {loading, invitationKey, invitationKeyInvalid, invitationKeyRequired} = this.state;
     return <div data-test-id='invitationKey' style={{padding: '3rem 3rem 0 3rem'}}>
       <div style={{marginTop: '0', paddingTop: '.5rem'}}>
         <BoldHeader>
           Enter your Invitation Key:
         </BoldHeader>
-        <TextInput id='invitationKey' value={this.state.invitationKey}
+        <TextInput id='invitationKey' value={invitationKey}
+                   onKeyPress={(event) => this.keyPressed(event.key)}
                    style={{width: '16rem'}}
                    placeholder='Invitation Key'
           onChange={v => this.setState({invitationKey: v})}
                    ref={this.inputElement} autoFocus/>
-        {this.state.invitationKeyReq &&
+        {invitationKeyRequired &&
          <AlertDanger>
            <div style={{fontWeight: 'bolder'}}>Invitation Key is required.</div>
          </AlertDanger>
         }
-        {this.state.invitationKeyInvalid &&
+        {invitationKeyInvalid &&
         <AlertDanger>
             <div style={{fontWeight: 'bolder'}}>
                 Invitation Key is not Valid.
@@ -102,11 +116,12 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
         }
         <div>
           <Button style={{width: '10rem', height: '2rem', margin: '.25rem .5rem .25rem 0'}}
-                  onClick={() => this.next()}>
+                  onClick={() => this.checkInvitationKey()}>
             Next
           </Button>
         </div>
       </div>
+      {loading && <SpinnerOverlay />}
     </div>;
   }
 }

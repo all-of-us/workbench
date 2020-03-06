@@ -4,11 +4,6 @@ import {reactStyles} from 'app/utils';
 import * as React from 'react';
 
 
-
-export const AoUTitle = () => {
-  return <span><i>All of Us</i> Research Program</span>;
-};
-
 export const indentedListStyles = {
   margin: '0.5rem 0 0.5rem 1.5rem', listStylePosition: 'outside'
 };

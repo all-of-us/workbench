@@ -70,7 +70,7 @@ paths:
        - Moodle
      consumes:
        - application/json
-     operationId: getMoodleBadge
+     operationId: getMoodleBadgeV1
      parameters:
        - name: moodlewsrestformat
          in: query
@@ -90,13 +90,48 @@ paths:
        200:
          description: Badge /error response
          schema:
-           $ref: '#/definitions/UserBadgeResponse'
+           $ref: '#/definitions/UserBadgeResponseV1'
        400:
          description: Bad request
        500:
          description: Moodle Internal Error
      security:
        - AdminSecurity: []
+
+  /server.php?wsfunction=local_workbenchapiv2_check_user_badge:
+    get:
+      summary: Get information of badges earned/completed by user.
+      tags:
+        - Moodle
+      consumes:
+        - application/json
+      operationId: getMoodleBadgeV2
+      parameters:
+        - name: moodlewsrestformat
+          in: query
+          description: Format of the response which will be json for AoU
+          type: string
+          required: true
+        - name: email
+          in: query
+          type: string
+        - name: wstoken
+          in: query
+          description: Secret Token associated with All of us
+          type: string
+          required: true
+
+      responses:
+        200:
+          description: Badge /error response
+          schema:
+            $ref: '#/definitions/UserBadgeResponseV2'
+        400:
+          description: Bad request
+        500:
+          description: Moodle Internal Error
+      security:
+        - AdminSecurity: []
 
 ##########################################################################################
 ## DEFINITIONS
@@ -126,14 +161,14 @@ definitions:
         confirmed:
           type: boolean
 
-    UserBadgeResponse:
+    UserBadgeResponseV1:
       required:
         - badges
       properties:
         badges:
           type: array
           items:
-            $ref: '#/definitions/BadgeDetails'
+            $ref: '#/definitions/BadgeDetailsV1'
         exception:
           type: string
         errorcode:
@@ -141,7 +176,50 @@ definitions:
         message:
           type: string
 
-    BadgeDetails:
+    UserBadgeResponseV2:
+      properties:
+        id:
+          type: integer
+          description: User id
+        username:
+          type: string
+          description: Moodle username
+        ret:
+          type: object
+          $ref: '#/definitions/BadgeDetailsV2'
+        dua:
+          type: object
+          $ref: '#/definitions/BadgeDetailsV2'
+        exception:
+          type: string
+        errorcode:
+          type: string
+        message:
+          type: string
+          description: A message describing the error
+
+    BadgeDetailsV2:
+      properties:
+        valid:
+          type: boolean
+          description: Whether the badge is valid
+        lastissued:
+          type: integer
+          format: int64
+          description: Date of latest issued badge. As a stringy epoch in SECONDS.
+        dateexpire:
+          type: integer
+          format: int64
+          description: Latest expiration of obtained badge. As a stringy epoch in SECONDS.
+        message:
+          type: string
+          description: General API message
+        globalexpiration:
+          type: integer
+          format: int64
+          description: Global expiration, overrides badge expiration date. As a stringy epoch in SECONDS.
+
+    BadgeDetailsV1:
       properties:
         name:
           type: string

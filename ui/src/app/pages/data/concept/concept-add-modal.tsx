@@ -12,13 +12,7 @@ import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {
-  Concept,
-  ConceptSet,
-  CreateConceptSetRequest,
-  DomainCount,
-  UpdateConceptSetRequest
-} from 'generated/fetch';
+import {Concept, ConceptSet, CreateConceptSetRequest, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
 import {validate} from 'validate.js';
 
 const styles = reactStyles({
@@ -31,11 +25,18 @@ const styles = reactStyles({
   }
 });
 
+const filterConcepts = (concepts: any[], domain: Domain) => {
+  if (domain === Domain.SURVEY) {
+    return concepts.filter(concept => !!concept.question);
+  } else {
+    return concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
+  }
+};
 
 export const ConceptAddModal = withCurrentWorkspace()
 (class extends React.Component<{
   workspace: WorkspaceData,
-  selectedDomain: DomainCount,
+  activeDomainTab: DomainCount,
   selectedConcepts: Concept[],
   onSave: Function,
   onClose: Function,
@@ -66,9 +67,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       name: '',
       saving: false,
       selectedSet: null,
-      selectedConceptsInDomain: props.selectedConcepts
-          .filter((concept: Concept) =>
-              concept.domainId === fp.capitalize(props.selectedDomain.domain))
+      selectedConceptsInDomain: filterConcepts(props.selectedConcepts, props.activeDomainTab.domain)
     };
   }
 
@@ -81,7 +80,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       const {workspace: {namespace, id}} = this.props;
       const conceptSets = await conceptSetsApi().getConceptSetsInWorkspace(namespace, id);
       const conceptSetsInDomain = conceptSets.items
-          .filter((conceptset) => conceptset.domain === this.props.selectedDomain.domain);
+          .filter((conceptset) => conceptset.domain === this.props.activeDomainTab.domain);
 
       this.setState({
         conceptSets: conceptSetsInDomain,
@@ -98,7 +97,7 @@ export const ConceptAddModal = withCurrentWorkspace()
 
   async saveConcepts() {
     const {workspace: {namespace, id}} = this.props;
-    const {onSave, selectedDomain} = this.props;
+    const {onSave, activeDomainTab} = this.props;
     const {selectedSet, addingToExistingSet, newSetDescription,
       name, selectedConceptsInDomain} = this.state;
     this.setState({saving: true});
@@ -130,7 +129,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       const conceptSet: ConceptSet = {
         name: name,
         description: newSetDescription,
-        domain: selectedDomain.domain
+        domain: activeDomainTab.domain
       };
       const request: CreateConceptSetRequest = {
         conceptSet: conceptSet,
@@ -150,7 +149,7 @@ export const ConceptAddModal = withCurrentWorkspace()
 
 
   render() {
-    const {selectedDomain, onClose} = this.props;
+    const {activeDomainTab, onClose} = this.props;
     const {conceptSets, loading, nameTouched, saving, addingToExistingSet,
       newSetDescription, name, errorMessage, errorSaving, selectedConceptsInDomain} = this.state;
     const errors = validate({name}, {
@@ -166,7 +165,7 @@ export const ConceptAddModal = withCurrentWorkspace()
     return <Modal>
       <ModalTitle data-test-id='add-concept-title'>
         Add {selectedConceptsInDomain.length} Concepts to
-        {' '}{selectedDomain.name} Concept Set</ModalTitle>
+        {' '}{activeDomainTab.name} Concept Set</ModalTitle>
       {loading ?
           <div style={{display: 'flex', justifyContent: 'center'}}>
             <Spinner style={{alignContent: 'center'}}/>
@@ -175,7 +174,7 @@ export const ConceptAddModal = withCurrentWorkspace()
         <ModalBody>
           <FlexRow>
             <TooltipTrigger content={
-              <div>No concept sets in domain '{selectedDomain.name}'</div>}
+              <div>No concept sets in domain '{activeDomainTab.name}'</div>}
                             disabled={conceptSets.length > 0}>
               <div>
                 <RadioButton value={addingToExistingSet}

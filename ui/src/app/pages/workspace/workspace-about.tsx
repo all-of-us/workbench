@@ -81,7 +81,7 @@ const WorkspaceInfoTooltipText = () => {
     <br/>The date this workspace was last updated<br/>
     <u>Access level</u>
     <br/>To make sure data is accessed only by authorized users, users can request
-      and be granted access to data access tiers within the All of Us Research Program.
+      and be granted access to data access tiers within the <i>All of Us</i> Research Program.
       Currently there are 3 tiers  - “Public”, “Registered” and “Controlled”.<br/>
   </div>;
 };
@@ -241,8 +241,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
               fp.capitalize(workspace.dataAccessLevel.toString()) : 'Loading...'}</div>
           </div>
           {!!this.workspaceClusterBillingProjectId() &&
-            <ResetClusterButton billingProjectId={this.workspaceClusterBillingProjectId()}
-                                workspaceFirecloudName={this.state.workspace.id}/>}
+            <ResetClusterButton workspaceNamespace={this.workspaceClusterBillingProjectId()}/>}
         </div>
       </div>
       {sharing && <WorkspaceShare workspace={workspace}

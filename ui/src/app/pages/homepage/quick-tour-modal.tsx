@@ -1,6 +1,6 @@
 
 import {
-  Button
+  Button, StyledAnchorTag
 } from 'app/components/buttons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -17,7 +17,7 @@ export const panels = [
   {
     title: 'Introduction',
     shortTitle: 'Intro',
-    content: <div>Welcome to the All of Us Researcher Workbench!<br/><br/>All workbench analyses
+    content: <div>Welcome to the <i>All of Us</i> Researcher Workbench!<br/><br/>All workbench analyses
       happen in a “Workspace.” Within a Workspace you can select participants
       using the “Cohort Builder” tool. Another tool, the “Concept Set Builder,”
       allows you to select data types for analysis. The cohorts and concept sets
@@ -31,13 +31,13 @@ export const panels = [
     content: <div>A Workspace is your place to store and analyze data for a specific project.
       You can share this Workspace with other users, allowing them to view or edit
       your work. The dataset referenced by a workspace is in
-      {' '}<a className='link' href={OMOPDataSetLink} target='_blank'>
+      {' '}<StyledAnchorTag href={OMOPDataSetLink} target='_blank'>
         OMOP common data model
-      </a>{' '}
+      </StyledAnchorTag>{' '}
       format. Here are some
-      {' '}<a className='link' href={OMOPTutorialsLink} target='_blank'>
+      {' '}<StyledAnchorTag href={OMOPTutorialsLink} target='_blank'>
         tutorials
-      </a>{' '}
+      </StyledAnchorTag>{' '}
       to understand OMOP data model.
       <br/><br/>
       When you create your Workspace, you will be prompted
@@ -332,7 +332,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
       <React.Fragment>
         <div style={styles.modalBackdrop}/>
         <div style={styles.mainStyling} data-test-id='quick-tour-react' className='quickTourReact'>
-          <div style={styles.title}>All of Us Researcher Workbench</div>
+          <div style={styles.title}><i>All of Us</i> Researcher Workbench</div>
           <div style={styles.mainTitle}>Quick Tour</div>
           <div style={styles.breadcrumbs}>
             {panels.map((p, i) => {

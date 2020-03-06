@@ -6,7 +6,7 @@ services:
     user: ${UID}
     working_dir: /w/api
     volumes:
-      - ..:/w:cached
+      - src-sync:/w:nocopy
       - gradle-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
@@ -17,9 +17,9 @@ services:
     volumes:
       - db:/var/lib/mysql
     ports:
-      - 3306:3306
+      - 127.0.0.1:3306:3306
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.3
     ports:
       - 127.0.0.1:9200:9200
     environment:
@@ -39,7 +39,7 @@ services:
     user: ${UID}
     working_dir: /w/api
     volumes:
-      - ..:/w:cached
+      - src-sync:/w:nocopy
       - gradle-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
@@ -49,8 +49,8 @@ services:
     env_file:
       - db/vars.env
     ports:
-      - 8081:8081
-      - 8001:8001
+      - 127.0.0.1:8081:8081
+      - 127.0.0.1:8001:8001
   es-scripts:
     depends_on:
       - elastic
@@ -61,7 +61,7 @@ services:
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/api/sa-key.json
     volumes:
-      - ..:/w:cached
+      - src-sync:/w:nocopy
       - gradle-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
@@ -73,7 +73,7 @@ services:
     user: ${UID}
     working_dir: /w/api/db
     volumes:
-      - ..:/w:cached
+      - src-sync:/w:nocopy
       - gradle-cache:/.gradle
     entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', '-t', '30', --]
     env_file:
@@ -87,7 +87,7 @@ services:
     user: ${UID}
     working_dir: /w/api
     volumes:
-      - ..:/w:cached
+      - src-sync:/w:nocopy
       - gradle-cache:/.gradle
     entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', '-t', '30', --]
     env_file:
@@ -101,7 +101,7 @@ services:
     user: ${UID}
     working_dir: /w/api/db-cdr
     volumes:
-      - ..:/w:cached
+      - src-sync:/w:nocopy
       - gradle-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
@@ -110,22 +110,22 @@ services:
       - db-cdr/vars.env
 
   db-make-bq-tables:
-      depends_on:
-        - db
-      build:
-        context: ./src/dev/server
-      user: ${UID}
-      working_dir: /w/db-cdr
-      volumes:
-        - gradle-cache:/.gradle
-        - .:/w:cached
-        - ~/.config:/.config:cached
-        - ~/.gsutil:/.gsutil:cached
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
 
-      environment:
-        - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
-      env_file:
-        - db-cdr/vars.env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db-cdr/vars.env
 
   db-cloudsql-import:
     build:
@@ -189,3 +189,6 @@ volumes:
   db:
   esdata:
   gradle-cache:
+  src-sync:
+    external: true
+

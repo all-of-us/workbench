@@ -24,8 +24,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,22 +52,17 @@ public class NotebooksServiceTest {
 
   private static DbUser DB_USER;
 
-  @Autowired private MonitoringService mockMonitoringService;
-  @Autowired private FireCloudService mockFirecloudService;
-  @Autowired private CloudStorageService mockCloudStorageService;
-  @Autowired private WorkspaceService mockWorkspaceService;
+  @MockBean private LogsBasedMetricService mockLogsBasedMetricsService;
+
+  @MockBean private FireCloudService mockFirecloudService;
+  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private NotebooksService notebooksService;
 
   @TestConfiguration
   @Import({NotebooksServiceImpl.class})
-  @MockBean({
-    CloudStorageService.class,
-    FireCloudService.class,
-    WorkspaceService.class,
-    UserRecentResourceService.class,
-    MonitoringService.class
-  })
+  @MockBean({UserRecentResourceService.class})
   static class Configuration {
 
     @Bean
@@ -168,7 +163,7 @@ public class NotebooksServiceTest {
   @Test
   public void testSaveNotebook_firesMetric() {
     notebooksService.saveNotebook(BUCKET_NAME, NOTEBOOK_NAME, NOTEBOOK_CONTENTS);
-    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_SAVE);
+    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Test
@@ -177,7 +172,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
-    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_DELETE);
+    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Test
@@ -186,7 +181,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
-    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_CLONE);
+    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_CLONE);
   }
 
   private void stubNotebookToJson() {

@@ -117,7 +117,7 @@ export const WorkspaceList = withUserProfile()
                 <NewWorkspaceButton />
                 {workspaceList.map(wp => {
                   return <WorkspaceCard
-                    key={wp.workspace.name}
+                    key={wp.workspace.namespace}
                     workspace={wp.workspace}
                     accessLevel={wp.accessLevel}
                     userEmail={profile.username}

@@ -2,7 +2,9 @@ package org.pmiops.workbench.tools;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.time.Clock;
@@ -11,6 +13,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -19,7 +22,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.notebooks.ApiClient;
 import org.pmiops.workbench.notebooks.ApiException;
+import org.pmiops.workbench.notebooks.ApiResponse;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
+import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.springframework.boot.CommandLineRunner;
@@ -41,6 +46,11 @@ public class ManageClusters {
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email"
       };
+  private static final List<String> DESCRIBE_ARG_NAMES =
+      ImmutableList.of("api_url", "project", "service_account", "cluster_id");
+  private static final List<String> DELETE_ARG_NAMES =
+      ImmutableList.of("api_url", "min_age", "ids", "dry_run");
+  private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private static Set<String> commaDelimitedStringToSet(String str) {
     return Arrays.asList(str.split(",")).stream()
@@ -89,6 +99,50 @@ public class ManageClusters {
               count.getAndIncrement();
             });
     System.out.println(String.format("listed %d clusters", count.get()));
+  }
+
+  private static void describeCluster(
+      String apiUrl, String workbenchProjectId, String workbenchServiceAccount, String clusterId)
+      throws IOException, ApiException {
+    String[] parts = clusterId.split("/");
+    if (parts.length != 2) {
+      System.err.println(
+          String.format(
+              "given cluster ID '%s' is invalid, wanted format 'project/clusterName'", clusterId));
+      return;
+    }
+    String clusterProject = parts[0];
+    String clusterName = parts[1];
+
+    // Leo's getCluster API swagger tends to be outdated; issue a raw getCluster request to ensure
+    // we get all available information for debugging.
+    ClusterApi client = newApiClient(apiUrl);
+    com.squareup.okhttp.Call call =
+        client.getClusterCall(
+            clusterProject,
+            clusterName,
+            /* progressListener */ null,
+            /* progressRequestListener */ null);
+    ApiResponse<Object> resp = client.getApiClient().execute(call, Object.class);
+
+    // Parse the response as well so we can log specific structured fields.
+    Cluster cluster = PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), Cluster.class);
+
+    System.out.println(PRETTY_GSON.toJson(resp.getData()));
+    System.out.printf("\n\nTo inspect logs in cloud storage, run the following:\n\n");
+
+    // TODO(PD-4740): Use impersonation here instead.
+    String keyPath = String.format("/tmp/%s-key.json", workbenchProjectId);
+    System.out.printf(
+        "    gcloud iam service-accounts keys create %s --iam-account %s\n",
+        keyPath, workbenchServiceAccount);
+    System.out.printf("    gcloud auth activate-service-account --key-file %s\n\n", keyPath);
+    System.out.printf("    gsutil ls gs://%s/**\n", cluster.getStagingBucket());
+    System.out.printf("    gsutil cat ... # inspect or copy logs\n\n");
+    System.out.printf("    # Delete the key when done\n");
+    System.out.printf(
+        "    gcloud iam service-accounts keys delete $(jq -r .private_key_id %s) --iam-account %s\n\n",
+        keyPath, workbenchServiceAccount);
   }
 
   private static void deleteClusters(
@@ -140,13 +194,23 @@ public class ManageClusters {
   public CommandLineRunner run() {
     return (args) -> {
       if (args.length < 1) {
-        throw new IllegalArgumentException("must specify a command 'list' or 'delete'");
+        throw new IllegalArgumentException("must specify a command 'list', 'describe' or 'delete'");
       }
       String cmd = args[0];
       args = Arrays.copyOfRange(args, 1, args.length);
       switch (cmd) {
+        case "describe":
+          if (args.length != DESCRIBE_ARG_NAMES.size()) {
+            throw new IllegalArgumentException(
+                String.format(
+                    "Expected %d args %s. Got: %s",
+                    DESCRIBE_ARG_NAMES.size(), DESCRIBE_ARG_NAMES, Arrays.asList(args)));
+          }
+          describeCluster(args[0], args[1], args[2], args[3]);
+          return;
+
         case "list":
-          if (args.length > 1) {
+          if (args.length != 1) {
             throw new IllegalArgumentException("Expected 1 arg. Got " + Arrays.asList(args));
           }
           listClusters(args[0]);
@@ -155,9 +219,11 @@ public class ManageClusters {
         case "delete":
           // User-friendly command-line parsing is done in devstart.rb, so we do only simple
           // positional argument parsing here.
-          if (args.length != 4) {
+          if (args.length != DELETE_ARG_NAMES.size()) {
             throw new IllegalArgumentException(
-                "Expected 4 args (api_url, min_age, ids, dry_run). Got " + Arrays.asList(args));
+                String.format(
+                    "Expected %d args %s. Got: %s",
+                    DELETE_ARG_NAMES.size(), DELETE_ARG_NAMES, Arrays.asList(args)));
           }
           String apiUrl = args[0];
           Instant oldest = null;

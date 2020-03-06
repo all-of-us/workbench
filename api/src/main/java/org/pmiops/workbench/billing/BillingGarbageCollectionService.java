@@ -7,6 +7,7 @@ import com.google.common.cache.LoadingCache;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -142,7 +143,9 @@ public class BillingGarbageCollectionService {
       garbageCollectionCredentials.refresh();
 
       fireCloudService.removeOwnerFromBillingProject(
-          projectName, appEngineSA, garbageCollectionCredentials.getAccessToken().getTokenValue());
+          projectName,
+          appEngineSA,
+          Optional.of(garbageCollectionCredentials.getAccessToken().getTokenValue()));
     } catch (final ExecutionException e) {
       final String msg =
           String.format(

@@ -4,21 +4,22 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
-import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
-import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {isAbortError} from 'app/utils/errors';
+import {ClusterInitializer} from 'app/utils/cluster-initializer';
 import {navigate, userProfileStore} from 'app/utils/navigation';
+import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {ClusterStatus} from 'generated/fetch';
+import {BillingStatus, ClusterStatus} from 'generated/fetch';
 
 
 const styles = reactStyles({
@@ -168,39 +169,17 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       this.aborter.abort();
     }
 
-    private runCluster(onClusterReady: Function): void {
-      const retry = () => {
-        this.runClusterTimer = setTimeout(() => this.runCluster(onClusterReady), 5000);
-      };
-
-      clusterApi().listClusters(this.props.urlParams.ns, this.props.urlParams.wsid, {
-        signal: this.aborter.signal
-      }).then((body) => {
-          const cluster = body.defaultCluster;
-          this.setState({clusterStatus: cluster.status});
-
-          if (cluster.status === ClusterStatus.Stopped) {
-            notebooksClusterApi()
-              .startCluster(cluster.clusterNamespace, cluster.clusterName);
-          }
-
-          if (cluster.status === ClusterStatus.Running) {
-            onClusterReady();
-          } else {
-            retry();
-          }
-        })
-        .catch((e: Error) => {
-          if (isAbortError(e)) {
-            return;
-          }
-          // TODO(RW-3097): Backoff, or don't retry forever.
-          retry();
-        });
+    private async runCluster(onClusterReady: Function): Promise<void> {
+      await ClusterInitializer.initialize({
+        workspaceNamespace: this.props.urlParams.ns,
+        onStatusUpdate: (status) => this.setState({clusterStatus: status}),
+        abortSignal: this.aborter.signal
+      });
+      onClusterReady();
     }
 
     private startEditMode() {
-      if (this.canWrite) {
+      if (this.canStartClusters) {
         if (!this.notebookInUse) {
           this.setState({userRequestedExecutableNotebook: true});
           this.runCluster(() => { this.navigateEditMode(); });
@@ -212,17 +191,15 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       }
     }
 
-
-
     private startPlaygroundMode() {
-      if (this.canWrite) {
+      if (this.canStartClusters) {
         this.setState({userRequestedExecutableNotebook: true});
         this.runCluster(() => { this.navigatePlaygroundMode(); });
       }
     }
 
     private onPlaygroundModeClick() {
-      if (!this.canWrite) {
+      if (!this.canStartClusters) {
         return;
       }
       if (Cookies.get(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN) === String(true)) {
@@ -253,9 +230,17 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
     }
 
+    private get billingLocked() {
+      return this.props.workspace.billingStatus === BillingStatus.INACTIVE;
+    }
+
+    private get canStartClusters() {
+      return this.canWrite && !this.billingLocked;
+    }
+
     private get buttonStyleObj() {
       return Object.assign({}, styles.navBarItem,
-        this.canWrite ? styles.clickable : styles.disabled);
+        this.canStartClusters ? styles.clickable : styles.disabled);
     }
 
     private cloneNotebook() {
@@ -327,27 +312,33 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 {this.renderNotebookText()}
               </div>) : (
-              <div style={{display: 'flex'}}>
-                <div style={this.buttonStyleObj}
-                     onClick={() => {
-                       AnalyticsTracker.Notebooks.Edit();
-                       this.startEditMode();
-                     }}>
-                  <EditComponentReact enableHoverEffect={false}
-                                      disabled={!this.canWrite}
-                                      style={styles.navBarIcon}/>
-                  Edit {this.notebookInUse && '(In Use)'}
-                </div>
-                <div style={this.buttonStyleObj}
-                     onClick={() => {
-                       AnalyticsTracker.Notebooks.Run();
-                       this.onPlaygroundModeClick();
-                     }}>
-                  <PlaygroundModeIcon enableHoverEffect={false} disabled={!this.canWrite}
-                                      style={styles.navBarIcon}/>
-                  Run (Playground Mode)
-                </div>
-              </div>)
+                  <div style={{display: 'flex'}}>
+                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                      <div style={this.buttonStyleObj}
+                           onClick={() => {
+                             AnalyticsTracker.Notebooks.Edit();
+                             this.startEditMode();
+                           }}>
+                        <EditComponentReact enableHoverEffect={false}
+                                            disabled={!this.canStartClusters}
+                                            style={styles.navBarIcon}/>
+                        Edit {this.notebookInUse && '(In Use)'}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                      <div style={this.buttonStyleObj}
+                           onClick={() => {
+                             AnalyticsTracker.Notebooks.Run();
+                             this.onPlaygroundModeClick();
+                           }}>
+                        <PlaygroundModeIcon enableHoverEffect={false}
+                                            disabled={!this.canStartClusters}
+                                            style={styles.navBarIcon}/>
+                        Run (Playground Mode)
+                      </div>
+                    </TooltipTrigger>
+                  </div>
+              )
             }
           </div>
           <div style={styles.previewDiv}>

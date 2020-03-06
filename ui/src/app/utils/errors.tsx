@@ -14,8 +14,8 @@ export function setStackdriverErrorReporter(reporter: StackdriverErrorReporter) 
 /**
  * Reports an error to Stackdriver error logging, if enabled.
  */
-export function reportError(err: Error) {
-  console.error(err);
+export function reportError(err: (Error|string)) {
+  console.error('Reporting error to Stackdriver: ', err);
   if (stackdriverReporter) {
     stackdriverReporter.report(err, (e) => {
       // Note: this does not detect non-200 responses from Stackdriver:
@@ -29,7 +29,7 @@ export function reportError(err: Error) {
 
 /** Returns true if the given error is an AbortError, as used in fetch() aborts. */
 export function isAbortError(e: Error) {
-  return (e instanceof DOMException) && e.name === 'AbortError';
+  return e instanceof DOMException && e.name === 'AbortError';
 }
 
 // convert error response from API JSON to ErrorResponse object, otherwise, report parse error

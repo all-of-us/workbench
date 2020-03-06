@@ -91,16 +91,15 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
     }
 
     // Store the span as a payload within our request so we can close the span on completion.
-    request.setAttribute(TRACE_ATTRIBUTE_KEY, requestScopedSpan);
+    request.setAttribute(RequestAttribute.TRACE.toString(), requestScopedSpan);
     return true;
   }
 
   @Override
   public void afterCompletion(
-      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-      throws Exception {
-    if (request.getAttribute(TRACE_ATTRIBUTE_KEY) != null) {
-      ((Scope) request.getAttribute(TRACE_ATTRIBUTE_KEY)).close();
+      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    if (request.getAttribute(RequestAttribute.TRACE.toString()) != null) {
+      ((Scope) request.getAttribute(RequestAttribute.TRACE.toString())).close();
     }
   }
 }

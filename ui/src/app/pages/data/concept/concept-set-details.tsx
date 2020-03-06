@@ -27,7 +27,7 @@ import {
 import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {Concept, ConceptSet, CopyRequest, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {Concept, ConceptSet, CopyRequest, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -175,7 +175,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       try {
         this.setState({editSaving: true});
         await conceptSetsApi().updateConceptSet(ns, wsid, csid,
-          {...conceptSet, name: editName, description: editDescription});
+          {...conceptSet, name: editName, description: editDescription, concepts: null});
         await this.getConceptSet();
       } catch (error) {
         console.log(error);
@@ -208,11 +208,10 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       const {urlParams: {ns, wsid, csid}} = this.props;
       try {
         await conceptSetsApi().deleteConceptSet(ns, wsid, csid);
-        navigate(['workspaces', ns, wsid, 'data', 'concepts', 'sets']);
+        navigate(['workspaces', ns, wsid, 'data', 'concepts']);
       } catch (error) {
-        console.log(error);
-        this.setState({error: true,
-          errorMessage: 'Could not delete concept set \'' + this.state.conceptSet.name + '\''});
+        console.error(error);
+        this.setState({error: true, errorMessage: 'Could not delete concept set \'' + this.state.conceptSet.name + '\''});
       } finally {
         this.setState({deleting: false});
       }
@@ -223,17 +222,14 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
     }
 
     get conceptSetConceptsCount(): number {
-      return !!this.state.conceptSet && this.state.conceptSet.concepts ?
-        this.state.conceptSet.concepts.length : 0;
+      return !!this.state.conceptSet && this.state.conceptSet.concepts ? this.state.conceptSet.concepts.length : 0;
     }
 
     addToConceptSet() {
       const {workspace} = this.props;
       const {conceptSet} = this.state;
-      const queryParams = conceptSet.survey ? '?survey=' +  conceptSet.survey :
-          '?domain=' + conceptSet.domain;
-      navigateByUrl('workspaces/' + workspace.namespace + '/' +
-          workspace.id + '/data/concepts' + queryParams);
+      const queryParams = conceptSet.survey ? '?survey=' +  conceptSet.survey : '?domain=' + conceptSet.domain;
+      navigateByUrl('workspaces/' + workspace.namespace + '/' + workspace.id + '/data/concepts' + queryParams);
     }
 
     render() {
@@ -301,31 +297,35 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                                             style={{marginTop: '0.1rem'}}/>
                       </Clickable>
                     </div>
-                    <div style={{marginBottom: '1.5rem', color: colors.primary}}
-                         data-test-id='concept-set-description'>
-                      {conceptSet.description}</div>
+                    <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
+                      {conceptSet.description}
+                    </div>
                   </React.Fragment>}
                   <div style={styles.conceptSetData}>
-                      <div data-test-id='participant-count'>
-                        Participant Count: {conceptSet.participantCount}</div>
-                      <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
-                          Domain: {fp.capitalize(conceptSet.domain.toString())}</div>
+                    <div data-test-id='participant-count'>
+                      Participant Count: {!!conceptSet.participantCount ? conceptSet.participantCount.toLocaleString() : ''}
+                    </div>
+                    <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
+                      Domain: {conceptSet.domain === Domain.PHYSICALMEASUREMENT
+                        ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString())}
+                    </div>
                   </div>
                 </div>
               </FlexRow>
               <FlexColumn>
-                <Button type='secondaryLight' style={styles.buttonBoxes}
-                        onClick={() => this.addToConceptSet()}>
+                <Button type='secondaryLight' style={styles.buttonBoxes} onClick={() => this.addToConceptSet()}>
                   <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
                 </Button>
               </FlexColumn>
             </div>
             {!!conceptSet.concepts ?
             <ConceptTable concepts={conceptSet.concepts} loading={loading}
+                          domain={conceptSet.domain}
                           reactKey={conceptSet.domain.toString()}
                           onSelectConcepts={this.onSelectConcepts.bind(this)}
                           placeholderValue={'No Concepts Found'}
-                          selectedConcepts={selectedConcepts}/> :
+                          selectedConcepts={selectedConcepts}
+                          error={false}/> :
             <Button type='secondaryLight' data-test-id='add-concepts'
                     style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
                     onClick={() => navigateByUrl('workspaces/' + ns + '/' +

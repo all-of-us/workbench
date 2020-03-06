@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -46,7 +47,15 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);
 
+  Optional<DbWorkspace> findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(
+      String workspaceNamespace);
+
+  Optional<DbWorkspace> findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
+      String workspaceNamespace, short activeStatus);
+
   List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
+
+  DbWorkspace findDbWorkspaceByWorkspaceId(long workspaceId);
 
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
@@ -62,4 +71,17 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
+
+  @Query(
+      "SELECT activeStatus, dataAccessLevel, COUNT(workspaceId) FROM DbWorkspace "
+          + "GROUP BY activeStatus, dataAccessLevel ORDER BY activeStatus, dataAccessLevel")
+  List<ActiveStatusAndDataAccessLevelToCountResult> getActiveStatusAndDataAccessLevelToCount();
+
+  interface ActiveStatusAndDataAccessLevelToCountResult {
+    Short getWorkspaceActiveStatus();
+
+    Short getDataAccessLevel();
+
+    Long getWorkspaceCount();
+  }
 }

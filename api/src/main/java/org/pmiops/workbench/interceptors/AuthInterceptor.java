@@ -109,76 +109,69 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return false;
     }
 
-    String token = authorizationHeader.substring("Bearer".length()).trim();
-    Userinfoplus userInfo = userInfoService.getUserInfo(token);
+    final String token = authorizationHeader.substring("Bearer".length()).trim();
+    final Userinfoplus OAuth2Userinfo = userInfoService.getUserInfo(token);
+
+    // The Workbench considers the user's generated GSuite email to be their userName
+    // Don't confuse this with the user's Contact Email, which is unrelated
+    String userName = OAuth2Userinfo.getEmail();
 
     // TODO: check Google group membership to ensure user is in registered user group
 
-    String userEmail = userInfo.getEmail();
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    if (workbenchConfig.auth.serviceAccountApiUsers.contains(userEmail)) {
+    if (workbenchConfig.auth.serviceAccountApiUsers.contains(userName)) {
       // Whitelisted service accounts are able to make API calls, too.
       // TODO: stop treating service accounts as normal users, have a separate table for them,
       // administrators.
-      DbUser user = userDao.findUserByUsername(userEmail);
+      DbUser user = userDao.findUserByUsername(userName);
       if (user == null) {
-        user = userService.createServiceAccountUser(userEmail);
+        user = userService.createServiceAccountUser(userName);
       }
       SecurityContextHolder.getContext()
           .setAuthentication(
-              new UserAuthentication(user, userInfo, token, UserType.SERVICE_ACCOUNT));
-      log.log(Level.INFO, "{0} service account in use", userInfo.getEmail());
+              new UserAuthentication(user, OAuth2Userinfo, token, UserType.SERVICE_ACCOUNT));
+      log.log(Level.INFO, "{0} service account in use", userName);
       return true;
     }
     String gsuiteDomainSuffix = "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
-    if (!userEmail.endsWith(gsuiteDomainSuffix)) {
+    if (!userName.endsWith(gsuiteDomainSuffix)) {
       // Temporarily set the authentication with no user, so we can look up what user this
       // corresponds to in FireCloud.
       SecurityContextHolder.getContext()
           .setAuthentication(
-              new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
+              new UserAuthentication(null, OAuth2Userinfo, token, UserType.SERVICE_ACCOUNT));
       // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
       // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
       // the user it was created for.
-      userEmail = fireCloudService.getMe().getUserInfo().getUserEmail();
-      if (!userEmail.endsWith(gsuiteDomainSuffix)) {
+      userName = fireCloudService.getMe().getUserInfo().getUserEmail();
+      if (!userName.endsWith(gsuiteDomainSuffix)) {
         log.log(
             Level.INFO,
             "User {0} isn't in domain {1}, can't access the workbench",
-            new Object[] {userEmail, gsuiteDomainSuffix});
+            new Object[] {userName, gsuiteDomainSuffix});
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         return false;
       }
     }
-    DbUser user = userDao.findUserByUsername(userEmail);
+    DbUser user = userDao.findUserByUsername(userName);
     if (user == null) {
       // TODO(danrodney): start populating contact email in Google account, use it here.
-      user =
-          userService.createUser(
-              userInfo.getGivenName(),
-              userInfo.getFamilyName(),
-              userInfo.getEmail(),
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null);
+      user = userService.createUser(OAuth2Userinfo);
     } else {
       if (user.getDisabled()) {
         throw new ForbiddenException(
             WorkbenchException.errorResponse(
-                "This user account has been disabled.", ErrorCode.USER_DISABLED));
+                "Rejecting request for disabled user account: " + user.getUsername(),
+                ErrorCode.USER_DISABLED));
       }
     }
 
     SecurityContextHolder.getContext()
-        .setAuthentication(new UserAuthentication(user, userInfo, token, UserType.RESEARCHER));
+        .setAuthentication(
+            new UserAuthentication(user, OAuth2Userinfo, token, UserType.RESEARCHER));
 
     // TODO: setup this in the context, get rid of log statement
-    log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
+    log.log(Level.INFO, "{0} logged in", OAuth2Userinfo.getEmail());
 
     if (!hasRequiredAuthority(method, user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);

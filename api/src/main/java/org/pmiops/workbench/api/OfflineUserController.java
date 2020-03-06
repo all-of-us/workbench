@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
+import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -30,12 +33,16 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public OfflineUserController(
-      CloudResourceManagerService cloudResourceManagerService, UserService userService) {
+      CloudResourceManagerService cloudResourceManagerService,
+      UserService userService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   private boolean timestampsEqual(Timestamp a, Timestamp b) {
@@ -66,7 +73,12 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp oldTime = user.getComplianceTrainingCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        DbUser updatedUser = userService.syncComplianceTrainingStatus(user);
+        DbUser updatedUser;
+        if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
+          updatedUser = userService.syncComplianceTrainingStatusV2(user, Agent.asSystem());
+        } else {
+          updatedUser = userService.syncComplianceTrainingStatusV1(user, Agent.asSystem());
+        }
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
@@ -87,10 +99,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         }
       } catch (org.pmiops.workbench.moodle.ApiException | NotFoundException e) {
         errorCount++;
-        log.severe(
+        log.log(
+            Level.SEVERE,
             String.format(
-                "Error syncing compliance training status for user %s: %s",
-                user.getUsername(), e.getMessage()));
+                "Error syncing compliance training status for user %s", user.getUsername()),
+            e);
       }
     }
 
@@ -125,7 +138,8 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp oldTime = user.getEraCommonsCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        DbUser updatedUser = userService.syncEraCommonsStatusUsingImpersonation(user);
+        DbUser updatedUser =
+            userService.syncEraCommonsStatusUsingImpersonation(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
@@ -189,7 +203,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        DbUser updatedUser = userService.syncTwoFactorAuthStatus(user);
+        DbUser updatedUser = userService.syncTwoFactorAuthStatus(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
