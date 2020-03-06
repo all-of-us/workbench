@@ -92,21 +92,24 @@ public class ProfileService {
         }
       };
 
-  private final UserDao userDao;
   private final FreeTierBillingService freeTierBillingService;
+  private final ProfileMapper profileMapper;
+  private final UserDao userDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
 
   @Autowired
   public ProfileService(
-      UserDao userDao,
       FreeTierBillingService freeTierBillingService,
+      ProfileMapper profileMapper,
+      UserDao userDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
-    this.userDao = userDao;
     this.freeTierBillingService = freeTierBillingService;
+    this.profileMapper = profileMapper;
+    this.userDao = userDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
@@ -122,99 +125,7 @@ public class ProfileService {
       user = userWithAuthoritiesAndPageVisits;
     }
 
-    Profile profile = new Profile();
-    profile.setUserId(user.getUserId());
-    profile.setUsername(user.getUsername());
-    if (user.getCreationNonce() != null) {
-      profile.setCreationNonce(user.getCreationNonce().toString());
-    }
-    profile.setFamilyName(user.getFamilyName());
-    profile.setGivenName(user.getGivenName());
-    profile.setOrganization(user.getOrganization());
-    profile.setCurrentPosition(user.getCurrentPosition());
-    profile.setContactEmail(user.getContactEmail());
-    profile.setPhoneNumber(user.getPhoneNumber());
-    profile.setAboutYou(user.getAboutYou());
-    profile.setAreaOfResearch(user.getAreaOfResearch());
-    profile.setDisabled(user.getDisabled());
-    profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
-    profile.setProfessionalUrl(user.getProfessionalUrl());
-    if (user.getComplianceTrainingCompletionTime() != null) {
-      profile.setComplianceTrainingCompletionTime(
-          user.getComplianceTrainingCompletionTime().getTime());
-    }
-    if (user.getComplianceTrainingBypassTime() != null) {
-      profile.setComplianceTrainingBypassTime(user.getComplianceTrainingBypassTime().getTime());
-    }
-    if (user.getEraCommonsLinkExpireTime() != null) {
-      profile.setEraCommonsLinkExpireTime(user.getEraCommonsLinkExpireTime().getTime());
-    }
-    if (user.getEraCommonsCompletionTime() != null) {
-      profile.setEraCommonsCompletionTime(user.getEraCommonsCompletionTime().getTime());
-    }
-    if (user.getEraCommonsBypassTime() != null) {
-      profile.setEraCommonsBypassTime(user.getEraCommonsBypassTime().getTime());
-    }
-    if (user.getDemographicSurveyCompletionTime() != null) {
-      profile.setDemographicSurveyCompletionTime(
-          user.getDemographicSurveyCompletionTime().getTime());
-    }
-    if (user.getFirstSignInTime() != null) {
-      profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
-    }
-    if (user.getIdVerificationBypassTime() != null) {
-      profile.setIdVerificationBypassTime(user.getIdVerificationBypassTime().getTime());
-    }
-    if (user.getIdVerificationCompletionTime() != null) {
-      profile.setIdVerificationCompletionTime(user.getIdVerificationCompletionTime().getTime());
-    }
-    if (user.getDataAccessLevelEnum() != null) {
-      profile.setDataAccessLevel(user.getDataAccessLevelEnum());
-    }
-    if (user.getBetaAccessBypassTime() != null) {
-      profile.setBetaAccessBypassTime(user.getBetaAccessBypassTime().getTime());
-    }
-    if (user.getBetaAccessRequestTime() != null) {
-      profile.setBetaAccessRequestTime(user.getBetaAccessRequestTime().getTime());
-    }
-    if (user.getEmailVerificationCompletionTime() != null) {
-      profile.setEmailVerificationCompletionTime(
-          user.getEmailVerificationCompletionTime().getTime());
-    }
-    if (user.getEmailVerificationBypassTime() != null) {
-      profile.setEmailVerificationBypassTime(user.getEmailVerificationBypassTime().getTime());
-    }
-    if (user.getDataUseAgreementCompletionTime() != null) {
-      profile.setDataUseAgreementCompletionTime(user.getDataUseAgreementCompletionTime().getTime());
-    }
-    if (user.getDataUseAgreementBypassTime() != null) {
-      profile.setDataUseAgreementBypassTime(user.getDataUseAgreementBypassTime().getTime());
-    }
-    if (user.getDataUseAgreementSignedVersion() != null) {
-      profile.setDataUseAgreementSignedVersion(user.getDataUseAgreementSignedVersion());
-    }
-    if (user.getTwoFactorAuthCompletionTime() != null) {
-      profile.setTwoFactorAuthCompletionTime(user.getTwoFactorAuthCompletionTime().getTime());
-    }
-    if (user.getTwoFactorAuthBypassTime() != null) {
-      profile.setTwoFactorAuthBypassTime(user.getTwoFactorAuthBypassTime().getTime());
-    }
-    if (user.getAuthoritiesEnum() != null) {
-      profile.setAuthorities(new ArrayList<>(user.getAuthoritiesEnum()));
-    }
-    if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
-      profile.setPageVisits(
-          user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT).collect(Collectors.toList()));
-    }
-    if (user.getDemographicSurvey() != null) {
-      profile.setDemographicSurvey(TO_CLIENT_DEMOGRAPHIC_SURVEY.apply(user.getDemographicSurvey()));
-    }
-    if (user.getAddress() != null) {
-      profile.setAddress(TO_CLIENT_ADDRESS_SURVEY.apply(user.getAddress()));
-    }
-    if (user.getDegreesEnum() != null) {
-      profile.setDegrees(user.getDegreesEnum());
-    }
+    Profile profile = profileMapper.dbUserToProfile(user);
     profile.setInstitutionalAffiliations(
         user.getInstitutionalAffiliations().stream()
             .map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
@@ -227,11 +138,6 @@ public class ProfileService {
                 profile.setVerifiedInstitutionalAffiliation(
                     verifiedInstitutionalAffiliationMapper.dbToModel(
                         verifiedInstitutionalAffiliation)));
-
-    profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
-
-    profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));
-    profile.setFreeTierDollarQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
 
     Optional<DbUserTermsOfService> latestTermsOfServiceMaybe =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());

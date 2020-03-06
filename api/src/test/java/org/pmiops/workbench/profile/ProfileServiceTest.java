@@ -37,7 +37,11 @@ public class ProfileServiceTest {
 
   @TestConfiguration
   @MockBean({FreeTierBillingService.class})
-  @Import({ProfileService.class, VerifiedInstitutionalAffiliationMapperImpl.class})
+  @Import({
+      ProfileMapperImpl.class,
+      ProfileService.class,
+      VerifiedInstitutionalAffiliationMapperImpl.class
+  })
   static class Configuration {}
 
   @Test

@@ -4,9 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.DataAccessLevel;
 
 @Mapper(
     componentModel = "spring",

@@ -27,6 +27,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -141,6 +142,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     UserServiceImpl.class,
     ProfileService.class,
     ProfileController.class,
+    ProfileMapperImpl.class,
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
