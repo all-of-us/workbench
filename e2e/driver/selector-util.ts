@@ -42,7 +42,7 @@ export async function exists(page: Page, selector: string) {
  * @param page Puppeteer.Page
  * @param selector CSS selector
  */
-export async function visible (page: Page, selector: string) {
+export async function visible(page: Page, selector: string) {
   return page.evaluate(css => {
     const element = document.querySelector(css);
     return !!(element && (element.offsetWidth || element.offsetHeight || element.getClientRects().length))

@@ -2,7 +2,7 @@ import * as puppeteer from 'puppeteer';
 
 const defaultLaunchOpts = {
   headless: !process.env.PUPPETEER_HEADLESS,
-  slowMo: 10,
+  slowMo: 20,
   defaultViewport: null,
   devtools: false,
   ignoreDefaultArgs: ['--disable-extensions'],
@@ -13,7 +13,9 @@ const defaultLaunchOpts = {
     '--disable-gpu',
     '--disable-background-timer-throttling',
     '--disable-backgrounding-occluded-windows',
-    '--disable-renderer-backgrounding'
+    '--disable-renderer-backgrounding',
+    '--disable-web-security',
+    '--disable-features=IsolateOrigins,site-per-process',
   ]
 };
 

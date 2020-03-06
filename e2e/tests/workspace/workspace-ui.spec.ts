@@ -1,13 +1,14 @@
 import {Page} from 'puppeteer';
-import WebElement from '../../app/aou-elements/WebElement';
-import WorkspaceCard from '../../app/page-mixin/WorkspaceCard';
-import {WorkspacesPage} from '../../app/WorkspacesPage';
+import WebElement from '../../app/aou-elements/web-element';
+import {NavLink} from '../../app/authenticated-page';
+import HomePage from '../../app/home-page';
+import WorkspaceCard from '../../app/workspace-card';
+import WorkspacesPage from '../../app/workspaces-page';
 
-const Chrome = require('../../driver/ChromeDriver');
-jest.setTimeout(60 * 1000);
+const Chrome = require('../../driver/chrome-driver');
 
-describe('Workspace', () => {
-
+jest.setTimeout(2 * 60 * 1000);
+describe('Workspace ui tests', () => {
   let page: Page;
 
   beforeEach(async () => {
@@ -18,7 +19,8 @@ describe('Workspace', () => {
     await Chrome.teardown();
   });
 
-  test('Workspace cards have same UI size', async () => {
+
+  test('Workspace cards all have same ui size', async () => {
     const cards = await WorkspaceCard.getAllCards(page);
     let width;
     let height;
@@ -39,10 +41,25 @@ describe('Workspace', () => {
   // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
   test('Click Create New Workspace link on My Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
-    await workspaces.goToURL();
+    await workspaces.goToUrl();
     const workspaceEdit = await workspaces.clickCreateNewWorkspace();
     const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
     expect(await workspaceNameTextbox.isVisible()).toBe(true);
+  });
+
+  test('Check Workspace card on Your Workspaces page', async () => {
+    const home = new HomePage(page);
+    await home.waitForReady();
+    await home.goTo(NavLink.YOUR_WORKSPACES);
+    await new WorkspacesPage(page).waitForReady();
+
+    await WorkspaceCard.getAllCards(page);
+    const anyCard = await WorkspaceCard.getAnyCard(page);
+    const cardName = await anyCard.getResourceCardName();
+    expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
+    expect(await anyCard.getEllipsisIcon()).toBeTruthy();
+    const links = await anyCard.getPopupLinkTextsArray();
+    expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 
 

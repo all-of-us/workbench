@@ -71,45 +71,6 @@ export async function exists(page: Page, element: ElementHandle) {
   }, element);
 }
 
-/**
- * <pre>
- *  Check if the element is visible
- * </pre>
- * @param {Page} page
- * @param {ElementHandle} element
- */
-export async function isVisible(page: Page, element: ElementHandle) {
-  return await page.evaluate(elem => {
-    return elem.boundingBox() !== null;
-  }, element);
-}
-
-export async function isElementVisible(element, page) {
-  const isVisibleHandle = await page.evaluateHandle((e) =>
-  {
-    const style = window.getComputedStyle(e);
-    return (style && style.display !== 'none' &&
-       style.visibility !== 'hidden' && style.opacity !== '0');
-  }, element);
-  const jValue = await isVisibleHandle.jsonValue();
-  const boxModelValue = await element.boxModel();
-  if (jValue && boxModelValue) {
-    return true;
-  }
-  return false;
-}
-
-export async function getCursorValue(page: Page, element: ElementHandle) {
-  const cursor = await page.evaluateHandle((e) => {
-    const style = window.getComputedStyle(e);
-    return style.cursor;
-  }, element);
-
-  const cursorValue = await cursor.jsonValue();
-  return cursorValue;
-
-}
-
 export async function findText(page: Page, txt: string) {
   return (await page.content()).match(txt);
 }

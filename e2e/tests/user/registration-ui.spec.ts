@@ -1,15 +1,12 @@
-import WebElement from '../../app/aou-elements/WebElement';
-import {CreateAccountPage, INSTITUTION_AFFILIATION} from '../../app/CreateAccountPage';
-import GoogleLoginPage from '../../app/GoogleLoginPage';
+import WebElement from '../../app/aou-elements/web-element';
+import CreateAccountPage, {INSTITUTION_AFFILIATION} from '../../app/create-account-page';
+import GoogleLoginPage from '../../app/google-login';
 import {findText} from '../../driver/element-util';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
-import {waitUntilFindTexts} from '../../driver/waitFuncs';
-require('../../driver/waitFuncs');
-
-jest.setTimeout(60 * 1000);
 
 const configs = require('../../resources/workbench-config');
 
+jest.setTimeout(2 * 60 * 1000);
 describe('User registration tests:', () => {
 
   let browser;
@@ -33,8 +30,7 @@ describe('User registration tests:', () => {
   });
 
 
-  test('Entered non-empty invalid invitation key', async () => {
-
+  test('Entered invalid invitation key', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.goto();
 
@@ -42,27 +38,22 @@ describe('User registration tests:', () => {
     await createAccountButton.click();
 
     const createAccountPage = new CreateAccountPage(page);
-
-    const keyIsNotValidError = 'Invitation Key is not Valid.';
-    const header = 'Enter your Invitation Key:';
-
-    const headerDisplayed = await waitUntilFindTexts(page, header);
+    const headerDisplayed = await createAccountPage.waitForTextExists('Enter your Invitation Key:');
     expect(headerDisplayed).toBeTruthy();
+    const keyIsNotValidError = 'Invitation Key is not Valid.';
     const errDisplayed = await findText(page, keyIsNotValidError);
     expect(errDisplayed).toBeFalsy();
 
     const badInvitationKey = process.env.INVITATION_KEY + '1';
     await createAccountPage.fillOutInvitationKey(badInvitationKey);
-    const found = await waitUntilFindTexts(page, keyIsNotValidError);
+    const found = await createAccountPage.waitForTextExists(keyIsNotValidError);
     expect(await found.jsonValue()).toBeTruthy();
     // Page should be unchanged. User can re-enter invitation key
     expect(await createAccountPage.getInvitationKeyInput()).toBeTruthy();
-
   });
 
 
   test('Loading Terms of Use and Privacy statement page', async () => {
-
     const loginPage = new GoogleLoginPage(page);
     await loginPage.goto();
 
@@ -102,9 +93,9 @@ describe('User registration tests:', () => {
     expect(await termsOfUseCheckbox.isDisabled()).toBe(false);
 
     // check both checkboxes
-    await (await createAccountPage.getPrivacyStatementLabel()).click();
+    await (await createAccountPage.getPrivacyStatementCheckbox()).check();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
-    await (await createAccountPage.getTermsOfUseLabel()).click();
+    await (await createAccountPage.getTermsOfUseCheckbox()).check();
 
     // verify checked
     expect(await privacyStatementCheckbox.isChecked()).toBe(true);
@@ -112,14 +103,12 @@ describe('User registration tests:', () => {
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
 
     // uncheck a checkbox then check NEXT button is again disabled
-    await (await createAccountPage.getTermsOfUseLabel()).click();
+    await (await createAccountPage.getTermsOfUseCheckbox()).unCheck();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
-
   });
 
 
   test('Loading User information page', async () => {
-
     const loginPage = new GoogleLoginPage(page);
     await loginPage.goto();
 
@@ -137,14 +126,15 @@ describe('User registration tests:', () => {
     }, {timeout: 30000});
 
     await createAccountPage.scrollToLastPdfPage();
-    // check on checkboxes
-    await (await createAccountPage.getPrivacyStatementLabel()).click();
-    await (await createAccountPage.getTermsOfUseLabel()).click();
+
+    // check checkboxes
+    await (await createAccountPage.getPrivacyStatementCheckbox()).check();
+    await (await createAccountPage.getTermsOfUseCheckbox()).check();
     const agreementPageButton = await createAccountPage.getNextButton();
     await agreementPageButton.click();
 
     // Step 3: Enter user information. Should be on Create your account: Step 1 of 2 page
-    expect(await waitUntilFindTexts(page, 'Create your account')).toBeTruthy();
+    expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
 
     // the NEXT button on User Information page should be disabled until all required fields are filled
     const userInforPageButton = await createAccountPage.getNextButton();
@@ -172,7 +162,6 @@ describe('User registration tests:', () => {
       expect(isDisabled).toBe(false);
       await elem.dispose();
     }
-
   });
 
 

@@ -1,14 +1,10 @@
-import GoogleLoginPage, {selectors} from '../../app/GoogleLoginPage';
+import GoogleLoginPage, {selectors} from '../../app/google-login';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
-import {waitUntilFindTexts} from '../../driver/waitFuncs';
-require('../../driver/waitFuncs');
-
-jest.setTimeout(60 * 1000);
 
 const configs = require('../../resources/workbench-config');
 
+jest.setTimeout(2 * 60 * 1000);
 describe('Login tests:', () => {
-
   let browser;
   let incognitoContext;
   let page;
@@ -32,32 +28,30 @@ describe('Login tests:', () => {
     await browser.close();
   });
 
-  test('Open Workspaces page before login redirects to login', async () => {
+  test('Open AoU Workspaces page before login redirects to login page', async () => {
     const url = configs.uiBaseUrl + configs.workspacesUrlPath;
     const loginPage = new GoogleLoginPage(page);
     await page.goto(url, {waitUntil: 'networkidle0'});
-    await page.waitFor(2000);
     expect(await loginPage.loginButton).toBeTruthy();
   });
 
-  test('Wrong password', async () => {
+  test('Entered wrong password', async () => {
     const INCORRECT_PASSWORD = 'wrongpassword123';
     const loginPage = new GoogleLoginPage(page);
     await loginPage.goto();
 
     const naviPromise = page.waitForNavigation({waitUntil: 'networkidle0'});
-    const googleButton = await loginPage.loginButton;
+    const googleButton = await loginPage.loginButton();
     await googleButton.click();
     await naviPromise;
 
     await loginPage.enterEmail(configs.userEmail);
     await loginPage.enterPassword(INCORRECT_PASSWORD);
-    const button = await page.waitForXPath(selectors.passwordNextButton);
+    const button = await page.waitForXPath(selectors.NextButton);
     await button.click();
 
-    const err = await waitUntilFindTexts(page, 'Wrong password. Try again');
+    const err = await loginPage.waitForTextExists('Wrong password. Try again');
     expect(err).toBeTruthy();
-
   });
 
 });

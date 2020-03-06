@@ -22,3 +22,17 @@ export async function waitUntilNetworkIdle(page: Page) {
     networkidle2(),
   ]);
 }
+
+export async function handleRecaptcha(page: Page) {
+  const css = '[id="recaptcha-anchor"][role="checkbox"]';
+  await page.frames().find(async (frame) => {
+    for(const childFrame of frame.childFrames()) {
+      const recaptcha = await childFrame.$$(css);
+      if (recaptcha.length > 0) {
+        await recaptcha[0].click();
+        return;
+      }
+    }
+
+  });
+}

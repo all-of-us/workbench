@@ -1,12 +1,10 @@
-import Button from '../../app/aou-elements/Button';
-import GoogleLoginPage from '../../app/GoogleLoginPage';
-import {HomePage} from '../../app/HomePage';
-import {LINK} from '../../app/page-mixin/PageNavigation';
-import Profile from '../../app/ProfilePage';
-import {WorkspacesPage} from '../../app/WorkspacesPage';
+import Button from '../../app/aou-elements/button';
+import {NavLink} from '../../app/authenticated-page';
+import GoogleLoginPage from '../../app/google-login';
+import ProfilePage from '../../app/profile-page';
+import WorkspacesPage from '../../app/workspaces-page';
 import launchBrowser from '../../driver/puppeteer-launch';
-
-jest.setTimeout(60 * 1000);
+import {waitForExists} from '../../driver/xpath-handler';
 
 const configs = require('../../resources/workbench-config');
 
@@ -17,74 +15,58 @@ export const HELP_DESK = {
   REQUEST_ADDITIONAL_BILLING_CREDITS: 'Request additional billing credits',
 };
 
+jest.setTimeout(2 * 60 * 1000);
 describe('Navigation', () => {
-
   let browser;
   let page;
 
-  beforeAll(async () => {
-    browser = await launchBrowser();
-  });
-
   beforeEach(async () => {
+    browser = await launchBrowser();
     page = await browser.newPage();
     await page.setUserAgent(configs.puppeteerUserAgent);
   });
 
   afterEach(async () => {
-    await page.close();
-    await page.waitFor(1000);
-  });
-
-  afterAll(async () => {
     await browser.close();
   });
 
 
-  test('App navigation links work', async () => {
-    const loginPage = new GoogleLoginPage(page);
-    await loginPage.login();
-
-    const homePage = new HomePage(page);
-    await homePage.waitForReady();
+  test('Check app side-nav work', async () => {
+    const homePage = await GoogleLoginPage.logIn(page);
     expect(await homePage.isLoaded()).toBe(true);
 
     // Select Profile link
-    await homePage.goTo(LINK.PROFILE);
-    const profilePage = new Profile(page);
+    await homePage.goTo(NavLink.PROFILE);
+    const profilePage = new ProfilePage(page);
     await profilePage.waitForReady();
     expect(await profilePage.isLoaded()).toBe(true);
 
     // check user name in dropdown matches names on Profile page
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();
-    await homePage.openDropdown();
+    await homePage.openSideNav();
     const displayedUsername = await homePage.getUserName();
     expect(displayedUsername).toBe(`${fname} ${lname}`);
 
     // Select Your Workspaces link
-    await homePage.goTo(LINK.YOUR_WORKSPACES);
+    await homePage.goTo(NavLink.YOUR_WORKSPACES);
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForReady();
     expect(await workspacesPage.isLoaded()).toBe(true);
 
     // Select Home link
-    await homePage.goTo(LINK.HOME);
+    await homePage.goTo(NavLink.HOME);
     await homePage.waitForReady();
     expect(await homePage.isLoaded()).toBe(true);
   });
 
-  test('Check Contact Us form', async () => {
-    const homePage = new HomePage(page);
-    await homePage.goToURL();
-
-    const iframeTitle = 'Find more information here';
-    let iframeHandle = await page.$(`iframe[title='${iframeTitle}']`);
+  test('User can see the Contact Us form', async () => {
+    const homePage = await GoogleLoginPage.logIn(page);
 
     // Select Contact Us
-    await homePage.goTo(LINK.CONTACT_US);
+    await homePage.goTo(NavLink.CONTACT_US);
 
-    iframeHandle = await page.waitForSelector(`iframe[title='${iframeTitle}']`);
+    const iframeHandle = await page.waitForSelector('iframe[title="Find more information here"]');
     const newIframe = await iframeHandle.contentFrame();
 
     const askQuestionAboutButton = new Button(newIframe);
@@ -106,20 +88,20 @@ describe('Navigation', () => {
     expect(await requestBillingCreditsButton.isVisible()).toBe(true);
     await requestBillingCreditsButton.dispose();
 
-    const minimizeButton = await newIframe.$('button[aria-label=\'Minimize widget\']');
+    const minimizeButton = await newIframe.$('button[aria-label="Minimize widget"]');
     await minimizeButton.click();
 
     expect(await askQuestionAboutButton.isVisible()).toBe(false);
     await askQuestionAboutButton.dispose();
   });
 
-  test('Sign Out', async () => {
-    const homePage = new HomePage(page);
-    await homePage.goToURL();
-
+  test('User can Sign Out', async () => {
+    const homePage = await GoogleLoginPage.logIn(page);
     // Select Sign Out link
-    await homePage.goTo(LINK.SIGN_OUT);
-    expect(await page.url()).toEqual(expect.stringMatching(/\/login$/));
+    await homePage.goTo(NavLink.SIGN_OUT);
+    await waitForExists(page, '//*[text()="Redirect Notice"]');
+    const href = await page.evaluate(() => location.href);
+    expect(href).toEqual(expect.stringMatching(/(\/|%2F)login$/));
   });
 
 });
