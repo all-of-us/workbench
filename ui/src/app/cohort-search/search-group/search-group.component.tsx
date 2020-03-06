@@ -443,63 +443,105 @@ export const SearchGroup = withCurrentWorkspace()(
       return counts.includes(0) || inputError;
     }
 
-    render() {
-      const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
-      const {count, criteriaMenuOptions: {domainTypes, programTypes}, error, inputError, inputTouched, loading, overlayStyle} = this.state;
-      const showGroupError = error || (temporal && this.temporalError);
-      const groupError = temporal && this.temporalError
-        ? 'Please complete criteria selections before saving temporal relationship.'
-        : 'Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.';
-      const domainMap = (domain: any, temporalGroup: number) => {
-        if (!!domain.children) {
-          return {label: domain.name, items: domain.children.map((dt) => domainMap(dt, temporalGroup))};
-        }
-        return {label: domain.name, command: () => this.launchWizard(domain, temporalGroup)};
-      };
-      const criteriaMenuItems = temporal
-        ? domainTypes.map((dt) => domainMap(dt, 0))
+    mapCriteriaMenuItem(domain: any, temporalGroup: number) {
+      if (!!domain.children) {
+        return {label: domain.name, items: domain.children.map((dt) => this.mapCriteriaMenuItem(dt, temporalGroup))};
+      }
+      return {label: domain.name, command: () => this.launchWizard(domain, temporalGroup)};
+    }
+
+    get criteriaMenuItems() {
+      const {criteriaMenuOptions: {domainTypes, programTypes}} = this.state;
+      return this.props.group.temporal
+        ? domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
         : [
           {label: 'Program Data', className: 'menuitem-header'},
-          ...programTypes.map((dt) => domainMap(dt, 0)),
+          ...programTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
           {separator: true},
           {label: 'Domains', className: 'menuitem-header'},
-          ...domainTypes.map((dt) => domainMap(dt, 0))
+          ...domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
         ];
-      const temporalCriteriaMenuItems = domainTypes.map((dt) => domainMap(dt, 1));
-      const groupMenuItems = [
+    }
+
+    get temporalCriteriaMenuItems() {
+      return this.state.criteriaMenuOptions.domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 1));
+    }
+
+    get mentionMenuItems() {
+      return temporalMentions.map(tm => ({label: temporalEnumToText(tm), command: () => this.setMention(tm)}));
+    }
+
+    get timeMenuItems() {
+      return temporalTimes.map(tt => ({label: temporalEnumToText(tt), command: () => this.setTime(tt)}));
+    }
+
+    get groupMenuItems() {
+      return [
         {label: 'Suppress group from total count', command: () => this.hide('hidden')},
         {label: 'Delete group', command: () => this.remove()},
       ];
-      const mentionMenuItems = temporalMentions.map(tm => ({label: temporalEnumToText(tm), command: () => this.setMention(tm)}));
-      const timeMenuItems = temporalTimes.map(tt => ({label: temporalEnumToText(tt), command: () => this.setTime(tt)}));
+    }
+
+    get groupErrorText() {
+      if (this.state.error) {
+        return 'Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.';
+      }
+      if (!this.hasActiveItems) {
+        return 'All criteria in this group are suppressed. Un-suppress criteria to update the group count based on the visible criteria.';
+      }
+      if (this.props.group.temporal && this.temporalError) {
+        return 'Please complete criteria selections before saving temporal relationship.';
+      }
+      return '';
+    }
+
+    render() {
+      const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
+      const {count, error, inputError, inputTouched, loading, overlayStyle} = this.state;
+      const showGroupCount = !loading && !error && this.hasActiveItems && (!temporal || !this.temporalError) && count !== undefined;
+      const showGroupError = error || !this.hasActiveItems || (temporal && this.temporalError);
       return <React.Fragment>
         <style>{css}</style>
         <div id={id} style={styles.card}>
           {/* Group Header */}
           <div style={styles.cardHeader}>
-            <Menu style={styles.menu} appendTo={document.body} model={groupMenuItems} popup ref={el => this.groupMenu = el} />
-            <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(e) => this.groupMenu.toggle(e)}>
+            <Menu style={styles.menu}
+              appendTo={document.body}
+              model={this.groupMenuItems}
+              popup
+              ref={el => this.groupMenu = el} />
+            <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}}onClick={(e) => this.groupMenu.toggle(e)}>
               <ClrIcon style={{color: colors.accent}} shape='ellipsis-vertical'/>
             </Clickable>
             Group {index + 1}
           </div>
           {/* Temporal mention dropdown */}
           {temporal && <div style={styles.cardBlock}>
-            <Menu style={styles.menu} appendTo={document.body} model={mentionMenuItems} popup ref={el => this.mentionMenu = el} />
+            <Menu style={styles.menu}
+              appendTo={document.body}
+              model={this.mentionMenuItems}
+              popup
+              ref={el => this.mentionMenu = el} />
             <button style={styles.menuButton} onClick={(e) => this.mentionMenu.toggle(e)}>
               {temporalEnumToText(mention)} <ClrIcon shape='caret down' size={12}/>
             </button>
           </div>}
           {/* Main search item list/temporal group 0 items */}
           {this.items.map((item, i) => <div key={i} data-test-id='item-list' style={styles.searchItem}>
-            <SearchGroupItem role={role} groupId={id} item={item} index={i}
+            <SearchGroupItem role={role}
+              groupId={id}
+              item={item}
+              index={i}
               updateGroup={() => this.update()}/>
             {status === 'active' && <div style={styles.itemOr}>OR</div>}
           </div>)}
           {/* Criteria menu for main search item list/temporal group 0 items */}
           <div style={styles.cardBlock}>
-            <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}} appendTo={document.body}
-              model={criteriaMenuItems} popup ref={el => this.criteriaMenu = el} />
+            <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}}
+              appendTo={document.body}
+              model={this.criteriaMenuItems}
+              popup
+              ref={el => this.criteriaMenu = el} />
             <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
               Add Criteria <ClrIcon shape='caret down' size={12}/>
             </button>
@@ -510,7 +552,11 @@ export const SearchGroup = withCurrentWorkspace()(
               {time !== TemporalTime.DURINGSAMEENCOUNTERAS && inputError && inputTouched && <div style={styles.inputError}>
                 Please enter a positive number
               </div>}
-              <Menu style={styles.menu} appendTo={document.body} model={timeMenuItems} popup ref={el => this.timeMenu = el} />
+              <Menu style={styles.menu}
+                appendTo={document.body}
+                model={this.timeMenuItems}
+                popup
+                ref={el => this.timeMenu = el} />
               <button style={styles.menuButton} onClick={(e) => this.timeMenu.toggle(e)}>
                 {temporalEnumToText(time)} <ClrIcon shape='caret down' size={12}/>
               </button>
@@ -521,13 +567,17 @@ export const SearchGroup = withCurrentWorkspace()(
             </div>
             {/* Temporal group 1 items */}
             {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
-              <SearchGroupItem role={role} groupId={id} item={item} index={i}
+              <SearchGroupItem
+                role={role}
+                groupId={id}
+                item={item}
+                index={i}
                 updateGroup={() => this.update()}/>
               {status === 'active' && <div style={styles.itemOr}>OR</div>}
             </div>)}
             {/* Criteria menu for temporal group 1 items */}
             <div style={styles.cardBlock}>
-              <Menu style={styles.menu} appendTo={document.body} model={temporalCriteriaMenuItems}
+              <Menu style={styles.menu} appendTo={document.body} model={this.temporalCriteriaMenuItems}
                 popup ref={el => this.temporalCriteriaMenu = el} />
               <button style={styles.menuButton} onClick={(e) => this.temporalCriteriaMenu.toggle(e)}>
                 Add Criteria <ClrIcon shape='caret down' size={12}/>
@@ -538,25 +588,25 @@ export const SearchGroup = withCurrentWorkspace()(
           {!!items.length && <div style={styles.cardHeader}>
             <div style={this.disableTemporal ? {...styles.row, cursor: 'not-allowed'} : styles.row}>
               <div style={{...styles.col6, display: 'flex'}}>
-                <InputSwitch checked={temporal} disabled={this.disableTemporal} onChange={(e) => this.handleTemporalChange(e)}/>
+                <InputSwitch
+                  checked={temporal}
+                  disabled={this.disableTemporal}
+                  onChange={(e) => this.handleTemporalChange(e)}/>
                 <div style={{paddingLeft: '0.5rem'}}>Temporal</div>
               </div>
               <div style={{...styles.col6, textAlign: 'right'}}>
                 <div>
                   Group Count:&nbsp;
                   {loading && (!temporal || !this.temporalError) && <Spinner size={16}/>}
-                  {!loading && <span>
-                    {(!temporal || !this.temporalError) && this.hasActiveItems && count !== undefined && count.toLocaleString()}
-                    {(count === null || !this.hasActiveItems) && !temporal && <span>
-                      -- <ClrIcon style={{color: colors.warning}} shape='warning-standard' size={21}/>
-                    </span>}
+                  {showGroupCount && <span>
+                    {count.toLocaleString()}
                   </span>}
                   {!temporal && error &&
                     <ClrIcon className='is-solid' style={{color: colors.white}} shape='exclamation-triangle' size={22}/>
                   }
                   {showGroupError && <span>
                     -- &nbsp;
-                    <TooltipTrigger content={groupError}>
+                    <TooltipTrigger content={this.groupErrorText}>
                       <ClrIcon style={{color: colors.warning}} shape='warning-standard' size={18}/>
                     </TooltipTrigger>
                   </span>}

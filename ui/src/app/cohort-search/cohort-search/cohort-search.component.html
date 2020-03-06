@@ -9,7 +9,7 @@
           <app-list-search-group-list
             [role]="'includes'"
             [groups]="criteria.includes"
-            [updated]="updateGroupLists"
+            [updated]="updateGroupListsCount"
             [updateRequest]="updateRequest">
           </app-list-search-group-list>
         </div>
@@ -19,7 +19,7 @@
             *ngIf="overview"
             [role]="'excludes'"
             [groups]="criteria.excludes"
-            [updated]="updateGroupLists"
+            [updated]="updateGroupListsCount"
             [updateRequest]="updateRequest">
           </app-list-search-group-list>
         </div>

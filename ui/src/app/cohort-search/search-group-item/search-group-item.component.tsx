@@ -12,7 +12,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CriteriaType, DomainType, Modifier, ModifierType, ResourceType, SearchRequest} from 'generated/fetch';
+import {CriteriaType, DomainType, Modifier, ModifierType, ResourceType, SearchGroupItem as Item, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
@@ -120,9 +120,14 @@ class SearchGroupItemParameter extends React.Component<{parameter: any}, {toolti
   }
 }
 
+interface ItemProp extends Item {
+  count: number;
+  status: string;
+}
+
 interface Props {
   groupId: string;
-  item: any;
+  item: ItemProp;
   index: number;
   role: keyof SearchRequest;
   updateGroup: Function;
@@ -278,7 +283,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {item: {count, modifiers, name, searchParameters, status, type}} = this.props;
       const {error, loading, paramListOpen, renaming} = this.state;
       const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
-      const titleDisplay = type === DomainType.PERSON ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
+      const titleDisplay = type === DomainType.PERSON.toString() ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
       const itemName = !!name ? name : `Contains ${titleDisplay} ${codeDisplay}`;
       const showCount = !loading && status !== 'hidden' && count !== undefined;
       const actionItems = [
