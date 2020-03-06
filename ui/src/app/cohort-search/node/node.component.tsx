@@ -86,14 +86,22 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   componentDidMount(): void {
     const {node} = this.props;
-    const {error} = this.state;
-    this.subscription = selectionsStore.subscribe(selections => {
-      this.setState({selected: selections.includes(this.paramId)});
+    const {children, error} = this.state;
+    this.subscription = subtreePathStore.subscribe(path => {
+      const expanded = path.includes(node.id.toString());
+      this.setState({expanded});
+      if (expanded && !children) {
+        this.loadChildren();
+      }
     });
+
+    this.subscription.add(selectionsStore.subscribe(selections => {
+      this.setState({selected: selections.includes(this.paramId)});
+    }));
 
     this.subscription.add(subtreeSelectedStore.subscribe(id => {
       const selected = id === node.id;
-      this.setState({selected});
+      // this.setState({selected});
       if (selected) {
         setTimeout(() => scrollStore.next(node.id));
       }
@@ -235,7 +243,6 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const {children, expanded, loading, selected} = this.state;
     return <React.Fragment>
       <div id={`node${id}`} className='clr-treenode-link container' onClick={() => this.toggleExpanded()}>
-        {/*  node-info */}
         {group && <div style={styles.iconContainer}>
           {loading
             ? <Spinner size={16}/>
@@ -271,11 +278,9 @@ interface State {
   children: any;
   empty: boolean;
   error: boolean;
-  expanded: boolean;
   ingredients: any;
   loading: boolean;
   searchTerms: string;
-  selected: boolean;
 }
 
 export const CriteriaTree = withCurrentWorkspace()(class extends React.Component<Props, State> {
@@ -286,43 +291,33 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       children: undefined,
       empty: false,
       error: false,
-      expanded: false,
       ingredients: undefined,
       loading: true,
       searchTerms: undefined,
-      selected: false
     };
   }
 
   componentDidMount(): void {
-    const {node, wizard} = this.props;
+    const {wizard} = this.props;
     const {children} = this.state;
     this.loadRootNodes();
-    this.subscription = subtreePathStore.subscribe(path => {
-      this.setState({expanded: path.includes(node.id.toString())});
-    });
-
-    this.subscription.add(autocompleteStore.subscribe(searchTerms => {
+    this.subscription = autocompleteStore.subscribe(searchTerms => {
       this.setState({searchTerms});
       if (wizard.fullTree && children) {
         const filteredChildren = this.filterTree(JSON.parse(JSON.stringify(children)), () => {});
         this.setState({children: filteredChildren});
       }
-    }));
+    });
   }
 
   componentWillUnmount(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    if (this.state.selected) {
-      subtreeSelectedStore.next(undefined);
-      scrollStore.next(undefined);
-    }
   }
 
   loadRootNodes() {
-    const {node: {domainId, id, isStandard, name, type}, wizard} = this.props;
+    const {node: {domainId, id, isStandard, type}} = this.props;
     // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
     if (domainId === DomainType.SURVEY.toString()) {
       this.trackEvent();
@@ -360,14 +355,12 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
   trackEvent() {
     const {node: {domainId, name, parentId, subtype}} = this.props;
-    if (parentId === 0 && this.state.expanded) {
-      const formattedName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `${domainToTitle(domainId)} - ${formattedName} - Expand`
-      );
-    }
+    const formattedName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
+    triggerEvent(
+      'Cohort Builder Search',
+      'Click',
+      `${domainToTitle(domainId)} - ${formattedName} - Expand`
+    );
   }
 
   isMatch(name: string) {
