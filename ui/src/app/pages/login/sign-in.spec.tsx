@@ -156,7 +156,7 @@ describe('SignInReact', () => {
     expect(steps).toEqual([
       SignInStep.LANDING,
       SignInStep.TERMS_OF_SERVICE,
-      SignInStep.ACCOUNT_CREATION,
+      SignInStep.ACCOUNT_DETAILS,
       SignInStep.DEMOGRAPHIC_SURVEY,
       SignInStep.SUCCESS_PAGE
     ]);

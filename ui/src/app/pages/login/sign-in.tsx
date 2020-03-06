@@ -23,6 +23,7 @@ import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
 import * as React from 'react';
+import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
@@ -80,13 +81,13 @@ export enum SignInStep {
   // Landing page. User can choose to sign in or create an account.
   LANDING,
   // Interstitial step, where a user must enter their invitation key.
-  //
-  // TODO: this needs to be controllable per-environment before beta launch!
   INVITATION_KEY,
   // Terms of Service page. User must read and acknowledge the privacy statement & TOS.
   TERMS_OF_SERVICE,
+  // Institutional affiliation step. Includes institution drop-down and contact email.
+  INSTITUTIONAL_AFFILIATION,
   // Basic account creation page. User chooses a username and provides basic name / address info.
-  ACCOUNT_CREATION,
+  ACCOUNT_DETAILS,
   // Optional demographic survey. Completion of this step triggers actual user creation.
   DEMOGRAPHIC_SURVEY,
   // Account creation success page.
@@ -153,7 +154,14 @@ export const createEmptyProfile = (requireInstitutionalVerification: boolean = f
     degrees: [] as Degree[],
   };
 
-  if (!requireInstitutionalVerification) {
+  if (requireInstitutionalVerification) {
+    profile.verifiedInstitutionalAffiliation = {
+      institutionShortName: undefined,
+      institutionDisplayName: undefined,
+      institutionalRoleEnum: undefined,
+      institutionalRoleOtherText: undefined,
+    };
+  } else {
     // initialize the institutional affiliations from the old unverified flow
     // (the new flow does not require it)
     profile.institutionalAffiliations = [
@@ -179,7 +187,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
   constructor(props: SignInProps) {
     super(props);
     this.state = {
-      currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
+      currentStep: props.initialStep ? props.initialStep : SignInStep.INSTITUTIONAL_AFFILIATION,
       invitationKey: null,
       termsOfServiceVersion: null,
       // This defines the profile state for a new user flow. This will get passed to each
@@ -206,16 +214,28 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
    * Made visible for ease of unit-testing.
    */
   public getAccountCreationSteps(): Array<SignInStep> {
-    const {requireInvitationKey} = this.props.serverConfig;
+    const {requireInvitationKey, requireInstitutionalVerification} = this.props.serverConfig;
 
     let steps = [
       SignInStep.LANDING,
       SignInStep.INVITATION_KEY,
       SignInStep.TERMS_OF_SERVICE,
-      SignInStep.ACCOUNT_CREATION,
+      SignInStep.ACCOUNT_DETAILS,
       SignInStep.DEMOGRAPHIC_SURVEY,
       SignInStep.SUCCESS_PAGE
     ];
+    if (requireInstitutionalVerification) {
+      steps = [
+        SignInStep.LANDING,
+        SignInStep.INVITATION_KEY,
+        SignInStep.TERMS_OF_SERVICE,
+        SignInStep.INSTITUTIONAL_AFFILIATION,
+        SignInStep.ACCOUNT_DETAILS,
+        SignInStep.DEMOGRAPHIC_SURVEY,
+        SignInStep.SUCCESS_PAGE
+      ];
+    }
+
 
     if (!requireInvitationKey) {
       steps = fp.remove(step => step === SignInStep.INVITATION_KEY, steps);
@@ -248,6 +268,19 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
   }
 
   private renderSignInStep(currentStep: SignInStep) {
+    const onComplete = (profile: Profile) => {
+      this.setState({
+        profile: profile,
+        currentStep: this.getNextStep(currentStep)
+      });
+    };
+    const onPrevious = (profile: Profile) => {
+      this.setState({
+        profile: profile,
+        currentStep: this.getPreviousStep(currentStep)
+      });
+    };
+
     switch (currentStep) {
       case SignInStep.LANDING:
         return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
@@ -266,30 +299,27 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
             termsOfServiceVersion: 1,
             currentStep: this.getNextStep(currentStep)
           })}/>;
-      case SignInStep.ACCOUNT_CREATION:
+      case SignInStep.INSTITUTIONAL_AFFILIATION:
+        return <AccountCreationInstitution
+          profile={this.state.profile}
+          onComplete={onComplete}
+          onPreviousClick={onPrevious}/>;
+      case SignInStep.ACCOUNT_DETAILS:
         return <AccountCreation invitationKey={this.state.invitationKey}
                                 profile={this.state.profile}
-                                onComplete={(profile: Profile) => this.setState({
-                                  profile: profile,
-                                  currentStep: this.getNextStep(currentStep)
-                                })}/>;
+                                onComplete={onComplete}
+                                onPreviousClick={onPrevious}/>;
       case SignInStep.DEMOGRAPHIC_SURVEY:
         return <AccountCreationSurvey
           profile={this.state.profile}
           invitationKey={this.state.invitationKey}
           termsOfServiceVersion={this.state.termsOfServiceVersion}
-          onComplete={(profile: Profile) => this.setState({
-            profile: profile,
-            currentStep: this.getNextStep(currentStep)
-          })}
-          onPreviousClick={(profile: Profile) => this.setState({
-            profile: profile,
-            currentStep: this.getPreviousStep(currentStep)
-          })}/>;
+          onComplete={onComplete}
+          onPreviousClick={onPrevious}/>;
       case SignInStep.SUCCESS_PAGE:
         return <AccountCreationSuccess profile={this.state.profile}/>;
       default:
-        return;
+        throw new Error('Unknown sign-in step: ' + currentStep);
     }
   }
 

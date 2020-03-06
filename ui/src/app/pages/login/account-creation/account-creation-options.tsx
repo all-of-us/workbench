@@ -29,7 +29,7 @@ export const AccountCreationOptions = {
     {label: 'B.S.N.', value: Degree.BSN},
   ],
   // BEGIN roles and affiliations for old (pre-verification) institutional affiliation
-  // TODO remove when the verification feature flag is fully enabled
+  // TODO(RW-4361) remove when the verification feature flag is fully enabled
   roles: [
     {label: `Undergraduate (Bachelor level) student`, value: AcademicRole.UNDERGRADUATE},
     {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training
@@ -65,7 +65,7 @@ export const AccountCreationOptions = {
   ],
   // END roles and affiliations for old (pre-verification) institutional affiliation
   // BEGIN roles for verified institutional affiliation
-  institutionalRoles: [
+  institutionalRoleOptions: [
     {label: `Undergraduate (Bachelor level) student`,
       value: InstitutionalRole.UNDERGRADUATE},
     {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training program)`,
