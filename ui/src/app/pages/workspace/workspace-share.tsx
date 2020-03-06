@@ -21,11 +21,11 @@ import {
 } from 'generated/fetch/api';
 
 import {Button} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {FlexRow} from 'app/components/flex';
 
 const styles = reactStyles( {
   tooltipLabel: {
