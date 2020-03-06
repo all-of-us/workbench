@@ -2839,7 +2839,7 @@ definitions:
       define the following authorities:
        1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
           the user has requested review to approve or reject.
-       2) DEVELOPER: *Grants all other authorities* as well as some internal-only
+       2) DEVELOPER: Grants access to some internal-only
           administrative endpoints, including group management and cluster
           management. Intended to be granted for devops needs, e.g. for oncall.
        3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
