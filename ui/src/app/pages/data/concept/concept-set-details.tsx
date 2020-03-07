@@ -294,7 +294,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                                                 workspace.accessLevel
                                               )
                                             }
-                                            style={{marginTop: '0.1rem'}}/>
+                                            style={{marginLeft: '.5rem', marginTop: '0.1rem'}}/>
                       </Clickable>
                     </div>
                     <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
