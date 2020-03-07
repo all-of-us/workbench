@@ -286,6 +286,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                       {conceptSet.name}
                       <Clickable disabled={!WorkspacePermissionsUtil
                                   .canWrite(workspace.accessLevel)}
+                                 style={{marginLeft: '.5rem'}}
                                  data-test-id='edit-concept-set'
                                  onClick={() => this.setState({editing: true})}>
                         <EditComponentReact enableHoverEffect={true}
@@ -294,7 +295,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                                                 workspace.accessLevel
                                               )
                                             }
-                                            style={{marginLeft: '.5rem', marginTop: '0.1rem'}}/>
+                                            style={{marginTop: '0.1rem'}}/>
                       </Clickable>
                     </div>
                     <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
