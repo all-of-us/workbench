@@ -23,7 +23,11 @@ All of Us uses a custom docker image for our notebook servers, which is defined
 Notably, this image is configured for client-side [egress limiting via wondershaper](https://docs.google.com/document/d/1SO77UGE41lH5ffa0Gg6KoiMszc6I33dIbm48sA-_5-U/edit)
 Finally, All of Us configures all Leo clusters with a set of startup scripts and
 Jupyter extensions such as code snippets and data use reminders, as described
-[here](../cluster-resources).
+[here](../cluster-resources). These static assets are all hosted publicly via
+the Workench API server, allowing Leonardo to pull them onto the VM at runtime.
+
+Note: some of the configuration choices here are necessitated by our use of
+VPC-SC in production. See [details here](https://docs.google.com/document/d/1BLfrlNC6UpZuTU38QNBXrFcqIHewAx0i2mYaP3GIrV0/edit).
 
 ## Auth and access
 
