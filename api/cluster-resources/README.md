@@ -11,7 +11,7 @@ To manually test updates to any notebook server assets (initialization script, U
 - Push a personal API server to test:
 
   ```
-  api$ ./project.rb deploy-api --no-promote --version "${USER}" --project all-of-us-workbench-test"
+  api$ ./project.rb deploy-api --no-promote --version "${USER}" --project all-of-us-workbench-test
   ```
   
   **Note**: This deployed API server will ONLY be used for serving your static assets. This approach
