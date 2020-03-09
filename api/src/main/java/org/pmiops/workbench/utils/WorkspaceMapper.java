@@ -1,41 +1,28 @@
 package org.pmiops.workbench.utils;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.mapstruct.AfterMapping;
-import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.model.DbStorageEnums;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.CdrVersion;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
-import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 
 @Mapper(
     componentModel = "spring",
     uses = {CommonMappers.class})
 public interface WorkspaceMapper {
-
-  @Mapping(target = "role", source = "dataAccessLevel")
-  @Mapping(target = "email", source = "username")
-  UserRole userToUserRole(DbUser user);
 
   default WorkspaceAccessLevel roleToWorkspaceAccessLevel(Short dataAccessLevel) {
     return DbStorageEnums.workspaceAccessLevelFromStorage(dataAccessLevel);
@@ -53,33 +40,12 @@ public interface WorkspaceMapper {
 
   // This method is simply merging the research purpose, which covers only a subset of the fields
   // in the DbWorkspace target
-  @BeanMapping(ignoreByDefault = true)
-  @Mapping(target = "specificPopulationsEnum", source = "populationDetails")
-  void mergeResearchPurposeIntoWorkspace(
-      @MappingTarget DbWorkspace dbWorkspace, ResearchPurpose researchPurpose);
 
   @Mapping(target = "timeReviewed", ignore = true)
+  @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
+  @Mapping(target = "researchOutcomeList", source = "researchOutcomeEnumSet")
+  @Mapping(target = "disseminateResearchFindingList", source = "disseminateResearchEnumSet")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
-
-  // This method (defined by AfterMapping annotation) handles the scenario in which the name of the
-  // parameters are different
-  @AfterMapping
-  default void afterWorkspaceIntoResearchPurpose(
-      @MappingTarget ResearchPurpose researchPurpose, DbWorkspace dbWorkspace) {
-    if (dbWorkspace.getPopulation()) {
-      researchPurpose.setPopulationDetails(
-          ImmutableList.copyOf(dbWorkspace.getSpecificPopulationsEnum()));
-    }
-    researchPurpose.setResearchOutcomeList(
-        Optional.ofNullable(dbWorkspace.getResearchOutcomeEnumSet())
-            .map(researchOutcome -> researchOutcome.stream().collect(Collectors.toList()))
-            .orElse(new ArrayList<ResearchOutcomeEnum>()));
-
-    researchPurpose.setDisseminateResearchFindingList(
-        Optional.ofNullable(dbWorkspace.getDisseminateResearchEnumSet())
-            .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toList()))
-            .orElse(new ArrayList<DisseminateResearchEnum>()));
-  }
 
   @AfterMapping
   default void afterResearchPurposeIntoWorkspace(
@@ -110,13 +76,5 @@ public interface WorkspaceMapper {
 
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());
-  }
-
-  default WorkspaceAccessLevel fromFcAccessLevel(String firecloudAccessLevel) {
-    if (firecloudAccessLevel.equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-      return WorkspaceAccessLevel.OWNER;
-    } else {
-      return WorkspaceAccessLevel.fromValue(firecloudAccessLevel);
-    }
   }
 }
