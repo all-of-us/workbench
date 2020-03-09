@@ -1,5 +1,5 @@
 import {Browser, Page} from 'puppeteer';
-import {NavLink} from '../../app/authenticated-page';
+import {SideNavLink} from '../../app/authenticated-page';
 import GoogleLoginPage from '../../app/google-login';
 import HomePage from '../../app/home-page';
 import ProfilePage from '../../app/profile-page';
@@ -29,7 +29,7 @@ describe('Profile', () => {
   test('Click First and Last name fields on Profile page', async () => {
     const homePage = new HomePage(page);
     await homePage.waitForReady();
-    await homePage.goTo(NavLink.PROFILE);
+    await homePage.navTo(SideNavLink.PROFILE);
     const profilePage = new ProfilePage(page);
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();

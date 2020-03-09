@@ -28,15 +28,12 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await this.waitForTextExists(PAGE.TITLE);
-    return true;
-  }
-
-  async waitForReady(): Promise<this> {
-    super.waitForReady();
-    await this.isLoaded();
-    await this.waitForSpinner();
-    return this;
+    try {
+      await this.waitForTextExists(PAGE.TITLE);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async getFirstName(): Promise<Textbox> {

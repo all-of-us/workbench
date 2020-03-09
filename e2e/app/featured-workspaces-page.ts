@@ -13,16 +13,12 @@ export default class FeaturedWorkspacesPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await super.isLoaded();
-    await this.waitForTextExists(PAGE.HEADER);
-    return true;
-  }
-
-  async waitForReady(): Promise<this> {
-    await super.waitForReady();
-    await this.isLoaded();
-    await this.waitForSpinner();
-    return this;
+    try {
+      await this.waitForTextExists(PAGE.HEADER);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
 }

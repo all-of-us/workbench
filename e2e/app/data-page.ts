@@ -19,18 +19,14 @@ export default class DataPage extends AuthenticatedPage {
     super(page);
   }
 
-
   async isLoaded(): Promise<boolean> {
-    await this.waitUntilTitleMatch(PAGE.TITLE);
-    await this.page.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true});
-    return true;
-  }
-
-  async waitForReady(): Promise<this> {
-    super.waitForReady();
-    await this.isLoaded();
-    await this.waitForSpinner();
-    return this;
+    try {
+      await this.waitUntilTitleMatch(PAGE.TITLE);
+      await this.page.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true});
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
 }

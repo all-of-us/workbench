@@ -75,6 +75,8 @@ describe('Home page ui tests', () => {
     expect(requestsFailed.length).toEqual(0);
     // Expect zero page error
     expect(pageErrors.length).toEqual(0);
+
+    await page.setRequestInterception(false);
   });
 
   test('Workspace cards have same ui size', async () => {

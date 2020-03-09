@@ -3,9 +3,6 @@ import Link from './aou-elements/link';
 import {findIcon} from './aou-elements/xpath-finder';
 import AuthenticatedPage from './authenticated-page';
 
-const configs = require('../resources/workbench-config.js');
-
-
 export const PAGE = {
   TITLE: 'Homepage',
   HEADER: 'Workspaces',
@@ -24,26 +21,14 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await this.waitUntilTitleMatch(PAGE.TITLE);
-    await this.waitForTextExists(PAGE.HEADER);
-    await new Link(this.page).withLabel(FIELD_LABEL.SEE_ALL_WORKSPACES);
-    return true;
-  }
-
-  async waitForReady(): Promise<this> {
-    super.waitForReady();
-    await this.isLoaded();
-    await this.waitForSpinner();
-    return this;
-  }
-
-  /**
-   * navigate to Home page URL
-   */
-  async goToUrl(): Promise<void> {
-    const pageUrl = configs.uiBaseUrl;
-    await this.page.goto(pageUrl, {waitUntil: ['domcontentloaded','networkidle0']});
-    await this.waitForReady();
+    try {
+      await this.waitUntilTitleMatch(PAGE.TITLE);
+      await this.waitForTextExists(PAGE.HEADER);
+      await new Link(this.page).withLabel(FIELD_LABEL.SEE_ALL_WORKSPACES);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async getCreateNewWorkspaceLink(): Promise<ElementHandle> {

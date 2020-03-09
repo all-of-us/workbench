@@ -47,11 +47,6 @@ export default class CreateAccountPage extends BasePage {
     return true;
   }
 
-  async waitForReady(): Promise<this> {
-    await this.isLoaded();
-    return this;
-  }
-
   async getInvitationKeyInput(): Promise<Textbox> {
     const textbox = new Textbox(this.page);
     await textbox.withCss('#invitationKey');

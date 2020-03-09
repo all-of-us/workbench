@@ -21,9 +21,11 @@ describe('Workspace creation tests:', () => {
     const workspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.createWorkspace(workspaceName, 'Use All of Us free credits',);
+    // check Data page is loaded
     const dataPage = new DataPage(page);
     await dataPage.waitForReady();
-    await new Link(page).withXpath(`//a[.='${workspaceName}' and @href]`, {visible: true})
+    // checking new workspace link is found
+    expect(await new Link(page).withXpath(`//a[.='${workspaceName}' and @href]`, {visible: true})).toBeTruthy();
   }, 2 * 60 * 1000);
 
 

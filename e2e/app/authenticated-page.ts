@@ -4,14 +4,20 @@ import {clrIconXpath} from './aou-elements/xpath-defaults';
 import {findIcon} from './aou-elements/xpath-finder';
 import BasePage from './base';
 
+const configs = require('../resources/workbench-config.js');
 
 const selectors = {
   signedInIndicator: 'body#body div',
   logo: 'img[src="/assets/images/all-of-us-logo.svg"]'
 };
 
+export enum AppUrl {
+  HOME = configs.uiBaseUrl,
+  WORKSPACES = configs.uiBaseUrl + configs.workspacesUrlPath,
+  ADMIN = configs.uiBaseUrl + configs.adminUrlPath,
+}
 
-export enum NavLink {
+export enum SideNavLink {
   HOME = 'Home',
   ADMIN = 'Admin',
   USER_ADMIN = 'User Admin',
@@ -23,7 +29,7 @@ export enum NavLink {
   FEATURED_WORKSPACES = 'Featured Workspaces',
 }
 
-export enum NavLinkIcon {
+export enum SideNavLinkIcon {
   HOME = 'home',
   ADMIN = 'user',
   CONTACT_US = 'envelope',
@@ -53,14 +59,24 @@ export default abstract class AuthenticatedPage extends BasePage {
     await this.page.screenshot({path: screenshotFile, fullPage: true});
   }
 
-  async isLoaded(): Promise<boolean> {
+  protected async isSignedIn(): Promise<boolean> {
     await this.page.waitForSelector(selectors.signedInIndicator);
     await this.page.waitForSelector(selectors.logo, {visible: true});
     return true;
   }
 
+  /*
+  // default if child classes do not provide this method
+  protected async waitForReady(): Promise<this> {
+    await this.isSignedIn();
+    await this.waitUntilNoSpinner();
+    return this;
+  } */
+  abstract async isLoaded(): Promise<boolean>
+
   async waitForReady(): Promise<this> {
     await this.isLoaded();
+    await this.waitUntilNoSpinner();
     return this;
   }
 
@@ -69,11 +85,19 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   /**
+   * Load URL
+   */
+  async loadUrl(url: AppUrl): Promise<void> {
+    await this.page.goto(url.toString(), {waitUntil: ['domcontentloaded','networkidle0']});
+    await this.waitForReady();
+  }
+
+  /**
    * Go to application page.
    * @param page
    * @param app
    */
-  async goTo(app: NavLink) {
+  async navTo(app: SideNavLink) {
     await this.openSideNav();
     const angleIconXpath = clrIconXpath('', 'angle');
     await this.page.waitForXPath(angleIconXpath, {timeout: 2000});
@@ -94,7 +118,7 @@ export default abstract class AuthenticatedPage extends BasePage {
       }
     }
     const link = await this.page.waitForXPath(appLinkXpath, {timeout: 2000});
-    if (app === NavLink.CONTACT_US) {
+    if (app === SideNavLink.CONTACT_US) {
       await link.click();
     } else {
       const navPromise = waitForNavigation(this.page);
@@ -102,15 +126,6 @@ export default abstract class AuthenticatedPage extends BasePage {
       await navPromise;
     }
 
-  }
-
-  async isOpenSideNav(): Promise<boolean> {
-    try {
-      await findIcon(this.page, 'Home', 'home', {visible: true, timeout: 1000});
-      return true;
-    } catch(err) {
-      return false;
-    }
   }
 
   async getUserName(): Promise<unknown> {
@@ -125,7 +140,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Open dropdown.
    */
   async openSideNav() {
-    const is = await this.isOpenSideNav();
+    const is = await this.isSideNavDropdownOpen();
     if (!is) {
       // click bars icon to open dropdown
       const icon = await findIcon(this.page, '', 'bars');
@@ -138,7 +153,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait for spinner to stop to indicated page is ready.
    * </pre>
    */
-  async waitForSpinner() {
+  async waitUntilNoSpinner() {
     // wait maximum 1 second for either spinner to show up
     const selectr1 = '.spinner, svg';
     const spinner = await this.page.waitFor((selector) => {
@@ -159,5 +174,15 @@ export default abstract class AuthenticatedPage extends BasePage {
       await this.page.waitFor(1000);
     }
   }
+
+  private async isSideNavDropdownOpen(): Promise<boolean> {
+    try {
+      await findIcon(this.page, 'Home', 'home', {visible: true, timeout: 1000});
+      return true;
+    } catch(err) {
+      return false;
+    }
+  }
+
 
 }

@@ -42,20 +42,17 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     super(page);
   }
 
-  async waitForReady(): Promise<this> {
-    super.waitForReady();
-    await this.isLoaded();
-    await this.waitForSpinner();
-    return this;
-  }
-
   async isLoaded(): Promise<boolean> {
-    await this.waitUntilTitleMatch(PAGE.TITLE);
-    await this.getWorkspaceNameTextbox();
-    await this.getDataSetSelectOption();
-    await new SelectComponent(this.page, FIELD_LABEL.SELECT_BILLING).getSelectedValue();
-    await this.getCreateWorkspaceButton();
-    return true;
+    try {
+      await this.waitUntilTitleMatch(PAGE.TITLE);
+      await this.getWorkspaceNameTextbox();
+      await this.getDataSetSelectOption();
+      await new SelectComponent(this.page, FIELD_LABEL.SELECT_BILLING).getSelectedValue();
+      await this.getCreateWorkspaceButton();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async getCreateWorkspaceButton(): Promise<ElementHandle> {

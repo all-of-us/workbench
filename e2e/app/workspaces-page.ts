@@ -1,10 +1,9 @@
 import {Page} from 'puppeteer';
 import select from './aou-elements/select';
 import {findButton} from './aou-elements/xpath-finder';
-import AuthenticatedPage from './authenticated-page';
+import AuthenticatedPage, {AppUrl} from './authenticated-page';
 import WorkspaceEditPage, {FIELD_LABEL as EditPageLabel} from './workspace-edit-page';
 
-const configs = require('../resources/workbench-config.js');
 const faker = require('faker/locale/en_US');
 
 export const PAGE = {
@@ -21,26 +20,14 @@ export default class WorkspacesPage extends AuthenticatedPage {
     super(page);
   }
 
-   /**
-    * navigate to My Workspaces URL
-    */
-  async goToUrl(): Promise<void> {
-    const pageUrl = configs.uiBaseUrl + configs.workspacesUrlPath;
-    await this.page.goto(pageUrl, {waitUntil: ['domcontentloaded','networkidle0']});
-    await this.waitForReady();
-  }
-
   async isLoaded(): Promise<boolean> {
-    await this.waitUntilTitleMatch(PAGE.TITLE);
-    await this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true});
-    return true;
-  }
-
-  async waitForReady(): Promise<this> {
-    super.waitForReady();
-    await this.isLoaded();
-    await this.waitForSpinner();
-    return this;
+    try {
+      await this.waitUntilTitleMatch(PAGE.TITLE);
+      await this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true});
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async getCreateNewWorkspaceLink() {
@@ -59,7 +46,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     * 4: return
     */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    await this.goToUrl();
+    await this.loadUrl(AppUrl.WORKSPACES);
     const link = await this.getCreateNewWorkspaceLink();
     await Promise.all([
       this.page.waitForNavigation( { waitUntil: ['domcontentloaded','networkidle0']} ),
@@ -139,7 +126,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const createButton = await workspaceEditPage.getCreateWorkspaceButton();
     await createButton.focus(); // bring into viewport
     await createButton.click();
-    await workspaceEditPage.waitForSpinner();
+    await workspaceEditPage.waitUntilNoSpinner();
   }
 
 }

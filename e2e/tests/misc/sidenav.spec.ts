@@ -1,5 +1,5 @@
 import Button from '../../app/aou-elements/button';
-import {NavLink} from '../../app/authenticated-page';
+import {SideNavLink} from '../../app/authenticated-page';
 import GoogleLoginPage from '../../app/google-login';
 import ProfilePage from '../../app/profile-page';
 import WorkspacesPage from '../../app/workspaces-page';
@@ -36,7 +36,7 @@ describe('Navigation', () => {
     expect(await homePage.isLoaded()).toBe(true);
 
     // Select Profile link
-    await homePage.goTo(NavLink.PROFILE);
+    await homePage.navTo(SideNavLink.PROFILE);
     const profilePage = new ProfilePage(page);
     await profilePage.waitForReady();
     expect(await profilePage.isLoaded()).toBe(true);
@@ -49,13 +49,13 @@ describe('Navigation', () => {
     expect(displayedUsername).toBe(`${fname} ${lname}`);
 
     // Select Your Workspaces link
-    await homePage.goTo(NavLink.YOUR_WORKSPACES);
+    await homePage.navTo(SideNavLink.YOUR_WORKSPACES);
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForReady();
     expect(await workspacesPage.isLoaded()).toBe(true);
 
     // Select Home link
-    await homePage.goTo(NavLink.HOME);
+    await homePage.navTo(SideNavLink.HOME);
     await homePage.waitForReady();
     expect(await homePage.isLoaded()).toBe(true);
   });
@@ -64,7 +64,7 @@ describe('Navigation', () => {
     const homePage = await GoogleLoginPage.logIn(page);
 
     // Select Contact Us
-    await homePage.goTo(NavLink.CONTACT_US);
+    await homePage.navTo(SideNavLink.CONTACT_US);
 
     const iframeHandle = await page.waitForSelector('iframe[title="Find more information here"]');
     const newIframe = await iframeHandle.contentFrame();
@@ -98,7 +98,7 @@ describe('Navigation', () => {
   test('User can Sign Out', async () => {
     const homePage = await GoogleLoginPage.logIn(page);
     // Select Sign Out link
-    await homePage.goTo(NavLink.SIGN_OUT);
+    await homePage.navTo(SideNavLink.SIGN_OUT);
     await waitForExists(page, '//*[text()="Redirect Notice"]');
     const href = await page.evaluate(() => location.href);
     expect(href).toEqual(expect.stringMatching(/(\/|%2F)login$/));
