@@ -8,7 +8,7 @@ require_relative 'lib/gcp_environment_visitor.rb'
 class LogsBasedMetrics
   def initialize(options)
     @envs_file = options[:'envs-file']
-    @source_dashboard_number = options[:'source-uri']
+    @source_metric_name = options[:'source-uri']
     @source_env_short_name = options[:'source-env']
     @logger = options[:logger] || Logger.new(STDOUT)
     @is_dry_run = options[:'replicate']
@@ -33,7 +33,7 @@ class LogsBasedMetrics
     @visitor.visit(source_env) do |env|
       logging_client = Google::Cloud::Logging.new({project: env.project_id})
       metrics = logging_client.metrics
-      source_metric = metrics.select { |m| m.name == @source_dashboard_number }.first
+      source_metric = metrics.select { |m| m.name == @source_metric_name }.first
       @logger.info("located source metric #{source_metric.name}")
     end
     source_metric
