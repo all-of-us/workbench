@@ -84,7 +84,7 @@ ENVIRONMENTS = {
   },
   "all-of-us-rw-preprod" => {
     :env_name => "preprod",
-    :api_endpoint_host => "api-dot-all-of-us-rw-preprod.appspot.com",
+    :api_endpoint_host => "api.preprod-workbench.researchallofus.org",
     :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
     :config_json => "config_preprod.json",
     :cdr_versions_json => "cdr_versions_preprod.json",

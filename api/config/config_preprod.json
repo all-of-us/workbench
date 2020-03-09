@@ -8,7 +8,7 @@
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-preprod",
-    "registeredDomainGroup": "all-of-us-registered-preprod@firecloud.org", // does this exist?
+    "registeredDomainGroup": "TODO",
     "xAppIdValue": "preprod-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod",
     "timeoutInSeconds": 60,
