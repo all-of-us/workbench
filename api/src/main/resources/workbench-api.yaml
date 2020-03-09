@@ -5041,7 +5041,7 @@ definitions:
         "$ref": "#/definitions/Education"
       disability:
         type: boolean
-        default: false
+        default: null
   Address:
     type: object
     properties:
