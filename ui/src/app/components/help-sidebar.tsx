@@ -17,7 +17,7 @@ import {NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {MenuItem} from './buttons';
+import {MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
 const proIcons = {
@@ -36,6 +36,10 @@ const styles = reactStyles({
     overflow: 'hidden',
     color: colors.primary,
     zIndex: -1,
+  },
+  notebookOverrides: {
+    top: '0px',
+    height: '100%'
   },
   sidebarContainerActive: {
     zIndex: 100,
@@ -206,6 +210,7 @@ interface Props {
   setSidebarState: Function;
   shareFunction: Function;
   sidebarOpen: boolean;
+  notebookStyles: boolean;
   workspace: WorkspaceData;
 }
 
@@ -328,6 +333,22 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       }
     }
 
+    sidebarContainerStyles(activeIcon, notebookStyles) {
+      if (notebookStyles) {
+        if (activeIcon) {
+          return {...styles.sidebarContainer, ...styles.notebookOverrides, ...styles.sidebarContainerActive};
+        } else {
+          return {...styles.sidebarContainer, ...styles.notebookOverrides};
+        }
+      } else {
+        if (activeIcon) {
+          return {...styles.sidebarContainer, ...styles.sidebarContainerActive};
+        } else {
+          return {...styles.sidebarContainer};
+        }
+      }
+    }
+
     renderWorkspaceMenu() {
       const {deleteFunction, shareFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
@@ -389,7 +410,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     render() {
-      const {helpContent, setSidebarState, sidebarOpen} = this.props;
+      const {helpContent, setSidebarState, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
       const contentStyle = (tab: string) => ({
@@ -399,7 +420,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
         padding: '0.5rem 0.5rem 5.5rem',
       });
       return <React.Fragment>
-        <div style={styles.iconContainer}>
+        <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {this.renderWorkspaceMenu()}
           {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
             <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
@@ -415,7 +436,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             </TooltipTrigger>
           </div>)}
         </div>
-        <div style={activeIcon ? {...styles.sidebarContainer, ...styles.sidebarContainerActive} : styles.sidebarContainer}>
+        <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
             <div style={styles.topBar}>
               <ClrIcon shape='caret right' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
@@ -454,10 +475,10 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
-                Visit the
-                <a style={styles.link} href='https://www.researchallofus.org/frequently-asked-questions/' target='_blank'
-                  onClick={() => this.analyticsEvent('FAQ')}> FAQs here </a>
-                or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                Visit the <StyledAnchorTag href='https://www.researchallofus.org/frequently-asked-questions/'
+                                           target='_blank' onClick={() => this.analyticsEvent('FAQ')}> FAQs here
+                </StyledAnchorTag> or <span style={styles.link} onClick={() => this.openContactWidget()}> contact
+                us</span>.
               </p>
             </div>
           </div>
@@ -477,8 +498,8 @@ export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
   @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
-
+  @Input('notebookStyles') notebookStyles: Props['notebookStyles'];
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen']);
+    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
   }
 }

@@ -190,11 +190,11 @@ public class DbWorkspace {
 
   @Transient
   public DataAccessLevel getDataAccessLevelEnum() {
-    return CommonStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @ManyToOne

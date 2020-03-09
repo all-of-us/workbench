@@ -45,7 +45,6 @@ import {SignInComponent} from './pages/login/sign-in';
 import {DataUseAgreementComponent} from './pages/profile/data-use-agreement';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
-import {StigmatizationPageComponent} from './pages/workspace/stigmatization-page';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
@@ -71,6 +70,7 @@ import {
 } from 'notebooks-generated';
 
 import {TextModalComponent} from 'app/components/text-modal';
+import {AdminWorkspaceSearchComponent} from 'app/pages/admin/admin-workspace-search';
 import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-notebook';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
@@ -130,6 +130,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   declarations: [
     AdminBannerComponent,
     AdminWorkspaceComponent,
+    AdminWorkspaceSearchComponent,
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
     AppComponent,
@@ -156,7 +157,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SignedInComponent,
     NavBarComponent,
     SignInComponent,
-    StigmatizationPageComponent,
     TablePage,
     TextModalComponent,
     WorkspaceAboutComponent,

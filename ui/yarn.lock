@@ -4096,6 +4096,7 @@ hash.js@^1.0.0, hash.js@^1.0.3:
 highcharts-react-official@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/highcharts-react-official/-/highcharts-react-official-2.0.0.tgz#3e4a8a2cd9a894a55f72ff7967b6573e47ec30c1"
+  integrity sha512-pEf1HBCmkJlIY6lAkjKXjjxaqZWUwcNcKrEIM2CFhXtLcl5VntiSgiVXe/pkDXyZG94mM90c72Z+8rnJ8ua6Dw==
 
 highcharts@^5.0.7:
   version "5.0.15"
@@ -4112,6 +4113,13 @@ hmac-drbg@^1.0.0:
     hash.js "^1.0.3"
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
+
+hoist-non-react-statics@^3.3.0:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-3.3.2.tgz#ece0acaf71d62c2969c2ec59feff42a4b1a85b45"
+  integrity sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==
+  dependencies:
+    react-is "^16.7.0"
 
 home-or-tmp@^2.0.0:
   version "2.0.0"
@@ -6982,7 +6990,7 @@ prop-types-exact@^1.2.0:
     object.assign "^4.1.0"
     reflect.ownkeys "^0.2.0"
 
-prop-types@^15.5.10, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.5.0, prop-types@^15.5.10, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   dependencies:
@@ -7180,6 +7188,14 @@ react-addons-test-utils@^15.6.2:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/react-addons-test-utils/-/react-addons-test-utils-15.6.2.tgz#c12b6efdc2247c10da7b8770d185080a7b047156"
 
+react-async-script@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/react-async-script/-/react-async-script-1.1.1.tgz#f481c6c5f094bf4b94a9d52da0d0dda2e1a74bdf"
+  integrity sha512-pmgS3O7JcX4YtH/Xy//NXylpD5CNb5T4/zqlVUV3HvcuyOanatvuveYoxl3X30ZSq/+q/+mSXcNS8xDVQJpSeA==
+  dependencies:
+    hoist-non-react-statics "^3.3.0"
+    prop-types "^15.5.0"
+
 react-calendar@^2.18.1:
   version "2.19.2"
   resolved "https://registry.yarnpkg.com/react-calendar/-/react-calendar-2.19.2.tgz#496e78eb11a00aee1ae6b5d02d221ed1ca2db952"
@@ -7206,6 +7222,14 @@ react-dom@^16.6.3:
     prop-types "^15.6.2"
     scheduler "^0.17.0"
 
+react-google-recaptcha@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/react-google-recaptcha/-/react-google-recaptcha-2.0.1.tgz#3276b29659493f7ca2a5b7739f6c239293cdf1d8"
+  integrity sha512-4Y8awVnarn7+gdVpu8uvSmRJzzlMMoXqdhLoyToTOfVK6oM+NaChNI8NShnu75Q2YGHLvR1IA1FWZesuYHwn5w==
+  dependencies:
+    prop-types "^15.5.0"
+    react-async-script "^1.1.1"
+
 react-iframe@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/react-iframe/-/react-iframe-1.8.0.tgz#8c78f2c59b894ca5605fa7e45e61e27e57e96091"
@@ -7229,6 +7253,11 @@ react-interactive@^0.9.1:
 react-is@^16.10.2, react-is@^16.8.6, react-is@^16.9.0:
   version "16.11.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.11.0.tgz#b85dfecd48ad1ce469ff558a882ca8e8313928fa"
+
+react-is@^16.7.0:
+  version "16.13.0"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.0.tgz#0f37c3613c34fe6b37cd7f763a0d6293ab15c527"
+  integrity sha512-GFMtL0vHkiBv9HluwNZTggSn/sCyEt9n02aM0dSAjGGyqyNlAyftYm4phPxdvCigG15JreC5biwxCgTAJZ7yAA==
 
 react-is@^16.8.1:
   version "16.12.0"

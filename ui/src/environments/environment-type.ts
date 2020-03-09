@@ -56,6 +56,10 @@ export interface Environment {
   enableProfileCapsFeatures: boolean;
   // Enable Surveys and Physical Measurements tabs in concept search
   enableNewConceptTabs: boolean;
+  // Enable Captcha during registration
+  enableCaptcha: boolean;
+  // Captcha site key registered with the domain
+  captchaSiteKey: string;
   // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
   // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
   // to the UI via ConfigController and serverConfigStore.

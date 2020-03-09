@@ -109,9 +109,18 @@ def get_cdr_sql_project(project)
   return must_get_env_value(project, :cdr_sql_instance).split(":")[0]
 end
 
+def ensure_docker_sync()
+  common = Common.new
+  at_exit do
+    common.run_inline %W{docker-sync stop}
+  end
+  common.run_inline %W{docker-sync start}
+end
+
 def ensure_docker(cmd_name, args=nil)
   args = (args or [])
   unless Workbench.in_docker?
+    ensure_docker_sync()
     exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
   end
 end
@@ -177,47 +186,34 @@ def dev_up()
     raise("Please run 'gcloud auth login' before starting the server.")
   end
 
-  at_exit { common.run_inline %W{docker-compose down} }
+  at_exit do
+    common.run_inline %W{docker-compose down}
+  end
+  ensure_docker_sync()
 
   overall_bm = Benchmark.measure {
     common.status "Database startup..."
-    bm = Benchmark.measure { common.run_inline %W{docker-compose up -d db} }
+    bm = Benchmark.measure {
+      common.run_inline %W{docker-compose up -d db}
+    }
     common.status "Database startup complete (#{format_benchmark(bm)})"
 
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
-      common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+      common.run_inline %W{
+        docker-compose run db-scripts ./run-migrations.sh main
+      }
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
     common.status "Database init & migrations complete (#{format_benchmark(bm)})"
 
-    common.status "Pushing configs & data..."
+    common.status "Loading configs & data..."
     bm = Benchmark.measure {
-      common.status "  --> Updating CDR versions"
-      common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
-
-      common.status "  --> Loading Workbench config"
       common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
+        docker-compose run api-scripts ./libproject/load_local_data_and_configs.sh
       }
-
-      common.status "  --> Loading CDR BigQuery Schema config"
-      common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
-      }
-
-      common.status "  --> Loading Featured Workspaces config"
-      common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
-      }
-
-      common.status "  --> Loading Data Dictionary data"
-      common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary -PappArgs=false}
     }
-    common.status "Pushing configs complete (#{format_benchmark(bm)})"
+    common.status "Loading configs complete (#{format_benchmark(bm)})"
 
   }
   common.status "Total dev-env setup time: #{format_benchmark(overall_bm)}"
@@ -412,22 +408,7 @@ Common.register_command({
   :fn => ->(*args) { run_api_tests("test-api", args) }
 })
 
-def run_common_api_tests(cmd_name, args)
-  ensure_docker cmd_name, args
-  Dir.chdir('../common-api') do
-    Common.new.run_inline %W{gradle :test} + args
-  end
-end
-
-Common.register_command({
-  :invocation => "test-common-api",
-  :description => "Runs common API tests. To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => ->(*args) { run_common_api_tests("test-common-api", args) }
-})
-
 def run_all_tests(cmd_name, args)
-  run_common_api_tests(cmd_name, args)
   run_api_tests(cmd_name, args)
 end
 
@@ -624,6 +605,7 @@ Common.register_command({
 })
 
 def run_local_all_migrations()
+  ensure_docker_sync()
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
@@ -638,6 +620,7 @@ Common.register_command({
 })
 
 def run_local_data_migrations()
+  ensure_docker_sync()
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
@@ -648,6 +631,7 @@ Common.register_command({
 })
 
 def run_local_rw_migrations()
+  ensure_docker_sync()
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 end
@@ -658,57 +642,137 @@ Common.register_command({
   :fn => ->() { run_local_rw_migrations() }
 })
 
-def make_bq_denormalized_tables(*args)
+def make_bq_denormalized_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--cdr-date [cdr-date]",
+    ->(opts, v) { opts.cdr_date = v},
+    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date}}
 end
 
 Common.register_command({
   :invocation => "make-bq-denormalized-tables",
-  :description => "make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET>
+  :description => "make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET> --cdr-date <YYYY-mm-dd>
 Generates big query denormalized tables for search and review. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_tables(*args) }
+  :fn => ->(*args) { make_bq_denormalized_tables("make-bq-denormalized-tables", *args) }
 })
 
-def make_bq_denormalized_review(*args)
+def make_bq_denormalized_review(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
 end
 
 Common.register_command({
   :invocation => "make-bq-denormalized-review",
   :description => "make-bq-denormalized-review --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates big query denormalized tables for review. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_review(*args) }
+  :fn => ->(*args) { make_bq_denormalized_review("make-bq-denormalized-review", *args) }
 })
 
-def make_bq_denormalized_search(*args)
+def make_bq_denormalized_search(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--cdr-date [cdr-date]",
+    ->(opts, v) { opts.cdr_date = v},
+    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date}}
 end
 
 Common.register_command({
   :invocation => "make-bq-denormalized-search",
-  :description => "make-bq-denormalized-search --bq-project <PROJECT> --bq-dataset <DATASET>
+  :description => "make-bq-denormalized-search --bq-project <PROJECT> --bq-dataset <DATASET> --cdr-date <YYYY-mm-dd>
 Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_search(*args) }
+  :fn => ->(*args) { make_bq_denormalized_search("make-bq-denormalized-search", *args) }
 })
 
-def make_bq_denormalized_dataset(*args)
+def make_bq_denormalized_dataset(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
 end
 
 Common.register_command({
                             :invocation => "make-bq-denormalized-dataset",
                             :description => "make-bq-denormalized-dataset --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates big query denormalized dataset tables. Used by Data Set Builder. Must be run once when a new cdr is released",
-                            :fn => ->(*args) { make_bq_denormalized_dataset(*args) }
+                            :fn => ->(*args) { make_bq_denormalized_dataset("make-bq-denormalized-dataset", *args) }
                         })
 
-def make_bq_dataset_linking(*args)
+def make_bq_dataset_linking(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
 end
 
 Common.register_command({
@@ -716,7 +780,7 @@ Common.register_command({
                             :description => "make-bq-dataset-linking --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates big query dataset linking tables. Used by Data Set Builder to show users values information.
 Must be run once when a new cdr is released",
-                            :fn => ->(*args) { make_bq_dataset_linking(*args) }
+                            :fn => ->(*args) { make_bq_dataset_linking("make-bq-dataset-linking", *args) }
                         })
 
 def generate_criteria_table(*args)
@@ -770,10 +834,13 @@ def generate_private_cdr_counts(cmd_name, *args)
     ->(opts, v) { opts.bucket = v},
     "GCS bucket. Required."
   )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.workbench_project and opts.cdr_version and opts.bucket }
   op.parse.validate
 
-  common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+  ServiceAccountContext.new(op.opts.workbench_project).run do
+    common = Common.new
+    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+  end
 end
 
 Common.register_command({
@@ -946,6 +1013,7 @@ Imports .sql file to local mysql instance",
 
 
 def run_drop_cdr_db()
+  ensure_docker_sync()
   common = Common.new
   common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
 end
@@ -1116,7 +1184,7 @@ def fetch_firecloud_user_profile(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--user=[user]",
+      "--user [user]",
       String,
       ->(opts, v) { opts.user = v},
       "The AoU user to fetch FireCloud data for (e.g. 'gjordan@fake-research-aou.org'")
@@ -1148,9 +1216,9 @@ def fetch_workspace_details(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--projectId=[projectId]",
+      "--workspace-project-id [workspace-project-id]",
       String,
-      ->(opts, v) { opts.projectId = v},
+      ->(opts, v) { opts.workspace_project_id = v},
       "Fetches details for workspace(s) that match the given project ID / namespace (e.g. 'aou-rw-231823128'")
 
   # Create a cloud context and apply the DB connection variables to the environment.
@@ -1163,7 +1231,7 @@ def fetch_workspace_details(cmd_name, *args)
 
   flags = ([
       ["--fc-base-url", fc_config["baseUrl"]],
-      ["--projectId", op.opts.projectId]
+      ["--workspace-project-id", op.opts.workspace_project_id]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
@@ -1190,7 +1258,7 @@ def export_workspace_data(cmd_name, *args)
   op.add_typed_option(
       "--export-filename [export-filename]",
       String,
-      ->(opts, v) { opts.exportFilename = v},
+      ->(opts, v) { opts.export_filename = v},
       "Filename of export file to write to")
 
   # Create a cloud context and apply the DB connection variables to the environment.
@@ -1200,7 +1268,7 @@ def export_workspace_data(cmd_name, *args)
   gcc.validate()
 
   flags = ([
-      ["--export-filename", op.opts.exportFilename]
+      ["--export-filename", op.opts.export_filename]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
@@ -1215,6 +1283,62 @@ Common.register_command({
     :invocation => "export-workspace-data",
     :description => "Export workspace data to CSV.\n",
     :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
+})
+
+def delete_workspaces(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  op.add_typed_option(
+      "--delete-list-filename [delete-list-filename]",
+      String,
+      ->(opts, v) { opts.deleteListFilename = v},
+      "File containing list of workspaces to delete.
+      Each line should contain a single workspace's namespace and firecloud name, separated by a comma
+      Example: ws-namespace-1,fc-id-1 \n ws-namespace-2,fc-id-2 \n ws-namespace-3, fc-id-3")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  flags = ([
+      ["--delete-list-filename", op.opts.deleteListFilename]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle deleteWorkspaces
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+DELETE_WORKSPACES_CMD = "delete-workspaces"
+
+Common.register_command({
+    :invocation => DELETE_WORKSPACES_CMD,
+    :description => "Delete workspaces listed in given file.\n",
+    :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
 })
 
 def authority_options(cmd_name, args)
@@ -1263,15 +1387,14 @@ Common.register_command({
 })
 
 def set_authority_local(cmd_name, *args)
-  ensure_docker_api(cmd_name, args)
+  setup_local_environment
 
   op = authority_options(cmd_name, args)
   op.parse.validate
 
+  app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]"]
   common = Common.new
-  common.run_inline %W{
-      gradle setAuthority
-     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+  common.run_inline %W{docker-compose run api-scripts ./gradlew setAuthority} + app_args
 end
 
 Common.register_command({
@@ -1436,6 +1559,7 @@ def load_es_index(cmd_name, *args)
   end
 
   unless Workbench.in_docker?
+    ensure_docker_sync()
     exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
   end
 
@@ -1508,6 +1632,7 @@ Common.register_command({
 })
 
 def update_cdr_versions_local(cmd_name, *args)
+  ensure_docker_sync()
   setup_local_environment
   op = update_cdr_version_options(cmd_name, args)
   op.parse.validate
@@ -1630,6 +1755,7 @@ def deploy_gcs_artifacts(cmd_name, args)
       start_notebook_cluster.sh
       activity-checker-extension.js
       aou-download-policy-extension.js
+      aou-upload-policy-extension.js
       generated/aou-snippets-menu.js
       gs://#{gcc.project}-cluster-resources/
     })
@@ -2062,12 +2188,17 @@ def start_api_and_incremental_build(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   begin
-    # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
-    # the application has finished starting.
-    common.run_inline %W{gradle --daemon appengineStart}
-    common.run_inline "tail -f -n 0 /w/api/build/dev-appserver-out/dev_appserver.out &"
-    # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
-    # in the output.
+    common.status "API server startup..."
+    bm = Benchmark.measure {
+      # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
+      # the application has finished starting.
+      common.run_inline %W{gradle --daemon appengineStart}
+      common.run_inline "tail -f -n 0 /w/api/build/dev-appserver-out/dev_appserver.out &"
+      # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
+      # in the output.
+    }
+    common.status "API server startup complete (#{format_benchmark(bm)})"
+
     common.run_inline %W{gradle --no-daemon --continuous incrementalHotSwap}
   ensure
     common.run_inline %W{gradle --stop}

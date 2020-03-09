@@ -32,9 +32,8 @@ public class ConfigController implements ConfigApiDelegate {
             .enableBillingLockout(config.featureFlags.enableBillingLockout)
             .firecloudURL(config.firecloud.baseUrl)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
-            .enableNewAccountCreation(config.featureFlags.enableNewAccountCreation)
             .requireInvitationKey(config.access.requireInvitationKey)
-            .requireInstitutionalVerification(
-                config.featureFlags.requireInstitutionalVerification));
+            .requireInstitutionalVerification(config.featureFlags.requireInstitutionalVerification)
+            .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions));
   }
 }

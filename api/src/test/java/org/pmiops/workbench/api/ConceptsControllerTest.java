@@ -296,8 +296,7 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService =
-        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao, cbCriteriaDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptsController = new ConceptsController(conceptService, workspaceService);
 
     DbUser user = new DbUser();
@@ -337,41 +336,43 @@ public class ConceptsControllerTest {
 
     DbCriteria parentSurvey =
         cbCriteriaDao.save(
-            new DbCriteria()
-                .ancestorData(false)
-                .attribute(false)
-                .code("c")
-                .conceptId("1")
-                .count("20")
-                .domainId("SURVEY")
-                .group(true)
-                .hierarchy(true)
-                .name("The Basics")
-                .parentId(0L)
-                .selectable(true)
-                .standard(true)
-                .subtype("QUESTION")
-                .type("PPI")
-                .path("0"));
+            DbCriteria.builder()
+                .addAncestorData(false)
+                .addAttribute(false)
+                .addCode("c")
+                .addConceptId("1")
+                .addCount("20")
+                .addDomainId("SURVEY")
+                .addGroup(true)
+                .addHierarchy(true)
+                .addName("The Basics")
+                .addParentId(0L)
+                .addSelectable(true)
+                .addStandard(true)
+                .addSubtype("QUESTION")
+                .addType("PPI")
+                .addPath("0")
+                .build());
 
     cbCriteriaDao.save(
-        new DbCriteria()
-            .ancestorData(false)
-            .attribute(false)
-            .code("c")
-            .conceptId("1")
-            .count("20")
-            .domainId("SURVEY")
-            .group(true)
-            .hierarchy(true)
-            .name("question")
-            .parentId(parentSurvey.getId())
-            .selectable(true)
-            .standard(true)
-            .subtype("QUESTION")
-            .type("PPI")
-            .synonyms("test")
-            .path(parentSurvey.getId() + ".1"));
+        DbCriteria.builder()
+            .addAncestorData(false)
+            .addAttribute(false)
+            .addCode("c")
+            .addConceptId("1")
+            .addCount("20")
+            .addDomainId("SURVEY")
+            .addGroup(true)
+            .addHierarchy(true)
+            .addName("question")
+            .addParentId(parentSurvey.getId())
+            .addSelectable(true)
+            .addStandard(true)
+            .addSubtype("QUESTION")
+            .addType("PPI")
+            .addSynonyms("test")
+            .addPath(parentSurvey.getId() + ".1")
+            .build());
   }
 
   @Test

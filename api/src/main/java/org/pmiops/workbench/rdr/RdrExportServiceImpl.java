@@ -1,5 +1,7 @@
 package org.pmiops.workbench.rdr;
 
+import com.google.common.annotations.VisibleForTesting;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -13,7 +15,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -22,21 +23,18 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.rdr.api.RdrApi;
-import org.pmiops.workbench.rdr.model.Gender;
-import org.pmiops.workbench.rdr.model.Race;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
 import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
 import org.pmiops.workbench.rdr.model.ResearcherVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.rdr.model.SexAtBirth;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,7 +48,6 @@ import org.springframework.stereotype.Service;
 public class RdrExportServiceImpl implements RdrExportService {
 
   private Clock clock;
-  private FireCloudService fireCloudService;
   private Provider<RdrApi> rdrApiProvider;
   private RdrExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
@@ -64,17 +61,15 @@ public class RdrExportServiceImpl implements RdrExportService {
   @Autowired
   public RdrExportServiceImpl(
       Clock clock,
-      FireCloudService fireCloudService,
-      Provider<RdrApi> RdrApiProvider,
+      Provider<RdrApi> rdrApiProvider,
       RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       UserDao userDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.clock = clock;
-    this.fireCloudService = fireCloudService;
     this.rdrExportDao = rdrExportDao;
-    this.rdrApiProvider = RdrApiProvider;
+    this.rdrApiProvider = rdrApiProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
@@ -93,7 +88,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     try {
       userIdList =
           rdrExportDao.findDbUserIdsToExport().stream()
-              .map(user -> user.longValue())
+              .map(BigInteger::longValue)
               .collect(Collectors.toList());
     } catch (Exception ex) {
       log.severe(
@@ -115,7 +110,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     try {
       workspaceListToExport =
           rdrExportDao.findDbWorkspaceIdsToExport().stream()
-              .map(workspaceId -> workspaceId.longValue())
+              .map(BigInteger::longValue)
               .collect(Collectors.toList());
     } catch (Exception ex) {
       log.severe(
@@ -133,16 +128,16 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public void exportUsers(List<Long> userIds) {
-    List<RdrResearcher> RdrResearchersList;
+    List<RdrResearcher> rdrResearchersList;
     try {
-      RdrResearchersList =
+      rdrResearchersList =
           userIds.stream()
               .map(userId -> toRdrResearcher(userDao.findUserByUserId(userId)))
               .collect(Collectors.toList());
       rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().exportResearcheres(RdrResearchersList);
+      rdrApiProvider.get().exportResearchers(rdrResearchersList);
 
-      updateDBRdrExport(RdrEntity.USER, userIds);
+      updateDbRdrExport(RdrEntity.USER, userIds);
     } catch (ApiException ex) {
       log.severe("Error while sending researcher data to RDR");
     }
@@ -168,7 +163,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       if (!rdrWorkspacesList.isEmpty()) {
         rdrApiProvider.get().getApiClient().setDebugging(true);
         rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
-        updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+        updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
       }
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
@@ -194,6 +189,10 @@ public class RdrExportServiceImpl implements RdrExportService {
             .map(RdrExportEnums::degreeToRdrDegree)
             .collect(Collectors.toList()));
 
+    if (dbUser.getContactEmail() != null) {
+      researcher.setEmail(dbUser.getContactEmail());
+    }
+
     if (dbUser.getAddress() != null) {
       researcher.setStreetAddress1(dbUser.getAddress().getStreetAddress1());
       researcher.setStreetAddress2(dbUser.getAddress().getStreetAddress2());
@@ -218,13 +217,13 @@ public class RdrExportServiceImpl implements RdrExportService {
                   dbDemographicSurvey.getSexAtBirthEnum().stream()
                       .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
                       .collect(Collectors.toList()))
-              .orElse(new ArrayList<SexAtBirth>()));
+              .orElse(new ArrayList<>()));
       researcher.setGender(
           Optional.ofNullable(
                   dbDemographicSurvey.getGenderIdentityEnumList().stream()
                       .map(RdrExportEnums::genderToRdrGender)
                       .collect(Collectors.toList()))
-              .orElse(new ArrayList<Gender>()));
+              .orElse(new ArrayList<>()));
 
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
@@ -234,7 +233,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                   dbDemographicSurvey.getRaceEnum().stream()
                       .map(RdrExportEnums::raceToRdrRace)
                       .collect(Collectors.toList()))
-              .orElse(new ArrayList<Race>()));
+              .orElse(new ArrayList<>()));
 
       researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
       researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
@@ -242,11 +241,10 @@ public class RdrExportServiceImpl implements RdrExportService {
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()
             .map(
-                inst -> {
-                  return new ResearcherAffiliation()
-                      .institution(inst.getInstitution())
-                      .role(inst.getRole());
-                })
+                inst ->
+                    new ResearcherAffiliation()
+                        .institution(inst.getInstitution())
+                        .role(inst.getRole()))
             .collect(Collectors.toList()));
 
     verifiedInstitutionalAffiliationDao
@@ -409,7 +407,8 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param entity
    * @param idList
    */
-  private void updateDBRdrExport(RdrEntity entity, List<Long> idList) {
+  @VisibleForTesting
+  public void updateDbRdrExport(RdrEntity entity, List<Long> idList) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     List<DbRdrExport> exportList =

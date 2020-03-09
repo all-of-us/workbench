@@ -20,16 +20,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -134,7 +135,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    */
   private DbUser updateUserWithRetries(Function<DbUser, DbUser> modifyUser) {
     DbUser user = userProvider.get();
-    return updateUserWithRetries(modifyUser, user);
+    return updateUserWithRetries(modifyUser, user, Agent.asUser(user));
   }
 
   /**
@@ -144,12 +145,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * user; handles conflicts with concurrent updates by retrying.
    */
   @Override
-  public DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser) {
+  public DbUser updateUserWithRetries(
+      Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent) {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
     while (true) {
       dbUser = userModifier.apply(dbUser);
-      updateDataAccessLevel(dbUser);
+      updateDataAccessLevel(dbUser, agent);
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       dbUser.setLastModifiedTime(now);
       try {
@@ -186,7 +188,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  private void updateDataAccessLevel(DbUser dbUser) {
+  private void updateDataAccessLevel(DbUser dbUser, Agent agent) {
     final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
     final DataAccessLevel newDataAccessLevel;
     if (shouldUserBeRegistered(dbUser)) {
@@ -205,7 +207,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
       userServiceAuditor.fireUpdateDataAccessAction(
-          dbUser, newDataAccessLevel, previousDataAccessLevel);
+          dbUser, newDataAccessLevel, previousDataAccessLevel, agent);
     }
   }
 
@@ -305,7 +307,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         oAuth2Userinfo.getGivenName(),
         oAuth2Userinfo.getFamilyName(),
         oAuth2Userinfo.getEmail(),
-        null,
+        oAuth2Userinfo.getEmail(),
         null,
         null,
         null,
@@ -430,7 +432,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
           return user;
         },
-        dbUser);
+        dbUser,
+        Agent.asUser(dbUser));
   }
 
   @Override
@@ -534,7 +537,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           setter.accept(u, bypassTime);
           return u;
         },
-        dbUser);
+        dbUser,
+        Agent.asAdmin(userProvider.get()));
     userServiceAuditor.fireAdministrativeBypassTime(
         dbUser.getUserId(),
         targetProperty,
@@ -558,7 +562,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           u.setDisabled(disabled);
           return u;
         },
-        user);
+        user,
+        Agent.asAdmin(userProvider.get()));
   }
 
   @Override
@@ -600,7 +605,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
     List<Short> dataAccessLevels =
         Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-            .map(CommonStorageEnums::dataAccessLevelToStorage)
+            .map(DbStorageEnums::dataAccessLevelToStorage)
             .collect(Collectors.toList());
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
   }
@@ -610,7 +615,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Deprecated
   public DbUser syncComplianceTrainingStatusV1()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    return syncComplianceTrainingStatusV1(userProvider.get());
+    DbUser user = userProvider.get();
+    return syncComplianceTrainingStatusV1(user, Agent.asUser(user));
   }
 
   /**
@@ -627,7 +633,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    */
   @Override
   @Deprecated
-  public DbUser syncComplianceTrainingStatusV1(DbUser dbUser)
+  public DbUser syncComplianceTrainingStatusV1(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     if (isServiceAccount(dbUser)) {
       // Skip sync for service account user rows.
@@ -681,7 +687,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             u.setComplianceTrainingCompletionTime(u.getComplianceTrainingCompletionTime());
             return u;
           },
-          dbUser);
+          dbUser,
+          agent);
 
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
@@ -701,7 +708,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   /** Syncs the current user's training status from Moodle. */
   public DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    return syncComplianceTrainingStatusV2(userProvider.get());
+    DbUser user = userProvider.get();
+    return syncComplianceTrainingStatusV2(user, Agent.asUser(user));
   }
 
   /**
@@ -715,7 +723,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * we clear the completion/expiration dates from the database as the user will need to complete a
    * new training.
    */
-  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser)
+  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Skip sync for service account user rows.
     if (isServiceAccount(dbUser)) {
@@ -765,7 +773,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
             return u;
           },
-          dbUser);
+          dbUser,
+          agent);
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
       throw e;
@@ -788,7 +797,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    *
    * <p>This method saves the updated user object to the database and returns it.
    */
-  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus) {
+  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus, Agent agent) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     return updateUserWithRetries(
@@ -830,7 +839,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           }
           return user;
         },
-        targetUser);
+        targetUser,
+        agent);
   }
 
   /** Syncs the eraCommons access module status for the current user. */
@@ -838,7 +848,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser syncEraCommonsStatus() {
     DbUser user = userProvider.get();
     FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
-    return setEraCommonsStatus(user, nihStatus);
+    return setEraCommonsStatus(user, nihStatus, Agent.asUser(user));
   }
 
   /**
@@ -850,7 +860,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * <p>Returns the updated User object.
    */
   @Override
-  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user)
+  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
       throws IOException, org.pmiops.workbench.firecloud.ApiException {
     if (isServiceAccount(user)) {
       // Skip sync for service account user rows.
@@ -861,7 +871,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     NihApi api = new NihApi(apiClient);
     try {
       FirecloudNihStatus nihStatus = api.nihStatus();
-      return setEraCommonsStatus(user, nihStatus);
+      return setEraCommonsStatus(user, nihStatus, agent);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
         // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
@@ -876,12 +886,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public void syncTwoFactorAuthStatus() {
-    syncTwoFactorAuthStatus(userProvider.get());
+    DbUser user = userProvider.get();
+    syncTwoFactorAuthStatus(user, Agent.asUser(user));
   }
 
   /** */
   @Override
-  public DbUser syncTwoFactorAuthStatus(DbUser targetUser) {
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
       return targetUser;
@@ -900,7 +911,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           }
           return user;
         },
-        targetUser);
+        targetUser,
+        agent);
   }
 
   @Override
@@ -914,7 +926,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
                     .addTag(
                         MetricLabel.DATA_ACCESS_LEVEL,
-                        CommonStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
+                        DbStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
                             .toString())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
                     .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())

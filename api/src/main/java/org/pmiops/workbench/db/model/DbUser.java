@@ -180,11 +180,11 @@ public class DbUser {
 
   @Transient
   public DataAccessLevel getDataAccessLevelEnum() {
-    return CommonStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @Column(name = "given_name")
@@ -242,6 +242,7 @@ public class DbUser {
     this.freeTierCreditsLimitDollarsOverride = freeTierCreditsLimitDollarsOverride;
   }
 
+  @Deprecated
   @Column(name = "free_tier_credits_limit_days_override")
   public Short getFreeTierCreditsLimitDaysOverride() {
     return freeTierCreditsLimitDaysOverride;
@@ -251,6 +252,7 @@ public class DbUser {
     this.freeTierCreditsLimitDaysOverride = freeTierCreditsLimitDaysOverride;
   }
 
+  @Deprecated
   @Column(name = "last_free_tier_credits_time_check")
   public Timestamp getLastFreeTierCreditsTimeCheck() {
     return lastFreeTierCreditsTimeCheck;

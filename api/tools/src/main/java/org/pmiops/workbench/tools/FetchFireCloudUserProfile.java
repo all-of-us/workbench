@@ -5,15 +5,17 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.ApiClient;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * A tool that takes an AoU username (e.g. gjordan) and fetches the FireCloud profile associated
@@ -23,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
  * domain-wide delegation to make FireCloud API calls impersonating other users.
  */
 @Configuration
-@ComponentScan("org.pmiops.workbench.firecloud")
+@Import({FireCloudServiceImpl.class, FireCloudConfig.class})
 public class FetchFireCloudUserProfile {
   private static final Logger log =
       Logger.getLogger(org.pmiops.workbench.tools.FetchFireCloudUserProfile.class.getName());

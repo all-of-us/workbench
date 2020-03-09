@@ -6,7 +6,9 @@ import {
   Ethnicity,
   GenderIdentity,
   IndustryRole,
+  InstitutionalRole,
   NonAcademicAffiliation,
+  OrganizationType,
   Race,
   SexAtBirth
 } from 'generated/fetch';
@@ -26,6 +28,8 @@ export const AccountCreationOptions = {
     {label: 'B.S.', value: Degree.BS},
     {label: 'B.S.N.', value: Degree.BSN},
   ],
+  // BEGIN roles and affiliations for old (pre-verification) institutional affiliation
+  // TODO remove when the verification feature flag is fully enabled
   roles: [
     {label: `Undergraduate (Bachelor level) student`, value: AcademicRole.UNDERGRADUATE},
     {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training
@@ -58,6 +62,80 @@ export const AccountCreationOptions = {
     {label: 'Student', value: EducationalRole.STUDENT},
     {label: 'Administrator', value: EducationalRole.ADMIN},
     {label: 'Other (free text)', value: EducationalRole.FREETEXT}
+  ],
+  // END roles and affiliations for old (pre-verification) institutional affiliation
+  // BEGIN roles for verified institutional affiliation
+  institutionalRoles: [
+    {label: `Undergraduate (Bachelor level) student`,
+      value: InstitutionalRole.UNDERGRADUATE},
+    {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training program)`,
+      value: InstitutionalRole.TRAINEE},
+    {label: `Research fellow (a post-doctoral fellow or medical resident in training)`,
+      value: InstitutionalRole.FELLOW},
+    {label: `Early career tenure-track researcher`,
+      value: InstitutionalRole.EARLYCAREER},
+    {label: `Mid-career tenured researcher`,
+      value: InstitutionalRole.MIDCAREER},
+    {label: `Late career tenured researcher`,
+      value: InstitutionalRole.LATECAREER},
+    {label: `Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research Coordinator or other roles)`,
+      value: InstitutionalRole.PROJECTPERSONNEL},
+    {label: 'Research Assistant (pre-doctoral)',
+      value: InstitutionalRole.PREDOCTORAL},
+    {label: 'Research associate (post-doctoral; early/mid career)',
+      value: InstitutionalRole.POSTDOCTORAL},
+    {label: 'Senior Researcher (PI/Team Lead, senior scientist)',
+      value: InstitutionalRole.SENIORRESEARCHER},
+    {label: 'Teacher/Instructor/Professor',
+      value: InstitutionalRole.TEACHER},
+    {label: 'Student',
+      value: InstitutionalRole.STUDENT},
+    {label: 'Administrator',
+      value: InstitutionalRole.ADMIN},
+    {label: 'Other (free text)',
+      value: InstitutionalRole.OTHER},
+  ],
+  institutionalRolesByOrganizationType: [
+    {type: OrganizationType.ACADEMICRESEARCHINSTITUTION,
+      roles: [
+        InstitutionalRole.UNDERGRADUATE,
+        InstitutionalRole.TRAINEE,
+        InstitutionalRole.FELLOW,
+        InstitutionalRole.EARLYCAREER,
+        InstitutionalRole.MIDCAREER,
+        InstitutionalRole.LATECAREER,
+        InstitutionalRole.PROJECTPERSONNEL,
+        InstitutionalRole.OTHER,
+      ]},
+    {type: OrganizationType.INDUSTRY,
+      // identical to the HEALTHCENTERNONPROFIT roles
+      roles: [
+        InstitutionalRole.PREDOCTORAL,
+        InstitutionalRole.POSTDOCTORAL,
+        InstitutionalRole.SENIORRESEARCHER,
+        InstitutionalRole.PROJECTPERSONNEL,
+        InstitutionalRole.OTHER,
+      ]},
+    {type: OrganizationType.HEALTHCENTERNONPROFIT,
+      // identical to the INDUSTRY roles
+      roles: [
+        InstitutionalRole.PREDOCTORAL,
+        InstitutionalRole.POSTDOCTORAL,
+        InstitutionalRole.SENIORRESEARCHER,
+        InstitutionalRole.PROJECTPERSONNEL,
+        InstitutionalRole.OTHER,
+      ]},
+    {type: OrganizationType.EDUCATIONALINSTITUTION,
+      roles: [
+        InstitutionalRole.TEACHER,
+        InstitutionalRole.STUDENT,
+        InstitutionalRole.ADMIN,
+        InstitutionalRole.PROJECTPERSONNEL,
+        InstitutionalRole.OTHER,
+      ]},
+    {type: OrganizationType.OTHER,
+      // display all roles for OTHER
+      roles: Object.keys(InstitutionalRole).map(k => InstitutionalRole[k])}
   ],
   race: [
     {label: `American Indian or Alaska Native (AIAN)`, value: Race.AIAN},

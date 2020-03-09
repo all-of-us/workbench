@@ -11,6 +11,7 @@ cron-emulator-err.log
 /api/cluster-resources/generated/*
 /api/db/?/
 /api/db-cdr/csv
+/api/.docker-sync/
 /api/.project/common/
 /api/.swagger-codegen/*
 /api/out/*
@@ -59,3 +60,4 @@ common-api/out/*
 **/*.iws
 **/build
 **/.gradle
+**/*.orig

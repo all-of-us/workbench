@@ -4,6 +4,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
@@ -289,6 +290,21 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
       disabled={disabled} {...props}
       {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
   >{children}</Clickable>;
+};
+
+export const StyledAnchorTag = ({href, style = {}, children, ...props}) => {
+  const inlineAnchor = {
+    display: 'inline-block',
+    color: colors.accent
+  };
+  return <a href={href}
+            onClick={e => {
+              // This does same page navigation iff there is no key pressed and target is not set.
+              if (props.target === null) {
+                navigateAndPreventDefaultIfNoKeysPressed(e, href);
+              }
+            }}
+            style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
 };
 
 interface SlidingFabState {

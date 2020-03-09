@@ -1,42 +1,15 @@
 #!/bin/bash
 
-# This generates big query denormalized tables for search and review.
+# This generates big query denormalized tables for search, review and datasets.
 
-set -xeuo pipefail
-IFS=$'\n\t'
+set -ex
 
-
-USAGE="./generate-cdr/make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET>"
-
-BQ_PROJECT=""
-BQ_DATASET=""
-
-while [ $# -gt 0 ]; do
-  echo "1 is $1"
-  case "$1" in
-    --bq-project) BQ_PROJECT=$2; shift 2;;
-    --bq-dataset) BQ_DATASET=$2; shift 2;;
-    -- ) shift; echo -e "Usage: $USAGE"; break ;;
-    * ) break ;;
-  esac
-done
-
-if [ -z "${BQ_PROJECT}" ]
-then
-  echo -e "Usage: $USAGE"
-  echo -e "Missing bq project name"
-  exit 1
-fi
-
-if [ -z "${BQ_DATASET}" ]
-then
-  echo -e "Usage: $USAGE"
-  echo -e "Missing bq_dataset name"
-  exit 1
-fi
+export BQ_PROJECT=$1  # project
+export BQ_DATASET=$2  # dataset
+export CDR_DATE=$3 # cdr date
 
 echo "Making denormalized search tables"
-if ./generate-cdr/make-bq-denormalized-search.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+if ./generate-cdr/make-bq-denormalized-search.sh $BQ_PROJECT $BQ_DATASET $CDR_DATE
 then
     echo "Denormalized search tables generated"
 else
@@ -45,7 +18,7 @@ else
 fi
 
 echo "Making criteria tables"
-if ./generate-cdr/generate-cb-criteria-tables.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+if ./generate-cdr/generate-cb-criteria-tables.sh $BQ_PROJECT $BQ_DATASET
 then
     echo "criteria tables generated"
 else
@@ -54,7 +27,7 @@ else
 fi
 
 echo "Making denormalized review tables"
-if ./generate-cdr/make-bq-denormalized-review.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+if ./generate-cdr/make-bq-denormalized-review.sh $BQ_PROJECT $BQ_DATASET
 then
     echo "Denormalized review tables generated"
 else
@@ -63,7 +36,7 @@ else
 fi
 
 echo "Making denormalized dataset tables"
-if ./generate-cdr/make-bq-denormalized-dataset.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+if ./generate-cdr/make-bq-denormalized-dataset.sh $BQ_PROJECT $BQ_DATASET
 then
     echo "Denormalized dataset tables generated"
 else
@@ -72,7 +45,7 @@ else
 fi
 
 echo "Making dataset linking tables"
-if ./generate-cdr/make-bq-dataset-linking.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+if ./generate-cdr/make-bq-dataset-linking.sh $BQ_PROJECT $BQ_DATASET
 then
     echo "dataset linking tables generated"
 else

@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.mail.MessagingException;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,6 +31,8 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.captcha.ApiException;
+import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
@@ -50,10 +51,12 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -93,7 +96,15 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String INVITATION_KEY = "secretpassword";
+  private static final String CAPTCHA_TOKEN = "captchaToken";
+  private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
+  private static final String STREET_ADDRESS = "1 Example Lane";
+  private static final String CITY = "Exampletown";
+  private static final String STATE = "EX";
+  private static final String COUNTRY = "Example";
+  private static final String ZIP_CODE = "12345";
+
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
@@ -107,6 +118,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private MailService mailService;
   @MockBean private ProfileAuditor mockProfileAuditor;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private CaptchaVerificationService captchaVerificationService;
 
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
@@ -131,6 +143,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     ProfileController.class,
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class,
+    CaptchaVerificationService.class,
+    PublicInstitutionDetailsMapperImpl.class,
     VerifiedInstitutionalAffiliationMapperImpl.class
   })
   static class Configuration {
@@ -174,10 +189,18 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setCurrentPosition(CURRENT_POSITION);
     profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
+    profile.setAddress(
+        new Address()
+            .streetAddress1(STREET_ADDRESS)
+            .city(CITY)
+            .state(STATE)
+            .country(COUNTRY)
+            .zipCode(ZIP_CODE));
 
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
+    createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
     invitationVerificationRequest = new InvitationVerificationRequest();
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
@@ -194,6 +217,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     } catch (MessagingException e) {
       e.printStackTrace();
     }
+    when(cloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
+    try {
+      when(captchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
+      when(captchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
+    } catch (ApiException e) {
+      e.printStackTrace();
+    }
   }
 
   @Test(expected = BadRequestException.class)
@@ -201,6 +231,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCreateAccount_invalidCaptchaToken() {
+    createUser();
+    createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
     profileController.createAccount(createAccountRequest);
   }
 
@@ -255,6 +292,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     CreateAccountRequest accountRequest = new CreateAccountRequest();
     accountRequest.setInvitationKey(INVITATION_KEY);
+    accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
     createAccountRequest.getProfile().setUsername("12");
     accountRequest.setProfile(createAccountRequest.getProfile());
     exception.expect(BadRequestException.class);
@@ -446,6 +484,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         new VerifiedInstitutionalAffiliation()
             .institutionShortName(broad.getShortName())
+            .institutionDisplayName(broad.getDisplayName())
             .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
     createAccountRequest
         .getProfile()
@@ -592,26 +631,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
     profile.setFamilyName(newName);
-    profileController.updateProfile(profile);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void updateCurrentPosition_badRequest() {
-    // Server-side verification for this field is only used for old-style account creation.
-    config.featureFlags.enableNewAccountCreation = false;
-    createUser();
-    Profile profile = profileController.getMe().getBody();
-    profile.setCurrentPosition(RandomStringUtils.random(256));
-    profileController.updateProfile(profile);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void updateOrganization_badRequest() {
-    // Server-side verification for this field is only used for old-style account creation.
-    config.featureFlags.enableNewAccountCreation = false;
-    createUser();
-    Profile profile = profileController.getMe().getBody();
-    profile.setOrganization(RandomStringUtils.random(256));
     profileController.updateProfile(profile);
   }
 

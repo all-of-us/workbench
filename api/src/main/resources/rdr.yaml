@@ -64,7 +64,7 @@ paths:
       description: Submits one or more researcher snapshots for storage in the RDR.
       tags:
         - Rdr
-      operationId: exportResearcheres
+      operationId: exportResearchers
       consumes:
         - application/json
       parameters:
@@ -291,6 +291,8 @@ definitions:
           $ref: '#/definitions/ResearcherAffiliation'
       verifiedInstitutionalAffiliation:
         $ref: '#/definitions/ResearcherVerifiedInstitutionalAffiliation'
+      email:
+        type: string
 
   ResearcherAffiliation:
     type: object

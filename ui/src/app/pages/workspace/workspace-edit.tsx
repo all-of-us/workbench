@@ -1,6 +1,6 @@
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
-import {Button, Link} from 'app/components/buttons';
+import {Button, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -448,9 +448,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     renderBillingDescription() {
       return <div>
-        The <i>All of Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)} in
-        free credits per user. When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
-        At any time, you can update your Workspace billing account.
+        The <i>All of Us</i> Program provides free credits for each registered user. If you use up your free credits,
+        you can request additional credits or use your own <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
+        'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>Google Cloud Platform
+        billing account</StyledAnchorTag>
       </div>;
     }
 
@@ -970,8 +971,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         onChange={v => this.updateResearchPurpose('scientificApproach', v)}/>
               <FlexRow style={styles.textBoxCharRemaining}>
                 {this.state.workspace.researchPurpose.scientificApproach &&
-                <div>{1000 - this.state.workspace.researchPurpose.scientificApproach.length}
-                characters remaining</div>}
+                <div>{1000 - this.state.workspace.researchPurpose.scientificApproach.length} characters remaining</div>}
                 {!this.state.workspace.researchPurpose.scientificApproach &&
                 <div>1000 characters remaining</div>}
               </FlexRow>
@@ -1080,12 +1080,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           {/* Request for review section*/}
         <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent>
           <FlexRow style={styles.text}><div>
-            Any research that focuses on certain population characteristics or &nbsp;
+            Any research that focuses on certain population characteristics or&nbsp;
             <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
-              <Link style={{display: 'inline-block'}}> uses
+              <Link style={{display: 'inline-block'}}>uses
               demographic variables</Link>
             </TooltipTrigger>
-            in analyses can result, often unintentionally,
+            &nbsp;in analyses can result, often unintentionally,
             in findings that may be misinterpreted or misused by others to foster stigma. While it
             may not be possible to completely prevent misuse of research for stigmatizing purposes,
             data users can take important steps to minimize the risk of this happening–
@@ -1099,7 +1099,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
             modifying your research purpose or scope. To learn more, please refer to the&nbsp;
             <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
-            <Link style={{display: 'inline-block'}}>All of Us Stigmatizing Research Policy</Link>
+            <Link style={{display: 'inline-block'}}><i>All of Us</i> Stigmatizing Research Policy</Link>
             </TooltipTrigger>. If you
             request a review, you can expect to receive an initial response within five business days.
             During the RAB’s review, you may begin working in your workspace.</div>

@@ -10,12 +10,11 @@ import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
-import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
-import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {isAbortError} from 'app/utils/errors';
+import {ClusterInitializer} from 'app/utils/cluster-initializer';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -54,7 +53,6 @@ const styles = reactStyles({
   navBarIcon: {
     height: '16px',
     width: '16px',
-    marginLeft: 0,
     marginRight: '5px'
   },
   previewDiv: {
@@ -170,35 +168,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       this.aborter.abort();
     }
 
-    private runCluster(onClusterReady: Function): void {
-      const retry = () => {
-        this.runClusterTimer = setTimeout(() => this.runCluster(onClusterReady), 5000);
-      };
-
-      clusterApi().listClusters(this.props.urlParams.ns, this.props.urlParams.wsid, {
-        signal: this.aborter.signal
-      }).then((body) => {
-          const cluster = body.defaultCluster;
-          this.setState({clusterStatus: cluster.status});
-
-          if (cluster.status === ClusterStatus.Stopped) {
-            notebooksClusterApi()
-              .startCluster(cluster.clusterNamespace, cluster.clusterName);
-          }
-
-          if (cluster.status === ClusterStatus.Running) {
-            onClusterReady();
-          } else {
-            retry();
-          }
-        })
-        .catch((e: Error) => {
-          if (isAbortError(e)) {
-            return;
-          }
-          // TODO(RW-3097): Backoff, or don't retry forever.
-          retry();
-        });
+    private async runCluster(onClusterReady: Function): Promise<void> {
+      await ClusterInitializer.initialize({
+        workspaceNamespace: this.props.urlParams.ns,
+        onStatusUpdate: (status) => this.setState({clusterStatus: status}),
+        abortSignal: this.aborter.signal
+      });
+      onClusterReady();
     }
 
     private startEditMode() {

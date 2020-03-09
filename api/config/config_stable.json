@@ -12,7 +12,7 @@
     "xAppIdValue": "stable-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.11",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:0.0.1",
     "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
@@ -22,11 +22,8 @@
     "retryCount": 2,
     "bufferCapacity": 10,
     "bufferRefillProjectsPerTask": 1,
-    "defaultFreeCreditsLimit": 100.0,
-    "defaultFreeCreditsDollarLimit": 100.0,
-    "defaultFreeCreditsDaysLimit": 180,
+    "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [0.5, 0.75],
-    "freeTierTimeAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-stable-1@all-of-us-rw-stable.iam.gserviceaccount.com"
@@ -91,14 +88,14 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": true,
     "enableRdrExport": false,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
     "useKeylessDelegatedCredentials": false,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false
+    "requireInstitutionalVerification": false,
+    "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-stable"
@@ -107,5 +104,8 @@
     "host": "all-of-us-rdr-stable.appspot.com",
     "queueName": "rdrQueue",
     "exportObjectsPerTask" : 10
+  },
+  "captcha": {
+    "enableCaptcha": false
   }
 }

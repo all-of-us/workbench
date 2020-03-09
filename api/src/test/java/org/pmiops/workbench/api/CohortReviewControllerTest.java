@@ -219,54 +219,61 @@ public class CohortReviewControllerTest {
     user = userDao.save(user);
 
     cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.PERSON.toString())
-            .type(CriteriaType.RACE.toString())
-            .parentId(1L)
-            .conceptId(String.valueOf(TestConcepts.ASIAN.conceptId))
-            .name(TestConcepts.ASIAN.name));
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.RACE.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.ASIAN.conceptId))
+            .addName(TestConcepts.ASIAN.name)
+            .build());
     cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.PERSON.toString())
-            .type(CriteriaType.GENDER.toString())
-            .parentId(1L)
-            .conceptId(String.valueOf(TestConcepts.FEMALE.conceptId))
-            .name(TestConcepts.FEMALE.name));
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.GENDER.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.FEMALE.conceptId))
+            .addName(TestConcepts.FEMALE.name)
+            .build());
     cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.PERSON.toString())
-            .type(CriteriaType.GENDER.toString())
-            .parentId(1L)
-            .conceptId(String.valueOf(TestConcepts.MALE.conceptId))
-            .name(TestConcepts.MALE.name));
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.GENDER.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.MALE.conceptId))
+            .addName(TestConcepts.MALE.name)
+            .build());
     cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.PERSON.toString())
-            .type(CriteriaType.ETHNICITY.toString())
-            .parentId(1L)
-            .conceptId(String.valueOf(TestConcepts.NOT_HISPANIC.conceptId))
-            .name(TestConcepts.NOT_HISPANIC.name));
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.ETHNICITY.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.NOT_HISPANIC.conceptId))
+            .addName(TestConcepts.NOT_HISPANIC.name)
+            .build());
     cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.PERSON.toString())
-            .type(CriteriaType.RACE.toString())
-            .parentId(1L)
-            .conceptId(String.valueOf(TestConcepts.WHITE.conceptId))
-            .name(TestConcepts.WHITE.name));
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.RACE.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.WHITE.conceptId))
+            .addName(TestConcepts.WHITE.name)
+            .build());
     cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.PERSON.toString())
-            .type(CriteriaType.RACE.toString())
-            .parentId(1L)
-            .conceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.conceptId))
-            .name(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.name));
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.RACE.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.conceptId))
+            .addName(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.name)
+            .build());
     cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.PERSON.toString())
-            .type(CriteriaType.RACE.toString())
-            .parentId(1L)
-            .conceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.conceptId))
-            .name(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.name));
+        DbCriteria.builder()
+            .addDomainId(DomainType.PERSON.toString())
+            .addType(CriteriaType.RACE.toString())
+            .addParentId(1L)
+            .addConceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.conceptId))
+            .addName(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.name)
+            .build());
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");

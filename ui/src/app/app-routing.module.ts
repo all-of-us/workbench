@@ -11,6 +11,7 @@ import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
+import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {CookiePolicyComponent} from './pages/cookie-policy';
@@ -26,7 +27,6 @@ import {HomepageComponent} from './pages/homepage/homepage';
 import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
-import {StigmatizationPageComponent} from './pages/workspace/stigmatization-page';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
@@ -60,12 +60,6 @@ const routes: Routes = [
         path: '',
         component: HomepageComponent,
         data: {title: 'Homepage'},
-      }, {
-        path: 'definitions/stigmatization',
-        component: StigmatizationPageComponent,
-        data: {
-          title: 'Stigmatization Definition'
-        }
       }, {
         path: 'nih-callback',
         component: HomepageComponent,
@@ -150,6 +144,8 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
+                      helpContent: 'preview',
+                      notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
                   }
@@ -287,9 +283,13 @@ const routes: Routes = [
         component: AdminBannerComponent,
         data: {title: 'Create Banner'}
       }, {
-        path: 'admin/workspace',
+        path: 'admin/workspaces',
+        component: AdminWorkspaceSearchComponent,
+        data: { title: 'Workspace Admin'},
+      }, {
+        path: 'admin/workspaces/:workspaceNamespace',
         component: AdminWorkspaceComponent,
-        data: { title: 'Manage Workspaces'}
+        data: { title: 'Workspace Admin'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,

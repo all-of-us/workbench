@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SmallHeader} from 'app/components/headers';
@@ -26,10 +27,6 @@ const styles = {
   tableHeader: {
     backgroundColor: colorWithWhiteness(colors.dark, 0.85),
     fontWeight: 500
-  },
-  inlineAnchor: {
-    display: 'inline-block',
-    color: colors.accent
   },
   header: {
     fontSize: 20,
@@ -109,8 +106,8 @@ export class CookiePolicy extends React.Component<{}, {}> {
         </FlexRow>
         <FlexRow>
           <div style={{...styles.tableItem, ...styles.smallItem}}>__cfduid</div>
-          <div style={{...styles.tableItem, ...styles.smallItem}}><a style={styles.inlineAnchor}
-                                                                     href={ZENDESK_PRIVACY_LINK}>Zendesk</a></div>
+          <div style={{...styles.tableItem, ...styles.smallItem}}><StyledAnchorTag href={ZENDESK_PRIVACY_LINK}>
+            Zendesk</StyledAnchorTag></div>
           <div style={{...styles.tableItem, ...styles.wideItem}}>Used by the CloudFlare content delivery network to
             identify trusted web traffic from the embedded Zendesk help widget.</div>
         </FlexRow>
@@ -119,8 +116,8 @@ export class CookiePolicy extends React.Component<{}, {}> {
             <div>_ga*</div>
             <div>_gid*</div>
           </FlexColumn>
-          <div style={{...styles.tableItem, ...styles.smallItem}}><a style={styles.inlineAnchor}
-                                                                     href={GOOGLE_PRIVACY_LINK}>Google</a></div>
+          <div style={{...styles.tableItem, ...styles.smallItem}}><StyledAnchorTag href={GOOGLE_PRIVACY_LINK}>
+            Google</StyledAnchorTag></div>
           <div style={{...styles.tableItem, ...styles.wideItem}}>Used by Google Analytics to distinguish users.</div>
         </FlexRow>
         <FlexRow>
@@ -134,8 +131,8 @@ export class CookiePolicy extends React.Component<{}, {}> {
             <div>SIDCC</div>
             <div>SSID</div>
           </FlexColumn>
-          <div style={{...styles.tableItem, ...styles.smallItem}}><a style={styles.inlineAnchor}
-                                                                     href={GOOGLE_PRIVACY_LINK}>Google</a></div>
+          <div style={{...styles.tableItem, ...styles.smallItem}}><StyledAnchorTag href={GOOGLE_PRIVACY_LINK}>
+            Google</StyledAnchorTag></div>
           <div style={{...styles.tableItem, ...styles.wideItem}}>Used to track site navigation, responsiveness, user
             preferences, and other metrics to help us improve visitors' experiences on our sites.</div>
         </FlexRow>
@@ -145,8 +142,8 @@ export class CookiePolicy extends React.Component<{}, {}> {
           access certain parts of our site. Unless you have adjusted your browser setting so that it will refuse
           cookies, our system will issue cookies when you log on to our site.</div>
         <div style={styles.textSection}>If you wish to delete cookies, you can do so through your browser, and further
-          information on how to do this can be found at the following <a style={styles.inlineAnchor}
-                                                                         href={COOKIE_DELETION_LINK}>link</a>.</div>
+          information on how to do this can be found at the following <StyledAnchorTag href={COOKIE_DELETION_LINK}>
+            link</StyledAnchorTag>.</div>
       </FadeBox>
     </React.Fragment>;
   }
