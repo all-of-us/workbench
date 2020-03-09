@@ -38,7 +38,7 @@ describe('Navigation', () => {
     // Select Profile link
     await homePage.navTo(SideNavLink.PROFILE);
     const profilePage = new ProfilePage(page);
-    await profilePage.waitForReady();
+    await profilePage.waitForLoad();
     expect(await profilePage.isLoaded()).toBe(true);
 
     // check user name in dropdown matches names on Profile page
@@ -51,12 +51,12 @@ describe('Navigation', () => {
     // Select Your Workspaces link
     await homePage.navTo(SideNavLink.YOUR_WORKSPACES);
     const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.waitForReady();
+    await workspacesPage.waitForLoad();
     expect(await workspacesPage.isLoaded()).toBe(true);
 
     // Select Home link
     await homePage.navTo(SideNavLink.HOME);
-    await homePage.waitForReady();
+    await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
   });
 

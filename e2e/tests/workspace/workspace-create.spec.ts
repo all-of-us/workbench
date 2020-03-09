@@ -23,7 +23,7 @@ describe('Workspace creation tests:', () => {
     await workspacesPage.createWorkspace(workspaceName, 'Use All of Us free credits',);
     // check Data page is loaded
     const dataPage = new DataPage(page);
-    await dataPage.waitForReady();
+    await dataPage.waitForLoad();
     // checking new workspace link is found
     expect(await new Link(page).withXpath(`//a[.='${workspaceName}' and @href]`, {visible: true})).toBeTruthy();
   }, 2 * 60 * 1000);

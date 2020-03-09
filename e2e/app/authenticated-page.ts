@@ -65,16 +65,9 @@ export default abstract class AuthenticatedPage extends BasePage {
     return true;
   }
 
-  /*
-  // default if child classes do not provide this method
-  protected async waitForReady(): Promise<this> {
-    await this.isSignedIn();
-    await this.waitUntilNoSpinner();
-    return this;
-  } */
   abstract async isLoaded(): Promise<boolean>
 
-  async waitForReady(): Promise<this> {
+  async waitForLoad(): Promise<this> {
     await this.isLoaded();
     await this.waitUntilNoSpinner();
     return this;
@@ -89,7 +82,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async loadUrl(url: AppUrl): Promise<void> {
     await this.page.goto(url.toString(), {waitUntil: ['domcontentloaded','networkidle0']});
-    await this.waitForReady();
+    await this.waitForLoad();
   }
 
   /**

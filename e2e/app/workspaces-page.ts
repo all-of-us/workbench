@@ -1,8 +1,7 @@
 import {Page} from 'puppeteer';
-import select from './aou-elements/select';
 import {findButton} from './aou-elements/xpath-finder';
 import AuthenticatedPage, {AppUrl} from './authenticated-page';
-import WorkspaceEditPage, {FIELD_LABEL as EditPageLabel} from './workspace-edit-page';
+import WorkspaceEditPage from './workspace-edit-page';
 
 const faker = require('faker/locale/en_US');
 
@@ -30,30 +29,29 @@ export default class WorkspacesPage extends AuthenticatedPage {
     }
   }
 
-  async getCreateNewWorkspaceLink() {
+  async getCreateNewWorkspaceButton() {
     return findButton(this.page, {normalizeSpace: FIELD_LABEL.CREATE_NEW_WORKSPACE}, {visible: true});
   }
 
+  // tests helpers: combined a number of steps in one function
 
-   // tests helpers: combined a number of steps in one function
-
-   /**
-    * Perform following steps:
-    *
-    * 1: go to My Workspaces page
-    * 2: click Create New Workspace link
-    * 3: wait until Edit page is loaded and ready
-    * 4: return
-    */
+ /**
+  * Perform following steps:
+  *
+  * 1: go to My Workspaces page
+  * 2: click Create New Workspace link (button)
+  * 3: wait until Edit page is loaded and ready
+  * 4: return
+  */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
     await this.loadUrl(AppUrl.WORKSPACES);
-    const link = await this.getCreateNewWorkspaceLink();
+    const link = await this.getCreateNewWorkspaceButton();
     await Promise.all([
       this.page.waitForNavigation( { waitUntil: ['domcontentloaded','networkidle0']} ),
       link.click()
     ]);
     const workspaceEdit = new WorkspaceEditPage(this.page);
-    await workspaceEdit.waitForReady();
+    await workspaceEdit.waitForLoad();
     return workspaceEdit;
   }
 
@@ -62,71 +60,61 @@ export default class WorkspacesPage extends AuthenticatedPage {
    */
   async createWorkspace(workspaceName: string, billingAccount: string) {
 
-    const workspaceEditPage = await this.clickCreateNewWorkspace();
+    const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
-    await workspaceEditPage.waitForTextExists('Use All of Us free credits');
+    await editPage.waitForTextExists('Use All of Us free credits');
 
-    await (await workspaceEditPage.getWorkspaceNameTextbox()).type(workspaceName);
-    await (await workspaceEditPage.getWorkspaceNameTextbox()).pressKeyboard('Tab', { delay: 100 });
+    await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
+    await (await editPage.getWorkspaceNameTextbox()).pressKeyboard('Tab', { delay: 100 });
 
-    const dataSetSelect = new select(this.page);
-    await dataSetSelect.withLabel({text: EditPageLabel.SYNTHETIC_DATASET});
-    await dataSetSelect.selectOption('2');
+    // select Synthetic Data Set 2
+    await editPage.selectDataSet('2');
 
-    const billingAccountSelect = new select(this.page);
-    await billingAccountSelect.withLabel({text: EditPageLabel.SELECT_BILLING});
-    await billingAccountSelect.selectOption(billingAccount);
+    // select Billing Account
+    await editPage.selectBillingAccount(billingAccount);
 
     // expand Disease purpose section
-    await workspaceEditPage.expandResearchPurposeSection();
+    await editPage.expandResearchPurposeGroup(true);
 
     // Enter value in 'Disease-focused research'
-    const diseaseName = workspaceEditPage.question1_diseaseFocusedResearch();
-    await (await diseaseName.asLabel()).click(); // click on label to toggle checkbox
-    await (await diseaseName.asTextBox()).type('diabetes');
-    await (await diseaseName.asTextBox()).pressKeyboard('Tab', { delay: 100 });
+    await editPage.fillOutDiseaseFocusedResearch();
 
-    const educationPurpose = workspaceEditPage.question1_educationalPurpose();
+    // check Educational Purpose checkbox
+    const educationPurpose = editPage.question1_educationalPurpose();
     await (await educationPurpose.asCheckBox()).check();
 
-    const forProfitPurpose = workspaceEditPage.question1_forProfitPurpose();
+    // check For-Profit Purpose checkbox
+    const forProfitPurpose = editPage.question1_forProfitPurpose();
     await (await forProfitPurpose.asCheckBox()).check();
 
-    const otherPurpose = workspaceEditPage.question1_otherPurpose();
-    await (await otherPurpose.asCheckBox()).check(); // enables textarea
-    await (await otherPurpose.asTextArea()).type(faker.lorem.word());
+    // check Other-Purpose checkbox
+    await editPage.fillOutOtherPurpose();
 
     // 2. Please provide a summary of your research purpose by responding to the questions below.
-    const scientificQuestions = workspaceEditPage.question2_scientificQuestionsIntendToStudy();
+    const scientificQuestions = editPage.question2_scientificQuestionsIntendToStudy();
     await (await scientificQuestions.asTextArea()).type(faker.lorem.word());
 
-    const scientificApproaches = workspaceEditPage.question2_scientificApproaches();
+    const scientificApproaches = editPage.question2_scientificApproaches();
     await (await scientificApproaches.asTextArea()).type(faker.lorem.word());
 
-    const anticipatedFindings = workspaceEditPage.question2_anticipatedFindings();
+    const anticipatedFindings = editPage.question2_anticipatedFindings();
     await (await anticipatedFindings.asTextArea()).type(faker.lorem.word());
 
     // 3. The All of Us Research Program encourages researchers to disseminate ....
-    const publicationInPeerReviewedJournal = workspaceEditPage.publicationInJournal();
-    await (await publicationInPeerReviewedJournal.asCheckBox()).check();
+    const publicationInJournal = editPage.publicationInJournal();
+    await (await publicationInJournal.asCheckBox()).check();
 
     // 4. The All of Us Research Program would like to understand how ....
-    const increaseWellness = workspaceEditPage.increaseWellnessResilience();
+    const increaseWellness = editPage.increaseWellnessResilience();
     await (await increaseWellness.asCheckBox()).check();
 
-    // 5. Population of interest: use default values
-    // Leave alone default values
+    // 5. Population of interest: use default values. Using default value
 
-    // 6. Request for Review of Research Purpose Description
-    // Leave alone default values
-    const noRadiobutton = workspaceEditPage.noConcernAboutStigmatization();
-    await (await noRadiobutton.asRadioButton()).select();
+    // 6. Request for Review of Research Purpose Description. Using default value
+    await editPage.requestForReviewRadiobutton(false);
 
-    // CREATE WORKSPACE button
-    const createButton = await workspaceEditPage.getCreateWorkspaceButton();
-    await createButton.focus(); // bring into viewport
-    await createButton.click();
-    await workspaceEditPage.waitUntilNoSpinner();
+    // click CREATE WORKSPACE button
+    await editPage.clickCreateFinishButton();
   }
 
 }

@@ -58,9 +58,10 @@ export default class GoogleLoginPage extends BasePage {
     await emailInput.focus();
     await emailInput.type(userEmail);
     const nextButton = await this.page.waitForXPath(selectors.NextButton);
+
     await Promise.all([
+      nextButton.click(),
       this.page.waitForNavigation(),
-      nextButton.click()
     ]);
   }
 
@@ -78,10 +79,11 @@ export default class GoogleLoginPage extends BasePage {
    * Click Next button to submit login credential.
    */
   async submit() : Promise<void> {
-    const naviPromise = this.waitForNavigation(this.page);
     const button = await this.page.waitForXPath(selectors.NextButton);
-    await button.click();
-    await naviPromise;
+    await Promise.all([
+      button.click(),
+      this.waitForNavigation(this.page),
+    ]);
   }
 
   /**
@@ -114,6 +116,21 @@ export default class GoogleLoginPage extends BasePage {
     await this.enterEmail(user);
     await this.enterPassword(pwd);
     await this.submit();
+
+    try {
+      await this.waitUntilTitleMatch('Homepage');
+    } catch (e) {
+      // Handle "Enter Recovery Email" prompt if found exists
+      const recoverEmail = await this.page.$x('//input[@type="email" and @aria-label="Enter recovery email address"]');
+      if (recoverEmail.length > 0) {
+        await recoverEmail[0].type(process.env.CONTACT_EMAIL);
+        await Promise.all([
+          this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
+          this.page.waitForNavigation(),
+        ]);
+      }
+    }
+
   }
 
   async loginAs(email, paswd) {
@@ -129,7 +146,7 @@ export default class GoogleLoginPage extends BasePage {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
     const home = new HomePage(page);
-    await home.waitForReady();
+    await home.waitForLoad();
     return home;
   }
 

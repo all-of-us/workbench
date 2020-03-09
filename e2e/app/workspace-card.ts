@@ -1,4 +1,4 @@
-import {ElementHandle, Page} from 'puppeteer';
+import {ElementHandle, JSHandle, Page} from 'puppeteer';
 import WebElement from './aou-elements/web-element';
 const _ = require('lodash');
 
@@ -134,6 +134,23 @@ export default class WorkspaceCard extends WebElement {
     return ellipsis[0];
   }
 
+  /**
+   * Find workspace access level.
+   * @param workspaceName
+   */
+  async getWorkspaceAccessLevel(workspaceName: string) : Promise<JSHandle<string>> {
+    const element = await this.page.waitForXPath(this.accessLevel(workspaceName), {visible: true});
+    return await element.getProperty('innerText');
+  }
+
+  /**
+   * Find element with specified workspace name on the page.
+   * @param {string} workspaceName
+   */
+  async getWorkspaceNameLink(workspaceName: string) : Promise<ElementHandle> {
+    return await this.page.waitForXPath(this.workspaceLink(workspaceName));
+  }
+
   private async clickEllipsis(): Promise<void> {
     const ellipsis = await this.getEllipsisIcon();
     await ellipsis.click();
@@ -147,6 +164,14 @@ export default class WorkspaceCard extends WebElement {
 
   private linkSelector(linkText: string) {
     return  `${WorkspaceCard.popupRootXpath}//*[@role='button' and text()='${linkText}']`;
+  }
+
+  private accessLevel(workspaceName: string) {
+    return `//*[.//*[@data-test-id='workspace-card-name' and normalize-space(text())='${workspaceName}']]/*[@data-test-id='workspace-access-level']`;
+  }
+
+  private workspaceLink(workspaceName: string) {
+    return `//*[@role='button'][./*[@data-test-id='workspace-card-name' and normalize-space(text())='${workspaceName}']]`
   }
 
 }

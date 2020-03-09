@@ -49,9 +49,9 @@ describe('Workspace ui tests', () => {
 
   test('Check Workspace card on Your Workspaces page', async () => {
     const home = new HomePage(page);
-    await home.waitForReady();
+    await home.waitForLoad();
     await home.navTo(SideNavLink.YOUR_WORKSPACES);
-    await new WorkspacesPage(page).waitForReady();
+    await new WorkspacesPage(page).waitForLoad();
 
     await WorkspaceCard.getAllCards(page);
     const anyCard = await WorkspaceCard.getAnyCard(page);

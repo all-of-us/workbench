@@ -28,7 +28,7 @@ describe('Profile', () => {
 
   test('Click First and Last name fields on Profile page', async () => {
     const homePage = new HomePage(page);
-    await homePage.waitForReady();
+    await homePage.waitForLoad();
     await homePage.navTo(SideNavLink.PROFILE);
     const profilePage = new ProfilePage(page);
     const fname = await (await profilePage.getFirstName()).getValue();

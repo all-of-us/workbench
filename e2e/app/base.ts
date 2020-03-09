@@ -3,7 +3,7 @@ import {Page} from 'puppeteer';
 export default abstract class BasePage {
 
   page: Page;
-  DEFAULT_TIMEOUT_MILLISECONDS = 60000;
+  DEFAULT_TIMEOUT_MILLISECONDS = 30000;
   timeout;
 
   protected constructor(page: Page, timeout?) {
@@ -64,10 +64,6 @@ export default abstract class BasePage {
       const actualTitle = document.title;
       return actualTitle.includes(t);
     }, {timeout: this.timeout}, title)
-    .catch ((err) => {
-      console.error(`Failed match document title "${title}".`);
-      throw err;
-    })
   }
 
   /**

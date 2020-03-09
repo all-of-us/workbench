@@ -1,10 +1,11 @@
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
+import select from './aou-elements/select';
 import SelectComponent from './aou-elements/select-component';
 import Textbox from './aou-elements/textbox';
 import WebComponent from './aou-elements/web-component';
 import {findButton} from './aou-elements/xpath-finder';
 import AuthenticatedPage from './authenticated-page';
-
+const faker = require('faker/locale/en_US');
 
 export const PAGE = {
   TITLE: 'Create Workspace',
@@ -33,7 +34,8 @@ export const FIELD_LABEL = {
   ANTICIPATED_FINDINGS: 'What are the anticipated findings from the study',
   PUBLICATION_IN_JOURNALS: 'Publication in peer-reviewed scientific journals',
   INCREASE_WELLNESS: 'This research project seeks to increase wellness and resilience',
-  NO_CONCERNS_ABOUT_STIGMATIZATION: 'No, I have no concerns at this time about potential stigmatization'
+  NO_CONCERNS_ABOUT_STIGMATIZATION: 'No, I have no concerns at this time about potential stigmatization',
+  YES_REQUEST_REVIEW: 'Yes, I would like to request a review of my research purpose',
 };
 
 export default class WorkspaceEditPage extends AuthenticatedPage {
@@ -143,63 +145,97 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     return new WebComponent(this.page, {textContains: FIELD_LABEL.INCREASE_WELLNESS, ancestorNodeLevel: 1});
   }
 
-  noConcernAboutStigmatization(): WebComponent {
-    return new WebComponent(this.page, {textContains: FIELD_LABEL.NO_CONCERNS_ABOUT_STIGMATIZATION});
+  /**
+   * Select Data Set.
+   * @param optionValue: 1 for selecting Data Set 1. 2 for Data Set 2.
+   */
+  async selectDataSet(optionValue: string) {
+    const dataSetSelect = new select(this.page);
+    await dataSetSelect.withLabel({text: FIELD_LABEL.SYNTHETIC_DATASET});
+    await dataSetSelect.selectOption(optionValue);
   }
 
+  /**
+   * Select Billing Account
+   */
+  async selectBillingAccount(account: string) {
+    const billingAccountSelect = new select(this.page);
+    await billingAccountSelect.withLabel({text: FIELD_LABEL.SELECT_BILLING});
+    await billingAccountSelect.selectOption(account);
+  }
 
-  async expandResearchPurposeSection() {
+  /**
+   * Assumption: Checked checkbox means to expand the section, hidden questions will become visible.
+   * @param yesOrNo: True means to check checkbox. False means to uncheck.
+   */
+  async expandResearchPurposeGroup(yesOrNo?: boolean) {
+    if (yesOrNo === undefined) {
+      yesOrNo = true;
+    }
     // expand Disease purpose section if needed
     const researchPurpose = this.question1_researchPurpose();
     const researchPurposeCheckbox = await researchPurpose.asCheckBox();
-    if (!await researchPurposeCheckbox.isChecked()) {
+    const is = await researchPurposeCheckbox.isChecked();
+    if (yesOrNo !== is) {
+      // click checkbox expands or collapses the section, reveal hidden questions contained inside.
       await researchPurposeCheckbox.check();
       await this.page.waitFor(1000);
     }
   }
 
   /**
-   * Find and Click "Create a New Workspace" button.
+   *  Enter value in 'Disease-focused research' textbox
+   * @param diseaseName
    */
-  async click_button_CreateNewWorkspace(): Promise<void> {
-    const buttonSelectr = '//*[@role="button" and normalize-space(.)="Create a New Workspace"]';
-    const button = await this.page.waitForXPath(buttonSelectr, { visible: true });
-    await button.click();
-  }
-
-
-  /**
-   * Find all visible Workspace names.
-   */
-  async getAllWorkspaceNames(): Promise<any[]> {
-    return await this.page.evaluate(() => {
-      return Array.from(document.querySelectorAll(`*[data-test-id="workspace-card-name"]`)).map(a =>a.textContent)
-    })
+  async fillOutDiseaseFocusedResearch(diseaseName?: string) {
+    if (diseaseName === undefined) {
+      diseaseName = 'diabetes';
+    }
+    const diseaseNameComponent = this.question1_diseaseFocusedResearch();
+    await (await diseaseNameComponent.asCheckBox()).check();
+    await (await diseaseNameComponent.asTextBox()).type(diseaseName);
+    await (await diseaseNameComponent.asTextBox()).pressKeyboard('Tab', { delay: 10 });
   }
 
   /**
-   * Find workspace access level.
-   * @param workspaceName
+   * Enter value in Other Purpose textarea
+   * @param value
    */
-  async getWorkspaceAccessLevel(workspaceName: string) : Promise<JSHandle<string>> {
-    const element = await this.page.waitForXPath(this.accessLevel(workspaceName), {visible: true});
-    return await element.getProperty('innerText');
+  async fillOutOtherPurpose(value?: string) {
+    if (value === undefined) {
+      value = faker.lorem.word();
+    }
+    // check Other-Purpose checkbox
+    const otherPurpose = this.question1_otherPurpose();
+    await (await otherPurpose.asCheckBox()).check(); // enables textarea
+    await (await otherPurpose.asTextArea()).type(value);
   }
 
   /**
-   * Find element with specified workspace name on the page.
-   * @param {string} workspaceName
+   * Question 6. Request for Review of Research Purpose Description
+   * @param yesOrNo: True means select "Yes, Request Review" radiobutton. False means select "No, Request Review" radiobutton.
    */
-  async getWorkspaceLink(workspaceName: string) : Promise<ElementHandle> {
-    return await this.page.waitForXPath(this.workspaceLink(workspaceName));
+  async requestForReviewRadiobutton(yesOrNo: boolean) {
+    let radioComponent;
+    if (yesOrNo) {
+      radioComponent = new WebComponent(this.page, {textContains: FIELD_LABEL.YES_REQUEST_REVIEW});
+    } else {
+      radioComponent = new WebComponent(this.page, {textContains: FIELD_LABEL.NO_CONCERNS_ABOUT_STIGMATIZATION });
+    }
+    await (await radioComponent.asRadioButton()).select();
   }
 
-  private workspaceLink(workspaceName: string) {
-    return `//*[@role='button'][./*[@data-test-id='workspace-card-name' and normalize-space(text())='${workspaceName}']]`
-  }
-
-  private accessLevel(workspaceName: string) {
-    return `//*[.//*[@data-test-id='workspace-card-name' and normalize-space(text())='${workspaceName}']]/*[@data-test-id='workspace-access-level']`;
+  /**
+   * Find and click the CREATE WORKSPACE (FINISH) button
+   */
+  async clickCreateFinishButton(): Promise<void> {
+    const createButton = await this.getCreateWorkspaceButton();
+    await createButton.focus(); // bring into viewport
+    await Promise.all([
+      createButton.click(),
+      this.waitUntilNoSpinner(),
+      this.page.waitForNavigation(),
+    ]);
   }
 
 }

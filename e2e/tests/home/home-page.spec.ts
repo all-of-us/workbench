@@ -109,7 +109,7 @@ describe('Home page ui tests', () => {
     await seeAllWorkspacesLink.withLabel(editPageFieldLabel.SEE_ALL_WORKSPACES);
     await seeAllWorkspacesLink.click();
     const workspaces = new WorkspacesPage(page);
-    await workspaces.waitForReady();
+    await workspaces.waitForLoad();
     expect(await workspaces.isLoaded()).toBe(true);
     await seeAllWorkspacesLink.dispose();
   });
@@ -120,7 +120,7 @@ describe('Home page ui tests', () => {
     await home.getCreateNewWorkspaceLink().then((link) => link.click());
 
     const workspaceEdit = new WorkspaceEditPage(page);
-    await workspaceEdit.waitForReady();
+    await workspaceEdit.waitForLoad();
     // expect Workspace name Input textfield exists and NOT disabled
     const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
     expect(await workspaceNameTextbox.isVisible()).toBe(true);
