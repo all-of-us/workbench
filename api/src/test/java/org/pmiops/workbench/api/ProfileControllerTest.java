@@ -111,6 +111,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
+  private static final double FREE_TIER_USAGE = 100D;
+  private static final double FREE_TIER_LIMIT = 300D;
+
   @MockBean private FireCloudService fireCloudService;
   @MockBean private DirectoryService directoryService;
   @MockBean private CloudStorageService cloudStorageService;
@@ -731,6 +734,28 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     profileController.deleteProfile();
     verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
+  }
+
+  @Test
+  public void testFreeTierLimits() {
+    createUser();
+    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+
+    when(freeTierBillingService.getUserCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
+    when(freeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
+
+    Profile profile = profileController.getMe().getBody();
+    assertProfile(
+        profile,
+        PRIMARY_EMAIL,
+        CONTACT_EMAIL,
+        FAMILY_NAME,
+        GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED,
+        TIMESTAMP,
+        false);
+    assertThat(profile.getFreeTierUsage()).isEqualTo(FREE_TIER_USAGE);
+    assertThat(profile.getFreeTierDollarQuota()).isEqualTo(FREE_TIER_LIMIT);
   }
 
   private Profile createUser() {

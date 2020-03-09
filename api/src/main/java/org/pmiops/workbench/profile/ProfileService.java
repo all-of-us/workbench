@@ -1,6 +1,7 @@
 package org.pmiops.workbench.profile;
 
 import java.util.Optional;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
+  private final FreeTierBillingService freeTierBillingService;
   private final ProfileMapper profileMapper;
   private final UserDao userDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
@@ -21,11 +23,13 @@ public class ProfileService {
 
   @Autowired
   public ProfileService(
+      FreeTierBillingService freeTierBillingService,
       ProfileMapper profileMapper,
       UserDao userDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+    this.freeTierBillingService = freeTierBillingService;
     this.profileMapper = profileMapper;
     this.userDao = userDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
@@ -44,6 +48,9 @@ public class ProfileService {
     }
 
     Profile profile = profileMapper.dbUserToProfile(user);
+
+    profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));
+    profile.setFreeTierDollarQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
 
     verifiedInstitutionalAffiliationDao
         .findFirstByUser(user)
