@@ -12,7 +12,7 @@
     "xAppIdValue": "staging-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.11",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:0.0.1",
     "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
