@@ -63,7 +63,7 @@ public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
     final String methodName = ((HandlerMethod) handler).getMethod().getName();
 
     // If we recorded the START_INSTANT property, find the time between then and now,
-    // and build a measurement bundle with the value, add the method name as a label, adn record.
+    // build a measurement bundle with that value, add the method name as a label, and record.
     Optional.ofNullable(request.getAttribute(RequestAttribute.START_INSTANT.getKeyName()))
         .map(obj -> (Instant) obj)
         .map(start -> Duration.between(start, clock.instant()))
