@@ -28,7 +28,7 @@ class LogsBasedMetrics
   # Fetch the source metric by name from the source environment
   def get_source_metric
     source_env = @visitor.env_by_short_name(@source_env_short_name)
-    @logger.info("Source environment is #{source_env.to_s}")
+    @logger.info("Source environment is #{source_env}")
     source_metric = nil # extract from its environment
     @visitor.visit(source_env) do |env|
       logging_client = Google::Cloud::Logging.new({project: env.project_id})

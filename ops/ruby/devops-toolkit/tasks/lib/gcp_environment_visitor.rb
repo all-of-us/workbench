@@ -18,7 +18,7 @@ class GcpEnvironmentVisitor
     Array(env_list).each do |env|
       @logger.info(">>>>>>>>>>>>>>>> Entering #{env.short_name} >>>>>>>>>>>>>>>>")
       sa_mgr = ServiceAccountManager.new(env.project_id, env.service_account, @logger)
-      sa_mgr.run do |svc_acct|
+      sa_mgr.run do
         yield env
       end
       @logger.info("<<<<<<<<<<<<<<<< Leaving #{env.short_name} <<<<<<<<<<<<<<<<\n")

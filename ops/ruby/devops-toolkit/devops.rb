@@ -40,7 +40,7 @@ end
 
 def setup_logger
   logger = Logger.new(STDOUT)
-  logger.formatter = proc do |severity, datetime, progname, msg|
+  logger.formatter = proc do |severity, datetime, _progname, msg|
     "#{datetime} #{severity}: #{msg}\n"
   end
   logger.datetime_format = '%Y-%m-%d %H:%M:%S'
@@ -59,7 +59,7 @@ def run_task(options)
   when 'replicate-dashboard'
     Dashboards.new(options).replicate
   when 'inventory'
-    monitoring_assets = MonitoringAssets.new(options[:'envs-file'], logger)
+    MonitoringAssets.new(options[:'envs-file'], logger)
   when 'replicate-logs-based-metric'
     LogsBasedMetrics.new(options).replicate
   when 'list-all-service-account-keys'

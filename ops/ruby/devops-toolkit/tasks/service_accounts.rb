@@ -7,7 +7,7 @@ class ServiceAccounts
     envs_json = JSON.load(IO.read(options[:'envs-file']))
     @environments = envs_json['environments'].map { |env| GcpEnvironmentInfo.new(env) }
     @logger = options[:logger]
-    @is_dry_run = !!options[:'dry-run']
+    @is_dry_run = options[:'dry-run'] ? true : false
   end
 
   def list_keys
