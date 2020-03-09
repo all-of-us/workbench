@@ -6,6 +6,7 @@ export const environment: Environment = {
   displayTag: 'Local->Local',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'http://localhost:8081',
+  captchaSiteKey: '6LdtP9wUAAAAANDDWvO8UYsrm4HSVSaWCEYLomEx',
   clientId: testEnvironmentBase.clientId,
   trainingUrl: 'https://aoudev.nnlm.gov',
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
@@ -20,6 +21,7 @@ export const environment: Environment = {
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
+  enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,
   enableNewConceptTabs: true

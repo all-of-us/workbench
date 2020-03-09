@@ -5,9 +5,9 @@ import {
   AccountCreationSurvey,
   AccountCreationSurveyProps,
 } from 'app/pages/login/account-creation/account-creation-survey';
-import {getEmptyProfile} from 'app/pages/login/test-utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {Ethnicity, GenderIdentity, Race, SexAtBirth} from 'generated/fetch';
+import {createEmptyProfile} from 'app/pages/login/sign-in';
 
 let props: AccountCreationSurveyProps;
 const onCompleteSpy = jest.fn();
@@ -20,7 +20,7 @@ beforeEach(() => {
 
   props = {
     invitationKey: 'asdf',
-    profile: getEmptyProfile(),
+    profile: createEmptyProfile(),
     onPreviousClick: onPreviousSpy,
     onComplete: onCompleteSpy,
   };

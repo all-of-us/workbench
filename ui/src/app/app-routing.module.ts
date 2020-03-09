@@ -27,7 +27,6 @@ import {HomepageComponent} from './pages/homepage/homepage';
 import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
-import {StigmatizationPageComponent} from './pages/workspace/stigmatization-page';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
@@ -61,12 +60,6 @@ const routes: Routes = [
         path: '',
         component: HomepageComponent,
         data: {title: 'Homepage'},
-      }, {
-        path: 'definitions/stigmatization',
-        component: StigmatizationPageComponent,
-        data: {
-          title: 'Stigmatization Definition'
-        }
       }, {
         path: 'nih-callback',
         component: HomepageComponent,

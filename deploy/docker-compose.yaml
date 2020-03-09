@@ -1,7 +1,7 @@
 version: "3"
 services:
   deploy:
-    image: allofustest/workbench:buildimage-0.0.13
+    image: allofustest/workbench:buildimage-0.0.15
     entrypoint: /bootstrap-docker.sh
     user: circleci
     environment:

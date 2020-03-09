@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
+import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -186,6 +188,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final ProfileAuditor profileAuditor;
   private final InstitutionService institutionService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
+  private final CaptchaVerificationService captchaVerificationService;
 
   @Autowired
   ProfileController(
@@ -202,7 +205,8 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<MailService> mailServiceProvider,
       ProfileAuditor profileAuditor,
       InstitutionService institutionService,
-      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
+      CaptchaVerificationService captchaVerificationService) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -217,6 +221,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.profileAuditor = profileAuditor;
     this.institutionService = institutionService;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
+    this.captchaVerificationService = captchaVerificationService;
   }
 
   @Override
@@ -247,15 +252,23 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void validateProfileFields(Profile profile) {
+  private void validateAndCleanProfile(Profile profile) throws BadRequestException {
+    // Validation steps, which yield a BadRequestException if errors are found.
+    String userName = profile.getUsername();
+    if (userName == null || userName.length() < 3 || userName.length() > 64) {
+      throw new BadRequestException(
+          "Username should be at least 3 characters and not more than 64 characters");
+    }
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
-    if (!workbenchConfigProvider.get().featureFlags.enableNewAccountCreation) {
-      // required for old create account flow
-      validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
-      validateStringLength(profile.getOrganization(), "Organization", 255, 1);
-      validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
-    }
+
+    // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
+    profile.setDemographicSurvey(
+        Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
+    profile.setInstitutionalAffiliations(
+        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
+    // We always store the username as all lowercase.
+    profile.setUsername(profile.getUsername().toLowerCase());
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -319,32 +332,29 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
+    if (workbenchConfigProvider.get().captcha.enableCaptcha) {
+      verifyCaptcha(request.getCaptchaVerificationToken());
+    }
+
     if (workbenchConfigProvider.get().access.requireInvitationKey) {
       verifyInvitationKey(request.getInvitationKey());
     }
 
-    String userName = request.getProfile().getUsername();
-    if (userName == null || userName.length() < 3 || userName.length() > 64)
-      throw new BadRequestException(
-          "Username should be at least 3 characters and not more than 64 characters");
-    request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
-    validateProfileFields(request.getProfile());
-    // This check will be removed once enableNewAccountCreation flag is turned on.
-    if (request.getProfile().getAddress() == null) {
-      request.getProfile().setAddress(new Address());
-    }
-    if (request.getProfile().getDemographicSurvey() == null) {
-      request.getProfile().setDemographicSurvey(new DemographicSurvey());
-    }
-    if (request.getProfile().getInstitutionalAffiliations() == null) {
-      request.getProfile().setInstitutionalAffiliations(new ArrayList<>());
-    }
+    final Profile profile = request.getProfile();
+
+    // We don't include this check in validateAndCleanProfile since some existing user profiles
+    // may have empty addresses. So we only check this on user creation, not update.
+    Optional.ofNullable(profile.getAddress())
+        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
+
+    validateAndCleanProfile(profile);
+
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
-            request.getProfile().getGivenName(),
-            request.getProfile().getFamilyName(),
-            request.getProfile().getUsername(),
-            request.getProfile().getContactEmail());
+            profile.getGivenName(),
+            profile.getFamilyName(),
+            profile.getUsername(),
+            profile.getContactEmail());
 
     // Create a user that has no data access or FC user associated.
     // We create this account before they sign in so we can keep track of which users we have
@@ -360,22 +370,22 @@ public class ProfileController implements ProfileApiDelegate {
 
     DbUser user =
         userService.createUser(
-            request.getProfile().getGivenName(),
-            request.getProfile().getFamilyName(),
+            profile.getGivenName(),
+            profile.getFamilyName(),
             googleUser.getPrimaryEmail(),
-            request.getProfile().getContactEmail(),
-            request.getProfile().getCurrentPosition(),
-            request.getProfile().getOrganization(),
-            request.getProfile().getAreaOfResearch(),
-            request.getProfile().getProfessionalUrl(),
-            request.getProfile().getDegrees(),
-            FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
-            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
-            request.getProfile().getInstitutionalAffiliations().stream()
+            profile.getContactEmail(),
+            profile.getCurrentPosition(),
+            profile.getOrganization(),
+            profile.getAreaOfResearch(),
+            profile.getProfessionalUrl(),
+            profile.getDegrees(),
+            FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
+            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(profile.getDemographicSurvey()),
+            profile.getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
                 .collect(Collectors.toList()),
             verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-                request.getProfile().getVerifiedInstitutionalAffiliation(), institutionService));
+                profile.getVerifiedInstitutionalAffiliation(), institutionService));
 
     if (request.getTermsOfServiceVersion() != null) {
       userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
@@ -384,8 +394,7 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       mailServiceProvider
           .get()
-          .sendWelcomeEmail(
-              request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
+          .sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
@@ -475,6 +484,18 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
+  private void verifyCaptcha(String captchaToken) {
+    boolean isValidCaptcha = false;
+    try {
+      isValidCaptcha = captchaVerificationService.verifyCaptcha(captchaToken);
+      if (!isValidCaptcha) {
+        throw new BadRequestException("Missing or incorrect Captcha Token");
+      }
+    } catch (org.pmiops.workbench.captcha.ApiException e) {
+      throw new ServerErrorException("Exception while verifying Captcha");
+    }
+  }
+
   private void checkUserCreationNonce(DbUser user, String nonce) {
     if (Strings.isNullOrEmpty(nonce)) {
       throw new BadRequestException("missing required creationNonce");
@@ -561,7 +582,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
-    validateProfileFields(updatedProfile);
+    validateAndCleanProfile(updatedProfile);
     DbUser user = userProvider.get();
 
     // Save current profile for audit trail. Continue to use the userProvider (instead

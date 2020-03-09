@@ -1,20 +1,23 @@
 import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {ListPageHeader} from 'app/components/headers';
 import {CheckBox, RadioButton} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {TextColumn} from 'app/components/text-column';
+import {AouTitle} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {toggleIncludes} from 'app/utils';
+import {serverConfigStore} from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
-import {Section, TextInputWithLabel} from './account-creation';
+import ReCAPTCHA from 'react-google-recaptcha';
+import {DropDownSection, Section, TextInputWithLabel} from './account-creation';
 import {AccountCreationOptions} from './account-creation-options';
 
 const styles = {
@@ -36,14 +39,6 @@ const styles = {
   }
 };
 
-export const DropDownSection = (props) => {
-  return <Section header={props.header}>
-    <Dropdown placeholder='Select' options={props.options} style={{width: '50%'}}
-              value={props.value}
-              onChange={(e) => props.onChange(e.value)}/>
-  </Section>;
-};
-
 export interface AccountCreationSurveyProps {
   invitationKey: string;
   termsOfServiceVersion?: number;
@@ -53,14 +48,19 @@ export interface AccountCreationSurveyProps {
 }
 
 export interface AccountCreationState {
+  captcha: boolean;
+  captchaToken: string;
   creatingAccount: boolean;
   profile: Profile;
 }
 
 export class AccountCreationSurvey extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
+  private captchaRef = React.createRef<ReCAPTCHA>();
   constructor(props: any) {
     super(props);
     this.state = {
+      captcha: !environment.enableCaptcha,
+      captchaToken: '',
       creatingAccount: false,
       profile: {...this.props.profile},
     };
@@ -75,6 +75,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     this.setState({creatingAccount: true});
     profileApi().createAccount({
       profile: this.state.profile,
+      captchaVerificationToken: this.state.captchaToken,
       invitationKey: invitationKey,
       termsOfServiceVersion: termsOfServiceVersion
     })
@@ -82,10 +83,20 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
         this.setState({profile: savedProfile, creatingAccount: false});
         onComplete(savedProfile);
       }).catch(error => {
+        // TODO: we need to show some user-facing error message when create account fails.
         console.log(error);
+        if (environment.enableCaptcha) {
+          // Reset captcha
+          this.captchaRef.current.reset();
+          this.setState({captcha: false});
+        }
         this.setState({creatingAccount: false});
-        // TODO: we need to show some user-facing error message when this fails.
+
       });
+  }
+
+  captureCaptchaResponse(token) {
+    this.setState({captchaToken: token, captcha: true});
   }
 
   updateList(key, value) {
@@ -111,7 +122,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   render() {
-    const {profile: {demographicSurvey}, creatingAccount} = this.state;
+    const {profile: {demographicSurvey}, creatingAccount, captcha} = this.state;
     const validationCheck = {
       lgbtqIdentity: {
         length: {
@@ -121,18 +132,23 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       },
     };
     const errors = validate(demographicSurvey, validationCheck);
+    const {requireInstitutionalVerification} = serverConfigStore.getValue();
 
     return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '26rem'}}>
-      <label style={{color: colors.primary, fontSize: 16}}>
-        Please complete Step 2 of 2
-      </label>
-      <ListPageHeader>
-        Demographics Survey <label style={{fontSize: '12px', fontWeight: 400}}>
-        (All Survey Fields are optional)</label>
-      </ListPageHeader>
+      <TextColumn>
+        <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Optional Demographics Survey</div>
+        <div style={{fontSize: 16, marginBottom: '.5rem'}}>
+          Please complete Step {requireInstitutionalVerification ? '3 of 3' : '2 of 2'}
+        </div>
+        <div>
+          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> <AouTitle/> will
+          use this information to measure our success at reaching diverse researchers.
+          We will not share your individual answers.
+        </div>
+      </TextColumn>
 
       {/*Race section*/}
-      <Section header='Race'>
+      <Section header='Race' subHeader='Select all that apply'>
         <FlexColumn style={styles.checkboxAreaContainer}>
           {AccountCreationOptions.race.map((race) => {
             return this.createOptionCheckbox('race', race);
@@ -145,6 +161,16 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
                        header='Ethnicity' options={AccountCreationOptions.ethnicity}
                        value={demographicSurvey.ethnicity}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
+
+      {/*Gender Identity section*/}
+      <Section header='Gender Identity' subHeader='Select all that apply'>
+        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
+          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
+            return this.createOptionCheckbox('genderIdentityList', genderIdentity);
+          })}
+        </FlexColumn>
+      </Section>
+
       <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
 or another sexual and/or gender minority?'>
         <FlexColumn>
@@ -170,17 +196,8 @@ or another sexual and/or gender minority?'>
                             disabled={!demographicSurvey.identifiesAsLgbtq}/>
       </Section>
 
-      {/*Gender Identity section*/}
-      <Section header='Gender Identity'>
-        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
-            return this.createOptionCheckbox('genderIdentityList', genderIdentity);
-          })}
-        </FlexColumn>
-      </Section>
-
       {/*Sex at birth section*/}
-      <Section header='Sex at birth'>
+      <Section header='Sex at birth' subHeader='Select all that apply'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox('sexAtBirth', sexAtBirth);
@@ -194,7 +211,7 @@ or another sexual and/or gender minority?'>
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
       {/*Disability section*/}
-      <Section header='Do you have a Physical or Cognitive disability?'>
+      <Section header='Do you have a physical or cognitive disability?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes' onChange={
@@ -217,6 +234,12 @@ or another sexual and/or gender minority?'>
                        value={demographicSurvey.education}
                        onChange={
                          (e) => this.updateDemographicAttribute('education', e)}/>
+
+      {environment.enableCaptcha && <div style={{paddingTop: '1rem'}}>
+        <ReCAPTCHA sitekey={environment.captchaSiteKey}
+                   ref = {this.captchaRef}
+                   onChange={(value) => this.captureCaptchaResponse(value)}/>
+      </div>}
       <FormSection style={{paddingBottom: '1rem'}}>
         <Button type='secondary' style={{marginRight: '1rem'}} disabled={creatingAccount}
                 onClick={() => this.props.onPreviousClick(this.state.profile)}>
@@ -228,7 +251,7 @@ or another sexual and/or gender minority?'>
               {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
             </ul>
         </React.Fragment>}>
-          <Button type='primary' disabled={creatingAccount || creatingAccount || errors}
+          <Button type='primary' disabled={creatingAccount || creatingAccount || errors || !captcha}
                   onClick={() => this.createAccount()}>
             Submit
           </Button>

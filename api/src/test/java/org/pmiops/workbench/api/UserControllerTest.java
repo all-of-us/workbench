@@ -22,7 +22,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -267,11 +267,10 @@ public class UserControllerTest {
     user.setFamilyName(familyName);
     user.setFirstSignInTime(new Timestamp(CLOCK.instant().toEpochMilli()));
     if (registered) {
-      user.setDataAccessLevel(
-          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     } else {
       user.setDataAccessLevel(
-          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
+          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
     }
     incrementedUserId++;
     userDao.save(user);
@@ -285,11 +284,10 @@ public class UserControllerTest {
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
     if (registered) {
-      user.setDataAccessLevel(
-          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     } else {
       user.setDataAccessLevel(
-          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
+          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
     }
     incrementedUserId++;
     userDao.save(user);

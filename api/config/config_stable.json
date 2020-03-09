@@ -22,8 +22,7 @@
     "retryCount": 2,
     "bufferCapacity": 10,
     "bufferRefillProjectsPerTask": 1,
-    "defaultFreeCreditsLimit": 100.0,
-    "defaultFreeCreditsDollarLimit": 100.0,
+    "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
@@ -89,7 +88,6 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": true,
     "enableRdrExport": false,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
@@ -106,5 +104,8 @@
     "host": "all-of-us-rdr-stable.appspot.com",
     "queueName": "rdrQueue",
     "exportObjectsPerTask" : 10
+  },
+  "captcha": {
+    "enableCaptcha": false
   }
 }
