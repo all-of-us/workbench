@@ -111,11 +111,11 @@ public class DbConceptSet {
 
   @Transient
   public Domain getDomainEnum() {
-    return CommonStorageEnums.domainFromStorage(domain);
+    return DbStorageEnums.domainFromStorage(domain);
   }
 
   public void setDomainEnum(Domain domain) {
-    this.domain = CommonStorageEnums.domainToStorage(domain);
+    this.domain = DbStorageEnums.domainToStorage(domain);
   }
 
   @Column(name = "survey")
@@ -129,11 +129,11 @@ public class DbConceptSet {
 
   @Transient
   public Surveys getSurveysEnum() {
-    return CommonStorageEnums.surveysFromStorage(survey);
+    return DbStorageEnums.surveysFromStorage(survey);
   }
 
   public void setSurveysEnum(Surveys survey) {
-    this.survey = CommonStorageEnums.surveysToStorage(survey);
+    this.survey = DbStorageEnums.surveysToStorage(survey);
   }
 
   @Column(name = "description")

@@ -39,7 +39,7 @@ then
 fi
 
 # Check that bq_project exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
+datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -53,7 +53,7 @@ else
 fi
 
 # Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
+datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."

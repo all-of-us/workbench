@@ -36,7 +36,7 @@ public class DbDatasetValue {
 
   @Transient
   public Domain getDomainEnum() {
-    return CommonStorageEnums.domainFromStorage(Short.parseShort(domainId));
+    return DbStorageEnums.domainFromStorage(Short.parseShort(domainId));
   }
 
   @Column(name = "value")

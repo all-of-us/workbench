@@ -15,14 +15,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.ConceptsController;
-import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
@@ -68,20 +67,15 @@ public class ConceptService {
   private ConceptDao conceptDao;
   private DomainInfoDao domainInfoDao;
   private SurveyModuleDao surveyModuleDao;
-  private CBCriteriaDao cbCriteriaDao;
 
   public ConceptService() {}
 
   @Autowired
   public ConceptService(
-      ConceptDao conceptDao,
-      DomainInfoDao domainInfoDao,
-      SurveyModuleDao surveyModuleDao,
-      CBCriteriaDao cbCriteriaDao) {
+      ConceptDao conceptDao, DomainInfoDao domainInfoDao, SurveyModuleDao surveyModuleDao) {
     this.conceptDao = conceptDao;
     this.domainInfoDao = domainInfoDao;
     this.surveyModuleDao = surveyModuleDao;
-    this.cbCriteriaDao = cbCriteriaDao;
   }
 
   private static String modifyMultipleMatchKeyword(String query) {
@@ -210,7 +204,7 @@ public class ConceptService {
         new DomainCount()
             .domain(Domain.SURVEY)
             .conceptCount(conceptCount)
-            .name(CommonStorageEnums.domainToDomainId(Domain.SURVEY).concat("s")));
+            .name(DbStorageEnums.domainToDomainId(Domain.SURVEY).concat("s")));
     return domainCountList;
   }
 

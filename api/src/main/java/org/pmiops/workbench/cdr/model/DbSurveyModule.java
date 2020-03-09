@@ -15,7 +15,7 @@ public class DbSurveyModule {
 
   public static final Function<DbSurveyModule, SurveyModule> TO_CLIENT_SURVEY_MODULE =
       (surveyModule) ->
-          new org.pmiops.workbench.model.SurveyModule()
+          new SurveyModule()
               .conceptId(surveyModule.getConceptId())
               .name(surveyModule.getName())
               .description(surveyModule.getDescription())

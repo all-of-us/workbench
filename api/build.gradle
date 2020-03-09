@@ -176,6 +176,30 @@ task generateRdrClient {
   }
 }
 
+def captchaApiFile = 'src/main/resources/captcha.yaml'
+
+task generateCaptchaClient {
+  inputs.file("$projectDir/$captchaApiFile")
+  outputs.dir("$projectDir/$swaggerTargetFolder")
+  doLast {
+    def config = new CodegenConfigurator()
+    config.setInputSpec("file:///$projectDir/$captchaApiFile")
+    config.setOutputDir("$projectDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
+    config.setLang('java')
+    config.setAdditionalProperties([
+            'invokerPackage'   : 'org.pmiops.workbench.captcha',
+            'modelPackage'     : 'org.pmiops.workbench.captcha.model',
+            'apiPackage'       : 'org.pmiops.workbench.captcha.api',
+            'sourceFolder'     : swaggerTargetFolder,
+            'library'          : 'okhttp-gson',
+            'serializableModel': 'true',
+            'dateLibrary'      : 'java8'
+    ])
+    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+  }
+}
+
 task generate_appengine_web_xml(type: Exec) {
   executable "ruby"
   args "libproject/generate_appengine_web_xml.rb"
@@ -343,6 +367,8 @@ ideaModule.dependsOn generateMoodleClient
 compileGeneratedJava.dependsOn generateMoodleClient
 ideaModule.dependsOn generateRdrClient
 compileGeneratedJava.dependsOn generateRdrClient
+ideaModule.dependsOn generateCaptchaClient
+compileGeneratedJava.dependsOn generateCaptchaClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
@@ -368,7 +394,6 @@ dependencies {
 
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
-  compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0'
   compile 'com.google.http-client:google-http-client-apache:1.29.2'

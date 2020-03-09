@@ -1,3 +1,4 @@
+import {StyledAnchorTag} from 'app/components/buttons';
 import {BolderHeader, BoldHeader} from 'app/components/headers';
 import {AouTitle} from 'app/components/text-wrappers';
 import * as React from 'react';
@@ -54,7 +55,8 @@ export const DataUseAgreementContent = () => {
     <SecondHeader>As an “Authorized Demonstration User” of the <AouTitle/> data, I
       will:</SecondHeader>
     <IndentedUnorderedList>
-      <IndentedListItem>read and adhere to the <AouTitle/> <a target='_blank' href={CORE_VALUES_URL}>core values</a>.
+      <IndentedListItem>read and adhere to the <AouTitle/> <StyledAnchorTag target='_blank' href={CORE_VALUES_URL}>core
+        values</StyledAnchorTag>.
       </IndentedListItem>
       <IndentedListItem>know and follow all laws regarding research involving human data and data privacy that are
         applicable in the area where I am conducting research.
@@ -113,7 +115,7 @@ export const DataUseAgreementContent = () => {
             PII means information that can be used to distinguish or trace the identity of an individual
             (e.g., name, social security number, biometric records, etc.) either alone, or when combined with other
             personal or identifying information that is linked or linkable to a specific
-            individual <a href={PII_URL}>(2 CFR §200.79)</a>
+            individual <StyledAnchorTag href={PII_URL}>(2 CFR §200.79)</StyledAnchorTag>
           </IndentedListItem></IndentedUnorderedList>
         </IndentedListItem>
         <IndentedListItem>I will use any external data, files, or software that I upload into my Workspace
@@ -182,7 +184,7 @@ export const DataUseAgreementContent = () => {
         <strong>NOT</strong> use <AouTitle/> data or any external data, files, or software that I upload
         into the Research Workbench for research that is discriminatory or stigmatizing of individuals, families,
         groups, or communities. Please review the <i>All of Us</i> policy on stigmatizing
-        research <a href={STIGMATIZING_RESEARCH_URL} target='_blank'>here</a>.
+        research <StyledAnchorTag href={STIGMATIZING_RESEARCH_URL} target='_blank'>here</StyledAnchorTag>.
         <IndentedUnorderedList>
           <IndentedListItem>I will contact the <AouTitle/> Resource Access Board (RAB) for
             further guidance on this point as needed.
@@ -212,7 +214,8 @@ export const DataUseAgreementContent = () => {
         <strong>NOT</strong> use <AouTitle/> data or any part of the Research Hub for marketing purposes.
         <IndentedUnorderedList>
           <IndentedListItem>“Marketing” means a communication about a product or service that encourages recipients of
-            the communication to purchase or use the product or service (<a href={MARKETING_URL}>US 45 CFR 164.501</a>).
+            the communication to purchase or use the product or service (<StyledAnchorTag
+              href={MARKETING_URL}>US 45 CFR 164.501</StyledAnchorTag>).
           </IndentedListItem>
         </IndentedUnorderedList>
       </IndentedListItem>
@@ -223,12 +226,12 @@ export const DataUseAgreementContent = () => {
 
     <SecondHeader>Terms and Definitions:</SecondHeader>
     <IndentedUnorderedList>
-      <IndentedListItem>The <a href={AOU_DEFINITION_URL} target='_blank'><AouTitle/></a> is a national longitudinal
-        research initiative that aims to engage one million or more participants living in the United States.
-        Participants contribute health data and specimens (blood, urine, saliva) to a repository that includes health,
-        behavioral, genomic, and other data. The <AouTitle/> is a key component of the Precision Medicine Initiative,
-        which aims to leverage advances in genomics and health information technology to accelerate biomedical
-        discoveries.</IndentedListItem>
+      <IndentedListItem>The <StyledAnchorTag href={AOU_DEFINITION_URL} target='_blank'><AouTitle/></StyledAnchorTag> is
+        a national longitudinal research initiative that aims to engage one million or more participants living in the
+        United States. Participants contribute health data and specimens (blood, urine, saliva) to a repository that
+        includes health, behavioral, genomic, and other data. The <AouTitle/> is a key component of the Precision
+        Medicine Initiative, which aims to leverage advances in genomics and health information technology to
+        accelerate biomedical discoveries.</IndentedListItem>
       <IndentedListItem>
         There are <strong>three data access tiers</strong> within the <AouTitle/>.
         <IndentedUnorderedList>

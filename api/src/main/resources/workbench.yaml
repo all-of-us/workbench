@@ -138,6 +138,18 @@ paths:
           schema:
             $ref: "#/definitions/FeaturedWorkspacesConfigResponse"
 
+  /v1/cdrVersions:
+    get:
+      tags:
+        - cdrVersions
+      description: Returns all curated data repository (CDR) versions that the user has access to
+      operationId: getCdrVersions
+      responses:
+        200:
+          description: A list of CDR versions.
+          schema:
+            $ref: "#/definitions/CdrVersionListResponse"
+
   /v1/status-alert:
     get:
       tags:
@@ -2425,6 +2437,249 @@ paths:
           schema:
             $ref: "#/definitions/Institution"
 definitions:
+
+  ArchivalStatus:
+    type: string
+    description: CDR archival status; archived CDRs cannot be used for new workspaces.
+    enum: &ARCHIVAL_STATUS [LIVE, ARCHIVED]
+
+  DataAccessLevel:
+    type: string
+    description: levels of access to data in the curated data repository
+    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected]
+
+
+  RdrEntity:
+    type: string
+    description: Entities send to RDR
+    enum: &RDR_ENTITY [USER, WORKSPACE]
+
+  Degree:
+    type: string
+    enum: &Degree [PHD, MD, JD, EDD, MSN, MS, MA, MBA, ME, BA, BS, BSN, NONE]
+
+  Domain:
+    type: string
+    description: a domain for concepts corresponding to a table in the OMOP schema
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, SURVEY, PERSON, PHYSICALMEASUREMENT]
+
+  Surveys:
+    type: string
+    description: a survey for concepts
+    enum: &SURVEYS [THE BASICS, LIFESTYLE, OVERALL HEALTH]
+
+  Race:
+    type: string
+    enum: &Race [AIAN, ASIAN, AA, NHOPI, WHITE, NONE, PREFER_NO_ANSWER]
+
+  Ethnicity:
+    type: string
+    enum: &Ethnicity [HISPANIC, NOT_HISPANIC, PREFER_NO_ANSWER]
+
+  GenderIdentity:
+    type: string
+    enum: &GenderIdentity [MAN, WOMAN, NON_BINARY, TRANSGENDER, NONE_DESCRIBE_ME, PREFER_NO_ANSWER]
+
+  SexAtBirth:
+    type: string
+    enum: &SexAtBirth [MALE, FEMALE, INTERSEX, NONE_OF_THESE_DESCRIBE_ME, PREFER_NO_ANSWER]
+
+  SexualOrientation:
+    type: string
+    enum: &SexualOrientation [GAY, LESBIAN, STRAIGHT, BISEXUAL, NONE_OF_THESE_DESCRIBE_ME, PREFER_NO_ANSWER]
+
+  Education:
+    type: string
+    enum: &Education [NO_EDUCATION, GRADES_1_12, UNDERGRADUATE, COLLEGE_GRADUATE, MASTER, DOCTORATE]
+
+  Disability:
+    type: string
+    enum: &Disability [YES, NO]
+
+  NonAcademicAffiliation:
+    type: string
+    enum: &Affiliation_Role [INDUSTRY, EDUCATIONAL_INSTITUTION, COMMUNITY_SCIENTIST, FREE_TEXT]
+    description: >
+      This enum is used by the older Institutional Affiliation flow associated with the Demographic Survey.
+      The corresponding Verified Institutional Affiliation (newer flow) enum is OrganizationType.
+      The two have slightly different values and are therefore NOT COMPATIBLE.
+      This enum may be deleted in the future.
+
+  IndustryRole:
+    type: string
+    enum: &Industry_Role [PRE_DOCTORAL, POST_DOCTORAL, EARLY, PI, FREE_TEXT]
+    description: >
+      This enum is used by the older Institutional Affiliation flow associated with the Demographic Survey.
+      The corresponding Verified Institutional Affiliation (newer flow) enum is the UI-only InstitutionalRole_IND_HCNP.
+      The two have slightly different values and are therefore NOT COMPATIBLE.
+      This enum may be deleted in the future.
+
+  EducationalRole:
+    type: string
+    enum: &Educational_Role [TEACHER, STUDENT, ADMIN, FREE_TEXT]
+    description: >
+      This enum is used by the older Institutional Affiliation flow associated with the Demographic Survey.
+      The corresponding Verified Institutional Affiliation (newer flow) enum is the UI-only InstitutionalRole_EDU.
+      The two have slightly different values and are therefore NOT COMPATIBLE.
+      This enum may be deleted in the future.
+
+  AcademicRole:
+    type: string
+    enum: &Role [UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, NON_TENURE, MID_CAREER, LATE_CAREER, PROJECT_PERSONNEL]
+    description: >
+      This enum is used by the older Institutional Affiliation flow associated with the Demographic Survey.
+      The corresponding Verified Institutional Affiliation (newer flow) enum is the UI-only InstitutionalRole_ARI.
+      The two have slightly different values and are therefore NOT COMPATIBLE.
+      This enum may be deleted in the future.
+
+  FeaturedWorkspaceCategory:
+    type: string
+    enum: [PHENOTYPE_LIBRARY, TUTORIAL_WORKSPACES]
+
+  CdrVersionListResponse:
+    type: object
+    required:
+      - items
+      - defaultCdrVersionId
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CdrVersion"
+      defaultCdrVersionId:
+        type: "string"
+        description: ID of the CDR versions that should be used by the user by default
+
+  CdrVersion:
+    type: object
+    required:
+      - cdrVersionId
+      - name
+      - dataAccessLevel
+      - creationTime
+    properties:
+      cdrVersionId:
+        type: string
+      name:
+        type: string
+      dataAccessLevel:
+        $ref: "#/definitions/DataAccessLevel"
+      archivalStatus:
+        $ref: "#/definitions/ArchivalStatus"
+      creationTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
+
+  DomainInfo:
+    type: object
+    required:
+      - domain
+      - name
+      - description
+      - standardConceptCount
+      - allConceptCount
+      - participantCount
+    properties:
+      domain:
+        description: the domain ID
+        $ref: "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      description:
+        description: description of the domain
+        type: string
+      standardConceptCount:
+        description: number of standard concepts in this domain
+        type: integer
+        format: int64
+      allConceptCount:
+        description: number of concepts in this domain (standard or non-standard)
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for a concept in this domain
+        type: integer
+        format: int64
+
+  SurveyModule:
+    type: object
+    required:
+      - conceptId
+      - name
+      - description
+      - questionCount
+      - participantCount
+      - orderNumber
+    properties:
+      conceptId:
+        description: the concept ID for the survey module
+        type: integer
+        format: int64
+      name:
+        description: display name of the module
+        type: string
+      description:
+        description: description of the module
+        type: string
+      questionCount:
+        description: number of questions in the module
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for questions in this module
+        type: integer
+        format: int64
+      orderNumber:
+        description: survey release order number
+        type: integer
+        format: int32
+
+  FeaturedWorkspace:
+    type: object
+    properties:
+      name:
+        type: string
+        description: the name of the workspace
+      namespace:
+        type: string
+        description: the namespace of the workspace
+      id:
+        type: string
+        description: the Firecloud id of the workspace
+      category:
+        $ref: '#/definitions/FeaturedWorkspaceCategory'
+        description: The category that this workspace belongs to
+
+  ErrorResponse:
+    type: object
+    properties:
+      message:
+        description: General error message for the response.
+        type: string
+      statusCode:
+        type: integer
+        description: HTTP status code
+      errorClassName:
+        type: string
+      errorCode:
+        description: Short description of the type of error
+        $ref: "#/definitions/ErrorCode"
+      errorUniqueId:
+        type: string
+        description: Unique ID for this error response, for correlation with backend logs
+      # TODO: add list of field-level error messages with field names.
+
+  ErrorCode:
+    type: string
+    description: Short parsable error descriptions
+    enum: [
+      PARSE_ERROR,
+      USER_DISABLED
+    ]
+
+
   StatusResponse:
     type: object
     required:
@@ -2584,7 +2839,7 @@ definitions:
       define the following authorities:
        1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
           the user has requested review to approve or reject.
-       2) DEVELOPER: *Grants all other authorities* as well as some internal-only
+       2) DEVELOPER: Grants access to some internal-only
           administrative endpoints, including group management and cluster
           management. Intended to be granted for devops needs, e.g. for oncall.
        3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
@@ -3329,11 +3584,7 @@ definitions:
 
   PrePackagedConceptSetEnum:
     type: string
-    enum:
-      - None
-      - Demographics
-      - Survey
-      - Both
+    enum: &PrePackagedConceptSetEnum [NONE, DEMOGRAPHICS, SURVEY, BOTH]
 
   DataSetExportRequest:
     type: object
@@ -3676,6 +3927,9 @@ definitions:
         $ref: '#/definitions/Profile'
       invitationKey:
         type: string
+      captchaVerificationToken:
+        description: Token generated by captcha service once user successfully completes captcha
+        type: string
       termsOfServiceVersion:
         type: integer
         format: int32
@@ -3959,7 +4213,6 @@ definitions:
         $ref: '#/definitions/Education'
       disability:
         type: boolean
-        default: false
 
   Address:
     type: object

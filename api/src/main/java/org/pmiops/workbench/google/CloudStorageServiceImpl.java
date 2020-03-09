@@ -194,4 +194,9 @@ public class CloudStorageServiceImpl implements CloudStorageService {
         .map(b -> BlobId.of(b.getBucket(), b.getName()))
         .collect(Collectors.toSet());
   }
+
+  @Override
+  public String getCaptchaServerKey() {
+    return getCredentialsBucketString("captcha-server-key.txt");
+  }
 }

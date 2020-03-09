@@ -296,8 +296,7 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService =
-        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao, cbCriteriaDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptsController = new ConceptsController(conceptService, workspaceService);
 
     DbUser user = new DbUser();
