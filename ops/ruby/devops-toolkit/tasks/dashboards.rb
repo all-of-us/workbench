@@ -62,7 +62,6 @@ class Dashboards
   # Irritatingly, we can't just just get_dashboard for this, as it throws an exception if
   # it's not found.
   def self.dashboard_exists?(dashboard_client, env, dashboard_name)
-    # all = dashboard_client.list_dashboards(env.formatted_project_number, filter: CUSTOM_DASHBOARD_FILTER)
     all = dashboard_client.list_dashboards(env.formatted_project_number)
     all.any? { |dash| dash.name == dashboard_name }
   end
@@ -71,7 +70,6 @@ class Dashboards
 
   def get_source_dashboard
     source_env = @visitor.env_map[@source_env_short_name]
-    # source_env = @visitor.env_by_short_name(@source_env_short_name)
     result = nil
     @visitor.visit(source_env) do |env|
       dashboard_client = Google::Cloud::Monitoring::Dashboard::V1::DashboardsServiceClient.new
@@ -84,7 +82,7 @@ class Dashboards
   end
 
   def copy_to_target_envs(source_dashboard)
-    target_envs = @visitor.target_envs(@source_env_short_name) # environments.select { |env| env.short_name != @source_env_short_name }
+    target_envs = @visitor.target_envs(@source_env_short_name)
     @visitor.visit(target_envs) do |env|
       dashboard_client = Google::Cloud::Monitoring::Dashboard::V1::DashboardsServiceClient.new
 
@@ -108,12 +106,11 @@ class Dashboards
   end
 
   def build_replacement_dashboard(env, source_dashboard, target_resource_path)
-    # result = Google::Monitoring::Dashboard::V1::Dashboard.new
     source_dashboard.freeze # avoid contaminating our source dashboard
     result = source_dashboard.dup
     result.etag = '' # populated by the create API
     result.name = target_resource_path
-    # result.grid_layout = Google::Monitoring::Dashboard::V1::GridLayout.new
+
     # Monitored Resource namespace is set up in StackDriver to match our environment short name (lowercased)
     namespace = env.short_name
     environment_title = "[#{namespace.capitalize}]"
@@ -128,7 +125,6 @@ class Dashboards
     result.grid_layout.widgets.map! do |widget|
         new_widget = widget.dup
         widget.xy_chart.data_sets.map! do |data_set|
-          # @logger.info("\tUpdating metric #{data_set.name}")
           update_data_set(data_set, namespace)
         end
         new_widget
