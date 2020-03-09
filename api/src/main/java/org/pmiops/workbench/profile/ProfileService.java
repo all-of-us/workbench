@@ -1,26 +1,12 @@
 package org.pmiops.workbench.profile;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
-import org.pmiops.workbench.db.model.DbAddress;
-import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
-import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
-import org.pmiops.workbench.model.Address;
-import org.pmiops.workbench.model.DemographicSurvey;
-import org.pmiops.workbench.model.Disability;
-import org.pmiops.workbench.model.InstitutionalAffiliation;
-import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

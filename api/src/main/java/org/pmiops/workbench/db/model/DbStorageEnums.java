@@ -30,7 +30,6 @@ import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.rdr.model.Gender;
 
 /**
  * Static utility for converting between API enums and stored short values. All stored enums should
@@ -126,11 +125,11 @@ public final class DbStorageEnums {
   // BillingMigrationStatus
   private static final BiMap<BillingMigrationStatus, Short>
       CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS =
-      ImmutableBiMap.<BillingMigrationStatus, Short>builder()
-          .put(BillingMigrationStatus.OLD, (short) 0)
-          .put(BillingMigrationStatus.NEW, (short) 1)
-          .put(BillingMigrationStatus.MIGRATED, (short) 2)
-          .build();
+          ImmutableBiMap.<BillingMigrationStatus, Short>builder()
+              .put(BillingMigrationStatus.OLD, (short) 0)
+              .put(BillingMigrationStatus.NEW, (short) 1)
+              .put(BillingMigrationStatus.MIGRATED, (short) 2)
+              .build();
 
   public static BillingMigrationStatus billingMigrationStatusFromStorage(Short s) {
     return CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS.inverse().get(s);
@@ -235,17 +234,18 @@ public final class DbStorageEnums {
   }
 
   // DisseminateResearch
-  private static final BiMap<DisseminateResearchEnum, Short> CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
-      ImmutableBiMap.<DisseminateResearchEnum, Short>builder()
-          .put(DisseminateResearchEnum.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
-          .put(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
-          .put(DisseminateResearchEnum.PRESS_RELEASE, (short) 2)
-          .put(DisseminateResearchEnum.PUBLICATION_COMMUNITY_BASED_BLOG, (short) 3)
-          .put(DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG, (short) 4)
-          .put(DisseminateResearchEnum.SOCIAL_MEDIA, (short) 5)
-          .put(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS, (short) 6)
-          .put(DisseminateResearchEnum.OTHER, (short) 7)
-          .build();
+  private static final BiMap<DisseminateResearchEnum, Short>
+      CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
+          ImmutableBiMap.<DisseminateResearchEnum, Short>builder()
+              .put(DisseminateResearchEnum.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
+              .put(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
+              .put(DisseminateResearchEnum.PRESS_RELEASE, (short) 2)
+              .put(DisseminateResearchEnum.PUBLICATION_COMMUNITY_BASED_BLOG, (short) 3)
+              .put(DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG, (short) 4)
+              .put(DisseminateResearchEnum.SOCIAL_MEDIA, (short) 5)
+              .put(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS, (short) 6)
+              .put(DisseminateResearchEnum.OTHER, (short) 7)
+              .build();
 
   public static DisseminateResearchEnum disseminateResearchEnumFromStorage(Short s) {
     return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.inverse().get(s);
@@ -304,8 +304,8 @@ public final class DbStorageEnums {
   }
 
   // Education
-  private static final BiMap<Education, Short>
-      CLIENT_TO_STORAGE_EDUCATION = ImmutableBiMap.<Education, Short>builder()
+  private static final BiMap<Education, Short> CLIENT_TO_STORAGE_EDUCATION =
+      ImmutableBiMap.<Education, Short>builder()
           .put(Education.NO_EDUCATION, (short) 0)
           .put(Education.GRADES_1_12, (short) 1)
           .put(Education.UNDERGRADUATE, (short) 2)
@@ -331,11 +331,13 @@ public final class DbStorageEnums {
               .put(EmailVerificationStatus.SUBSCRIBED, (short) 2)
               .build();
 
-  public static EmailVerificationStatus emailVerificationStatusFromStorage(Short emailVerificationStatus) {
+  public static EmailVerificationStatus emailVerificationStatusFromStorage(
+      Short emailVerificationStatus) {
     return CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS.inverse().get(emailVerificationStatus);
   }
 
-  public static Short emailVerificationStatusToStorage(EmailVerificationStatus emailVerificationStatus) {
+  public static Short emailVerificationStatusToStorage(
+      EmailVerificationStatus emailVerificationStatus) {
     return CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS.get(emailVerificationStatus);
   }
 
@@ -402,19 +404,22 @@ public final class DbStorageEnums {
   }
 
   // NonAcademicAffiliation
-  private static final BiMap<NonAcademicAffiliation, Short> CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION =
-      ImmutableBiMap.<NonAcademicAffiliation, Short>builder()
-          .put(NonAcademicAffiliation.INDUSTRY, (short) 0)
-          .put(NonAcademicAffiliation.EDUCATIONAL_INSTITUTION, (short) 1)
-          .put(NonAcademicAffiliation.COMMUNITY_SCIENTIST, (short) 2)
-          .put(NonAcademicAffiliation.FREE_TEXT, (short) 3)
-          .build();
+  private static final BiMap<NonAcademicAffiliation, Short>
+      CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION =
+          ImmutableBiMap.<NonAcademicAffiliation, Short>builder()
+              .put(NonAcademicAffiliation.INDUSTRY, (short) 0)
+              .put(NonAcademicAffiliation.EDUCATIONAL_INSTITUTION, (short) 1)
+              .put(NonAcademicAffiliation.COMMUNITY_SCIENTIST, (short) 2)
+              .put(NonAcademicAffiliation.FREE_TEXT, (short) 3)
+              .build();
 
-  public static NonAcademicAffiliation nonAcademicAffiliationFromStorage(Short nonAcademicAffiliation) {
+  public static NonAcademicAffiliation nonAcademicAffiliationFromStorage(
+      Short nonAcademicAffiliation) {
     return CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION.inverse().get(nonAcademicAffiliation);
   }
 
-  public static Short nonAcademicAffiliationToStorage(NonAcademicAffiliation nonAcademicAffiliation) {
+  public static Short nonAcademicAffiliationToStorage(
+      NonAcademicAffiliation nonAcademicAffiliation) {
     return CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION.get(nonAcademicAffiliation);
   }
 
@@ -439,12 +444,12 @@ public final class DbStorageEnums {
   // PrePackagedConceptSet
   private static final BiMap<PrePackagedConceptSetEnum, Short>
       CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =
-      ImmutableBiMap.<PrePackagedConceptSetEnum, Short>builder()
-          .put(PrePackagedConceptSetEnum.NONE, (short) 0)
-          .put(PrePackagedConceptSetEnum.DEMOGRAPHICS, (short) 1)
-          .put(PrePackagedConceptSetEnum.SURVEY, (short) 2)
-          .put(PrePackagedConceptSetEnum.BOTH, (short) 3)
-          .build();
+          ImmutableBiMap.<PrePackagedConceptSetEnum, Short>builder()
+              .put(PrePackagedConceptSetEnum.NONE, (short) 0)
+              .put(PrePackagedConceptSetEnum.DEMOGRAPHICS, (short) 1)
+              .put(PrePackagedConceptSetEnum.SURVEY, (short) 2)
+              .put(PrePackagedConceptSetEnum.BOTH, (short) 3)
+              .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {
     return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET.inverse().get(conceptSet);
@@ -465,7 +470,7 @@ public final class DbStorageEnums {
           .put(Race.NONE, (short) 5)
           .put(Race.PREFER_NO_ANSWER, (short) 6)
           .build();
-  
+
   public static final Race raceFromStorage(Short race) {
     return CLIENT_TO_STORAGE_RACE.inverse().get(race);
   }

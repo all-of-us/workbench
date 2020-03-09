@@ -41,8 +41,7 @@ public class CommonMappers {
   public static Short booleanToShort(Boolean value) {
     if (value != null) {
       return value ? (short) 1 : (short) 0;
-    }
-    else {
+    } else {
       return null;
     }
   }
@@ -50,8 +49,7 @@ public class CommonMappers {
   public static Boolean shortToBoolean(Short value) {
     if (value != null) {
       return value == 1;
-    }
-    else {
+    } else {
       return null;
     }
   }
@@ -121,11 +119,13 @@ public class CommonMappers {
     return DbStorageEnums.ethnicityToStorage(ethnicity);
   }
 
-  public static EmailVerificationStatus emailVerificationStatusFromStorage(Short emailVerificationStatus) {
+  public static EmailVerificationStatus emailVerificationStatusFromStorage(
+      Short emailVerificationStatus) {
     return DbStorageEnums.emailVerificationStatusFromStorage(emailVerificationStatus);
   }
 
-  public static Short emailVerificationStatusToStorage(EmailVerificationStatus emailVerificationStatus) {
+  public static Short emailVerificationStatusToStorage(
+      EmailVerificationStatus emailVerificationStatus) {
     return DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus);
   }
 
@@ -137,11 +137,13 @@ public class CommonMappers {
     return DbStorageEnums.genderIdentityToStorage(genderIdentity);
   }
 
-  public static NonAcademicAffiliation nonAcademicAffiliationFromStorage(Short nonAcademicAffiliation) {
+  public static NonAcademicAffiliation nonAcademicAffiliationFromStorage(
+      Short nonAcademicAffiliation) {
     return DbStorageEnums.nonAcademicAffiliationFromStorage(nonAcademicAffiliation);
   }
 
-  public static Short nonAcademicAffiliationToStorage(NonAcademicAffiliation nonAcademicAffiliation) {
+  public static Short nonAcademicAffiliationToStorage(
+      NonAcademicAffiliation nonAcademicAffiliation) {
     return DbStorageEnums.nonAcademicAffiliationToStorage(nonAcademicAffiliation);
   }
 
