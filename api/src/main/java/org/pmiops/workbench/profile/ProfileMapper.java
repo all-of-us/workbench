@@ -55,13 +55,11 @@ public interface ProfileMapper {
     return DbStorageEnums.ethnicityToStorage(ethnicity);
   }
 
-  static EmailVerificationStatus emailVerificationStatusFromStorage(
-      Short emailVerificationStatus) {
+  static EmailVerificationStatus emailVerificationStatusFromStorage(Short emailVerificationStatus) {
     return DbStorageEnums.emailVerificationStatusFromStorage(emailVerificationStatus);
   }
 
-  static Short emailVerificationStatusToStorage(
-      EmailVerificationStatus emailVerificationStatus) {
+  static Short emailVerificationStatusToStorage(EmailVerificationStatus emailVerificationStatus) {
     return DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus);
   }
 
@@ -73,13 +71,11 @@ public interface ProfileMapper {
     return DbStorageEnums.genderIdentityToStorage(genderIdentity);
   }
 
-  static NonAcademicAffiliation nonAcademicAffiliationFromStorage(
-      Short nonAcademicAffiliation) {
+  static NonAcademicAffiliation nonAcademicAffiliationFromStorage(Short nonAcademicAffiliation) {
     return DbStorageEnums.nonAcademicAffiliationFromStorage(nonAcademicAffiliation);
   }
 
-  static Short nonAcademicAffiliationToStorage(
-      NonAcademicAffiliation nonAcademicAffiliation) {
+  static Short nonAcademicAffiliationToStorage(NonAcademicAffiliation nonAcademicAffiliation) {
     return DbStorageEnums.nonAcademicAffiliationToStorage(nonAcademicAffiliation);
   }
 

@@ -8,16 +8,7 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.Education;
-import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.Ethnicity;
-import org.pmiops.workbench.model.GenderIdentity;
-import org.pmiops.workbench.model.NonAcademicAffiliation;
-import org.pmiops.workbench.model.Race;
-import org.pmiops.workbench.model.SexAtBirth;
 
 @Mapper(componentModel = "spring")
 public class CommonMappers {
