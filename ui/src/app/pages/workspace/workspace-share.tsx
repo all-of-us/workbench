@@ -14,6 +14,7 @@ import * as React from 'react';
 import {User} from 'generated';
 
 import {
+  BillingAccountType,
   UserRole,
   Workspace,
   WorkspaceAccessLevel,
@@ -354,10 +355,11 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
               <InfoIcon style={{width: '14px', height: '14px', marginLeft: '.4rem'}}/>
             </TooltipTrigger>
           </FlexRow>
-          <div style={{color: colors.primary, fontSize: 14, fontWeight: 400}}>
-              When you share this workspace as a ‘Writer’ or an ‘Owner’, the free credits of the creator of the
-              workspace ({this.props.workspace.creator}) will be used for all analysis in this workspace.
-          </div>
+          {this.props.workspace.billingAccountType === BillingAccountType.FREETIER &&
+            <div style={{color: colors.primary, fontSize: 14, fontWeight: 400}}>
+                When you share this workspace as a ‘Writer’ or an ‘Owner’, the free credits of the creator of the
+                workspace ({this.props.workspace.creator}) will be used for all analysis in this workspace.
+            </div>}
         </ModalTitle>
         <ModalBody style={styles.sharingBody}>
           <div ref={node => this.searchingNode = node} style={styles.dropdown} >
