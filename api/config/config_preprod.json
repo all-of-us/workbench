@@ -8,27 +8,25 @@
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-preprod",
-    "registeredDomainGroup": "",
+    "registeredDomainGroup": "all-of-us-registered-preprod@firecloud.org", // does this exist?
     "xAppIdValue": "preprod-AoU-RW",
-    "vpcServicePerimeterName": "",
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.6"
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.11",
+    "welderDockerImage": "broadinstitute/welder-server:e6562d0"
   },
   "billing": {
-    "accountId": "015EAA-E95687-1F8614",
+    "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-preprod-",
-    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
+    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
-    "bufferCapacity": 10,
+    "bufferCapacity": 20,
     "bufferRefillProjectsPerTask": 1,
-    "defaultFreeCreditsLimit": 100.0,
-    "defaultFreeCreditsDollarLimit": 100.0,
-    "defaultFreeCreditsDaysLimit": 180,
+    "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [0.5, 0.75],
-    "freeTierTimeAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
-      "aou-rw-gc-preprod-1@all-of-us-rw-preprod.iam.gserviceaccount.com"
+      "aou-rw-gc-preprod-1@all-of-us-rw-preprod.iam.gserviceaccount.com" // does this exist?
     ]
   },
   "auth": {
@@ -48,45 +46,66 @@
     "gSuiteDomain": "preprod.researchallofus.org"
   },
   "server": {
-    "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-preprod.appspot.com",
-    "publicApiKeyForErrorReports": "how do I generate this value?",
+    "apiBaseUrl": "https:\/\/www.api.preprod-workbench.researchallofus.org",
+    "publicApiKeyForErrorReports": "AIzaSyA5Q0xqZdyaHUIUjZFqpim26wQFO0JqIRw",
     "projectId": "all-of-us-rw-preprod",
-    "shortName": "PreProd",
+    "shortName": "preprod",
     "oauthClientId": "589109405884-bmoj9ra8849rqeepuamk8jpu102iq363.apps.googleusercontent.com",
     "traceAllRequests": false,
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "https:\/\/all-of-us-rw-preprod.appspot.com/login",
+    "loginUrl": "https:\/\/www.preprod-workbench.researchallofus.org/login",
     "adminIdVerification": "support@researchallofus.org"
   },
   "mandrill": {
     "fromEmail": "donotreply@researchallofus.org",
     "sendRetries": 3
   },
+  "zendesk": {
+    "host": "https:\/\/aousupporthelp.zendesk.com"
+  },
   "elasticsearch": {
-    "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
+    "baseUrl": "",
     "enableBasicAuth": true,
     "enableElasticsearchBackend": false
   },
   "moodle": {
     "host": "aou.nnlm.gov",
-    "enableMoodleBackend": true
+    "enableMoodleBackend": true,
+    "credentialsKeyV1": "moodle-key.txt",
+    "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
     "enableComplianceTraining": false,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
-    "unsafeAllowSelfBypass": false
+    "unsafeAllowSelfBypass": false,
+    "requireInvitationKey": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false
+    "enableRdrExport": false,
+    "enableBillingLockout": false,
+    "enableSumoLogicEventHandling": false,
+    "useKeylessDelegatedCredentials": false,
+    "sendFreeTierAlertEmails": false,
+    "enableMoodleV2Api": false,
+    "requireInstitutionalVerification": false,
+    "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-preprod"
+  },
+  "rdrExport": {
+    "host": "all-of-us-rdr-preprod.appspot.com", // this does not exist
+    "queueName": "rdrQueue",
+    "exportObjectsPerTask" : 10
+  },
+  "captcha": {
+    "enableCaptcha": false
   }
 }
