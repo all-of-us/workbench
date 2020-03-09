@@ -42,6 +42,14 @@ public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
         || (!(handler instanceof HandlerMethod));
   }
 
+  /**
+   * Compute the elapsed time since preHandle and record it to the API_METHOD_TIME logs-based
+   * metric
+   * @param request - request that was just handled
+   * @param response - response (unused)
+   * @param handler - handler object. Only interested in the HandlerMethod variety
+   * @param modelAndView - not used
+   */
   @Override
   public void postHandle(
       HttpServletRequest request,
@@ -54,6 +62,8 @@ public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
 
     final String methodName = ((HandlerMethod) handler).getMethod().getName();
 
+    // If we recorded the START_INSTANT property, find the time between then and now,
+    // and build a measurement bundle with the value, add the method name as a label, adn record.
     Optional.ofNullable(request.getAttribute(RequestAttribute.START_INSTANT.getKeyName()))
         .map(obj -> (Instant) obj)
         .map(start -> Duration.between(start, clock.instant()))
