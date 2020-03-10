@@ -781,6 +781,7 @@ task updateCdrVersions(type: JavaExec) {
   }
 }
 
+// This can be run directly or via the deploy command.
 task loadDataDictionary(type: JavaExec) {
   classpath sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.LoadDataDictionary"
