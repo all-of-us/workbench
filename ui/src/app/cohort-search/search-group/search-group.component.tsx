@@ -29,7 +29,7 @@ const styles = reactStyles({
   },
   cardBlock: {
     borderBottom: `1px solid ${colors.light}`,
-    padding: '0.5rem 0.75rem'
+    padding: '0.5rem 0.5rem 0.5rem 0.75rem'
   },
   cardHeader: {
     backgroundColor: colorWithWhiteness(colors.light, -0.3),
@@ -102,14 +102,15 @@ const styles = reactStyles({
   col6: {
     flex: '0 0 50%',
     maxWidth: '50%',
-    padding: '0 0.5rem',
+    padding: '0 0.25rem',
   },
   timeInput: {
     border: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
     borderRadius: '0.1rem',
     height: '1.4rem',
-    marginLeft: '1rem',
-    width: '2.5rem'
+    marginLeft: '0.5rem',
+    verticalAlign: 'middle',
+    width: '3rem'
   },
   inputError: {
     background: colorWithWhiteness(colors.danger, 0.85),
