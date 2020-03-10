@@ -30,10 +30,6 @@ jobs:
               echo No relevant changes on non-master branch, skipping
               circleci step halt
             fi
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
       - run:
           name: Validate swagger definitions
           working_directory: ~/workbench/api
@@ -83,10 +79,6 @@ jobs:
       - run:
           name: Fetch Submodules
           command: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
       - run:
           working_directory: ~/workbench
           command: ci/activate_creds.sh api/circle-sa-key.json
@@ -119,10 +111,6 @@ jobs:
       # workspaces, but that seemed to have a negligible effect on speed. It's
       # also tricky to pick specific sub directories since the API deploy
       # touches several top level folders {common,}api.
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
       - run:
           working_directory: ~/workbench
           command: ci/activate_creds.sh api/circle-sa-key.json
@@ -163,10 +151,6 @@ jobs:
               echo No relevant changes on non-master branch, skipping
               circleci step halt
             fi
-      - restore_cache:
-          keys:
-          - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-integration-cache-
       - run:
           working_directory: ~/workbench
           # Used to call gsutil from the circle environment.
@@ -194,10 +178,6 @@ jobs:
               echo No relevant changes on non-master branch, skipping
               circleci step halt
             fi
-      - restore_cache:
-          keys:
-          - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-integration-cache-
       - run:
           working_directory: ~/workbench
           # Used to call gsutil from the circle environment.
@@ -293,10 +273,6 @@ jobs:
       - checkout
       - run:
           command: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
       - deploy:
           working_directory: ~/workbench/deploy
           command: |
@@ -316,10 +292,6 @@ jobs:
       - checkout
       - run:
           command: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
       - deploy:
           working_directory: ~/workbench/deploy
           command: |
