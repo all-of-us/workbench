@@ -43,8 +43,8 @@ public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
   }
 
   /**
-   * Compute the elapsed time since preHandle and record it to the API_METHOD_TIME logs-based
-   * metric
+   * Compute the elapsed time since preHandle and record it to the API_METHOD_TIME logs-based metric
+   *
    * @param request - request that was just handled
    * @param response - response (unused)
    * @param handler - handler object. Only interested in the HandlerMethod variety
