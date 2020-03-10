@@ -175,9 +175,7 @@ paths:
       operationId: getStatusAlert
       responses:
         200:
-          description: 'A status alert information object.
-
-'
+          description: 'A status alert information object.'
           schema:
             "$ref": "#/definitions/StatusAlert"
     post:
@@ -193,9 +191,7 @@ paths:
           "$ref": "#/definitions/StatusAlert"
       responses:
         200:
-          description: 'A status alert information object.
-
-'
+          description: 'A status alert information object.'
           schema:
             "$ref": "#/definitions/StatusAlert"
   "/v1/profile":
