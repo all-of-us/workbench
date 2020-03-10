@@ -12,7 +12,7 @@ import org.pmiops.workbench.monitoring.views.Metric;
 
 public class MeasurementBundleTest {
 
-  private static final long USER_COUNT = 999L;
+  private static final long USER_COUNT = 1000L;
 
   @Test
   public void testBuild_singleMeasurementBundle() {
