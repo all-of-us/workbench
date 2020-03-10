@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
+import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingAccountType;
@@ -12,13 +13,12 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.model.AnticipatedResearchOutcome;
+import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
@@ -231,17 +231,18 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.get(s);
   }
 
-  public static final BiMap<ResearchPublicationOutlet, Short> CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
-      ImmutableBiMap.<ResearchPublicationOutlet, Short>builder()
-          .put(ResearchPublicationOutlet.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
-          .put(ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
-          .put(ResearchPublicationOutlet.PRESS_RELEASE, (short) 2)
-          .put(ResearchPublicationOutlet.PUBLICATION_COMMUNITY_BASED_BLOG, (short) 3)
-          .put(ResearchPublicationOutlet.PUBLICATION_PERSONAL_BLOG, (short) 4)
-          .put(ResearchPublicationOutlet.SOCIAL_MEDIA, (short) 5)
-          .put(ResearchPublicationOutlet.PRESENTATION_ADVISORY_GROUPS, (short) 6)
-          .put(ResearchPublicationOutlet.OTHER, (short) 7)
-          .build();
+  public static final BiMap<ResearchPublicationOutlet, Short>
+      CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
+          ImmutableBiMap.<ResearchPublicationOutlet, Short>builder()
+              .put(ResearchPublicationOutlet.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
+              .put(ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
+              .put(ResearchPublicationOutlet.PRESS_RELEASE, (short) 2)
+              .put(ResearchPublicationOutlet.PUBLICATION_COMMUNITY_BASED_BLOG, (short) 3)
+              .put(ResearchPublicationOutlet.PUBLICATION_PERSONAL_BLOG, (short) 4)
+              .put(ResearchPublicationOutlet.SOCIAL_MEDIA, (short) 5)
+              .put(ResearchPublicationOutlet.PRESENTATION_ADVISORY_GROUPS, (short) 6)
+              .put(ResearchPublicationOutlet.OTHER, (short) 7)
+              .build();
 
   public static ResearchPublicationOutlet disseminateResearchEnumFromStorage(Short s) {
     return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.inverse().get(s);

@@ -14,7 +14,7 @@ import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SexualOrientation;
 
-public class DemographicSurveyEnum {
+public class DemographicSurveyEnums {
   private static final BiMap<Race, Short> CLIENT_TO_STORAGE_RACE =
       ImmutableBiMap.<Race, Short>builder()
           .put(Race.AA, (short) 1)

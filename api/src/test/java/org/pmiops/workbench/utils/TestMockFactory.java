@@ -19,10 +19,10 @@ import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPublicationOutlet;
-import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -35,10 +35,12 @@ public class TestMockFactory {
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<ResearchPublicationOutlet> disseminateResearchEnumsList =
         new ArrayList<ResearchPublicationOutlet>();
-    disseminateResearchEnumsList.add(ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES);
+    disseminateResearchEnumsList.add(
+        ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(ResearchPublicationOutlet.PRESENTATION_ADVISORY_GROUPS);
 
-    List<AnticipatedResearchOutcome> ResearchOutcomeEnumsList = new ArrayList<AnticipatedResearchOutcome>();
+    List<AnticipatedResearchOutcome> ResearchOutcomeEnumsList =
+        new ArrayList<AnticipatedResearchOutcome>();
     ResearchOutcomeEnumsList.add(AnticipatedResearchOutcome.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
