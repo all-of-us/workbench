@@ -1,15 +1,15 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
-import WebElement from './web-element';
+import BaseElement from './base-element';
 import {findTextbox} from './xpath-finder';
 
-export default class Textbox extends WebElement {
+export default class Textbox extends BaseElement {
 
   constructor(aPage: Page) {
     super(aPage);
   }
-   
-  async withLabel(textOptions?: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+
+  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
     throwErr = throwErr || true;
     if (waitOptions === undefined) { waitOptions = {visible: true}; }
     try {

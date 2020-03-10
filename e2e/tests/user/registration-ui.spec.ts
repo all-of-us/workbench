@@ -1,7 +1,6 @@
-import WebElement from '../../app/aou-elements/web-element';
+import BaseElement from '../../app/aou-elements/base-element';
 import CreateAccountPage, {INSTITUTION_AFFILIATION} from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
-import {findText} from '../../driver/element-util';
 import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 const configs = require('../../resources/workbench-config');
@@ -41,7 +40,7 @@ describe('User registration tests:', () => {
     const headerDisplayed = await createAccountPage.waitForTextExists('Enter your Invitation Key:');
     expect(headerDisplayed).toBeTruthy();
     const keyIsNotValidError = 'Invitation Key is not Valid.';
-    const errDisplayed = await findText(page, keyIsNotValidError);
+    const errDisplayed = await createAccountPage.findText(keyIsNotValidError);
     expect(errDisplayed).toBeFalsy();
 
     const badInvitationKey = process.env.INVITATION_KEY + '1';
@@ -157,7 +156,7 @@ describe('User registration tests:', () => {
     // verify all input fields are visible and editable on this page
     const allInputs = await page.$$('input', { visible: true });
     for (const aInput of allInputs) {
-      const elem = new WebElement(page, aInput);
+      const elem = new BaseElement(page, aInput);
       const isDisabled = await elem.isDisabled();
       expect(isDisabled).toBe(false);
       await elem.dispose();

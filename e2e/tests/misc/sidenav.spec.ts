@@ -4,7 +4,7 @@ import GoogleLoginPage from '../../app/google-login';
 import ProfilePage from '../../app/profile-page';
 import WorkspacesPage from '../../app/workspaces-page';
 import launchBrowser from '../../driver/puppeteer-launch';
-import {waitForExists} from '../../driver/xpath-handler';
+import {waitForExists} from '../../driver/xpath-util';
 
 const configs = require('../../resources/workbench-config');
 

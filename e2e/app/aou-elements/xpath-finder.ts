@@ -1,13 +1,13 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
-import * as widgetxpath from './xpath-defaults';
+import * as xpathDefaults from './xpath-defaults';
 
 /**
  * Find a LINK or BUTTON element with a specified label.
  * @param {string} label
  */
 export async function findClickable(page: Page, label: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
-  const selector = widgetxpath.clickableXpath(label);
+  const selector = xpathDefaults.clickableXpath(label);
   return page.waitForXPath(selector, options);
 }
 
@@ -15,11 +15,11 @@ export async function findClickable(page: Page, label: string, options?: WaitFor
  * Find SELECT element with a specified label.
  * @param {string} label
  */
-export async function findSelect(page: Page, opts?: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  if (opts.ancestorNodeLevel === undefined) {
-    opts.ancestorNodeLevel = 2;
+export async function findSelect(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  if (textOptions.ancestorNodeLevel === undefined) {
+    textOptions.ancestorNodeLevel = 2;
   }
-  const selector = `${widgetxpath.labelXpath(opts)}/ancestor::node()[${opts.ancestorNodeLevel}]//select`;
+  const selector = `${xpathDefaults.labelXpath(textOptions)}/ancestor::node()[${textOptions.ancestorNodeLevel}]//select`;
   return page.waitForXPath(selector, waitOptions);
 }
 
@@ -27,12 +27,12 @@ export async function findSelect(page: Page, opts?: TextOptions, waitOptions?: W
  * Find CHECKBOX element with a specified label.
  * @param {string} label
  */
-export async function findCheckbox(page: Page, opts?: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  if (opts.ancestorNodeLevel === undefined) {
-    opts.ancestorNodeLevel = 1;
+export async function findCheckbox(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  if (textOptions.ancestorNodeLevel === undefined) {
+    textOptions.ancestorNodeLevel = 1;
   }
-  opts.inputType = 'checkbox';
-  const selector = `${widgetxpath.inputXpath(opts)}`;
+  textOptions.inputType = 'checkbox';
+  const selector = `${xpathDefaults.inputXpath(textOptions)}`;
   return page.waitForXPath(selector, waitOptions);
 }
 
@@ -40,8 +40,8 @@ export async function findCheckbox(page: Page, opts?: TextOptions, waitOptions?:
  * Find BUTTON element with a specified label.
  * @param label: Button label partial text
  */
-export async function findButton(page: Page, textOptions?: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  const selector = widgetxpath.buttonXpath(textOptions);
+export async function findButton(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  const selector = xpathDefaults.buttonXpath(textOptions);
   return page.waitForXPath(selector, waitOptions);
 }
 
@@ -49,11 +49,11 @@ export async function findButton(page: Page, textOptions?: TextOptions, waitOpti
  * Find TEXTAREA element with a specified label.
  * @param {string} label: Textarea label partial text
  */
-export async function findTextarea(page: Page, opts?: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  if (opts.ancestorNodeLevel === undefined) {
-    opts.ancestorNodeLevel = 2;
+export async function findTextarea(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  if (textOptions.ancestorNodeLevel === undefined) {
+    textOptions.ancestorNodeLevel = 2;
   }
-  const selector = `${widgetxpath.labelXpath(opts)}/ancestor::node()[${opts.ancestorNodeLevel}]//textarea`;
+  const selector = `${xpathDefaults.labelXpath(textOptions)}/ancestor::node()[${textOptions.ancestorNodeLevel}]//textarea`;
   return page.waitForXPath(selector, waitOptions);
 }
 
@@ -61,8 +61,8 @@ export async function findTextarea(page: Page, opts?: TextOptions, waitOptions?:
  * Find visible text label on the page.
  * @param {string} label:
  */
-export async function findLabel(page: Page, textOptions?: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  const selector = widgetxpath.labelXpath(textOptions);
+export async function findLabel(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  const selector = xpathDefaults.labelXpath(textOptions);
   return page.waitForXPath(selector, waitOptions);
 }
 
@@ -70,12 +70,12 @@ export async function findLabel(page: Page, textOptions?: TextOptions, waitOptio
  * Find TEXTINPUT element with a specified label.
  * @param {string} label
  */
-export async function findTextbox(page: Page, opts?: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  if (opts.ancestorNodeLevel === undefined) {
-    opts.ancestorNodeLevel = 1;
+export async function findTextbox(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  if (textOptions.ancestorNodeLevel === undefined) {
+    textOptions.ancestorNodeLevel = 1;
   }
-  opts.inputType = 'text';
-  const selector = `${widgetxpath.inputXpath(opts)}`;
+  textOptions.inputType = 'text';
+  const selector = `${xpathDefaults.inputXpath(textOptions)}`;
   return page.waitForXPath(selector, waitOptions);
 }
 
@@ -83,12 +83,12 @@ export async function findTextbox(page: Page, opts?: TextOptions, waitOptions?: 
  * Find RADIOBUTTON element with a specified label.
  * @param {string} label
  */
-export async function findRadiobutton(page: Page, opts?: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  if (opts.ancestorNodeLevel === undefined) {
-    opts.ancestorNodeLevel = 1;
+export async function findRadiobutton(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  if (textOptions.ancestorNodeLevel === undefined) {
+    textOptions.ancestorNodeLevel = 1;
   }
-  opts.inputType = 'radio';
-  const selector = `${widgetxpath.inputXpath(opts)}`;
+  textOptions.inputType = 'radio';
+  const selector = `${xpathDefaults.inputXpath(textOptions)}`;
   return page.waitForXPath(selector, waitOptions);
 }
 
@@ -98,7 +98,7 @@ export async function findRadiobutton(page: Page, opts?: TextOptions, waitOption
  * @param label
  */
 export async function findIcon(page: Page, label: string, shape: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  const selector = widgetxpath.clrIconXpath(label, shape);
+  const selector = xpathDefaults.clrIconXpath(label, shape);
   if (waitOptions === undefined) { waitOptions = {visible: true}; }
   return page.waitForXPath(selector, waitOptions);
 }
@@ -108,7 +108,7 @@ export async function findIcon(page: Page, label: string, shape: string, waitOpt
  * @param {string} label
  */
 export async function findImage(page: Page, label: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  const selector = widgetxpath.imageXpath(label);
+  const selector = xpathDefaults.imageXpath(label);
   if (waitOptions === undefined) { waitOptions = {visible: true}; }
   return page.waitForXPath(selector, waitOptions);
 }

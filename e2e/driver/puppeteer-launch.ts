@@ -2,7 +2,7 @@ import * as puppeteer from 'puppeteer';
 
 const defaultLaunchOpts = {
   headless: !process.env.PUPPETEER_HEADLESS,
-  slowMo: 20,
+  slowMo: 10,
   defaultViewport: null,
   devtools: false,
   ignoreDefaultArgs: ['--disable-extensions'],

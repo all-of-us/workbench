@@ -1,15 +1,15 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
-import WebElement from './web-element';
+import BaseElement from './base-element';
 import {findRadiobutton} from './xpath-finder';
 
-export default class RadioButton extends WebElement {
+export default class RadioButton extends BaseElement {
 
   constructor(aPage: Page) {
     super(aPage);
   }
    
-  async withLabel(textOptions?: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
     throwErr = throwErr || true;
     if (waitOptions === undefined) { waitOptions = {visible: true}; }
     try {

@@ -1,5 +1,5 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import WebElement from './aou-elements/web-element';
+import BaseElement from './aou-elements/base-element';
 const _ = require('lodash');
 
 
@@ -12,9 +12,10 @@ export const LINK_LABEL = {
 
 
 /**
- * A Workspace Card is the parent element that contains child element with attribute: @data-test-id='workspace-card'
+ * WorkspaceCard represents workspace card user found on Home and All Workspaces pages.
+ * A Workspace Card is element that contains a child element with attribute: @data-test-id='workspace-card'
  */
-export default class WorkspaceCard extends WebElement {
+export default class WorkspaceCard extends BaseElement {
 
   static readonly popupRootXpath = '//*[@id="popup-root"]'; // element is not a child of workspace-card
   static readonly cardRootXpath = '//*[child::*[@data-test-id="workspace-card"]]';

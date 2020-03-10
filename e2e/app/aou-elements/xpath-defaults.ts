@@ -1,6 +1,6 @@
 import TextOptions from './text-options';
 
-function textXpathHelper(opts?: TextOptions) {
+function textXpathHelper(opts: TextOptions) {
   let txt;
   if (opts.text) {
     txt = `text()="${opts.text}" or @aria-label="${opts.text}" or @placeholder="${opts.text}"`;
@@ -16,7 +16,7 @@ function textXpathHelper(opts?: TextOptions) {
  * Label. It can be partial or full string.
  * @param label
  */
-export function labelXpath(opts?: TextOptions) {
+export function labelXpath(opts: TextOptions) {
   return `(//label | //*)[${textXpathHelper(opts)}]`;
 }
 
@@ -24,13 +24,13 @@ export function labelXpath(opts?: TextOptions) {
  * any [@role=button] element with specified label.
  * @param label
  */
-export function buttonXpath(opts?: TextOptions) {
+export function buttonXpath(opts: TextOptions) {
   const role = '@role="button"';
   const txt = textXpathHelper(opts);
   return `(//button[${txt}] | //*[${txt} and ${role}])`;
 }
 
-export function inputXpath(opts?: TextOptions) {
+export function inputXpath(opts: TextOptions) {
   const numSlashes = opts.inputType === 'checkbox' ? '/' : '//';
   const nodeLevel = `ancestor::node()[${opts.ancestorNodeLevel}]`;
   if (opts.inputType !== undefined) {

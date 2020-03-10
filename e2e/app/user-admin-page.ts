@@ -5,7 +5,7 @@ export const PAGE = {
   TITLE: 'User Admin Table',
 };
 
-export default class AdminPage extends AuthenticatedPage {
+export default class UserAdminPage extends AuthenticatedPage {
 
   constructor(page: Page) {
     super(page);

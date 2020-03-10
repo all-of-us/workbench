@@ -1,6 +1,6 @@
 import NewClrIconLink from '../../app/aou-elements/clr-icon-link';
 import Link from '../../app/aou-elements/link';
-import WebElement from '../../app/aou-elements/web-element';
+import BaseElement from '../../app/aou-elements/base-element';
 import GoogleLoginPage from '../../app/google-login';
 import {FIELD_LABEL as editPageFieldLabel} from '../../app/home-page';
 import WorkspaceCard from '../../app/workspace-card';
@@ -86,7 +86,7 @@ describe('Home page ui tests', () => {
     let width;
     let height;
     for (const card of cards) {
-      const cardElem = new WebElement(page, card.asElementHandle());
+      const cardElem = new BaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.size();
       if (width === undefined) {

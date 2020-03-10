@@ -1,10 +1,14 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
-import {ElementInterface} from './element-interface';
+import {BaseElementInterface} from './base-element-interface';
 
-export default class WebElement implements ElementInterface {
+/**
+ * BaseElement represents a web element in the DOM.
+ * It implements useful methods for querying and interacting with this element.
+ */
+export default class BaseElement implements BaseElementInterface {
 
-  static asWebElement(page: Page, elem: ElementHandle): WebElement {
-    return new WebElement(page, elem);
+  static asBaseElement(page: Page, elem: ElementHandle): BaseElement {
+    return new BaseElement(page, elem);
   }
 
   protected readonly page: Page;
@@ -17,50 +21,49 @@ export default class WebElement implements ElementInterface {
     this.element = aElement || undefined;
   }
 
-  async withCss(aCssSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
-    this.css = aCssSelector;
-    this.element = await this.waitForCss(options);
-    return this.element;
-  }
-
-  async withXpath(aXpathSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
-    this.xpath = aXpathSelector;
-    this.element = await this.waitForXpath(options);
-    return this.element;
-  }
-
-  async waitForXpath(options?: WaitForSelectorOptions): Promise<ElementHandle> {
-    if (this.xpath == null) { throw new Error('Xpath selector is undefined.'); }
-    this.element = await this.page.waitForXPath(this.xpath, options);
-    return this.element
-  }
-
-  async waitForCss(options?: WaitForSelectorOptions): Promise<ElementHandle> {
-    if (this.css == null) { throw new Error('CSS selector is undefined.'); }
+  async withCss(cssSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
+    this.css = cssSelector;
     this.element = await this.page.waitForSelector(this.css, options);
     return this.element;
   }
 
+  async withXpath(xpathSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
+    this.xpath = xpathSelector;
+    this.element = await this.page.waitForXPath(this.xpath, options);
+    return this.element;
+  }
+
    /**
-    * Find element without waiting for.
+    * Find first element without wait for.
     */
-  async findByCss(): Promise<ElementHandle | null> {
-    if (this.css == null) { throw new Error('CSS selector is undefined.'); }
+  async findByCss(cssSelector: string,): Promise<ElementHandle | null> {
+    this.css = cssSelector;
     this.element = await this.page.$(this.css);
     return this.element;
   }
 
    /**
-    * Find element without waiting for.
+    * Find first element without wait for.
     */
-  async findByXpath(): Promise<ElementHandle> {
-    if (this.xpath == null) { throw new Error('Xpath selector is undefined.'); }
-    this.element = (await this.page.$x(this.xpath))[0];
+  async findByXpath(xpathSelector: string): Promise<ElementHandle | null> {
+    this.xpath = xpathSelector;
+    const found = await this.page.$x(this.xpath);
+    if (found.length > 0) {
+      this.element = found[0];
+    } else {
+      this.element = null;
+    }
     return this.element;
   }
 
   /**
-   * Finds the value of a property
+   * Finds the value of a property for this element.
+   *
+   * Alternative:
+   *  const handle = await page.evaluateHandle((elem, prop) => {
+   *    return elem[prop];
+   *  }, element, property);
+   *  return await handle.jsonValue();
    */
   async getProperty(propertyName: string): Promise<unknown> {
     if (this.element == null) { throw new Error('The element is undefined.'); }
@@ -70,21 +73,27 @@ export default class WebElement implements ElementInterface {
 
   /**
    * Finds the value of an attribute
+   * @param attribute name
    */
   async getAttribute(attributeName: string): Promise<string | null> {
     if (this.element == null) { throw new Error('The element is undefined.'); }
     const elem = this.element.asElement();
     const attributeValue = await this.page.evaluate(
-       (link, attr) => link.getAttribute(attr), elem, attributeName
-    );
+       (link, attr) => link.getAttribute(attr), elem, attributeName);
     return attributeValue;
   }
 
+  /*
+  const handle = await page.evaluateHandle((elem, attr) => {
+    return elem.getAttribute(attr);
+  }, element, attribute);
+  return await handle.jsonValue();
+   */
+
   /**
-   * Call one of following functions before call this function.
-   * findByCss
+   * Does attribute exists for this element?
    *
-   * @param attributeName
+   * @param attribute name
    */
   async hasAttribute(attributeName: string): Promise<boolean> {
     if (this.element == null) { throw new Error('The element is undefined.'); }
@@ -93,11 +102,12 @@ export default class WebElement implements ElementInterface {
   }
 
   /**
+   * Is element disabled or readonly?
    * Disabled means element has `disabled` attribute.
    */
   async isDisabled(): Promise<boolean> {
     const disabled = await this.getProperty('disabled');
-    return !!disabled ;
+    return !!disabled;
   }
 
   /**
@@ -154,6 +164,11 @@ export default class WebElement implements ElementInterface {
     ]);
   }
 
+  /**
+   * <pre>
+   * Get the textContent property value for a element.
+   * </pre>
+   */
   async getTextContent(): Promise<string> {
     const handle = await this.element.asElement();
     return await handle.evaluate(
@@ -161,6 +176,10 @@ export default class WebElement implements ElementInterface {
     );
   }
 
+  /**
+   * Get the value of property 'value' for this element.
+   * Alternative: await page.evaluate(elem => elem.value, element);
+   */
   async getValue(): Promise<unknown> {
     return await this.getProperty('value');
   }
@@ -173,6 +192,14 @@ export default class WebElement implements ElementInterface {
     }, this.element);
 
     return (await attrStyle.getProperty(styleName)).jsonValue()
+  }
+
+  /**
+   * Determine if cursor is disabled (= not-allowed) by checking style attribute 'cursor'.
+   */
+  async isCursorNotAllowed(): Promise<boolean> {
+    const cursor = await this.getComputedStyle('cursor');
+    return cursor === 'not-allowed';
   }
 
   /**
@@ -194,7 +221,9 @@ export default class WebElement implements ElementInterface {
   // try this method when click() is not working
   async clickWithEval() {
     await this.page.evaluate(elem =>
-       elem.click(), this.element );
+       elem.click()
+       , this.element
+    );
   }
 
 }

@@ -1,9 +1,9 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
-import WebElement from './web-element';
+import BaseElement from './base-element';
 import {findSelect} from './xpath-finder';
 
-export default class Select extends WebElement {
+export default class Select extends BaseElement {
 
   private selectedOption;
 
@@ -11,7 +11,7 @@ export default class Select extends WebElement {
     super(aPage);
   }
    
-  async withLabel(textOptions?: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
     throwErr = throwErr || true;
     if (waitOptions === undefined) { waitOptions = {visible: true}; }
     try {

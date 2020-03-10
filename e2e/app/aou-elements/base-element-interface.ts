@@ -1,6 +1,10 @@
-import {ClickOptions} from 'puppeteer';
+import {ClickOptions, ElementHandle, WaitForSelectorOptions} from 'puppeteer';
 
-export interface ElementInterface {
+export interface BaseElementInterface {
+
+  withCss(aCssSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle>
+
+  withXpath(aXpathSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle>
 
   getProperty(propertyName: string): Promise<unknown>;
 

@@ -1,4 +1,4 @@
-import {Page} from 'puppeteer';
+import {ElementHandle, Page, Response} from 'puppeteer';
 
 export default abstract class BasePage {
 
@@ -16,6 +16,20 @@ export default abstract class BasePage {
   }
 
   /**
+   * Reload current page.
+   */
+  async reloadPage(): Promise<Response> {
+    return await this.page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
+  }
+
+  /**
+   * Load a URL.
+   */
+  async gotoUrl(url: string): Promise<void> {
+    await this.page.goto(url, {waitUntil: ['domcontentloaded','networkidle0']});
+  }
+
+  /**
    *  <pre>
    * Get the element's textContent for a specified CSS selector.
    *  </pre>
@@ -26,10 +40,11 @@ export default abstract class BasePage {
     return this.page.$eval(`${cssSelector}`, elem => elem.textContent.trim())
   }
 
-  async waitForNavigation(page: Page) {
+  async waitForNavigation() {
     return Promise.all([
-      page.waitForNavigation({waitUntil: 'load'}),
-      page.waitForNavigation({waitUntil: 'domcontentloaded'})
+      this.page.waitForNavigation({waitUntil: 'load'}),
+      this.page.waitForNavigation({waitUntil: 'domcontentloaded'}),
+      this.page.waitForNavigation({waitUntil: 'networkidle0', timeout: 60000}),
     ]);
   }
 
@@ -151,6 +166,55 @@ export default abstract class BasePage {
     }, {timeout: 50000}, cssSelector, expectedText);
 
     await this.page.waitForSelector(cssSelector, { visible: true });
+  }
+
+  /**
+   * Find texts in DOM.
+   * @param txt
+   */
+  async findText(txt: string): Promise<boolean> {
+    const indx = await (await this.page.content()).indexOf(txt);
+    return indx !== -1;
+  }
+
+  /**
+   * <pre>
+   * Get the value of a particular property for a particular element
+   * </pre>
+   * @param {ElementHandle} element - The web element to get the property value for
+   * @param {string} property - The property to look for
+   * @returns {string} value - The property value
+   */
+  async getProperty(element: ElementHandle, property: string) {
+    // Alternative: return element.getProperty(property).then((elem) => elem.jsonValue());
+    const handle = await this.page.evaluateHandle((elem, prop) => {
+      return elem[prop];
+    }, element, property);
+    return await handle.jsonValue();
+  }
+
+  /**
+   * Get the element attribute value.
+   * @param {ElementHandle} element
+   * @param {string} attribute
+   */
+  async getAttribute(element: ElementHandle, attribute: string) {
+    const handle = await this.page.evaluateHandle((elem, attr) => {
+      return elem.getAttribute(attr);
+    }, element, attribute);
+    return await handle.jsonValue();
+  }
+
+  /**
+   * <pre>
+   * Check whether a web element exist. Visibility is not checked.
+   * </pre>
+   * @param {ElementHandle} element: The web element to check
+   */
+  async exists(element: ElementHandle) {
+    return await this.page.evaluate(elem => {
+      return elem !== null;
+    }, element);
   }
 
 }

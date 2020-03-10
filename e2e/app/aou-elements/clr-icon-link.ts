@@ -1,9 +1,9 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
-import WebElement from './web-element';
+import BaseElement from './base-element';
 import {findIcon} from './xpath-finder';
 
 
-export default class ClrIconLink extends WebElement {
+export default class ClrIconLink extends BaseElement {
 
   constructor(aPage: Page) {
     super(aPage);

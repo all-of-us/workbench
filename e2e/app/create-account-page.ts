@@ -7,7 +7,7 @@ import RadioButton from './aou-elements/radiobutton';
 import SelectComponent from './aou-elements/select-component';
 import Textarea from './aou-elements/textarea';
 import Textbox from './aou-elements/textbox';
-import BasePage from './base';
+import BasePage from './base-page';
 
 
 const faker = require('faker/locale/en_US');

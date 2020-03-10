@@ -1,15 +1,15 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
-import WebElement from './web-element';
+import BaseElement from './base-element';
 import {findButton} from './xpath-finder';
 
-export default class Button extends WebElement {
+export default class Button extends BaseElement {
 
   constructor(aPage: Page) {
     super(aPage);
   }
    
-  async withLabel(textOptions?: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
+  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
     throwErr = throwErr || true;
     if (waitOptions === undefined) { waitOptions = {visible: true}; }
     try {
@@ -21,14 +21,6 @@ export default class Button extends WebElement {
       }
     }
     return this.element;
-  }
-
-  /**
-   * Determine if button is disabled by checking style 'cursor'.
-   */
-  async isCursorNotAllowed(): Promise<boolean> {
-    const cursor = await this.getComputedStyle('cursor');
-    return cursor === 'not-allowed';
   }
 
 }

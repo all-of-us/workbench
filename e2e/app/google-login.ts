@@ -1,6 +1,6 @@
 import { ElementHandle, Page } from 'puppeteer';
 import {findButton} from './aou-elements/xpath-finder';
-import BasePage from './base';
+import BasePage from './base-page';
 import HomePage from './home-page';
 
 const configs = require('../resources/workbench-config');
@@ -82,7 +82,7 @@ export default class GoogleLoginPage extends BasePage {
     const button = await this.page.waitForXPath(selectors.NextButton);
     await Promise.all([
       button.click(),
-      this.waitForNavigation(this.page),
+      this.page.waitForNavigation(),
     ]);
   }
 
@@ -90,7 +90,7 @@ export default class GoogleLoginPage extends BasePage {
    * Open All-of-Us Google login page.
    */
   async goto(): Promise<void> {
-    await this.page.goto(configs.uiBaseUrl + configs.loginUrlPath, {waitUntil: ['networkidle0', 'domcontentloaded']});
+    await this.page.goto(configs.uiBaseUrl + configs.loginUrlPath, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 0});
   }
 
   /**
@@ -105,10 +105,11 @@ export default class GoogleLoginPage extends BasePage {
 
     await this.goto();
 
-    const navPromise = this.waitForNavigation(this.page);
     const googleButton = await this.loginButton();
-    await googleButton.click();
-    await navPromise;
+    await Promise.all([
+      googleButton.click(),
+      this.page.waitForNavigation(),
+    ]);
 
     if (!user || user.trim().length === 0) {
       console.warn('Login user email: value is empty!!!')

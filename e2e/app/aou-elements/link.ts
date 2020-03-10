@@ -1,8 +1,8 @@
 import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
-import WebElement from './web-element';
+import BaseElement from './base-element';
 import {findClickable} from './xpath-finder';
 
-export default class Link extends WebElement {
+export default class Link extends BaseElement {
 
   constructor(aPage: Page) {
     super(aPage);
@@ -22,12 +22,5 @@ export default class Link extends WebElement {
     return this.element;
   }
 
-  /**
-   * Determine if button is disabled by checking style 'cursor'.
-   */
-  async isCursorAllowed(): Promise<boolean> {
-    const cursor = await this.getComputedStyle('cursor');
-    return cursor === 'not-allowed';
-  }
 
 }
