@@ -75,6 +75,7 @@ import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-noteb
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
+import {UserDisabledComponent} from 'app/pages/user-disabled';
 
 
 
@@ -159,6 +160,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SignInComponent,
     TablePage,
     TextModalComponent,
+    UserDisabledComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,

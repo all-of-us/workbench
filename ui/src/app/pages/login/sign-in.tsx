@@ -26,7 +26,7 @@ import * as React from 'react';
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
-const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImageConfig) => {
+export const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImageConfig) => {
   // Lower bounds to prevent the small and large images from covering the
   // creation controls, respectively.
   const bgWidthMinPx = 900;

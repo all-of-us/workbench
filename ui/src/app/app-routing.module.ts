@@ -27,6 +27,7 @@ import {HomepageComponent} from './pages/homepage/homepage';
 import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
+import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
@@ -36,6 +37,7 @@ import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/com
 import {environment} from 'environments/environment';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
+import {DisabledGuard} from "./guards/disabled-guard.service";
 
 
 declare let gtag: Function;
@@ -50,10 +52,14 @@ const routes: Routes = [
     component: CookiePolicyComponent,
     data: {title: 'Cookie Policy'}
   }, {
+    path: 'user-disabled',
+    component: UserDisabledComponent,
+    data: {title: 'Disabled'}
+  }, {
     path: '',
     component: SignedInComponent,
-    canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, RegistrationGuard],
+    canActivate: [SignInGuard, DisabledGuard],
+    canActivateChild: [SignInGuard, DisabledGuard, RegistrationGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -308,6 +314,7 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
+    DisabledGuard,
     RegistrationGuard,
     SignInGuard,
   ]
