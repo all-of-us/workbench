@@ -61,9 +61,11 @@ We need a newish version of Ruby. I'm running 2.6.5 as of this writing, but have
 back and tested with older versions. We also currently need the `gcloud` tools and an account with
 sufficient privilege account to create service account tokens.
 
-Additionally, you'll need to install a gem or two. Right now, it's
-
-`gem install --user google-cloud-monitoring` for the monitoring library
+A `Gemfile` specifies the dependencies needed (currently just two google monitoring gems).
+To use it, do
+```
+bundle install
+```
 
 ## Design Decisions
 I should justify some of the  directions I've taken here, since they're departures to varying
