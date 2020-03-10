@@ -21,9 +21,9 @@ def parse_options
   options = {}
   OptionParser.new do |parser|
     parser.on('-t', '--task [TASK]', String, 'Task to be run in each environment')
-    parser.on('-e', '--envs-file [ENVS]', String, 'Path to environments JSON file.')
-    parser.on('-s', '--source-uri [SOURCE-URI]', String, 'URI or FQ name for source asset')
-    parser.on('-u', '--source-env [SOURCE-ENV]', String, 'Short name for source Environment (lowercase)')
+    parser.on('-e', '--envs-file [ENVS]', String, 'Path to environments JSON file. See examples directory.')
+    parser.on('-s', '--source-uri [SOURCE-URI]', String, 'URI or fully qualified name for source asset')
+    parser.on('-u', '--source-env [SOURCE-ENV]', String, 'Short name for source Environment (lowercase), for example "staging".')
     parser.on('-d', '--dry-run', 'Execute a dry run of the task')
   end.parse!({into: options})
 
