@@ -18,7 +18,7 @@ import {domainToTitle, highlightMatches, stripHtml, subTypeToTitle} from 'app/co
 import {ClrIcon} from 'app/components/icons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -34,6 +34,39 @@ const styles = reactStyles({
     height: '1.25rem',
     width: '1.25rem',
   },
+  ingredients: {
+    float: 'left',
+    fontWeight: 'bold',
+    padding: '0.5rem',
+  },
+  returnLink: {
+    background: 'transparent',
+    border: 0,
+    color: colors.accent,
+    float: 'right',
+    fontSize: '12px',
+    height: '1.5rem',
+    margin: '0.25rem 0',
+    padding: '0 0.5rem',
+  },
+  searchBarContainer: {
+    position: 'absolute',
+    width: '95%',
+    marginTop: '-1px',
+    display: 'flex',
+    padding: '0.4rem 0',
+    backgroundColor: colors.white,
+    zIndex: 1,
+  },
+  treeContainer: {
+    margin: '3rem 0 1rem',
+    width: '99%',
+  },
+  treeHeader: {
+    overflow: 'auto',
+    background: colorWithWhiteness(colors.black, 0.97),
+    borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+  }
 });
 
 const iconStyles = reactStyles({
@@ -242,12 +275,12 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const {node, node: {id, group, hasAttributes, name, selectable}} = this.props;
     const {children, expanded, loading, selected} = this.state;
     return <React.Fragment>
-      <div id={`node${id}`} className='clr-treenode-link container' onClick={() => this.toggleExpanded()}>
+      <div id={`node${id}`} onClick={() => this.toggleExpanded()}>
         {group && <div style={styles.iconContainer}>
           {loading
             ? <Spinner size={16}/>
             : <ClrIcon style={iconStyles.caretIcon} shape={'angle ' + (expanded ? 'down' : 'right')}
-              size='20' onClick={() => this.toggleExpanded()}/>}
+              size='16' onClick={() => this.toggleExpanded()}/>}
         </div>}
         {selectable && <div style={styles.iconContainer}>
           {hasAttributes
@@ -258,7 +291,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             </React.Fragment>
           }
         </div>}
-        <span>{name}</span>
+        <div className='clr-treenode-link container'>{name}</div>
       </div>
       {expanded && !!children && <div style={{marginLeft: '1rem'}} className='node-list'>
         {children.map((child, c) => <TreeNode key={c} node={child}/>)}
@@ -411,17 +444,17 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     const {back, node} = this.props;
     const {children, ingredients, loading} = this.state;
     return <React.Fragment>
-      <div style={{padding: '0.4rem 0'}} className='dropdown-search-container'>
-        <div className='search-container'>
-          <SearchBar node={node} setIngredients={(i) => this.setState({ingredients: i})}/>
-        </div>
+      <div style={styles.searchBarContainer}>
+        <SearchBar node={node} setIngredients={(i) => this.setState({ingredients: i})}/>
       </div>
-      <div className='tree-container'>
-        {this.showHeader && <div className='tree-header'>
-          {!!ingredients && <div className='ingredients'>
+      <div style={this.showHeader
+        ? {...styles.treeContainer, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}
+        : styles.treeContainer}>
+        {this.showHeader && <div style={styles.treeHeader}>
+          {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
           </div>}
-          <button className='btn btn-link' onClick={() => back()}>Return to list</button>
+          <button style={styles.returnLink} onClick={() => back()}>Return to list</button>
         </div>}
         {this.isEmpty && <div className='alert alert-warning'>
           <ClrIcon className='alert-icon is-solid' shape='exclamation-triangle' />
@@ -436,7 +469,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
 @Component({
   selector: 'crit-tree',
-  template: '<div #root></div>'
+  template: '<div #root style="display: inline"></div>'
 })
 export class CriteriaTreeComponent extends ReactWrapperBase {
   @Input('back') back: Props['back'];

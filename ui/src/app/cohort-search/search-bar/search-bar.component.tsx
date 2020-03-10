@@ -285,7 +285,7 @@ export class SearchBar extends React.Component<Props, State> {
 
   render() {
     const {highlightedOption, loading, options, searchTerm, typedTerm} = this.state;
-    return <div style={{position: 'relative'}}>
+    return <div style={{position: 'relative', width: '100%'}}>
       <div style={styles.searchContainer}>
         <div style={styles.searchBar}>
           {loading ? <Spinner style={{verticalAlign: 'middle'}} size={16}/> : <ClrIcon shape='search' size='18'/>}
