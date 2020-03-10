@@ -18,8 +18,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.CdrVersion;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
+import org.pmiops.workbench.model.ResearchPublicationOutlet;
+import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
@@ -73,12 +73,12 @@ public interface WorkspaceMapper {
     researchPurpose.setResearchOutcomeList(
         Optional.ofNullable(dbWorkspace.getResearchOutcomeEnumSet())
             .map(researchOutcome -> researchOutcome.stream().collect(Collectors.toList()))
-            .orElse(new ArrayList<ResearchOutcomeEnum>()));
+            .orElse(new ArrayList<AnticipatedResearchOutcome>()));
 
     researchPurpose.setDisseminateResearchFindingList(
         Optional.ofNullable(dbWorkspace.getDisseminateResearchEnumSet())
             .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toList()))
-            .orElse(new ArrayList<DisseminateResearchEnum>()));
+            .orElse(new ArrayList<ResearchPublicationOutlet>()));
   }
 
   @AfterMapping

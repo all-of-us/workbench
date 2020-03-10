@@ -133,7 +133,7 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
@@ -143,7 +143,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
+import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -1145,9 +1145,9 @@ public class WorkspacesControllerTest {
         ImmutableList.of(
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
     modPurpose.setDisseminateResearchFindingList(
-        ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
+        ImmutableList.of(ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES));
     modPurpose.setResearchOutcomeList(
-        ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
+        ImmutableList.of(AnticipatedResearchOutcome.DECREASE_ILLNESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");

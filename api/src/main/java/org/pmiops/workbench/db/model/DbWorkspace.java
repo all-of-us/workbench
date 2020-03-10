@@ -24,8 +24,8 @@ import javax.persistence.Version;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
+import org.pmiops.workbench.model.ResearchPublicationOutlet;
+import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
@@ -422,10 +422,10 @@ public class DbWorkspace {
   }
 
   @Transient
-  public Set<DisseminateResearchEnum> getDisseminateResearchEnumSet() {
+  public Set<ResearchPublicationOutlet> getDisseminateResearchEnumSet() {
     Set<Short> from = getDisseminateResearchSet();
     if (from == null) {
-      return new HashSet<DisseminateResearchEnum>();
+      return new HashSet<ResearchPublicationOutlet>();
     }
     return from.stream()
         .map(DbStorageEnums::disseminateResearchEnumFromStorage)
@@ -433,7 +433,7 @@ public class DbWorkspace {
   }
 
   public void setDisseminateResearchEnumSet(
-      Set<DisseminateResearchEnum> disseminateResearchEnumEnum) {
+      Set<ResearchPublicationOutlet> disseminateResearchEnumEnum) {
     setDisseminateResearchSet(
         disseminateResearchEnumEnum.stream()
             .map(DbStorageEnums::disseminateResearchToStorage)
@@ -463,17 +463,17 @@ public class DbWorkspace {
   }
 
   @Transient
-  public Set<ResearchOutcomeEnum> getResearchOutcomeEnumSet() {
+  public Set<AnticipatedResearchOutcome> getResearchOutcomeEnumSet() {
     Set<Short> from = getResearchOutcomeSet();
     if (from == null) {
-      return new HashSet<ResearchOutcomeEnum>();
+      return new HashSet<AnticipatedResearchOutcome>();
     }
     return from.stream()
         .map(DbStorageEnums::researchOutcomeEnumFromStorage)
         .collect(Collectors.toSet());
   }
 
-  public void setResearchOutcomeEnumSet(Set<ResearchOutcomeEnum> researchOutcomeEnum) {
+  public void setResearchOutcomeEnumSet(Set<AnticipatedResearchOutcome> researchOutcomeEnum) {
     setResearchOutcomeSet(
         researchOutcomeEnum.stream()
             .map(DbStorageEnums::researchOutcomeToStorage)

@@ -18,9 +18,9 @@ import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.RecentWorkspace;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
+import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
@@ -173,16 +173,16 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setDisseminateResearchEnumSet(
         Optional.ofNullable(purpose.getDisseminateResearchFindingList())
             .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toSet()))
-            .orElse(new HashSet<DisseminateResearchEnum>()));
+            .orElse(new HashSet<ResearchPublicationOutlet>()));
 
-    if (dbWorkspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
+    if (dbWorkspace.getDisseminateResearchEnumSet().contains(ResearchPublicationOutlet.OTHER)) {
       dbWorkspace.setDisseminateResearchOther(purpose.getOtherDisseminateResearchFindings());
     }
 
     dbWorkspace.setResearchOutcomeEnumSet(
         Optional.ofNullable(purpose.getResearchOutcomeList())
             .map(researchOutcoming -> researchOutcoming.stream().collect(Collectors.toSet()))
-            .orElse(new HashSet<ResearchOutcomeEnum>()));
+            .orElse(new HashSet<AnticipatedResearchOutcome>()));
   }
 
   private ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
@@ -215,19 +215,19 @@ public class ManualWorkspaceMapper {
                     .map(
                         disseminateResearchEnums ->
                             disseminateResearchEnums.stream().collect(Collectors.toList()))
-                    .orElse(new ArrayList<DisseminateResearchEnum>()))
+                    .orElse(new ArrayList<ResearchPublicationOutlet>()))
             .researchOutcomeList(
                 Optional.ofNullable(workspace.getResearchOutcomeEnumSet())
                     .map(
                         researchOutcomeEnums ->
                             researchOutcomeEnums.stream().collect(Collectors.toList()))
-                    .orElse(new ArrayList<ResearchOutcomeEnum>()))
+                    .orElse(new ArrayList<AnticipatedResearchOutcome>()))
             .populationDetails(
                 workspace.getPopulationDetails().stream()
                     .map(DbStorageEnums::specificPopulationFromStorage)
                     .collect(Collectors.toList()));
 
-    if (workspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
+    if (workspace.getDisseminateResearchEnumSet().contains(ResearchPublicationOutlet.OTHER)) {
       researchPurpose.setOtherDisseminateResearchFindings(workspace.getDisseminateResearchOther());
     }
 

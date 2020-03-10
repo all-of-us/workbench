@@ -12,13 +12,13 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
+import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
+import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
@@ -231,41 +231,41 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.get(s);
   }
 
-  public static final BiMap<DisseminateResearchEnum, Short> CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
-      ImmutableBiMap.<DisseminateResearchEnum, Short>builder()
-          .put(DisseminateResearchEnum.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
-          .put(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
-          .put(DisseminateResearchEnum.PRESS_RELEASE, (short) 2)
-          .put(DisseminateResearchEnum.PUBLICATION_COMMUNITY_BASED_BLOG, (short) 3)
-          .put(DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG, (short) 4)
-          .put(DisseminateResearchEnum.SOCIAL_MEDIA, (short) 5)
-          .put(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS, (short) 6)
-          .put(DisseminateResearchEnum.OTHER, (short) 7)
+  public static final BiMap<ResearchPublicationOutlet, Short> CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
+      ImmutableBiMap.<ResearchPublicationOutlet, Short>builder()
+          .put(ResearchPublicationOutlet.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
+          .put(ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
+          .put(ResearchPublicationOutlet.PRESS_RELEASE, (short) 2)
+          .put(ResearchPublicationOutlet.PUBLICATION_COMMUNITY_BASED_BLOG, (short) 3)
+          .put(ResearchPublicationOutlet.PUBLICATION_PERSONAL_BLOG, (short) 4)
+          .put(ResearchPublicationOutlet.SOCIAL_MEDIA, (short) 5)
+          .put(ResearchPublicationOutlet.PRESENTATION_ADVISORY_GROUPS, (short) 6)
+          .put(ResearchPublicationOutlet.OTHER, (short) 7)
           .build();
 
-  public static DisseminateResearchEnum disseminateResearchEnumFromStorage(Short s) {
+  public static ResearchPublicationOutlet disseminateResearchEnumFromStorage(Short s) {
     return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.inverse().get(s);
   }
 
-  public static Short disseminateResearchToStorage(DisseminateResearchEnum s) {
+  public static Short disseminateResearchToStorage(ResearchPublicationOutlet s) {
     return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.get(s);
   }
 
-  public static final BiMap<ResearchOutcomeEnum, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
-      ImmutableBiMap.<ResearchOutcomeEnum, Short>builder()
-          .put(ResearchOutcomeEnum.PROMOTE_HEALTHY_LIVING, (short) 0)
-          .put(ResearchOutcomeEnum.IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS, (short) 1)
-          .put(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT, (short) 2)
-          .put(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN, (short) 3)
-          .put(ResearchOutcomeEnum.PRECISION_INTERVENTION, (short) 4)
-          .put(ResearchOutcomeEnum.NONE_APPLY, (short) 5)
+  public static final BiMap<AnticipatedResearchOutcome, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
+      ImmutableBiMap.<AnticipatedResearchOutcome, Short>builder()
+          .put(AnticipatedResearchOutcome.PROMOTE_HEALTHY_LIVING, (short) 0)
+          .put(AnticipatedResearchOutcome.IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS, (short) 1)
+          .put(AnticipatedResearchOutcome.IMPROVED_RISK_ASSESMENT, (short) 2)
+          .put(AnticipatedResearchOutcome.DECREASE_ILLNESS_BURDEN, (short) 3)
+          .put(AnticipatedResearchOutcome.PRECISION_INTERVENTION, (short) 4)
+          .put(AnticipatedResearchOutcome.NONE_APPLY, (short) 5)
           .build();
 
-  public static ResearchOutcomeEnum researchOutcomeEnumFromStorage(Short s) {
+  public static AnticipatedResearchOutcome researchOutcomeEnumFromStorage(Short s) {
     return CLIENT_TO_STORAGE_RESEARCH_OUTCOME.inverse().get(s);
   }
 
-  public static Short researchOutcomeToStorage(ResearchOutcomeEnum s) {
+  public static Short researchOutcomeToStorage(AnticipatedResearchOutcome s) {
     return CLIENT_TO_STORAGE_RESEARCH_OUTCOME.get(s);
   }
 
