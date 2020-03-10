@@ -24,10 +24,6 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     uses = {CommonMappers.class})
 public interface WorkspaceMapper {
 
-  default WorkspaceAccessLevel roleToWorkspaceAccessLevel(Short dataAccessLevel) {
-    return DbStorageEnums.workspaceAccessLevelFromStorage(dataAccessLevel);
-  }
-
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
   @Mapping(target = "dataAccessLevel", source = "dbWorkspace.dataAccessLevelEnum")
@@ -39,39 +35,19 @@ public interface WorkspaceMapper {
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
 
   // This method is simply merging the research purpose, which covers only a subset of the fields
-  // in the DbWorkspace target
+  // in the DbWorkspace source.
 
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
   @Mapping(target = "researchOutcomeList", source = "researchOutcomeEnumSet")
   @Mapping(target = "disseminateResearchFindingList", source = "disseminateResearchEnumSet")
+  @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
-
-  @AfterMapping
-  default void afterResearchPurposeIntoWorkspace(
-      @MappingTarget DbWorkspace dbWorkspace, ResearchPurpose researchPurpose) {
-    if (researchPurpose.getPopulation()) {
-      dbWorkspace.setSpecificPopulationsEnum(
-          ImmutableSet.copyOf(researchPurpose.getPopulationDetails()));
-    }
-  }
 
   default Set<Short> map(List<SpecificPopulationEnum> value) {
     return value.stream()
         .map(DbStorageEnums::specificPopulationToStorage)
         .collect(ImmutableSet.toImmutableSet());
-  }
-
-  default List<SpecificPopulationEnum> ordinalsToSpecificPopulationEnumList(Set<Short> ordinals) {
-    final Stream<Short> ordinalsStream;
-    if (ordinals == null) {
-      ordinalsStream = Stream.of();
-    } else {
-      ordinalsStream = ordinals.stream();
-    }
-    return ordinalsStream
-        .map(DbStorageEnums::specificPopulationFromStorage)
-        .collect(Collectors.toList());
   }
 
   default String cdrVersionId(CdrVersion cdrVersion) {
