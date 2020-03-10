@@ -113,7 +113,7 @@ public class ProfileController implements ProfileApiDelegate {
                 result.setInstitution(institutionalAffiliation.getInstitution());
               }
               if (institutionalAffiliation.getNonAcademicAffiliation() != null) {
-                result.setNonAcademicAffiliationnEnum(
+                result.setNonAcademicAffiliationEnum(
                     institutionalAffiliation.getNonAcademicAffiliation());
               }
 

@@ -82,12 +82,12 @@ public class DbInstitutionalAffiliation {
 
   @Transient
   public NonAcademicAffiliation getNonAcademicAffiliationEnum() {
-    return DemographicSurveyEnum.nonAcademicAffiliationFromStorage(this.nonAcademicAffiliation);
+    return DbStorageEnums.nonAcademicAffiliationFromStorage(this.nonAcademicAffiliation);
   }
 
-  public void setNonAcademicAffiliationnEnum(NonAcademicAffiliation affiliation) {
+  public void setNonAcademicAffiliationEnum(NonAcademicAffiliation affiliation) {
     this.nonAcademicAffiliation =
-        DemographicSurveyEnum.nonAcademicAffiliationToStorage(affiliation);
+        DbStorageEnums.nonAcademicAffiliationToStorage(affiliation);
   }
 
   @Column(name = "other")

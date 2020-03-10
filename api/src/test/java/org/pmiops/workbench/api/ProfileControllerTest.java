@@ -50,6 +50,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
@@ -68,6 +69,9 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.profile.AddressMapperImpl;
+import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
+import org.pmiops.workbench.profile.PageVisitMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
@@ -142,6 +146,10 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @TestConfiguration
   @Import({
+    AddressMapperImpl.class,
+    DemographicSurveyMapperImpl.class,
+    InstitutionalAffiliationMapperImpl.class,
+    PageVisitMapperImpl.class,
     UserServiceImpl.class,
     ProfileService.class,
     ProfileController.class,

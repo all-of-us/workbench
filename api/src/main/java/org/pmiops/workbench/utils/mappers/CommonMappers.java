@@ -29,22 +29,6 @@ public class CommonMappers {
     return null;
   }
 
-  public static Short booleanToShort(Boolean value) {
-    if (value != null) {
-      return value ? (short) 1 : (short) 0;
-    } else {
-      return null;
-    }
-  }
-
-  public static Boolean shortToBoolean(Short value) {
-    if (value != null) {
-      return value == 1;
-    } else {
-      return null;
-    }
-  }
-
   public static String dbUserToCreatorEmail(DbUser creator) {
     return Optional.ofNullable(creator).map(DbUser::getUsername).orElse(null);
   }

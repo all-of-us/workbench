@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import org.mapstruct.Named;
 import org.pmiops.workbench.model.AcademicRole;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
@@ -87,15 +88,6 @@ public class DemographicSurveyEnum {
           .put(IndustryRole.PRE_DOCTORAL, (short) 5)
           .build();
 
-  private static final BiMap<NonAcademicAffiliation, Short>
-      CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION =
-          ImmutableBiMap.<NonAcademicAffiliation, Short>builder()
-              .put(NonAcademicAffiliation.COMMUNITY_SCIENTIST, (short) 1)
-              .put(NonAcademicAffiliation.EDUCATIONAL_INSTITUTION, (short) 2)
-              .put(NonAcademicAffiliation.INDUSTRY, (short) 3)
-              .put(NonAcademicAffiliation.FREE_TEXT, (short) 4)
-              .build();
-
   private static final BiMap<EducationalRole, Short> CLIENT_TO_STORAGE_EDUCATIONAL_ROLE =
       ImmutableBiMap.<EducationalRole, Short>builder()
           .put(EducationalRole.TEACHER, (short) 1)
@@ -169,11 +161,25 @@ public class DemographicSurveyEnum {
   }
 
   public static Short disabilityToStorage(Boolean disability) {
-    return disability ? (short) 1 : (short) 2;
+    if (disability != null) {
+      return disability ? (short) 1 : (short) 2;
+    } else {
+      return null;
+    }
   }
 
   public static Disability disabilityFromStorage(Short disability) {
     return CLIENT_TO_STORAGE_DISABILITY.inverse().get(disability);
+  }
+
+  // named such for MapStruct, which will automatically pick up on a function with this signature.
+  // can't be named disabilityFromStorage because it would have the same args as the other one.
+  public static Boolean boolyDisabilityFromStorage(Short disability) {
+    if (disability != null) {
+      return disability == 1;
+    } else {
+      return null;
+    }
   }
 
   public static Short roleToStorage(AcademicRole role) {
@@ -190,14 +196,6 @@ public class DemographicSurveyEnum {
 
   public static IndustryRole industryRoleFromStorage(Short role) {
     return CLIENT_TO_STORAGE_INDUSTRY_ROLE.inverse().get(role);
-  }
-
-  public static Short nonAcademicAffiliationToStorage(NonAcademicAffiliation role) {
-    return CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION.get(role);
-  }
-
-  public static NonAcademicAffiliation nonAcademicAffiliationFromStorage(Short role) {
-    return CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION.inverse().get(role);
   }
 
   public static Short educationRoleToStorage(EducationalRole role) {
