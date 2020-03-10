@@ -1,28 +1,20 @@
 import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
-import org.gradle.api.tasks.JavaExec
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
 def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
-def mergedApiSourceFile = 'src/main/resources/merged.yaml'
-def clientApiSourceFile = 'src/main/resources/client_api.yaml'
-def cbReviewApiSourceFile = 'src/main/resources/cb_review_api.yaml'
-def cbSearchApiSourceFile = 'src/main/resources/cb_search_api.yaml'
 def swaggerTargetFolder = 'src/generated/java'
-
-task generateMergedSwagger(type: Exec) {
-  commandLine "./build.rb", "merge-yaml"
-}
+def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
 
 task generateApi {
-  inputs.file("$projectDir/$mergedApiSourceFile")
+  inputs.file("$projectDir/$workbenchApiSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$mergedApiSourceFile")
+    config.setInputSpec("$projectDir/$workbenchApiSourceFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('spring')
@@ -46,7 +38,7 @@ task generateFireCloudClient {
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$fireCloudApiFile")
+    config.setInputSpec("$projectDir/$fireCloudApiFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
@@ -95,7 +87,7 @@ task generateJiraClient {
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$jiraApiFile")
+    config.setInputSpec("$projectDir/$jiraApiFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
@@ -219,7 +211,7 @@ task generate_appengine_cron_yaml(type: Exec) {
 }
 
 configurations {
-  generatedCompile
+  jvmCodegenDependencies
   all {
     exclude group: 'com.google.guava', module:'guava-jdk5'
   }
@@ -253,7 +245,7 @@ buildscript {    // Configuration for building
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
-    // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
+    // implicit dependencies: (1) the set of "jvmCodegenDependencies" Gradle dependencies need to be updated
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
@@ -310,7 +302,7 @@ configurations {
 // See https://github.com/int128/gradle-swagger-generator-plugin
 sourceSets {
   generated {
-    compileClasspath = configurations.generatedCompile
+    compileClasspath = configurations.jvmCodegenDependencies
   }
   main {
     compileClasspath += generated.output
@@ -360,7 +352,6 @@ sourceSets {
   }
 }
 
-validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
@@ -510,45 +501,21 @@ dependencies {
   // Dependencies for Swagger codegen. This should include all dependencies required by Swagger's
   // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
   // plus any custom templates included in our repo under the swaggerTemplateDir.
-  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:${SPRING_BOOT_VERSION}"
-  generatedCompile "io.springfox:springfox-swagger2:${SPRINGFOX_VERSION}"
-  generatedCompile "io.springfox:springfox-swagger-ui:${SPRINGFOX_VERSION}"
-  generatedCompile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
-  generatedCompile "com.squareup.okhttp:logging-interceptor:${OKHTTP_VERSION}"
-  generatedCompile "com.google.code.gson:gson:${GSON_VERSION}"
-  generatedCompile "joda-time:joda-time:${JODA_VERSION}"
-  generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
+  jvmCodegenDependencies "org.springframework.boot:spring-boot-starter-data-rest:${SPRING_BOOT_VERSION}"
+  jvmCodegenDependencies "io.springfox:springfox-swagger2:${SPRINGFOX_VERSION}"
+  jvmCodegenDependencies "io.springfox:springfox-swagger-ui:${SPRINGFOX_VERSION}"
+  jvmCodegenDependencies "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
+  jvmCodegenDependencies "com.squareup.okhttp:logging-interceptor:${OKHTTP_VERSION}"
+  jvmCodegenDependencies "com.google.code.gson:gson:${GSON_VERSION}"
+  jvmCodegenDependencies "joda-time:joda-time:${JODA_VERSION}"
+  jvmCodegenDependencies "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
   // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
   // template file api.mustache for more details.
-  generatedCompile "io.opencensus:opencensus-api:${OPENCENSUS_VERSION}"
-  generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
-  generatedCompile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
+  jvmCodegenDependencies "io.opencensus:opencensus-api:${OPENCENSUS_VERSION}"
+  jvmCodegenDependencies "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
+  jvmCodegenDependencies "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${KOTLIN_VERSION}"
-}
-
-swaggerSources {
-  workbench {
-    inputFile = file("$projectDir/$mergedApiSourceFile")
-  }
-  client {
-    inputFile = file("$projectDir/$clientApiSourceFile")
-  }
-  cbReview {
-    inputFile = file("$projectDir/$cbReviewApiSourceFile")
-  }
-  cbSearch {
-    inputFile = file("$projectDir/$cbSearchApiSourceFile")
-  }
-  firecloud {
-    inputFile = file("$projectDir/$fireCloudApiFile")
-  }
-  notebooks {
-    inputFile = file("$projectDir/$notebooksApiFile")
-  }
-  jira {
-    inputFile = file("$projectDir/$jiraApiFile")
-  }
 }
 
 compileJava {
@@ -651,7 +618,7 @@ task incrementalHotSwap(type: IncrementalHotSwapTask) {
 
 incrementalHotSwap.dependsOn compileJava
 
-task listProjectAPIs(type: GenerateAPIListingTask, dependsOn: generateMergedSwagger)
+task listProjectAPIs(type: GenerateAPIListingTask)
 
 
 //
