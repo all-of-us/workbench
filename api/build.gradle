@@ -1,28 +1,20 @@
 import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
-import org.gradle.api.tasks.JavaExec
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
 def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
-def mergedApiSourceFile = 'src/main/resources/merged.yaml'
-def clientApiSourceFile = 'src/main/resources/client_api.yaml'
-def cbReviewApiSourceFile = 'src/main/resources/cb_review_api.yaml'
-def cbSearchApiSourceFile = 'src/main/resources/cb_search_api.yaml'
 def swaggerTargetFolder = 'src/generated/java'
-
-task generateMergedSwagger(type: Exec) {
-  commandLine "./build.rb", "merge-yaml"
-}
+def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
 
 task generateApi {
-  inputs.file("$projectDir/$mergedApiSourceFile")
+  inputs.file("$projectDir/$workbenchApiSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$mergedApiSourceFile")
+    config.setInputSpec("$projectDir/$workbenchApiSourceFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('spring')
@@ -46,7 +38,7 @@ task generateFireCloudClient {
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$fireCloudApiFile")
+    config.setInputSpec("$projectDir/$fireCloudApiFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
@@ -95,7 +87,7 @@ task generateJiraClient {
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$jiraApiFile")
+    config.setInputSpec("$projectDir/$jiraApiFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
@@ -360,7 +352,6 @@ sourceSets {
   }
 }
 
-validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
@@ -527,30 +518,6 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${KOTLIN_VERSION}"
 }
 
-swaggerSources {
-  workbench {
-    inputFile = file("$projectDir/$mergedApiSourceFile")
-  }
-  client {
-    inputFile = file("$projectDir/$clientApiSourceFile")
-  }
-  cbReview {
-    inputFile = file("$projectDir/$cbReviewApiSourceFile")
-  }
-  cbSearch {
-    inputFile = file("$projectDir/$cbSearchApiSourceFile")
-  }
-  firecloud {
-    inputFile = file("$projectDir/$fireCloudApiFile")
-  }
-  notebooks {
-    inputFile = file("$projectDir/$notebooksApiFile")
-  }
-  jira {
-    inputFile = file("$projectDir/$jiraApiFile")
-  }
-}
-
 compileJava {
   options.compilerArgs << '-Xlint:unchecked'
 }
@@ -651,7 +618,7 @@ task incrementalHotSwap(type: IncrementalHotSwapTask) {
 
 incrementalHotSwap.dependsOn compileJava
 
-task listProjectAPIs(type: GenerateAPIListingTask, dependsOn: generateMergedSwagger)
+task listProjectAPIs(type: GenerateAPIListingTask)
 
 
 //
@@ -781,6 +748,7 @@ task updateCdrVersions(type: JavaExec) {
   }
 }
 
+// This can be run directly or via the deploy command.
 task loadDataDictionary(type: JavaExec) {
   classpath sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.LoadDataDictionary"
