@@ -86,8 +86,7 @@ public class DbInstitutionalAffiliation {
   }
 
   public void setNonAcademicAffiliationEnum(NonAcademicAffiliation affiliation) {
-    this.nonAcademicAffiliation =
-        DbStorageEnums.nonAcademicAffiliationToStorage(affiliation);
+    this.nonAcademicAffiliation = DbStorageEnums.nonAcademicAffiliationToStorage(affiliation);
   }
 
   @Column(name = "other")

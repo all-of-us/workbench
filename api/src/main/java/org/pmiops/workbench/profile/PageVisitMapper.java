@@ -8,15 +8,14 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 
 @Mapper(
     componentModel = "spring",
-    uses = {CommonMappers.class}
-)
+    uses = {CommonMappers.class})
 public interface PageVisitMapper {
-  @Mapping(target="page", source="pageId")
-  @Mapping(target="userId", ignore=true) // set by ProfileService.getProfile
+  @Mapping(target = "page", source = "pageId")
+  @Mapping(target = "userId", ignore = true) // set by ProfileService.getProfile
   PageVisit dbPageVisitToPageVisit(DbPageVisit dbPageVisit);
 
-  @Mapping(target="pageId", source="page")
-  @Mapping(target="pageVisitId", ignore=true)
-  @Mapping(target="user", ignore=true) // set by ProfileController.updatePageVisits
+  @Mapping(target = "pageId", source = "page")
+  @Mapping(target = "pageVisitId", ignore = true)
+  @Mapping(target = "user", ignore = true) // set by ProfileController.updatePageVisits
   DbPageVisit pageVisitToDbPageVisit(PageVisit pageVisit);
 }

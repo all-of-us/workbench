@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import org.mapstruct.Named;
 import org.pmiops.workbench.model.AcademicRole;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
@@ -10,7 +9,6 @@ import org.pmiops.workbench.model.EducationalRole;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.IndustryRole;
-import org.pmiops.workbench.model.NonAcademicAffiliation;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SexualOrientation;

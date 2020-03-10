@@ -9,16 +9,18 @@ import org.pmiops.workbench.model.NonAcademicAffiliation;
 
 @Mapper(componentModel = "spring")
 public interface InstitutionalAffiliationMapper {
-  @Mapping(target="nonAcademicAffiliation", source="nonAcademicAffiliationEnum")
+  @Mapping(target = "nonAcademicAffiliation", source = "nonAcademicAffiliationEnum")
   InstitutionalAffiliation dbInstitutionalAffiliationToInstitutionalAffiliation(
       DbInstitutionalAffiliation dbInstitutionalAffiliation);
 
-  @Mapping(target="institutionalAffiliationId", ignore=true)
-  @Mapping(target="nonAcademicAffiliationEnum", source="nonAcademicAffiliation")
-  @Mapping(target="orderIndex", ignore=true) // set by ProfileController.updateInstitutionalAffiliations
-  @Mapping(target="user", ignore=true) // set by UserService.createUser
-  DbInstitutionalAffiliation institutionalAffiliationToDbInstitutionalAffiliation(InstitutionalAffiliation institutionalAffiliation);
-
+  @Mapping(target = "institutionalAffiliationId", ignore = true)
+  @Mapping(target = "nonAcademicAffiliationEnum", source = "nonAcademicAffiliation")
+  @Mapping(
+      target = "orderIndex",
+      ignore = true) // set by ProfileController.updateInstitutionalAffiliations
+  @Mapping(target = "user", ignore = true) // set by UserService.createUser
+  DbInstitutionalAffiliation institutionalAffiliationToDbInstitutionalAffiliation(
+      InstitutionalAffiliation institutionalAffiliation);
 
   static NonAcademicAffiliation nonAcademicAffiliationFromStorage(Short nonAcademicAffiliation) {
     return DbStorageEnums.nonAcademicAffiliationFromStorage(nonAcademicAffiliation);

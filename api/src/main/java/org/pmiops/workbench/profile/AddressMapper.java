@@ -9,7 +9,7 @@ import org.pmiops.workbench.model.Address;
 public interface AddressMapper {
   Address dbAddressToAddress(DbAddress dbAddress);
 
-  @Mapping(target="id", ignore=true)
-  @Mapping(target="user", ignore=true) // set by UserService.createUser
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "user", ignore = true) // set by UserService.createUser
   DbAddress addressToDbAddress(Address address);
 }
