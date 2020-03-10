@@ -476,10 +476,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
-                Visit the <StyledAnchorTag href={environment.zendeskHelpCenterUrl}
-                                           target='_blank' onClick={() => this.analyticsEvent('FAQ')}> User Support
-                </StyledAnchorTag> or <span style={styles.link} onClick={() => this.openContactWidget()}> contact
-                us</span>.
+                Visit our <StyledAnchorTag href={environment.zendeskHelpCenterUrl}
+                                           target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support
+                </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
               </p>
             </div>
           </div>
