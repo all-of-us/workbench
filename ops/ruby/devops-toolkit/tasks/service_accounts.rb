@@ -38,7 +38,7 @@ class ServiceAccounts
       --iam-account=#{env.service_account}
       --project=#{env.project_id}
       --format=json].join(' ')
-    stdout, stderr = Open3.capture2(list_cmd) # stderr is spammed by this command, but here for debugging
+    stdout, _stderr = Open3.capture2(list_cmd)
     JSON.load(stdout)
   end
 

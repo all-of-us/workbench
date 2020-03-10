@@ -33,7 +33,7 @@ class LogsBasedMetrics
     @visitor.visit(source_env) do |env|
       logging_client = Google::Cloud::Logging.new({project: env.project_id})
       metrics = logging_client.metrics
-      source_metric = metrics.select { |m| m.name == @source_metric_name }.first
+      source_metric = metrics.find { |m| m.name == @source_metric_name }
       @logger.info("located source metric #{source_metric.name}")
     end
     source_metric
