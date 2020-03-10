@@ -47,8 +47,3 @@ ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
 # Force a lower concurrent-ruby version, as we only have Ruby 2.3.
 RUN sudo gem install jira-ruby
-
-# Create a gradle cache directory as a volume that can be read/written by any
-# container (including containers running as any user -- hence the a+rwx)
-RUN sudo mkdir /.gradle && sudo chmod a+rwx -R /.gradle
-ENV GRADLE_USER_HOME /.gradle

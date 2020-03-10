@@ -15,7 +15,6 @@ export interface EditComponentState {
 const defaultStyle = {
   height: 19,
   width: 19,
-  marginLeft: '.5rem',
   fill: colors.accent,
   cursor: 'pointer'
 };

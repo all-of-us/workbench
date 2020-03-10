@@ -53,7 +53,6 @@ const styles = reactStyles({
   navBarIcon: {
     height: '16px',
     width: '16px',
-    marginLeft: 0,
     marginRight: '5px'
   },
   previewDiv: {

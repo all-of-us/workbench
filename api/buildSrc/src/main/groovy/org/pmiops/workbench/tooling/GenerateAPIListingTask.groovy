@@ -22,10 +22,8 @@ class GenerateAPIListingTask extends DefaultTask {
 
     @TaskAction
     void defaultAction() {
-        String apiYaml = "src/main/resources/merged.yaml"
-        String publicYaml = "../public-api/src/main/resources/merged.yaml"
+        String apiYaml = "src/main/resources/workbench-api.yaml"
         printPaths(getApisFromYamlFile(apiYaml))
-        printPaths(getApisFromYamlFile(publicYaml))
     }
 
     private void printPaths(LinkedHashMap<String, LinkedHashMap> paths) {

@@ -16,7 +16,7 @@ import {
   getSelectedResearchPurposeItems
 } from 'app/utils/research-purpose';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
   editIcon: {
@@ -25,7 +25,6 @@ const styles = reactStyles({
     width: 22,
     fill: colors.light,
     backgroundColor: colors.accent,
-    cursor: 'pointer',
     padding: '5px',
     borderRadius: '23px'
   },
@@ -56,82 +55,70 @@ const styles = reactStyles({
 
 
 export const ResearchPurpose = withCurrentWorkspace()(
-  class extends React.Component<
-    {workspace: WorkspaceData},
-    {workspacePermissions: WorkspacePermissions}> {
-    constructor(props) {
-      super(props);
-      this.state = {
-        workspacePermissions: new WorkspacePermissions(props.workspace)
-      };
-    }
+  ({workspace}: {workspace: WorkspaceData}) => {
+    const isOwner = WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
+    const selectedResearchPurposeItems = getSelectedResearchPurposeItems(workspace.researchPurpose);
+    return <FadeBox>
+      <div style={styles.mainHeader}>Primary purpose of project
+        <Clickable disabled={!isOwner}
+                   style={{display: 'flex', alignItems: 'center', marginLeft: '.5rem'}}
+                   data-test-id='edit-workspace'
+                   onClick={() => navigate(
+                     ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>
+          <EditComponentReact enableHoverEffect={true}
+                              disabled={!isOwner}
+                              style={styles.editIcon}/>
+        </Clickable>
+      </div>
+      <div style={styles.sectionContentContainer}>
+        {selectedResearchPurposeItems.map((selectedResearchPurposeItem, i) => <div key={i}>
+          <div style={{marginTop: '1rem'}}>{selectedResearchPurposeItem}</div>
+        </div>)}
+      </div>
+      <div style={styles.sectionHeader}>Summary of research purpose</div>
+      <div style={styles.sectionContentContainer}>
+        {/*Intended study section*/}
+        <div style={styles.sectionSubHeader}>{researchPurposeQuestions[2].header}</div>
+        <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
+          {workspace.researchPurpose.intendedStudy}</div>
 
-    render() {
-      const {workspace} = this.props;
-      const {workspacePermissions} = this.state;
-      const selectedResearchPurposeItems = getSelectedResearchPurposeItems(this.props.workspace.researchPurpose);
-      return <FadeBox>
-        <div style={styles.mainHeader}>Primary purpose of project
-          <Clickable disabled={!workspacePermissions.canWrite}
-                     style={{display: 'flex', alignItems: 'center'}}
-                     data-test-id='edit-workspace'
-                     onClick={() => navigate(
-                       ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>
-            <EditComponentReact enableHoverEffect={true}
-                                disabled={!workspacePermissions.canWrite}
-                                style={styles.editIcon}/>
-          </Clickable>
+        {/*Scientific approach section*/}
+        <div style={styles.sectionSubHeader}>{researchPurposeQuestions[3].header}</div>
+        <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
+          {workspace.researchPurpose.scientificApproach}</div>
+
+        {/*Anticipated findings section*/}
+        <div style={styles.sectionSubHeader}>{researchPurposeQuestions[4].header}</div>
+        <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
+          {workspace.researchPurpose.anticipatedFindings}
         </div>
+      </div>
+
+      {/*Findings section*/}
+      <div style={styles.sectionHeader}>Findings will be disseminate by the following:</div>
+      <div style={styles.sectionContentContainer}>
+        {workspace.researchPurpose.disseminateResearchFindingList.map((disseminateFinding, i) =>
+          <div key={i} style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{disseminateFindings
+            .find(finding => finding.shortName === disseminateFinding).label}</div>
+        )}
+      </div>
+
+      {/*Outcomes section*/}
+      <div style={styles.sectionHeader}>Outcomes anticipated from the research:</div>
+      <div style={styles.sectionContentContainer}>
+        {workspace.researchPurpose.researchOutcomeList.map((workspaceOutcome, i) =>
+          <div key={i} style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{researchOutcomes
+            .find(outcome => outcome.shortName === workspaceOutcome).label}</div>
+        )}
+      </div>
+
+      {/*Underserved populations section*/}
+      {workspace.researchPurpose.population && <React.Fragment>
+        <div style={styles.sectionHeader}>Population of interest</div>
         <div style={styles.sectionContentContainer}>
-          {selectedResearchPurposeItems.map((selectedResearchPurposeItem, i) => <div key={i}>
-            <div style={{marginTop: '1rem'}}>{selectedResearchPurposeItem}</div>
-          </div>)}
+          <div style={{marginTop: '0.5rem'}}>{getSelectedPopulations(workspace.researchPurpose)}</div>
         </div>
-        <div style={styles.sectionHeader}>Summary of research purpose</div>
-        <div style={styles.sectionContentContainer}>
-          {/*Intended study section*/}
-          <div style={styles.sectionSubHeader}>{researchPurposeQuestions[2].header}</div>
-          <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
-            {workspace.researchPurpose.intendedStudy}</div>
-
-          {/*Scientific approach section*/}
-          <div style={styles.sectionSubHeader}>{researchPurposeQuestions[3].header}</div>
-          <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
-            {workspace.researchPurpose.scientificApproach}</div>
-
-          {/*Anticipated findings section*/}
-          <div style={styles.sectionSubHeader}>{researchPurposeQuestions[4].header}</div>
-          <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
-            {workspace.researchPurpose.anticipatedFindings}
-          </div>
-        </div>
-
-        {/*Findings section*/}
-        <div style={styles.sectionHeader}>Findings will be disseminate by the following:</div>
-        <div style={styles.sectionContentContainer}>
-          {workspace.researchPurpose.disseminateResearchFindingList.map((disseminateFinding, i) =>
-            <div key={i} style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{disseminateFindings
-              .find(finding => finding.shortName === disseminateFinding).label}</div>
-          )}
-        </div>
-
-        {/*Outcomes section*/}
-        <div style={styles.sectionHeader}>Outcomes anticipated from the research:</div>
-        <div style={styles.sectionContentContainer}>
-          {workspace.researchPurpose.researchOutcomeList.map((workspaceOutcome, i) =>
-            <div key={i} style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{researchOutcomes
-              .find(outcome => outcome.shortName === workspaceOutcome).label}</div>
-          )}
-        </div>
-
-        {/*Underserved populations section*/}
-        {workspace.researchPurpose.population && <React.Fragment>
-          <div style={styles.sectionHeader}>Population of interest</div>
-          <div style={styles.sectionContentContainer}>
-            <div style={{marginTop: '0.5rem'}}>{getSelectedPopulations(workspace.researchPurpose)}</div>
-          </div>
-        </React.Fragment>}
-      </FadeBox>;
-    }
+      </React.Fragment>}
+    </FadeBox>;
   }
 );
