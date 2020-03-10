@@ -411,7 +411,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     const {back, node} = this.props;
     const {children, ingredients, loading} = this.state;
     return <React.Fragment>
-      <div className='dropdown-search-container'>
+      <div style={{padding: '0.4rem 0'}} className='dropdown-search-container'>
         <div className='search-container'>
           <SearchBar node={node} setIngredients={(i) => this.setState({ingredients: i})}/>
         </div>

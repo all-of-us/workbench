@@ -6,50 +6,79 @@ import {domainToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
+import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType} from 'generated/fetch';
-import {AutoComplete} from 'primereact/autocomplete';
 import {Subscription} from 'rxjs/Subscription';
+import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   searchContainer: {
-    position: 'absolute',
-    width: '95%',
-    padding: '0.4rem 0',
     background: colors.white,
+    width: '100%',
     zIndex: 10,
   },
   searchBar: {
-    height: '40px',
-    width: '100%',
-    padding: '7px 14px',
-    borderRadius: '5px',
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
+    borderRadius: '5px',
+    height: '40px',
+    padding: '7px 14px',
   },
   searchInput: {
-    width: '85%',
-    height: '1rem',
-    marginLeft: '0.25rem',
-    padding: '0',
     background: 'transparent',
     border: 0,
+    height: '1rem',
+    marginLeft: '0.25rem',
     outline: 'none',
+    padding: '0',
+    width: '85%',
   },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    marginTop: '.083333rem',
+    display: 'flex',
+    flexDirection: 'column',
+    background: colors.white,
+    padding: '.25rem 0',
+    border: '1px solid #ccc',
+    boxShadow: '0 1px 0.125rem hsla(0,0%,45%,.25)',
+    maxHeight: '15rem',
+    minHeight: '1.25rem',
+    overflowY: 'auto',
+    width: '100%',
+    borderRadius: '.125rem',
+    zIndex: 1000
+  },
+  dropdownItem: {
+    height: '1rem',
+    background: 'transparent',
+    border: 0,
+    cursor: 'pointer',
+    margin: 0,
+    overflow: 'hidden',
+    padding: '0 1rem',
+    textAlign: 'left',
+    textOverflow: 'ellipsis'
+  }
 });
 
 const trigger = 3;
 
 interface OptionProps {
+  onClick: Function;
   option: any;
   searchTerm: string;
   highlighted: boolean;
 }
 
 interface OptionState {
+  hover: boolean;
   truncated: boolean;
 }
 
@@ -57,7 +86,10 @@ class SearchBarOption extends React.Component<OptionProps, OptionState> {
   container: HTMLButtonElement;
   constructor(props: OptionProps) {
     super(props);
-    this.state = {truncated: false};
+    this.state = {
+      hover: false,
+      truncated: false
+    };
   }
 
   handleResize = fp.debounce(100, () => {
@@ -78,9 +110,14 @@ class SearchBarOption extends React.Component<OptionProps, OptionState> {
     this.setState({truncated: scrollWidth > offsetWidth});
   }
   render() {
-    const {option: {name}, searchTerm} = this.props;
+    const {highlighted, onClick, option: {name}, searchTerm} = this.props;
+    const {hover} = this.state;
     const displayText = highlightSearchTerm(searchTerm, name, colors.success);
-    return <button className='dropdown-item'ref={(e) => this.container = e}>
+    return <button ref={(e) => this.container = e}
+      style={highlighted || hover ? {...styles.dropdownItem, background: colorWithWhiteness(colors.black, .93)} : styles.dropdownItem}
+      onClick={() => onClick()}
+      onMouseEnter={() => this.setState({hover: true})}
+      onMouseLeave={() => this.setState({hover: false})}>
       <TooltipTrigger content={<div>{displayText}</div>} disabled={!this.state.truncated}>
         <div>{displayText}</div>
       </TooltipTrigger>
@@ -106,12 +143,13 @@ interface State {
 }
 
 export class SearchBar extends React.Component<Props, State> {
+  dropdown: HTMLDivElement;
   subscription: Subscription;
   constructor(props: Props) {
     super(props);
     this.state = {
-      searchTerm: undefined,
-      typedTerm: undefined,
+      searchTerm: '',
+      typedTerm: '',
       options: [],
       loading: false,
       noResults: false,
@@ -123,7 +161,6 @@ export class SearchBar extends React.Component<Props, State> {
   }
 
   debounceInput = fp.debounce(300, (input: string) => {
-    console.log(input);
     if (input.length < trigger) {
       this.setState({options: [], noResults: false});
     } else {
@@ -135,6 +172,11 @@ export class SearchBar extends React.Component<Props, State> {
     this.subscription = autocompleteStore.subscribe(searchTerm => {
       this.setState({searchTerm});
     });
+    document.addEventListener('click', (e) => {
+      if (!!this.dropdown && !this.dropdown.contains(e.target as Node)) {
+        this.setState({options: []});
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -142,7 +184,6 @@ export class SearchBar extends React.Component<Props, State> {
   }
 
   onInputChange(value: string) {
-    console.log(value);
     const {node: {domainId}} = this.props;
     autocompleteStore.next(value);
     if (domainId === DomainType.PHYSICALMEASUREMENT.toString()) {
@@ -157,7 +198,7 @@ export class SearchBar extends React.Component<Props, State> {
     const {node: {domainId, isStandard, type}} = this.props;
     const {searchTerm} = this.state;
     triggerEvent(`Cohort Builder Search - ${domainToTitle(domainId)}`, 'Search', searchTerm);
-    this.setState({loading: true, optionSelected: false, noResults: false});
+    this.setState({loading: true, optionSelected: false, noResults: false, typedTerm: searchTerm});
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     const apiCall = domainId === DomainType.DRUG.toString()
       ? cohortBuilderApi().findDrugBrandOrIngredientByValue(+cdrVersionId, searchTerm)
@@ -183,7 +224,7 @@ export class SearchBar extends React.Component<Props, State> {
   selectOption(option: any) {
     if (option) {
       const {setIngredients} = this.props;
-      this.setState({optionSelected: true, searchTerm: option.name});
+      this.setState({options: [], optionSelected: true, searchTerm: option.name});
       if (option.type === CriteriaType[CriteriaType.BRAND]) {
         const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
         cohortBuilderApi().findDrugIngredientByConceptId(cdrId, option.conceptId)
@@ -206,28 +247,60 @@ export class SearchBar extends React.Component<Props, State> {
     }
   }
 
+  onKeyDown(key: Key) {
+    switch (key) {
+      case Key.ArrowDown:
+        this.moveDown();
+        break;
+      case Key.ArrowUp:
+        this.moveUp();
+        break;
+      case Key.Enter:
+        this.enterSelect();
+    }
+  }
+
+  moveUp() {
+    const {highlightedOption, options, typedTerm} = this.state;
+    if (highlightedOption === 0) {
+      this.setState({highlightedOption: null, searchTerm: typedTerm});
+    } else if (highlightedOption > 0) {
+      this.setState({highlightedOption: highlightedOption - 1, searchTerm: options[highlightedOption - 1].name});
+    }
+  }
+
+  moveDown() {
+    const {highlightedOption, options} = this.state;
+    if (highlightedOption === null) {
+      this.setState({highlightedOption: 0, searchTerm: options[0].name});
+    } else if ((highlightedOption + 1) < options.length) {
+      this.setState({highlightedOption: highlightedOption + 1, searchTerm: options[highlightedOption + 1].name});
+    }
+  }
+
   enterSelect() {
     const {highlightedOption, options} = this.state;
     this.selectOption(options[highlightedOption]);
   }
 
   render() {
-    const {node} = this.props;
-    const {highlightedOption, options, searchTerm} = this.state;
-    return <div>
+    const {highlightedOption, loading, options, searchTerm, typedTerm} = this.state;
+    return <div style={{position: 'relative'}}>
       <div style={styles.searchContainer}>
         <div style={styles.searchBar}>
-          <ClrIcon shape='search' size='18'/>
-          <TextInput style={styles.searchInput} value={searchTerm} onChange={(e) => this.onInputChange(e)} />
+          {loading ? <Spinner style={{verticalAlign: 'middle'}} size={16}/> : <ClrIcon shape='search' size='18'/>}
+          <TextInput style={styles.searchInput}
+            value={searchTerm}
+            onChange={(e) => this.onInputChange(e)}
+            onKeyDown={(e) => this.onKeyDown(e.key)}/>
         </div>
-        {/*<AutoComplete field='name' value={searchTerm} onChange={(e) => this.onInputChange(e.value)}*/}
-        {/*  suggestions={options} onSelect={(e) => this.selectOption(e.value)} completeMethod={() => this.inputChange()}/>*/}
       </div>
-      {options.length && <div className='dropdown-menu'>
+      {options.length > 0 && <div ref={(el) => this.dropdown = el} style={styles.dropdownMenu}>
         {options.map((opt, o) => <SearchBarOption key={o}
                                             option={opt}
-                                            searchTerm={searchTerm}
-                                            highlighted={o === highlightedOption}/>)}
+                                            searchTerm={typedTerm}
+                                            highlighted={o === highlightedOption}
+                                            onClick={() => this.selectOption(opt)}/>)}
       </div>}
     </div>;
   }
