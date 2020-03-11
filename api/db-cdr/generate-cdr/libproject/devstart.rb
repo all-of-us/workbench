@@ -27,6 +27,13 @@ ENVIRONMENTS = {
     :dest_cdr_project => "fc-aou-cdr-synth-stable",
     :config_json => "config_stable.json"
   },
+  "all-of-us-rw-preprod" => {
+      :publisher_account => "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com",
+      :source_cdr_project => "aou-res-curation-output-prod",
+      :ingest_cdr_project => "fc-aou-vpc-ingest-preprod",
+      :dest_cdr_project => "fc-aou-cdr-preprod",
+      :config_json => "config_preprod.json"
+  },
   "all-of-us-rw-prod" => {
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
     :source_cdr_project => "aou-res-curation-output-prod",
