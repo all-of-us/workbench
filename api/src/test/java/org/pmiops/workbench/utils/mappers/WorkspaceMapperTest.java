@@ -51,10 +51,10 @@ public class WorkspaceMapperTest {
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   private static final int CDR_VERSION_ID = 2;
   private static final String FIRECLOUD_BUCKET_NAME = "my-favorite-bucket";
-  private static final ImmutableSet<SpecificPopulationEnum> SPECIFIC_POPULATIONS = ImmutableSet
-      .of(SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY);
-  private static final ImmutableSet<ResearchOutcomeEnum> RESEARCH_OUTCOMES = ImmutableSet
-      .of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
+  private static final ImmutableSet<SpecificPopulationEnum> SPECIFIC_POPULATIONS =
+      ImmutableSet.of(SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY);
+  private static final ImmutableSet<ResearchOutcomeEnum> RESEARCH_OUTCOMES =
+      ImmutableSet.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
   private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
 
   private DbWorkspace sourceDbWorkspace;
@@ -131,8 +131,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setBillingStatus(BillingStatus.ACTIVE);
     sourceDbWorkspace.setBillingAccountName(BILLING_ACCOUNT_NAME);
     sourceDbWorkspace.setSpecificPopulationsEnum(SPECIFIC_POPULATIONS);
-    sourceDbWorkspace.setResearchOutcomeEnumSet(
-        RESEARCH_OUTCOMES);
+    sourceDbWorkspace.setResearchOutcomeEnumSet(RESEARCH_OUTCOMES);
     sourceDbWorkspace.setDisseminateResearchEnumSet(Collections.emptySet());
     sourceDbWorkspace.setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER);
   }
