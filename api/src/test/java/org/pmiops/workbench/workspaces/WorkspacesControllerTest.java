@@ -1142,8 +1142,7 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modPurpose.setPopulation(true);
     modPurpose.setPopulationDetails(
-        ImmutableList.of(
-            SpecificPopulation.DISABILITY_STATUS, SpecificPopulation.GEOGRAPHY));
+        ImmutableList.of(SpecificPopulation.DISABILITY_STATUS, SpecificPopulation.GEOGRAPHY));
     modPurpose.setDisseminateResearchFindingList(
         ImmutableList.of(ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES));
     modPurpose.setResearchOutcomeList(

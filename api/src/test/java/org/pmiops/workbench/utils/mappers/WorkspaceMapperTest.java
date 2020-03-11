@@ -107,8 +107,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setCommercialPurpose(false);
     sourceDbWorkspace.setPopulation(false);
     sourceDbWorkspace.setPopulationDetails(
-        ImmutableSet.of(SpecificPopulation.AGE_GROUPS, SpecificPopulation.INCOME_LEVEL)
-            .stream()
+        ImmutableSet.of(SpecificPopulation.AGE_GROUPS, SpecificPopulation.INCOME_LEVEL).stream()
             .map(DbStorageEnums::specificPopulationToStorage)
             .collect(Collectors.toSet()));
     sourceDbWorkspace.setSocialBehavioral(false);

@@ -710,7 +710,10 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
+                workspace.getNamespace(),
+                WORKSPACE_NAME,
+                NotebookKernelType.PYTHON.toString(),
+                dataSet)
             .getBody();
     assertThat(response.getCode()).isEmpty();
   }
@@ -731,7 +734,10 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
+                workspace.getNamespace(),
+                WORKSPACE_NAME,
+                NotebookKernelType.PYTHON.toString(),
+                dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     String prefix = "dataset_00000000_condition_";
@@ -832,7 +838,10 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
+                workspace.getNamespace(),
+                WORKSPACE_NAME,
+                NotebookKernelType.PYTHON.toString(),
+                dataSet)
             .getBody();
     verify(bigQueryService, times(2)).executeQuery(any());
     assertThat(response.getCode()).contains("condition_df");
@@ -855,7 +864,10 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
+                workspace.getNamespace(),
+                WORKSPACE_NAME,
+                NotebookKernelType.PYTHON.toString(),
+                dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     assertThat(response.getCode()).contains("observation_df");
@@ -879,7 +891,10 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
+                workspace.getNamespace(),
+                WORKSPACE_NAME,
+                NotebookKernelType.PYTHON.toString(),
+                dataSet)
             .getBody();
     assertThat(response.getCode()).contains("UNION DISTINCT");
   }
@@ -902,7 +917,10 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
+                workspace.getNamespace(),
+                WORKSPACE_NAME,
+                NotebookKernelType.PYTHON.toString(),
+                dataSet)
             .getBody();
     /* this should produces the following query
        import pandas

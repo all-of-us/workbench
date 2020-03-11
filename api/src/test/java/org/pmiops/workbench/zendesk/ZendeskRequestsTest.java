@@ -53,8 +53,7 @@ public class ZendeskRequestsTest {
                             .educational(true)
                             .drugDevelopment(true)
                             .population(true)
-                            .populationDetails(
-                                ImmutableList.copyOf(SpecificPopulation.values()))
+                            .populationDetails(ImmutableList.copyOf(SpecificPopulation.values()))
                             .additionalNotes("additional notes")
                             .reasonForAllOfUs("reason for aou")
                             .intendedStudy("intended study")

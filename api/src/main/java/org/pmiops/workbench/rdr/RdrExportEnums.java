@@ -79,13 +79,10 @@ public class RdrExportEnums {
 
   private static final BiMap<SpecificPopulation, RdrWorkspaceDemographic.RaceEthnicityEnum>
       CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY =
-          ImmutableBiMap
-              .<SpecificPopulation, RdrWorkspaceDemographic.RaceEthnicityEnum>builder()
+          ImmutableBiMap.<SpecificPopulation, RdrWorkspaceDemographic.RaceEthnicityEnum>builder()
               .put(SpecificPopulation.RACE_AA, RdrWorkspaceDemographic.RaceEthnicityEnum.AA)
               .put(SpecificPopulation.RACE_AIAN, RdrWorkspaceDemographic.RaceEthnicityEnum.AIAN)
-              .put(
-                  SpecificPopulation.RACE_ASIAN,
-                  RdrWorkspaceDemographic.RaceEthnicityEnum.ASIAN)
+              .put(SpecificPopulation.RACE_ASIAN, RdrWorkspaceDemographic.RaceEthnicityEnum.ASIAN)
               .put(SpecificPopulation.RACE_NHPI, RdrWorkspaceDemographic.RaceEthnicityEnum.NHPI)
               .put(SpecificPopulation.RACE_MENA, RdrWorkspaceDemographic.RaceEthnicityEnum.MENA)
               .put(
@@ -100,8 +97,7 @@ public class RdrExportEnums {
       CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE =
           ImmutableBiMap.<SpecificPopulation, RdrWorkspaceDemographic.AgeEnum>builder()
               .put(SpecificPopulation.AGE_CHILDREN, RdrWorkspaceDemographic.AgeEnum.AGE_0_11)
-              .put(
-                  SpecificPopulation.AGE_ADOLESCENTS, RdrWorkspaceDemographic.AgeEnum.AGE_12_17)
+              .put(SpecificPopulation.AGE_ADOLESCENTS, RdrWorkspaceDemographic.AgeEnum.AGE_12_17)
               .put(SpecificPopulation.AGE_OLDER, RdrWorkspaceDemographic.AgeEnum.AGE_65_74)
               .put(
                   SpecificPopulation.AGE_OLDER_MORE_THAN_75,

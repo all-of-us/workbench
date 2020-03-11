@@ -332,8 +332,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     return rdrWorkspace;
   }
 
-  RdrWorkspaceDemographic toRdrWorkspaceDemographics(
-      Set<SpecificPopulation> dbPopulationEnumSet) {
+  RdrWorkspaceDemographic toRdrWorkspaceDemographics(Set<SpecificPopulation> dbPopulationEnumSet) {
     RdrWorkspaceDemographic rdrDemographic = new RdrWorkspaceDemographic();
 
     rdrDemographic.setAccessToCare(

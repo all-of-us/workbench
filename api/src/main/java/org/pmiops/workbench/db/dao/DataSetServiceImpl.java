@@ -61,14 +61,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String R_CDR_ENV_VARIABLE = "";
   private static final Map<NotebookKernelType, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
       ImmutableMap.of(
-          NotebookKernelType.R, R_CDR_ENV_VARIABLE, NotebookKernelType.PYTHON, PYTHON_CDR_ENV_VARIABLE);
+          NotebookKernelType.R,
+          R_CDR_ENV_VARIABLE,
+          NotebookKernelType.PYTHON,
+          PYTHON_CDR_ENV_VARIABLE);
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
           + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
   private static final ImmutableSet<PrePackagedConceptSetSelection>
       CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
-          ImmutableSet.of(PrePackagedConceptSetSelection.SURVEY, PrePackagedConceptSetSelection.BOTH);
+          ImmutableSet.of(
+              PrePackagedConceptSetSelection.SURVEY, PrePackagedConceptSetSelection.BOTH);
 
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final int DATA_SET_VERSION = 1;
