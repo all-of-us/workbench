@@ -758,6 +758,16 @@ task loadDataDictionary(type: JavaExec) {
   }
 }
 
+// See project.rb command: load-institutions
+task loadInstitutions(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.LoadInstitutions"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 // See project.rb command: backfill-billing-project-owners
 task backfillBillingProjectOwners(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath

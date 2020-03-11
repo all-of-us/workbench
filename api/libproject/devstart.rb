@@ -1285,6 +1285,60 @@ Common.register_command({
     :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
 })
 
+def load_institutions(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  op.add_typed_option(
+      "--import-filename [import-filename]",
+      String,
+      ->(opts, v) { opts.importFilename = v},
+      "File (JSON) containing list of institutions to save")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  flags = ([
+      ["--import-filename", op.opts.importFilename]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle loadInstitutions
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+LOAD_INSTITUTIONS_CMD = "load-institutions"
+
+Common.register_command({
+    :invocation => LOAD_INSTITUTIONS_CMD,
+    :description => "Load institutions specified in given file.\n",
+    :fn => ->(*args) {load_institutions(LOAD_INSTITUTIONS_CMD, *args)}
+})
+
 def delete_workspaces(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
