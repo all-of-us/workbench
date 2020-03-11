@@ -27,7 +27,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -51,6 +50,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
@@ -69,6 +69,11 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.profile.AddressMapperImpl;
+import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
+import org.pmiops.workbench.profile.PageVisitMapperImpl;
+import org.pmiops.workbench.profile.ProfileMapperImpl;
+import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +115,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
+  private static final double FREE_TIER_USAGE = 100D;
+  private static final double FREE_TIER_LIMIT = 300D;
+
   @MockBean private FireCloudService fireCloudService;
   @MockBean private DirectoryService directoryService;
   @MockBean private CloudStorageService cloudStorageService;
@@ -138,9 +146,14 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @TestConfiguration
   @Import({
+    AddressMapperImpl.class,
+    DemographicSurveyMapperImpl.class,
+    InstitutionalAffiliationMapperImpl.class,
+    PageVisitMapperImpl.class,
     UserServiceImpl.class,
     ProfileService.class,
     ProfileController.class,
+    ProfileMapperImpl.class,
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
@@ -729,6 +742,28 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     profileController.deleteProfile();
     verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
+  }
+
+  @Test
+  public void testFreeTierLimits() {
+    createUser();
+    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+
+    when(freeTierBillingService.getUserCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
+    when(freeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
+
+    Profile profile = profileController.getMe().getBody();
+    assertProfile(
+        profile,
+        PRIMARY_EMAIL,
+        CONTACT_EMAIL,
+        FAMILY_NAME,
+        GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED,
+        TIMESTAMP,
+        false);
+    assertThat(profile.getFreeTierUsage()).isEqualTo(FREE_TIER_USAGE);
+    assertThat(profile.getFreeTierDollarQuota()).isEqualTo(FREE_TIER_LIMIT);
   }
 
   private Profile createUser() {

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.auth;
+package org.pmiops.workbench.profile;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Profile;
@@ -35,7 +36,15 @@ public class ProfileServiceTest {
 
   @TestConfiguration
   @MockBean({FreeTierBillingService.class})
-  @Import({ProfileService.class, VerifiedInstitutionalAffiliationMapperImpl.class})
+  @Import({
+    AddressMapperImpl.class,
+    DemographicSurveyMapperImpl.class,
+    InstitutionalAffiliationMapperImpl.class,
+    PageVisitMapperImpl.class,
+    ProfileMapperImpl.class,
+    ProfileService.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class
+  })
   static class Configuration {}
 
   @Test

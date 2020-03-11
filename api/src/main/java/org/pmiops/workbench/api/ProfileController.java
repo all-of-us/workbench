@@ -19,7 +19,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
@@ -68,6 +67,7 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -113,7 +113,7 @@ public class ProfileController implements ProfileApiDelegate {
                 result.setInstitution(institutionalAffiliation.getInstitution());
               }
               if (institutionalAffiliation.getNonAcademicAffiliation() != null) {
-                result.setNonAcademicAffiliationnEnum(
+                result.setNonAcademicAffiliationEnum(
                     institutionalAffiliation.getNonAcademicAffiliation());
               }
 
@@ -604,8 +604,8 @@ public class ProfileController implements ProfileApiDelegate {
     user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
-    user.setLastModifiedTime(now);
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
+    user.setLastModifiedTime(now);
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.
