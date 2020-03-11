@@ -11,9 +11,10 @@ export default class Select extends BaseElement {
     super(aPage);
   }
    
-  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    throwErr = throwErr || true;
-    if (waitOptions === undefined) { waitOptions = {visible: true}; }
+  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr = true): Promise<ElementHandle> {
+    if (waitOptions === undefined) {
+      waitOptions = {visible: true};
+    }
     try {
       this.element = await findSelect(this.page, textOptions, waitOptions);
     } catch (e) {

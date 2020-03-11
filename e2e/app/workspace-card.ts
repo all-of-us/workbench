@@ -131,7 +131,9 @@ export default class WorkspaceCard extends BaseElement {
 
   async getEllipsisIcon(): Promise<ElementHandle | null> {
     const ellipsis = await this.element.$x('.//clr-icon[@shape="ellipsis-vertical"]');
-    if (ellipsis.length === 0) {return null;}
+    if (ellipsis.length === 0) {
+      return null;
+    }
     return ellipsis[0];
   }
 

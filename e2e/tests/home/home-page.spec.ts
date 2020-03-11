@@ -8,6 +8,7 @@ import WorkspaceEditPage from '../../app/workspace-edit-page';
 import WorkspacesPage from '../../app/workspaces-page';
 import launchBrowser from '../../driver/puppeteer-launch';
 
+// set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
 const configs = require('../../resources/workbench-config');
@@ -31,16 +32,12 @@ describe('Home page ui tests', () => {
     await page.setRequestInterception(true);
 
     // Following network requests expected to happen
-    const targetRequestsUrls = [
-      configs.apiBaseUrl+'/config',
-      configs.apiBaseUrl+'/profile',
+    const targetRequestUrls = [
       configs.apiBaseUrl+'/workspaces',
-      configs.apiBaseUrl+'/cdrVersions',
       configs.apiBaseUrl+'/workspaces/user-recent-workspaces',
       configs.apiBaseUrl+'/workspaces/user-recent-resources',
     ];
     const requestsUrls = [];
-    const requestsFailed = [];
     const pageErrors = [];
 
     page.on('request', request => {
@@ -55,14 +52,9 @@ describe('Home page ui tests', () => {
     page.on('response', response => {
       const request = response.request();
       const url = request.url().split('?')[0].split('#')[0];
-      const status = response.status();
-      if (targetRequestsUrls.includes(url)) {
-        requestsUrls.push(request.url());
-        // console.log('response url:', url, 'status:', status);
-        if (status !== 200) {
-          requestsFailed.push(request.url());
-        }
-      }
+      requestsUrls.push(url);
+      // const status = response.status();
+      // console.log('request url:', url, 'status:', status);
     });
 
     await GoogleLoginPage.logIn(page);
@@ -70,9 +62,7 @@ describe('Home page ui tests', () => {
     expect(title).toMatch('Homepage');
 
     // Check targeted api succeeded
-    expect(requestsUrls).toEqual(expect.arrayContaining(targetRequestsUrls));
-    // Expect zero request fail
-    expect(requestsFailed.length).toEqual(0);
+    expect(requestsUrls).toEqual(expect.arrayContaining(targetRequestUrls));
     // Expect zero page error
     expect(pageErrors.length).toEqual(0);
 

@@ -16,12 +16,9 @@ import Textbox from './textbox';
  */
 export default class WebComponent {
 
-  private readonly labelTextOptions: TextOptions;
-  private readonly page: Page;
-
-  constructor(aPage: Page, textOptions?: TextOptions) {
-    this.page = aPage;
-    this.labelTextOptions = textOptions;
+  constructor(private readonly page: Page, private readonly labelTextOptions?: TextOptions) {
+    this.page = page;
+    this.labelTextOptions = labelTextOptions || undefined;
   }
 
   async asCheckBox(): Promise<Checkbox> {

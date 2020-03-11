@@ -1,15 +1,13 @@
 import TextOptions from './text-options';
 
 function textXpathHelper(opts: TextOptions) {
-  let txt;
   if (opts.text) {
-    txt = `text()="${opts.text}" or @aria-label="${opts.text}" or @placeholder="${opts.text}"`;
+    return `text()="${opts.text}" or @aria-label="${opts.text}" or @placeholder="${opts.text}"`;
   } else if (opts.textContains) {
-    txt = `contains(text(),"${opts.textContains}") or contains(@aria-label,"${opts.textContains}") or contains(@placeholder,"${opts.textContains}")`;
+    return `contains(text(),"${opts.textContains}") or contains(@aria-label,"${opts.textContains}") or contains(@placeholder,"${opts.textContains}")`;
   } else if (opts.normalizeSpace) {
-    txt = `contains(normalize-space(), "${opts.normalizeSpace}")`;
+    return `contains(normalize-space(), "${opts.normalizeSpace}")`;
   }
-  return txt;
 }
 
 /**

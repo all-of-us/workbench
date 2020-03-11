@@ -3,7 +3,7 @@ import {clrIconXpath} from './aou-elements/xpath-defaults';
 import {findIcon} from './aou-elements/xpath-finder';
 import BasePage from './base-page';
 
-const configs = require('../resources/workbench-config.js');
+const configs = require('../resources/workbench-config');
 
 const selectors = {
   signedInIndicator: 'body#body div',

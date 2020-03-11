@@ -15,7 +15,9 @@ export const HELP_DESK = {
   REQUEST_ADDITIONAL_BILLING_CREDITS: 'Request additional billing credits',
 };
 
+// set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
+
 describe('Navigation', () => {
   let browser;
   let page;

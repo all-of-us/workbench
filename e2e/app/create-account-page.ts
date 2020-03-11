@@ -183,6 +183,7 @@ export default class CreateAccountPage extends BasePage {
     await (await this.areYouAffiliatedRadioButton(true)).click();
     await (await this.getInstitutionNameInput()).type(faker.company.companyName());
     await this.selectInstitution(INSTITUTION_AFFILIATION.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
+    // need pause 1 second for dropdown to disappear, so it is not blocking click on elements below.
     await this.page.waitFor(1000);
     return newUserName;
   }

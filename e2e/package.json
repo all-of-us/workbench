@@ -6,8 +6,8 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "WORKBENCH_ENV=test jest --detectOpenHandles",
-    "test:debug": "WORKBENCH_ENV=test PUPPETEER_HEADLESS=false jest --detectOpenHandles --runInBand",
+    "test": "WORKBENCH_ENV=dev jest --detectOpenHandles",
+    "test:debug": "WORKBENCH_ENV=dev PUPPETEER_HEADLESS=false jest --detectOpenHandles --runInBand",
     "test-local": "WORKBENCH_ENV=local jest",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn run lint --fix",

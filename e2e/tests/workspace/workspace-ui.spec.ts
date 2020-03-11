@@ -7,7 +7,9 @@ import WorkspacesPage from '../../app/workspaces-page';
 
 const Chrome = require('../../driver/chrome-driver');
 
+// set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
+
 describe('Workspace ui tests', () => {
   let page: Page;
 

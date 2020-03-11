@@ -9,9 +9,10 @@ export default class Label extends BaseElement {
     super(aPage);
   }
    
-  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    throwErr = throwErr || true;
-    if (waitOptions === undefined) { waitOptions = {visible: true}; }
+  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr = true): Promise<ElementHandle> {
+    if (waitOptions === undefined) {
+      waitOptions = {visible: true};
+    }
     try {
       this.element = await findLabel(this.page, textOptions, waitOptions);
     } catch (e) {

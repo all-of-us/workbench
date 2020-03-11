@@ -50,6 +50,8 @@ export async function findButton(page: Page, textOptions: TextOptions, waitOptio
  * @param {string} label: Textarea label partial text
  */
 export async function findTextarea(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  // ancestor node level is used to find the closest common parent for the label element and input element.
+  // For most cases, closest parent element is two level up from label. Thus for the default value 2.
   if (textOptions.ancestorNodeLevel === undefined) {
     textOptions.ancestorNodeLevel = 2;
   }
@@ -99,7 +101,9 @@ export async function findRadiobutton(page: Page, textOptions: TextOptions, wait
  */
 export async function findIcon(page: Page, label: string, shape: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
   const selector = xpathDefaults.clrIconXpath(label, shape);
-  if (waitOptions === undefined) { waitOptions = {visible: true}; }
+  if (waitOptions === undefined) {
+    waitOptions = {visible: true};
+  }
   return page.waitForXPath(selector, waitOptions);
 }
 
@@ -109,6 +113,8 @@ export async function findIcon(page: Page, label: string, shape: string, waitOpt
  */
 export async function findImage(page: Page, label: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
   const selector = xpathDefaults.imageXpath(label);
-  if (waitOptions === undefined) { waitOptions = {visible: true}; }
+  if (waitOptions === undefined) {
+    waitOptions = {visible: true};
+  }
   return page.waitForXPath(selector, waitOptions);
 }

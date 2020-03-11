@@ -5,7 +5,9 @@ import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 const configs = require('../../resources/workbench-config');
 
+// set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
+
 describe('User registration tests:', () => {
 
   let browser;

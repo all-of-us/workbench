@@ -2,12 +2,9 @@ import {Page} from 'puppeteer';
 
 export default class SelectComponent {
 
-  private readonly page: Page;
-  private readonly name: string;
-
-  constructor(page: Page, name?: string) {
+  constructor(private readonly page: Page, private readonly label?: string) {
     this.page = page;
-    this.name = name || undefined;
+    this.label = label || undefined;
   }
 
   async select(textValue: string) {
@@ -20,8 +17,8 @@ export default class SelectComponent {
   async getSelectedValue(): Promise<unknown> {
     const selector = this.componentXpath() + '/label';
     const displayedValue = await this.page.waitForXPath(selector, { visible: true });
-    const jValue = await (await displayedValue.getProperty('innerText')).jsonValue();
-    return jValue;
+    const innerText = await displayedValue.getProperty('innerText');
+    return await innerText.jsonValue();
   }
 
   // open Select dropdown with retries
@@ -36,7 +33,7 @@ export default class SelectComponent {
       if (retries < 0) {
         return;
       }
-      retries -= 1;
+      retries --;
       await this.page.waitFor(1000).then(click);
     };
     return click();
@@ -60,10 +57,10 @@ export default class SelectComponent {
   }
 
   private componentXpath(): string {
-    if (this.name === undefined) {
+    if (this.label === undefined) {
       return '//*[contains(@class,"p-dropdown p-component")]';
     }
-    return `//*[child::*[normalize-space()='${this.name}']]/*[contains(@class,'p-dropdown p-component')]`;
+    return `//*[child::*[normalize-space()='${this.label}']]/*[contains(@class,'p-dropdown p-component')]`;
   }
 
 }

@@ -66,7 +66,9 @@ export default class BaseElement implements BaseElementInterface {
    *  return await handle.jsonValue();
    */
   async getProperty(propertyName: string): Promise<unknown> {
-    if (this.element == null) { throw new Error('The element is undefined.'); }
+    if (this.element == null) {
+      throw new Error('The element is undefined.');
+    }
     const p = await this.element.asElement().getProperty(propertyName);
     return await p.jsonValue();
   }
@@ -76,19 +78,14 @@ export default class BaseElement implements BaseElementInterface {
    * @param attribute name
    */
   async getAttribute(attributeName: string): Promise<string | null> {
-    if (this.element == null) { throw new Error('The element is undefined.'); }
+    if (this.element == null) {
+      throw new Error('The element is undefined.');
+    }
     const elem = this.element.asElement();
     const attributeValue = await this.page.evaluate(
        (link, attr) => link.getAttribute(attr), elem, attributeName);
     return attributeValue;
   }
-
-  /*
-  const handle = await page.evaluateHandle((elem, attr) => {
-    return elem.getAttribute(attr);
-  }, element, attribute);
-  return await handle.jsonValue();
-   */
 
   /**
    * Does attribute exists for this element?
@@ -96,7 +93,9 @@ export default class BaseElement implements BaseElementInterface {
    * @param attribute name
    */
   async hasAttribute(attributeName: string): Promise<boolean> {
-    if (this.element == null) { throw new Error('The element is undefined.'); }
+    if (this.element == null) {
+      throw new Error('The element is undefined.');
+    }
     const value = await this.getAttribute(attributeName);
     return value !== null;
   }
@@ -207,7 +206,10 @@ export default class BaseElement implements BaseElementInterface {
    */
   async size(): Promise<{ width: number; height: number }> {
     const box = await this.element.boundingBox();
-    if (!box) { return { width: 0, height: 0 }; }
+    if (!box) {
+      // if element is not visible, returns size of (0, 0).
+      return { width: 0, height: 0 };
+    }
     const { width, height } = box;
     return { width, height };
   }

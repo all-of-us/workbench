@@ -9,8 +9,7 @@ export default class ClrIconLink extends BaseElement {
     super(aPage);
   }
    
-  async withLabel(aElementName: string, shape: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    throwErr = throwErr || true;
+  async withLabel(aElementName: string, shape: string, options?: WaitForSelectorOptions, throwErr = true): Promise<ElementHandle> {
     try {
       this.element = await findIcon(this.page, aElementName, shape, options);
     } catch (e) {

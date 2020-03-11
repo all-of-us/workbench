@@ -5,7 +5,9 @@ import WorkspacesPage from '../../app/workspaces-page';
 
 const Chrome = require('../../driver/chrome-driver');
 
+// set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
+
 describe('Workspace creation tests:', () => {
   let page: Page;
 
@@ -26,7 +28,7 @@ describe('Workspace creation tests:', () => {
     await dataPage.waitForLoad();
     // checking new workspace link is found
     expect(await new Link(page).withXpath(`//a[.='${workspaceName}' and @href]`, {visible: true})).toBeTruthy();
-  }, 2 * 60 * 1000);
+  });
 
 
 });

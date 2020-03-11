@@ -8,9 +8,10 @@ export default class Link extends BaseElement {
     super(aPage);
   }
    
-  async withLabel(aElementName: string, options?: WaitForSelectorOptions, throwErr?: boolean): Promise<ElementHandle> {
-    throwErr = throwErr || true;
-    if (options === undefined) { options = {visible: true}; }
+  async withLabel(aElementName: string, options?: WaitForSelectorOptions, throwErr = true): Promise<ElementHandle> {
+    if (options === undefined) {
+      options = {visible: true};
+    }
     try {
       this.element = await findClickable(this.page, aElementName, options);
     } catch (e) {
