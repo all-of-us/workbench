@@ -4420,7 +4420,7 @@ definitions:
         type: boolean
         default: false
       kernelType:
-        "$ref": "#/definitions/KernelTypeEnum"
+        "$ref": "#/definitions/NotebookKernelType"
   MarkDataSetRequest:
     type: object
     properties:
@@ -4439,7 +4439,7 @@ definitions:
     - CONCEPT_SET
     - DATASET
     - WORKSPACE
-  KernelTypeEnum:
+  NotebookKernelType:
     type: string
     enum:
     - Python
@@ -4515,7 +4515,7 @@ definitions:
     type: object
     properties:
       kernelType:
-        "$ref": "#/definitions/KernelTypeEnum"
+        "$ref": "#/definitions/NotebookKernelType"
       code:
         type: string
         description: The code required to generate the query for the data set.

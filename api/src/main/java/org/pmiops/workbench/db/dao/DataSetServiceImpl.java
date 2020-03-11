@@ -42,7 +42,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
-import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.NotebookKernelType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
@@ -59,9 +59,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
   private static final String R_CDR_ENV_VARIABLE = "";
-  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
+  private static final Map<NotebookKernelType, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
       ImmutableMap.of(
-          KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
+          NotebookKernelType.R, R_CDR_ENV_VARIABLE, NotebookKernelType.PYTHON, PYTHON_CDR_ENV_VARIABLE);
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
@@ -541,7 +541,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public List<String> generateCodeCells(
-      KernelTypeEnum kernelTypeEnum,
+      NotebookKernelType kernelTypeEnum,
       String dataSetName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
@@ -674,7 +674,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private static String generateSqlWithEnvironmentVariables(
-      String query, KernelTypeEnum kernelTypeEnum) {
+      String query, NotebookKernelType kernelTypeEnum) {
     return query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum));
   }
 
@@ -728,7 +728,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       Domain domain,
       String dataSetName,
       String qualifier,
-      KernelTypeEnum kernelTypeEnum) {
+      NotebookKernelType kernelTypeEnum) {
 
     // Define [namespace]_sql, query parameters (as either [namespace]_query_config
     // or [namespace]_query_parameters), and [namespace]_df variables

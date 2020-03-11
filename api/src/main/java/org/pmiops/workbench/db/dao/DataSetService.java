@@ -11,7 +11,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataSetRequest;
-import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.NotebookKernelType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 
 public interface DataSetService {
@@ -30,7 +30,7 @@ public interface DataSetService {
   Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
 
   List<String> generateCodeCells(
-      KernelTypeEnum kernelTypeEnum,
+      NotebookKernelType kernelTypeEnum,
       String dataSetName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);

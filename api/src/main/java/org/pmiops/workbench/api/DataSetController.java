@@ -73,7 +73,7 @@ import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.NotebookKernelType;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
@@ -271,7 +271,7 @@ public class DataSetController implements DataSetApiDelegate {
       DataSetRequest dataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
+    final NotebookKernelType kernelTypeEnum = NotebookKernelType.fromValue(kernelTypeEnumString);
 
     // Generate query per domain for the selected concept set, cohort and values
     // TODO(jaycarlton): return better error information form this function for common validation
@@ -458,13 +458,13 @@ public class DataSetController implements DataSetApiDelegate {
                 .map(kernelSpec -> kernelSpec.getString("language"))
                 .orElse("Python");
         if ("R".equals(language)) {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.R);
+          dataSetExportRequest.setKernelType(NotebookKernelType.R);
         } else {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+          dataSetExportRequest.setKernelType(NotebookKernelType.PYTHON);
         }
       } catch (JSONException e) {
         // If we can't find metadata to parse, default to python.
-        dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+        dataSetExportRequest.setKernelType(NotebookKernelType.PYTHON);
       }
     } else {
       switch (dataSetExportRequest.getKernelType()) {

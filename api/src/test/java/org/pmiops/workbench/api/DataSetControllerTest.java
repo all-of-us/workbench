@@ -113,7 +113,7 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.NotebookKernelType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SearchRequest;
@@ -688,7 +688,7 @@ public class DataSetControllerTest {
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     dataSetController.generateCode(
-        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+        workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet);
   }
 
   @Test(expected = BadRequestException.class)
@@ -697,7 +697,7 @@ public class DataSetControllerTest {
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
 
     dataSetController.generateCode(
-        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+        workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet);
   }
 
   @Test
@@ -710,7 +710,7 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
             .getBody();
     assertThat(response.getCode()).isEmpty();
   }
@@ -731,7 +731,7 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     String prefix = "dataset_00000000_condition_";
@@ -778,7 +778,7 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.R.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     String prefix = "dataset_00000000_condition_";
@@ -832,7 +832,7 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(2)).executeQuery(any());
     assertThat(response.getCode()).contains("condition_df");
@@ -855,7 +855,7 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     assertThat(response.getCode()).contains("observation_df");
@@ -879,7 +879,7 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
             .getBody();
     assertThat(response.getCode()).contains("UNION DISTINCT");
   }
@@ -902,7 +902,7 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, NotebookKernelType.PYTHON.toString(), dataSet)
             .getBody();
     /* this should produces the following query
        import pandas
@@ -1000,7 +1000,7 @@ public class DataSetControllerTest {
             .dataSetRequest(dataSet)
             .newNotebook(true)
             .notebookName(notebookName)
-            .kernelType(KernelTypeEnum.PYTHON);
+            .kernelType(NotebookKernelType.PYTHON);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
     verify(notebooksService, never()).getNotebookContents(any(), any());
