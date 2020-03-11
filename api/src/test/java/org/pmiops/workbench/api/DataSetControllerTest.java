@@ -114,7 +114,7 @@ import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.NotebookKernelType;
-import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.PrePackagedConceptSetSelection;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
@@ -603,7 +603,7 @@ public class DataSetControllerTest {
         .cohortIds(new ArrayList<>())
         .domainValuePairs(new ArrayList<>())
         .name("blah")
-        .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
+        .prePackagedConceptSet(PrePackagedConceptSetSelection.NONE);
   }
 
   private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
@@ -889,7 +889,7 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
-    dataSet.setPrePackagedConceptSet(PrePackagedConceptSetEnum.DEMOGRAPHICS);
+    dataSet.setPrePackagedConceptSet(PrePackagedConceptSetSelection.DEMOGRAPHICS);
     List<DomainValuePair> domainValuePairs = new ArrayList<>();
     domainValuePairs.add(new DomainValuePair().domain(Domain.PERSON).value("GENDER"));
     dataSet.setDomainValuePairs(domainValuePairs);

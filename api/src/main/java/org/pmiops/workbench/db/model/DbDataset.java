@@ -14,7 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.PrePackagedConceptSetSelection;
 
 @Entity
 @Table(name = "data_set")
@@ -204,11 +204,11 @@ public class DbDataset {
   }
 
   @Transient
-  public PrePackagedConceptSetEnum getPrePackagedConceptSetEnum() {
+  public PrePackagedConceptSetSelection getPrePackagedConceptSetEnum() {
     return DbStorageEnums.prePackageConceptSetsFromStorage(prePackagedConceptSet);
   }
 
-  public void setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum domain) {
+  public void setPrePackagedConceptSetEnum(PrePackagedConceptSetSelection domain) {
     this.prePackagedConceptSet = DbStorageEnums.prePackageConceptSetsToStorage(domain);
   }
 }

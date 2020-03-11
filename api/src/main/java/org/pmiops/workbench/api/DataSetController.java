@@ -75,7 +75,7 @@ import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.NotebookKernelType;
 import org.pmiops.workbench.model.MarkDataSetRequest;
-import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.PrePackagedConceptSetSelection;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -194,7 +194,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Missing name");
     } else if (dataSetRequest.getConceptSetIds() == null
         || (dataSetRequest.getConceptSetIds().isEmpty()
-            && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))) {
+            && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetSelection.NONE))) {
       throw new BadRequestException("Missing concept set ids");
     } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().isEmpty())
         && !includesAllParticipants) {

@@ -12,7 +12,7 @@ import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.NotebookKernelType;
-import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.PrePackagedConceptSetSelection;
 
 public interface DataSetService {
   DbDataset saveDataSet(
@@ -23,7 +23,7 @@ public interface DataSetService {
       List<Long> cohortIdList,
       List<Long> conceptIdList,
       List<DbDatasetValue> values,
-      PrePackagedConceptSetEnum prePackagedConceptSetEnum,
+      PrePackagedConceptSetSelection prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime);
 

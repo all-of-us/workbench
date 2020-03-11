@@ -43,7 +43,7 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.NotebookKernelType;
-import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.PrePackagedConceptSetSelection;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -66,9 +66,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
           + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
-  private static final ImmutableSet<PrePackagedConceptSetEnum>
+  private static final ImmutableSet<PrePackagedConceptSetSelection>
       CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
-          ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
+          ImmutableSet.of(PrePackagedConceptSetSelection.SURVEY, PrePackagedConceptSetSelection.BOTH);
 
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final int DATA_SET_VERSION = 1;
@@ -197,7 +197,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       List<Long> cohortIdList,
       List<Long> conceptIdList,
       List<DbDatasetValue> values,
-      PrePackagedConceptSetEnum prePackagedConceptSetEnum,
+      PrePackagedConceptSetSelection prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {
     final DbDataset dataSetModel = new DbDataset();
@@ -287,7 +287,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // note: ImmutableList is OK return type on private methods, but should be avoided in public
   // signatures.
   private ImmutableList<DbConceptSet> getExpandedConceptSetSelections(
-      PrePackagedConceptSetEnum prePackagedConceptSet,
+      PrePackagedConceptSetSelection prePackagedConceptSet,
       List<Long> conceptSetIds,
       List<DbCohort> selectedCohorts,
       boolean includesAllParticipants,
@@ -312,12 +312,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private static boolean hasNoConcepts(
-      PrePackagedConceptSetEnum prePackagedConceptSet,
+      PrePackagedConceptSetSelection prePackagedConceptSet,
       List<DomainValuePair> domainValuePairs,
       ImmutableList<DbConceptSet> initialSelectedConceptSets) {
     return initialSelectedConceptSets.isEmpty()
         && domainValuePairs.isEmpty()
-        && prePackagedConceptSet.equals(PrePackagedConceptSetEnum.NONE);
+        && prePackagedConceptSet.equals(PrePackagedConceptSetSelection.NONE);
   }
 
   @VisibleForTesting

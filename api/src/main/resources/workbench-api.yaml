@@ -4374,7 +4374,7 @@ definitions:
 
 '
       prePackagedConceptSet:
-        "$ref": "#/definitions/PrePackagedConceptSetEnum"
+        "$ref": "#/definitions/PrePackagedConceptSetSelection"
       conceptSetIds:
         type: array
         description: 'The ids of all concept sets in the data set
@@ -4398,7 +4398,7 @@ definitions:
 '
         items:
           "$ref": "#/definitions/DomainValuePair"
-  PrePackagedConceptSetEnum:
+  PrePackagedConceptSetSelection:
     type: string
     enum:
     - NONE
@@ -4503,7 +4503,7 @@ definitions:
         items:
           "$ref": "#/definitions/DomainValuePair"
       prePackagedConceptSet:
-        "$ref": "#/definitions/PrePackagedConceptSetEnum"
+        "$ref": "#/definitions/PrePackagedConceptSetSelection"
   DataSetListResponse:
     type: object
     properties:
@@ -4591,7 +4591,7 @@ definitions:
 
 '
       prePackagedConceptSet:
-        "$ref": "#/definitions/PrePackagedConceptSetEnum"
+        "$ref": "#/definitions/PrePackagedConceptSetSelection"
       conceptSetIds:
         type: array
         description: 'The ids of all concept sets in the data set

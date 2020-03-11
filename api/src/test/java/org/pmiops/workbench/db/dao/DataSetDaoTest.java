@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.PrePackagedConceptSetSelection;
 import org.pmiops.workbench.utils.Booleans;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -51,7 +51,7 @@ public class DataSetDaoTest {
     dataset.setCohortIds(Collections.emptyList());
     dataset.setConceptSetIds(Collections.emptyList());
     dataset.setValues(Collections.emptyList());
-    dataset.setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum.BOTH);
+    dataset.setPrePackagedConceptSetEnum(PrePackagedConceptSetSelection.BOTH);
     dataset.setWorkspaceId(workspaceId);
     return dataSetDao.save(dataset);
   }
