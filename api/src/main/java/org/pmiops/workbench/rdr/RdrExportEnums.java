@@ -157,21 +157,14 @@ public class RdrExportEnums {
   }
 
   public static org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum
-      specificPopulationToRaceEthnicity(SpecificPopulation specificPopulationEnum) {
-    if (CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY.containsKey(specificPopulationEnum)) {
-      return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY.get(specificPopulationEnum);
-    } else {
-      return null;
-    }
+      specificPopulationToRaceEthnicity(SpecificPopulation specificPopulation) {
+    return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY
+        .getOrDefault(specificPopulation, null);
   }
 
   public static org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AgeEnum
-      specificPopulationToAge(SpecificPopulation specificPopulationEnum) {
-    if (CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE.containsKey(specificPopulationEnum)) {
-      return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE.get(specificPopulationEnum);
-    } else {
-      return null;
-    }
+      specificPopulationToAge(SpecificPopulation specificPopulation) {
+    return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE.getOrDefault(specificPopulation, null);
   }
 
   public static org.pmiops.workbench.rdr.model.Degree degreeToRdrDegree(Degree degree) {

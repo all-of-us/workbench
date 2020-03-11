@@ -68,7 +68,7 @@ public interface WorkspaceMapper {
       @MappingTarget ResearchPurpose researchPurpose, DbWorkspace dbWorkspace) {
     if (dbWorkspace.getPopulation()) {
       researchPurpose.setPopulationDetails(
-          ImmutableList.copyOf(dbWorkspace.getSpecificPopulationsEnum()));
+          ImmutableList.copyOf(dbWorkspace.getSpecificPopulations()));
     }
     researchPurpose.setResearchOutcomeList(
         Optional.ofNullable(dbWorkspace.getResearchOutcomeEnumSet())
@@ -76,7 +76,7 @@ public interface WorkspaceMapper {
             .orElse(new ArrayList<AnticipatedResearchOutcome>()));
 
     researchPurpose.setDisseminateResearchFindingList(
-        Optional.ofNullable(dbWorkspace.getDisseminateResearchEnumSet())
+        Optional.ofNullable(dbWorkspace.getResearchPublicationOutlets())
             .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toList()))
             .orElse(new ArrayList<ResearchPublicationOutlet>()));
   }
@@ -85,7 +85,7 @@ public interface WorkspaceMapper {
   default void afterResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace dbWorkspace, ResearchPurpose researchPurpose) {
     if (researchPurpose.getPopulation()) {
-      dbWorkspace.setSpecificPopulationsEnum(
+      dbWorkspace.setSpecificPopulations(
           ImmutableSet.copyOf(researchPurpose.getPopulationDetails()));
     }
   }

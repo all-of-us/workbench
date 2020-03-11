@@ -391,7 +391,7 @@ public class DbWorkspace {
   }
 
   @Transient
-  public Set<SpecificPopulation> getSpecificPopulationsEnum() {
+  public Set<SpecificPopulation> getSpecificPopulations() {
     Set<Short> from = getPopulationDetails();
     if (from == null) {
       return null;
@@ -401,7 +401,7 @@ public class DbWorkspace {
         .collect(Collectors.toSet());
   }
 
-  public void setSpecificPopulationsEnum(Set<SpecificPopulation> newPopulationDetails) {
+  public void setSpecificPopulations(Set<SpecificPopulation> newPopulationDetails) {
     setPopulationDetails(
         newPopulationDetails.stream()
             .map(DbStorageEnums::specificPopulationToStorage)
@@ -422,21 +422,21 @@ public class DbWorkspace {
   }
 
   @Transient
-  public Set<ResearchPublicationOutlet> getDisseminateResearchEnumSet() {
+  public Set<ResearchPublicationOutlet> getResearchPublicationOutlets() {
     Set<Short> from = getDisseminateResearchSet();
     if (from == null) {
-      return new HashSet<ResearchPublicationOutlet>();
+      return new HashSet<>();
     }
     return from.stream()
-        .map(DbStorageEnums::disseminateResearchEnumFromStorage)
+        .map(DbStorageEnums::researchPublicationOutletFromStorage)
         .collect(Collectors.toSet());
   }
 
-  public void setDisseminateResearchEnumSet(
-      Set<ResearchPublicationOutlet> disseminateResearchEnumEnum) {
+  public void setResearchPublicationOutlets(
+      Set<ResearchPublicationOutlet> researchPublicationOutlets) {
     setDisseminateResearchSet(
-        disseminateResearchEnumEnum.stream()
-            .map(DbStorageEnums::disseminateResearchToStorage)
+        researchPublicationOutlets.stream()
+            .map(DbStorageEnums::researchPublicationOutletToStorage)
             .collect(Collectors.toSet()));
   }
 

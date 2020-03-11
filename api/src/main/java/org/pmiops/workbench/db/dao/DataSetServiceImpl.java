@@ -61,10 +61,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String R_CDR_ENV_VARIABLE = "";
   private static final Map<NotebookKernelType, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
       ImmutableMap.of(
-          NotebookKernelType.R,
-          R_CDR_ENV_VARIABLE,
-          NotebookKernelType.PYTHON,
-          PYTHON_CDR_ENV_VARIABLE);
+          NotebookKernelType.R, R_CDR_ENV_VARIABLE,
+          NotebookKernelType.PYTHON, PYTHON_CDR_ENV_VARIABLE);
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
@@ -201,7 +199,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       List<Long> cohortIdList,
       List<Long> conceptIdList,
       List<DbDatasetValue> values,
-      PrePackagedConceptSetSelection prePackagedConceptSetEnum,
+      PrePackagedConceptSetSelection prePackagedConceptSetSelection,
       long creatorId,
       Timestamp creationTime) {
     final DbDataset dataSetModel = new DbDataset();
@@ -216,7 +214,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     dataSetModel.setCohortIds(cohortIdList);
     dataSetModel.setConceptSetIds(conceptIdList);
     dataSetModel.setValues(values);
-    dataSetModel.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
+    dataSetModel.setPrePackagedConceptSetSelection(prePackagedConceptSetSelection);
 
     return dataSetDao.save(dataSetModel);
   }
@@ -291,7 +289,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // note: ImmutableList is OK return type on private methods, but should be avoided in public
   // signatures.
   private ImmutableList<DbConceptSet> getExpandedConceptSetSelections(
-      PrePackagedConceptSetSelection prePackagedConceptSet,
+      PrePackagedConceptSetSelection prePackagedConceptSetSelection,
       List<Long> conceptSetIds,
       List<DbCohort> selectedCohorts,
       boolean includesAllParticipants,
@@ -300,7 +298,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         ImmutableList.copyOf(this.conceptSetDao.findAllByConceptSetIdIn(conceptSetIds));
     final boolean noCohortsIncluded = selectedCohorts.isEmpty() && !includesAllParticipants;
     if (noCohortsIncluded
-        || hasNoConcepts(prePackagedConceptSet, domainValuePairs, initialSelectedConceptSets)) {
+        || hasNoConcepts(prePackagedConceptSetSelection, domainValuePairs, initialSelectedConceptSets)) {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
@@ -309,19 +307,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
     // of all survey questions
-    if (CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY.contains(prePackagedConceptSet)) {
+    if (CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY.contains(prePackagedConceptSetSelection)) {
       selectedConceptSetsBuilder.add(buildPrePackagedSurveyConceptSet());
     }
     return selectedConceptSetsBuilder.build();
   }
 
   private static boolean hasNoConcepts(
-      PrePackagedConceptSetSelection prePackagedConceptSet,
+      PrePackagedConceptSetSelection prePackagedConceptSetSelection,
       List<DomainValuePair> domainValuePairs,
       ImmutableList<DbConceptSet> initialSelectedConceptSets) {
     return initialSelectedConceptSets.isEmpty()
         && domainValuePairs.isEmpty()
-        && prePackagedConceptSet.equals(PrePackagedConceptSetSelection.NONE);
+        && prePackagedConceptSetSelection.equals(PrePackagedConceptSetSelection.NONE);
   }
 
   @VisibleForTesting
@@ -545,12 +543,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public List<String> generateCodeCells(
-      NotebookKernelType kernelTypeEnum,
+      NotebookKernelType notebookKernelType,
       String dataSetName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
     String prerequisites;
-    switch (kernelTypeEnum) {
+    switch (notebookKernelType) {
       case R:
         prerequisites = "library(bigrquery)";
         break;
@@ -559,7 +557,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         break;
       default:
         throw new BadRequestException(
-            "Kernel Type " + kernelTypeEnum.toString() + " not supported");
+            "Kernel Type " + notebookKernelType.toString() + " not supported");
     }
     return queryJobConfigurationMap.entrySet().stream()
         .map(
@@ -571,7 +569,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                         Domain.fromValue(entry.getKey()),
                         dataSetName,
                         qualifier,
-                        kernelTypeEnum))
+                    notebookKernelType))
         .collect(Collectors.toList());
   }
 
@@ -678,8 +676,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private static String generateSqlWithEnvironmentVariables(
-      String query, NotebookKernelType kernelTypeEnum) {
-    return query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum));
+      String query, NotebookKernelType notebookKernelType) {
+    return query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(notebookKernelType));
   }
 
   // This takes the query, and string replaces in the values for each of the named
@@ -732,7 +730,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       Domain domain,
       String dataSetName,
       String qualifier,
-      NotebookKernelType kernelTypeEnum) {
+      NotebookKernelType notebookKernelType) {
 
     // Define [namespace]_sql, query parameters (as either [namespace]_query_config
     // or [namespace]_query_parameters), and [namespace]_df variables
@@ -750,14 +748,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String dataFrameSection;
     String displayHeadSection;
 
-    switch (kernelTypeEnum) {
+    switch (notebookKernelType) {
       case PYTHON:
         sqlSection =
             namespace
                 + "sql = \"\"\""
                 + fillInQueryParams(
                     generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                        queryJobConfiguration.getQuery(), notebookKernelType),
                     queryJobConfiguration.getNamedParameters())
                 + "\"\"\"";
         dataFrameSection =
@@ -770,7 +768,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "sql <- paste(\""
                 + fillInQueryParams(
                     generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                        queryJobConfiguration.getQuery(), notebookKernelType),
                     queryJobConfiguration.getNamedParameters())
                 + "\", sep=\"\")";
         dataFrameSection =
@@ -781,7 +779,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         displayHeadSection = "head(" + namespace + "df, 5)";
         break;
       default:
-        throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
+        throw new BadRequestException("Language " + notebookKernelType.toString() + " not supported.");
     }
 
     return descriptiveComment

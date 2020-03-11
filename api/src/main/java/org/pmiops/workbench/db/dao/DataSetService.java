@@ -23,14 +23,14 @@ public interface DataSetService {
       List<Long> cohortIdList,
       List<Long> conceptIdList,
       List<DbDatasetValue> values,
-      PrePackagedConceptSetSelection prePackagedConceptSetEnum,
+      PrePackagedConceptSetSelection prePackagedConceptSetSelection,
       long creatorId,
       Timestamp creationTime);
 
   Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
 
   List<String> generateCodeCells(
-      NotebookKernelType kernelTypeEnum,
+      NotebookKernelType notebookKernelType,
       String dataSetName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);

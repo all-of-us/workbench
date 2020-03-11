@@ -155,7 +155,7 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setCommercialPurpose(purpose.getCommercialPurpose());
     dbWorkspace.setPopulation(purpose.getPopulation());
     if (purpose.getPopulation()) {
-      dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(purpose.getPopulationDetails()));
+      dbWorkspace.setSpecificPopulations(new HashSet<>(purpose.getPopulationDetails()));
     }
     dbWorkspace.setSocialBehavioral(purpose.getSocialBehavioral());
     dbWorkspace.setPopulationHealth(purpose.getPopulationHealth());
@@ -170,12 +170,12 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setScientificApproach(purpose.getScientificApproach());
     dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
-    dbWorkspace.setDisseminateResearchEnumSet(
+    dbWorkspace.setResearchPublicationOutlets(
         Optional.ofNullable(purpose.getDisseminateResearchFindingList())
             .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toSet()))
             .orElse(new HashSet<ResearchPublicationOutlet>()));
 
-    if (dbWorkspace.getDisseminateResearchEnumSet().contains(ResearchPublicationOutlet.OTHER)) {
+    if (dbWorkspace.getResearchPublicationOutlets().contains(ResearchPublicationOutlet.OTHER)) {
       dbWorkspace.setDisseminateResearchOther(purpose.getOtherDisseminateResearchFindings());
     }
 
@@ -211,7 +211,7 @@ public class ManualWorkspaceMapper {
             .approved(workspace.getApproved())
             .otherPopulationDetails(workspace.getOtherPopulationDetails())
             .disseminateResearchFindingList(
-                Optional.ofNullable(workspace.getDisseminateResearchEnumSet())
+                Optional.ofNullable(workspace.getResearchPublicationOutlets())
                     .map(
                         disseminateResearchEnums ->
                             disseminateResearchEnums.stream().collect(Collectors.toList()))
@@ -227,7 +227,7 @@ public class ManualWorkspaceMapper {
                     .map(DbStorageEnums::specificPopulationFromStorage)
                     .collect(Collectors.toList()));
 
-    if (workspace.getDisseminateResearchEnumSet().contains(ResearchPublicationOutlet.OTHER)) {
+    if (workspace.getResearchPublicationOutlets().contains(ResearchPublicationOutlet.OTHER)) {
       researchPurpose.setOtherDisseminateResearchFindings(workspace.getDisseminateResearchOther());
     }
 
@@ -238,7 +238,7 @@ public class ManualWorkspaceMapper {
     // population field is a guard on (specific) population details
     final List<SpecificPopulation> specificPopulationDetails;
     if (workspace.getPopulation()) {
-      specificPopulationDetails = new ArrayList<>(workspace.getSpecificPopulationsEnum());
+      specificPopulationDetails = new ArrayList<>(workspace.getSpecificPopulations());
     } else {
       specificPopulationDetails = new ArrayList<>();
     }

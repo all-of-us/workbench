@@ -296,9 +296,9 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
 
     rdrWorkspace.setWorkspaceDemographic(
-        toRdrWorkspaceDemographics(dbWorkspace.getSpecificPopulationsEnum()));
+        toRdrWorkspaceDemographics(dbWorkspace.getSpecificPopulations()));
 
-    if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulation.OTHER)) {
+    if (dbWorkspace.getSpecificPopulations().contains(SpecificPopulation.OTHER)) {
       rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
     }
 
@@ -332,51 +332,51 @@ public class RdrExportServiceImpl implements RdrExportService {
     return rdrWorkspace;
   }
 
-  RdrWorkspaceDemographic toRdrWorkspaceDemographics(Set<SpecificPopulation> dbPopulationEnumSet) {
+  RdrWorkspaceDemographic toRdrWorkspaceDemographics(Set<SpecificPopulation> specificPopulations) {
     RdrWorkspaceDemographic rdrDemographic = new RdrWorkspaceDemographic();
 
     rdrDemographic.setAccessToCare(
-        dbPopulationEnumSet.contains(SpecificPopulation.ACCESS_TO_CARE)
+        specificPopulations.contains(SpecificPopulation.ACCESS_TO_CARE)
             ? RdrWorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
             : RdrWorkspaceDemographic.AccessToCareEnum.UNSET);
 
     rdrDemographic.setDisabilityStatus(
-        dbPopulationEnumSet.contains(SpecificPopulation.DISABILITY_STATUS)
+        specificPopulations.contains(SpecificPopulation.DISABILITY_STATUS)
             ? RdrWorkspaceDemographic.DisabilityStatusEnum.DISABILITY
             : RdrWorkspaceDemographic.DisabilityStatusEnum.UNSET);
 
     rdrDemographic.setEducationLevel(
-        dbPopulationEnumSet.contains(SpecificPopulation.EDUCATION_LEVEL)
+        specificPopulations.contains(SpecificPopulation.EDUCATION_LEVEL)
             ? RdrWorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
             : RdrWorkspaceDemographic.EducationLevelEnum.UNSET);
 
     rdrDemographic.setIncomeLevel(
-        dbPopulationEnumSet.contains(SpecificPopulation.INCOME_LEVEL)
+        specificPopulations.contains(SpecificPopulation.INCOME_LEVEL)
             ? RdrWorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
             : RdrWorkspaceDemographic.IncomeLevelEnum.UNSET);
 
     rdrDemographic.setGeography(
-        dbPopulationEnumSet.contains(SpecificPopulation.GEOGRAPHY)
+        specificPopulations.contains(SpecificPopulation.GEOGRAPHY)
             ? RdrWorkspaceDemographic.GeographyEnum.RURAL
             : RdrWorkspaceDemographic.GeographyEnum.UNSET);
 
     rdrDemographic.setSexualOrientation(
-        dbPopulationEnumSet.contains(SpecificPopulation.SEXUAL_ORIENTATION)
+        specificPopulations.contains(SpecificPopulation.SEXUAL_ORIENTATION)
             ? RdrWorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
             : RdrWorkspaceDemographic.SexualOrientationEnum.UNSET);
 
     rdrDemographic.setGenderIdentity(
-        dbPopulationEnumSet.contains(SpecificPopulation.GENDER_IDENTITY)
+        specificPopulations.contains(SpecificPopulation.GENDER_IDENTITY)
             ? RdrWorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
             : RdrWorkspaceDemographic.GenderIdentityEnum.UNSET);
 
     rdrDemographic.setSexAtBirth(
-        dbPopulationEnumSet.contains(SpecificPopulation.SEX)
+        specificPopulations.contains(SpecificPopulation.SEX)
             ? RdrWorkspaceDemographic.SexAtBirthEnum.INTERSEX
             : RdrWorkspaceDemographic.SexAtBirthEnum.UNSET);
 
     rdrDemographic.setRaceEthnicity(
-        dbPopulationEnumSet.stream()
+        specificPopulations.stream()
             .map(RdrExportEnums::specificPopulationToRaceEthnicity)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
@@ -387,7 +387,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     }
 
     rdrDemographic.setAge(
-        dbPopulationEnumSet.stream()
+        specificPopulations.stream()
             .map(RdrExportEnums::specificPopulationToAge)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));

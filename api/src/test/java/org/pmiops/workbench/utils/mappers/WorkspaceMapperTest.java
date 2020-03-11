@@ -169,7 +169,7 @@ public class WorkspaceMapperTest {
     assertThat(rp.getOtherPurposeDetails()).isEqualTo(sourceDbWorkspace.getOtherPurposeDetails());
     assertThat(rp.getPopulation()).isEqualTo(sourceDbWorkspace.getPopulation());
     assertThat(rp.getPopulationDetails())
-        .containsExactlyElementsIn(sourceDbWorkspace.getSpecificPopulationsEnum());
+        .containsExactlyElementsIn(sourceDbWorkspace.getSpecificPopulations());
     assertThat(rp.getPopulationHealth()).isEqualTo(sourceDbWorkspace.getPopulationHealth());
     assertThat(rp.getReasonForAllOfUs()).isEqualTo(sourceDbWorkspace.getReasonForAllOfUs());
     assertThat(rp.getReviewRequested()).isEqualTo(sourceDbWorkspace.getReviewRequested());

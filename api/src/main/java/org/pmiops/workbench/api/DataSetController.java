@@ -218,7 +218,7 @@ public class DataSetController implements DataSetApiDelegate {
                   .id(dataSet.getDataSetId())
                   .etag(Etags.fromVersion(dataSet.getVersion()))
                   .description(dataSet.getDescription())
-                  .prePackagedConceptSet(dataSet.getPrePackagedConceptSetEnum());
+                  .prePackagedConceptSet(dataSet.getPrePackagedConceptSetSelection());
           if (dataSet.getLastModifiedTime() != null) {
             result.setLastModifiedTime(dataSet.getLastModifiedTime().getTime());
           }
@@ -273,7 +273,7 @@ public class DataSetController implements DataSetApiDelegate {
       DataSetRequest dataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    final NotebookKernelType kernelTypeEnum = NotebookKernelType.fromValue(kernelTypeEnumString);
+    final NotebookKernelType notebookKernelType = NotebookKernelType.fromValue(kernelTypeEnumString);
 
     // Generate query per domain for the selected concept set, cohort and values
     // TODO(jaycarlton): return better error information form this function for common validation
@@ -290,11 +290,11 @@ public class DataSetController implements DataSetApiDelegate {
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
             dataSetService.generateCodeCells(
-                kernelTypeEnum, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
+                notebookKernelType, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
-        new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
+        new DataSetCodeResponse().code(generatedCode).kernelType(notebookKernelType));
   }
 
   // TODO (srubenst): Delete this method and make generate query take the composite parts.
@@ -604,7 +604,7 @@ public class DataSetController implements DataSetApiDelegate {
     dbDataSet.setConceptSetIds(request.getConceptSetIds());
     dbDataSet.setDescription(request.getDescription());
     dbDataSet.setName(request.getName());
-    dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
+    dbDataSet.setPrePackagedConceptSetSelection(request.getPrePackagedConceptSet());
     dbDataSet.setValues(
         request.getDomainValuePairs().stream()
             .map(this::getDataSetValuesFromDomainValueSet)

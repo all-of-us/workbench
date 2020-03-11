@@ -232,7 +232,7 @@ public final class DbStorageEnums {
   }
 
   public static final BiMap<ResearchPublicationOutlet, Short>
-      CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH =
+      CLIENT_TO_STORAGE_RESEARCH_PUBLICATION_OUTLET =
           ImmutableBiMap.<ResearchPublicationOutlet, Short>builder()
               .put(ResearchPublicationOutlet.PUBLICATION_PEER_REVIEWED_JOURNALS, (short) 0)
               .put(ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES, (short) 1)
@@ -244,12 +244,12 @@ public final class DbStorageEnums {
               .put(ResearchPublicationOutlet.OTHER, (short) 7)
               .build();
 
-  public static ResearchPublicationOutlet disseminateResearchEnumFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.inverse().get(s);
+  public static ResearchPublicationOutlet researchPublicationOutletFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_RESEARCH_PUBLICATION_OUTLET.inverse().get(s);
   }
 
-  public static Short disseminateResearchToStorage(ResearchPublicationOutlet s) {
-    return CLIENT_TO_STORAGE_DISSEMINATE_RESEARCH.get(s);
+  public static Short researchPublicationOutletToStorage(ResearchPublicationOutlet s) {
+    return CLIENT_TO_STORAGE_RESEARCH_PUBLICATION_OUTLET.get(s);
   }
 
   public static final BiMap<AnticipatedResearchOutcome, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
@@ -465,7 +465,7 @@ public final class DbStorageEnums {
   }
 
   private static final BiMap<PrePackagedConceptSetSelection, Short>
-      CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =
+      CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPT_SET_SELECTION =
           ImmutableBiMap.<PrePackagedConceptSetSelection, Short>builder()
               .put(PrePackagedConceptSetSelection.NONE, (short) 0)
               .put(PrePackagedConceptSetSelection.DEMOGRAPHICS, (short) 1)
@@ -474,11 +474,11 @@ public final class DbStorageEnums {
               .build();
 
   public static PrePackagedConceptSetSelection prePackageConceptSetsFromStorage(Short conceptSet) {
-    return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET.inverse().get(conceptSet);
+    return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPT_SET_SELECTION.inverse().get(conceptSet);
   }
 
   public static Short prePackageConceptSetsToStorage(PrePackagedConceptSetSelection conceptSet) {
-    return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET.get(conceptSet);
+    return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPT_SET_SELECTION.get(conceptSet);
   }
 
   /** Utility class. */

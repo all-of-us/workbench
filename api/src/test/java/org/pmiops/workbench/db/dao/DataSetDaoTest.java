@@ -51,7 +51,7 @@ public class DataSetDaoTest {
     dataset.setCohortIds(Collections.emptyList());
     dataset.setConceptSetIds(Collections.emptyList());
     dataset.setValues(Collections.emptyList());
-    dataset.setPrePackagedConceptSetEnum(PrePackagedConceptSetSelection.BOTH);
+    dataset.setPrePackagedConceptSetSelection(PrePackagedConceptSetSelection.BOTH);
     dataset.setWorkspaceId(workspaceId);
     return dataSetDao.save(dataset);
   }
