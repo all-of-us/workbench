@@ -158,8 +158,8 @@ public class RdrExportEnums {
 
   public static org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum
       specificPopulationToRaceEthnicity(SpecificPopulation specificPopulation) {
-    return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY
-        .getOrDefault(specificPopulation, null);
+    return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY.getOrDefault(
+        specificPopulation, null);
   }
 
   public static org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AgeEnum

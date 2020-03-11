@@ -273,7 +273,8 @@ public class DataSetController implements DataSetApiDelegate {
       DataSetRequest dataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    final NotebookKernelType notebookKernelType = NotebookKernelType.fromValue(kernelTypeEnumString);
+    final NotebookKernelType notebookKernelType =
+        NotebookKernelType.fromValue(kernelTypeEnumString);
 
     // Generate query per domain for the selected concept set, cohort and values
     // TODO(jaycarlton): return better error information form this function for common validation
@@ -290,7 +291,10 @@ public class DataSetController implements DataSetApiDelegate {
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
             dataSetService.generateCodeCells(
-                notebookKernelType, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
+                notebookKernelType,
+                dataSetRequest.getName(),
+                qualifier,
+                bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(

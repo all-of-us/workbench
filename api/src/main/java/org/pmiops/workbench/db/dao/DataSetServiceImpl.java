@@ -298,7 +298,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         ImmutableList.copyOf(this.conceptSetDao.findAllByConceptSetIdIn(conceptSetIds));
     final boolean noCohortsIncluded = selectedCohorts.isEmpty() && !includesAllParticipants;
     if (noCohortsIncluded
-        || hasNoConcepts(prePackagedConceptSetSelection, domainValuePairs, initialSelectedConceptSets)) {
+        || hasNoConcepts(
+            prePackagedConceptSetSelection, domainValuePairs, initialSelectedConceptSets)) {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
@@ -569,7 +570,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                         Domain.fromValue(entry.getKey()),
                         dataSetName,
                         qualifier,
-                    notebookKernelType))
+                        notebookKernelType))
         .collect(Collectors.toList());
   }
 
@@ -779,7 +780,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         displayHeadSection = "head(" + namespace + "df, 5)";
         break;
       default:
-        throw new BadRequestException("Language " + notebookKernelType.toString() + " not supported.");
+        throw new BadRequestException(
+            "Language " + notebookKernelType.toString() + " not supported.");
     }
 
     return descriptiveComment
