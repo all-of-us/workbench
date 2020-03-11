@@ -17,13 +17,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 @Service
-public class ElapsedTimeDistributionInterceptor extends HandlerInterceptorAdapter {
+public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
 
   private final LogsBasedMetricService logsBasedMetricService;
   private Clock clock;
 
-  public ElapsedTimeDistributionInterceptor(
-      LogsBasedMetricService logsBasedMetricService, Clock clock) {
+  public RequestTimeMetricInterceptor(LogsBasedMetricService logsBasedMetricService, Clock clock) {
     this.logsBasedMetricService = logsBasedMetricService;
     this.clock = clock;
   }
@@ -43,6 +42,14 @@ public class ElapsedTimeDistributionInterceptor extends HandlerInterceptorAdapte
         || (!(handler instanceof HandlerMethod));
   }
 
+  /**
+   * Compute the elapsed time since preHandle and record it to the API_METHOD_TIME logs-based metric
+   *
+   * @param request - request that was just handled
+   * @param response - response (unused)
+   * @param handler - handler object. Only interested in the HandlerMethod variety
+   * @param modelAndView - not used
+   */
   @Override
   public void postHandle(
       HttpServletRequest request,
@@ -55,6 +62,8 @@ public class ElapsedTimeDistributionInterceptor extends HandlerInterceptorAdapte
 
     final String methodName = ((HandlerMethod) handler).getMethod().getName();
 
+    // If we recorded the START_INSTANT property, find the time between then and now,
+    // build a measurement bundle with that value, add the method name as a label, and record.
     Optional.ofNullable(request.getAttribute(RequestAttribute.START_INSTANT.getKeyName()))
         .map(obj -> (Instant) obj)
         .map(start -> Duration.between(start, clock.instant()))

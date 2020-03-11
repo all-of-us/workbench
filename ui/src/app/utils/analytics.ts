@@ -84,8 +84,7 @@ export const AnalyticsTracker = {
     OpenSidebar: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.SIDEBAR, 'Click', suffix),
     Search: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Search', `Help - Search - ${suffix}`),
     ContactUs: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Click', `Help - Contact Us - ${suffix}`),
-    FAQ: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Click', `Help - FAQs - ${suffix}`),
-
+    UserSupport: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Click', `Help - User Support - ${suffix}`)
   }
 };
 

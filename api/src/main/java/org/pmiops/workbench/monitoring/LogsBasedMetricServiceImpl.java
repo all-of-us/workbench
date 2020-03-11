@@ -46,7 +46,7 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
 
   @Override
   public void record(MeasurementBundle measurementBundle) {
-    log.log(Level.INFO, String.format("Recording bundle %s", measurementBundle.toString()));
+    log.log(Level.FINE, String.format("Recording bundle %s", measurementBundle.toString()));
     final ImmutableSet<LogEntry> logEntries =
         measurementBundleToJsonPayloads(measurementBundle).stream()
             .map(this::payloadToLogEntry)

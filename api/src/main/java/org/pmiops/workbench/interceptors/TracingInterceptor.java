@@ -29,7 +29,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class TracingInterceptor extends HandlerInterceptorAdapter {
   private static final Tracer tracer = Tracing.getTracer();
   private static final Logger log = Logger.getLogger(TracingInterceptor.class.getName());
-  private static final String TRACE_ATTRIBUTE_KEY = "Tracing Span";
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
