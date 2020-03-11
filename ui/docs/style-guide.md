@@ -12,3 +12,8 @@ Although disabling buttons is easier, it is valuable to maintain the accessibili
 shortcut benefits of anchor tags for page navigation.
 
 TODO: We need to build disabled functionality into that wrapper.
+
+## Async Code:
+Where possible, we prefer the use of async functions with the keyword `await` within them. If a function
+wants to make promises in parallel, prefer abstracting to other functions. If there is logic
+that needs to happen after all promises have resolved, use the `await all` function.
