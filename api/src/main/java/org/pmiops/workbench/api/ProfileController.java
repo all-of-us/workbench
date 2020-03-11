@@ -604,8 +604,8 @@ public class ProfileController implements ProfileApiDelegate {
     user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
-    user.setLastModifiedTime(now);
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
+    user.setLastModifiedTime(now);
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.
