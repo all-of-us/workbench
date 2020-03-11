@@ -146,7 +146,6 @@ public class DbUser {
    *
    * @return
    */
-  @Column(name = "email")
   public String getUsername() {
     return username;
   }

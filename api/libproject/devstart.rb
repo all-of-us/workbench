@@ -619,6 +619,12 @@ Common.register_command({
   :fn => ->() { run_local_all_migrations() }
 })
 
+Common.register_command({
+    :invocation => "run-all-local-migrations",
+    :description => "Runs local data/schema migrations for the cdr and workbench schemas (alias)",
+    :fn => ->() { run_local_all_migrations() }
+})
+
 def run_local_data_migrations()
   ensure_docker_sync()
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
