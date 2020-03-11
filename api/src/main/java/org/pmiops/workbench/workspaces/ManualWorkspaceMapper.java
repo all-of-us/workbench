@@ -22,7 +22,7 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulation;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -236,7 +236,7 @@ public class ManualWorkspaceMapper {
     }
 
     // population field is a guard on (specific) population details
-    final List<SpecificPopulationEnum> specificPopulationDetails;
+    final List<SpecificPopulation> specificPopulationDetails;
     if (workspace.getPopulation()) {
       specificPopulationDetails = new ArrayList<>(workspace.getSpecificPopulationsEnum());
     } else {

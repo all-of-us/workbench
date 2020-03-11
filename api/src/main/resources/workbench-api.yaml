@@ -3930,7 +3930,7 @@ definitions:
       populationDetails:
         type: array
         items:
-          "$ref": "#/definitions/SpecificPopulationEnum"
+          "$ref": "#/definitions/SpecificPopulation"
       populationHealth:
         type: boolean
         default: false
@@ -3960,7 +3960,7 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AnticipatedResearchOutcome"
-  SpecificPopulationEnum:
+  SpecificPopulation:
     type: string
     description: Short parsable descriptions of specific population categories
     enum:

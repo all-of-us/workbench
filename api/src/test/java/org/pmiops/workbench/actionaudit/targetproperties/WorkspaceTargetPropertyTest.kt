@@ -6,7 +6,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.ResearchPurpose
-import org.pmiops.workbench.model.SpecificPopulationEnum
+import org.pmiops.workbench.model.SpecificPopulation
 import org.pmiops.workbench.model.Workspace
 import org.springframework.test.context.junit4.SpringRunner
 
@@ -22,7 +22,7 @@ class WorkspaceTargetPropertyTest {
                 .apply { approved = true }
                 .apply { diseaseOfFocus = "Chicken Pox" }
                 .apply { otherPopulationDetails = "cool people" }
-                .apply { populationDetails = listOf(SpecificPopulationEnum.ACCESS_TO_CARE) }
+                .apply { populationDetails = listOf(SpecificPopulation.ACCESS_TO_CARE) }
                 .apply { reasonForAllOfUs = "a triple dog dare" }
                 .apply { intendedStudy = "stubbed toes" }
                 .apply { additionalNotes = "I really like the cloud." }

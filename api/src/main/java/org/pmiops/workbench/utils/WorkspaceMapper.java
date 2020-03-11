@@ -21,7 +21,7 @@ import org.pmiops.workbench.model.AnticipatedResearchOutcome;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulation;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -90,13 +90,13 @@ public interface WorkspaceMapper {
     }
   }
 
-  default Set<Short> map(List<SpecificPopulationEnum> value) {
+  default Set<Short> map(List<SpecificPopulation> value) {
     return value.stream()
         .map(DbStorageEnums::specificPopulationToStorage)
         .collect(ImmutableSet.toImmutableSet());
   }
 
-  default List<SpecificPopulationEnum> ordinalsToSpecificPopulationEnumList(Set<Short> ordinals) {
+  default List<SpecificPopulation> ordinalsToSpecificPopulationEnumList(Set<Short> ordinals) {
     final Stream<Short> ordinalsStream;
     if (ordinals == null) {
       ordinalsStream = Stream.of();

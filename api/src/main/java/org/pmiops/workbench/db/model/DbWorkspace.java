@@ -26,7 +26,7 @@ import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPublicationOutlet;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulation;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
@@ -391,7 +391,7 @@ public class DbWorkspace {
   }
 
   @Transient
-  public Set<SpecificPopulationEnum> getSpecificPopulationsEnum() {
+  public Set<SpecificPopulation> getSpecificPopulationsEnum() {
     Set<Short> from = getPopulationDetails();
     if (from == null) {
       return null;
@@ -401,7 +401,7 @@ public class DbWorkspace {
         .collect(Collectors.toSet());
   }
 
-  public void setSpecificPopulationsEnum(Set<SpecificPopulationEnum> newPopulationDetails) {
+  public void setSpecificPopulationsEnum(Set<SpecificPopulation> newPopulationDetails) {
     setPopulationDetails(
         newPopulationDetails.stream()
             .map(DbStorageEnums::specificPopulationToStorage)

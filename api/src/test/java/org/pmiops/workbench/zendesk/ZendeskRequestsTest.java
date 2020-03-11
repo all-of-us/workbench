@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulation;
 import org.pmiops.workbench.model.Workspace;
 
 public class ZendeskRequestsTest {
@@ -54,7 +54,7 @@ public class ZendeskRequestsTest {
                             .drugDevelopment(true)
                             .population(true)
                             .populationDetails(
-                                ImmutableList.copyOf(SpecificPopulationEnum.values()))
+                                ImmutableList.copyOf(SpecificPopulation.values()))
                             .additionalNotes("additional notes")
                             .reasonForAllOfUs("reason for aou")
                             .intendedStudy("intended study")
@@ -97,14 +97,14 @@ public class ZendeskRequestsTest {
                     new Workspace()
                         .researchPurpose(
                             new ResearchPurpose()
-                                .addPopulationDetailsItem(SpecificPopulationEnum.AGE_GROUPS)
-                                .addPopulationDetailsItem(SpecificPopulationEnum.OTHER)
+                                .addPopulationDetailsItem(SpecificPopulation.AGE_GROUPS)
+                                .addPopulationDetailsItem(SpecificPopulation.OTHER)
                                 .otherPopulationDetails("targaryen bloodline")))
                 .getComment()
                 .getBody());
-    assertThat(zdBody).contains(SpecificPopulationEnum.AGE_GROUPS.toString());
+    assertThat(zdBody).contains(SpecificPopulation.AGE_GROUPS.toString());
     assertThat(zdBody).contains("targaryen bloodline");
-    assertThat(zdBody).doesNotContain(SpecificPopulationEnum.GEOGRAPHY.toString());
+    assertThat(zdBody).doesNotContain(SpecificPopulation.GEOGRAPHY.toString());
   }
 
   private static String mustStripRawResearchPurposeJSON(String body) {

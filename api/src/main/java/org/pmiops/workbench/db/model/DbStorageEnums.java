@@ -20,7 +20,7 @@ import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetSelection;
 import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulation;
 import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -197,37 +197,37 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS.get(s);
   }
 
-  public static final BiMap<SpecificPopulationEnum, Short> CLIENT_TO_STORAGE_SPECIFIC_POPULATION =
-      ImmutableBiMap.<SpecificPopulationEnum, Short>builder()
-          .put(SpecificPopulationEnum.RACE_ETHNICITY, (short) 0)
-          .put(SpecificPopulationEnum.AGE_GROUPS, (short) 1)
-          .put(SpecificPopulationEnum.SEX, (short) 2)
-          .put(SpecificPopulationEnum.GENDER_IDENTITY, (short) 3)
-          .put(SpecificPopulationEnum.SEXUAL_ORIENTATION, (short) 4)
-          .put(SpecificPopulationEnum.GEOGRAPHY, (short) 5)
-          .put(SpecificPopulationEnum.DISABILITY_STATUS, (short) 6)
-          .put(SpecificPopulationEnum.ACCESS_TO_CARE, (short) 7)
-          .put(SpecificPopulationEnum.EDUCATION_LEVEL, (short) 8)
-          .put(SpecificPopulationEnum.INCOME_LEVEL, (short) 9)
-          .put(SpecificPopulationEnum.OTHER, (short) 10)
-          .put(SpecificPopulationEnum.RACE_ASIAN, (short) 11)
-          .put(SpecificPopulationEnum.RACE_AA, (short) 12)
-          .put(SpecificPopulationEnum.RACE_HISPANIC, (short) 13)
-          .put(SpecificPopulationEnum.RACE_AIAN, (short) 14)
-          .put(SpecificPopulationEnum.RACE_MENA, (short) 15)
-          .put(SpecificPopulationEnum.RACE_NHPI, (short) 16)
-          .put(SpecificPopulationEnum.RACE_MORE_THAN_ONE, (short) 17)
-          .put(SpecificPopulationEnum.AGE_CHILDREN, (short) 18)
-          .put(SpecificPopulationEnum.AGE_ADOLESCENTS, (short) 19)
-          .put(SpecificPopulationEnum.AGE_OLDER, (short) 20)
-          .put(SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75, (short) 21)
+  public static final BiMap<SpecificPopulation, Short> CLIENT_TO_STORAGE_SPECIFIC_POPULATION =
+      ImmutableBiMap.<SpecificPopulation, Short>builder()
+          .put(SpecificPopulation.RACE_ETHNICITY, (short) 0)
+          .put(SpecificPopulation.AGE_GROUPS, (short) 1)
+          .put(SpecificPopulation.SEX, (short) 2)
+          .put(SpecificPopulation.GENDER_IDENTITY, (short) 3)
+          .put(SpecificPopulation.SEXUAL_ORIENTATION, (short) 4)
+          .put(SpecificPopulation.GEOGRAPHY, (short) 5)
+          .put(SpecificPopulation.DISABILITY_STATUS, (short) 6)
+          .put(SpecificPopulation.ACCESS_TO_CARE, (short) 7)
+          .put(SpecificPopulation.EDUCATION_LEVEL, (short) 8)
+          .put(SpecificPopulation.INCOME_LEVEL, (short) 9)
+          .put(SpecificPopulation.OTHER, (short) 10)
+          .put(SpecificPopulation.RACE_ASIAN, (short) 11)
+          .put(SpecificPopulation.RACE_AA, (short) 12)
+          .put(SpecificPopulation.RACE_HISPANIC, (short) 13)
+          .put(SpecificPopulation.RACE_AIAN, (short) 14)
+          .put(SpecificPopulation.RACE_MENA, (short) 15)
+          .put(SpecificPopulation.RACE_NHPI, (short) 16)
+          .put(SpecificPopulation.RACE_MORE_THAN_ONE, (short) 17)
+          .put(SpecificPopulation.AGE_CHILDREN, (short) 18)
+          .put(SpecificPopulation.AGE_ADOLESCENTS, (short) 19)
+          .put(SpecificPopulation.AGE_OLDER, (short) 20)
+          .put(SpecificPopulation.AGE_OLDER_MORE_THAN_75, (short) 21)
           .build();
 
-  public static SpecificPopulationEnum specificPopulationFromStorage(Short s) {
+  public static SpecificPopulation specificPopulationFromStorage(Short s) {
     return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.inverse().get(s);
   }
 
-  public static Short specificPopulationToStorage(SpecificPopulationEnum s) {
+  public static Short specificPopulationToStorage(SpecificPopulation s) {
     return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.get(s);
   }
 

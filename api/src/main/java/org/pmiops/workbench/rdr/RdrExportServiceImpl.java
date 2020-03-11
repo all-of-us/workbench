@@ -26,7 +26,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulation;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
@@ -298,7 +298,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setWorkspaceDemographic(
         toRdrWorkspaceDemographics(dbWorkspace.getSpecificPopulationsEnum()));
 
-    if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
+    if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulation.OTHER)) {
       rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
     }
 
@@ -333,46 +333,46 @@ public class RdrExportServiceImpl implements RdrExportService {
   }
 
   RdrWorkspaceDemographic toRdrWorkspaceDemographics(
-      Set<SpecificPopulationEnum> dbPopulationEnumSet) {
+      Set<SpecificPopulation> dbPopulationEnumSet) {
     RdrWorkspaceDemographic rdrDemographic = new RdrWorkspaceDemographic();
 
     rdrDemographic.setAccessToCare(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.ACCESS_TO_CARE)
+        dbPopulationEnumSet.contains(SpecificPopulation.ACCESS_TO_CARE)
             ? RdrWorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
             : RdrWorkspaceDemographic.AccessToCareEnum.UNSET);
 
     rdrDemographic.setDisabilityStatus(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.DISABILITY_STATUS)
+        dbPopulationEnumSet.contains(SpecificPopulation.DISABILITY_STATUS)
             ? RdrWorkspaceDemographic.DisabilityStatusEnum.DISABILITY
             : RdrWorkspaceDemographic.DisabilityStatusEnum.UNSET);
 
     rdrDemographic.setEducationLevel(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.EDUCATION_LEVEL)
+        dbPopulationEnumSet.contains(SpecificPopulation.EDUCATION_LEVEL)
             ? RdrWorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
             : RdrWorkspaceDemographic.EducationLevelEnum.UNSET);
 
     rdrDemographic.setIncomeLevel(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.INCOME_LEVEL)
+        dbPopulationEnumSet.contains(SpecificPopulation.INCOME_LEVEL)
             ? RdrWorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
             : RdrWorkspaceDemographic.IncomeLevelEnum.UNSET);
 
     rdrDemographic.setGeography(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.GEOGRAPHY)
+        dbPopulationEnumSet.contains(SpecificPopulation.GEOGRAPHY)
             ? RdrWorkspaceDemographic.GeographyEnum.RURAL
             : RdrWorkspaceDemographic.GeographyEnum.UNSET);
 
     rdrDemographic.setSexualOrientation(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.SEXUAL_ORIENTATION)
+        dbPopulationEnumSet.contains(SpecificPopulation.SEXUAL_ORIENTATION)
             ? RdrWorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
             : RdrWorkspaceDemographic.SexualOrientationEnum.UNSET);
 
     rdrDemographic.setGenderIdentity(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.GENDER_IDENTITY)
+        dbPopulationEnumSet.contains(SpecificPopulation.GENDER_IDENTITY)
             ? RdrWorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
             : RdrWorkspaceDemographic.GenderIdentityEnum.UNSET);
 
     rdrDemographic.setSexAtBirth(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.SEX)
+        dbPopulationEnumSet.contains(SpecificPopulation.SEX)
             ? RdrWorkspaceDemographic.SexAtBirthEnum.INTERSEX
             : RdrWorkspaceDemographic.SexAtBirthEnum.UNSET);
 

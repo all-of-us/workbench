@@ -77,34 +77,34 @@ public class RdrExportEnums {
               .put(Disability.FALSE, org.pmiops.workbench.rdr.model.Disability.NO)
               .build();
 
-  private static final BiMap<SpecificPopulationEnum, RdrWorkspaceDemographic.RaceEthnicityEnum>
+  private static final BiMap<SpecificPopulation, RdrWorkspaceDemographic.RaceEthnicityEnum>
       CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY =
           ImmutableBiMap
-              .<SpecificPopulationEnum, RdrWorkspaceDemographic.RaceEthnicityEnum>builder()
-              .put(SpecificPopulationEnum.RACE_AA, RdrWorkspaceDemographic.RaceEthnicityEnum.AA)
-              .put(SpecificPopulationEnum.RACE_AIAN, RdrWorkspaceDemographic.RaceEthnicityEnum.AIAN)
+              .<SpecificPopulation, RdrWorkspaceDemographic.RaceEthnicityEnum>builder()
+              .put(SpecificPopulation.RACE_AA, RdrWorkspaceDemographic.RaceEthnicityEnum.AA)
+              .put(SpecificPopulation.RACE_AIAN, RdrWorkspaceDemographic.RaceEthnicityEnum.AIAN)
               .put(
-                  SpecificPopulationEnum.RACE_ASIAN,
+                  SpecificPopulation.RACE_ASIAN,
                   RdrWorkspaceDemographic.RaceEthnicityEnum.ASIAN)
-              .put(SpecificPopulationEnum.RACE_NHPI, RdrWorkspaceDemographic.RaceEthnicityEnum.NHPI)
-              .put(SpecificPopulationEnum.RACE_MENA, RdrWorkspaceDemographic.RaceEthnicityEnum.MENA)
+              .put(SpecificPopulation.RACE_NHPI, RdrWorkspaceDemographic.RaceEthnicityEnum.NHPI)
+              .put(SpecificPopulation.RACE_MENA, RdrWorkspaceDemographic.RaceEthnicityEnum.MENA)
               .put(
-                  SpecificPopulationEnum.RACE_HISPANIC,
+                  SpecificPopulation.RACE_HISPANIC,
                   RdrWorkspaceDemographic.RaceEthnicityEnum.HISPANIC)
               .put(
-                  SpecificPopulationEnum.RACE_MORE_THAN_ONE,
+                  SpecificPopulation.RACE_MORE_THAN_ONE,
                   RdrWorkspaceDemographic.RaceEthnicityEnum.MULTI)
               .build();
 
-  private static final BiMap<SpecificPopulationEnum, RdrWorkspaceDemographic.AgeEnum>
+  private static final BiMap<SpecificPopulation, RdrWorkspaceDemographic.AgeEnum>
       CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE =
-          ImmutableBiMap.<SpecificPopulationEnum, RdrWorkspaceDemographic.AgeEnum>builder()
-              .put(SpecificPopulationEnum.AGE_CHILDREN, RdrWorkspaceDemographic.AgeEnum.AGE_0_11)
+          ImmutableBiMap.<SpecificPopulation, RdrWorkspaceDemographic.AgeEnum>builder()
+              .put(SpecificPopulation.AGE_CHILDREN, RdrWorkspaceDemographic.AgeEnum.AGE_0_11)
               .put(
-                  SpecificPopulationEnum.AGE_ADOLESCENTS, RdrWorkspaceDemographic.AgeEnum.AGE_12_17)
-              .put(SpecificPopulationEnum.AGE_OLDER, RdrWorkspaceDemographic.AgeEnum.AGE_65_74)
+                  SpecificPopulation.AGE_ADOLESCENTS, RdrWorkspaceDemographic.AgeEnum.AGE_12_17)
+              .put(SpecificPopulation.AGE_OLDER, RdrWorkspaceDemographic.AgeEnum.AGE_65_74)
               .put(
-                  SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75,
+                  SpecificPopulation.AGE_OLDER_MORE_THAN_75,
                   RdrWorkspaceDemographic.AgeEnum.AGE_75_AND_MORE)
               .build();
 
@@ -161,7 +161,7 @@ public class RdrExportEnums {
   }
 
   public static org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum
-      specificPopulationToRaceEthnicity(SpecificPopulationEnum specificPopulationEnum) {
+      specificPopulationToRaceEthnicity(SpecificPopulation specificPopulationEnum) {
     if (CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY.containsKey(specificPopulationEnum)) {
       return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_RACE_ETHNICITY.get(specificPopulationEnum);
     } else {
@@ -170,7 +170,7 @@ public class RdrExportEnums {
   }
 
   public static org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AgeEnum
-      specificPopulationToAge(SpecificPopulationEnum specificPopulationEnum) {
+      specificPopulationToAge(SpecificPopulation specificPopulationEnum) {
     if (CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE.containsKey(specificPopulationEnum)) {
       return CLIENT_TO_RDR_WORKSPACE_DEMOGRAPHIC_AGE.get(specificPopulationEnum);
     } else {

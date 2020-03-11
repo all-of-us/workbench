@@ -1,5 +1,6 @@
 package org.pmiops.workbench.actionaudit.targetproperties
 
+import org.pmiops.workbench.model.SpecificPopulation
 import org.pmiops.workbench.model.Workspace
 
 // N.B. entries will rarely be referred to by name, but are accessed via values(). I.e. they are
@@ -51,7 +52,7 @@ constructor(
             { it.researchPurpose.population?.toString() }),
     POPULATION_DETAILS("population_details",
             { it.researchPurpose.getPopulationDetails()
-                ?.map(org.pmiops.workbench.model.SpecificPopulationEnum::toString)
+                ?.map(SpecificPopulation::toString)
                 ?.joinToString { ", " } }),
     POPULATION_HEALTH("population_health",
             { it.researchPurpose.populationHealth?.toString() }),

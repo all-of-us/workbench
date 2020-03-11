@@ -22,7 +22,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulation;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.utils.WorkspaceMapper;
@@ -107,7 +107,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setCommercialPurpose(false);
     sourceDbWorkspace.setPopulation(false);
     sourceDbWorkspace.setPopulationDetails(
-        ImmutableSet.of(SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL)
+        ImmutableSet.of(SpecificPopulation.AGE_GROUPS, SpecificPopulation.INCOME_LEVEL)
             .stream()
             .map(DbStorageEnums::specificPopulationToStorage)
             .collect(Collectors.toSet()));

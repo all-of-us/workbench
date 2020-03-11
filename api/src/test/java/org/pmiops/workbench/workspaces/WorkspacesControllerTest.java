@@ -147,7 +147,7 @@ import org.pmiops.workbench.model.ResearchPublicationOutlet;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulation;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
@@ -1143,7 +1143,7 @@ public class WorkspacesControllerTest {
     modPurpose.setPopulation(true);
     modPurpose.setPopulationDetails(
         ImmutableList.of(
-            SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
+            SpecificPopulation.DISABILITY_STATUS, SpecificPopulation.GEOGRAPHY));
     modPurpose.setDisseminateResearchFindingList(
         ImmutableList.of(ResearchPublicationOutlet.PRESENATATION_SCIENTIFIC_CONFERENCES));
     modPurpose.setResearchOutcomeList(
@@ -1284,7 +1284,7 @@ public class WorkspacesControllerTest {
   }
 
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
-    final List<SpecificPopulationEnum> populateionDetailsSorted =
+    final List<SpecificPopulation> populateionDetailsSorted =
         researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
     researchPurpose.setPopulationDetails(populateionDetailsSorted);
   }
