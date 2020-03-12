@@ -5,6 +5,7 @@ class DeveloperEnvironment
   def initialize(options)
     @logger = options[:'logger']
     @output_file = options[:'output-file'] || 'dev-tools-list.yaml'
+    @input = {'tools' => []}
   end
 
   def list
@@ -28,6 +29,8 @@ class DeveloperEnvironment
     @logger.info("writing to output file: #{@output_file}")
     IO.write(@output_file, yaml)
     versions
+
+    @logger.info(YAML.dump(@input))
   end
 
   private
@@ -45,6 +48,13 @@ class DeveloperEnvironment
   # use_stderr - if true, capture stderr instead of stdout for this tool
   # number_regex - optional. Regex that captures a group named 'version' when matched against a tool's long-form output
   def get_version_info(versions, tool_cmd, number_regex = nil, flag = '-v', use_stderr = false) # number_extractor = ->(x) { x.itself })
+    input = {
+        'tool_cmd' => tool_cmd,
+        'number_regex' => number_regex.to_s,
+        'flag' => flag,
+        'use_stderr' => use_stderr
+    }
+    @input['tools'] << input
     @logger.info("#{tool_cmd} #{flag} #{use_stderr} #{number_regex}")
     result = {}
     full_cmd  = "#{tool_cmd} #{flag}"
