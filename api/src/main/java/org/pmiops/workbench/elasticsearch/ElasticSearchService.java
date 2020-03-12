@@ -28,10 +28,13 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ElasticsearchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,18 +64,19 @@ public class ElasticSearchService {
         ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticIndexBaseName());
     QueryBuilder filter = ElasticFilters.fromCohortSearch(cbCriteriaDao, req);
     log.info("Elastic filter: " + filter.toString());
-    long count =
-        client()
-            .count(
-                new CountRequest(personIndex)
-                    .source(SearchSourceBuilder.searchSource().query(filter)),
-                RequestOptions.DEFAULT)
-            .getCount();
-    return count;
+    return client()
+        .count(
+            new CountRequest(personIndex).source(SearchSourceBuilder.searchSource().query(filter)),
+            RequestOptions.DEFAULT)
+        .getCount();
   }
 
   /** Get the demographic data info for the given search criteria. */
-  public List<DemoChartInfo> demoChartInfo(SearchRequest req) throws IOException {
+  public List<DemoChartInfo> demoChartInfo(ParticipantCriteria participantCriteria)
+      throws IOException {
+    SearchRequest req = participantCriteria.getSearchRequest();
+    GenderOrSexType genderOrSexType = participantCriteria.getGenderOrSexType();
+    AgeType ageType = participantCriteria.getAgeType();
     String personIndex =
         ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticIndexBaseName());
     QueryBuilder filter = ElasticFilters.fromCohortSearch(cbCriteriaDao, req);
@@ -86,9 +90,12 @@ public class ElasticSearchService {
                             .size(0) // reduce the payload since were only interested in the
                             // aggregations
                             .query(filter)
-                            .aggregation(buildDemoChartAggregation(RANGE_18_44))
-                            .aggregation(buildDemoChartAggregation(RANGE_45_64))
-                            .aggregation(buildDemoChartAggregation(RANGE_GT_65))),
+                            .aggregation(
+                                buildDemoChartAggregation(genderOrSexType, ageType, RANGE_18_44))
+                            .aggregation(
+                                buildDemoChartAggregation(genderOrSexType, ageType, RANGE_45_64))
+                            .aggregation(
+                                buildDemoChartAggregation(genderOrSexType, ageType, RANGE_GT_65))),
                 RequestOptions.DEFAULT);
     return unwrapDemoChartBuckets(searchResponse, RANGE_18_44, RANGE_45_64, RANGE_GT_65);
   }

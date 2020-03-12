@@ -359,7 +359,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
         && !isApproximate(request)) {
       try {
-        return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request)));
+        return ResponseEntity.ok(
+            response.items(
+                elasticSearchService.demoChartInfo(
+                    new ParticipantCriteria(request, genderOrSexType, ageType))));
       } catch (IOException e) {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }
