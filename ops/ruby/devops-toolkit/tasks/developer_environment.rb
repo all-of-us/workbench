@@ -5,7 +5,8 @@ class DeveloperEnvironment
   def initialize(options)
     @logger = options[:'logger']
     @logger.level = Logger::INFO
-    @input_file = options[:'input-file'] || './tasks/input/aou-workbench-dev-tools.yaml'
+    # TODO(jaycarlton) make this configurable
+    @input_file = './tasks/input/aou-workbench-dev-tools.yaml'
     @output_file = options[:'output-file'] || 'dev-tools-list.yaml'
     @versions = []
   end

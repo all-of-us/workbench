@@ -63,7 +63,7 @@ def run_task(options)
     LogsBasedMetrics.new(options).replicate
   when 'list-all-service-account-keys'
     ServiceAccounts.new(options).list_keys
-  when 'dele.te-all-service-account-keys'
+  when 'delete-all-service-account-keys'
     # Delete all user-generated SA keys for given service account. Should only be necessary
     # to clean up after debug sessions that killed the process before it had time to delete the
     # key associated with the current environment. Note that this may cause other users' jobs to fail
