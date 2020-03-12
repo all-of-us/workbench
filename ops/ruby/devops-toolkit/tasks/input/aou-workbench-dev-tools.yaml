@@ -6,7 +6,7 @@ tools:
     number_regex: "(?-mix:^Google\\sCloud\\sSDK\\s(?<version>\\d+\\.\\d+\\.\\d+)$)"
   - tool: gem
   - tool: gradle
-    number_regex: "(?-mix:\\s+Gradle\\s(?<version>\\d+\\.\\d+\\.\\d+)$)"
+    number_regex: "(?-mix:\\s+Gradle\\s(?<version>\\d+(\\.\\d+)*)$)"
   - tool: java
     number_regex: "(?-mix:^java\\sversion\\s\\\"(?<version>\\d+\\.\\d+\\.[_\\d]+)\\\"$)"
     flag: "-version"
