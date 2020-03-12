@@ -224,7 +224,7 @@ export const WorkspaceText = (props) => {
       borderColor: props.summaryObj.warningMsg ? colors.danger : colorWithWhiteness(colors.dark, 0.5)}}>
       {props.summaryObj.warningMsg && <label data-test-id='warningMsg'
         style={{color: colors.danger, textAlign: 'right', justifyContent: 'flex-start'}}>
-        Please enter atleast 50 characters.
+        Please enter at least 50 characters.
       </label>}
       {props.researchValue &&
       <div data-test-id='characterMsg' style={{color: props.summaryObj.textColor, marginLeft: 'auto'}}>
@@ -261,7 +261,7 @@ export interface SummaryProps {
   warningMsg: boolean;
 }
 
-export interface ResearchSummaryProps {
+export interface ResearchSummaryState {
   intendedStudy: SummaryProps;
   scientificApproach: SummaryProps;
   anticipatedFindings: SummaryProps;
@@ -283,7 +283,7 @@ export interface WorkspaceEditState {
   showResearchPurpose: boolean;
   billingAccounts: Array<BillingAccount>;
   showCreateBillingAccountModal: boolean;
-  researchSummaryProps: ResearchSummaryProps;
+  researchSummaryState: ResearchSummaryState;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -306,7 +306,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showStigmatizationDetails: false,
         billingAccounts: [],
         showCreateBillingAccountModal: false,
-        researchSummaryProps: {
+        researchSummaryState: {
           intendedStudy: {textColor: colors.disabled , warningMsg: false},
           scientificApproach: {textColor: colors.disabled , warningMsg: false},
           anticipatedFindings: {textColor: colors.disabled , warningMsg: false}
@@ -671,16 +671,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
 
     updateResearchPurposeSummary(purposeSummary, value) {
-      if (this.state.researchSummaryProps[purposeSummary].warningMsg && value.length >= 50 ) {
-        this.setState(fp.set(['researchSummaryProps', purposeSummary, 'warningMsg'], false));
+      if (this.state.researchSummaryState[purposeSummary].warningMsg && value.length >= 50 ) {
+        this.setState(fp.set(['researchSummaryState', purposeSummary, 'warningMsg'], false));
       }
       if (value.length > 1000) {
         value = value.substring(0, 1000);
       }
-      if (value.length >= 950 && this.state.researchSummaryProps[purposeSummary].textColor !== colors.danger) {
-        this.setState(fp.set(['researchSummaryProps', purposeSummary, 'textColor'], colors.danger));
-      } else if (value.length < 950 && this.state.researchSummaryProps[purposeSummary].textColor !== colors.disabled) {
-        this.setState(fp.set(['researchSummaryProps', purposeSummary, 'textColor'], colors.disabled));
+      if (value.length >= 950 && this.state.researchSummaryState[purposeSummary].textColor !== colors.danger) {
+        this.setState(fp.set(['researchSummaryState', purposeSummary, 'textColor'], colors.danger));
+      } else if (value.length < 950 && this.state.researchSummaryState[purposeSummary].textColor !== colors.disabled) {
+        this.setState(fp.set(['researchSummaryState', purposeSummary, 'textColor'], colors.disabled));
       }
       this.updateResearchPurpose(purposeSummary, value);
     }
@@ -688,9 +688,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     displayWarningMsg(summary) {
       const textAreaValue = fp.get(['workspace', 'researchPurpose', summary], this.state);
       if (textAreaValue.length < 50) {
-        this.setState(fp.set(['researchSummaryProps', summary, 'warningMsg'], true));
+        this.setState(fp.set(['researchSummaryState', summary, 'warningMsg'], true));
       } else {
-        this.setState(fp.set(['researchSummaryProps', summary, 'warningMsg'], false));
+        this.setState(fp.set(['researchSummaryState', summary, 'warningMsg'], false));
       }
     }
 
@@ -1017,14 +1017,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                           researchValue={this.state.workspace.researchPurpose.intendedStudy}
                           onChange={v => this.updateResearchPurposeSummary('intendedStudy', v)}
                           onBlur = {v => this.displayWarningMsg('intendedStudy')}
-                          summaryObj = {this.state.researchSummaryProps['intendedStudy']}
+                          summaryObj = {this.state.researchSummaryState['intendedStudy']}
                           index='2.1' rowId='intendedStudyText'/>
 
             {/* TextBox: scientific approaches section*/}
             <WorkspaceText researchPurpose={researchPurposeQuestions[3]}
                            researchValue={this.state.workspace.researchPurpose.scientificApproach}
                            onBlur = {v => this.displayWarningMsg('scientificApproach')}
-                           summaryObj = {this.state.researchSummaryProps['scientificApproach']}
+                           summaryObj = {this.state.researchSummaryState['scientificApproach']}
                            onChange={v => this.updateResearchPurposeSummary('scientificApproach', v)}
                            index='2.2' rowId='scientificApproachText'/>
             {/*TextBox: anticipated findings from the study section*/}
@@ -1032,7 +1032,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                            researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
                            onChange={v => this.updateResearchPurposeSummary('anticipatedFindings', v)}
                            onBlur = {v => this.displayWarningMsg('anticipatedFindings')}
-                           summaryObj = {this.state.researchSummaryProps['anticipatedFindings']}
+                           summaryObj = {this.state.researchSummaryState['anticipatedFindings']}
                            index='2.3' rowId='anticipatedFindingsText'/>
           </FlexColumn>
         </WorkspaceEditSection>
@@ -1196,13 +1196,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.primaryPurpose && <div>You must choose at least one primary research
                   purpose (Question 1)</div>}
                 {errors.anticipatedFindings && <div>Answer for <i>What are the anticipated findings
-                  from the study? (Question # 2.1)</i> should be of atleast 50 characters and max 1000 characters</div>}
+                  from the study? (Question # 2.1)</i> should be of atleast  50 characters</div>}
                 {errors.scientificApproach && <div>Answer for <i>What are the scientific
                   approaches you plan to use for your study (Question # 2.2)</i> should be of
-                  atleast 50 characters and max 1000 characters</div>}
+                  at least 50 characters</div>}
                 {errors.intendedStudy && <div>Answer for<i>What are the specific
                   scientific question(s) you intend to study (Question # 2.3)</i> should be of
-                  atleast 50 characters and max 1000 characters</div>}
+                  at least 50 characters</div>}
                 {errors.specificPopulation && <div>You must specify a population of study</div>}
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
                 {errors.researchOutcoming && <div>You must specify the outcome of the research</div>}

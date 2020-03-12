@@ -8,7 +8,7 @@ import {ClusterApi, Profile, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} fr
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {cdrVersionStore, currentWorkspaceStore, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore, serverConfigSworktore, userProfileStore} from 'app/utils/navigation';
 import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
