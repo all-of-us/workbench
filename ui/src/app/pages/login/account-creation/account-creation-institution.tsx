@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Error as ErrorDiv, TextInput} from 'app/components/inputs';
+import {Error as ErrorDiv, ErrorMessage, TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
@@ -22,6 +22,8 @@ import {WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/c
 import {TooltipTrigger} from 'app/components/popups';
 import {Button} from 'app/components/buttons';
 import {FormSection} from 'app/components/forms';
+import {defaultInstitutions} from 'testing/stubs/institution-api-stub';
+import {reportError} from 'app/utils/errors';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -30,7 +32,7 @@ const styles = reactStyles({
     fontWeight: 400
   },
   sectionInput: {
-    width: '12rem',
+    width: '14rem',
     height: '1.5rem'
   },
   text: {
@@ -73,7 +75,7 @@ interface State {
   emailFailedValidation: boolean;
   loadingInstitutions: boolean;
   institutions: Array<PublicInstitutionDetails>;
-  dataLoadError?: ErrorResponse;
+  dataLoadError: boolean;
 }
 
 export class AccountCreationInstitution extends React.Component<Props, State> {
@@ -83,25 +85,42 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       profile: props.profile,
       emailFailedValidation: false,
       institutions: [],
-      loadingInstitutions: true
+      loadingInstitutions: true,
+      dataLoadError: false,
     };
   }
 
   async componentDidMount() {
-    const details = await institutionApi().getPublicInstitutionDetails();
-    this.setState({
-      loadingInstitutions: false,
-      institutions: details.institutions
-    });
+    try {
+      const details = await institutionApi().getPublicInstitutionDetails();
+      this.setState({
+        loadingInstitutions: false,
+        institutions: details.institutions
+      });
+    } catch (e) {
+      this.setState({
+        loadingInstitutions: false,
+        dataLoadError: true
+      });
+      reportError(e);
+    }
   }
 
-  validateContactEmail() {
-    const emailValidRegexp = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
-    if (!isBlank(this.state.profile.contactEmail) &&
-      !emailValidRegexp.test(this.state.profile.contactEmail)) {
-      this.setState({emailFailedValidation: true});
-    } else {
+  validateContactEmailInline() {
+    const {profile: { contactEmail } } = this.state;
+
+    if (isBlank(contactEmail)) {
+      // Allow a blank email to pass inline validation: it will still block overall form
+      // submission via the validate() config below.
       this.setState({emailFailedValidation: false});
+      return;
+    }
+
+    const result = validate.single(contactEmail, { email: true } );
+    if (result === undefined) {
+      this.setState({emailFailedValidation: false});
+    } else {
+      this.setState({emailFailedValidation: true});
     }
   }
 
@@ -110,13 +129,8 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     this.setState(fp.set(['profile', 'contactEmail'], contactEmail));
   }
 
-  validate(): Map<string, Array<string>> {
-    const presenceCheck = {
-      presence: {
-        allowEmpty: false
-      }
-    };
-
+  // Visible for testing.
+  public validate(): {[key: string]: Array<string>} {
     const validationCheck = {
       'verifiedInstitutionalAffiliation.institutionShortName': {
         presence: {
@@ -124,16 +138,19 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           message: '^You must select an institution to continue',
         }
       },
-      'verifiedInstitutionalAffiliation.institutionalRoleEnum': {
-        presence: {
-          allowEmpty: false,
-          message: '^Institutional role cannot be blank',
-        }
-      },
       contactEmail: {
         presence: {
           allowEmpty: false,
           message: '^Email address cannot be blank',
+        },
+        email: {
+          message: '^Email address is invalid'
+        }
+      },
+      'verifiedInstitutionalAffiliation.institutionalRoleEnum': {
+        presence: {
+          allowEmpty: false,
+          message: '^Institutional role cannot be blank',
         }
       },
     };
@@ -200,7 +217,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             enables us to provide their researchers with access to the Workbench.
           </div>
           <div style={{...styles.text, fontSize: 12, marginTop: '0.5rem'}}>
-            All fields required unless indicated as optional
+            All fields are required.
           </div>
           {loadingInstitutions && <SpinnerOverlay />}
           {!loadingInstitutions && <div style={{marginTop: '.5rem'}}>
@@ -218,7 +235,18 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 style={{width: '50%', minWidth: '600px'}}
                 options={institutions.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
                 value={institutionShortName}
-                onChange={(e) => this.updateAffiliationValue('institutionShortName', e.value)}/>
+                onChange={(e) => {
+                  this.updateAffiliationValue('institutionShortName', e.value);
+                  // Clear out any existing values for role when the institution changes.
+                  this.updateAffiliationValue('institutionalRoleEnum', undefined);
+                  this.updateAffiliationValue('institutionalRoleOtherText', undefined);
+                }}/>
+            {this.state.dataLoadError &&
+            <ErrorDiv data-test-id='data-load-error'>
+              An error occurred loading the institution list. Please try again or contact
+              <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+            </ErrorDiv>
+            }
             <div style={{marginTop: '.5rem'}}>
               <a href={'https://www.researchallofus.org/apply/'} target='_blank' style={{color: colors.accent}}>
               Don't see your institution listed?
@@ -226,7 +254,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </div>
             <TextInputWithLabel containerStyle={{marginTop: '1rem', width: null}}
                                 value={contactEmail}
-                                inputId='contactEmail'
+                                inputId='contact-email'
                                 inputName='contactEmail'
                                 labelContent={<div>
                                   <label style={{...styles.text, fontWeight: 600}}>
@@ -237,10 +265,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                   </div>
                                 </div>}
                                 invalid={this.state.emailFailedValidation}
-                                onBlur={() => this.validateContactEmail()}
+                                onBlur={() => this.validateContactEmailInline()}
                                 onChange={email => this.updateContactEmail(email)}/>
             {this.state.emailFailedValidation &&
-              <ErrorDiv id='invalidEmailError'>
+              <ErrorDiv data-test-id='invalid-email-error'>
                 Error: email address is invalid
               </ErrorDiv>
             }
@@ -252,7 +280,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 </i>
               </label>
               <div>
-                <Dropdown style={{width: '50%', 'minWidth': '600px'}}
+                <Dropdown data-test-id='role-dropdown'
+                          style={{width: '50%', 'minWidth': '600px'}}
+                          placeholder={this.getRoleOptions() ?
+                            '' : 'First select an institution above'}
                           options={this.getRoleOptions()}
                           value={institutionalRoleEnum}
                           onChange={(e) => this.updateAffiliationValue('institutionalRoleEnum', e.value)}/>
@@ -278,13 +309,14 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                     onClick={() => this.props.onPreviousClick(this.state.profile)}>
               Previous
             </Button>
-            <TooltipTrigger content={errors && <React.Fragment>
+            <TooltipTrigger content={errors && <div data-test-id='validation-errors'>
               <div>Please review the following: </div>
               <ul>
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
               </ul>
-            </React.Fragment>} disabled={!errors}>
-              <Button disabled={loadingInstitutions || errors != null}
+            </div>} disabled={!errors}>
+              <Button data-test-id='submit-button'
+                      disabled={loadingInstitutions || errors != null}
                       onClick={() => this.props.onComplete(this.state.profile)}>
                 Next
               </Button>

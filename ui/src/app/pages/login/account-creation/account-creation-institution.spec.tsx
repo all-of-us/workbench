@@ -1,4 +1,4 @@
-import {mount} from 'enzyme';
+import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {serverConfigStore} from 'app/utils/navigation';
@@ -14,13 +14,34 @@ import SpyInstance = jest.SpyInstance;
 import {Dropdown} from 'primereact/dropdown';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {defaultInstitutions} from 'testing/stubs/institution-api-stub';
+import {InstitutionalRole} from 'generated/fetch';
+import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 
 let mockGetPublicInstitutionDetails: SpyInstance;
 
+type AnyWrapper = (ShallowWrapper|ReactWrapper);
+
 let props: Props;
-const component = () => {
+function component(): ReactWrapper {
   return mount(<AccountCreationInstitution {...props}/>);
-};
+}
+
+function getInstitutionDropdown(wrapper: AnyWrapper): Dropdown {
+  return wrapper.find('Dropdown[data-test-id="institution-dropdown"]').instance() as Dropdown;
+}
+
+function getEmailInput(wrapper: AnyWrapper): AnyWrapper {
+  return wrapper.find('[data-test-id="contact-email"]').hostNodes();
+}
+
+function getRoleDropdown(wrapper: AnyWrapper): Dropdown {
+  return wrapper.find('Dropdown[data-test-id="role-dropdown"]').instance() as Dropdown;
+}
+
+function getSubmitButton(wrapper: AnyWrapper): AnyWrapper {
+  return wrapper.find('[data-test-id="submit-button"]');
+}
+
 
 beforeEach(() => {
   serverConfigStore.next(defaultServerConfig);
@@ -43,20 +64,92 @@ it('should render', async() => {
 
 it('should load institutions list', async() => {
   const wrapper = component();
-
   await waitOneTickAndUpdate(wrapper);
+
   expect(mockGetPublicInstitutionDetails).toHaveBeenCalled();
 
-  const options = wrapper.find('Dropdown[data-test-id="institution-dropdown"]').prop('options') as Array<Object>;
+  const options = getInstitutionDropdown(wrapper).props.options as Array<Object>;
   expect(options.length).toEqual(defaultInstitutions.length);
 });
 
-it('should show role list ', async() => {
+const academicSpecificOption = AccountCreationOptions.institutionalRoleOptions.find(
+  x => x.value === InstitutionalRole.UNDERGRADUATE
+);
+
+const industrySpecificOption = AccountCreationOptions.institutionalRoleOptions.find(
+  x => x.value === InstitutionalRole.SENIORRESEARCHER
+);
+
+it('should reset role value & options when institution is selected', async() => {
   const wrapper = component();
-
   await waitOneTickAndUpdate(wrapper);
-  expect(mockGetPublicInstitutionDetails).toHaveBeenCalled();
 
-  wrapper.find('Dropdown[data-test-id="institution-dropdown"]')
-  
+  // Simulate choosing an institution from the dropdown.
+  const institutionDropdown = getInstitutionDropdown(wrapper);
+  institutionDropdown.props.onChange({originalEvent: undefined, value: 'Broad'});
+  await waitOneTickAndUpdate(wrapper);
+
+  const roleDropdown = getRoleDropdown(wrapper);
+  // Broad is an academic institution, which should contain the undergrad role.
+  expect(roleDropdown.props.options).toContain(academicSpecificOption);
+
+  // Simulate selecting a role value for Broad.
+  roleDropdown.props.onChange({originalEvent: undefined, value: academicSpecificOption.value});
+  expect(roleDropdown.props.value).toEqual(academicSpecificOption.value);
+
+  // Simulate switching to Verily.
+  institutionDropdown.props.onChange({originalEvent: undefined, value: 'Verily'});
+
+  // Role value should be cleared when institution changes.
+  expect(roleDropdown.props.value).toBeNull();
+  // Role options should have been swapped out w/ industry options.
+  expect(roleDropdown.props.options).toContain(industrySpecificOption);
+});
+
+
+it('should validate form', async() => {
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  const reactComponent = wrapper.find(AccountCreationInstitution).instance() as AccountCreationInstitution;
+  const errors = reactComponent.validate();
+
+  expect(Object.keys(errors).length).toBeGreaterThan(0);
+  expect(errors['verifiedInstitutionalAffiliation.institutionShortName'])
+    .toContain('select an institution to continue');
+  expect(errors['verifiedInstitutionalAffiliation.institutionRoleEnum'])
+    .toContain('cannot be blank');
+  expect(errors['contactEmail']).toContain('cannot be blank');
+  expect(errors['contactEmail']).toContain('address is invalid');
+});
+
+it('should call callback with correct form data', async() => {
+  let profile: Profile = null;
+  props.onComplete = (formProfile: Profile) => {
+    profile = formProfile;
+  };
+  // Fill in all fields with reasonable data.
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+
+  const emailField = getEmailInput(wrapper);
+  emailField.simulate('change', {target: {value: 'asdf@asdf.com'}});
+
+  const roleDropdown = getRoleDropdown(wrapper);
+  roleDropdown.props.onChange({originalEvent: undefined, value: InstitutionalRole.UNDERGRADUATE});
+
+  // Click the button.
+  getSubmitButton(wrapper).simulate('click');
+
+  expect(profile).toBeDefined();
+});
+
+it('should handle error response from institution API', async() => {
+  mockGetPublicInstitutionDetails.mockRejectedValueOnce(new Response(null, {status: 500}));
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  expect(wrapper.find('[data-test-id="data-load-error"]').exists).toBeTruthy();
 });
