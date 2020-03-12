@@ -214,6 +214,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               Your institution will be notified that you have registered using your institutional credentials.
             </div>
             <Dropdown
+                data-test-id='institution-dropdown'
                 style={{width: '50%', minWidth: '600px'}}
                 options={institutions.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
                 value={institutionShortName}
