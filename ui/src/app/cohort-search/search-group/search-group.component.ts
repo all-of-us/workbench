@@ -340,11 +340,11 @@ export class SearchGroupComponent implements OnInit {
       case TemporalTime.DURINGSAMEENCOUNTERAS:
         return 'During same encounter as';
       case TemporalTime.XDAYSBEFORE:
-        return 'X Days before';
+        return 'X or more days before';
       case TemporalTime.XDAYSAFTER:
-        return 'X Days after';
+        return 'X or more days after';
       case TemporalTime.WITHINXDAYSOF:
-        return 'Within X Days of';
+        return 'on or within X days of';
     }
   }
 
