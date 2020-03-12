@@ -1,7 +1,7 @@
-import {waitUntilTitleMatch} from '../driver/waitFuncs';
-import authenticatedpage from './mixin/authenticatedpage';
+import {Page} from 'puppeteer';
+import AuthenticatedPage from './authenticated-page';
 
-const tabsSelector = {
+export const TAB_SELECTOR = {
   cohortsTab: '//*[@role="button"][(text()="Cohorts")]',
   dataSetsTab: '//*[@role="button"][(text()="Datasets")]',
   cohortReviewsTab: '//*[@role="button"][(text()="Cohort Reviews")]',
@@ -9,13 +9,24 @@ const tabsSelector = {
   showAllTab: '//*[@role="button"][(text()="Show All")]',
 };
 
+export const PAGE = {
+  TITLE: 'Data Page',
+};
 
-export default class DataPage extends authenticatedpage {
+export default class DataPage extends AuthenticatedPage {
 
-  public async waitUntilPageReady() {
-    await waitUntilTitleMatch(this.puppeteerPage, 'Data Page');
-    await this.puppeteerPage.waitForXPath(tabsSelector.showAllTab, {visible: true});
-    await this.waitForSpinner();
+  constructor(page: Page) {
+    super(page);
+  }
+
+  async isLoaded(): Promise<boolean> {
+    try {
+      await this.waitUntilTitleMatch(PAGE.TITLE);
+      await this.page.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true});
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
 }
