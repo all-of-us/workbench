@@ -26,4 +26,4 @@ tools:
     use_stderr: true
   - tool: ruby
     number_regex: "(?-mix:ruby\\s(?<version>\\d+\\.\\d+\\.\\w+))"
-  - tool: yarn 
+  - tool: yarn

@@ -23,7 +23,6 @@ class DeveloperEnvironment
     @logger.info("writing to output file: #{@output_file}")
     IO.write(@output_file, yaml)
 
-    @logger.info(YAML.dump(@input))
     @versions
   end
 
