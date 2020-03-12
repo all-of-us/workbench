@@ -26,12 +26,37 @@ import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator}
 import {Subscription} from 'rxjs/Subscription';
 
 const styles = reactStyles({
-  icon: {},
-  iconContainer: {
+  count: {
+    alignItems: 'center',
+    background: colors.accent,
+    borderRadius: '10px',
+    color: colors.white,
+    display: 'inline-flex',
+    fontSize: '10px',
+    height: '0.625rem',
+    justifyContent: 'center',
+    lineHeight: 'normal',
+    minWidth: '0.675rem',
+    padding: '0 4px'
+  },
+  error: {
+    background: colors.warning,
+    color: colors.white,
+    fontSize: '12px',
+    fontWeight: 500,
+    textAlign: 'left',
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    marginTop: '0.25rem',
+    padding: '8px',
+  },
+  iconButton: {
+    background: 'transparent',
+    border: 0,
     cursor: 'pointer',
-    display: 'inline-block',
     flex: '0 0 1.25rem',
     height: '1.25rem',
+    padding: 0,
     width: '1.25rem',
   },
   ingredients: {
@@ -58,6 +83,16 @@ const styles = reactStyles({
     backgroundColor: colors.white,
     zIndex: 1,
   },
+  selectIcon: {
+    color: colors.select,
+    margin: '5px'
+  },
+  selectedIcon: {
+    color: colors.select,
+    cursor: 'not-allowed',
+    margin: '5px',
+    opacity: 0.4
+  },
   treeContainer: {
     margin: '3rem 0 1rem',
     width: '99%',
@@ -66,28 +101,17 @@ const styles = reactStyles({
     overflow: 'auto',
     background: colorWithWhiteness(colors.black, 0.97),
     borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+  },
+  treeNode: {
+    alignItems: 'center',
+    display: 'flex'
+  },
+  treeNodeContent: {
+    cursor: 'pointer',
+    margin: 0,
+    paddingLeft: '0.25rem',
+    width: '90%'
   }
-});
-
-const iconStyles = reactStyles({
-  attributesIcon: {
-    ...styles.icon,
-    color: colors.accent
-  },
-  caretIcon: {
-    ...styles.icon,
-    color: colors.disabled
-  },
-  selectIcon: {
-    ...styles.icon,
-    color: colors.success
-  },
-  selectedIcon: {
-    ...styles.icon,
-    color: colors.success,
-    cursor: 'not-allowed',
-    opacity: 0.4
-  },
 });
 
 interface TreeNodeProps {
@@ -213,6 +237,12 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       .includes(this.props.node.subtype);
   }
 
+  get showCount() {
+    const {node: {code, count, group, selectable, subtype, type}} = this.props;
+    return count > -1 &&
+      (selectable || (subtype === CriteriaSubType.LAB.toString() && group && code !== null) || type === CriteriaType.CPT4.toString());
+  }
+
   select() {
     const {node, node: {conceptId, domainId, group, id, name, parentId, subtype, value}} = this.props;
     let selections = selectionsStore.getValue();
@@ -272,28 +302,32 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   render() {
-    const {node, node: {id, group, hasAttributes, name, selectable}} = this.props;
+    const {node, node: {code, count, id, group, hasAttributes, name, selectable}} = this.props;
     const {children, expanded, loading, selected} = this.state;
     return <React.Fragment>
-      <div id={`node${id}`} onClick={() => this.toggleExpanded()}>
-        {group && <div style={styles.iconContainer}>
+      <div style={{...styles.treeNode, paddingLeft: !group ? '1.25rem' : 0}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
+        {group && <button style={styles.iconButton}>
           {loading
             ? <Spinner size={16}/>
-            : <ClrIcon style={iconStyles.caretIcon} shape={'angle ' + (expanded ? 'down' : 'right')}
+            : <ClrIcon style={{color: colors.disabled}} shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16' onClick={() => this.toggleExpanded()}/>}
-        </div>}
-        {selectable && <div style={styles.iconContainer}>
-          {hasAttributes
-            ? <ClrIcon style={iconStyles.attributesIcon} shape='slider' dir='right' size='20' onClick={() => attributesStore.next(node)}/>
-            : <React.Fragment>
-              {!selected && <ClrIcon style={iconStyles.selectIcon} shape='plus-circle' size='20' onClick={() => this.select()}/>}
-              {selected && <ClrIcon style={iconStyles.selectedIcon} shape='check-circle' size='20'/>}
-            </React.Fragment>
-          }
-        </div>}
-        <div className='clr-treenode-link container'>{name}</div>
+        </button>}
+        <div style={styles.treeNodeContent}>
+          {selectable && <button style={styles.iconButton}>
+            {hasAttributes
+              ? <ClrIcon style={{color: colors.accent}} shape='slider' dir='right' size='20' onClick={() => attributesStore.next(node)}/>
+              : <React.Fragment>
+                {!selected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='20' onClick={() => this.select()}/>}
+                {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
+              </React.Fragment>
+            }
+          </button>}
+          <div style={{display: 'inline-block'}}>
+            <b style={{color: colors.dark}}>{code}</b> {name} {this.showCount && <span style={styles.count}>{count.toLocaleString()}</span>}
+          </div>
+        </div>
       </div>
-      {expanded && !!children && <div style={{marginLeft: '1rem'}} className='node-list'>
+      {expanded && !!children && <div style={{marginLeft: '0.875rem'}}>
         {children.map((child, c) => <TreeNode key={c} node={child}/>)}
       </div>}
     </React.Fragment>;
@@ -387,7 +421,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   trackEvent() {
-    const {node: {domainId, name, parentId, subtype}} = this.props;
+    const {node: {domainId, name, subtype}} = this.props;
     const formattedName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
     triggerEvent(
       'Cohort Builder Search',
@@ -424,10 +458,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     });
   }
 
-  get showSearch() {
-    return this.props.node.domainId !== DomainType.VISIT.toString();
-  }
-
   get showHeader() {
     const {node: {domainId}} = this.props;
     return domainId !== DomainType.PHYSICALMEASUREMENT.toString()
@@ -435,7 +465,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       && domainId !== DomainType.VISIT.toString();
   }
 
-  get isEmpty() {
+  get hasError() {
     const {empty, error, loading} = this.state;
     return !loading && (empty || error);
   }
@@ -444,9 +474,9 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     const {back, node} = this.props;
     const {children, ingredients, loading} = this.state;
     return <React.Fragment>
-      <div style={styles.searchBarContainer}>
+      {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
         <SearchBar node={node} setIngredients={(i) => this.setState({ingredients: i})}/>
-      </div>
+      </div>}
       <div style={this.showHeader
         ? {...styles.treeContainer, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}
         : styles.treeContainer}>
@@ -456,13 +486,13 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           </div>}
           <button style={styles.returnLink} onClick={() => back()}>Return to list</button>
         </div>}
-        {this.isEmpty && <div className='alert alert-warning'>
-          <ClrIcon className='alert-icon is-solid' shape='exclamation-triangle' />
+        {this.hasError && <div style={styles.error}>
+          <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
         {!loading && !!children && children.map((child, c) => <TreeNode key={c} node={child}/>)}
     </div>
-      {loading && <SpinnerOverlay/>}
+      {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
   }
 });
