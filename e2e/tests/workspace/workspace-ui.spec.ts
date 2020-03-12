@@ -29,7 +29,7 @@ describe('Workspace ui tests', () => {
     for (const card of cards) {
       const cardElem = new BaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
-      const size = await cardElem.size();
+      const size = await cardElem.getSize();
       if (width === undefined) {
         width = size.width; // Initialize width and height with first card element's size, compare with rest cards
         height = size.height;

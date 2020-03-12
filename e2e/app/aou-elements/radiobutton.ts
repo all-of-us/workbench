@@ -1,27 +1,27 @@
-import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import {Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
 import {findRadiobutton} from './xpath-finder';
 
 export default class RadioButton extends BaseElement {
-
-  constructor(aPage: Page) {
-    super(aPage);
-  }
    
-  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr = true): Promise<ElementHandle> {
-    if (waitOptions === undefined) {
-      waitOptions = {visible: true};
-    }
+  static async forLabel(
+     page: Page,
+     textOptions: TextOptions,
+     waitOptions: WaitForSelectorOptions = {visible: true},
+     throwErr = true): Promise<RadioButton> {
+
+    let element: RadioButton;
     try {
-      this.element = await findRadiobutton(this.page, textOptions, waitOptions);
+      const radioElement = await findRadiobutton(page, textOptions, waitOptions);
+      element = new RadioButton(page, radioElement);
     } catch (e) {
       if (throwErr) {
         console.error(`FAILED finding Radiobutton: "${JSON.stringify(textOptions)}".`);
         throw e;
       }
     }
-    return this.element;
+    return element;
   }
 
   async isSelected() {

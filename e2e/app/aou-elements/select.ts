@@ -1,4 +1,4 @@
-import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import {Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
 import {findSelect} from './xpath-finder';
@@ -6,24 +6,24 @@ import {findSelect} from './xpath-finder';
 export default class Select extends BaseElement {
 
   private selectedOption;
-
-  constructor(aPage: Page) {
-    super(aPage);
-  }
    
-  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr = true): Promise<ElementHandle> {
-    if (waitOptions === undefined) {
-      waitOptions = {visible: true};
-    }
+  static async forLabel(
+     page: Page,
+     textOptions: TextOptions,
+     waitOptions: WaitForSelectorOptions = {visible: true},
+     throwErr = true): Promise<Select> {
+
+    let elem: Select;
     try {
-      this.element = await findSelect(this.page, textOptions, waitOptions);
+      const selectElement = await findSelect(page, textOptions, waitOptions);
+      elem = new Select(page, selectElement);
     } catch (e) {
       if (throwErr) {
         console.error(`FAILED finding Select: "${JSON.stringify(textOptions)}".`);
         throw e;
       }
     }
-    return this.element;
+    return elem;
   }
 
   async selectOption(optionValue: string): Promise<string> {

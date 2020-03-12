@@ -65,14 +65,13 @@ describe('User registration tests:', () => {
     // Step 1: Enter invitation key.
     const createAccountPage = new CreateAccountPage(page);
     await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
-    await page.waitFor(1000);
 
     // Step 2: Checking Accepting Terms of Service.
-    const pdfPageCount =  await page.waitForFunction(() => {
-      return document.querySelectorAll('.tos-pdf-page[data-page-number]').length === 9
+    const pdfPage =  await page.waitForFunction(() => {
+      return document.querySelectorAll('.tos-pdf-page[data-page-number]').length > 1
     }, {timeout: 30000});
-    // expecting 9 pages in pdf document
-    expect(await pdfPageCount.jsonValue()).toBe(true);
+    // expecting pdf document
+    expect(await pdfPage.jsonValue()).toBe(true);
 
     // Before user read all pdf pages, checkboxes are unchecked and disabled
     const privacyStatementCheckbox = await createAccountPage.getPrivacyStatementCheckbox();

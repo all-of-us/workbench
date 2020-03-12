@@ -71,22 +71,18 @@ describe('Navigation', () => {
     const iframeHandle = await page.waitForSelector('iframe[title="Find more information here"]');
     const newIframe = await iframeHandle.contentFrame();
 
-    const askQuestionAboutButton = new Button(newIframe);
-    await askQuestionAboutButton.withLabel({text: HELP_DESK.ASK_QUESTION});
+    const askQuestionAboutButton = await Button.forLabel(newIframe, {text: HELP_DESK.ASK_QUESTION});
     expect(await askQuestionAboutButton.isVisible()).toBe(true);
 
-    const reportConcernButton = new Button(newIframe);
-    await reportConcernButton.withLabel({text: HELP_DESK.REPORT_DATA_PRIVACY_CONCERN});
+    const reportConcernButton = await Button.forLabel(newIframe, {text: HELP_DESK.REPORT_DATA_PRIVACY_CONCERN});
     expect(await reportConcernButton.isVisible()).toBe(true);
     await reportConcernButton.dispose();
 
-    const tellAboutPublicationButton = new Button(newIframe);
-    await tellAboutPublicationButton.withLabel({text: HELP_DESK.TELL_US_ABOUT_PUBLICATION});
+    const tellAboutPublicationButton = await Button.forLabel(newIframe, {text: HELP_DESK.TELL_US_ABOUT_PUBLICATION});
     expect(await tellAboutPublicationButton.isVisible()).toBe(true);
     await tellAboutPublicationButton.dispose();
 
-    const requestBillingCreditsButton = new Button(newIframe);
-    await requestBillingCreditsButton.withLabel({text: HELP_DESK.REQUEST_ADDITIONAL_BILLING_CREDITS});
+    const requestBillingCreditsButton = await Button.forLabel(newIframe, {text: HELP_DESK.REQUEST_ADDITIONAL_BILLING_CREDITS});
     expect(await requestBillingCreditsButton.isVisible()).toBe(true);
     await requestBillingCreditsButton.dispose();
 

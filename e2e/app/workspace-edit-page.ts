@@ -1,5 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
-import select from './aou-elements/select';
+import Select from './aou-elements/select';
 import SelectComponent from './aou-elements/select-component';
 import Textbox from './aou-elements/textbox';
 import WebComponent from './aou-elements/web-component';
@@ -66,9 +66,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   async getWorkspaceNameTextbox(): Promise<Textbox> {
-    const textbox = new Textbox(this.page);
-    await textbox.withLabel({text: FIELD_LABEL.NEW_WORKSPACE_NAME, ancestorNodeLevel: 2});
-    return textbox;
+    return await Textbox.forLabel(this.page, {text: FIELD_LABEL.NEW_WORKSPACE_NAME, ancestorNodeLevel: 2});
   }
 
   getDataSetSelectOption(): WebComponent {
@@ -150,8 +148,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
    * @param optionValue: 1 for selecting Data Set 1. 2 for Data Set 2.
    */
   async selectDataSet(optionValue: string) {
-    const dataSetSelect = new select(this.page);
-    await dataSetSelect.withLabel({text: FIELD_LABEL.SYNTHETIC_DATASET});
+    const dataSetSelect = await Select.forLabel(this.page, {text: FIELD_LABEL.SYNTHETIC_DATASET});
     await dataSetSelect.selectOption(optionValue);
   }
 
@@ -159,8 +156,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
    * Select Billing Account
    */
   async selectBillingAccount(account: string) {
-    const billingAccountSelect = new select(this.page);
-    await billingAccountSelect.withLabel({text: FIELD_LABEL.SELECT_BILLING});
+    const billingAccountSelect = await Select.forLabel(this.page, {text: FIELD_LABEL.SELECT_BILLING});
     await billingAccountSelect.selectOption(account);
   }
 
@@ -179,7 +175,6 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     if (yesOrNo !== is) {
       // click checkbox expands or collapses the section, reveal hidden questions contained inside.
       await researchPurposeCheckbox.check();
-      await this.page.waitFor(1000);
     }
   }
 

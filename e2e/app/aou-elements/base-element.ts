@@ -1,11 +1,10 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
-import {BaseElementInterface} from './base-element-interface';
 
 /**
  * BaseElement represents a web element in the DOM.
  * It implements useful methods for querying and interacting with this element.
  */
-export default class BaseElement implements BaseElementInterface {
+export default class BaseElement {
 
   static asBaseElement(page: Page, elem: ElementHandle): BaseElement {
     return new BaseElement(page, elem);
@@ -21,15 +20,25 @@ export default class BaseElement implements BaseElementInterface {
     this.element = aElement || undefined;
   }
 
-  async withCss(cssSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
+  /**
+   * Find element with wait.
+   * @param cssSelector
+   * @param waitOptions
+   */
+  async withCss(cssSelector: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
     this.css = cssSelector;
-    this.element = await this.page.waitForSelector(this.css, options);
+    this.element = await this.page.waitForSelector(this.css, waitOptions);
     return this.element;
   }
 
-  async withXpath(xpathSelector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
+  /**
+   * Find element with wait.
+   * @param xpathSelector
+   * @param waitOptions
+   */
+  async withXpath(xpathSelector: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
     this.xpath = xpathSelector;
-    this.element = await this.page.waitForXPath(this.xpath, options);
+    this.element = await this.page.waitForXPath(this.xpath, waitOptions);
     return this.element;
   }
 
@@ -54,6 +63,15 @@ export default class BaseElement implements BaseElementInterface {
       this.element = null;
     }
     return this.element;
+  }
+
+  async retryFindElement(): Promise<ElementHandle | null> {
+    if (this.xpath != null) {
+      return this.findByXpath(this.xpath);
+    } else if (this.css != null) {
+      return this.findByCss(this.css);
+    }
+    return null;
   }
 
   /**
@@ -204,7 +222,7 @@ export default class BaseElement implements BaseElementInterface {
   /**
    * Finds element's size.
    */
-  async size(): Promise<{ width: number; height: number }> {
+  async getSize(): Promise<{ width: number; height: number }> {
     const box = await this.element.boundingBox();
     if (!box) {
       // if element is not visible, returns size of (0, 0).

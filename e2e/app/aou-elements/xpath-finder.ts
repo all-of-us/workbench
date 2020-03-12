@@ -16,6 +16,8 @@ export async function findClickable(page: Page, label: string, options?: WaitFor
  * @param {string} label
  */
 export async function findSelect(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  // ancestor node level is used to find the closest common parent for the label element and Select element.
+  // For most cases of Select, closest parent element is two level up from label. Thus for the default value 2.
   if (textOptions.ancestorNodeLevel === undefined) {
     textOptions.ancestorNodeLevel = 2;
   }
@@ -28,6 +30,8 @@ export async function findSelect(page: Page, textOptions: TextOptions, waitOptio
  * @param {string} label
  */
 export async function findCheckbox(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  // ancestor node level is used to find the closest common parent for the label element and checkbox element.
+  // For most cases of checkbox, closest parent element is one level up from label. Thus for the default value 1.
   if (textOptions.ancestorNodeLevel === undefined) {
     textOptions.ancestorNodeLevel = 1;
   }
@@ -50,8 +54,8 @@ export async function findButton(page: Page, textOptions: TextOptions, waitOptio
  * @param {string} label: Textarea label partial text
  */
 export async function findTextarea(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  // ancestor node level is used to find the closest common parent for the label element and input element.
-  // For most cases, closest parent element is two level up from label. Thus for the default value 2.
+  // ancestor node level is used to find the closest common parent for the label element and textarea element.
+  // For most cases of textarea, closest parent element is two level up from label. Thus for the default value 2.
   if (textOptions.ancestorNodeLevel === undefined) {
     textOptions.ancestorNodeLevel = 2;
   }
@@ -73,6 +77,8 @@ export async function findLabel(page: Page, textOptions: TextOptions, waitOption
  * @param {string} label
  */
 export async function findTextbox(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  // ancestor node level is used to find the closest common parent for the label element and textbox element.
+  // For most cases of textbox, closest parent element is one level up from label. Thus for the default value 1.
   if (textOptions.ancestorNodeLevel === undefined) {
     textOptions.ancestorNodeLevel = 1;
   }
@@ -86,6 +92,8 @@ export async function findTextbox(page: Page, textOptions: TextOptions, waitOpti
  * @param {string} label
  */
 export async function findRadiobutton(page: Page, textOptions: TextOptions, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  // ancestor node level is used to find the closest common parent for the label element and radiobutton element.
+  // For most cases of radiobutton, closest parent element is one level up from label. Thus for the default value 1.
   if (textOptions.ancestorNodeLevel === undefined) {
     textOptions.ancestorNodeLevel = 1;
   }

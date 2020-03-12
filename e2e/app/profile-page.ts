@@ -37,15 +37,11 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async getFirstName(): Promise<Textbox> {
-    const textbox = new Textbox(this.page);
-    await textbox.withLabel({text: FIELD_LABEL.FIRST_NAME});
-    return textbox;
+    return await Textbox.forLabel(this.page, {text: FIELD_LABEL.FIRST_NAME});
   }
 
   async getLastName(): Promise<Textbox> {
-    const textbox = new Textbox(this.page);
-    await textbox.withLabel({text: FIELD_LABEL.LAST_NAME});
-    return textbox;
+    return await Textbox.forLabel(this.page, {text: FIELD_LABEL.LAST_NAME});
   }
 
 }

@@ -16,57 +16,41 @@ import Textbox from './textbox';
  */
 export default class WebComponent {
 
-  constructor(private readonly page: Page, private readonly labelTextOptions?: TextOptions) {
+  constructor(private readonly page: Page, private readonly labelTextOptions: TextOptions) {
     this.page = page;
-    this.labelTextOptions = labelTextOptions || undefined;
+    this.labelTextOptions = labelTextOptions;
   }
 
   async asCheckBox(): Promise<Checkbox> {
-    const checkbox = new Checkbox(this.page);
-    await checkbox.withLabel(this.labelTextOptions);
-    return checkbox;
+    return await Checkbox.forLabel(this.page, this.labelTextOptions);
   }
 
   async asTextBox(): Promise<Textbox> {
-    const textbox = new Textbox(this.page);
-    await textbox.withLabel(this.labelTextOptions);
-    return textbox;
+    return await Textbox.forLabel(this.page, this.labelTextOptions);
   }
 
   async asTextArea(): Promise<Textarea> {
-    const textarea = new Textarea(this.page);
-    await textarea.withLabel(this.labelTextOptions);
-    return textarea;
+    return await Textarea.forLabel(this.page, this.labelTextOptions);
   }
 
   async asRadioButton(): Promise<RadioButton> {
-    const radio = new RadioButton(this.page);
-    await radio.withLabel(this.labelTextOptions);
-    return radio;
+    return await RadioButton.forLabel(this.page, this.labelTextOptions);
   }
 
   async asButton(): Promise<Button> {
-    const button = new Button(this.page);
-    await button.withLabel(this.labelTextOptions);
-    return button;
+    return await Button.forLabel(this.page, this.labelTextOptions);
   }
 
   async asLabel(): Promise<Label> {
-    const txt = new Label(this.page);
-    await txt.withLabel(this.labelTextOptions);
-    return txt;
+    return await Label.forLabel(this.page, this.labelTextOptions);
   }
 
   async asSelect(): Promise<Select> {
-    const select = new Select(this.page);
-    await select.withLabel(this.labelTextOptions);
-    return select;
+    return await Select.forLabel(this.page, this.labelTextOptions);
   }
 
   async asLink(): Promise<Link> {
-    const link = new Link(this.page);
-    await link.withLabel(this.labelTextOptions.text);
-    return link;
+    return await Link.forLabel(this.page, this.labelTextOptions.text);
   }
 
 }

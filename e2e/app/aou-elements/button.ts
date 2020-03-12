@@ -1,27 +1,27 @@
-import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import {Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
 import {findButton} from './xpath-finder';
 
 export default class Button extends BaseElement {
 
-  constructor(aPage: Page) {
-    super(aPage);
-  }
-   
-  async withLabel(textOptions: TextOptions, waitOptions?: WaitForSelectorOptions, throwErr = true): Promise<ElementHandle> {
-    if (waitOptions === undefined) {
-      waitOptions = {visible: true};
-    }
+  static async forLabel(
+     page: Page,
+     textOptions: TextOptions,
+     waitOptions: WaitForSelectorOptions = { visible: true },
+     throwErr = true): Promise<Button> {
+
+    let element: Button;
     try {
-      this.element = await findButton(this.page, textOptions, waitOptions);
+      const buttonElement = await findButton(page, textOptions, waitOptions);
+      element = new Button(page, buttonElement);
     } catch (e) {
       if (throwErr) {
         console.error(`FAILED finding Button: "${JSON.stringify(textOptions)}".`);
         throw e;
       }
     }
-    return this.element;
+    return element;
   }
 
 }

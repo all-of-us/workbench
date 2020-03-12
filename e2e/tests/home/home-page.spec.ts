@@ -78,7 +78,7 @@ describe('Home page ui tests', () => {
     for (const card of cards) {
       const cardElem = new BaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
-      const size = await cardElem.size();
+      const size = await cardElem.getSize();
       if (width === undefined) {
         width = size.width; // Initialize width and height with first card element's size, compare with rest cards
         height = size.height;
@@ -95,8 +95,7 @@ describe('Home page ui tests', () => {
   test('Click on See All Workspace link', async () => {
     await GoogleLoginPage.logIn(page);
 
-    const seeAllWorkspacesLink = new Link(page);
-    await seeAllWorkspacesLink.withLabel(editPageFieldLabel.SEE_ALL_WORKSPACES);
+    const seeAllWorkspacesLink = await Link.forLabel(page, editPageFieldLabel.SEE_ALL_WORKSPACES);
     await seeAllWorkspacesLink.click();
     const workspaces = new WorkspacesPage(page);
     await workspaces.waitForLoad();
@@ -119,9 +118,8 @@ describe('Home page ui tests', () => {
   test('Check Create New Workspace link on Home page', async () => {
     await GoogleLoginPage.logIn(page);
 
-    const anyLink = new NewClrIconLink(page);
-    const linkHandle = await anyLink.withLabel(editPageFieldLabel.CREATE_NEW_WORKSPACE, 'plus-circle');
-    expect(linkHandle).toBeTruthy();
+    const anyLink = await NewClrIconLink.forLabel(page, editPageFieldLabel.CREATE_NEW_WORKSPACE, 'plus-circle');
+    expect(anyLink).toBeTruthy();
     const classname = await anyLink.getProperty('className');
     expect(classname).toBe('is-solid');
     const shape = await anyLink.getAttribute('shape');

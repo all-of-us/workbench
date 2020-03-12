@@ -8,10 +8,12 @@ export default class SelectComponent {
   }
 
   async select(textValue: string) {
-    await this.open(2);
+    await this.open(2); // with 2 retries
     const selector = this.componentXpath() + `//li[@class='p-dropdown-item'][normalize-space(.)="${textValue}"]`;
     const selectValue = await this.page.waitForXPath(selector, { visible: true });
     await selectValue.click();
+    // need to make sure dropdown is disappeared, so it cannot interfere with clicking on elements below.
+    await this.waitUntilDropdownClosed();
   }
 
   async getSelectedValue(): Promise<unknown> {
@@ -34,13 +36,13 @@ export default class SelectComponent {
         return;
       }
       retries --;
-      await this.page.waitFor(1000).then(click);
+      await this.page.waitFor(1000).then(click); // one second pause before try again
     };
     return click();
   }
 
   private async toggleOpenClose(): Promise<void> {
-    const selector = this.componentXpath() + '/*[contains(@class,"p-dropdown-trigger")]';
+    const selector = this.componentXpath() + '/*[@class="p-dropdown-trigger"]';
     const dropdownTrigger = await this.page.waitForXPath(selector, { visible: true });
     await dropdownTrigger.hover();
     await dropdownTrigger.click();
@@ -48,7 +50,7 @@ export default class SelectComponent {
   }
 
   private async isOpen() {
-    const selector = this.componentXpath() + '/*[contains(@class,"p-dropdown-panel")]';
+    const selector = this.componentXpath() + '/*[contains(normalize-space(@class),"p-dropdown-panel")]';
     const panel = await this.page.waitForXPath(selector);
     const classNameString = await (await panel.getProperty('className')).jsonValue();
     const splits = classNameString.toString().split(' ');
@@ -58,9 +60,17 @@ export default class SelectComponent {
 
   private componentXpath(): string {
     if (this.label === undefined) {
-      return '//*[contains(@class,"p-dropdown p-component")]';
+      return '//*[contains(normalize-space(@class),"p-dropdown")]';
     }
-    return `//*[child::*[normalize-space()='${this.label}']]/*[contains(@class,'p-dropdown p-component')]`;
+    return `//*[child::*[normalize-space()="${this.label}"]]/*[contains(normalize-space(@class),"p-dropdown")]`;
+  }
+
+  private async waitUntilDropdownClosed() {
+    const xpath = this.componentXpath() + '/*[contains(normalize-space(@class), "p-input-overlay-visible")]';
+    await this.page.waitForXPath(xpath, {hidden: true}).catch((err) => {
+      console.error('Select dropdown is not closed.');
+      throw err;
+    })
   }
 
 }

@@ -1,24 +1,27 @@
-import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import {Page, WaitForSelectorOptions} from 'puppeteer';
 import BaseElement from './base-element';
 import {findIcon} from './xpath-finder';
 
-
 export default class ClrIconLink extends BaseElement {
-
-  constructor(aPage: Page) {
-    super(aPage);
-  }
    
-  async withLabel(aElementName: string, shape: string, options?: WaitForSelectorOptions, throwErr = true): Promise<ElementHandle> {
+  static async forLabel(
+     page: Page,
+     aElementName: string,
+     shape: string,
+     waitOptions: WaitForSelectorOptions = {visible: true},
+     throwErr = true): Promise<ClrIconLink> {
+
+    let element: ClrIconLink;
     try {
-      this.element = await findIcon(this.page, aElementName, shape, options);
+      const iconElement = await findIcon(page, aElementName, shape, waitOptions);
+      element = new ClrIconLink(page, iconElement);
     } catch (e) {
       if (throwErr) {
-        console.error(`FAILED finding a 'clr-icon': "${aElementName}".`);
+        console.error(`FAILED finding a clr-icon: "${aElementName}".`);
         throw e;
       }
     }
-    return this.element;
+    return element;
   }
 
 }

@@ -39,7 +39,7 @@ export enum SideNavLinkIcon {
 
 
 /**
- * AuthenticatedPage represents any AoU page after user has successfully logged in (aka authenticated).
+ * AuthenticatedPage represents the base page for any AoU page after user has successfully logged in (aka authenticated).
  * This is the base page for all AoU pages to extends from.
  */
 export default abstract class AuthenticatedPage extends BasePage {
@@ -163,7 +163,6 @@ export default abstract class AuthenticatedPage extends BasePage {
 
     // wait maximum 60 seconds for spinner disappear if spinner existed
     const selectr2 = 'svg[style*="spin"], .spinner:empty';
-
     if (jValue) {
       await this.page.waitFor((selector) => {
         return document.querySelectorAll(selector).length === 0

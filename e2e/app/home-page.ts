@@ -24,7 +24,7 @@ export default class HomePage extends AuthenticatedPage {
     try {
       await this.waitUntilTitleMatch(PAGE.TITLE);
       await this.waitForTextExists(PAGE.HEADER);
-      await new Link(this.page).withLabel(FIELD_LABEL.SEE_ALL_WORKSPACES);
+      await Link.forLabel(this.page, FIELD_LABEL.SEE_ALL_WORKSPACES);
       return true;
     } catch (e) {
       return false;

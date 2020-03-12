@@ -1,5 +1,9 @@
 import {ElementHandle, Page, Response} from 'puppeteer';
 
+/**
+ * All Page Object classes will extends the BasePage.
+ * Contains common functions/actions that help with tests creation.
+ */
 export default abstract class BasePage {
 
   page: Page;

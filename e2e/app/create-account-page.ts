@@ -54,15 +54,11 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getSubmitButton(): Promise<Button> {
-    const button = new Button(this.page);
-    await button.withLabel({text: 'Submit'});
-    return button;
+    return await Button.forLabel(this.page, {text: 'Submit'});
   }
 
   async getNextButton(): Promise<Button> {
-    const button = new Button(this.page);
-    await button.withLabel({text: 'Next'});
-    return button;
+    return await Button.forLabel(this.page, {text: 'Next'});
   }
 
   async scrollToLastPdfPage(): Promise<ElementHandle> {
@@ -73,21 +69,15 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    const checkbox = new Checkbox(this.page);
-    await checkbox.withLabel({normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_PRIVACY_STATEMENT});
-    return checkbox;
+    return await Checkbox.forLabel(this.page, {normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_PRIVACY_STATEMENT});
   }
 
   async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    const checkbox = new Checkbox(this.page);
-    await checkbox.withLabel({normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_TERMS_OF_USE});
-    return checkbox;
+    return await Checkbox.forLabel(this.page, {normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_TERMS_OF_USE});
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    const textbox = new Textbox(this.page);
-    await textbox.withLabel({text: FIELD_LABEL.INSTITUTION_NAME});
-    return textbox;
+    return await Textbox.forLabel(this.page, {text: FIELD_LABEL.INSTITUTION_NAME});
   }
 
   // true for select Yes radiobutton. false for select No radiobutton.
@@ -104,9 +94,7 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    const textarea = new Textarea(this.page);
-    await textarea.withLabel({normalizeSpace: FIELD_LABEL.RESEARCH_BACKGROUND});
-    return textarea;
+    return await Textarea.forLabel(this.page, {normalizeSpace: FIELD_LABEL.RESEARCH_BACKGROUND});
   }
 
   async getUsernameDomain(): Promise<unknown> {
@@ -117,12 +105,11 @@ export default class CreateAccountPage extends BasePage {
   async fillInFormFields(fields: { label: string; value: string; }[]): Promise<string> {
     let newUserName;
     for (const field of fields) {
-      const textbox = new Textbox(this.page);
-      await textbox.withLabel({text: field.label});
+      const textbox = await Textbox.forLabel(this.page, {text: field.label});
       await textbox.type(field.value);
       await textbox.pressKeyboard('Tab', { delay: 100 });
       if (field.label === 'New Username') {
-        await new ClrIconLink(this.page).withLabel('New Username', 'success-standard');
+        await ClrIconLink.forLabel(this.page, 'New Username', 'success-standard');
         newUserName = field.value; // store new username for return
       }
     }
@@ -183,8 +170,6 @@ export default class CreateAccountPage extends BasePage {
     await (await this.areYouAffiliatedRadioButton(true)).click();
     await (await this.getInstitutionNameInput()).type(faker.company.companyName());
     await this.selectInstitution(INSTITUTION_AFFILIATION.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
-    // need pause 1 second for dropdown to disappear, so it is not blocking click on elements below.
-    await this.page.waitFor(1000);
     return newUserName;
   }
 
@@ -201,7 +186,6 @@ export default class CreateAccountPage extends BasePage {
     }
     await this.selectYearOfBirth('1955');
     await this.selectEducationLevel(EDUCATION_LEVEL.DOCTORATE);
-    await this.page.waitFor(1000);
   }
 
 }
