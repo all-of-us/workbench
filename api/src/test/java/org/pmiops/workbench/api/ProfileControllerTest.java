@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -59,14 +60,20 @@ import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.Ethnicity;
+import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
+import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.profile.AddressMapperImpl;
@@ -316,13 +323,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         "Username should be at least 3 characters and not more than 64 characters");
     profileController.createAccount(accountRequest);
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
-  }
-
-  @Test
-  public void testSubmitDemographicSurvey_success() {
-    createUser();
-    assertThat(profileController.submitDemographicsSurvey().getStatusCode())
-        .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @Test
@@ -767,6 +767,38 @@ public class ProfileControllerTest extends BaseControllerTest {
         false);
     assertThat(profile.getFreeTierUsage()).isEqualTo(FREE_TIER_USAGE);
     assertThat(profile.getFreeTierDollarQuota()).isEqualTo(FREE_TIER_LIMIT);
+  }
+
+  @Test
+  public void testUpdateProfile_updateDemographicSurvey() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+
+    DemographicSurvey demographicSurvey = profile.getDemographicSurvey();
+    demographicSurvey.addRaceItem(Race.AA);
+    demographicSurvey.setEthnicity(Ethnicity.HISPANIC);
+    demographicSurvey.setIdentifiesAsLgbtq(true);
+    demographicSurvey.setLgbtqIdentity("very");
+    demographicSurvey.addGenderIdentityListItem(GenderIdentity.NONE_DESCRIBE_ME);
+    demographicSurvey.addSexAtBirthItem(SexAtBirth.FEMALE);
+    demographicSurvey.setYearOfBirth(new BigDecimal(2000));
+    demographicSurvey.setEducation(Education.NO_EDUCATION);
+    demographicSurvey.setDisability(false);
+
+    profile.setDemographicSurvey(demographicSurvey);
+
+    profileController.updateProfile(profile);
+
+    Profile updatedProfile = profileController.getMe().getBody();
+    assertProfile(
+        updatedProfile,
+        PRIMARY_EMAIL,
+        CONTACT_EMAIL,
+        FAMILY_NAME,
+        GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED,
+        TIMESTAMP,
+        false);
   }
 
   private Profile createUser() {

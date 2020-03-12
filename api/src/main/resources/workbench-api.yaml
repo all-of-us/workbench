@@ -472,17 +472,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/account/submit-demographic-survey":
-    post:
-      tags:
-      - profile
-      description: Submits demographic survey responses.
-      operationId: submitDemographicsSurvey
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            "$ref": "#/definitions/Profile"
   "/v1/auth-domain/{groupName}":
     post:
       tags:
