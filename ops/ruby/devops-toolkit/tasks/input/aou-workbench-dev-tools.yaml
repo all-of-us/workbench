@@ -5,7 +5,7 @@ tools:
     flag: "-v"
     use_stderr: false
   - tool: gcloud
-    number_regex: ""
+    number_regex: "(?-mix:^Google\\sCloud\\sSDK\\s(?<version>\\d+\\.\\d+\\.\\d+)$)"
     flag: "-v"
     use_stderr: false
   - tool: gradle

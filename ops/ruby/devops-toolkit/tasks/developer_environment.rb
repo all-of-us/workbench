@@ -4,33 +4,30 @@ require 'yaml'
 class DeveloperEnvironment
   def initialize(options)
     @logger = options[:'logger']
+    @input_file = options[:'input-file'] || './tasks/input/aou-workbench-dev-tools.yaml'
     @output_file = options[:'output-file'] || 'dev-tools-list.yaml'
-    @input = {'tools' => []}
+    @versions = []
   end
 
   def list
-    versions = {}
-    # Assumes that a ruby version always has three sections.
-    get_version_info(versions, 'ruby', /ruby\s(?<version>\d+\.\d+\.\w+)/)
-    get_version_info(versions, 'yarn', /(?<version>\d+\.\d+\.\d+)/)
-    # Gradle uses a multiline version  string, so take that into account. The Gradle x.y.z
-    # is on a line by itself, offset with some spaces
-    get_version_info(versions, 'gradle', /\s+Gradle\s(?<version>\d+\.\d+\.\d+)$/)
-    get_version_info(versions, 'docker',/Docker\sversion\s(?<version>\d+\.\d+\.\d+),/)
-    get_version_info(versions, 'gcloud', '--version')
-    get_version_info(versions, 'node')
-    get_version_info(versions, 'javac', nil, '-version', true)
-    get_version_info(versions, 'java', nil, '-version', true)
-    get_version_info(versions, 'python', nil, '--version', true)
+    input_yaml = YAML.load(IO.read(@input_file))
+    @logger.info(input_yaml)
+    input_yaml['tools'].each do |tool|
+      get_version_info(
+          tool['tool'],
+          Regexp.new(tool['number_regex']),
+          tool['flag'],
+          tool['use_stderr'])
+    end
 
-    yaml = YAML.dump(versions)
+    yaml = YAML.dump(@versions)
     @logger.info(yaml)
 
     @logger.info("writing to output file: #{@output_file}")
     IO.write(@output_file, yaml)
-    versions
 
     @logger.info(YAML.dump(@input))
+    @versions
   end
 
   private
@@ -47,16 +44,9 @@ class DeveloperEnvironment
   # flag - flag to pass  to the tool to get the version info
   # use_stderr - if true, capture stderr instead of stdout for this tool
   # number_regex - optional. Regex that captures a group named 'version' when matched against a tool's long-form output
-  def get_version_info(versions, tool_cmd, number_regex = nil, flag = '-v', use_stderr = false) # number_extractor = ->(x) { x.itself })
-    input = {
-        'tool_cmd' => tool_cmd,
-        'number_regex' => number_regex.to_s,
-        'flag' => flag,
-        'use_stderr' => use_stderr
-    }
-    @input['tools'] << input
-    @logger.info("#{tool_cmd} #{flag} #{use_stderr} #{number_regex}")
-    result = {}
+  def get_version_info(tool_cmd, number_regex = nil, flag = '-v', use_stderr = false) # number_extractor = ->(x) { x.itself })
+    # @logger.info("#{tool_cmd} #{flag} #{use_stderr} #{number_regex}")
+    result = { 'tool' => tool_cmd }
     full_cmd  = "#{tool_cmd} #{flag}"
     if use_stderr
       _stdout, output, _status = Open3.capture3(full_cmd)
@@ -68,7 +58,7 @@ class DeveloperEnvironment
 
     installation_dir  = `which #{tool_cmd}`.strip
     result['installed_at'] = installation_dir.empty? ? INSTALLATION_NOT_FOUND : installation_dir
-    versions[tool_cmd] = result
+    @versions << result
   end
 
   def extract_version_number(version_string, tool_cmd, number_regex)
@@ -79,7 +69,7 @@ class DeveloperEnvironment
       version_number = ''
       if match_data && match_data.captures.size > 0
         @logger.info("Tool: #{tool_cmd} MatchData: #{match_data}")
-        version_number = match_data[:version] # match_data.captures[0]
+        version_number = match_data[:version]
       end
       if version_number.nil? || version_number.empty?
         return VERSION_NOT_RECOGNIZED
