@@ -1,0 +1,29 @@
+title: All of Us Researcher Workbench Developer Tools Manifest
+tools:
+  - tool: docker
+    number_regex: "(?-mix:Docker\\sversion\\s(?<version>\\d+\\.\\d+\\.\\d+),)"
+  - tool: gcloud
+    number_regex: "(?-mix:^Google\\sCloud\\sSDK\\s(?<version>\\d+\\.\\d+\\.\\d+)$)"
+  - tool: gem
+  - tool: gradle
+    number_regex: "(?-mix:\\s+Gradle\\s(?<version>\\d+(\\.\\d+)*)$)"
+  - tool: java
+    number_regex: "(?-mix:^java\\sversion\\s\\\"(?<version>\\d+\\.\\d+\\.[_\\d]+)\\\"$)"
+    flag: "-version"
+    use_stderr: true
+  - tool: javac
+    flag: "-version"
+    number_regex: "(?-mix:^javac\\s(?<version>\\d+\\.\\d+\\.[\\d_]+)$)"
+    use_stderr: true
+  - tool: node
+    number_regex: "(?-mix:^v(?<version>\\d+\\.\\d+\\.\\d+)$)"
+  - tool: pip
+    flag: '-V'
+    number_regex: "(?-mix:^pip\\s(?<version>\\d+\\.\\d+\\.\\d+)\\sfrom)"
+  - tool: python
+    number_regex: "(?-mix:^Python\\s(?<version>\\d+\\.\\d+\\.\\d+)$)"
+    flag: "--version"
+    use_stderr: true
+  - tool: ruby
+    number_regex: "(?-mix:ruby\\s(?<version>\\d+\\.\\d+\\.\\w+))"
+  - tool: yarn

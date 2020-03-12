@@ -6,6 +6,7 @@ require 'ostruct'
 
 require_relative 'tasks/monitoring_assets'
 require_relative 'tasks/dashboards'
+require_relative 'tasks/developer_environment'
 require_relative 'tasks/logs_based_metrics'
 require_relative 'tasks/service_accounts'
 
@@ -25,11 +26,11 @@ def parse_options
     parser.on('-s', '--source-uri [SOURCE-URI]', String, 'URI or fully qualified name for source asset')
     parser.on('-u', '--source-env [SOURCE-ENV]', String, 'Short name for source Environment (lowercase), for example "staging".')
     parser.on('-d', '--dry-run', 'Execute a dry run of the task')
+    parser.on('-o', '--output-file [OUTPUT-FILE]', String, 'Output file for task.')
   end.parse!({into: options})
 
   #Now raise an exception if we have not found a required arg
   raise OptionParser::MissingArgument.new('task') if options[:task].nil?
-  raise OptionParser::MissingArgument.new('envs-file') if options[:'envs-file'].nil?
 
   options
 end
@@ -52,6 +53,8 @@ def run_task(options)
   case options[:task]
   when 'list-dashboards'
     Dashboards.new(options).list
+  when 'list-dev-tools'
+    DeveloperEnvironment.new(options).list
   when 'replicate-dashboard'
     Dashboards.new(options).replicate
   when 'inventory'
