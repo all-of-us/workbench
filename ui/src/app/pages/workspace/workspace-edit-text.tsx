@@ -158,7 +158,7 @@ export const researchPurposeQuestions = [
     description: <div>If you are exploring the data at this stage to formalize a specific
       research question, please describe the reason for exploring the data, and the scientific
       question you hope to be able to answer using the data. <br/>
-      (Free text; 500 Character limit)</div>
+      (Free text; 1000 Character limit)</div>
   }, {
     header: 'What are the scientific approaches you plan to use for your study? Describe the ' +
     'datasets, research methods and tools you will use to answer your scientific question(s). \n',

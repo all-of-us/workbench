@@ -196,4 +196,28 @@ describe('WorkspaceEdit', () => {
 
     jest.useRealTimers();
   });
+
+  it ('should show error message if research purpose summary  Intended study have answer less than 50 characters', async() => {
+    const wrapper = component();
+    // Intended Study Text
+    const text  = 'intended Study text';
+    // since its a new page the characters box for Intended study should say 1000 characters remaining
+    let intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    expect(intendedStudySection.find('[data-test-id="characterMsg"]').get(0).props.children)
+      .toBe('1000 characters remaining');
+
+    intendedStudySection.find('textarea#intendedStudyText').simulate('change', {target: {value: text}});
+
+    intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    const charsRemaining = 1000 - text.length;
+
+    expect(intendedStudySection.find('[data-test-id="characterMsg"]').get(0).props.children)
+      .toContain(charsRemaining);
+
+    // Error message will apear once we loose the focus
+
+    intendedStudySection.find('textarea#intendedStudyText').simulate('blur');
+    expect(wrapper.find('[data-test-id="warningMsg"]').get(0).props.children)
+      .toBe('Please enter atleast 50 characters.');
+  });
 });
