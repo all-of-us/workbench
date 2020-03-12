@@ -1,26 +1,24 @@
-import {Page} from 'puppeteer';
 import BaseElement from '../../app/aou-elements/base-element';
 import {PageUrl, SideNavLink} from '../../app/authenticated-page';
 import HomePage from '../../app/home-page';
 import WorkspaceCard from '../../app/workspace-card';
 import WorkspacesPage from '../../app/workspaces-page';
+import {signIn} from '../app';
 
-const Chrome = require('../../driver/chrome-driver');
 
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
 describe('Workspace ui tests', () => {
-  let page: Page;
 
-  beforeEach(async () => {
-    page = await Chrome.setup();
+  beforeAll(async () => {
+    // all tests are using same incognito page. sign-in is only required once at the beginning.
+    await signIn(page);
   });
 
   afterEach(async () => {
-    await Chrome.teardown();
+    await jestPuppeteer.resetPage();
   });
-
 
   test('Workspace cards all have same ui size', async () => {
     const cards = await WorkspaceCard.getAllCards(page);
@@ -47,11 +45,12 @@ describe('Workspace ui tests', () => {
     const workspaceEdit = await workspaces.clickCreateNewWorkspace();
     const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
     expect(await workspaceNameTextbox.isVisible()).toBe(true);
+    await workspaceEdit.navTo(SideNavLink.HOME);
   });
 
   test('Check Workspace card on Your Workspaces page', async () => {
     const home = new HomePage(page);
-    await home.waitForLoad();
+    await home.load();
     await home.navTo(SideNavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 

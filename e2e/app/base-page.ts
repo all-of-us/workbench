@@ -49,6 +49,8 @@ export default abstract class BasePage {
       this.page.waitForNavigation({waitUntil: 'load'}),
       this.page.waitForNavigation({waitUntil: 'domcontentloaded'}),
       this.page.waitForNavigation({waitUntil: 'networkidle0', timeout: 60000}),
+      // information to aid troubleshooting
+      page.once('load', () => console.log('waitForNavigation function: page loaded.')),
     ]);
   }
 
@@ -220,5 +222,6 @@ export default abstract class BasePage {
       return elem !== null;
     }, element);
   }
+
 
 }

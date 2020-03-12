@@ -90,7 +90,9 @@ export default class GoogleLoginPage extends BasePage {
    * Open All-of-Us Google login page.
    */
   async goto(): Promise<void> {
-    await this.page.goto(configs.uiBaseUrl + configs.loginUrlPath, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 0});
+    const url = configs.uiBaseUrl + configs.loginUrlPath;
+    console.log('login url = '+url);
+    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 60000});
   }
 
   /**

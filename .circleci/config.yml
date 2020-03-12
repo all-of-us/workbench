@@ -333,6 +333,24 @@ jobs:
               --key-file circle-sa-key.json \
               --promote
 
+  puppeteer-e2e-test:
+    steps:
+      - checkout
+      - working_directory: ~/e2e
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+      - run:
+          name: Workaround for GoogleChrome/puppeteer#290
+          command: 'sh .circleci/setup_puppeteer.sh'
+      - run: yarn install
+      - save_cache:
+          paths:
+            - ~/node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run: yarn test
+
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
 filter_master: &filter_master
   filters:
@@ -365,6 +383,12 @@ workflows:
           <<: *filter_master
           requires:
             - ui-build-test
+      - puppeteer-e2e-test:
+          <<: *filter_master
+          requires:
+            - api-build-test
+            - ui-build-test
+            
   deploy-staging:
     jobs:
       - api-local-test:

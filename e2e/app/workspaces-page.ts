@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 import {findButton} from './aou-elements/xpath-finder';
-import AuthenticatedPage, {PageUrl} from './authenticated-page';
+import AuthenticatedPage from './authenticated-page';
 import WorkspaceEditPage from './workspace-edit-page';
 
 const faker = require('faker/locale/en_US');
@@ -44,7 +44,6 @@ export default class WorkspacesPage extends AuthenticatedPage {
   * 4: return
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    await this.loadPageUrl(PageUrl.WORKSPACES);
     const link = await this.getCreateNewWorkspaceButton();
     await Promise.all([
       this.page.waitForNavigation( { waitUntil: ['domcontentloaded','networkidle0']} ),

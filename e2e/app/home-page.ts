@@ -1,7 +1,7 @@
 import {ElementHandle, Page} from 'puppeteer';
 import Link from './aou-elements/link';
 import {findIcon} from './aou-elements/xpath-finder';
-import AuthenticatedPage from './authenticated-page';
+import AuthenticatedPage, {PageUrl} from './authenticated-page';
 
 export const PAGE = {
   TITLE: 'Homepage',
@@ -33,6 +33,17 @@ export default class HomePage extends AuthenticatedPage {
 
   async getCreateNewWorkspaceLink(): Promise<ElementHandle> {
     return findIcon(this.page, FIELD_LABEL.CREATE_NEW_WORKSPACE, 'plus-circle');
+  }
+
+  async load(): Promise<this> {
+    const onPageUrl = this.page.url();
+    const homeUrl = PageUrl.HOME.toString();
+    if (onPageUrl !== homeUrl) {
+      // only load Home URL if current page is not on Home page
+      await this.gotoUrl(homeUrl);
+      await this.waitForLoad();
+    }
+    return this;
   }
 
 }
