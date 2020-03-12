@@ -232,8 +232,6 @@ export const WorkspaceText = (props) => {
       {!props.researchValue &&
       <div data-test-id='characterMsg' style={{color: props.textColor, marginLeft: 'auto'}}>1000 characters remaining</div>}
     </FlexRow>
-
-
   </WorkspaceEditSection>;
 };
 
@@ -258,15 +256,15 @@ export interface WorkspaceEditProps {
   cancel: Function;
 }
 
-export interface SummaryDetails {
+export interface SummaryProps {
   textColor: string;
   warningMsg: boolean;
 }
 
 export interface ResearchSummaryProps {
-  intendedStudy: SummaryDetails;
-  scientificApproach: SummaryDetails;
-  anticipatedFindings: SummaryDetails;
+  intendedStudy: SummaryProps;
+  scientificApproach: SummaryProps;
+  anticipatedFindings: SummaryProps;
 }
 
 export interface WorkspaceEditState {
