@@ -1,39 +1,45 @@
 require 'open3'
+require 'yaml'
 
 class DeveloperEnvironment
   def initialize(options)
     @logger = options[:'logger']
-    @output_file = options[:'output-file']
+    @output_file = options[:'output-file'] || 'dev-tools-list.yaml'
   end
 
   def list
     versions = {}
-    versions['ruby'] = `ruby -v`.strip
-    versions['yarn'] = `yarn -v`.strip
-    versions['gradle'] = `gradle -v`.strip
-    versions['docker'] = `docker -v`.strip
-    versions['gcloud'] = `gcloud -v`.strip
-    versions[:node] = `node -v`.strip
+    get_version_info(versions, 'ruby')
+    get_version_info(versions, 'yarn')
+    get_version_info(versions, 'gradle')
+    get_version_info(versions, 'docker')
+    get_version_info(versions, 'gcloud', '--version')
+    get_version_info(versions, 'node')
+    get_version_info(versions, 'javac', '-version', true)
+    get_version_info(versions, 'java', '-version', true)
+    get_version_info(versions, 'python', '--version', true)
 
-    versions[:javac] = get_stderr('javac -version')
+    yaml = YAML.dump(versions)
+    @logger.info(yaml)
 
-    stderr = get_stderr('java -version')
-    versions['java'] = stderr
-
-    _stdout, stderr, status = Open3.capture3('python --version')
-    versions[:python] = stderr.strip
-    @logger.info(JSON.pretty_generate(versions))
-
-
-    # IO.write(@output_file, versions.to_json)
-    # versions
+    @logger.info("writing to output file: #{@output_file}")
+    IO.write(@output_file, yaml)
+    versions
   end
 
   private
 
-  def get_stderr(cmd)
-    stdout, stderr, status = Open3.capture3(cmd)
-    # @logger.info("java: #{stdout} #{stderr} #{status}")
-    stderr
+  def get_version_info(versions, tool_cmd, flag = '-v', use_stderr = false, number_extractor = ->(x) { x.itself })
+    result = {}
+    full_cmd  = "#{tool_cmd} #{flag}"
+    if use_stderr
+      _stdout, output, _status = Open3.capture3(full_cmd)
+    else
+      output, _status = Open3.capture2(full_cmd)
+    end
+    result['version_string'] = output.strip
+    result['version_number'] = number_extractor.call(result['version_string'])
+    result['installed_at'] = `which #{tool_cmd}`.strip
+    versions[tool_cmd] = result
   end
 end
