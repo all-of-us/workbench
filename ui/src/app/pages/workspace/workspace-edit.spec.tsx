@@ -40,9 +40,9 @@ describe('WorkspaceEdit', () => {
       // fields in the workspace form.
       researchPurpose: {
         ...workspaceStubs[0].researchPurpose,
-        intendedStudy: 'greyscale',
-        anticipatedFindings: 'everything',
-        scientificApproach: 'science',
+        intendedStudy: 'this has to be more than 50 characters so intendedStudy blah blah',
+        anticipatedFindings: 'this has to be more than 50 characters so anticipatedFindings blah blah',
+        scientificApproach: 'this has to be more than 50 characters so scientificApproach blah blah',
         drugDevelopment: true,
         disseminateResearchFindingList: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
         researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN]
