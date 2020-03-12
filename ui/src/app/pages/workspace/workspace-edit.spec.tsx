@@ -218,6 +218,6 @@ describe('WorkspaceEdit', () => {
 
     intendedStudySection.find('textarea#intendedStudyText').simulate('blur');
     expect(wrapper.find('[data-test-id="warningMsg"]').get(0).props.children)
-      .toBe('Please enter at least 50 characters.');
+      .toContain('The description you entered seems too short.');
   });
 });

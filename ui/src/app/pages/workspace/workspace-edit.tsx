@@ -139,13 +139,14 @@ const styles = reactStyles({
     colors: colors.primary,
     padding: '0.25rem',
     borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-    border: `1px solid`
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
   },
   textArea: {
     height: '15rem',
     resize: 'none',
     width: '50rem',
-    borderRadius: '3px 3px 0 0'
+    borderRadius: '3px 3px 0 0',
+    boderColor: colorWithWhiteness(colors.dark, 0.5)
   },
   flexColumnBy2: {
     flex: '1 1 0',
@@ -215,16 +216,15 @@ export const WorkspaceText = (props) => {
       header={props.researchPurpose.header}
       description={props.researchPurpose.description} index={props.index} indent>
         {/* Change the box border color to red if the number of characters is less than 50 */}
-      <TextArea style={{...styles.textArea,
-        borderColor: props.summaryObj.warningMsg ? colors.danger : colorWithWhiteness(colors.dark, 0.5)}}
+      <TextArea style={styles.textArea}
         id={props.rowId} name={props.rowId} value={props.researchValue}  onBlur={() => props.onBlur()}
         onChange={v => props.onChange(v)}/>
 
-    <FlexRow id={props.rowId} data-test-id='charBox' style={{...styles.textBoxCharRemaining,
-      borderColor: props.summaryObj.warningMsg ? colors.danger : colorWithWhiteness(colors.dark, 0.5)}}>
+    <FlexRow id={props.rowId} data-test-id='charBox' style={styles.textBoxCharRemaining}>
       {props.summaryObj.warningMsg && <label data-test-id='warningMsg'
         style={{color: colors.danger, textAlign: 'right', justifyContent: 'flex-start'}}>
-        Please enter at least 50 characters.
+        The description you entered seems too short.
+        Please consider adding more descriptive details to help the Program and your fellow Researchers understand your work.
       </label>}
       {props.researchValue &&
       <div data-test-id='characterMsg' style={{color: props.summaryObj.textColor, marginLeft: 'auto'}}>
@@ -893,9 +893,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           length: { minimum: 1, maximum: 80 }
         },
         billingAccountName: { presence: true },
-        intendedStudy: { length: { minimum: 50, maximum: 1000 } },
-        anticipatedFindings: {length: { minimum: 50, maximum: 1000 }},
-        scientificApproach: { length: { minimum: 50, maximum: 1000 } },
+        intendedStudy: { length: { minimum: 1, maximum: 1000 } },
+        anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
+        scientificApproach: { length: { minimum: 1, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
         specificPopulation: { truthiness: true },
         diseaseOfFocus: { truthiness: true },
@@ -1197,13 +1197,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.primaryPurpose && <div>You must choose at least one primary research
                   purpose (Question 1)</div>}
                 {errors.anticipatedFindings && <div>Answer for <i>What are the anticipated findings
-                  from the study? (Question # 2.1)</i> should be of atleast  50 characters</div>}
+                  from the study? (Question # 2.1)</i> cannot be empty</div>}
                 {errors.scientificApproach && <div>Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question # 2.2)</i> should be of
-                  at least 50 characters</div>}
+                  approaches you plan to use for your study (Question # 2.2)</i> cannot be empty</div>}
                 {errors.intendedStudy && <div>Answer for<i>What are the specific
-                  scientific question(s) you intend to study (Question # 2.3)</i> should be of
-                  at least 50 characters</div>}
+                  scientific question(s) you intend to study (Question # 2.3)</i> cannot be empty</div>}
                 {errors.specificPopulation && <div>You must specify a population of study</div>}
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
                 {errors.researchOutcoming && <div>You must specify the outcome of the research</div>}
