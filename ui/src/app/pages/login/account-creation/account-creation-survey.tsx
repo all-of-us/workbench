@@ -257,7 +257,7 @@ or another sexual and/or gender minority?'>
           </Button>
         </TooltipTrigger>
       </FormSection>
-      {creatingAccount && <SpinnerOverlay />}
+      {creatingAccount && <SpinnerOverlay overrideStylesOverlay={{position: 'fixed'}}/>}
     </div>;
   }
 }
