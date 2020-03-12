@@ -10,16 +10,18 @@ export class DisabledGuard implements CanActivate, CanActivateChild {
   constructor(private router: Router) {}
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
-    return profileApi().getMe().then(_ => true).catch(error => {
-      return convertAPIError(error).then(errorResponse => {
-        if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
-          this.router.navigate(['/user-disabled']);
-          return false;
-        } else {
-          return true;
-        }
-      });
-    });
+    try {
+      await profileApi().getMe();
+      return true;
+    } catch (e) {
+      const errorResponse = await convertAPIError(e);
+      if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
+        this.router.navigate(['/user-disabled']);
+        return false;
+      } else {
+        return true;
+      }
+    }
   }
 
   async canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
