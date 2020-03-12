@@ -31,6 +31,7 @@ export function triggerEvent(
 
 enum ANALYTICS_CATEGORIES {
   WORKSPACES = 'Workspaces',
+  FEATURED_WORKSPACES = 'Featured Workspaces',
   DATASET_BUILDER = 'Dataset Builder',
   NOTEBOOKS = 'Notebooks',
   SIDEBAR = 'Sidebar Menu',
@@ -43,6 +44,10 @@ export const AnalyticsTracker = {
     Create: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Create'),
     OpenDuplicatePage: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Duplicate Page', getCurrentPageLabel(suffix)),
     Duplicate: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Duplicate'),
+    DuplicateFeatured: (name) =>
+      triggerEvent(ANALYTICS_CATEGORIES.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - Duplicate - ${name}`),
+    NavigateToFeatured: (name) =>
+      triggerEvent(ANALYTICS_CATEGORIES.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - ${name}`),
     OpenEditPage: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Edit Page', getCurrentPageLabel(suffix)),
     Edit: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Edit'),
     OpenShareModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Share Modal', getCurrentPageLabel(suffix)),
