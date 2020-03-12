@@ -109,9 +109,18 @@ def get_cdr_sql_project(project)
   return must_get_env_value(project, :cdr_sql_instance).split(":")[0]
 end
 
+def ensure_docker_sync()
+  common = Common.new
+  at_exit do
+    common.run_inline %W{docker-sync stop}
+  end
+  common.run_inline %W{docker-sync start}
+end
+
 def ensure_docker(cmd_name, args=nil)
   args = (args or [])
   unless Workbench.in_docker?
+    ensure_docker_sync()
     exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
   end
 end
@@ -177,47 +186,34 @@ def dev_up()
     raise("Please run 'gcloud auth login' before starting the server.")
   end
 
-  at_exit { common.run_inline %W{docker-compose down} }
+  at_exit do
+    common.run_inline %W{docker-compose down}
+  end
+  ensure_docker_sync()
 
   overall_bm = Benchmark.measure {
     common.status "Database startup..."
-    bm = Benchmark.measure { common.run_inline %W{docker-compose up -d db} }
+    bm = Benchmark.measure {
+      common.run_inline %W{docker-compose up -d db}
+    }
     common.status "Database startup complete (#{format_benchmark(bm)})"
 
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
-      common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+      common.run_inline %W{
+        docker-compose run db-scripts ./run-migrations.sh main
+      }
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
     common.status "Database init & migrations complete (#{format_benchmark(bm)})"
 
-    common.status "Pushing configs & data..."
+    common.status "Loading configs & data..."
     bm = Benchmark.measure {
-      common.status "  --> Updating CDR versions"
-      common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
-
-      common.status "  --> Loading Workbench config"
       common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
+        docker-compose run api-scripts ./libproject/load_local_data_and_configs.sh
       }
-
-      common.status "  --> Loading CDR BigQuery Schema config"
-      common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
-      }
-
-      common.status "  --> Loading Featured Workspaces config"
-      common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
-      }
-
-      common.status "  --> Loading Data Dictionary data"
-      common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary -PappArgs=false}
     }
-    common.status "Pushing configs complete (#{format_benchmark(bm)})"
+    common.status "Loading configs complete (#{format_benchmark(bm)})"
 
   }
   common.status "Total dev-env setup time: #{format_benchmark(overall_bm)}"
@@ -609,6 +605,7 @@ Common.register_command({
 })
 
 def run_local_all_migrations()
+  ensure_docker_sync()
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
@@ -623,6 +620,7 @@ Common.register_command({
 })
 
 def run_local_data_migrations()
+  ensure_docker_sync()
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
@@ -633,6 +631,7 @@ Common.register_command({
 })
 
 def run_local_rw_migrations()
+  ensure_docker_sync()
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 end
@@ -838,8 +837,10 @@ def generate_private_cdr_counts(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.workbench_project and opts.cdr_version and opts.bucket }
   op.parse.validate
 
-  common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+  ServiceAccountContext.new(op.opts.workbench_project).run do
+    common = Common.new
+    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+  end
 end
 
 Common.register_command({
@@ -1012,6 +1013,7 @@ Imports .sql file to local mysql instance",
 
 
 def run_drop_cdr_db()
+  ensure_docker_sync()
   common = Common.new
   common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
 end
@@ -1557,6 +1559,7 @@ def load_es_index(cmd_name, *args)
   end
 
   unless Workbench.in_docker?
+    ensure_docker_sync()
     exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
   end
 
@@ -1629,6 +1632,7 @@ Common.register_command({
 })
 
 def update_cdr_versions_local(cmd_name, *args)
+  ensure_docker_sync()
   setup_local_environment
   op = update_cdr_version_options(cmd_name, args)
   op.parse.validate
@@ -2184,12 +2188,17 @@ def start_api_and_incremental_build(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   begin
-    # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
-    # the application has finished starting.
-    common.run_inline %W{gradle --daemon appengineStart}
-    common.run_inline "tail -f -n 0 /w/api/build/dev-appserver-out/dev_appserver.out &"
-    # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
-    # in the output.
+    common.status "API server startup..."
+    bm = Benchmark.measure {
+      # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
+      # the application has finished starting.
+      common.run_inline %W{gradle --daemon appengineStart}
+      common.run_inline "tail -f -n 0 /w/api/build/dev-appserver-out/dev_appserver.out &"
+      # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
+      # in the output.
+    }
+    common.status "API server startup complete (#{format_benchmark(bm)})"
+
     common.run_inline %W{gradle --no-daemon --continuous incrementalHotSwap}
   ensure
     common.run_inline %W{gradle --stop}

@@ -33,6 +33,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {StyledAnchorTag} from 'app/components/buttons';
 import {Divider} from 'app/components/divider';
 import {AouTitle} from 'app/components/text-wrappers';
 import {reactStyles} from 'app/utils';
@@ -548,9 +549,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <Dropdown options={institutionList.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
                     value={institutionShortName}
                     onChange={(e) => this.updateInstitutionAffiliation('institutionShortName', e.value)}/>
-          <a href={'https://www.researchallofus.org/apply/'} target='_blank' style={{color: colors.accent}}>
+          <StyledAnchorTag href={'https://www.researchallofus.org/apply/'} target='_blank'>
             Don't see your institution listed?
-          </a>
+          </StyledAnchorTag>
           <TextInputWithLabel style={{marginTop: '1rem'}}
                               value={contactEmail}
                               inputId='contactEmail'

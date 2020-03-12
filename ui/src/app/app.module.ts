@@ -45,7 +45,6 @@ import {SignInComponent} from './pages/login/sign-in';
 import {DataUseAgreementComponent} from './pages/profile/data-use-agreement';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
-import {StigmatizationPageComponent} from './pages/workspace/stigmatization-page';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
@@ -76,6 +75,7 @@ import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-noteb
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
+import {UserDisabledComponent} from 'app/pages/user-disabled';
 
 
 
@@ -158,9 +158,9 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SignedInComponent,
     NavBarComponent,
     SignInComponent,
-    StigmatizationPageComponent,
     TablePage,
     TextModalComponent,
+    UserDisabledComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,

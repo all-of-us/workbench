@@ -21,7 +21,7 @@ import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
@@ -204,7 +204,7 @@ public class ConceptService {
         new DomainCount()
             .domain(Domain.SURVEY)
             .conceptCount(conceptCount)
-            .name(CommonStorageEnums.domainToDomainId(Domain.SURVEY).concat("s")));
+            .name(DbStorageEnums.domainToDomainId(Domain.SURVEY).concat("s")));
     return domainCountList;
   }
 

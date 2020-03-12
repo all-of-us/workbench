@@ -14,6 +14,7 @@ import * as React from 'react';
 import {User} from 'generated';
 
 import {
+  BillingAccountType,
   UserRole,
   Workspace,
   WorkspaceAccessLevel,
@@ -21,6 +22,7 @@ import {
 } from 'generated/fetch/api';
 
 import {Button} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -36,7 +38,7 @@ const styles = reactStyles( {
     margin: '0',
     fontSize: '.91667rem',
     fontWeight: 600,
-    paddingBottom: '1rem'
+    paddingBottom: '0.25rem'
   },
 
   tooltipPoint: {
@@ -332,25 +334,32 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       <Modal width={450}>
         {this.state.saving && <SpinnerOverlay />}
         <ModalTitle style={styles.modalTitle}>
-          <div>
-          <label>Share {this.props.workspace.name}</label>
-          <TooltipTrigger content={<div style={styles.tooltipLabel}>
-            Search for a collaborator that has an <i>All of Us</i> research account. Collaborators can
-            be assigned different permissions within your Workspace.
-            <ul>
-              <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
-                Reader</span> can view your notebooks, but not make edits, deletes or share
-                contents of the Workspace.</li>
-              <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
-                Writer</span> can view, edit and delete content in the Workspace but not share
-                the Workspace with others.</li>
-              <li style={styles.tooltipPoint}>An <span style={{'textDecoration': 'underline'}}>
-                Owner</span> can view, edit, delete and share contents in the Workspace.</li>
-            </ul>
-          </div>}>
-            <InfoIcon style={{width: '13px', height: '14px', marginLeft: '.4rem'}}/>
-          </TooltipTrigger>
-          </div>
+          <FlexRow style={{alignItems: 'center', justifyContent: 'space-between'}}>
+            <div>
+              <label>Share {this.props.workspace.name}</label>
+            </div>
+            <TooltipTrigger content={<div style={styles.tooltipLabel}>
+              Search for a collaborator that has an <i>All of Us</i> research account. Collaborators can
+              be assigned different permissions within your Workspace.
+              <ul>
+                <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
+                  Reader</span> can view your notebooks, but not make edits, deletes or share
+                  contents of the Workspace.</li>
+                <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
+                  Writer</span> can view, edit and delete content in the Workspace but not share
+                  the Workspace with others.</li>
+                <li style={styles.tooltipPoint}>An <span style={{'textDecoration': 'underline'}}>
+                  Owner</span> can view, edit, delete and share contents in the Workspace.</li>
+              </ul>
+            </div>}>
+              <InfoIcon style={{width: '14px', height: '14px', marginLeft: '.4rem'}}/>
+            </TooltipTrigger>
+          </FlexRow>
+          {this.props.workspace.billingAccountType === BillingAccountType.FREETIER &&
+            <div style={{color: colors.primary, fontSize: 14, fontWeight: 400}}>
+                When you share this workspace as a ‘Writer’ or an ‘Owner’, the free credits of the creator of the
+                workspace ({this.props.workspace.creator}) will be used for all analysis in this workspace.
+            </div>}
         </ModalTitle>
         <ModalBody style={styles.sharingBody}>
           <div ref={node => this.searchingNode = node} style={styles.dropdown} >

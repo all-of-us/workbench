@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainInfo;
 
@@ -87,11 +87,11 @@ public class DbDomainInfo {
 
   @Transient
   public Domain getDomainEnum() {
-    return CommonStorageEnums.domainFromStorage(domain);
+    return DbStorageEnums.domainFromStorage(domain);
   }
 
   public DbDomainInfo domainEnum(Domain domain) {
-    this.domain = CommonStorageEnums.domainToStorage(domain);
+    this.domain = DbStorageEnums.domainToStorage(domain);
     return this;
   }
 

@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {
-  Clickable,
+  Clickable, StyledAnchorTag,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {CustomBulletList, CustomBulletListItem} from 'app/components/custom-bullet-list';
@@ -318,17 +318,17 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                     <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
                                     <CustomBulletList>
                                       <CustomBulletListItem bullet='→'>
-                                        Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
-                                        with your <i>All of Us</i> Researcher Workbench Google account. This will keep your Workbench
-                                        browser sessions isolated from your other Google accounts.
+                                        Create a <StyledAnchorTag href='https://support.google.com/chrome/answer/2364824'>Chrome
+                                        Profile</StyledAnchorTag> with your <i>All of Us</i> Researcher Workbench Google account.
+                                        This will keep your Workbench browser sessions isolated from your other Google accounts.
                                       </CustomBulletListItem>
                                       <CustomBulletListItem bullet='→'>
                                         Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
                                         from the left hand panel to browse through example workspaces.
                                       </CustomBulletListItem>
                                       <CustomBulletListItem bullet='→'>
-                                        Browse through our <a href='https://aousupporthelp.zendesk.com/hc/en-us'> support materials </a>
-                                        and forum topics.
+                                        Browse through our <StyledAnchorTag href='https://aousupporthelp.zendesk.com/hc/en-us'>support
+                                        materials</StyledAnchorTag> and forum topics.
                                       </CustomBulletListItem>
                                     </CustomBulletList>
                                   </div>

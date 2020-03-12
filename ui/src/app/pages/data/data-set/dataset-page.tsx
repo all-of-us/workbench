@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable, Link} from 'app/components/buttons';
+import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -1023,11 +1023,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                     width: '100%', height: '1.375rem', backgroundColor: colorWithWhiteness(colors.dark, 0.9),
                     color: colors.primary, paddingLeft: '0.4rem', fontSize: '13px', lineHeight: '16px',
                     alignItems: 'center'}}>
-                    <a href={'https://aousupporthelp.zendesk.com/hc/en-us/articles/' +
-                    '360033200232-Data-Dictionary-for-Registered-Tier-CDR'} target='_blank'
-                       style={{color: colors.accent}}>
+                    <StyledAnchorTag href={'https://aousupporthelp.zendesk.com/hc/en-us/articles/' +
+                    '360033200232-Data-Dictionary-for-Registered-Tier-CDR'} target='_blank'>
                       Learn more
-                    </a>&nbsp;in the data dictionary
+                    </StyledAnchorTag>&nbsp;in the data dictionary
                   </FlexRow>}
                 </div>
               </div>

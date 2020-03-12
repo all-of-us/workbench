@@ -26,6 +26,7 @@ public class WorkbenchConfig {
   public BillingConfig billing;
   public ActionAuditConfig actionAudit;
   public RdrExportConfig rdrExport;
+  public CaptchaConfig captcha;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -48,6 +49,7 @@ public class WorkbenchConfig {
     config.billing = new BillingConfig();
     config.actionAudit = new ActionAuditConfig();
     config.rdrExport = new RdrExportConfig();
+    config.captcha = new CaptchaConfig();
     return config;
   }
 
@@ -246,5 +248,9 @@ public class WorkbenchConfig {
     public String queueName;
     // Number of ids per task
     public Integer exportObjectsPerTask;
+  }
+
+  public static class CaptchaConfig {
+    public boolean enableCaptcha;
   }
 }

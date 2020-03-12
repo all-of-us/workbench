@@ -13,11 +13,11 @@
 #
 # We use OpenJDK 8, Node, and some common browsers from CircleCI's base image
 # see: https://circleci.com/docs/2.0/circleci-images/#language-image-variants
-FROM circleci/openjdk:8-jdk-node-browsers
+FROM circleci/openjdk:8-buster-node-browsers
 
 USER circleci
 
-ENV CLOUD_SDK_VERSION 215.0.0
+ENV CLOUD_SDK_VERSION 260.0.0
 
 RUN cd && \
   wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
@@ -27,9 +27,8 @@ RUN cd && \
   rm -rf gcloud.tgz
 
 RUN sudo apt-get update
-RUN sudo apt-get install gettext ruby mysql-client python-pip
-RUN sudo pip install --upgrade pip
-RUN sudo pip install --upgrade pylint
+RUN sudo apt-get install gettext ruby default-mysql-client python-pip
+RUN sudo pip install --upgrade pip pylint
 
 ENV PATH=/home/circleci/node/bin:/home/circleci/google-cloud-sdk/bin:$PATH
 
@@ -46,4 +45,5 @@ RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin
   && sudo unzip /tmp/gradle.zip -d /opt/gradle
 ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
+# Force a lower concurrent-ruby version, as we only have Ruby 2.3.
 RUN sudo gem install jira-ruby

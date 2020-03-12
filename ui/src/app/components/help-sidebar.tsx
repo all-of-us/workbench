@@ -16,8 +16,9 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
+import {environment} from 'environments/environment';
 import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {MenuItem} from './buttons';
+import {MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
 const proIcons = {
@@ -475,10 +476,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
-                Visit the
-                <a style={styles.link} href='https://www.researchallofus.org/frequently-asked-questions/' target='_blank'
-                  onClick={() => this.analyticsEvent('FAQ')}> FAQs here </a>
-                or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                Visit our <StyledAnchorTag href={environment.zendeskHelpCenterUrl}
+                                           target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support
+                </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
               </p>
             </div>
           </div>

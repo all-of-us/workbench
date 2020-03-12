@@ -20,7 +20,7 @@ public class StorageEnumsTest {
   final Set<Class> enumClasses = getEnumerationClasses();
   final Set<Method> methods =
       arraysToSet(
-          DbStorageEnums.class.getDeclaredMethods(), CommonStorageEnums.class.getDeclaredMethods());
+          DbStorageEnums.class.getDeclaredMethods(), DbStorageEnums.class.getDeclaredMethods());
 
   // e.g. public static Short reviewStatusToStorage(ReviewStatus s)
   final Map<Class, Method> enumClassToStorageMethod =
@@ -43,9 +43,9 @@ public class StorageEnumsTest {
   @Test
   public void test_domainId() {
     for (Domain domainValue : Domain.values()) {
-      String storageValue = CommonStorageEnums.domainToDomainId(domainValue);
+      String storageValue = DbStorageEnums.domainToDomainId(domainValue);
       assertWithMessage("unmapped enum value: " + domainValue).that(storageValue).isNotNull();
-      assertThat(CommonStorageEnums.domainIdToDomain(storageValue)).isEqualTo(domainValue);
+      assertThat(DbStorageEnums.domainIdToDomain(storageValue)).isEqualTo(domainValue);
     }
   }
 
@@ -75,16 +75,16 @@ public class StorageEnumsTest {
   }
 
   /**
-   * Retrieve all Enum classes in DbStorageEnums and CommonStorageEnums
+   * Retrieve all Enum classes in DbStorageEnums
    *
-   * <p>our convention for BiMaps in DbStorageEnums/CommonStorageEnums is <Enum, Short> so we
-   * retrieve the first parameterized type
+   * <p>our convention for BiMaps in DbStorageEnums is <Enum, Short> so we retrieve the first
+   * parameterized type
    *
    * @return
    */
   private Set<Class> getEnumerationClasses() {
     return arraysToSet(
-            DbStorageEnums.class.getDeclaredFields(), CommonStorageEnums.class.getDeclaredFields())
+            DbStorageEnums.class.getDeclaredFields(), DbStorageEnums.class.getDeclaredFields())
         .stream()
         .map(
             field -> {

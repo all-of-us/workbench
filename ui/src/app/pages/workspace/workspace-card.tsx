@@ -78,7 +78,11 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
       <React.Fragment>
         <MenuItem icon='copy'
                   onClick={() => {
-                    AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
+                    // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
+                    // this on the workspace object once users are able to publish their own workspaces
+                    workspace.published ?
+                      AnalyticsTracker.Workspaces.DuplicateFeatured(workspace.name) :
+                      AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
                     navigate([wsPathPrefix, 'duplicate']); }
                   }>
           Duplicate
@@ -256,7 +260,11 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                   <div style={styles.workspaceName}
                        data-test-id='workspace-card-name'
                        onClick={() => {
-                         triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+                         // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property
+                         // for this on the workspace object once users are able to publish their own workspaces
+                         workspace.published ?
+                          AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name) :
+                          triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
                          navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
                        }}>
                     {workspace.name}</div>

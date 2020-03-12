@@ -54,4 +54,6 @@ public interface CloudStorageService {
   void deleteBlob(BlobId blobId);
 
   String getMoodleApiKey();
+
+  String getCaptchaServerKey();
 }

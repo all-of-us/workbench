@@ -13,6 +13,7 @@ import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 import {CdrVersionsStubVariables, cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {SpecificPopulationItems} from './workspace-edit-text';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -100,5 +101,12 @@ describe('WorkspaceAbout', () => {
       .toContain(new Date(workspace.creationTime).toDateString());
     expect(wrapper.find('[data-test-id="lastUpdated"]').text())
       .toContain(new Date(workspace.lastModifiedTime).toDateString());
+  });
+
+  it('should not manipulate SpecificPopulationItems object on page load', async () => {
+    const raceSubCategoriesBeforePageload = SpecificPopulationItems[0].subCategory.length;
+    const wrapper = component();
+    const raceSubCategoriesAfterPageLoad = SpecificPopulationItems[0].subCategory.length;
+    expect(raceSubCategoriesBeforePageload).toBe(raceSubCategoriesAfterPageLoad);
   });
 });
