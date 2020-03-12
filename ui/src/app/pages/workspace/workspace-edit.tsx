@@ -132,21 +132,20 @@ const styles = reactStyles({
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
   },
   textBoxCharRemaining: {
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     width: '50rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.95),
     fontSize: 12,
     colors: colors.primary,
     padding: '0.25rem',
     borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
+    border: `1px solid`
   },
   textArea: {
     height: '15rem',
     resize: 'none',
     width: '50rem',
-    borderRadius: '3px 3px 0 0',
-    borderColor: colorWithWhiteness(colors.dark, 0.5)
+    borderRadius: '3px 3px 0 0'
   },
   flexColumnBy2: {
     flex: '1 1 0',
@@ -159,6 +158,15 @@ const styles = reactStyles({
     marginLeft: '-1rem',
     paddingTop: '0.3rem',
     paddingBottom: '0.3rem'
+  },
+  spinner: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    height: '100%',
+    width: '100%',
   }
 });
 
@@ -202,6 +210,33 @@ export const WorkspaceEditSection = (props) => {
   </div>;
 };
 
+export const WorkspaceText = (props) => {
+  return  <WorkspaceEditSection data-test-id={props.rowId}
+      header={props.researchPurpose.header}
+      description={props.researchPurpose.description} index={props.index} indent>
+        {/* Change the box border color to red if the number of characters is less than 50 */}
+      <TextArea style={{...styles.textArea,
+        borderColor: props.summaryObj.warningMsg ? colors.danger : colorWithWhiteness(colors.dark, 0.5)}}
+        id={props.rowId} name={props.rowId} value={props.researchValue}  onBlur={() => props.onBlur()}
+        onChange={v => props.onChange(v)}/>
+
+    <FlexRow id={props.rowId} data-test-id='charBox' style={{...styles.textBoxCharRemaining,
+      borderColor: props.summaryObj.warningMsg ? colors.danger : colorWithWhiteness(colors.dark, 0.5)}}>
+      {props.summaryObj.warningMsg && <label data-test-id='warningMsg'
+        style={{color: colors.danger, textAlign: 'right', justifyContent: 'flex-start'}}>
+        Please enter atleast 50 characters.
+      </label>}
+      {props.researchValue &&
+      <div data-test-id='characterMsg' style={{color: props.summaryObj.textColor, marginLeft: 'auto'}}>
+        {1000 - props.researchValue.length} characters remaining</div>}
+      {!props.researchValue &&
+      <div data-test-id='characterMsg' style={{color: props.textColor, marginLeft: 'auto'}}>1000 characters remaining</div>}
+    </FlexRow>
+
+
+  </WorkspaceEditSection>;
+};
+
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
 function getDiseaseNames(keyword) {
@@ -223,6 +258,17 @@ export interface WorkspaceEditProps {
   cancel: Function;
 }
 
+export interface SummaryDetails {
+  textColor: string;
+  warningMsg: boolean;
+}
+
+export interface AnticipatedFindingsTextColor {
+  intendedStudy: SummaryDetails;
+  scientificApproach: SummaryDetails;
+  anticipatedFindings: SummaryDetails;
+}
+
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
   selectResearchPurpose: boolean;
@@ -239,6 +285,7 @@ export interface WorkspaceEditState {
   showResearchPurpose: boolean;
   billingAccounts: Array<BillingAccount>;
   showCreateBillingAccountModal: boolean;
+  summaryTextColor: AnticipatedFindingsTextColor;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -260,7 +307,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
         billingAccounts: [],
-        showCreateBillingAccountModal: false
+        showCreateBillingAccountModal: false,
+        summaryTextColor: {
+          intendedStudy: {textColor: colors.disabled , warningMsg: false},
+          scientificApproach: {textColor: colors.disabled , warningMsg: false},
+          anticipatedFindings: {textColor: colors.disabled , warningMsg: false}
+        }
       };
     }
 
@@ -619,6 +671,31 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return researchPurpose.researchOutcomeList && researchPurpose.researchOutcomeList.length !== 0 ;
     }
 
+
+    updateResearchPurposeSummary(purposeSummary, value) {
+      if (this.state.summaryTextColor[purposeSummary].warningMsg && value.length >= 50 ) {
+        this.setState(fp.set(['summaryTextColor', purposeSummary, 'warningMsg'], false));
+      }
+      if (value.length > 1000) {
+        value = value.substring(0, 1000);
+      }
+      if (value.length >= 950 && this.state.summaryTextColor[purposeSummary].textColor !== colors.danger) {
+        this.setState(fp.set(['summaryTextColor', purposeSummary, 'textColor'], colors.danger));
+      } else if (value.length < 950 && this.state.summaryTextColor[purposeSummary].textColor !== colors.disabled) {
+        this.setState(fp.set(['summaryTextColor', purposeSummary, 'textColor'], colors.disabled));
+      }
+      this.updateResearchPurpose(purposeSummary, value);
+    }
+
+    displayWarningMsg(summary) {
+      const textAreaValue = fp.get(['workspace', 'researchPurpose', summary], this.state);
+      if (textAreaValue.length < 50) {
+        this.setState(fp.set(['summaryTextColor', summary, 'warningMsg'], true));
+      } else {
+        this.setState(fp.set(['summaryTextColor', summary, 'warningMsg'], false));
+      }
+    }
+
     updateResearchPurpose(category, value) {
       if (category === 'population' && !value) {
         this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'], []));
@@ -817,9 +894,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           length: { minimum: 1, maximum: 80 }
         },
         billingAccountName: { presence: true },
-        intendedStudy: { length: { minimum: 1, maximum: 500 } },
-        anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
-        scientificApproach: { length: { minimum: 1, maximum: 1000 } },
+        intendedStudy: { length: { minimum: 50, maximum: 1000 } },
+        anticipatedFindings: {length: { minimum: 50, maximum: 1000 }},
+        scientificApproach: { length: { minimum: 50, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
         specificPopulation: { truthiness: true },
         diseaseOfFocus: { truthiness: true },
@@ -829,17 +906,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
-          {this.state.loading && <SpinnerOverlay overrideStylesOverlay={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.2)',
-            height: '100%',
-            width: '100%',
-          }}/>}
+          {this.state.loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
-                              section={{marginTop: '24px'}} largeHeader required={!this.isMode(WorkspaceEditMode.Duplicate)}>
+                                section={{marginTop: '24px'}} largeHeader
+                                required={!this.isMode(WorkspaceEditMode.Duplicate)}>
           <FlexRow>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
               value = {this.state.workspace.name}
@@ -869,8 +939,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </FlexRow>
         </WorkspaceEditSection>
         {this.isMode(WorkspaceEditMode.Duplicate) &&
-        <WorkspaceEditSection header='Options for duplicate workspace'
-          >
+        <WorkspaceEditSection header='Options for duplicate workspace'>
           <CheckBox
             style={styles.checkboxStyle}
             label='Share workspace with the same set of collaborators'
@@ -941,54 +1010,32 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </FlexRow>
         </WorkspaceEditSection>
 
-        {/* TextBox: scientific question(s) researcher intend to study Section*/}
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header} indent
           description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
           <FlexColumn>
-          <WorkspaceEditSection
-              header={researchPurposeQuestions[2].header}
-              description={researchPurposeQuestions[2].description} index='2.1' indent>
-            <TextArea style={styles.textArea}
-                      id='intendedStudy'
-                      name='intendedStudy'
-                      value={this.state.workspace.researchPurpose.intendedStudy}
-                      onChange={v => this.updateResearchPurpose('intendedStudy', v)}/>
-            <FlexRow id='intendedStudyText' style={styles.textBoxCharRemaining}>
-              {500 - this.state.workspace.researchPurpose.intendedStudy.length} characters remaining
-            </FlexRow>
-          </WorkspaceEditSection>
+            {/* TextBox: scientific question(s) researcher intend to study Section*/}
+            <WorkspaceText researchPurpose={researchPurposeQuestions[2]}
+                          researchValue={this.state.workspace.researchPurpose.intendedStudy}
+                          onChange={v => this.updateResearchPurposeSummary('intendedStudy', v)}
+                          onBlur = {v => this.displayWarningMsg('intendedStudy')}
+                          summaryObj = {this.state.summaryTextColor['intendedStudy']}
+                          index='2.1' rowId='intendedStudyText'/>
 
             {/* TextBox: scientific approaches section*/}
-            <WorkspaceEditSection
-                header={researchPurposeQuestions[3].header}
-                description={researchPurposeQuestions[3].description} index='2.2' indent>
-              <TextArea style={styles.textArea}
-                        id='scientificApproach'
-                        name='scientificApproach'
-                        value={this.state.workspace.researchPurpose.scientificApproach}
-                        onChange={v => this.updateResearchPurpose('scientificApproach', v)}/>
-              <FlexRow style={styles.textBoxCharRemaining}>
-                {this.state.workspace.researchPurpose.scientificApproach &&
-                <div>{1000 - this.state.workspace.researchPurpose.scientificApproach.length}
-                characters remaining</div>}
-                {!this.state.workspace.researchPurpose.scientificApproach &&
-                <div>1000 characters remaining</div>}
-              </FlexRow>
-            </WorkspaceEditSection>
-
+            <WorkspaceText researchPurpose={researchPurposeQuestions[3]}
+                           researchValue={this.state.workspace.researchPurpose.scientificApproach}
+                           onBlur = {v => this.displayWarningMsg('scientificApproach')}
+                           summaryObj = {this.state.summaryTextColor['scientificApproach']}
+                           onChange={v => this.updateResearchPurposeSummary('scientificApproach', v)}
+                           index='2.2' rowId='scientificApproachText'/>
             {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceEditSection header={researchPurposeQuestions[4].header} indent
-                                  description={researchPurposeQuestions[4].description} index='2.3'>
-              <TextArea style={styles.textArea}
-                        id='anticipatedFindings'
-                        name='anticipatedFindings'
-                        value={this.state.workspace.researchPurpose.anticipatedFindings}
-                        onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}/>
-              <FlexRow style={styles.textBoxCharRemaining}>
-                {1000 - this.state.workspace.researchPurpose.anticipatedFindings.length} characters remaining
-              </FlexRow>
-            </WorkspaceEditSection>
+            <WorkspaceText researchPurpose={researchPurposeQuestions[4]}
+                           researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
+                           onChange={v => this.updateResearchPurposeSummary('anticipatedFindings', v)}
+                           onBlur = {v => this.displayWarningMsg('anticipatedFindings')}
+                           summaryObj = {this.state.summaryTextColor['anticipatedFindings']}
+                           index='2.3' rowId='anticipatedFindingsText'/>
           </FlexColumn>
         </WorkspaceEditSection>
 
@@ -1150,12 +1197,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.billingAccountName && <div>You must select a billing account</div>}
                 {errors.primaryPurpose && <div>You must choose at least one primary research
                   purpose (Question 1)</div>}
-                {errors.anticipatedFindings && <div>You must answer <i>What are the anticipated findings
-                  from the study? (Question # 2.1)</i></div>}
-                {errors.scientificApproach && <div>You must answer <i>What are the scientific
-                  approaches you plan to use for your study (Question # 2.2)</i></div>}
-                {errors.intendedStudy && <div>You must answer <i>What are the specific
-                  scientific question(s) you intend to study (Question # 2.3)</i></div>}
+                {errors.anticipatedFindings && <div>Answer for <i>What are the anticipated findings
+                  from the study? (Question # 2.1)</i> should be of atleast 50 characters and max 1000 characters</div>}
+                {errors.scientificApproach && <div>Answer for <i>What are the scientific
+                  approaches you plan to use for your study (Question # 2.2)</i> should be of
+                  atleast 50 characters and max 1000 characters</div>}
+                {errors.intendedStudy && <div>Answer for<i>What are the specific
+                  scientific question(s) you intend to study (Question # 2.3)</i> should be of
+                  atleast 50 characters and max 1000 characters</div>}
                 {errors.specificPopulation && <div>You must specify a population of study</div>}
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
                 {errors.researchOutcoming && <div>You must specify the outcome of the research</div>}
