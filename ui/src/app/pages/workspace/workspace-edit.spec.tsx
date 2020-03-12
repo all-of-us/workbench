@@ -10,6 +10,7 @@ import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditSection} from './workspace-edit';
+import * as fp from "lodash/fp";
 
 jest.mock('app/utils/navigation', () => ({
   ...(require.requireActual('app/utils/navigation')),
@@ -40,9 +41,9 @@ describe('WorkspaceEdit', () => {
       // fields in the workspace form.
       researchPurpose: {
         ...workspaceStubs[0].researchPurpose,
-        intendedStudy: 'this has to be more than 50 characters so intendedStudy blah blah',
-        anticipatedFindings: 'this has to be more than 50 characters so anticipatedFindings blah blah',
-        scientificApproach: 'this has to be more than 50 characters so scientificApproach blah blah',
+        intendedStudy: 'intendedStudy ',
+        anticipatedFindings: 'anticipatedFindings ',
+        scientificApproach: 'scientificApproach ',
         drugDevelopment: true,
         disseminateResearchFindingList: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
         researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN]
@@ -214,10 +215,31 @@ describe('WorkspaceEdit', () => {
     expect(intendedStudySection.find('[data-test-id="characterMsg"]').get(0).props.children)
       .toContain(charsRemaining);
 
-    // Error message will apear once we loose the focus
+    // Error message will appear once we loose the focus
 
     intendedStudySection.find('textarea#intendedStudyText').simulate('blur');
     expect(wrapper.find('[data-test-id="warningMsg"]').get(0).props.children)
       .toContain('The description you entered seems too short.');
+  });
+
+  it ('should show error message if research purpose summary has reached 1000 characters', async() => {
+    const wrapper = component();
+    // Intended Study Text
+    const testInput = fp.repeat(1000, 'a');
+    // since its a new page the characters box for Intended study should say 1000 characters remaining
+    let intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    expect(intendedStudySection.find('[data-test-id="characterMsg"]').get(0).props.children)
+      .toBe('1000 characters remaining');
+
+    intendedStudySection.find('textarea#intendedStudyText').simulate('change', {target: {value: testInput}});
+
+    intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    const charsRemaining = 1000 - testInput.length;
+
+    expect(intendedStudySection.find('[data-test-id="characterMsg"]').get(0).props.children)
+      .toContain(charsRemaining);
+
+    expect(wrapper.find('[data-test-id="characterLimit"]').get(0).props.children)
+      .toContain('You have reached the character limit for this question');
   });
 });
