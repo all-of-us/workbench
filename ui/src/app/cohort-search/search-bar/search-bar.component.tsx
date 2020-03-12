@@ -64,7 +64,9 @@ const styles = reactStyles({
     overflow: 'hidden',
     padding: '0 1rem',
     textAlign: 'left',
-    textOverflow: 'ellipsis'
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    width: '100%'
   }
 });
 
@@ -113,15 +115,17 @@ class SearchBarOption extends React.Component<OptionProps, OptionState> {
     const {highlighted, onClick, option: {name}, searchTerm} = this.props;
     const {hover} = this.state;
     const displayText = highlightSearchTerm(searchTerm, name, colors.success);
-    return <button ref={(e) => this.container = e}
-      style={highlighted || hover ? {...styles.dropdownItem, background: colorWithWhiteness(colors.black, .93)} : styles.dropdownItem}
-      onClick={() => onClick()}
-      onMouseEnter={() => this.setState({hover: true})}
-      onMouseLeave={() => this.setState({hover: false})}>
+    return <div>
       <TooltipTrigger content={<div>{displayText}</div>} disabled={!this.state.truncated}>
-        <div>{displayText}</div>
+        <button ref={(e) => this.container = e}
+          style={highlighted || hover ? {...styles.dropdownItem, background: colorWithWhiteness(colors.black, .93)} : styles.dropdownItem}
+          onClick={() => onClick()}
+          onMouseEnter={() => this.setState({hover: true})}
+          onMouseLeave={() => this.setState({hover: false})}>
+            {displayText}
+        </button>
       </TooltipTrigger>
-    </button>;
+    </div>;
   }
 }
 

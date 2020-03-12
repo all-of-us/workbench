@@ -118,6 +118,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   back = () => {
     switch (this.mode) {
       case 'tree':
+        autocompleteStore.next('');
+        subtreePathStore.next([]);
+        subtreeSelectedStore.next(undefined);
         this.backMode = 'list';
         this.mode = 'list';
         break;

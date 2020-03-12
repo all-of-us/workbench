@@ -26,6 +26,11 @@ import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator}
 import {Subscription} from 'rxjs/Subscription';
 
 const styles = reactStyles({
+  code: {
+    color: colors.dark,
+    fontWeight: 'bold',
+    marginRight: '0.25rem'
+  },
   count: {
     alignItems: 'center',
     background: colors.accent,
@@ -36,6 +41,7 @@ const styles = reactStyles({
     height: '0.625rem',
     justifyContent: 'center',
     lineHeight: 'normal',
+    marginLeft: '0.25rem',
     minWidth: '0.675rem',
     padding: '0 4px'
   },
@@ -68,6 +74,7 @@ const styles = reactStyles({
     background: 'transparent',
     border: 0,
     color: colors.accent,
+    cursor: 'pointer',
     float: 'right',
     fontSize: '12px',
     height: '1.5rem',
@@ -82,6 +89,12 @@ const styles = reactStyles({
     padding: '0.4rem 0',
     backgroundColor: colors.white,
     zIndex: 1,
+  },
+  searchMatch: {
+    color: '#659F3D',
+    fontWeight: 'bolder',
+    backgroundColor: 'rgba(101,159,61,0.2)',
+    padding: '2px 0',
   },
   selectIcon: {
     color: colors.select,
@@ -124,6 +137,7 @@ interface TreeNodeState {
   error: boolean;
   expanded: boolean;
   loading: boolean;
+  searchMatch: boolean;
   selected: boolean;
 }
 
@@ -137,17 +151,18 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       error: false,
       expanded: false,
       loading: false,
+      searchMatch: false,
       selected: false
     };
   }
 
   componentDidMount(): void {
     const {node} = this.props;
-    const {children, error} = this.state;
+    const {error} = this.state;
     this.subscription = subtreePathStore.subscribe(path => {
       const expanded = path.includes(node.id.toString());
       this.setState({expanded});
-      if (expanded && !children) {
+      if (expanded && !this.state.children) {
         this.loadChildren();
       }
     });
@@ -158,7 +173,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
     this.subscription.add(subtreeSelectedStore.subscribe(id => {
       const selected = id === node.id;
-      // this.setState({selected});
+      this.setState({searchMatch: selected});
       if (selected) {
         setTimeout(() => scrollStore.next(node.id));
       }
@@ -166,6 +181,10 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         subtreeSelectedStore.next(undefined);
       }
     }));
+  }
+
+  componentWillUnmount(): void {
+    this.subscription.unsubscribe();
   }
 
   loadChildren() {
@@ -303,7 +322,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   render() {
     const {node, node: {code, count, id, group, hasAttributes, name, selectable}} = this.props;
-    const {children, expanded, loading, selected} = this.state;
+    const {children, expanded, loading, searchMatch, selected} = this.state;
     return <React.Fragment>
       <div style={{...styles.treeNode, paddingLeft: !group ? '1.25rem' : 0}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
         {group && <button style={styles.iconButton}>
@@ -323,7 +342,9 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             }
           </button>}
           <div style={{display: 'inline-block'}}>
-            <b style={{color: colors.dark}}>{code}</b> {name} {this.showCount && <span style={styles.count}>{count.toLocaleString()}</span>}
+            <span style={styles.code}>{code}</span>
+            <span style={searchMatch ? styles.searchMatch : {}}>{name}</span>
+            {this.showCount && <span style={styles.count}>{count.toLocaleString()}</span>}
           </div>
         </div>
       </div>
@@ -378,9 +399,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   componentWillUnmount(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription.unsubscribe();
   }
 
   loadRootNodes() {
