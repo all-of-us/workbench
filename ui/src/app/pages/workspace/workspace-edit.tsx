@@ -226,6 +226,8 @@ export const WorkspaceText = (props) => {
         The description you entered seems too short.
         Please consider adding more descriptive details to help the Program and your fellow Researchers understand your work.
       </label>}
+      {props.researchValue.length === 1000 && <label style={{color: colors.danger}}>
+        You have reached the character limit for this question</label>}
       {props.researchValue &&
       <div data-test-id='characterMsg' style={{color: props.summaryObj.textColor, marginLeft: 'auto'}}>
         {1000 - props.researchValue.length} characters remaining</div>}
