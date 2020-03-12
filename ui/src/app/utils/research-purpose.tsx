@@ -3,6 +3,7 @@ import * as React from 'react';
 import {ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
 import {ResearchPurpose} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 
 const styles = {
   researchPurposeItemHeader: {
@@ -43,9 +44,9 @@ export function getSelectedResearchPurposeItems(researchPurpose: ResearchPurpose
 }
 
 export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
-  const categories = SpecificPopulationItems.filter(specificPopulationItem => specificPopulationItem
-    .subCategory.filter(item => researchPurpose.populationDetails.includes(item.shortName)).length > 0);
-  categories.forEach(category => category.subCategory = category.subCategory
+  const categories = fp.cloneDeep(SpecificPopulationItems.filter(specificPopulationItem => specificPopulationItem
+    .subCategory.filter(item => researchPurpose.populationDetails.includes(item.shortName)).length > 0));
+  categories.filter(category => category.subCategory = category.subCategory
     .filter(subCategoryItem => researchPurpose.populationDetails.includes(subCategoryItem.shortName)));
   return categories.map((selectedPopulationOfInterest, index) => {
     return <React.Fragment>
