@@ -229,10 +229,10 @@ export const WorkspaceText = (props) => {
       {props.researchValue.length === 1000 && <label data-test-id='characterLimit' style={{color: colors.danger}}>
         You have reached the character limit for this question</label>}
       {props.researchValue &&
-      <div data-test-id='characterMsg' style={{color: props.summaryObj.textColor, marginLeft: 'auto'}}>
+      <div data-test-id='characterMessage' style={{color: props.summaryObj.textColor, marginLeft: 'auto'}}>
         {1000 - props.researchValue.length} characters remaining</div>}
       {!props.researchValue &&
-      <div data-test-id='characterMsg' style={{color: props.textColor, marginLeft: 'auto'}}>1000 characters remaining</div>}
+      <div data-test-id='characterMessage' style={{color: props.textColor, marginLeft: 'auto'}}>1000 characters remaining</div>}
     </FlexRow>
   </WorkspaceEditSection>;
 };
