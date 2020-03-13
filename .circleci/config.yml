@@ -363,7 +363,6 @@ jobs:
           command: .circleci/install_puppeteer_dependencies.sh
       - run:
           name: Install Chrome
-          working_directory: ~/workbench/e2e
           command: .circleci/install_chrome.sh
       - run:
           working_directory: ~/workbench/e2e
