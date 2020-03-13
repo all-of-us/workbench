@@ -341,7 +341,7 @@ jobs:
             PASSWORD: $PUPPETEER_TEST_USER_PASSWORD
             INVITATION_KEY: $PUPPETEER_TEST_REGISTRATION_KEY
             CONTACT_EMAIL: hermione.owner@quality.firecloud.org
-    working_directory: ~/workbench/e2e
+    working_directory: ~/workbench
     steps:
       - checkout
       - run:
@@ -352,7 +352,7 @@ jobs:
           - v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
           - v1-dependencies-
       - run: 
-          working_directory: ~/workbench/e2e
+          # working_directory: ~/workbench/e2e
           command: yarn install --frozen-lockfile
       - save_cache:
           paths:
@@ -369,7 +369,7 @@ jobs:
           command: |
             echo $INVITATION_KEY
       - run:
-          working_directory: ~/workbench/e2e
+          # working_directory: ~/workbench/e2e
           command: yarn test --runInBand
       - persist_to_workspace:
           root: .
