@@ -336,7 +336,7 @@ jobs:
   puppeteer-e2e-test:
     docker:
       - image: circleci/node:12.16.1
-      environment:
+        environment:
             USER_NAME: $PUPPETEER_TEST_USER
             PASSWORD: $PUPPETEER_TEST_USER_PASSWORD
             INVITATION_KEY: $PUPPETEER_TEST_REGISTRATION_KEY
