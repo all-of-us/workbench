@@ -127,8 +127,13 @@ const styles = reactStyles({
   }
 });
 
+interface NodeProp extends Criteria {
+  children: Array<NodeProp>;
+}
+
 interface TreeNodeProps {
-  node: Criteria;
+  fullTree: boolean;
+  node: NodeProp;
 }
 
 interface TreeNodeState {
@@ -236,9 +241,10 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   toggleExpanded() {
-    if (this.props.node.group) {
+    const {fullTree, node: {group}} = this.props;
+    if (group) {
       const {children, expanded} = this.state;
-      if (!expanded && !children) {
+      if (!fullTree && !expanded && !children) {
         this.loadChildren();
       }
       this.setState({expanded: !expanded});
@@ -321,10 +327,11 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   render() {
-    const {node, node: {code, count, id, group, hasAttributes, name, selectable}} = this.props;
+    const {fullTree, node, node: {code, count, id, group, hasAttributes, name, parentId, selectable}} = this.props;
     const {children, expanded, loading, searchMatch, selected} = this.state;
+    const nodeChildren = fullTree ? node.children : children;
     return <React.Fragment>
-      <div style={{...styles.treeNode, paddingLeft: !group ? '1.25rem' : 0}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
+      <div style={{...styles.treeNode}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
         {group && <button style={styles.iconButton}>
           {loading
             ? <Spinner size={16}/>
@@ -334,11 +341,12 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         <div style={styles.treeNodeContent}>
           {selectable && <button style={styles.iconButton}>
             {hasAttributes
-              ? <ClrIcon style={{color: colors.accent}} shape='slider' dir='right' size='20' onClick={() => attributesStore.next(node)}/>
-              : <React.Fragment>
-                {!selected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='20' onClick={() => this.select()}/>}
-                {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
-              </React.Fragment>
+              ? <ClrIcon style={{color: colors.accent}}
+                  shape='slider' dir='right' size='20'
+                  onClick={() => attributesStore.next(node)}/>
+              : selected
+                ? <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+                : <ClrIcon style={styles.selectIcon} shape='plus-circle' size='20' onClick={() => this.select()}/>
             }
           </button>}
           <div style={{display: 'inline-block'}}>
@@ -348,8 +356,8 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           </div>
         </div>
       </div>
-      {expanded && !!children && <div style={{marginLeft: '0.875rem'}}>
-        {children.map((child, c) => <TreeNode key={c} node={child}/>)}
+      {expanded && !!nodeChildren && nodeChildren.length > 0 && <div style={{marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
+        {nodeChildren.map((child, c) => <TreeNode key={c} fullTree={fullTree} node={child}/>)}
       </div>}
     </React.Fragment>;
   }
@@ -387,10 +395,10 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
   componentDidMount(): void {
     const {wizard} = this.props;
-    const {children} = this.state;
     this.loadRootNodes();
     this.subscription = autocompleteStore.subscribe(searchTerms => {
       this.setState({searchTerms});
+      const {children} = this.state;
       if (wizard.fullTree && children) {
         const filteredChildren = this.filterTree(JSON.parse(JSON.stringify(children)), () => {});
         this.setState({children: filteredChildren});
@@ -403,7 +411,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   loadRootNodes() {
-    const {node: {domainId, id, isStandard, type}} = this.props;
+    const {node: {domainId, id, isStandard, type}, wizard: {fullTree}} = this.props;
     // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
     if (domainId === DomainType.SURVEY.toString()) {
       this.trackEvent();
@@ -411,13 +419,30 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, id)
-      .then(resp => this.setState({children: resp.items, loading: false}))
+    const parentId = fullTree ? null : id;
+    cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
+      .then(resp => {
+        if (fullTree) {
+          let children = [];
+          resp.items.forEach(child => {
+            child['children'] = [];
+            if (child.parentId === 0) {
+              children.push(child);
+            } else {
+              children = this.addChildToParent(child, children);
+            }
+          });
+          this.setState({children});
+        } else {
+          this.setState({children: resp.items});
+        }
+      })
       .catch(error => {
         console.error(error);
-        this.setState({error: true, loading: false});
+        this.setState({error: true});
         subtreeSelectedStore.next(undefined);
-      });
+      })
+      .finally(() => this.setState({loading: false}));
   }
 
   addChildToParent(child, itemList) {
@@ -490,7 +515,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   render() {
-    const {back, node} = this.props;
+    const {back, node, wizard: {fullTree}} = this.props;
     const {children, ingredients, loading} = this.state;
     return <React.Fragment>
       {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
@@ -509,7 +534,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
-        {!loading && !!children && children.map((child, c) => <TreeNode key={c} node={child}/>)}
+        {!loading && !!children && children.map((child, c) => <TreeNode key={c} fullTree={fullTree} node={child}/>)}
     </div>
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;

@@ -216,7 +216,7 @@ export class SearchGroupList extends React.Component<Props, State> {
       (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
     triggerEvent(category, 'Click', `${category} - ${label}`);
-    const fullTree = criteria.fullTree || false;
+    const fullTree = domain === DomainType.PHYSICALMEASUREMENT;
     let context: any;
     const itemId = generateId('items');
     const groupId = null;
