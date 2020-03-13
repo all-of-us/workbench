@@ -1,12 +1,10 @@
 import Button from '../../app/aou-elements/button';
 import {SideNavLink} from '../../app/authenticated-page';
-import GoogleLoginPage from '../../app/google-login';
+import HomePage from '../../app/home-page';
 import ProfilePage from '../../app/profile-page';
 import WorkspacesPage from '../../app/workspaces-page';
-import launchBrowser from '../../driver/puppeteer-launch';
+import {signIn} from '../app';
 import {waitForExists} from '../../driver/xpath-util';
-
-const configs = require('../../resources/workbench-config');
 
 export const HELP_DESK = {
   ASK_QUESTION: 'Ask a question about the Researcher Workbench',
@@ -19,24 +17,20 @@ export const HELP_DESK = {
 jest.setTimeout(2 * 60 * 1000);
 
 describe('Navigation', () => {
-  let browser;
-  let page;
 
-  beforeEach(async () => {
-    browser = await launchBrowser();
-    page = await browser.newPage();
-    await page.setUserAgent(configs.puppeteerUserAgent);
+  beforeAll(async () => {
+    // tests are using same incognito page. sign-in is only required once at the beginning.
+    await signIn(page);
   });
 
   afterEach(async () => {
-    await browser.close();
+    await jestPuppeteer.resetPage();
   });
 
 
   test('Check app side-nav work', async () => {
-    const homePage = await GoogleLoginPage.logIn(page);
-    expect(await homePage.isLoaded()).toBe(true);
-
+    const homePage = new HomePage(page);
+    await homePage.load();
     // Select Profile link
     await homePage.navTo(SideNavLink.PROFILE);
     const profilePage = new ProfilePage(page);
@@ -63,13 +57,13 @@ describe('Navigation', () => {
   });
 
   test('User can see the Contact Us form', async () => {
-    const homePage = await GoogleLoginPage.logIn(page);
-
+    const homePage = new HomePage(page);
+    await homePage.load();
     // Select Contact Us
     await homePage.navTo(SideNavLink.CONTACT_US);
 
     const iframeHandle = await page.waitForSelector('iframe[title="Find more information here"]');
-    const newIframe = await iframeHandle.contentFrame();
+    const newIframe: any = await iframeHandle.contentFrame();
 
     const askQuestionAboutButton = await Button.forLabel(newIframe, {text: HELP_DESK.ASK_QUESTION});
     expect(await askQuestionAboutButton.isVisible()).toBe(true);
@@ -94,7 +88,8 @@ describe('Navigation', () => {
   });
 
   test('User can Sign Out', async () => {
-    const homePage = await GoogleLoginPage.logIn(page);
+    const homePage = new HomePage(page);
+    await homePage.load();
     // Select Sign Out link
     await homePage.navTo(SideNavLink.SIGN_OUT);
     await waitForExists(page, '//*[text()="Redirect Notice"]');

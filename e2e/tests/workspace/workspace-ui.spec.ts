@@ -12,7 +12,7 @@ jest.setTimeout(2 * 60 * 1000);
 describe('Workspace ui tests', () => {
 
   beforeAll(async () => {
-    // all tests are using same incognito page. sign-in is only required once at the beginning.
+    // tests are using same incognito page. sign-in is only required once at the beginning.
     await signIn(page);
   });
 

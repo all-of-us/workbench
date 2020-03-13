@@ -1,4 +1,4 @@
-import {ElementHandle, Page, Response} from 'puppeteer';
+import {ElementHandle, Frame, Page, Response} from 'puppeteer';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -223,5 +223,19 @@ export default abstract class BasePage {
     }, element);
   }
 
+  async waitForFrame(page, frameName): Promise<any> {
+    let fulfill;
+    const promise = new Promise(x => fulfill = x);
+    checkFrame();
+    return promise;
+
+    function checkFrame() {
+      const frame: Frame = page.frames().find(f => f.name() === frameName);
+      if (frame)
+        fulfill(frame);
+      else
+        page.once('frameattached', checkFrame);
+    }
+  }
 
 }

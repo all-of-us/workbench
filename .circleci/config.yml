@@ -336,6 +336,11 @@ jobs:
   puppeteer-e2e-test:
     docker:
       - image: circleci/node:12.16.1
+      environment:
+            USER_NAME: $PUPPETEER_TEST_USER
+            PASSWORD: $PUPPETEER_TEST_USER_PASSWORD
+            INVITATION_KEY: $PUPPETEER_TEST_REGISTRATION_KEY
+            CONTACT_EMAIL: hermione.owner@quality.firecloud.org
     working_directory: ~/workbench
     steps:
       - checkout
@@ -355,20 +360,14 @@ jobs:
           key: v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
       - run:
           name: Install Chrome headless dependencies
-          command: .circleci/setup_puppeteer.sh
+          command: .circleci/install_puppeteer_dependencies.sh
       - run:
-          name: Install Chromedriver latest version
+          name: Install Chrome
           working_directory: ~/workbench/e2e
-          command: |
-            sudo apt-get update
-            sudo apt-get install lsb-release libappindicator3-1
-            curl -L -o google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-            sudo dpkg -i google-chrome.deb
-            sudo sed -i 's|HERE/chrome"|HERE/chrome" --no-sandbox|g' /opt/google/chrome/google-chrome
-            rm google-chrome.deb
+          command: .circleci/install_chrome.sh
       - run:
           working_directory: ~/workbench/e2e
-          command: yarn test
+          command: yarn test --runInBand
       - persist_to_workspace:
           root: .
           paths:

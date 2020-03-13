@@ -92,7 +92,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * @param targetPage
    */
   async navTo(targetPage: SideNavLink) {
-    await this.openSideNav(5);
+    await this.openSideNav();
     const angleIconXpath = clrIconXpath('', 'angle');
     await this.page.waitForXPath(angleIconXpath, {timeout: 30000});
     const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${targetPage}")]`;
@@ -139,7 +139,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   /**
    * Open sidenav dropdown.
    */
-  async openSideNav(retries: number): Promise<void> {
+  async openSideNav(retries: number = 2): Promise<void> {
     const click = async () => {
       const is = await this.isSideNavDropdownOpen();
       if (!is) {
