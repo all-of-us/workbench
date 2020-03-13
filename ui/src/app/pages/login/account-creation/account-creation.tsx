@@ -14,18 +14,15 @@ import {
 
 import {TooltipTrigger} from 'app/components/popups';
 
-import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {FlexColumn, FlexRow, flexStyle} from 'app/components/flex';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   EducationalRole,
   IndustryRole,
-  InstitutionalRole,
   NonAcademicAffiliation,
-  OrganizationType,
   Profile,
-  PublicInstitutionDetails,
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
@@ -33,9 +30,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-import {StyledAnchorTag} from 'app/components/buttons';
 import {Divider} from 'app/components/divider';
-import {AouTitle} from 'app/components/text-wrappers';
 import {commonStyles} from 'app/pages/login/account-creation/common-styles';
 import {isBlank, reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';

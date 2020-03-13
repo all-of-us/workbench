@@ -1,6 +1,6 @@
 import {AouTitle} from 'app/components/text-wrappers';
-import * as React from 'react';
 import {commonStyles} from 'app/pages/login/account-creation/common-styles';
+import * as React from 'react';
 
 const styles = commonStyles;
 

@@ -2,28 +2,25 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Error as ErrorDiv, ErrorMessage, TextInput} from 'app/components/inputs';
+import {FormSection} from 'app/components/forms';
+import {Error as ErrorDiv, TextInput} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common-content';
+import {commonStyles} from 'app/pages/login/account-creation/common-styles';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
+import {reportError} from 'app/utils/errors';
 import {
-  ErrorResponse,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {AouTitle} from 'app/components/text-wrappers';
-import {commonStyles} from 'app/pages/login/account-creation/common-styles';
-import {WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common-content';
-import {TooltipTrigger} from 'app/components/popups';
-import {Button} from 'app/components/buttons';
-import {FormSection} from 'app/components/forms';
-import {defaultInstitutions} from 'testing/stubs/institution-api-stub';
-import {reportError} from 'app/utils/errors';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -196,7 +193,6 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
         contactEmail,
         verifiedInstitutionalAffiliation: {
           institutionShortName, institutionalRoleEnum, institutionalRoleOtherText,
-          institutionDisplayName
         }
       }
     } = this.state;

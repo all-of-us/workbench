@@ -22,8 +22,8 @@ import {
 import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
-import * as React from 'react';
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
+import * as React from 'react';
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
