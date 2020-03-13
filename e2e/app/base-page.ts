@@ -28,6 +28,7 @@ export default abstract class BasePage {
     const timestamp = new Date().getTime();
     const screenshotFile = `${dir}/${fileName}_${timestamp}.png`;
     await this.page.screenshot({path: screenshotFile, fullPage: true});
+    console.log("screenshot taken: " + screenshotFile);
   }
 
   async getPageTitle() : Promise<string> {

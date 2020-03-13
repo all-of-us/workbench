@@ -341,7 +341,7 @@ jobs:
             PASSWORD: $PUPPETEER_TEST_USER_PASSWORD
             INVITATION_KEY: $PUPPETEER_TEST_REGISTRATION_KEY
             CONTACT_EMAIL: hermione.owner@quality.firecloud.org
-    working_directory: ~/workbench
+    # working_directory: ~/workbench
     steps:
       - checkout
       - run:
@@ -365,8 +365,12 @@ jobs:
       #    name: Install Chrome
       #    command: .circleci/install_chrome.sh
       - run:
+          name: echo
+          command: |
+            echo $INVITATION_KEY
+      - run:
           working_directory: ~/workbench/e2e
-          command: yarn test:headful --runInBand
+          command: yarn test --runInBand
       - persist_to_workspace:
           root: .
           paths:
