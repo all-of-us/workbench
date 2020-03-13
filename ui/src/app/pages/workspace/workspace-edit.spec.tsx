@@ -9,8 +9,9 @@ import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditSection} from './workspace-edit';
+import {WorkspaceEdit, WorkspaceEditMode} from './workspace-edit';
 import * as fp from "lodash/fp";
+import {WorkspaceEditSection} from "./workspace-util-component";
 
 jest.mock('app/utils/navigation', () => ({
   ...(require.requireActual('app/utils/navigation')),
