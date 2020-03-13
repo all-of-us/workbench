@@ -1,0 +1,19 @@
+[{
+	"shortName": "VUMC",
+	"displayName": "Vanderbilt University Medical Center",
+	"organizationTypeEnum": "HEALTH_CENTER_NON_PROFIT",
+	"emailAddresses": [],
+	"emailDomains": ["vumc.org"]
+}, {
+	"shortName": "Broad",
+	"displayName": "Broad Institute",
+	"organizationTypeEnum": "ACADEMIC_RESEARCH_INSTITUTION",
+	"emailAddresses": [],
+	"emailDomains": ["broadinstitute.org"]
+}, {
+	"shortName": "Verily",
+	"displayName": "Verily LLC",
+	"organizationTypeEnum": "INDUSTRY",
+	"emailAddresses": [],
+	"emailDomains": ["verily.com", "google.com"]
+}]
