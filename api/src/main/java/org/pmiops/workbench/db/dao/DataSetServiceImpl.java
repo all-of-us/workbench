@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -675,7 +676,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private static String generateSqlWithEnvironmentVariables(
       String query, KernelTypeEnum kernelTypeEnum) {
-    return query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum));
+    return new BasicFormatterImpl()
+        .format(query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum)));
   }
 
   // This takes the query, and string replaces in the values for each of the named
