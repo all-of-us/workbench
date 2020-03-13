@@ -44,6 +44,11 @@ const styles = reactStyles({
     borderRadius: 8,
     padding: 21
   },
+  title: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: 600
+  },
   uneditableProfileElement: {
     paddingLeft: '0.5rem',
     marginRight: 20,
@@ -353,6 +358,10 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               {usdElement(profile.freeTierDollarQuota - profile.freeTierUsage)}
             </FlexColumn>
           </FlexRow>}
+          <div>
+            <div style={styles.title}>Optional Demographics Survey</div>
+            <Button type={'link'}>Update Survey</Button>
+          </div>
           <ProfileRegistrationStepStatus
             title='Google 2-Step Verification'
             wasBypassed={!!profile.twoFactorAuthBypassTime}
