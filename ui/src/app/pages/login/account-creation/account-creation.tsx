@@ -31,11 +31,10 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {Divider} from 'app/components/divider';
-import {commonStyles} from 'app/pages/login/account-creation/common-styles';
+import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common';
 import {isBlank, reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
-import {AccountCreationOptions} from './account-creation-options';
-import {WhyWillSomeInformationBePublic} from './common-content';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -52,15 +51,6 @@ const styles = reactStyles({
     fontWeight: 600,
     fontSize: 18,
   },
-  sectionInput: {
-    width: '12rem',
-    height: '1.5rem'
-  },
-  text: {
-    fontSize: 14,
-    color: colors.primary,
-    lineHeight: '22px',
-  }
 });
 
 const researchPurposeList = [
@@ -98,24 +88,6 @@ export const DropDownSection = (props) => {
               value={props.value}
               onChange={(e) => props.onChange(e.value)}/>
   </Section>;
-};
-
-export const TextInputWithLabel = (props) => {
-  return <FlexColumn style={{width: '12rem', ...props.containerStyle}}>
-    <label style={{...styles.text, fontWeight: 600}}>{props.labelText}</label>
-    <FlexRow style={{alignItems: 'center', marginTop: '0.1rem'}}>
-      <TextInput id={props.inputId}
-                 name={props.inputName}
-                 placeholder={props.placeholder}
-                 value={props.value}
-                 disabled={props.disabled}
-                 onChange={props.onChange}
-                 onBlur={props.onBlur}
-                 invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...styles.sectionInput, ...props.inputStyle}}/>
-      {props.children}
-    </FlexRow>
-  </FlexColumn>;
 };
 
 export const MultiSelectWithLabel = (props) => {
@@ -392,6 +364,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       },
     };
 
+    // The validation data for this form is *almost* the raw Profile, except for the additional
+    // 'usernameWithEmail' field we're adding, to be able to separate our validation on the
+    // username itself from validation of the full email address. For this reason, we need to cast
+    // the profile object to 'any'.
     let validationData = {...this.state.profile} as any;
     validationData.usernameWithEmail = validationData.username + '@' + gsuiteDomain;
 

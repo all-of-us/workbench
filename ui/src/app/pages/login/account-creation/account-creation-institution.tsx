@@ -5,12 +5,11 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {Error as ErrorDiv, TextInput} from 'app/components/inputs';
+import {Error as ErrorDiv} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common-content';
-import {commonStyles} from 'app/pages/login/account-creation/common-styles';
+import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
@@ -28,37 +27,12 @@ const styles = reactStyles({
     fontSize: 12,
     fontWeight: 400
   },
-  sectionInput: {
-    width: '14rem',
-    height: '1.5rem'
+  dropdown: {
+    width: '50%',
+    minWidth: '600px'
   },
-  text: {
-    fontSize: 14,
-    color: colors.primary,
-    lineHeight: '22px',
-  }
 });
 
-// TODO: this is copy-pasted from account-creation.tsx. Consider factoring this into a true component.
-function TextInputWithLabel(props) {
-  return <div style={{width: '12rem', ...props.containerStyle}}>
-    {props.labelContent}
-    {props.labelText && <label style={{...styles.text, fontWeight: 600}}>{props.labelText}</label>}
-    <div style={{marginTop: '0.1rem'}}>
-      <TextInput data-test-id={props.inputId}
-                 id={props.inputId}
-                 name={props.inputName}
-                 placeholder={props.placeholder}
-                 value={props.value}
-                 disabled={props.disabled}
-                 onChange={props.onChange}
-                 onBlur={props.onBlur}
-                 invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...styles.sectionInput, ...props.inputStyle}}/>
-      {props.children}
-    </div>
-  </div>;
-}
 
 export interface Props {
   profile: Profile;
@@ -217,7 +191,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           </div>
           {loadingInstitutions && <SpinnerOverlay />}
           {!loadingInstitutions && <div style={{marginTop: '.5rem'}}>
-            <label style={{...styles.text, fontWeight: 600}}>
+            <label style={styles.boldText}>
               Select your institution
               <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
                 Publicly displayed
@@ -228,7 +202,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </div>
             <Dropdown
                 data-test-id='institution-dropdown'
-                style={{width: '50%', minWidth: '600px'}}
+                style={styles.dropdown}
                 options={institutions.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
                 value={institutionShortName}
                 onChange={(e) => {
@@ -253,7 +227,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                 inputId='contact-email'
                                 inputName='contactEmail'
                                 labelContent={<div>
-                                  <label style={{...styles.text, fontWeight: 600}}>
+                                  <label style={styles.boldText}>
                                     Your institutional email address
                                   </label>
                                   <div style={{...styles.text, fontSize: 14}}>
@@ -269,7 +243,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               </ErrorDiv>
             }
             <div style={{marginTop: '.5rem'}}>
-              <label style={{...styles.text, fontWeight: 600, marginTop: '1rem'}}>
+              <label style={{...styles.boldText, marginTop: '1rem'}}>
                 Which of the following best describes your role?
                 <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
                   Publicly displayed
@@ -277,7 +251,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               </label>
               <div>
                 <Dropdown data-test-id='role-dropdown'
-                          style={{width: '50%', 'minWidth': '600px'}}
+                          style={styles.dropdown}
                           placeholder={this.getRoleOptions() ?
                             '' : 'First select an institution above'}
                           options={this.getRoleOptions()}
@@ -286,7 +260,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               </div>
             </div>
             {institutionalRoleEnum === InstitutionalRole.OTHER && <div style={{marginTop: '.5rem'}}>
-              <label style={{...styles.text, fontWeight: 600, marginTop: '1rem'}}>
+              <label style={{...styles.boldText, marginTop: '1rem'}}>
                 Please describe your role
                 <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
                   Publicly displayed

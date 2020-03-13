@@ -42,6 +42,14 @@ function getSubmitButton(wrapper: AnyWrapper): AnyWrapper {
   return wrapper.find('[data-test-id="submit-button"]');
 }
 
+const academicSpecificRoleOption = AccountCreationOptions.institutionalRoleOptions.find(
+  x => x.value === InstitutionalRole.UNDERGRADUATE
+);
+
+const industrySpecificRoleOption = AccountCreationOptions.institutionalRoleOptions.find(
+  x => x.value === InstitutionalRole.SENIORRESEARCHER
+);
+
 
 beforeEach(() => {
   serverConfigStore.next(defaultServerConfig);
@@ -80,14 +88,6 @@ it('should show user-facing error message on data load error', async() => {
   expect(wrapper.find('[data-test-id="data-load-error"]').exists).toBeTruthy();
 });
 
-const academicSpecificOption = AccountCreationOptions.institutionalRoleOptions.find(
-  x => x.value === InstitutionalRole.UNDERGRADUATE
-);
-
-const industrySpecificOption = AccountCreationOptions.institutionalRoleOptions.find(
-  x => x.value === InstitutionalRole.SENIORRESEARCHER
-);
-
 it('should reset role value & options when institution is selected', async() => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
@@ -99,11 +99,11 @@ it('should reset role value & options when institution is selected', async() => 
 
   const roleDropdown = getRoleDropdown(wrapper);
   // Broad is an academic institution, which should contain the undergrad role.
-  expect(roleDropdown.props.options).toContain(academicSpecificOption);
+  expect(roleDropdown.props.options).toContain(academicSpecificRoleOption);
 
   // Simulate selecting a role value for Broad.
-  roleDropdown.props.onChange({originalEvent: undefined, value: academicSpecificOption.value});
-  expect(roleDropdown.props.value).toEqual(academicSpecificOption.value);
+  roleDropdown.props.onChange({originalEvent: undefined, value: academicSpecificRoleOption.value});
+  expect(roleDropdown.props.value).toEqual(academicSpecificRoleOption.value);
 
   // Simulate switching to Verily.
   institutionDropdown.props.onChange({originalEvent: undefined, value: 'Verily'});
@@ -111,7 +111,7 @@ it('should reset role value & options when institution is selected', async() => 
   // Role value should be cleared when institution changes.
   expect(roleDropdown.props.value).toBeNull();
   // Role options should have been swapped out w/ industry options.
-  expect(roleDropdown.props.options).toContain(industrySpecificOption);
+  expect(roleDropdown.props.options).toContain(industrySpecificRoleOption);
 });
 
 
