@@ -9,6 +9,7 @@
           <app-list-search-group-list
             [role]="'includes'"
             [groups]="criteria.includes"
+            [updated]="updateGroupListsCount"
             [updateRequest]="updateRequest">
           </app-list-search-group-list>
         </div>
@@ -18,6 +19,7 @@
             *ngIf="overview"
             [role]="'excludes'"
             [groups]="criteria.excludes"
+            [updated]="updateGroupListsCount"
             [updateRequest]="updateRequest">
           </app-list-search-group-list>
         </div>
@@ -27,7 +29,7 @@
       <app-list-overview
         *ngIf="overview"
         [searchRequest]="criteria"
-        [updateCriteria]="updateCriteria"
+        [updateCount]="updateCount"
         [updateSaving]="updateSaving"></app-list-overview>
     </div>
     <div *ngIf="loading" class="spinner root-spinner">

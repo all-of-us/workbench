@@ -160,7 +160,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       temporal: false,
       mention: TemporalMention.ANYMENTION,
       time: TemporalTime.DURINGSAMEENCOUNTERAS,
-      timeValue: 0,
+      timeValue: '',
       timeFrame: '',
       isRequesting: false,
       status: 'active'

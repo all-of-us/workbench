@@ -4,7 +4,7 @@
   </div>
 
   <div *ngFor="let group of groups; let i = index;">
-    <app-list-search-group [group]="group" [index]="i + index" [role]="role" [updateRequest]="updateRequest">
+    <app-list-search-group [group]="group" [index]="i + index" [role]="role" [updated]="updateGroups" [updateRequest]="updateRequest">
     </app-list-search-group>
     <div class="circle-wrapper">
       <div class="and-circle">AND</div>

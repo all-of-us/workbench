@@ -25,12 +25,13 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   error = false;
   overview = false;
   criteria = {includes: [], excludes: []};
-  updateCriteria = {update: 0, recalculate: true};
+  updateCount = 0;
   cohort: any;
   resolve: Function;
   modalPromise: Promise<boolean> | null = null;
   modalOpen = false;
   saving = false;
+  updateGroupListsCount = 0;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -59,6 +60,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     searchRequestStore.subscribe(sr => {
       this.criteria = sr;
       this.overview = sr.includes.length || sr.excludes.length;
+      this.updateGroupListsCount++;
     });
     this.updateWrapperDimensions();
   }
@@ -98,8 +100,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 
-  updateRequest = (recalculate: boolean) => {
-    this.updateCriteria = {update: this.updateCriteria.update + 1, recalculate};
+  updateRequest = () => {
+    // timeout prevents Angular 'Expression changed after checked' error
+    setTimeout(() => this.updateCount++);
   }
 
   updateSaving = (flag: boolean) => {

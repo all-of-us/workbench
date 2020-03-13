@@ -248,7 +248,7 @@ export function parseCohortDefinition(json: string) {
       });
       grp.mention = grp.mention ? grp.mention : TemporalMention.ANYMENTION;
       grp.time = grp.time ? grp.time : TemporalTime.DURINGSAMEENCOUNTERAS;
-      grp.timeValue = grp.timeValue ? grp.timeValue : 0;
+      grp.timeValue = grp.timeValue ? grp.timeValue : '';
       grp.timeFrame = grp.timeFrame ? grp.timeFrame : '';
       grp.status = 'active';
       return grp;
@@ -280,7 +280,7 @@ export function mapGroup(group: any) {
   }, []);
   let searchGroup = <SearchGroup>{id, items, temporal};
   if (temporal) {
-    searchGroup = {...searchGroup, mention, time, timeValue};
+    searchGroup = {...searchGroup, mention, time, timeValue: parseInt(timeValue, 10)};
   }
   return searchGroup;
 }
