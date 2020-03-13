@@ -10,7 +10,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -44,9 +43,7 @@ public class LoadInstitutions {
           .desc("If specified, the tool runs in dry run mode; no modifications are made")
           .build();
 
-  private static Options options = new Options()
-      .addOption(importFilename)
-      .addOption(dryRunOpt);
+  private static Options options = new Options().addOption(importFilename).addOption(dryRunOpt);
 
   @Bean
   public CommandLineRunner run(InstitutionService institutionService) {
@@ -60,7 +57,8 @@ public class LoadInstitutions {
         Institution[] institutions = mapper.readValue(reader, Institution[].class);
 
         for (Institution institution : institutions) {
-          Optional<Institution> institutionMaybe = institutionService.getInstitution(institution.getShortName());
+          Optional<Institution> institutionMaybe =
+              institutionService.getInstitution(institution.getShortName());
           if (institutionMaybe.isPresent()) {
             log.info("Skipping... Entry already exists for " + institution.getShortName());
             Institution fetchedInstitution = institutionMaybe.get();
@@ -69,7 +67,9 @@ public class LoadInstitutions {
             fetchedInstitution.getEmailAddresses().sort(Comparator.naturalOrder());
             institution.getEmailAddresses().sort(Comparator.naturalOrder());
             if (!institutionMaybe.get().equals(institution)) {
-              log.warning("Database and import file have different definitions for " + institution.getShortName());
+              log.warning(
+                  "Database and import file have different definitions for "
+                      + institution.getShortName());
               log.warning("Database: " + institutionMaybe.get().toString());
               log.warning("Import File: " + institution.toString());
             }
