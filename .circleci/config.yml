@@ -369,7 +369,7 @@ jobs:
           command: |
             echo ${PUPPETEER_TEST_REGISTRATION_KEY}
       - run:
-          # working_directory: ~/workbench/e2e
+          working_directory: ~/workbench/e2e
           command: yarn test --runInBand
       - persist_to_workspace:
           root: .
