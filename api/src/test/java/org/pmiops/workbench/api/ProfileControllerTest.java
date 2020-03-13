@@ -192,6 +192,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void setUp() throws IOException {
     super.setUp();
 
+    // Most tests should run with institutional verification off by default.
+    config.featureFlags.requireInstitutionalVerification = false;
+
     fakeClock.setInstant(NOW);
 
     Profile profile = new Profile();

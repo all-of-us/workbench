@@ -13,7 +13,7 @@ let props: AccountCreationSurveyProps;
 const onCompleteSpy = jest.fn();
 const onPreviousSpy = jest.fn();
 
-const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: false};
+const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: true};
 
 beforeEach(() => {
   serverConfigStore.next(defaultConfig);
