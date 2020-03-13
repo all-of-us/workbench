@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -343,6 +344,8 @@ public class DataSetControllerTest {
   }
 
   private DataSetController dataSetController;
+
+  private BasicFormatterImpl sqlFormatter = new BasicFormatterImpl();
 
   @Before
   public void setUp() throws Exception {
@@ -737,29 +740,30 @@ public class DataSetControllerTest {
     String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
-            "import pandas\nimport os\n\n"
-                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
-                + prefix
-                + "sql = \"\"\"SELECT PERSON_ID FROM `"
-                + TEST_CDR_TABLE
-                + ".condition_occurrence` c_occurrence WHERE \n"
-                + "(condition_concept_id IN (123) OR \n"
-                + "condition_source_concept_id IN (123)) \n"
-                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
-                + TEST_CDR_TABLE
-                + ".person` person WHERE "
-                + NAMED_PARAMETER_VALUE.getValue()
-                + " IN (2, 5)))"
-                + "\"\"\"\n"
-                + "\n"
-                + prefix
-                + "df = pandas.read_gbq("
-                + prefix
-                + "sql, dialect=\"standard\")"
-                + "\n"
-                + "\n"
-                + prefix
-                + "df.head(5)");
+            sqlFormatter.format(
+                "import pandas\nimport os\n\n"
+                    + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                    + prefix
+                    + "sql = \"\"\"SELECT PERSON_ID FROM `"
+                    + TEST_CDR_TABLE
+                    + ".condition_occurrence` c_occurrence WHERE \n"
+                    + "(condition_concept_id IN (123) OR \n"
+                    + "condition_source_concept_id IN (123)) \n"
+                    + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
+                    + TEST_CDR_TABLE
+                    + ".person` person WHERE "
+                    + NAMED_PARAMETER_VALUE.getValue()
+                    + " IN (2, 5)))"
+                    + "\"\"\"\n"
+                    + "\n"
+                    + prefix
+                    + "df = pandas.read_gbq("
+                    + prefix
+                    + "sql, dialect=\"standard\")"
+                    + "\n"
+                    + "\n"
+                    + prefix
+                    + "df.head(5)"));
   }
 
   @Test
@@ -784,30 +788,31 @@ public class DataSetControllerTest {
     String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
-            "library(bigrquery)\n\n"
-                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
-                + prefix
-                + "sql <- paste(\"SELECT PERSON_ID FROM `"
-                + TEST_CDR_TABLE
-                + ".condition_occurrence` c_occurrence WHERE \n"
-                + "(condition_concept_id IN (123) OR \n"
-                + "condition_source_concept_id IN (123)) \n"
-                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
-                + TEST_CDR_TABLE
-                + ".person` person WHERE "
-                + NAMED_PARAMETER_VALUE.getValue()
-                + " IN (2, 5)))"
-                + "\", sep=\"\")\n"
-                + "\n"
-                + prefix
-                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
-                + prefix
-                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")"
-                + "\n"
-                + "\n"
-                + "head("
-                + prefix
-                + "df, 5)");
+            sqlFormatter.format(
+                "library(bigrquery)\n\n"
+                    + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                    + prefix
+                    + "sql <- paste(\"SELECT PERSON_ID FROM `"
+                    + TEST_CDR_TABLE
+                    + ".condition_occurrence` c_occurrence WHERE \n"
+                    + "(condition_concept_id IN (123) OR \n"
+                    + "condition_source_concept_id IN (123)) \n"
+                    + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
+                    + TEST_CDR_TABLE
+                    + ".person` person WHERE "
+                    + NAMED_PARAMETER_VALUE.getValue()
+                    + " IN (2, 5)))"
+                    + "\", sep=\"\")\n"
+                    + "\n"
+                    + prefix
+                    + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
+                    + prefix
+                    + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")"
+                    + "\n"
+                    + "\n"
+                    + "head("
+                    + prefix
+                    + "df, 5)"));
   }
 
   @Test
@@ -881,7 +886,7 @@ public class DataSetControllerTest {
             .generateCode(
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-    assertThat(response.getCode()).contains("UNION DISTINCT");
+    assertThat(response.getCode()).contains("UNION\n" + "                        DISTINCT ");
   }
 
   @Test
@@ -922,7 +927,8 @@ public class DataSetControllerTest {
     */
     assertThat(response.getCode())
         .contains(
-            "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
+            sqlFormatter.format(
+                "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person"));
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
     assertThat(response.getCode()).contains("WHERE person.PERSON_ID");
