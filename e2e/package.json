@@ -29,7 +29,9 @@
     "testPathIgnorePatterns": [
       "/node_modules/"
     ],
-    "testRegex": "(tests/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "testMatch": [
+      "<rootDir>/**/tests/**/*.spec.ts"
+    ],
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/(?!tests)"
     ],

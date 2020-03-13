@@ -1,4 +1,5 @@
 import {ElementHandle, Frame, Page, Response} from 'puppeteer';
+import * as fs from 'fs';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -13,6 +14,20 @@ export default abstract class BasePage {
   protected constructor(page: Page, timeout?) {
     this.page = page;
     this.timeout = timeout || this.DEFAULT_TIMEOUT_MILLISECONDS;
+  }
+
+  /**
+   * Take a full-page screenshot, save file in .png format in logs/screenshots directory.
+   * @param fileName
+   */
+  async takeScreenshot(fileName: string) {
+    const dir = 'screenshot';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+    const timestamp = new Date().getTime();
+    const screenshotFile = `${dir}/${fileName}_${timestamp}.png`;
+    await this.page.screenshot({path: screenshotFile, fullPage: true});
   }
 
   async getPageTitle() : Promise<string> {

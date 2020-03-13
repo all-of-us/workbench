@@ -18,19 +18,19 @@ jest.setTimeout(2 * 60 * 1000);
 
 describe('Navigation', () => {
 
-  beforeAll(async () => {
-    // tests are using same incognito page. sign-in is only required once at the beginning.
+  let page;
+
+  beforeEach(async () => {
+    page = await context.newPage();
     await signIn(page);
   });
 
   afterEach(async () => {
-    await jestPuppeteer.resetPage();
+    await jestPuppeteer.resetBrowser();
   });
-
 
   test('Check app side-nav work', async () => {
     const homePage = new HomePage(page);
-    await homePage.load();
     // Select Profile link
     await homePage.navTo(SideNavLink.PROFILE);
     const profilePage = new ProfilePage(page);
@@ -52,13 +52,11 @@ describe('Navigation', () => {
 
     // Select Home link
     await homePage.navTo(SideNavLink.HOME);
-    await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
   });
 
   test('User can see the Contact Us form', async () => {
     const homePage = new HomePage(page);
-    await homePage.load();
     // Select Contact Us
     await homePage.navTo(SideNavLink.CONTACT_US);
 
@@ -89,7 +87,6 @@ describe('Navigation', () => {
 
   test('User can Sign Out', async () => {
     const homePage = new HomePage(page);
-    await homePage.load();
     // Select Sign Out link
     await homePage.navTo(SideNavLink.SIGN_OUT);
     await waitForExists(page, '//*[text()="Redirect Notice"]');

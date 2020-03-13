@@ -1,5 +1,4 @@
 import GoogleLoginPage, {selectors} from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 const configs = require('../../resources/workbench-config');
 
@@ -7,27 +6,19 @@ const configs = require('../../resources/workbench-config');
 jest.setTimeout(2 * 60 * 1000);
 
 describe('Login tests:', () => {
-  let browser;
-  let incognitoContext;
+
+  let browserContext;
   let page;
 
-  beforeAll(async () =>  {
-    browser = await PuppeteerLaunch();
-  });
-
-  beforeEach(async () => {
-    incognitoContext = await browser.createIncognitoBrowserContext();
-    page = await incognitoContext.newPage();
+  beforeEach(async () =>  {
+    browserContext = await browser.createIncognitoBrowserContext();
+    page = await browserContext.newPage();
     await page.setUserAgent(configs.puppeteerUserAgent);
     await page.setDefaultNavigationTimeout(60000);
   });
 
   afterEach(async () => {
-    await incognitoContext.close();
-  });
-
-  afterAll(async () => {
-    await browser.close();
+    await browserContext.close();
   });
 
   test('Open AoU Workspaces page before login redirects to login page', async () => {

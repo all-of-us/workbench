@@ -1,7 +1,6 @@
 import BaseElement from '../../app/aou-elements/base-element';
 import CreateAccountPage, {INSTITUTION_AFFILIATION} from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 const configs = require('../../resources/workbench-config');
 
@@ -10,24 +9,14 @@ jest.setTimeout(2 * 60 * 1000);
 
 describe('User registration tests:', () => {
 
-  let browser;
   let page;
 
-  beforeAll(async () => {
-    browser = await PuppeteerLaunch();
-  });
-
   beforeEach(async () => {
-    page = await browser.newPage();
-    await page.setDefaultNavigationTimeout(60000);
+    page = await context.newPage();
   });
 
   afterEach(async () => {
-    await page.close();
-  });
-
-  afterAll(async () => {
-    await browser.close();
+    await jestPuppeteer.resetBrowser();
   });
 
 

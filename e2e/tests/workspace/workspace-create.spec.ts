@@ -1,23 +1,24 @@
-import {Page} from 'puppeteer';
 import Link from '../../app/aou-elements/link';
 import {PageUrl} from '../../app/authenticated-page';
 import DataPage from '../../app/data-page';
 import WorkspacesPage from '../../app/workspaces-page';
+import {signIn} from '../app';
 
-const Chrome = require('../../driver/chrome-driver');
 
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
 describe('Workspace creation tests:', () => {
-  let page: Page;
+
+  let page;
 
   beforeEach(async () => {
-    page = await Chrome.setup();
+    page = await context.newPage();
+    await signIn(page);
   });
 
   afterEach(async () => {
-    await Chrome.teardown();
+    await jestPuppeteer.resetBrowser();
   });
 
   test('User can create a simple workspace with some default values', async () => {

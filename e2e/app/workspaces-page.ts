@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 import {findButton} from './aou-elements/xpath-finder';
-import AuthenticatedPage from './authenticated-page';
+import AuthenticatedPage, {PageUrl} from './authenticated-page';
 import WorkspaceEditPage from './workspace-edit-page';
 
 const faker = require('faker/locale/en_US');
@@ -27,6 +27,17 @@ export default class WorkspacesPage extends AuthenticatedPage {
     } catch (e) {
       return false;
     }
+  }
+
+  async load(): Promise<this> {
+    const onPageUrl = this.page.url();
+    const workspacesUrl = PageUrl.WORKSPACES.toString();
+    if (onPageUrl !== workspacesUrl) {
+      // only load Workspaces URL if current page is not the Workspaces page
+      await this.gotoUrl(workspacesUrl);
+      await this.waitForLoad();
+    }
+    return this;
   }
 
   async getCreateNewWorkspaceButton() {

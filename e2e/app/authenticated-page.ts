@@ -48,16 +48,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     super(page);
   }
 
-  /**
-   * Take a full-page screenshot, save file in .png format in logs/screenshots directory.
-   * @param fileName
-   */
-  async takeScreenshot(fileName: string) {
-    const timestamp = new Date().getTime();
-    const screenshotFile = `screenshots/${fileName}_${timestamp}.png`;
-    await this.page.screenshot({path: screenshotFile, fullPage: true});
-  }
-
   protected async isSignedIn(): Promise<boolean> {
     await this.page.waitForSelector(selectors.signedInIndicator);
     await this.page.waitForSelector(selectors.logo, {visible: true});

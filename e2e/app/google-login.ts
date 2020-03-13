@@ -37,7 +37,7 @@ export default class GoogleLoginPage extends BasePage {
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.loginButton, {visible: true});
+    return await this.page.waitForXPath(selectors.loginButton, {visible: true, timeout: 10000});
   }
 
   /**
@@ -92,6 +92,7 @@ export default class GoogleLoginPage extends BasePage {
   async goto(): Promise<void> {
     const url = configs.uiBaseUrl + configs.loginUrlPath;
     await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 60000});
+    await this.takeScreenshot('googleloginpage');
   }
 
   /**
@@ -105,8 +106,10 @@ export default class GoogleLoginPage extends BasePage {
     const pwd = paswd || configs.userPassword;
 
     await this.goto();
-
-    const googleButton = await this.loginButton();
+    const googleButton = await this.loginButton().catch((err) => {
+      console.error('Google login button not found. ' + err);
+      throw err;
+    });
     await Promise.all([
       googleButton.click(),
       this.page.waitForNavigation(),
@@ -145,6 +148,8 @@ export default class GoogleLoginPage extends BasePage {
 
 
   static async logIn(page: Page): Promise<HomePage> {
+    await page.setUserAgent(configs.puppeteerUserAgent);
+    await page.setDefaultNavigationTimeout(60000);
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
     const home = new HomePage(page);

@@ -19,5 +19,5 @@ module.exports = {
     ],
   },
   browser: 'chromium',
-  browserContext: process.env.INCOGNITO ? 'incognito' : 'default',
+  browserContext: (process.env.INCOGNITO || true) ? 'incognito' : 'default',
 };

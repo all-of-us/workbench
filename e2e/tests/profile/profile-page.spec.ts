@@ -1,31 +1,22 @@
-import {Browser, Page} from 'puppeteer';
 import {SideNavLink} from '../../app/authenticated-page';
-import GoogleLoginPage from '../../app/google-login';
 import HomePage from '../../app/home-page';
 import ProfilePage from '../../app/profile-page';
-import launchBrowser from '../../driver/puppeteer-launch';
+import {signIn} from '../app';
 
-const configs = require('../../resources/workbench-config');
 
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
 describe('Profile', () => {
-  let browser: Browser;
-  let page: Page;
+  let page;
 
   beforeEach(async () => {
-    browser = await launchBrowser();
-    const incognitoContext = await browser.createIncognitoBrowserContext();
-    page = await incognitoContext.newPage();
-    await page.setUserAgent(configs.puppeteerUserAgent);
-    const loginPage = new GoogleLoginPage(page);
-    await loginPage.login();
+    page = await context.newPage();
+    await signIn(page);
   });
 
   afterEach(async () => {
-    await page.close();
-    await browser.close();
+    await jestPuppeteer.resetBrowser();
   });
 
   test('Click First and Last name fields on Profile page', async () => {

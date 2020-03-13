@@ -1,37 +1,20 @@
 import CreateAccountPage from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
-const configs = require('../../resources/workbench-config');
 
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
 describe('User registration tests:', () => {
 
-  let browser;
-  let incognitoContext;
   let page;
 
-
-  beforeAll(async () => {
-    browser = await PuppeteerLaunch();
-  });
-
   beforeEach(async () => {
-    incognitoContext = await browser.createIncognitoBrowserContext();
-    page = await incognitoContext.newPage();
-    await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(60000);
+    page = await context.newPage();
   });
 
   afterEach(async () => {
-    await incognitoContext.close();
+    await jestPuppeteer.resetBrowser();
   });
-
-  afterAll(async () => {
-    await browser.close();
-  });
-
 
   test('Can register new user', async () => {
     // Load the landing page for login.

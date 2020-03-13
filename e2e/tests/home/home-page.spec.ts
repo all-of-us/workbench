@@ -1,3 +1,4 @@
+import {Page} from 'puppeteer';
 import NewClrIconLink from '../../app/aou-elements/clr-icon-link';
 import Link from '../../app/aou-elements/link';
 import BaseElement from '../../app/aou-elements/base-element';
@@ -6,7 +7,7 @@ import {FIELD_LABEL as editPageFieldLabel} from '../../app/home-page';
 import WorkspaceCard from '../../app/workspace-card';
 import WorkspaceEditPage from '../../app/workspace-edit-page';
 import WorkspacesPage from '../../app/workspaces-page';
-import launchBrowser from '../../driver/puppeteer-launch';
+
 
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
@@ -14,17 +15,15 @@ jest.setTimeout(2 * 60 * 1000);
 const configs = require('../../resources/workbench-config');
 
 describe('Home page ui tests', () => {
-  let browser;
-  let page;
+
+  let page: Page;
 
   beforeEach(async () => {
-    browser = await launchBrowser();
-    page = await browser.newPage();
-    await page.setUserAgent(configs.puppeteerUserAgent);
+    page = await context.newPage();
   });
 
   afterEach(async () => {
-    await browser.close();
+    await jestPuppeteer.resetBrowser();
   });
 
   test('Homepage is the landing page after Sign In', async () => {
