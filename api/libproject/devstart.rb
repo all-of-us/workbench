@@ -1287,7 +1287,7 @@ Common.register_command({
 
 def load_institutions(cmd_name, *args)
   common = Common.new
-  ensure_docker cmd_name, args
+  ensure_docker(cmd_name, args)
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
@@ -1315,19 +1315,19 @@ def load_institutions(cmd_name, *args)
     common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
   end
 
-  flags = ([
+  gradle_args = ([
       ["--import-filename", op.opts.importFilename]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   if op.opts.dry_run
-    flags += ["--dry-run"]
+    gradle_args += ["--dry-run"]
   end
   # Gradle args need to be single-quote wrapped.
-  flags.map! { |f| "'#{f}'" }
+  gradle_args.map! { |f| "'#{f}'" }
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
         gradle loadInstitutions
-       -PappArgs=[#{flags.join(',')}]}
+       -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
 
@@ -1335,7 +1335,7 @@ LOAD_INSTITUTIONS_CMD = "load-institutions"
 
 Common.register_command({
     :invocation => LOAD_INSTITUTIONS_CMD,
-    :description => "Load institutions specified in given file.\n",
+    :description => "Load institutions specified in given file.",
     :fn => ->(*args) {load_institutions(LOAD_INSTITUTIONS_CMD, *args)}
 })
 
