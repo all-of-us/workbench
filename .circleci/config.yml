@@ -361,9 +361,9 @@ jobs:
       - run:
           name: Install Chrome headless dependencies
           command: .circleci/install_puppeteer_dependencies.sh
-      - run:
-          name: Install Chrome
-          command: .circleci/install_chrome.sh
+      # - run:
+      #    name: Install Chrome
+      #    command: .circleci/install_chrome.sh
       - run:
           working_directory: ~/workbench/e2e
           command: yarn test:headful --runInBand
