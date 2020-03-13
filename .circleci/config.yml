@@ -349,8 +349,6 @@ jobs:
             ls
             git submodule update --init --recursive
       - restore_cache:
-          paths:
-            - ~/workbench/e2e/node_modules
           keys:
           - v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
           - v1-dependencies-
