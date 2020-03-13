@@ -334,7 +334,6 @@ jobs:
               --promote
 
   puppeteer-e2e-test:
-    working_directory: ~/workbench/e2e
     docker:
       - image: circleci/node:12.16.1
         environment:
@@ -344,6 +343,9 @@ jobs:
             CONTACT_EMAIL: hermione.owner@quality.firecloud.org
     steps:
       - checkout
+        command: |
+          pwd
+          ls
       - run:
           name: Fetch Submodules
           command: |
@@ -358,6 +360,7 @@ jobs:
       - run: 
           working_directory: ~/workbench/e2e
           command: |
+            pwd
             ls
             yarn install --frozen-lockfile
       - save_cache:
@@ -365,29 +368,26 @@ jobs:
             - ~/workbench/e2e/node_modules
           key: v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
       - run:
-          working_directory: ~/workbench/e2e
           name: Install Chrome headless dependencies
+          working_directory: ~/workbench
           command: |
+            pwd
             ls
             .circleci/install_puppeteer_dependencies.sh
       # - run:
       #    name: Install Chrome
       #    command: .circleci/install_chrome.sh
       - run:
-          working_directory: ~/workbench/e2e
-          name: echo
-          command: |
-            ls
-            echo ${PUPPETEER_TEST_REGISTRATION_KEY}
-      - run:
+          name: Run Puppeteer tests
           working_directory: ~/workbench/e2e
           command: |
+            pwd
             ls
             yarn test --runInBand
       - persist_to_workspace:
           root: .
           paths:
-            - workbench/e2e
+            - e2e
 
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
 filter_master: &filter_master
