@@ -214,7 +214,7 @@ def dev_up(cmd_name, args)
     }
     common.status "Database startup complete (#{format_benchmark(bm)})"
 
-    if !op.opts.skip_db_changes
+    unless op.opts.skip_db_changes
       common.status "Database init & migrations..."
       bm = Benchmark.measure {
         common.run_inline %W{
@@ -225,7 +225,7 @@ def dev_up(cmd_name, args)
       common.status "Database init & migrations complete (#{format_benchmark(bm)})"
     end
 
-    if !op.opts.skip_configs
+    unless op.opts.skip_configs
       common.status "Loading configs & data..."
       bm = Benchmark.measure {
         common.run_inline %W{
