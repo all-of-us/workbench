@@ -72,6 +72,14 @@ it('should load institutions list', async() => {
   expect(options.length).toEqual(defaultInstitutions.length);
 });
 
+it('should show user-facing error message on data load error', async() => {
+  mockGetPublicInstitutionDetails.mockRejectedValueOnce(new Response(null, {status: 500}));
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  expect(wrapper.find('[data-test-id="data-load-error"]').exists).toBeTruthy();
+});
+
 const academicSpecificOption = AccountCreationOptions.institutionalRoleOptions.find(
   x => x.value === InstitutionalRole.UNDERGRADUATE
 );
@@ -114,13 +122,9 @@ it('should validate form', async() => {
   const reactComponent = wrapper.find(AccountCreationInstitution).instance() as AccountCreationInstitution;
   const errors = reactComponent.validate();
 
-  expect(Object.keys(errors).length).toBeGreaterThan(0);
-  expect(errors['verifiedInstitutionalAffiliation.institutionShortName'])
-    .toContain('select an institution to continue');
-  expect(errors['verifiedInstitutionalAffiliation.institutionRoleEnum'])
-    .toContain('cannot be blank');
-  expect(errors['contactEmail']).toContain('cannot be blank');
-  expect(errors['contactEmail']).toContain('address is invalid');
+  expect(errors['verifiedInstitutionalAffiliation.institutionShortName'].length).toBeGreaterThan(0);
+  expect(errors['verifiedInstitutionalAffiliation.institutionalRoleEnum'].length).toBeGreaterThan(0);
+  expect(errors['contactEmail'].length).toBeGreaterThan(0);
 });
 
 it('should call callback with correct form data', async() => {
@@ -144,12 +148,4 @@ it('should call callback with correct form data', async() => {
   getSubmitButton(wrapper).simulate('click');
 
   expect(profile).toBeDefined();
-});
-
-it('should handle error response from institution API', async() => {
-  mockGetPublicInstitutionDetails.mockRejectedValueOnce(new Response(null, {status: 500}));
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  expect(wrapper.find('[data-test-id="data-load-error"]').exists).toBeTruthy();
 });

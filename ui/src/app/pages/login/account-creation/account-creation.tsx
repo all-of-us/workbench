@@ -86,7 +86,9 @@ export const Section = (props) => {
       <label style={{...styles.sectionHeader, ...props.sectionHeaderStyles}}>
         {props.header}
       </label>
-      <label style={{color: colors.primary, fontSize: '12px', marginLeft: '.25rem'}}> {props.subHeader} </label>
+      {props.subHeader &&
+        <label style={{color: colors.primary, fontSize: '12px', marginLeft: '.25rem'}}> {props.subHeader} </label>
+      }
     </div>
     <Divider style={{marginTop: '.25rem'}}/>
     {props.children}
@@ -223,14 +225,16 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     return state;
   }
 
-  get usernameValid(): boolean {
+  // Returns whether the current username is considered valid. Undefined is returned when the
+  // username is empty, or if a username check is in progress.
+  isUsernameValid(): (boolean|undefined) {
     if (isBlank(this.state.profile.username) || this.state.usernameCheckInProgress) {
       return undefined;
     }
-    return !this.isUsernameValidationError;
+    return !this.isUsernameValidationError();
   }
 
-  get isUsernameValidationError(): boolean {
+  isUsernameValidationError(): boolean {
     return (this.state.usernameConflictError || this.usernameInvalidError());
   }
 
@@ -251,7 +255,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
   usernameChanged(username: string): void {
     this.updateProfileObject('username', username);
-    if (!username.trim()) {
+    if (isBlank(username)) {
       return;
     }
     // TODO: This should use a debounce, rather than manual setTimeout()s.
@@ -328,62 +332,120 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.updateInstitutionAffiliation('role', role);
   }
 
-  validateAccountCreation() {
+  validate(): {[key: string]: string} {
     const {showInstitution} = this.state;
     const {gsuiteDomain, requireInstitutionalVerification} = serverConfigStore.getValue();
 
-    const presenceCheck = {
-      presence: {
-        allowEmpty: false
-      }
-    };
-
     const validationCheck = {
-      username: {
-        presence: presenceCheck,
-        length: {
-          minimum: 4 + gsuiteDomain.length,
-          maximum: 64 + gsuiteDomain.length,
-          tooShort: 'not valid',
-          tooLong: 'not valid'
+      'username': {
+        presence: {
+          allowEmpty: false,
+          message: '^Username cannot be blank'
         },
-        email: {
-          message: ' not valid'
+        length: {
+          minimum: 4,
+          maximum: 64,
+        },
+      },
+      'givenName': {
+        presence: {
+          allowEmpty: false,
+          message: '^First name cannot be blank'
         }
       },
-      givenName: presenceCheck,
-      familyName: presenceCheck,
-      // TODO(RW-4361): remove this validation after we switch to verified institutional affiliation
-      contactEmail: {
-        presence: presenceCheck,
-        email: {
-          message: 'invalid'
+      'familyName': {
+        presence: {
+          allowEmpty: false,
+          message: '^Last name cannot be blank'
         }
       },
-      streetAddress1: presenceCheck,
-      city: presenceCheck,
-      state: presenceCheck,
-      zipCode: presenceCheck,
-      country: presenceCheck,
-      areaOfResearch: presenceCheck
+      'areaOfResearch': {
+        presence: {
+          allowEmpty: false,
+          message: '^Research description cannot be blank'
+        }
+      },
+      'address.streetAddress1': {
+        presence: {
+          allowEmpty: false,
+          message: '^Street address cannot be blank'
+        }
+      },
+      'address.city': {
+        presence: {
+          allowEmpty: false,
+          message: '^City cannot be blank'
+        }
+      },
+      'address.state': {
+        presence: {
+          allowEmpty: false,
+          message: '^State cannot be blank'
+        }
+      },
+      'address.zipCode': {
+        presence: {
+          allowEmpty: false,
+          message: '^Zip code cannot be blank'
+        }
+      },
+      'address.country': {
+        presence: {
+          allowEmpty: false,
+          message: '^Country cannot be blank'
+        }
+      },
     };
 
-    let validationData = this.state.profile;
-    validationData.username = this.state.profile.username + '@' + gsuiteDomain;
+    let validationData = {...this.state.profile} as any;
+    validationData.usernameWithEmail = validationData.username + '@' + gsuiteDomain;
 
-    // TODO(RW-4361): remove this check after we switch to verified institutional affiliation
+    if (!isBlank(validationData.username)) {
+      validationCheck['usernameWithEmail'] = {
+        email: {
+          message: '^Username contains invalid characters'
+        }
+      };
+    }
+
+    // TODO(RW-4361): remove these checks after we switch to verified institutional affiliation
     if (!requireInstitutionalVerification) {
       validationData = {...validationData, ...this.state.profile.institutionalAffiliations[0]};
 
+      validationCheck['contactEmail'] = {
+        presence: {
+          allowEmpty: false,
+          message: '^Contact email cannot be blank'
+        },
+        email: {
+          message: '^Contact email is invalid'
+        }
+      };
+
       if (showInstitution) {
-        validationCheck['institution'] = presenceCheck;
+        validationCheck['institution'] = {
+          presence: {
+            allowEmpty: false,
+            message: '^Institution cannot be blank'
+          }
+        };
       } else {
-        validationCheck['nonAcademicAffiliation'] = presenceCheck;
+        validationCheck['nonAcademicAffiliation'] = {
+          presence: {
+            allowEmpty: false,
+            message: '^Affiliation cannot be blank'
+          }
+        };
       }
 
       if (showInstitution ||
         this.state.profile.institutionalAffiliations[0].nonAcademicAffiliation !== NonAcademicAffiliation.COMMUNITYSCIENTIST) {
-        validationCheck['role'] = presenceCheck;
+        validationCheck['role'] = {
+          presence: {
+            allowEmpty: false,
+            message: '^Role cannot be blank'
+          }
+        };
       }
     }
     return validate(validationData, validationCheck);
@@ -413,7 +475,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </TooltipTrigger>
       </div>;
 
-    const errors = this.validateAccountCreation();
+    const errors = this.validate();
 
     return <div id='account-creation'
                 style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
@@ -433,7 +495,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                       containerStyle={{width: '26rem'}} labelText={usernameLabelText}
                                     onChange={v => this.usernameChanged(v)}>
                   <div style={{...inputStyles.iconArea}}>
-                    <ValidationIcon validSuccess={this.usernameValid}/>
+                    <ValidationIcon validSuccess={this.isUsernameValid()}/>
                   </div>
                   <i style={{...styles.asideText, marginLeft: 4}}>@{gsuiteDomain}</i>
                 </TextInputWithLabel>
@@ -445,9 +507,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   Username is already taken.
                 </ErrorDiv></div>}
               {this.usernameInvalidError() &&
-              <div style={{height: '1.5rem'}}><ErrorDiv id='usernameError'>
-                {username} is not a valid username.
-              </ErrorDiv></div>}
+                <div style={{height: '1.5rem'}}><ErrorDiv id='usernameError'>
+                  {username} is not a valid username.
+                </ErrorDiv></div>
+              }
             </div>
           </Section>
           <Section header={<div>About you <i style={styles.publiclyDisplayedText}>Publicly displayed</i></div>}>
@@ -477,23 +540,33 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   Last Name must be {nameLength} character or less.
                 </ErrorMessage>}
               </FlexRow>
-              <FlexRow style={{alignItems: 'left'}}>
-                {/* TODO(RW-4361): remove after we switch to verified institutional affiliation */}
-                {!requireInstitutionalVerification &&
+              {!requireInstitutionalVerification &&
+                <FlexRow style={{alignItems: 'left'}}>
                   <TextInputWithLabel value={contactEmail}
                                       inputId='contactEmail'
                                       inputName='contactEmail'
                                       placeholder='Email Address'
                                       labelText='Email Address'
-                                      onChange={v => this.updateProfileObject('contactEmail', v)}/>}
-                <MultiSelectWithLabel placeholder={'Select one or more'}
-                                      options={AccountCreationOptions.degree}
-                                      containerStyle={styles.multiInputSpacing}
-                                      value={this.state.profile.degrees}
-                                      labelText='Your degrees (optional)'
-                                      onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
-                                      />
-              </FlexRow>
+                                      onChange={v => this.updateProfileObject('contactEmail', v)}/>
+                  <MultiSelectWithLabel placeholder={'Select one or more'}
+                                        options={AccountCreationOptions.degree}
+                                        containerStyle={styles.multiInputSpacing}
+                                        value={this.state.profile.degrees}
+                                        labelText='Your degrees (optional)'
+                                        onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
+                                        />
+                </FlexRow>
+              }
+              {requireInstitutionalVerification &&
+                <div>
+                  <MultiSelectWithLabel placeholder={'Select one or more'}
+                                        options={AccountCreationOptions.degree}
+                                        value={this.state.profile.degrees}
+                                        labelText='Your degrees (optional)'
+                                        onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
+                  />
+                </div>
+              }
             </FlexColumn>
           </Section>
           <Section header={<React.Fragment>
@@ -639,7 +712,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
               </ul>
             </React.Fragment>} disabled={!errors}>
-              <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError || errors}
+              <Button disabled={this.state.usernameCheckInProgress ||
+                                this.isUsernameValidationError() ||
+                                Boolean(errors)}
                       style={{'height': '2rem', 'width': '10rem'}}
                       onClick={() => this.props.onComplete(this.state.profile)}>
                 Next
@@ -652,6 +727,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             <div style={styles.asideHeader}>About your new username</div>
             <div style={styles.asideText}>We create a 'username'@{gsuiteDomain} Google
                 account which you will use to login to the Workbench.</div>
+            <div style={{marginTop: '1rem'}}></div>
             <WhyWillSomeInformationBePublic />
           </FlexColumn>
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
