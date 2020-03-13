@@ -334,7 +334,7 @@ jobs:
               --promote
 
   puppeteer-e2e-test:
-    working_directory: ~/workbench/e2e
+    working_directory: $CIRCLE_WORKING_DIRECTORY/workbench/e2e
     docker:
       - image: circleci/node:12.16.1
         environment:
@@ -346,14 +346,18 @@ jobs:
       - checkout
       - run:
           name: Fetch Submodules
-          command: git submodule update --init --recursive
+          command: |
+            ls
+            git submodule update --init --recursive
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
           - v1-dependencies-
       - run: 
           working_directory: ~/workbench/e2e
-          command: yarn install --frozen-lockfile
+          command: |
+            ls
+            yarn install --frozen-lockfile
       - save_cache:
           working_directory: ~/workbench/e2e
           paths:
@@ -362,7 +366,9 @@ jobs:
       - run:
           working_directory: ~/workbench/e2e
           name: Install Chrome headless dependencies
-          command: .circleci/install_puppeteer_dependencies.sh
+          command: |
+            ls
+            .circleci/install_puppeteer_dependencies.sh
       # - run:
       #    name: Install Chrome
       #    command: .circleci/install_chrome.sh
@@ -370,10 +376,13 @@ jobs:
           working_directory: ~/workbench/e2e
           name: echo
           command: |
+            ls
             echo ${PUPPETEER_TEST_REGISTRATION_KEY}
       - run:
           working_directory: ~/workbench/e2e
-          command: yarn test --runInBand
+          command: |
+            ls
+            yarn test --runInBand
       - persist_to_workspace:
           root: .
           paths:
