@@ -565,20 +565,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return researchPurpose.researchOutcomeList && researchPurpose.researchOutcomeList.length !== 0 ;
     }
 
-
-    updateResearchPurposeSummary(purposeSummary, value) {
-      this.updateResearchPurpose(purposeSummary, value);
-    }
-
-    displayWarningMsg(summary) {
-      const textAreaValue = fp.get(['workspace', 'researchPurpose', summary], this.state);
-      if (textAreaValue.length < 50) {
-        this.setState(fp.set(['researchSummaryState', summary, 'warningMsg'], true));
-      } else {
-        this.setState(fp.set(['researchSummaryState', summary, 'warningMsg'], false));
-      }
-    }
-
     updateResearchPurpose(category, value) {
       if (category === 'population' && !value) {
         this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'], []));
