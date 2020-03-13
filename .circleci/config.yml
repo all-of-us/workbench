@@ -343,9 +343,6 @@ jobs:
             CONTACT_EMAIL: hermione.owner@quality.firecloud.org
     steps:
       - checkout
-        command: |
-          pwd
-          ls
       - run:
           name: Fetch Submodules
           command: |
