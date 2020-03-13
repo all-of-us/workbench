@@ -1,9 +1,13 @@
 import * as React from 'react';
 
+import {Divider} from 'app/components/divider';
+import {flexStyle} from 'app/components/flex';
+import {FormSection} from 'app/components/forms';
 import {TextInput} from 'app/components/inputs';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {Dropdown} from 'primereact/dropdown';
 
 // Contains style definitions shared across multiple account-creation form steps.
 export const commonStyles = reactStyles({
@@ -39,6 +43,12 @@ export const commonStyles = reactStyles({
     color: colors.primary,
     lineHeight: '22px',
     fontWeight: 600,
+  },
+  sectionHeader: {
+    width: '26rem',
+    color: colors.primary,
+    fontWeight: 600,
+    fontSize: 18,
   },
   sectionInput: {
     width: '14rem',
@@ -85,3 +95,40 @@ export function TextInputWithLabel(props) {
     </div>
   </div>;
 }
+
+/**
+ * Creates a FormSection with custom base styling for account-creation pages.
+ * @param props
+ * @constructor
+ */
+export const Section = (props) => {
+  return <FormSection
+    style={{...flexStyle.column, ...props.style}}>
+    <div>
+      <label style={{...commonStyles.sectionHeader, ...props.sectionHeaderStyles}}>
+        {props.header}
+      </label>
+      {props.subHeader &&
+      <label style={{color: colors.primary, fontSize: '12px', marginLeft: '.25rem'}}> {props.subHeader} </label>
+      }
+    </div>
+    <Divider style={{marginTop: '.25rem'}}/>
+    {props.children}
+  </FormSection>;
+};
+
+/**
+ * Creates a form section with a dropdown input.
+ *
+ * @param props
+ * @constructor
+ */
+export const DropDownSection = (props) => {
+  return <Section header={props.header}>
+    <Dropdown placeholder='Select'
+              options={props.options}
+              style={{width: '50%'}}
+              value={props.value}
+              onChange={(e) => props.onChange(e.value)}/>
+  </Section>;
+};

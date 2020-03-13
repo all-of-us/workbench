@@ -16,7 +16,7 @@ import {TooltipTrigger} from 'app/components/popups';
 
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
-import {FlexColumn, FlexRow, flexStyle} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   EducationalRole,
@@ -30,9 +30,13 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-import {Divider} from 'app/components/divider';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common';
+import {
+  commonStyles,
+  Section,
+  TextInputWithLabel,
+  WhyWillSomeInformationBePublic,
+} from 'app/pages/login/account-creation/common';
 import {isBlank, reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 
@@ -44,12 +48,6 @@ const styles = reactStyles({
   publiclyDisplayedText: {
     fontSize: 12,
     fontWeight: 400
-  },
-  sectionHeader: {
-    width: '26rem',
-    color: colors.primary,
-    fontWeight: 600,
-    fontSize: 18,
   },
 });
 
@@ -64,31 +62,6 @@ const researchPurposeList = [
 
 const nameLength = 80;
 
-export const Section = (props) => {
-  return <FormSection
-      style={{...flexStyle.column, ...props.style}}>
-    <div>
-      <label style={{...styles.sectionHeader, ...props.sectionHeaderStyles}}>
-        {props.header}
-      </label>
-      {props.subHeader &&
-        <label style={{color: colors.primary, fontSize: '12px', marginLeft: '.25rem'}}> {props.subHeader} </label>
-      }
-    </div>
-    <Divider style={{marginTop: '.25rem'}}/>
-    {props.children}
-  </FormSection>;
-};
-
-export const DropDownSection = (props) => {
-  return <Section header={props.header}>
-    <Dropdown placeholder='Select'
-              options={props.options}
-              style={{width: '50%'}}
-              value={props.value}
-              onChange={(e) => props.onChange(e.value)}/>
-  </Section>;
-};
 
 export const MultiSelectWithLabel = (props) => {
   return <FlexColumn style={{width: '12rem', ...props.containerStyle}}>

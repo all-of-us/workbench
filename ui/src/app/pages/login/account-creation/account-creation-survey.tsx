@@ -10,6 +10,8 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {AouTitle} from 'app/components/text-wrappers';
+import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {DropDownSection, Section, TextInputWithLabel} from 'app/pages/login/account-creation/common';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {toggleIncludes} from 'app/utils';
@@ -17,8 +19,6 @@ import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 import ReCAPTCHA from 'react-google-recaptcha';
-import {DropDownSection, Section, TextInputWithLabel} from './account-creation';
-import {AccountCreationOptions} from './account-creation-options';
 
 const styles = {
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
