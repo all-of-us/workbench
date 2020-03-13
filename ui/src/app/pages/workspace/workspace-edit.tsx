@@ -54,6 +54,7 @@ import {
   SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
   toolTipTextStigmatization
 } from './workspace-edit-text';
+import {WorkspaceEditSection, WorkspaceResearchSummary} from './workspace-util-component';
 
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -70,15 +71,6 @@ const styles = reactStyles({
     lineHeight: '24px',
     color: colors.primary
   },
-
-  requiredText: {
-    fontSize: '13px',
-    fontStyle: 'italic',
-    fontWeight: 400,
-    color: colors.primary,
-    marginLeft: '0.2rem'
-  },
-
   text: {
     fontSize: '13px',
     color: colors.primary,
@@ -131,23 +123,6 @@ const styles = reactStyles({
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
   },
-  textBoxCharRemaining: {
-    justifyContent: 'space-between',
-    width: '50rem',
-    backgroundColor: colorWithWhiteness(colors.primary, 0.95),
-    fontSize: 12,
-    colors: colors.primary,
-    padding: '0.25rem',
-    borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
-  },
-  textArea: {
-    height: '15rem',
-    resize: 'none',
-    width: '50rem',
-    borderRadius: '3px 3px 0 0',
-    boderColor: colorWithWhiteness(colors.dark, 0.5)
-  },
   flexColumnBy2: {
     flex: '1 1 0',
     marginLeft: '1rem'
@@ -171,72 +146,6 @@ const styles = reactStyles({
   }
 });
 
-export const WorkspaceEditSection = (props) => {
-  return <div key={props.header} style={{...props.style, marginBottom: '0.5rem'}}>
-    <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),
-      marginTop: (props.largeHeader ? 12 : 24)}}>
-      {props.index && <FlexRow style={{...styles.header,
-        fontSize: (props.largeHeader ? 20 : 16)}}>
-        <div style={{marginRight: '0.4rem'}}>{props.index}</div>
-        <div style={{...styles.header,
-          fontSize: (props.largeHeader ? 20 : 16)}}>
-          {props.header}
-        </div>
-      </FlexRow>}
-      {!props.index &&
-      <div style={{...styles.header,
-        fontSize: (props.largeHeader ? 20 : 16)}}>
-        {props.header}
-      </div>
-      }
-      {props.required && <div style={styles.requiredText}>
-        (Required)
-      </div>
-      }
-      {props.tooltip && <TooltipTrigger content={props.tooltip}>
-        <InfoIcon style={{...styles.infoIcon,  marginTop: '0.2rem'}}/>
-      </TooltipTrigger>
-      }
-    </FlexRow>
-    {props.subHeader && <div style={{...styles.header, color: colors.primary, fontSize: 14}}>
-      {props.subHeader}
-    </div>
-    }
-    <div style={{...styles.text, marginLeft: '0.9rem'}}>
-      {props.description}
-    </div>
-    <div style={{marginTop: '0.5rem', marginLeft: (props.indent ? '0.9rem' : '0rem')}}>
-      {props.children}
-    </div>
-  </div>;
-};
-
-export const WorkspaceText = (props) => {
-  return  <WorkspaceEditSection data-test-id={props.rowId}
-      header={props.researchPurpose.header}
-      description={props.researchPurpose.description} index={props.index} indent>
-        {/* Change the box border color to red if the number of characters is less than 50 */}
-      <TextArea style={styles.textArea}
-        id={props.rowId} name={props.rowId} value={props.researchValue}  onBlur={() => props.onBlur()}
-        onChange={v => props.onChange(v)}/>
-
-    <FlexRow id={props.rowId} data-test-id='charBox' style={styles.textBoxCharRemaining}>
-      {props.summaryObj.warningMsg && <label data-test-id='warningMsg'
-        style={{color: colors.danger, textAlign: 'right', justifyContent: 'flex-start'}}>
-        The description you entered seems too short.
-        Please consider adding more descriptive details to help the Program and your fellow Researchers understand your work.
-      </label>}
-      {props.researchValue.length === 1000 && <label data-test-id='characterLimit' style={{color: colors.danger}}>
-        You have reached the character limit for this question</label>}
-      {props.researchValue &&
-      <div data-test-id='characterMessage' style={{color: props.summaryObj.textColor, marginLeft: 'auto'}}>
-        {1000 - props.researchValue.length} characters remaining</div>}
-      {!props.researchValue &&
-      <div data-test-id='characterMessage' style={{color: props.textColor, marginLeft: 'auto'}}>1000 characters remaining</div>}
-    </FlexRow>
-  </WorkspaceEditSection>;
-};
-
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
 function getDiseaseNames(keyword) {
@@ -258,16 +167,6 @@ export interface WorkspaceEditProps {
   cancel: Function;
 }
 
-export interface SummaryProps {
-  textColor: string;
-  warningMsg: boolean;
-}
-
-export interface ResearchSummaryState {
-  intendedStudy: SummaryProps;
-  scientificApproach: SummaryProps;
-  anticipatedFindings: SummaryProps;
-}
 
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
@@ -285,7 +184,6 @@ export interface WorkspaceEditState {
   showResearchPurpose: boolean;
   billingAccounts: Array<BillingAccount>;
   showCreateBillingAccountModal: boolean;
-  researchSummaryState: ResearchSummaryState;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -307,12 +205,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
         billingAccounts: [],
-        showCreateBillingAccountModal: false,
-        researchSummaryState: {
-          intendedStudy: {textColor: colors.disabled , warningMsg: false},
-          scientificApproach: {textColor: colors.disabled , warningMsg: false},
-          anticipatedFindings: {textColor: colors.disabled , warningMsg: false}
-        }
+        showCreateBillingAccountModal: false
       };
     }
 
@@ -674,17 +567,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
 
     updateResearchPurposeSummary(purposeSummary, value) {
-      if (this.state.researchSummaryState[purposeSummary].warningMsg && value.length >= 50 ) {
-        this.setState(fp.set(['researchSummaryState', purposeSummary, 'warningMsg'], false));
-      }
-      if (value.length > 1000) {
-        value = value.substring(0, 1000);
-      }
-      if (value.length >= 950 && this.state.researchSummaryState[purposeSummary].textColor !== colors.danger) {
-        this.setState(fp.set(['researchSummaryState', purposeSummary, 'textColor'], colors.danger));
-      } else if (value.length < 950 && this.state.researchSummaryState[purposeSummary].textColor !== colors.disabled) {
-        this.setState(fp.set(['researchSummaryState', purposeSummary, 'textColor'], colors.disabled));
-      }
       this.updateResearchPurpose(purposeSummary, value);
     }
 
@@ -1016,26 +898,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
-            <WorkspaceText researchPurpose={researchPurposeQuestions[2]}
+            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[2]}
                           researchValue={this.state.workspace.researchPurpose.intendedStudy}
-                          onChange={v => this.updateResearchPurposeSummary('intendedStudy', v)}
-                          onBlur = {v => this.displayWarningMsg('intendedStudy')}
-                          summaryObj = {this.state.researchSummaryState['intendedStudy']}
+                          onChange={v => this.updateResearchPurpose('intendedStudy', v)}
                           index='2.1' rowId='intendedStudyText'/>
 
             {/* TextBox: scientific approaches section*/}
-            <WorkspaceText researchPurpose={researchPurposeQuestions[3]}
+            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[3]}
                            researchValue={this.state.workspace.researchPurpose.scientificApproach}
-                           onBlur = {v => this.displayWarningMsg('scientificApproach')}
-                           summaryObj = {this.state.researchSummaryState['scientificApproach']}
-                           onChange={v => this.updateResearchPurposeSummary('scientificApproach', v)}
+                            onChange={v => this.updateResearchPurpose('scientificApproach', v)}
                            index='2.2' rowId='scientificApproachText'/>
             {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceText researchPurpose={researchPurposeQuestions[4]}
+            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[4]}
                            researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
-                           onChange={v => this.updateResearchPurposeSummary('anticipatedFindings', v)}
-                           onBlur = {v => this.displayWarningMsg('anticipatedFindings')}
-                           summaryObj = {this.state.researchSummaryState['anticipatedFindings']}
+                           onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
                            index='2.3' rowId='anticipatedFindingsText'/>
           </FlexColumn>
         </WorkspaceEditSection>

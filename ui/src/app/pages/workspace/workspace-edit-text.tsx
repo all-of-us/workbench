@@ -139,7 +139,12 @@ export const toolTipText = {
     for. </div>,
 };
 
-export const researchPurposeQuestions = [
+export interface ResearchPurposeQuestion {
+  header: React.ReactNode;
+  description: React.ReactNode;
+}
+
+export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
   {
     header: ' What is the primary purpose of your project?',
     description: <div>All fields required unless indicated as optional. Your response will be
