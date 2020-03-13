@@ -334,22 +334,45 @@ jobs:
               --promote
 
   puppeteer-e2e-test:
+    docker:
+      - image: circleci/node:12.16.1
+    working_directory: ~/workbench
     steps:
       - checkout
-      - working_directory: ~/e2e
+      - run:
+          name: Fetch Submodules
+          command: git submodule update --init --recursive
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
           - v1-dependencies-
-      - run:
-          name: Workaround for GoogleChrome/puppeteer#290
-          command: 'sh .circleci/setup_puppeteer.sh'
-      - run: yarn install
+      - run: 
+          working_directory: ~/workbench/e2e
+          command: yarn install --frozen-lockfile
       - save_cache:
           paths:
-            - ~/node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-      - run: yarn test
+            - node_modules
+          key: v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
+      - run:
+          name: Install Chrome headless dependencies
+          command: .circleci/setup_puppeteer.sh
+      - run:
+          name: Install Chromedriver latest version
+          working_directory: ~/workbench/e2e
+          command: |
+            sudo apt-get update
+            sudo apt-get install lsb-release libappindicator3-1
+            curl -L -o google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            sudo dpkg -i google-chrome.deb
+            sudo sed -i 's|HERE/chrome"|HERE/chrome" --no-sandbox|g' /opt/google/chrome/google-chrome
+            rm google-chrome.deb
+      - run:
+          working_directory: ~/workbench/e2e
+          command: yarn test
+      - persist_to_workspace:
+          root: .
+          paths:
+            - e2e
 
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
 filter_master: &filter_master
@@ -374,6 +397,8 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
+      - puppeteer-e2e-test
+
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
@@ -383,12 +408,7 @@ workflows:
           <<: *filter_master
           requires:
             - ui-build-test
-      - puppeteer-e2e-test:
-          <<: *filter_master
-          requires:
-            - api-build-test
-            - ui-build-test
-            
+
   deploy-staging:
     jobs:
       - api-local-test:

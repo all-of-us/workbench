@@ -91,7 +91,6 @@ export default class GoogleLoginPage extends BasePage {
    */
   async goto(): Promise<void> {
     const url = configs.uiBaseUrl + configs.loginUrlPath;
-    console.log('login url = '+url);
     await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 60000});
   }
 

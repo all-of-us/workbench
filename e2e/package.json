@@ -6,7 +6,7 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "cross-env WORKBENCH_ENV=dev INCOGNITO=true jest --detectOpenHandles --forceExit",
+    "test": "cross-env WORKBENCH_ENV=dev INCOGNITO=true jest --detectOpenHandles --forceExit --runInBand",
     "test:incognito": "cross-env WORKBENCH_ENV=dev HEADLESS=false INCOGNITO=true jest --detectOpenHandles --runInBand --forceExit",
     "test-local": "cross-env WORKBENCH_ENV=local jest",
     "lint": "tslint --project tsconfig.json",
