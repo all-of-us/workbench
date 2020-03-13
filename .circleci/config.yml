@@ -354,31 +354,22 @@ jobs:
           - v1-dependencies-
       - run: 
           working_directory: ~/workbench/e2e
-          command: |
-            pwd
-            ls
-            yarn install --frozen-lockfile
+          command: yarn install --frozen-lockfile
       - save_cache:
           paths:
             - ~/workbench/e2e/node_modules
           key: v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
       - run:
           name: Install Chrome headless dependencies
-          working_directory: ~/workbench
-          command: |
-            pwd
-            ls
-            .circleci/install_puppeteer_dependencies.sh
+          working_directory: /
+          command: .circleci/install_puppeteer_dependencies.sh
       # - run:
       #    name: Install Chrome
       #    command: .circleci/install_chrome.sh
       - run:
-          name: Run Puppeteer tests
+          name: Run tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
-          command: |
-            pwd
-            ls
-            yarn test --runInBand
+          command: yarn test --runInBand
       - persist_to_workspace:
           root: .
           paths:
