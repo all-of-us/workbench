@@ -4,6 +4,7 @@ import {mount, shallow} from 'enzyme';
 import * as React from 'react';
 
 import {AccountCreation} from 'app/pages/login/account-creation/account-creation';
+import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
 import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
 import AccountCreationTos from 'app/pages/login/account-creation/account-creation-tos';
@@ -30,6 +31,7 @@ describe('SignInReact', () => {
   };
 
   beforeEach(() => {
+    window.scrollTo = () => {};
     props = {
       onInit: () => {},
       signIn: signIn,
@@ -132,6 +134,9 @@ describe('SignInReact', () => {
     // Terms of Service is part of the new-style flow.
     expect(wrapper.exists(AccountCreationTos)).toBeTruthy();
     wrapper.find(AccountCreationTos).props().onComplete();
+
+    expect(wrapper.exists(AccountCreationInstitution)).toBeTruthy();
+    wrapper.find(AccountCreationInstitution).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
 
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
     wrapper.find(AccountCreation).props().onComplete(createEmptyProfile(requireInstitutionalVerification));
