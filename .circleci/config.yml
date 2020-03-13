@@ -361,8 +361,7 @@ jobs:
           key: v1-dependencies-{{ checksum "~/workbench/e2e/package.json" }}
       - run:
           name: Install Chrome headless dependencies
-          working_directory: /
-          command: .circleci/install_puppeteer_dependencies.sh
+          command: workbench/.circleci/install_puppeteer_dependencies.sh
       # - run:
       #    name: Install Chrome
       #    command: .circleci/install_chrome.sh
