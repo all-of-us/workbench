@@ -347,6 +347,8 @@ jobs:
     steps:
       - checkout
       - run:
+        command: ls -l ~/repo
+      - run:
           name: Fetch Submodules
           command: git submodule update --init --recursive
       - restore_cache:
@@ -370,7 +372,7 @@ jobs:
               libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates \
               fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
       - run:
-          name: Run tests (Puppeteer and Jest)
+          name: Run e2e tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
           command: yarn test:ci
       
