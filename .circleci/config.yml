@@ -375,7 +375,7 @@ jobs:
       - run:
           name: Run e2e tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
-          command: yarn --silent test:ci
+          command: yarn --silent --ci test:ci
       - store_artifacts:
           path: e2e/screenshot
       
