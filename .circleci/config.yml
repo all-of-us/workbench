@@ -368,6 +368,9 @@ jobs:
             - ~/.cache/yarn
           key: ui-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
+          working_directory: ~/workbench/e2e
+          command: ls -la
+      - run:
           name: Install Headless Chrome dependencies
           command: |
             ls -la
@@ -381,6 +384,10 @@ jobs:
           name: Run e2e tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
           command: yarn test:ci
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/artifacts 
       
 
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
