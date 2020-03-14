@@ -371,6 +371,7 @@ jobs:
           working_directory: ~/workbench/e2e
           command: ls -la
       - run:
+          working_directory: ~/workbench/e2e
           name: Install Headless Chrome dependencies
           command: |
             ls -la
