@@ -4,7 +4,7 @@ import GoogleLoginPage from '../../app/google-login';
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
-describe('User registration tests:', () => {
+describe.skip('User registration tests:', () => {
 
   let page;
 

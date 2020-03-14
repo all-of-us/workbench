@@ -91,6 +91,7 @@ export default class GoogleLoginPage extends BasePage {
    */
   async goto(): Promise<void> {
     const url = configs.uiBaseUrl + configs.loginUrlPath;
+    console.log('Login URL ' + url);
     await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 30000}).catch((err) => {
       console.error('Google login page not found. ' + err);
       throw err;
@@ -107,7 +108,8 @@ export default class GoogleLoginPage extends BasePage {
   async login(email?: string, paswd?: string) {
     const user = email || configs.userEmail;
     const pwd = paswd || configs.userPassword;
-
+    console.log('user = ' + user);
+    console.log('password = ' + pwd);
     await this.goto();
     const googleButton = await this.loginButton().catch((err) => {
       console.error('Google login button not found. ' + err);

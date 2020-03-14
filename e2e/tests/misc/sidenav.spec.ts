@@ -16,7 +16,7 @@ export const HELP_DESK = {
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
-describe('Navigation', () => {
+describe.skip('Navigation', () => {
 
   let page;
 

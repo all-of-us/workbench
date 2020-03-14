@@ -7,7 +7,7 @@ import {signIn} from '../app';
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
-describe('Profile', () => {
+describe.skip('Profile', () => {
   let page;
 
   beforeEach(async () => {

@@ -5,7 +5,7 @@ const configs = require('../../resources/workbench-config');
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
-describe('Login tests:', () => {
+describe.skip('Login tests:', () => {
 
   let browserContext;
   let page;

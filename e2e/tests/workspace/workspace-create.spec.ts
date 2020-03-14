@@ -8,7 +8,7 @@ import {signIn} from '../app';
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
-describe('Workspace creation tests:', () => {
+describe.skip('Workspace creation tests:', () => {
 
   let page;
 

@@ -386,9 +386,7 @@ jobs:
           working_directory: ~/workbench/e2e
           command: yarn test:ci
       - store_test_results:
-          path: ~/test-results
-      - store_artifacts:
-          path: ~/artifacts 
+          path: ~/workbench/e2e/screenshot 
       
 
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
