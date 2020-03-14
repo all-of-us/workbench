@@ -372,7 +372,7 @@ jobs:
       - run:
           name: Run tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
-          command: cd ~/workbench/e2e && yarn test:ci
+          command: cd workbench/e2e && yarn test:ci
       - persist_to_workspace:
           root: .
           paths:
