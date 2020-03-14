@@ -347,7 +347,7 @@ jobs:
     steps:
       - checkout
       - run:
-          command: ls -l ~/repo
+          command: ls -l ~/workbench
       - run:
           name: Fetch Submodules
           command: git submodule update --init --recursive
