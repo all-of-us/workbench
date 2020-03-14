@@ -333,11 +333,12 @@ jobs:
               --key-file circle-sa-key.json \
               --promote
 
-  # https://github.com/puppeteer/puppeteer/blob/master/docs/troubleshooting.md#running-puppeteer-on-circleci
+  
   puppeteer-e2e-test:
     docker:
       - image: circleci/node:12.16.1
         environment:
+        # https://github.com/puppeteer/puppeteer/blob/master/docs/troubleshooting.md#running-puppeteer-on-circleci
             NODE_ENV: development
             USER_NAME: ${PUPPETEER_TEST_USER}
             PASSWORD: ${PUPPETEER_TEST_USER_PASSWORD}
@@ -360,7 +361,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.cache/yarn
-          key: ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+          key: ui-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
         name: Install Headless Chrome dependencies
         command: |
