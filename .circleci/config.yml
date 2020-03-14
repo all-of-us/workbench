@@ -347,7 +347,11 @@ jobs:
     steps:
       - checkout
       - run:
-          command: ls -la /
+          working_directory: ~/workbench
+          command: ls -la
+      - run:
+          working_directory: ~/workbench/e2e
+          command: ls -la
       - run:
           name: Fetch Submodules
           command: git submodule update --init --recursive
