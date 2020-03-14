@@ -6,6 +6,7 @@
   "private": true,
   "license": "BSD",
   "scripts": {
+    "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev INCOGNITO=true jest --maxWorkers=2 --detectOpenHandles --forceExit --runInBand",
     "test": "cross-env WORKBENCH_ENV=dev INCOGNITO=true jest --detectOpenHandles --forceExit",
     "test:headful": "cross-env WORKBENCH_ENV=dev HEADLESS=false INCOGNITO=true jest --detectOpenHandles --runInBand --forceExit",
     "test-local": "cross-env WORKBENCH_ENV=local jest",
