@@ -355,7 +355,7 @@ jobs:
           - ui-cache-
       - run: 
           working_directory: ~/workbench/e2e
-          command: yarn install --verbose --frozen-lockfile
+          command: yarn cache clean && yarn install --verbose --frozen-lockfile
       - save_cache:
           paths:
             - ~/.cache/yarn
