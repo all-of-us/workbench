@@ -27,7 +27,7 @@ const styles = reactStyles({
     fontSize: 12,
     fontWeight: 400
   },
-  dropdown: {
+  wideInputSize: {
     width: '50%',
     minWidth: '600px'
   },
@@ -202,7 +202,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </div>
             <Dropdown
                 data-test-id='institution-dropdown'
-                style={styles.dropdown}
+                style={styles.wideInputSize}
                 options={institutions.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
                 value={institutionShortName}
                 onChange={(e) => {
@@ -226,6 +226,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                 value={contactEmail}
                                 inputId='contact-email'
                                 inputName='contactEmail'
+                                inputStyle={{width: '14rem'}}
                                 labelContent={<div>
                                   <label style={styles.boldText}>
                                     Your institutional email address
@@ -251,7 +252,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               </label>
               <div>
                 <Dropdown data-test-id='role-dropdown'
-                          style={styles.dropdown}
+                          style={styles.wideInputSize}
                           placeholder={this.getRoleOptions() ?
                             '' : 'First select an institution above'}
                           options={this.getRoleOptions()}
@@ -267,6 +268,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 </i>
               </label>
               <TextInputWithLabel value={institutionalRoleOtherText}
+                                  inputStyle={styles.wideInputSize}
                                   inputId='institutionalRoleOtherText'
                                   inputName='institutionalRoleOtherText'
                                   onChange={v => this.updateAffiliationValue('institutionalRoleOtherText', v)}/>
