@@ -66,6 +66,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           onSubmit={(profile, captchaToken) => this.createAccount(profile, captchaToken)}
           onPreviousClick={(profile) => this.props.onPreviousClick(profile)}
           enableCaptcha={true}
+          enablePrevious={true}
       />
     </React.Fragment>
   }

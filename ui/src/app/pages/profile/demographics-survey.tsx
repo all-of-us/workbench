@@ -43,9 +43,11 @@ const styles = reactStyles({
 
 interface Props {
   profile: Profile;
-  onPreviousClick: Function;
+  onPreviousClick?: Function;
+  onCancelClick?: Function;
   onSubmit: Function;
   enableCaptcha: boolean;
+  enablePrevious: boolean;
 }
 
 interface State {
@@ -219,10 +221,17 @@ or another sexual and/or gender minority?'>
                    onChange={(value) => this.captureCaptchaResponse(value)}/>
       </div>}
       <FormSection style={{paddingBottom: '1rem'}}>
-        <Button type='secondary' style={{marginRight: '1rem'}} disabled={loading}
+        {this.props.enablePrevious && <Button type='secondary' style={{marginRight: '1rem'}} disabled={loading}
                 onClick={() => this.props.onPreviousClick(this.state.profile)}>
           Previous
-        </Button>
+        </Button>}
+        {!this.props.enablePrevious && <Button
+            type={'secondary'}
+            style={{marginRight: '1rem'}}
+            disabled={loading}
+            onClick={() => this.props.onCancelClick(this.state.profile)}>
+          Cancel
+        </Button>}
         <TooltipTrigger content={errors && <React.Fragment>
           <div>Please review the following: </div>
           <ul>
@@ -254,6 +263,3 @@ or another sexual and/or gender minority?'>
     </div>;
   }
 }
-
-// TODO: we need to show some user-facing error message when create account fails.
-// console.log(error);,

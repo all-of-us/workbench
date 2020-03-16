@@ -18,6 +18,8 @@ import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {InstitutionalAffiliation, InstitutionalRole, Profile} from 'generated/fetch';
+import {Modal} from "../../components/modals";
+import {DemographicSurvey} from "./demographics-survey";
 
 const styles = reactStyles({
   h1: {
@@ -74,9 +76,22 @@ const validators = {
   areaOfResearch: required,
 };
 
+interface ProfilePageProps {
+  profileState: {
+    profile: Profile;
+    reload: Function;
+  }
+}
+
+interface ProfilePageState {
+  profileEdits: Profile;
+  updating: boolean;
+  updatingSurvey: boolean;
+}
+
 export const ProfilePage = withUserProfile()(class extends React.Component<
-  { profileState: { profile: Profile, reload: Function } },
-  { profileEdits: Profile, updating: boolean }
+    ProfilePageProps,
+    ProfilePageState
 > {
   static displayName = 'ProfilePage';
 
@@ -85,7 +100,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
     this.state = {
       profileEdits: props.profileState.profile || {},
-      updating: false
+      updating: false,
+      updatingSurvey: false
     };
   }
 
@@ -117,9 +133,24 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     }
   }
 
+  async saveDemographicSurvey(profile) {
+    const {profileState: {reload}} = this.props;
+    this.setState({updating: true});
+
+    try {
+      await profileApi().updateProfile(profile);
+      await reload();
+    } catch (e) {
+      // TODO: We should display some sort of user facing error if update fails.
+      console.error(e);
+    } finally {
+      this.setState({updating: false});
+    }
+  }
+
   render() {
     const {profileState: {profile}} = this.props;
-    const {profileEdits, updating} = this.state;
+    const {profileEdits, updating, updatingSurvey} = this.state;
     const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, requireInstitutionalVerification} =
       serverConfigStore.getValue();
     const {
@@ -360,7 +391,10 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           </FlexRow>}
           <div>
             <div style={styles.title}>Optional Demographics Survey</div>
-            <Button type={'link'}>Update Survey</Button>
+            <Button
+                type={'link'}
+                onClick={() => this.setState({updatingSurvey: true})}
+            >Update Survey</Button>
           </div>
           <ProfileRegistrationStepStatus
             title='Google 2-Step Verification'
@@ -428,8 +462,21 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </a>
           </ProfileRegistrationStepStatus>}
         </div>
-
       </div>
+      {updatingSurvey && <Modal>
+        <DemographicSurvey
+            profile={profileEdits}
+            onCancelClick={() => {
+              this.setState({updatingSurvey: false})
+            }}
+            onSubmit={(profile, captchaToken) => {
+              this.setState({updatingSurvey: false});
+              this.saveDemographicSurvey(profile);
+            }}
+            enableCaptcha={false}
+            enablePrevious={false}
+        />
+      </Modal>}
     </div>;
   }
 });
