@@ -51,7 +51,7 @@ export const commonStyles = reactStyles({
     fontSize: 18,
   },
   sectionInput: {
-    width: '14rem',
+    width: '12rem',
     height: '1.5rem'
   },
 });
@@ -77,7 +77,7 @@ export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
  * @constructor
  */
 export function TextInputWithLabel(props) {
-  return <div style={{width: '12rem', ...props.containerStyle}}>
+  return <div style={{...props.containerStyle}}>
     {props.labelContent}
     {props.labelText && <label style={{...commonStyles.text, fontWeight: 600}}>{props.labelText}</label>}
     <div style={{marginTop: '0.1rem'}}>
