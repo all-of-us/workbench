@@ -6,6 +6,7 @@ import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
 import {CheckBox, RadioButton} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
@@ -15,9 +16,10 @@ import {DropDownSection, Section, TextInputWithLabel} from 'app/pages/login/acco
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {toggleIncludes} from 'app/utils';
+import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import {Profile} from 'generated/fetch';
+import {ErrorResponse, Profile} from 'generated/fetch';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 const styles = {
@@ -51,6 +53,7 @@ export interface AccountCreationState {
   captcha: boolean;
   captchaToken: string;
   creatingAccount: boolean;
+  createAccountErrorResponse?: ErrorResponse;
   profile: Profile;
 }
 
@@ -73,6 +76,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   createAccount(): void {
     const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
     this.setState({creatingAccount: true});
+    console.log('creating account...', invitationKey);
     profileApi().createAccount({
       profile: this.state.profile,
       captchaVerificationToken: this.state.captchaToken,
@@ -82,9 +86,11 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
         onComplete(savedProfile);
-      }).catch(error => {
-        // TODO: we need to show some user-facing error message when create account fails.
-        console.log(error);
+      }).catch(async error => {
+        reportError(error);
+        const errorResponse = await convertAPIError(error);
+        this.setState({createAccountErrorResponse: errorResponse});
+
         if (environment.enableCaptcha) {
           // Reset captcha
           this.captchaRef.current.reset();
@@ -95,7 +101,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       });
   }
 
-  captureCaptchaResponse(token) {
+  /**
+   * Made visible for testing.
+   */
+  public captureCaptchaResponse(token) {
     this.setState({captchaToken: token, captcha: true});
   }
 
@@ -122,7 +131,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   render() {
-    const {profile: {demographicSurvey}, creatingAccount, captcha} = this.state;
+    const {profile: {demographicSurvey}, createAccountErrorResponse, creatingAccount, captcha} = this.state;
     const validationCheck = {
       lgbtqIdentity: {
         length: {
@@ -251,13 +260,33 @@ or another sexual and/or gender minority?'>
               {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
             </ul>
         </React.Fragment>}>
-          <Button type='primary' disabled={creatingAccount || creatingAccount || errors || !captcha}
+          <Button data-test-id='submit-button'
+                  type='primary'
+                  disabled={creatingAccount || creatingAccount || errors || !captcha}
                   onClick={() => this.createAccount()}>
             Submit
           </Button>
         </TooltipTrigger>
       </FormSection>
       {creatingAccount && <SpinnerOverlay overrideStylesOverlay={{position: 'fixed'}}/>}
+      {createAccountErrorResponse &&
+        <Modal data-test-id='create-account-error'>
+          <ModalTitle>Error creating account</ModalTitle>
+          <ModalBody>
+            <div>An error occurred while creating your account. The following message was returned:</div>
+            <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+              "{createAccountErrorResponse.message}"
+            </div>
+            <div>
+              Please try again or contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick = {() => this.setState({createAccountErrorResponse: null})}
+                    type='primary'>Close</Button>
+          </ModalFooter>
+        </Modal>
+      }
     </div>;
   }
 }
