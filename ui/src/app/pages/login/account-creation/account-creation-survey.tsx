@@ -76,7 +76,6 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   createAccount(): void {
     const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
     this.setState({creatingAccount: true});
-    console.log('creating account...', invitationKey);
     profileApi().createAccount({
       profile: this.state.profile,
       captchaVerificationToken: this.state.captchaToken,
