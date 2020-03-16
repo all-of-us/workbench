@@ -652,6 +652,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceBillingUsageResponse> getBillingUsage(
       String workspaceNamespace, String workspaceId) {
+    // This is its own method as opposed to part of the workspace response because this is gated
+    // behind write+ access, and adding access based composition to the workspace response
+    // would add a lot of unnecessary complexity.
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
