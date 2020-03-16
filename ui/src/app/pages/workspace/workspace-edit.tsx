@@ -13,9 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {colorWithWhiteness} from 'app/styles/colors';
 import {
-  reactStyles,
   ReactWrapperBase,
   sliceByHalfLength,
   withCdrVersions,
@@ -42,6 +40,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {WorkspaceEditSection} from './workspace-edit-section';
 import {
   disseminateFindings,
   PrimaryPurposeItems,
@@ -54,7 +53,8 @@ import {
   SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
   toolTipTextStigmatization
 } from './workspace-edit-text';
-import {WorkspaceEditSection, WorkspaceResearchSummary} from './workspace-util-component';
+import {WorkspaceResearchSummary} from './workspace-research-summary';
+import {styles} from './workspace-styles';
 
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -64,87 +64,6 @@ const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
 // to Sam (as part of Postgres migration).
 const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
 const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
-
-const styles = reactStyles({
-  header: {
-    fontWeight: 600,
-    lineHeight: '24px',
-    color: colors.primary
-  },
-  text: {
-    fontSize: '13px',
-    color: colors.primary,
-    fontWeight: 400,
-    lineHeight: '24px'
-  },
-
-  textInput: {
-    width: '20rem',
-    borderColor: 'rgb(151, 151, 151)',
-    borderRadius: '6px',
-    marginRight: '20px',
-    marginBottom: '5px'
-  },
-
-  infoIcon: {
-    height: '16px',
-    marginLeft: '0.2rem',
-    width: '16px'
-  },
-  select: {
-    display: 'inline-block',
-    verticalAlign: 'middle',
-    position: 'relative',
-    overflow: 'visible',
-    width: '11.3rem',
-    marginRight: '20px'
-  },
-  shortDescription: {
-    color: colors.primary,
-    fontSize: '16px',
-    fontWeight: 600,
-    lineHeight: '24px',
-    cursor: 'pointer'
-  },
-  longDescription: {
-    position: 'relative',
-    display: 'inline-block',
-    minHeight: '1rem',
-    cursor: 'text',
-    lineHeight: '1rem',
-    width: '100%'
-  },
-  categoryRow: {
-    display: 'flex', flexDirection: 'row', padding: '0.6rem 0', width: '95%'
-  },
-  checkboxStyle: {
-    marginRight: '.31667rem', zoom: '1.5'
-  },
-  checkboxRow: {
-    display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
-  },
-  flexColumnBy2: {
-    flex: '1 1 0',
-    marginLeft: '1rem'
-  },
-  researchPurposeRow: {
-    backgroundColor: colors.white,
-    borderColor: colors.white,
-    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
-    marginLeft: '-1rem',
-    paddingTop: '0.3rem',
-    paddingBottom: '0.3rem'
-  },
-  spinner: {
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    height: '100%',
-    width: '100%',
-  }
-});
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
@@ -475,8 +394,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * options.
      */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-      return <div><strong>{item.label} *</strong>
-        {item.subCategory.map((sub, index) => <FlexRow>
+      return <div key={item.label}><strong>{item.label} *</strong>
+        {item.subCategory.map((sub, index) => <FlexRow key={sub.label}>
           <CheckBox
               wrapperStyle={styles.checkboxRow}
               data-test-id={sub.shortName + '-checkbox'}

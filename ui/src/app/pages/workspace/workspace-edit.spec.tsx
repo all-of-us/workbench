@@ -1,17 +1,17 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {mount} from 'enzyme';
 import {DisseminateResearchEnum, ResearchOutcomeEnum,
   SpecificPopulationEnum,UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspaceEdit, WorkspaceEditMode} from './workspace-edit';
-import * as fp from "lodash/fp";
-import {WorkspaceEditSection} from "./workspace-util-component";
+import {WorkspaceEditSection} from './workspace-edit-section';
 
 jest.mock('app/utils/navigation', () => ({
   ...(require.requireActual('app/utils/navigation')),
