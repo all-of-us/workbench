@@ -738,32 +738,37 @@ public class DataSetControllerTest {
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     String prefix = "dataset_00000000_condition_";
+    String formattedSql =
+        sqlFormatter.format(
+            "SELECT PERSON_ID FROM `"
+                + TEST_CDR_TABLE
+                + ".condition_occurrence` c_occurrence WHERE \n"
+                + "(condition_concept_id IN (123) OR \n"
+                + "condition_source_concept_id IN (123)) \n"
+                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
+                + TEST_CDR_TABLE
+                + ".person` person WHERE "
+                + NAMED_PARAMETER_VALUE.getValue());
+
     assertThat(response.getCode())
-        .isEqualTo(
-            sqlFormatter.format(
-                "import pandas\nimport os\n\n"
-                    + "# This query represents dataset \"blah\" for domain \"condition\"\n"
-                    + prefix
-                    + "sql = \"\"\"SELECT PERSON_ID FROM `"
-                    + TEST_CDR_TABLE
-                    + ".condition_occurrence` c_occurrence WHERE \n"
-                    + "(condition_concept_id IN (123) OR \n"
-                    + "condition_source_concept_id IN (123)) \n"
-                    + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
-                    + TEST_CDR_TABLE
-                    + ".person` person WHERE "
-                    + NAMED_PARAMETER_VALUE.getValue()
-                    + " IN (2, 5)))"
-                    + "\"\"\"\n"
-                    + "\n"
-                    + prefix
-                    + "df = pandas.read_gbq("
-                    + prefix
-                    + "sql, dialect=\"standard\")"
-                    + "\n"
-                    + "\n"
-                    + prefix
-                    + "df.head(5)"));
+        .contains(
+            "import pandas\nimport os\n\n"
+                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                + prefix
+                + "sql = \"\"\"");
+
+    assertThat(response.getCode()).contains(formattedSql);
+
+    assertThat(response.getCode())
+        .contains(
+            prefix
+                + "df = pandas.read_gbq("
+                + prefix
+                + "sql, dialect=\"standard\")"
+                + "\n"
+                + "\n"
+                + prefix
+                + "df.head(5)");
   }
 
   @Test
@@ -786,33 +791,24 @@ public class DataSetControllerTest {
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     String prefix = "dataset_00000000_condition_";
+    String formatSql =
+        sqlFormatter.format(
+            "SELECT PERSON_ID FROM `"
+                + TEST_CDR_TABLE
+                + ".condition_occurrence` c_occurrence WHERE \n"
+                + "(condition_concept_id IN (123) OR \n"
+                + "condition_source_concept_id IN (123)) \n"
+                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
+                + TEST_CDR_TABLE
+                + ".person` person WHERE "
+                + NAMED_PARAMETER_VALUE.getValue());
     assertThat(response.getCode())
-        .isEqualTo(
-            sqlFormatter.format(
-                "library(bigrquery)\n\n"
-                    + "# This query represents dataset \"blah\" for domain \"condition\"\n"
-                    + prefix
-                    + "sql <- paste(\"SELECT PERSON_ID FROM `"
-                    + TEST_CDR_TABLE
-                    + ".condition_occurrence` c_occurrence WHERE \n"
-                    + "(condition_concept_id IN (123) OR \n"
-                    + "condition_source_concept_id IN (123)) \n"
-                    + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
-                    + TEST_CDR_TABLE
-                    + ".person` person WHERE "
-                    + NAMED_PARAMETER_VALUE.getValue()
-                    + " IN (2, 5)))"
-                    + "\", sep=\"\")\n"
-                    + "\n"
-                    + prefix
-                    + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
-                    + prefix
-                    + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")"
-                    + "\n"
-                    + "\n"
-                    + "head("
-                    + prefix
-                    + "df, 5)"));
+        .contains(
+            "library(bigrquery)\n"
+                + "\n# This query represents dataset \"blah\" for domain \"condition\"\n"
+                + prefix
+                + "sql <- paste(\"");
+    assertThat(response.getCode()).contains(formatSql);
   }
 
   @Test
@@ -928,9 +924,10 @@ public class DataSetControllerTest {
        }
     */
 
-    String queryToVerify = sqlFormatter.format("SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person");
-    assertThat(response.getCode())
-        .contains("person_sql = ");
+    String queryToVerify =
+        sqlFormatter.format(
+            "SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person");
+    assertThat(response.getCode()).contains("person_sql = ");
     assertThat(response.getCode().contains(queryToVerify));
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
