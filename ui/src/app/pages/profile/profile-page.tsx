@@ -8,18 +8,18 @@ import {Button, Clickable} from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
+import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import { getRegistrationTasksMap } from 'app/pages/homepage/registration-dashboard';
-import { ProfileRegistrationStepStatus } from 'app/pages/profile/profile-registration-step-status';
+import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
+import {DemographicSurvey} from 'app/pages/profile/demographics-survey';
+import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {InstitutionalAffiliation, InstitutionalRole, Profile} from 'generated/fetch';
-import {Modal} from "../../components/modals";
-import {DemographicSurvey} from "./demographics-survey";
 
 const styles = reactStyles({
   h1: {
@@ -80,7 +80,7 @@ interface ProfilePageProps {
   profileState: {
     profile: Profile;
     reload: Function;
-  }
+  };
 }
 
 interface ProfilePageState {
@@ -393,7 +393,12 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             <div style={styles.title}>Optional Demographics Survey</div>
             <Button
                 type={'link'}
-                onClick={() => this.setState({updatingSurvey: true})}
+                onClick={async () => {
+                  if (!profileEdits.demographicSurvey) {
+                    await this.setState(fp.set(['profileEdits', 'demographicSurvey'], {}))
+                  }
+                  this.setState({updatingSurvey: true})
+                }}
             >Update Survey</Button>
           </div>
           <ProfileRegistrationStepStatus
@@ -463,15 +468,15 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           </ProfileRegistrationStepStatus>}
         </div>
       </div>
-      {updatingSurvey && <Modal>
+      {updatingSurvey && <Modal width={850}>
         <DemographicSurvey
             profile={profileEdits}
             onCancelClick={() => {
-              this.setState({updatingSurvey: false})
-            }}
-            onSubmit={(profile, captchaToken) => {
               this.setState({updatingSurvey: false});
-              this.saveDemographicSurvey(profile);
+            }}
+            onSubmit={async (profileWithUpdatedDemographicSurvey, captchaToken) => {
+              await this.saveDemographicSurvey(profileWithUpdatedDemographicSurvey);
+              this.setState({updatingSurvey: false});
             }}
             enableCaptcha={false}
             enablePrevious={false}

@@ -15,12 +15,8 @@ import {AouTitle} from '../../components/text-wrappers';
 import colors from '../../styles/colors';
 import {reactStyles, toggleIncludes} from '../../utils';
 import {serverConfigStore} from '../../utils/navigation';
-import {
-  DropDownSection,
-  Section,
-  TextInputWithLabel
-} from '../login/account-creation/account-creation';
-import {AccountCreationOptions} from '../login/account-creation/account-creation-options';
+import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {DropDownSection, Section, TextInputWithLabel} from "../login/account-creation/common";
 
 const styles = reactStyles({
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
@@ -73,7 +69,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
   createOptionCheckbox(optionKey: string, optionObject: any) {
     const {profile: {demographicSurvey}} = this.props;
-    const initialValue = demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
+    const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
 
     return <CheckBox label={optionObject.label} data-test-id={'checkbox-' + optionObject.value.toString()}
                      style={styles.checkbox} key={optionObject.value.toString()}
@@ -140,7 +136,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
       {/*Ethnicity section*/}
       <DropDownSection data-test-id='dropdown-ethnicity'
                        header='Ethnicity' options={AccountCreationOptions.ethnicity}
-                       value={demographicSurvey.ethnicity}
+                       value={!!demographicSurvey ? demographicSurvey.ethnicity : null}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
 
       {/*Gender Identity section*/}
@@ -158,23 +154,23 @@ or another sexual and/or gender minority?'>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton data-test-id='radio-lgbtq-yes' id='radio-lgbtq-yes' onChange={
               (e) => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
-                         checked={demographicSurvey.identifiesAsLgbtq === true}
+                         checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === true : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-lgbtq-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton data-test-id='radio-lgbtq-no' id='radio-lgbtq-no' onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
-                         checked={demographicSurvey.identifiesAsLgbtq === false}
+                         checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === false : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-lgbtq-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
         </FlexColumn>
         <label></label>
         <TextInputWithLabel labelText='If yes, please tell us about your LGBTQ+ identity'
-                            value={demographicSurvey.lgbtqIdentity} inputName='lgbtqIdentity'
+                            value={!!demographicSurvey ? demographicSurvey.lgbtqIdentity : ''} inputName='lgbtqIdentity'
                             containerStyle={{width: '26rem', marginTop: '0.5rem'}} inputStyle={{width: '26rem'}}
                             onChange={(value) => this.updateDemographicAttribute('lgbtqIdentity', value)}
-                            disabled={!demographicSurvey.identifiesAsLgbtq}/>
+                            disabled={!!demographicSurvey ? !demographicSurvey.identifiesAsLgbtq : true}/>
       </Section>
 
       {/*Sex at birth section*/}
@@ -188,7 +184,7 @@ or another sexual and/or gender minority?'>
 
       {/*Year of birth section*/}
       <DropDownSection header='Year of Birth' options={AccountCreationOptions.Years}
-                       value={demographicSurvey.yearOfBirth}
+                       value={!!demographicSurvey ? demographicSurvey.yearOfBirth : null}
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
       {/*Disability section*/}
@@ -197,13 +193,13 @@ or another sexual and/or gender minority?'>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes' onChange={
               (e) => this.updateDemographicAttribute('disability', true)}
-                         checked={demographicSurvey.disability === true}
+                         checked={!!demographicSurvey ? demographicSurvey.disability === true : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-no' onChange={(e) => this.updateDemographicAttribute('disability', false)}
-                         checked={demographicSurvey.disability === false}
+                         checked={!!demographicSurvey ? demographicSurvey.disability === false : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
@@ -212,7 +208,7 @@ or another sexual and/or gender minority?'>
       {/*Education section*/}
       <DropDownSection header='Highest Level of Education Completed'
                        options={AccountCreationOptions.levelOfEducation}
-                       value={demographicSurvey.education}
+                       value={!!demographicSurvey ? demographicSurvey.education : null}
                        onChange={
                          (e) => this.updateDemographicAttribute('education', e)}/>
       {environment.enableCaptcha && this.props.enableCaptcha && <div style={{paddingTop: '1rem'}}>
@@ -238,7 +234,7 @@ or another sexual and/or gender minority?'>
             {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
           </ul>
         </React.Fragment>}>
-          <Button type='primary' disabled={loading || errors && errors.length > 0 || !captcha}
+          <Button type='primary' disabled={loading || errors && errors.length > 0 || (!environment.enableCaptcha && !this.props.enableCaptcha && !captcha)}
                   onClick={async() => {
                     this.setState({loading: true});
                     try {

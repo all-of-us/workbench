@@ -68,6 +68,6 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           enableCaptcha={true}
           enablePrevious={true}
       />
-    </React.Fragment>
+    </React.Fragment>;
   }
 }
