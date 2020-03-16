@@ -1,7 +1,6 @@
 import {Component, OnDestroy, OnInit } from '@angular/core';
 import {
   attributesStore,
-  autocompleteStore,
   groupSelectionsStore,
   scrollStore,
   searchRequestStore,
@@ -46,6 +45,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   attributesNode: any;
   hierarchyNode: any;
   publicUiUrl = environment.publicUiUrl;
+  treeSearchTerms = '';
 
   constructor() {}
 
@@ -104,7 +104,6 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   close() {
     wizardStore.next(undefined);
-    autocompleteStore.next('');
     selectionsStore.next([]);
     subtreePathStore.next([]);
     attributesStore.next( undefined);
@@ -118,9 +117,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   back = () => {
     switch (this.mode) {
       case 'tree':
-        autocompleteStore.next('');
         subtreePathStore.next([]);
         subtreeSelectedStore.next(undefined);
+        this.treeSearchTerms = '';
         this.backMode = 'list';
         this.mode = 'list';
         break;
@@ -235,7 +234,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   showHierarchy = (criterion: any) => {
-    autocompleteStore.next(criterion.name);
+    this.treeSearchTerms = criterion.name;
     subtreePathStore.next(criterion.path.split('.'));
     subtreeSelectedStore.next(criterion.id);
     this.hierarchyNode = {

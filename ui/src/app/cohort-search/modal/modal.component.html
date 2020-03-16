@@ -71,6 +71,7 @@
                   <!-- Tree View -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
                     <crit-tree *ngIf="hierarchyNode" [node]="hierarchyNode"
+                      [searchTerms]="treeSearchTerms"
                       [selections]="selectionIds"
                       [wizard]="wizard"
                       [back]="back"></crit-tree>

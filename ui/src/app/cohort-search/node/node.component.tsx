@@ -5,7 +5,6 @@ import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {
   attributesStore,
-  autocompleteStore,
   groupSelectionsStore,
   ppiQuestions,
   scrollStore,
@@ -14,12 +13,12 @@ import {
   subtreeSelectedStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
-import {domainToTitle, highlightMatches, stripHtml, subTypeToTitle} from 'app/cohort-search/utils';
+import {domainToTitle, subTypeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
@@ -132,8 +131,10 @@ interface NodeProp extends Criteria {
 }
 
 interface TreeNodeProps {
+  expand?: Function;
   fullTree: boolean;
   node: NodeProp;
+  searchTerms: string;
 }
 
 interface TreeNodeState {
@@ -188,6 +189,13 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     }));
   }
 
+  componentDidUpdate(prevProps: Readonly<TreeNodeProps>): void {
+    const {node: {domainId, group}} = this.props;
+    if ( domainId === DomainType.PHYSICALMEASUREMENT.toString() && group && this.props.searchTerms !== prevProps.searchTerms) {
+      this.searchChildren();
+    }
+  }
+
   componentWillUnmount(): void {
     this.subscription.unsubscribe();
   }
@@ -225,6 +233,18 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       console.error(error);
       this.setState({error: true, loading: false});
       subtreeSelectedStore.next(undefined);
+    }
+  }
+
+  searchChildren() {
+    const {expand, node: {children, parentId}, searchTerms} = this.props;
+    if (!!searchTerms && children.some(child => child.name.toLowerCase().includes(searchTerms.toLowerCase()))) {
+      if (parentId !== 0) {
+        setTimeout(() => expand());
+      }
+      this.setState({expanded: true});
+    } else {
+      this.setState({expanded: false});
     }
   }
 
@@ -327,9 +347,12 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   render() {
-    const {fullTree, node, node: {code, count, id, group, hasAttributes, name, parentId, selectable}} = this.props;
+    const {fullTree, node, node: {code, count, domainId, id, group, hasAttributes, name, selectable}, searchTerms} = this.props;
     const {children, expanded, loading, searchMatch, selected} = this.state;
     const nodeChildren = fullTree ? node.children : children;
+    const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
+      ? highlightSearchTerm(searchTerms, name, colors.success)
+      : name;
     return <React.Fragment>
       <div style={{...styles.treeNode}} id={`node${id}`} onClick={() => this.toggleExpanded()}>
         {group && <button style={styles.iconButton}>
@@ -351,13 +374,17 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           </button>}
           <div style={{display: 'inline-block'}}>
             <span style={styles.code}>{code}</span>
-            <span style={searchMatch ? styles.searchMatch : {}}>{name}</span>
+            <span style={searchMatch ? styles.searchMatch : {}}>{displayName}</span>
             {this.showCount && <span style={styles.count}>{count.toLocaleString()}</span>}
           </div>
         </div>
       </div>
-      {expanded && !!nodeChildren && nodeChildren.length > 0 && <div style={{marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
-        {nodeChildren.map((child, c) => <TreeNode key={c} fullTree={fullTree} node={child}/>)}
+      {!!nodeChildren && nodeChildren.length > 0 && <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
+        {nodeChildren.map((child, c) => <TreeNode key={c}
+                                                  expand={() => this.setState({expanded: true})}
+                                                  fullTree={fullTree}
+                                                  node={child}
+                                                  searchTerms={searchTerms}/>)}
       </div>}
     </React.Fragment>;
   }
@@ -366,6 +393,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 interface Props {
   back: Function;
   node: Criteria;
+  searchTerms: string;
   selections: Array<string>;
   wizard: any;
 }
@@ -380,7 +408,6 @@ interface State {
 }
 
 export const CriteriaTree = withCurrentWorkspace()(class extends React.Component<Props, State> {
-  subscription: Subscription;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -389,25 +416,19 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       error: false,
       ingredients: undefined,
       loading: true,
-      searchTerms: undefined,
+      searchTerms: props.searchTerms,
     };
   }
 
   componentDidMount(): void {
-    const {wizard} = this.props;
     this.loadRootNodes();
-    this.subscription = autocompleteStore.subscribe(searchTerms => {
-      this.setState({searchTerms});
-      const {children} = this.state;
-      if (wizard.fullTree && children) {
-        const filteredChildren = this.filterTree(JSON.parse(JSON.stringify(children)), () => {});
-        this.setState({children: filteredChildren});
-      }
-    });
   }
 
-  componentWillUnmount(): void {
-    this.subscription.unsubscribe();
+  componentDidUpdate(prevProps: Readonly<Props>): void {
+    const {searchTerms} = this.props;
+    if (prevProps.searchTerms !== searchTerms) {
+      this.setState({searchTerms});
+    }
   }
 
   loadRootNodes() {
@@ -474,34 +495,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     );
   }
 
-  isMatch(name: string) {
-    return stripHtml(name).toLowerCase().includes(this.state.searchTerms.toLowerCase());
-  }
-
-  filterTree(tree: Array<any>, expand: Function) {
-    const {searchTerms} = this.state;
-    return tree.map((item) => {
-      item.name = stripHtml(item.name);
-      if (searchTerms.length > 1) {
-        item.expanded = item.children.some(it => this.isMatch(it.name));
-      } else {
-        item.expanded = false;
-      }
-      const func = () => {
-        item.expanded = true;
-        expand();
-      };
-      if (searchTerms.length > 1 && this.isMatch(item.name)) {
-        item.name = highlightMatches([searchTerms], item.name, false);
-        expand();
-      }
-      if (item.children.length) {
-        item.children = this.filterTree(item.children, func);
-      }
-      return item;
-    });
-  }
-
   get showHeader() {
     const {node: {domainId}} = this.props;
     return domainId !== DomainType.PHYSICALMEASUREMENT.toString()
@@ -516,10 +509,13 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
   render() {
     const {back, node, wizard: {fullTree}} = this.props;
-    const {children, ingredients, loading} = this.state;
+    const {children, ingredients, loading, searchTerms} = this.state;
     return <React.Fragment>
       {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
-        <SearchBar node={node} setIngredients={(i) => this.setState({ingredients: i})}/>
+        <SearchBar node={node}
+          searchTerms={searchTerms}
+          setIngredients={(i) => this.setState({ingredients: i})}
+          setInput={(v) => this.setState({searchTerms: v})}/>
       </div>}
       <div style={this.showHeader
         ? {...styles.treeContainer, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}
@@ -534,7 +530,10 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
-        {!loading && !!children && children.map((child, c) => <TreeNode key={c} fullTree={fullTree} node={child}/>)}
+        {!loading && !!children && children.map((child, c) => <TreeNode key={c}
+                                                                fullTree={fullTree}
+                                                                node={child}
+                                                                searchTerms={searchTerms}/>)}
     </div>
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
@@ -548,10 +547,11 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 export class CriteriaTreeComponent extends ReactWrapperBase {
   @Input('back') back: Props['back'];
   @Input('node') node: Props['node'];
+  @Input('searchTerms') searchTerms: Props['searchTerms'];
   @Input('selections') selections: Props['selections'];
   @Input('wizard') wizard: Props['wizard'];
 
   constructor() {
-    super(CriteriaTree, ['back', 'node', 'selections', 'wizard']);
+    super(CriteriaTree, ['back', 'node', 'searchTerms', 'selections', 'wizard']);
   }
 }
