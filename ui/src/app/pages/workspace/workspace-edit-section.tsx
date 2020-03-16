@@ -32,9 +32,8 @@ export const styles = reactStyles({
 });
 
 interface Props {
-  // As child description or header can be either string or reactNode
-  children?: any;
-  description?: any;
+  children?: string | React.ReactNode;
+  description?: string | React.ReactNode;
   header: any;
   index?: string;
   indent?: boolean;
