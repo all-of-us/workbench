@@ -2990,6 +2990,22 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testGetBillingUsage() {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testGetBillingUsageWithoutAccess() {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
+    workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
+  }
+
+  @Test
   public void testNotebookLockingMetadataPlaintextUser() {
     final String lastLockedUser = LOGGED_IN_USER_EMAIL;
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();

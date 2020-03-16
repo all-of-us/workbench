@@ -17,7 +17,17 @@ import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
-import {Authority, CdrVersion, CdrVersionListResponse, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {
+  Authority,
+  BillingAccountType,
+  CdrVersion,
+  CdrVersionListResponse,
+  Profile,
+  UserRole,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
+
 
 interface WorkspaceProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -28,6 +38,7 @@ interface WorkspaceState {
   sharing: boolean;
   cdrVersion: CdrVersion;
   workspace: WorkspaceData;
+  workspaceFreeTierUsage: number;
   workspaceUserRoles: UserRole[];
   publishing: boolean;
 }
@@ -95,6 +106,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
       sharing: false,
       cdrVersion: undefined,
       workspace: undefined,
+      workspaceFreeTierUsage: undefined,
       workspaceUserRoles: [],
       publishing: false,
     };
@@ -103,9 +115,16 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   async componentDidMount() {
     this.setVisits();
     await this.reloadWorkspace(currentWorkspaceStore.getValue());
+    this.loadFreeTierUsage();
     this.loadUserRoles();
     const cdrs = this.props.cdrVersionListResponse.items;
     this.setState({cdrVersion: cdrs.find(v => v.cdrVersionId === this.state.workspace.cdrVersionId)});
+  }
+
+  async loadFreeTierUsage() {
+    const freeTierUsage = await workspacesApi().getBillingUsage(
+      this.state.workspace.namespace, this.state.workspace.id);
+    this.setState({workspaceFreeTierUsage: freeTierUsage.billingUsage});
   }
 
   async setVisits() {
@@ -240,6 +259,15 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
             <div style={{fontSize: '0.5rem'}}>{workspace ?
               fp.capitalize(workspace.dataAccessLevel.toString()) : 'Loading...'}</div>
           </div>
+          {workspace && WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
+            && workspace.billingAccountType === BillingAccountType.FREETIER &&
+              <div style={{...styles.infoBox, height: '2.5rem'}} data-test-id='dataAccessLevel'>
+                <div style={styles.infoBoxHeader}>Workspace Free Credit Usage</div>
+                <div style={{fontSize: '0.5rem'}}>{this.state.workspaceFreeTierUsage !== undefined ?
+                  '$' + this.state.workspaceFreeTierUsage.toFixed(2) :
+                  <Spinner style={{height: 16, width: 16}}/>
+                }</div>
+              </div>}
           {!!this.workspaceClusterBillingProjectId() &&
             <ResetClusterButton workspaceNamespace={this.workspaceClusterBillingProjectId()}/>}
         </div>

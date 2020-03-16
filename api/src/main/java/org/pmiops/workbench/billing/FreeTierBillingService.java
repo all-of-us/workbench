@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,15 @@ public class FreeTierBillingService {
 
   public boolean userHasFreeTierCredits(DbUser user) {
     return getUserFreeTierDollarLimit(user) > workspaceFreeTierUsageDao.totalCostByUser(user);
+  }
+
+  public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
+    DbWorkspaceFreeTierUsage dbWorkspaceFreeTierUsage =
+        workspaceFreeTierUsageDao.findOneByWorkspace(dbWorkspace);
+    if (dbWorkspaceFreeTierUsage == null) {
+      return 0;
+    }
+    return dbWorkspaceFreeTierUsage.getCost();
   }
 
   /**

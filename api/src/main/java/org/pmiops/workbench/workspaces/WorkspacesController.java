@@ -38,6 +38,7 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -81,6 +82,7 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
@@ -119,22 +121,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
-  private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
+  private final Clock clock;
+  private final Provider<Cloudbilling> cloudbillingProvider;
+  private final CloudStorageService cloudStorageService;
+  private final FireCloudService fireCloudService;
+  private final FreeTierBillingService freeTierBillingService;
+  private final LogsBasedMetricService logsBasedMetricService;
+  private final ManualWorkspaceMapper manualWorkspaceMapper;
+  private final NotebooksService notebooksService;
   private final UserDao userDao;
   private final Provider<DbUser> userProvider;
-  private final FireCloudService fireCloudService;
-  private final Provider<Cloudbilling> cloudbillingProvider;
-  private final Provider<Zendesk> zendeskProvider;
-  private final CloudStorageService cloudStorageService;
-  private final Clock clock;
-  private final NotebooksService notebooksService;
   private final UserService userService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceMapper workspaceMapper;
-  private final ManualWorkspaceMapper manualWorkspaceMapper;
-  private final LogsBasedMetricService logsBasedMetricService;
+  private final WorkspaceService workspaceService;
+  private final Provider<Zendesk> zendeskProvider;
 
   @Autowired
   public WorkspacesController(
@@ -147,6 +150,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CloudStorageService cloudStorageService,
       Provider<Cloudbilling> cloudBillingProvider,
       Provider<Zendesk> zendeskProvider,
+      FreeTierBillingService freeTierBillingService,
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
@@ -161,6 +165,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
+    this.freeTierBillingService = freeTierBillingService;
     this.cloudStorageService = cloudStorageService;
     this.cloudbillingProvider = cloudBillingProvider;
     this.zendeskProvider = zendeskProvider;
@@ -642,6 +647,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       log.warning("Service Account does not have access to bucket " + bucketName);
       throw e;
     }
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceBillingUsageResponse> getBillingUsage(
+      String workspaceNamespace, String workspaceId) {
+    workspaceService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    return ResponseEntity.ok(
+        new WorkspaceBillingUsageResponse()
+            .billingUsage(
+                freeTierBillingService.getWorkspaceFreeTierBillingUsage(
+                    workspaceService.get(workspaceNamespace, workspaceId))));
   }
 
   @Override
