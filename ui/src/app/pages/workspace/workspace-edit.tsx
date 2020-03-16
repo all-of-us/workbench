@@ -11,17 +11,31 @@ import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
-import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import {colorWithWhiteness} from 'app/styles/colors';
+import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
-  reactStyles,
+  disseminateFindings,
+  PrimaryPurposeItems,
+  researchOutcomes,
+  ResearchPurposeDescription,
+  ResearchPurposeItem,
+  ResearchPurposeItems,
+  researchPurposeQuestions,
+  SpecificPopulationItem,
+  SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
+  toolTipTextStigmatization
+} from 'app/pages/workspace/workspace-edit-text';
+import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-summary';
+import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
+import {
   ReactWrapperBase,
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
   withRouteConfigData
 } from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
@@ -42,62 +56,46 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {
-  disseminateFindings,
-  PrimaryPurposeItems,
-  researchOutcomes,
-  ResearchPurposeDescription,
-  ResearchPurposeItem,
-  ResearchPurposeItems,
-  researchPurposeQuestions,
-  SpecificPopulationItem,
-  SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
-  toolTipTextStigmatization
-} from './workspace-edit-text';
 
-
-const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
-
-// Poll parameters to check Workspace ACLs after creation of a new workspace. See
-// SATURN-104 for details, eventually the root cause should be resolved by fixes
-// to Sam (as part of Postgres migration).
-const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
-const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
-
-const styles = reactStyles({
+export const styles = reactStyles({
+  categoryRow: {
+    display: 'flex', flexDirection: 'row', padding: '0.6rem 0', width: '95%'
+  },
+  checkboxRow: {
+    display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
+  },
+  checkboxStyle: {
+    marginRight: '.31667rem', zoom: '1.5'
+  },
   header: {
     fontWeight: 600,
     lineHeight: '24px',
     color: colors.primary
   },
-
-  requiredText: {
-    fontSize: '13px',
-    fontStyle: 'italic',
-    fontWeight: 400,
-    color: colors.primary,
-    marginLeft: '0.2rem'
+  flexColumnBy2: {
+    flex: '1 1 0',
+    marginLeft: '1rem'
   },
-
-  text: {
-    fontSize: '13px',
-    color: colors.primary,
-    fontWeight: 400,
-    lineHeight: '24px'
-  },
-
-  textInput: {
-    width: '20rem',
-    borderColor: 'rgb(151, 151, 151)',
-    borderRadius: '6px',
-    marginRight: '20px',
-    marginBottom: '5px'
-  },
-
   infoIcon: {
     height: '16px',
     marginLeft: '0.2rem',
     width: '16px'
+  },
+  longDescription: {
+    position: 'relative',
+    display: 'inline-block',
+    minHeight: '1rem',
+    cursor: 'text',
+    lineHeight: '1rem',
+    width: '100%'
+  },
+  researchPurposeRow: {
+    backgroundColor: colors.white,
+    borderColor: colors.white,
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
+    marginLeft: '-1rem',
+    paddingTop: '0.3rem',
+    paddingBottom: '0.3rem'
   },
   select: {
     display: 'inline-block',
@@ -114,93 +112,37 @@ const styles = reactStyles({
     lineHeight: '24px',
     cursor: 'pointer'
   },
-  longDescription: {
-    position: 'relative',
-    display: 'inline-block',
-    minHeight: '1rem',
-    cursor: 'text',
-    lineHeight: '1rem',
-    width: '100%'
+  spinner: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    height: '100%',
+    width: '100%',
   },
-  categoryRow: {
-    display: 'flex', flexDirection: 'row', padding: '0.6rem 0', width: '95%'
+  text: {
+    fontSize: '13px',
+    color: colors.primary,
+    fontWeight: 400,
+    lineHeight: '24px'
   },
-  checkboxStyle: {
-    marginRight: '.31667rem', zoom: '1.5'
-  },
-  checkboxRow: {
-    display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
-  },
-  textBoxCharRemaining: {
-    justifyContent: 'flex-end',
-    width: '50rem',
-    backgroundColor: colorWithWhiteness(colors.primary, 0.95),
-    fontSize: 12,
-    colors: colors.primary,
-    padding: '0.25rem',
-    borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
-  },
-  textArea: {
-    height: '15rem',
-    resize: 'none',
-    width: '50rem',
-    borderRadius: '3px 3px 0 0',
-    borderColor: colorWithWhiteness(colors.dark, 0.5)
-  },
-  flexColumnBy2: {
-    flex: '1 1 0',
-    marginLeft: '1rem'
-  },
-  researchPurposeRow: {
-    backgroundColor: colors.white,
-    borderColor: colors.white,
-    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
-    marginLeft: '-1rem',
-    paddingTop: '0.3rem',
-    paddingBottom: '0.3rem'
+  textInput: {
+    width: '20rem',
+    borderColor: 'rgb(151, 151, 151)',
+    borderRadius: '6px',
+    marginRight: '20px',
+    marginBottom: '5px'
   }
 });
 
-export const WorkspaceEditSection = (props) => {
-  return <div key={props.header} style={{...props.style, marginBottom: '0.5rem'}}>
-    <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),
-      marginTop: (props.largeHeader ? 12 : 24)}}>
-      {props.index && <FlexRow style={{...styles.header,
-        fontSize: (props.largeHeader ? 20 : 16)}}>
-        <div style={{marginRight: '0.4rem'}}>{props.index}</div>
-        <div style={{...styles.header,
-          fontSize: (props.largeHeader ? 20 : 16)}}>
-          {props.header}
-        </div>
-      </FlexRow>}
-      {!props.index &&
-      <div style={{...styles.header,
-        fontSize: (props.largeHeader ? 20 : 16)}}>
-        {props.header}
-      </div>
-      }
-      {props.required && <div style={styles.requiredText}>
-        (Required)
-      </div>
-      }
-      {props.tooltip && <TooltipTrigger content={props.tooltip}>
-        <InfoIcon style={{...styles.infoIcon,  marginTop: '0.2rem'}}/>
-      </TooltipTrigger>
-      }
-    </FlexRow>
-    {props.subHeader && <div style={{...styles.header, color: colors.primary, fontSize: 14}}>
-      {props.subHeader}
-    </div>
-    }
-    <div style={{...styles.text, marginLeft: '0.9rem'}}>
-      {props.description}
-    </div>
-    <div style={{marginTop: '0.5rem', marginLeft: (props.indent ? '0.9rem' : '0rem')}}>
-      {props.children}
-    </div>
-  </div>;
-};
+const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
+
+// Poll parameters to check Workspace ACLs after creation of a new workspace. See
+// SATURN-104 for details, eventually the root cause should be resolved by fixes
+// to Sam (as part of Postgres migration).
+const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
+const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
@@ -222,6 +164,7 @@ export interface WorkspaceEditProps {
   workspace: WorkspaceData;
   cancel: Function;
 }
+
 
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
@@ -530,8 +473,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * options.
      */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-      return <div><strong>{item.label} *</strong>
-        {item.subCategory.map((sub, index) => <FlexRow>
+      return <div key={item.label}><strong>{item.label} *</strong>
+        {item.subCategory.map((sub, index) => <FlexRow key={sub.label}>
           <CheckBox
               wrapperStyle={styles.checkboxRow}
               data-test-id={sub.shortName + '-checkbox'}
@@ -818,7 +761,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           length: { minimum: 1, maximum: 80 }
         },
         billingAccountName: { presence: true },
-        intendedStudy: { length: { minimum: 1, maximum: 500 } },
+        intendedStudy: { length: { minimum: 1, maximum: 1000 } },
         anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
         scientificApproach: { length: { minimum: 1, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
@@ -830,17 +773,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
-          {this.state.loading && <SpinnerOverlay overrideStylesOverlay={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.2)',
-            height: '100%',
-            width: '100%',
-          }}/>}
+          {this.state.loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
-                              section={{marginTop: '24px'}} largeHeader required={!this.isMode(WorkspaceEditMode.Duplicate)}>
+                                style={{marginTop: '24px'}} largeHeader
+                                required={!this.isMode(WorkspaceEditMode.Duplicate)}>
           <FlexRow>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
               value = {this.state.workspace.name}
@@ -870,8 +806,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </FlexRow>
         </WorkspaceEditSection>
         {this.isMode(WorkspaceEditMode.Duplicate) &&
-        <WorkspaceEditSection header='Options for duplicate workspace'
-          >
+        <WorkspaceEditSection header='Options for duplicate workspace'>
           <CheckBox
             style={styles.checkboxStyle}
             label='Share workspace with the same set of collaborators'
@@ -942,53 +877,26 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </FlexRow>
         </WorkspaceEditSection>
 
-        {/* TextBox: scientific question(s) researcher intend to study Section*/}
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header} indent
           description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
           <FlexColumn>
-          <WorkspaceEditSection
-              header={researchPurposeQuestions[2].header}
-              description={researchPurposeQuestions[2].description} index='2.1' indent>
-            <TextArea style={styles.textArea}
-                      id='intendedStudy'
-                      name='intendedStudy'
-                      value={this.state.workspace.researchPurpose.intendedStudy}
-                      onChange={v => this.updateResearchPurpose('intendedStudy', v)}/>
-            <FlexRow id='intendedStudyText' style={styles.textBoxCharRemaining}>
-              {500 - this.state.workspace.researchPurpose.intendedStudy.length} characters remaining
-            </FlexRow>
-          </WorkspaceEditSection>
+            {/* TextBox: scientific question(s) researcher intend to study Section*/}
+            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[2]}
+                          researchValue={this.state.workspace.researchPurpose.intendedStudy}
+                          onChange={v => this.updateResearchPurpose('intendedStudy', v)}
+                          index='2.1' rowId='intendedStudyText'/>
 
             {/* TextBox: scientific approaches section*/}
-            <WorkspaceEditSection
-                header={researchPurposeQuestions[3].header}
-                description={researchPurposeQuestions[3].description} index='2.2' indent>
-              <TextArea style={styles.textArea}
-                        id='scientificApproach'
-                        name='scientificApproach'
-                        value={this.state.workspace.researchPurpose.scientificApproach}
-                        onChange={v => this.updateResearchPurpose('scientificApproach', v)}/>
-              <FlexRow style={styles.textBoxCharRemaining}>
-                {this.state.workspace.researchPurpose.scientificApproach &&
-                <div>{1000 - this.state.workspace.researchPurpose.scientificApproach.length} characters remaining</div>}
-                {!this.state.workspace.researchPurpose.scientificApproach &&
-                <div>1000 characters remaining</div>}
-              </FlexRow>
-            </WorkspaceEditSection>
-
+            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[3]}
+                           researchValue={this.state.workspace.researchPurpose.scientificApproach}
+                            onChange={v => this.updateResearchPurpose('scientificApproach', v)}
+                           index='2.2' rowId='scientificApproachText'/>
             {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceEditSection header={researchPurposeQuestions[4].header} indent
-                                  description={researchPurposeQuestions[4].description} index='2.3'>
-              <TextArea style={styles.textArea}
-                        id='anticipatedFindings'
-                        name='anticipatedFindings'
-                        value={this.state.workspace.researchPurpose.anticipatedFindings}
-                        onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}/>
-              <FlexRow style={styles.textBoxCharRemaining}>
-                {1000 - this.state.workspace.researchPurpose.anticipatedFindings.length} characters remaining
-              </FlexRow>
-            </WorkspaceEditSection>
+            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[4]}
+                           researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
+                           onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
+                           index='2.3' rowId='anticipatedFindingsText'/>
           </FlexColumn>
         </WorkspaceEditSection>
 
@@ -1150,12 +1058,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.billingAccountName && <div>You must select a billing account</div>}
                 {errors.primaryPurpose && <div>You must choose at least one primary research
                   purpose (Question 1)</div>}
-                {errors.anticipatedFindings && <div>You must answer <i>What are the anticipated findings
-                  from the study? (Question # 2.1)</i></div>}
-                {errors.scientificApproach && <div>You must answer <i>What are the scientific
-                  approaches you plan to use for your study (Question # 2.2)</i></div>}
-                {errors.intendedStudy && <div>You must answer <i>What are the specific
-                  scientific question(s) you intend to study (Question # 2.3)</i></div>}
+                {errors.anticipatedFindings && <div>Answer for <i>What are the anticipated findings
+                  from the study? (Question # 2.1)</i> cannot be empty</div>}
+                {errors.scientificApproach && <div>Answer for <i>What are the scientific
+                  approaches you plan to use for your study (Question # 2.2)</i> cannot be empty</div>}
+                {errors.intendedStudy && <div>Answer for<i>What are the specific
+                  scientific question(s) you intend to study (Question # 2.3)</i> cannot be empty</div>}
                 {errors.specificPopulation && <div>You must specify a population of study</div>}
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
                 {errors.researchOutcoming && <div>You must specify the outcome of the research</div>}
