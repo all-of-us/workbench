@@ -18,9 +18,7 @@ public class StorageEnumsTest {
   private final Object INDICATES_STATIC_METHOD = null;
 
   final Set<Class> enumClasses = getEnumerationClasses();
-  final Set<Method> methods =
-      arraysToSet(
-          DbStorageEnums.class.getDeclaredMethods(), DbStorageEnums.class.getDeclaredMethods());
+  final Set<Method> methods = arraysToSet(DbStorageEnums.class.getDeclaredMethods());
 
   // e.g. public static Short reviewStatusToStorage(ReviewStatus s)
   final Map<Class, Method> enumClassToStorageMethod =
@@ -83,8 +81,7 @@ public class StorageEnumsTest {
    * @return
    */
   private Set<Class> getEnumerationClasses() {
-    return arraysToSet(
-            DbStorageEnums.class.getDeclaredFields(), DbStorageEnums.class.getDeclaredFields())
+    return arraysToSet(DbStorageEnums.class.getDeclaredFields())
         .stream()
         .map(
             field -> {
