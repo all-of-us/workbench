@@ -886,7 +886,9 @@ public class DataSetControllerTest {
             .generateCode(
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-    assertThat(response.getCode()).contains("UNION\n" + "                        DISTINCT ");
+
+    assertThat(response.getCode()).containsMatch("UNION");
+    assertThat(response.getCode()).containsMatch("DISTINCT SELECT");
   }
 
   @Test
@@ -925,13 +927,14 @@ public class DataSetControllerTest {
          }
        }
     */
+
+    String queryToVerify = sqlFormatter.format("SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person");
     assertThat(response.getCode())
-        .contains(
-            sqlFormatter.format(
-                "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person"));
+        .contains("person_sql = ");
+    assertThat(response.getCode().contains(queryToVerify));
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
-    assertThat(response.getCode()).contains("WHERE person.PERSON_ID");
+    assertThat(response.getCode()).contains("person.PERSON_ID IN (");
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
