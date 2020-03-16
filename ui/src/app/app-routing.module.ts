@@ -71,9 +71,9 @@ const routes: Routes = [
         component: HomepageComponent,
         data: {title: 'Homepage'},
       }, {
-        path: 'data-use-agreement',
+        path: 'data-code-of-conduct',
         component: DataUseAgreementComponent,
-        data: {title: 'Data Use Agreement'}
+        data: {title: 'Data Code of Conduct'}
       }, {
         path: 'library',
         component: WorkspaceLibraryComponent,
