@@ -11,6 +11,20 @@ import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
+import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
+import {
+  disseminateFindings,
+  PrimaryPurposeItems,
+  researchOutcomes,
+  ResearchPurposeDescription,
+  ResearchPurposeItem,
+  ResearchPurposeItems,
+  researchPurposeQuestions,
+  SpecificPopulationItem,
+  SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
+  toolTipTextStigmatization
+} from 'app/pages/workspace/workspace-edit-text';
+import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-summary';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {colorWithWhiteness} from 'app/styles/colors';
 import colors from 'app/styles/colors';
@@ -42,20 +56,6 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {WorkspaceEditSection} from './workspace-edit-section';
-import {
-  disseminateFindings,
-  PrimaryPurposeItems,
-  researchOutcomes,
-  ResearchPurposeDescription,
-  ResearchPurposeItem,
-  ResearchPurposeItems,
-  researchPurposeQuestions,
-  SpecificPopulationItem,
-  SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
-  toolTipTextStigmatization
-} from './workspace-edit-text';
-import {WorkspaceResearchSummary} from './workspace-research-summary';
 
 export const styles = reactStyles({
   categoryRow: {
@@ -775,7 +775,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <div style={{width: '95%'}}>
           {this.state.loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
-                                section={{marginTop: '24px'}} largeHeader
+                                style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
           <FlexRow>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'

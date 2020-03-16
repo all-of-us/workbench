@@ -10,8 +10,8 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {WorkspaceEdit, WorkspaceEditMode} from './workspace-edit';
-import {WorkspaceEditSection} from './workspace-edit-section';
+import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
+import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 
 jest.mock('app/utils/navigation', () => ({
   ...(require.requireActual('app/utils/navigation')),

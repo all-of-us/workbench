@@ -30,7 +30,22 @@ export const styles = reactStyles({
     lineHeight: '24px'
   }
 });
-export const WorkspaceEditSection = (props) => {
+
+interface Props {
+  // As child description or header can be either string or reactNode
+  children?: any;
+  description?: any;
+  header: any;
+  index?: string;
+  indent?: boolean;
+  largeHeader?: any;
+  required?: boolean;
+  tooltip?: React.ReactNode;
+  subHeader?: string;
+  style?: any;
+}
+
+export const WorkspaceEditSection = (props: Props) => {
   return <div key={props.header} style={{...props.style, marginBottom: '0.5rem'}}>
     <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),
       marginTop: (props.largeHeader ? 12 : 24)}}>
