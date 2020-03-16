@@ -1,10 +1,31 @@
 import {FlexRow} from 'app/components/flex';
 import {TextArea} from 'app/components/inputs';
 import colors from 'app/styles/colors';
+import {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
 import * as React from 'react';
 import {WorkspaceEditSection} from './workspace-edit-section';
 import {ResearchPurposeQuestion} from './workspace-edit-text';
-import {styles} from './workspace-styles';
+
+const styles = reactStyles({
+  textArea: {
+    height: '15rem',
+    resize: 'none',
+    width: '50rem',
+    borderRadius: '3px 3px 0 0',
+    boderColor: colorWithWhiteness(colors.dark, 0.5)
+  },
+  textBoxCharRemaining: {
+    justifyContent: 'space-between',
+    width: '50rem',
+    backgroundColor: colorWithWhiteness(colors.primary, 0.95),
+    fontSize: 12,
+    colors: colors.primary,
+    padding: '0.25rem',
+    borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
+  },
+});
 
 interface Props {
   index: string;

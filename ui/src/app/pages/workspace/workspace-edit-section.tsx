@@ -2,9 +2,34 @@ import {FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
 import * as React from 'react';
-import {styles} from './workspace-styles';
 
+export const styles = reactStyles({
+  header: {
+    fontWeight: 600,
+    lineHeight: '24px',
+    color: colors.primary
+  },
+  infoIcon: {
+    height: '16px',
+    marginLeft: '0.2rem',
+    width: '16px'
+  },
+  requiredText: {
+    fontSize: '13px',
+    fontStyle: 'italic',
+    fontWeight: 400,
+    color: colors.primary,
+    marginLeft: '0.2rem'
+  },
+  text: {
+    fontSize: '13px',
+    color: colors.primary,
+    fontWeight: 400,
+    lineHeight: '24px'
+  }
+});
 export const WorkspaceEditSection = (props) => {
   return <div key={props.header} style={{...props.style, marginBottom: '0.5rem'}}>
     <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),

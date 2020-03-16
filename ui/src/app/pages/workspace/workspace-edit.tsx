@@ -12,7 +12,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import {colors, colorWithWhiteness} from 'app/styles/colors';
 import {
   ReactWrapperBase,
   sliceByHalfLength,
@@ -20,6 +20,7 @@ import {
   withCurrentWorkspace,
   withRouteConfigData
 } from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
@@ -54,8 +55,85 @@ import {
   toolTipTextStigmatization
 } from './workspace-edit-text';
 import {WorkspaceResearchSummary} from './workspace-research-summary';
-import {styles} from './workspace-styles';
 
+export const styles = reactStyles({
+  categoryRow: {
+    display: 'flex', flexDirection: 'row', padding: '0.6rem 0', width: '95%'
+  },
+  checkboxRow: {
+    display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
+  },
+  checkboxStyle: {
+    marginRight: '.31667rem', zoom: '1.5'
+  },
+  header: {
+    fontWeight: 600,
+    lineHeight: '24px',
+    color: colors.primary
+  },
+  flexColumnBy2: {
+    flex: '1 1 0',
+    marginLeft: '1rem'
+  },
+  infoIcon: {
+    height: '16px',
+    marginLeft: '0.2rem',
+    width: '16px'
+  },
+  longDescription: {
+    position: 'relative',
+    display: 'inline-block',
+    minHeight: '1rem',
+    cursor: 'text',
+    lineHeight: '1rem',
+    width: '100%'
+  },
+  researchPurposeRow: {
+    backgroundColor: colors.white,
+    borderColor: colors.white,
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
+    marginLeft: '-1rem',
+    paddingTop: '0.3rem',
+    paddingBottom: '0.3rem'
+  },
+  select: {
+    display: 'inline-block',
+    verticalAlign: 'middle',
+    position: 'relative',
+    overflow: 'visible',
+    width: '11.3rem',
+    marginRight: '20px'
+  },
+  shortDescription: {
+    color: colors.primary,
+    fontSize: '16px',
+    fontWeight: 600,
+    lineHeight: '24px',
+    cursor: 'pointer'
+  },
+  spinner: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    height: '100%',
+    width: '100%',
+  },
+  text: {
+    fontSize: '13px',
+    color: colors.primary,
+    fontWeight: 400,
+    lineHeight: '24px'
+  },
+  textInput: {
+    width: '20rem',
+    borderColor: 'rgb(151, 151, 151)',
+    borderRadius: '6px',
+    marginRight: '20px',
+    marginBottom: '5px'
+  }
+});
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
 
