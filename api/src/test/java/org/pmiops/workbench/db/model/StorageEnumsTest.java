@@ -81,8 +81,7 @@ public class StorageEnumsTest {
    * @return
    */
   private Set<Class> getEnumerationClasses() {
-    return arraysToSet(DbStorageEnums.class.getDeclaredFields())
-        .stream()
+    return arraysToSet(DbStorageEnums.class.getDeclaredFields()).stream()
         .map(
             field -> {
               // gets the specific BiMap type including annotations
