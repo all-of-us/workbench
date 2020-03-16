@@ -12,7 +12,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {colors, colorWithWhiteness} from 'app/styles/colors';
+import {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   ReactWrapperBase,
   sliceByHalfLength,
