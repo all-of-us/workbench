@@ -38,7 +38,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props {
+export interface Props {
   profile: Profile;
   onPreviousClick?: Function;
   onCancelClick?: Function;
@@ -245,18 +245,27 @@ or another sexual and/or gender minority?'>
                     this.setState({loading: true});
                     try {
                       const profile = await this.props.onSubmit(this.state.profile, captchaToken);
-                      this.setState({profile: profile, loading: false});
+                      // If the submit fails, then profile is null, and the try will apparently not
+                      // always break in time to prevent these next lines from executing. so we
+                      // null-check and don't null out the profile if it doesn't exist.
+                      if (!!profile) {
+                        this.setState({profile: profile, loading: false});
+                      } else {
+                        this.setState({loading: false});
+                      }
                     } catch (error) {
                       // TODO: we need to show some user-facing error message when create account fails.
                       console.log(error);
-                      if (environment.enableCaptcha) {
+                      if (environment.enableCaptcha && this.props.enableCaptcha) {
                         // Reset captcha
                         this.captchaRef.current.reset();
                         this.setState({captcha: false});
                       }
                       this.setState({loading: false});
                     }
-                  }}>
+                  }}
+                  data-test-id={'submit-button'}
+          >
             Submit
           </Button>
         </TooltipTrigger>
