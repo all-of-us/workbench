@@ -603,9 +603,19 @@ public class ProfileController implements ProfileApiDelegate {
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
+
     DbDemographicSurvey dbDemographicSurvey = demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(updatedProfile.getDemographicSurvey());
-    dbDemographicSurvey.setUser(user);
+
+    if (user.getDemographicSurveyCompletionTime() == null && dbDemographicSurvey != null) {
+      user.setDemographicSurveyCompletionTime(now);
+    }
+
+    if (dbDemographicSurvey != null && dbDemographicSurvey.getUser() == null) {
+      dbDemographicSurvey.setUser(user);
+    }
+
     user.setDemographicSurvey(dbDemographicSurvey);
+
     user.setLastModifiedTime(now);
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
