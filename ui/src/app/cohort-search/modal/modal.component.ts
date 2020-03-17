@@ -119,6 +119,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       case 'tree':
         subtreePathStore.next([]);
         subtreeSelectedStore.next(undefined);
+        this.hierarchyNode = undefined;
         this.treeSearchTerms = '';
         this.backMode = 'list';
         this.mode = 'list';
@@ -254,5 +255,9 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   get disableFlag() {
     return this.noSelection || this.modifiersDisabled;
+  }
+
+  setTreeSearchTerms = (input: string) => {
+    this.treeSearchTerms = input;
   }
 }

@@ -136,10 +136,8 @@ interface Props {
 }
 
 interface State {
-  typedTerm: string;
   options: Array<any>;
   loading: boolean;
-  noResults: boolean;
   optionSelected: boolean;
   error: boolean;
   highlightedOption: number;
@@ -151,20 +149,18 @@ export class SearchBar extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      typedTerm: '',
-      options: [],
+      options: null,
       loading: false,
-      noResults: false,
       optionSelected: false,
       error: false,
-      highlightedOption: undefined,
+      highlightedOption: null,
       subtype: undefined,
     };
   }
 
   debounceInput = fp.debounce(300, (input: string) => {
     if (input.length < trigger) {
-      this.setState({options: [], noResults: false});
+      this.setState({options: null});
     } else {
       this.handleInput();
     }
@@ -183,7 +179,9 @@ export class SearchBar extends React.Component<Props, State> {
     if (searchTerms !== prevProps.searchTerms) {
       if (domainId === DomainType.PHYSICALMEASUREMENT.toString()) {
         triggerEvent(`Cohort Builder Search - Physical Measurements`, 'Search', searchTerms);
-      } else if (searchTerms !== this.state.typedTerm) {
+      } else if (this.state.optionSelected) {
+        this.setState({optionSelected: false});
+      } else {
         this.debounceInput(searchTerms);
       }
     }
@@ -192,7 +190,7 @@ export class SearchBar extends React.Component<Props, State> {
   handleInput() {
     const {node: {domainId, isStandard, type}, searchTerms} = this.props;
     triggerEvent(`Cohort Builder Search - ${domainToTitle(domainId)}`, 'Search', searchTerms);
-    this.setState({loading: true, optionSelected: false, noResults: false, typedTerm: searchTerms});
+    this.setState({loading: true});
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     const apiCall = domainId === DomainType.DRUG.toString()
       ? cohortBuilderApi().findDrugBrandOrIngredientByValue(+cdrVersionId, searchTerms)
@@ -206,7 +204,7 @@ export class SearchBar extends React.Component<Props, State> {
         }
         return false;
       });
-      this.setState({highlightedOption: null, loading: false, noResults: options.length === 0, options});
+      this.setState({highlightedOption: null, loading: false, options});
     }, (err) => this.setState({error: err}));
   }
 
@@ -219,7 +217,7 @@ export class SearchBar extends React.Component<Props, State> {
     if (option) {
       const {setIngredients} = this.props;
       this.props.setInput(option.name);
-      this.setState({options: [], optionSelected: true, typedTerm: option.name});
+      this.setState({options: null, optionSelected: true});
       if (option.type === CriteriaType[CriteriaType.BRAND]) {
         const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
         cohortBuilderApi().findDrugIngredientByConceptId(cdrId, option.conceptId)
@@ -255,25 +253,19 @@ export class SearchBar extends React.Component<Props, State> {
   }
 
   moveUp() {
-    const {setInput} = this.props;
-    const {highlightedOption, options, typedTerm} = this.state;
+    const {highlightedOption} = this.state;
     if (highlightedOption === 0) {
-      setInput(typedTerm);
       this.setState({highlightedOption: null});
     } else if (highlightedOption > 0) {
-      setInput(options[highlightedOption - 1].name);
       this.setState({highlightedOption: highlightedOption - 1});
     }
   }
 
   moveDown() {
-    const {setInput} = this.props;
     const {highlightedOption, options} = this.state;
     if (highlightedOption === null) {
-      setInput(options[0].name);
       this.setState({highlightedOption: 0});
     } else if ((highlightedOption + 1) < options.length) {
-      setInput(options[highlightedOption + 1].name);
       this.setState({highlightedOption: highlightedOption + 1});
     }
   }
@@ -284,21 +276,24 @@ export class SearchBar extends React.Component<Props, State> {
   }
 
   render() {
-    const {highlightedOption, loading, options, typedTerm} = this.state;
+    const {highlightedOption, loading, options} = this.state;
+    const inputValue = highlightedOption !== null ? options[highlightedOption].name : this.props.searchTerms;
     return <div style={{position: 'relative', width: '100%'}}>
       <div style={styles.searchContainer}>
         <div style={styles.searchBar}>
           {loading ? <Spinner style={{verticalAlign: 'middle'}} size={16}/> : <ClrIcon shape='search' size='18'/>}
           <TextInput style={styles.searchInput}
-            value={this.props.searchTerms}
+            value={inputValue}
             onChange={(e) => this.props.setInput(e)}
             onKeyDown={(e) => this.onKeyDown(e.key)}/>
         </div>
       </div>
-      {options.length > 0 && <div ref={(el) => this.dropdown = el} style={styles.dropdownMenu}>
-        {options.map((opt, o) => <SearchBarOption key={o}
+      {options !== null && <div ref={(el) => this.dropdown = el} style={styles.dropdownMenu}>
+        {options.length === 0
+          ? <em style={{padding: '0.15rem 1.25rem'}}>No results based on your search</em>
+          : options.map((opt, o) => <SearchBarOption key={o}
                                             option={opt}
-                                            searchTerm={typedTerm}
+                                            searchTerm={this.props.searchTerms}
                                             highlighted={o === highlightedOption}
                                             onClick={() => this.selectOption(opt)}/>)}
       </div>}

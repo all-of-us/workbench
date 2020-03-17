@@ -395,6 +395,7 @@ interface Props {
   node: Criteria;
   searchTerms: string;
   selections: Array<string>;
+  setSearchTerms: Function;
   wizard: any;
 }
 
@@ -404,7 +405,6 @@ interface State {
   error: boolean;
   ingredients: any;
   loading: boolean;
-  searchTerms: string;
 }
 
 export const CriteriaTree = withCurrentWorkspace()(class extends React.Component<Props, State> {
@@ -416,7 +416,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       error: false,
       ingredients: undefined,
       loading: true,
-      searchTerms: props.searchTerms,
     };
   }
 
@@ -424,12 +423,12 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     this.loadRootNodes();
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>): void {
-    const {searchTerms} = this.props;
-    if (prevProps.searchTerms !== searchTerms) {
-      this.setState({searchTerms});
-    }
-  }
+  // componentDidUpdate(prevProps: Readonly<Props>): void {
+  //   const {searchTerms} = this.props;
+  //   if (prevProps.searchTerms !== searchTerms) {
+  //     this.setState({searchTerms});
+  //   }
+  // }
 
   loadRootNodes() {
     const {node: {domainId, id, isStandard, type}, wizard: {fullTree}} = this.props;
@@ -508,14 +507,14 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   render() {
-    const {back, node, wizard: {fullTree}} = this.props;
-    const {children, ingredients, loading, searchTerms} = this.state;
+    const {back, node, searchTerms, setSearchTerms, wizard: {fullTree}} = this.props;
+    const {children, ingredients, loading} = this.state;
     return <React.Fragment>
       {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
         <SearchBar node={node}
           searchTerms={searchTerms}
           setIngredients={(i) => this.setState({ingredients: i})}
-          setInput={(v) => this.setState({searchTerms: v})}/>
+          setInput={(v) => setSearchTerms(v)}/>
       </div>}
       <div style={this.showHeader
         ? {...styles.treeContainer, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}
@@ -549,9 +548,10 @@ export class CriteriaTreeComponent extends ReactWrapperBase {
   @Input('node') node: Props['node'];
   @Input('searchTerms') searchTerms: Props['searchTerms'];
   @Input('selections') selections: Props['selections'];
+  @Input('setSearchTerms') setSearchTerms: Props['setSearchTerms'];
   @Input('wizard') wizard: Props['wizard'];
 
   constructor() {
-    super(CriteriaTree, ['back', 'node', 'searchTerms', 'selections', 'wizard']);
+    super(CriteriaTree, ['back', 'node', 'searchTerms', 'selections', 'setSearchTerms', 'wizard']);
   }
 }
