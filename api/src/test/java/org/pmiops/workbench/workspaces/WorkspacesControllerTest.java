@@ -772,7 +772,7 @@ public class WorkspacesControllerTest {
   public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    
+
     doReturn(false)
         .when(freeTierBillingService)
         .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
