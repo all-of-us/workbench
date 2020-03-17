@@ -430,7 +430,8 @@ export const AttributesPage = withCurrentWorkspace() (
             modifiers: []
           }],
           temporal: false
-        }]
+        }],
+        dataFilters: []
       };
       cohortBuilderApi().countParticipants(cdrVersionId, request).then(response => {
         this.setState({count: response, calculating: false});

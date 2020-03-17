@@ -6,7 +6,10 @@
     "race": "Caucasian",
     "dob": "1980-08-01",
     "age_at_consent": 30,
-    "age_at_cdr": 30
+    "age_at_cdr": 30,
+    "has_ehr_data": 1,
+    "has_physical_measurement_data": 1,
+    "has_ppi_survey_data": 1
   },
   {
     "person_id": 2,
@@ -33,6 +36,7 @@
     "race": "Asian",
     "dob": "1970-02-17",
     "age_at_consent": 55,
-    "age_at_cdr": 55
+    "age_at_cdr": 55,
+    "has_ehr_data": 1
   }
 ]

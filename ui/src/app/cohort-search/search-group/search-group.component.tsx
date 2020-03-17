@@ -274,6 +274,7 @@ export const SearchGroup = withCurrentWorkspace()(
       const request = {
         includes: [],
         excludes: [],
+        dataFilters: [],
         [role]: [mappedGroup]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request, {signal: this.aborter.signal})

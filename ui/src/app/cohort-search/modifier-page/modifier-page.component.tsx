@@ -399,7 +399,8 @@ export const ListModifierPage = withCurrentWorkspace()(
               searchParameters: searchParameters.map(mapParameter),
               modifiers: modifiers
             }]
-          }]
+          }],
+          dataFilters: []
         };
         cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
           this.setState({count: response, loading: false});
