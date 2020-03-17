@@ -1,24 +1,10 @@
 import * as React from 'react';
 
-import {Button} from 'app/components/buttons';
-import {FlexColumn, FlexRow} from 'app/components/flex';
-import {FormSection} from 'app/components/forms';
-import {CheckBox, RadioButton} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
-import {TextColumn} from 'app/components/text-column';
-import {AouTitle} from 'app/components/text-wrappers';
-import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {DropDownSection, Section, TextInputWithLabel} from 'app/pages/login/account-creation/common';
+import {DemographicSurvey} from 'app/pages/profile/demographics-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import {toggleIncludes} from 'app/utils';
-import {convertAPIError, reportError} from 'app/utils/errors';
-import {serverConfigStore} from 'app/utils/navigation';
+
 import {environment} from 'environments/environment';
-import {ErrorResponse, Profile} from 'generated/fetch';
-import ReCAPTCHA from 'react-google-recaptcha';
+import {Profile} from 'generated/fetch';
 
 
 export interface AccountCreationSurveyProps {

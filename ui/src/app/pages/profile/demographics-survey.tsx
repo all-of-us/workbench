@@ -1,22 +1,23 @@
+import {Button} from 'app/components/buttons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {FormSection} from 'app/components/forms';
+import {CheckBox, RadioButton} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {TextColumn} from 'app/components/text-column';
+import {AouTitle} from 'app/components/text-wrappers';
+import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {DropDownSection, Section, TextInputWithLabel} from 'app/pages/login/account-creation/common';
+import colors from 'app/styles/colors';
+import {reactStyles, toggleIncludes} from 'app/utils';
+import {serverConfigStore} from 'app/utils/navigation';
+
+import {environment} from 'environments/environment';
+import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import * as validate from 'validate.js';
-import {environment} from '../../../environments/environment';
-import {Profile} from '../../../generated/fetch';
-import {Button} from '../../components/buttons';
-import {FlexColumn, FlexRow} from '../../components/flex';
-import {FormSection} from '../../components/forms';
-import {CheckBox, RadioButton} from '../../components/inputs';
-import {TooltipTrigger} from '../../components/popups';
-import {SpinnerOverlay} from '../../components/spinners';
-import {TextColumn} from '../../components/text-column';
-import {AouTitle} from '../../components/text-wrappers';
-import colors from '../../styles/colors';
-import {reactStyles, toggleIncludes} from '../../utils';
-import {serverConfigStore} from '../../utils/navigation';
-import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {DropDownSection, Section, TextInputWithLabel} from "../login/account-creation/common";
 
 const styles = reactStyles({
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
@@ -234,7 +235,12 @@ or another sexual and/or gender minority?'>
             {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
           </ul>
         </React.Fragment>}>
-          <Button type='primary' disabled={loading || errors && errors.length > 0 || (!environment.enableCaptcha && !this.props.enableCaptcha && !captcha)}
+          <Button type='primary'
+                  disabled={
+                    loading
+                    || (errors && errors.length > 0)
+                    || (!environment.enableCaptcha && !this.props.enableCaptcha && !captcha)
+                  }
                   onClick={async() => {
                     this.setState({loading: true});
                     try {

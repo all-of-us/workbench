@@ -393,11 +393,11 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             <div style={styles.title}>Optional Demographics Survey</div>
             <Button
                 type={'link'}
-                onClick={async () => {
+                onClick={async() => {
                   if (!profileEdits.demographicSurvey) {
-                    await this.setState(fp.set(['profileEdits', 'demographicSurvey'], {}))
+                    await this.setState(fp.set(['profileEdits', 'demographicSurvey'], {}));
                   }
-                  this.setState({updatingSurvey: true})
+                  this.setState({updatingSurvey: true});
                 }}
             >Update Survey</Button>
           </div>
@@ -474,7 +474,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             onCancelClick={() => {
               this.setState({updatingSurvey: false});
             }}
-            onSubmit={async (profileWithUpdatedDemographicSurvey, captchaToken) => {
+            onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
               this.setState({updatingSurvey: false});
               this.saveDemographicSurvey(profileWithUpdatedDemographicSurvey);
             }}
