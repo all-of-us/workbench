@@ -350,7 +350,7 @@ public class WorkspacesControllerTest {
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Autowired Zendesk mockZendesk;
-  @Autowired FreeTierBillingService freeTierBillingService;
+  @SpyBean @Autowired FreeTierBillingService freeTierBillingService;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   private DbCdrVersion cdrVersion;
@@ -772,7 +772,10 @@ public class WorkspacesControllerTest {
   public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-
+    
+    doReturn(false)
+        .when(freeTierBillingService)
+        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
     // Creating the workspace with a user provided billing account
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -817,15 +820,13 @@ public class WorkspacesControllerTest {
             workspace.getId(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
-    workspaceDao.save(dbWorkspace);
-
     doReturn(true)
         .when(freeTierBillingService)
         .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    workspace.setEtag("\"2\"");
+    workspace.setEtag("\"1\"");
     request.setWorkspace(workspace);
     Workspace response =
         workspacesController
@@ -2999,7 +3000,8 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
-    WorkspaceBillingUsageResponse workspaceBillingUsageResponse = workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
+    WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
+        workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(0.0d);
   }
 
@@ -3008,10 +3010,15 @@ public class WorkspacesControllerTest {
     Double cost = new Double(150.50d);
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-    DbWorkspace dbWorkspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(ws.getNamespace(), ws.getId(), DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    DbWorkspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            ws.getNamespace(),
+            ws.getId(),
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     workspaceFreeTierUsageDao.updateCost(dbWorkspace, cost);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
-    WorkspaceBillingUsageResponse workspaceBillingUsageResponse = workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
+    WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
+        workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(cost);
   }
 
