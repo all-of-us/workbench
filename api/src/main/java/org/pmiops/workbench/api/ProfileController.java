@@ -384,7 +384,8 @@ public class ProfileController implements ProfileApiDelegate {
             profile.getProfessionalUrl(),
             profile.getDegrees(),
             FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
-            demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(profile.getDemographicSurvey()),
+            demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
+                profile.getDemographicSurvey()),
             profile.getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
                 .collect(Collectors.toList()),
@@ -604,7 +605,9 @@ public class ProfileController implements ProfileApiDelegate {
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
 
-    DbDemographicSurvey dbDemographicSurvey = demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(updatedProfile.getDemographicSurvey());
+    DbDemographicSurvey dbDemographicSurvey =
+        demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
+            updatedProfile.getDemographicSurvey());
 
     if (user.getDemographicSurveyCompletionTime() == null && dbDemographicSurvey != null) {
       user.setDemographicSurveyCompletionTime(now);
