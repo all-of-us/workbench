@@ -1,12 +1,12 @@
 import {
   AccessBypassRequest,
-  AccessModule,
+  AccessModule, CreateAccountRequest,
   DataAccessLevel,
   InstitutionalRole,
   InvitationVerificationRequest,
   NihToken,
   Profile,
-  ProfileApi
+  ProfileApi,
 } from 'generated/fetch';
 
 import {EmptyResponse} from 'generated/fetch/api';
@@ -59,6 +59,10 @@ export class ProfileApiStub extends ProfileApi {
       const err = new Error('Invalid invitation code');
       return Promise.reject(response => { throw err; });
     }
+  }
+
+  public createAccount(request?: CreateAccountRequest, options?: any): Promise<Profile> {
+    return Promise.resolve(this.profile);
   }
 
   public updateNihToken(token?: NihToken, options?: any) {
