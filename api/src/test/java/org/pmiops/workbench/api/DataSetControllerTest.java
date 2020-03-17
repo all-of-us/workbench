@@ -234,6 +234,8 @@ public class DataSetControllerTest {
 
   @Autowired FireCloudService fireCloudService;
 
+  @Autowired FreeTierBillingService freeTierBillingService;
+
   @Autowired CohortQueryBuilder cohortQueryBuilder;
 
   @Autowired TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
@@ -295,6 +297,7 @@ public class DataSetControllerTest {
     DataSetService.class,
     DataSetMapper.class,
     FireCloudService.class,
+    FreeTierBillingService.class,
     DirectoryService.class,
     NotebooksService.class,
     CohortQueryBuilder.class,
@@ -388,6 +391,7 @@ public class DataSetControllerTest {
             cloudStorageService,
             cloudBillingProvider,
             mockZendeskProvider,
+            freeTierBillingService,
             CLOCK,
             notebooksService,
             userService,

@@ -815,6 +815,21 @@ paths:
           description: Workspace deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+      - workspaces
+      description: Gets the free tier billing spend for a specified workspace
+      operationId: getBillingUsage
+      responses:
+        200:
+          description: The billing usage for a workspace
+          schema:
+            "$ref":
+              "#/definitions/WorkspaceBillingUsageResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/share":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3750,6 +3765,16 @@ definitions:
       published:
         type: boolean
         default: false
+  WorkspaceBillingUsageResponse:
+    type: object
+    required:
+    - cost
+    properties:
+      cost:
+        type: number
+        format: double
+        description: amount of free tier money spent on this workspace in USD
+
   UserRole:
     type: object
     required:

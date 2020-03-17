@@ -10,7 +10,7 @@ import {
   SpecificPopulationEnum,
   UserRole,
   Workspace,
-  WorkspaceAccessLevel,
+  WorkspaceAccessLevel, WorkspaceBillingUsageResponse,
   WorkspaceListResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
@@ -311,6 +311,12 @@ export class WorkspacesApiStub extends WorkspacesApi {
   updateRecentWorkspaces(workspaceNamespace: string, workspaceId: string, options?: any): Promise<RecentWorkspaceResponse> {
     return new Promise<RecentWorkspaceResponse>(resolve => {
       resolve(recentWorkspaceStubs);
+    });
+  }
+
+  getBillingUsage(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceBillingUsageResponse> {
+    return new Promise<WorkspaceBillingUsageResponse>(resolve => {
+      resolve({cost: 5.5});
     });
   }
 }

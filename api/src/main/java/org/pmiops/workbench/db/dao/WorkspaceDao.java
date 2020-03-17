@@ -24,9 +24,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
 
-  DbWorkspace findByWorkspaceNamespaceAndNameAndActiveStatus(
-      String workspaceNamespace, String name, short activeStatus);
-
   @Query("SELECT distinct w.workspaceNamespace, w from DbWorkspace w")
   Set<String> findAllWorkspaceNamespaces();
 
