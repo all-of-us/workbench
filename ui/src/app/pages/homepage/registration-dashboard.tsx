@@ -107,7 +107,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionPropsKey: 'eraCommonsLinked',
     title: 'Connect Your eRA Commons Account',
     description: 'Connect your account to the eRA Commons account. The application instructions will guide you through this.',
-    buttonText: 'Login',
+    buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
       return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
@@ -127,7 +127,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     },
     onClick: redirectToTraining
   }, {
-    key: 'dataUseAgreement',
+    key: 'dataUserCodeOfConduct',
     completionPropsKey: 'dataUseAgreementCompleted',
     title: 'Data User Code of Conduct',
     description: <span>Sign the data user code of conduct consenting to the <i>All of Us</i> data use policy.</span>,
