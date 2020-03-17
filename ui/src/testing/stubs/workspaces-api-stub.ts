@@ -316,7 +316,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   getBillingUsage(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceBillingUsageResponse> {
     return new Promise<WorkspaceBillingUsageResponse>(resolve => {
-      resolve({billingUsage: 5.5});
+      resolve({cost: 5.5});
     });
   }
 }

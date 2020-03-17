@@ -124,7 +124,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   async loadFreeTierUsage() {
     const freeTierUsage = await workspacesApi().getBillingUsage(
       this.state.workspace.namespace, this.state.workspace.id);
-    this.setState({workspaceFreeTierUsage: freeTierUsage.billingUsage});
+    this.setState({workspaceFreeTierUsage: freeTierUsage.cost});
   }
 
   async setVisits() {
@@ -261,7 +261,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
           </div>
           {workspace && WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
             && workspace.billingAccountType === BillingAccountType.FREETIER &&
-              <div style={{...styles.infoBox, height: '2.5rem'}} data-test-id='dataAccessLevel'>
+              <div style={{...styles.infoBox, height: '2.5rem'}}>
                 <div style={styles.infoBoxHeader}>Workspace Free Credit Usage</div>
                 <div style={{fontSize: '0.5rem'}}>{this.state.workspaceFreeTierUsage !== undefined ?
                   '$' + this.state.workspaceFreeTierUsage.toFixed(2) :

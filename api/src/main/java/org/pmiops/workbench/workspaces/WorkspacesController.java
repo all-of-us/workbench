@@ -660,7 +660,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     return ResponseEntity.ok(
         new WorkspaceBillingUsageResponse()
-            .billingUsage(
+            .cost(
                 freeTierBillingService.getWorkspaceFreeTierBillingUsage(
                     workspaceService.get(workspaceNamespace, workspaceId))));
   }

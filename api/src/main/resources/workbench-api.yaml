@@ -822,7 +822,7 @@ paths:
     get:
       tags:
       - workspaces
-      description: 'Gets the free tier billing spend for a specified workspace'
+      description: Gets the free tier billing spend for a specified workspace
       operationId: getBillingUsage
       responses:
         200:
@@ -3768,9 +3768,9 @@ definitions:
   WorkspaceBillingUsageResponse:
     type: object
     required:
-    - billingUsage
+    - cost
     properties:
-      billingUsage:
+      cost:
         type: number
         format: double
         description: amount of free tier money spent on this workspace in USD
