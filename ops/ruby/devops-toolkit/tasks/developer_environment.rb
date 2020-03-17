@@ -8,13 +8,25 @@ class DeveloperEnvironment
     # TODO(jaycarlton) make this configurable
     @input_file = options[:'input-tools-file'] || './tasks/input/aou-workbench-dev-tools.yaml'
     @output_file = options[:'output-file'] || 'dev-tools-list.yaml'
-    # Use strings as hash key
+    # Use strings as hash key so YAML translation doesn't have symbol keys
     @output = { 'tools' =>  []}
   end
 
   def list
     input_yaml = YAML.load(IO.read(@input_file))
     @logger.debug(input_yaml)
+
+    # Verify these are safe
+    all_commands = input_yaml['tools'].map do |t|
+      "#{t['tool']} #{t['flag'] || '-v'}"
+    end.join("\n")
+    puts("Based on input file #{@input_file}, script will run the following commands:\n" +
+             "#{all_commands}\nIs this safe? [y/N]")
+    reply = gets.chomp
+    unless reply.downcase == 'y'
+      puts "Not safe. Quitting."
+      return
+    end
     input_yaml['tools'].each do |tool|
       get_version_info(tool)
     end
