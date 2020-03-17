@@ -185,7 +185,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       this.setState({
         eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
         dataUseAgreementCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
-          (() => !!(getRegistrationTasksMap()['dataUseAgreement']
+          (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))() : true)
       });
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
