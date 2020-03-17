@@ -128,7 +128,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     onClick: redirectToTraining
   }, {
     key: 'dataUserCodeOfConduct',
-    completionPropsKey: 'dataUseAgreementCompleted',
+    completionPropsKey: 'dataUserCodeOfConductCompleted',
     title: 'Data User Code of Conduct',
     description: <span>Sign the data user code of conduct consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
@@ -156,7 +156,7 @@ export interface RegistrationDashboardProps {
   trainingCompleted: boolean;
   firstVisitTraining: boolean;
   twoFactorAuthCompleted: boolean;
-  dataUseAgreementCompleted: boolean;
+  dataUserCodeOfConductCompleted: boolean;
 }
 
 interface State {
