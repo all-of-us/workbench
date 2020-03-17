@@ -398,13 +398,13 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           </ProfileRegistrationStepStatus>}
 
           {enableDataUseAgreement && <ProfileRegistrationStepStatus
-            title='Data Use Agreement'
+            title='Data User Code Of Conduct'
             wasBypassed={!!profile.dataUseAgreementBypassTime}
             incompleteButtonText='Sign'
-            completedButtonText={getRegistrationTasksMap()['dataUseAgreement'].completedText}
-            completionTimestamp={getRegistrationTasksMap()['dataUseAgreement'].completionTimestamp(profile)}
-            isComplete={!!(getRegistrationTasksMap()['dataUseAgreement'].completionTimestamp(profile))}
-            completeStep={getRegistrationTasksMap()['dataUseAgreement'].onClick} >
+            completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
+            completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick} >
             {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
               <div> Agreement Renewal: </div>
               <div>
@@ -414,7 +414,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               </div>
             </React.Fragment>}
             <a
-              onClick={getRegistrationTasksMap()['dataUseAgreement'].onClick}>
+              onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
               View current agreement
             </a>
           </ProfileRegistrationStepStatus>}

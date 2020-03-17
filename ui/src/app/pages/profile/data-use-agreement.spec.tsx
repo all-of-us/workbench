@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {DataUseAgreement} from 'app/pages/profile/data-use-agreement';
+import {DataUseAgreement} from 'app/pages/profile/data-user-code-of-conduct';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {userProfileStore} from 'app/utils/navigation';
 import {Profile, ProfileApi} from 'generated/fetch';
