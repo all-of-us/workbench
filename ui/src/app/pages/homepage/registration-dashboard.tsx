@@ -130,7 +130,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'dataUseAgreement',
     completionPropsKey: 'dataUseAgreementCompleted',
     title: 'Data User Code of Conduct',
-    description: <span>Sign the data user code of conduct consenting to the <i> All of Us data </i> use policy.</span>,
+    description: <span>Sign the data user code of conduct consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',

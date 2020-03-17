@@ -6,7 +6,7 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
-import {DataUseAgreementComponent} from 'app/pages/profile/data-use-agreement';
+import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
@@ -72,8 +72,8 @@ const routes: Routes = [
         data: {title: 'Homepage'},
       }, {
         path: 'data-code-of-conduct',
-        component: DataUseAgreementComponent,
-        data: {title: 'Data Code of Conduct'}
+        component: DataUserCodeOfConduct,
+        data: {title: 'Data User Code of Conduct'}
       }, {
         path: 'library',
         component: WorkspaceLibraryComponent,

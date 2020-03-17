@@ -83,7 +83,7 @@ export const DataUseAgreement = withUserProfile()(
 @Component({
   template: '<div #root></div>'
 })
-export class DataUseAgreementComponent extends ReactWrapperBase {
+export class DataUserCodeOfConduct extends ReactWrapperBase {
   constructor() {
     super(DataUseAgreement, []);
   }
