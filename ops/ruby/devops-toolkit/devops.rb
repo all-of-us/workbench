@@ -26,6 +26,7 @@ def parse_options
     parser.on('-s', '--source-uri [SOURCE-URI]', String, 'URI or fully qualified name for source asset')
     parser.on('-u', '--source-env [SOURCE-ENV]', String, 'Short name for source Environment (lowercase), for example "staging".')
     parser.on('-d', '--dry-run', 'Execute a dry run of the task')
+    parser.on('-i', '--input-tools-file [INPUT-TOOLS-FILE]', String, 'Input YAML file for tools')
     parser.on('-o', '--output-file [OUTPUT-FILE]', String, 'Output file for task.')
   end.parse!({into: options})
 

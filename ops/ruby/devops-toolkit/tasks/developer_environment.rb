@@ -6,9 +6,10 @@ class DeveloperEnvironment
     @logger = options[:'logger']
     @logger.level = Logger::INFO
     # TODO(jaycarlton) make this configurable
-    @input_file = './tasks/input/aou-workbench-dev-tools.yaml'
+    @input_file = options[:'input-tools-file'] || './tasks/input/aou-workbench-dev-tools.yaml'
     @output_file = options[:'output-file'] || 'dev-tools-list.yaml'
-    @versions = []
+    # Use strings as hash key
+    @output = { 'tools' =>  []}
   end
 
   def list
@@ -18,13 +19,20 @@ class DeveloperEnvironment
       get_version_info(tool)
     end
 
-    yaml = YAML.dump(@versions)
+    @output['metadata'] = {}
+    metadata = @output['metadata']
+    metadata['hostname'] = get_stdout('hostname')
+    metadata['shell'] = get_stdout('echo $0')
+    metadata['timestamp'] = Time.now.getutc
+    metadata['os_name'] = get_stdout('uname -a')
+    metadata['username'] = get_stdout('whoami')
+
+    yaml = YAML.dump(@output)
     @logger.info(yaml)
 
     @logger.info("writing to output file: #{@output_file}")
     IO.write(@output_file, yaml)
-
-    @versions
+    @output
   end
 
   private
@@ -65,16 +73,26 @@ class DeveloperEnvironment
     result = { 'tool' => tool_cmd }
     full_cmd  = "#{tool_cmd} #{flag}"
     if use_stderr
-      _stdout, output, _status = Open3.capture3(full_cmd)
+      output = get_stderr(full_cmd)
     else
-      output, _status = Open3.capture2(full_cmd)
+      output = get_stdout(full_cmd)
     end
     result['version_string'] = output.strip
     result['version_number'] = extract_version_number(result['version_string'], number_regex)
 
     installation_dir  = `which #{tool_cmd}`.strip
     result['installed_at'] = installation_dir.empty? ? INSTALLATION_NOT_FOUND : installation_dir
-    @versions << result
+    @output['tools'] << result
+  end
+
+  def get_stderr(full_cmd)
+    _stdout, output, _status = Open3.capture3(full_cmd)
+    output
+  end
+
+  def get_stdout(full_cmd)
+    output, _status = Open3.capture2(full_cmd)
+    output.strip
   end
 
   def extract_version_number(version_string, number_regex)
