@@ -476,7 +476,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             }}
             onSubmit={async (profileWithUpdatedDemographicSurvey, captchaToken) => {
               this.setState({updatingSurvey: false});
-              await this.saveDemographicSurvey(profileWithUpdatedDemographicSurvey);
+              this.saveDemographicSurvey(profileWithUpdatedDemographicSurvey);
             }}
             enableCaptcha={false}
             enablePrevious={false}
