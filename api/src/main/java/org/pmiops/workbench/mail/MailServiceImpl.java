@@ -321,7 +321,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private String getRegistrationImage() {
-    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.png");
+    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.jpg");
   }
 
   // TODO choose desired date format
