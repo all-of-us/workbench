@@ -51,7 +51,8 @@ class LogsBasedMetrics
       else
         # TODO(jaycarlton): Set namespace equal to project short name in the filter
         @logger.info("Making copy of #{source_metric.name} in #{tgt_env.short_name} env")
-        copied_metric = logging_client.create_metric(source_metric.name, source_metric.filter, {description: source_metric.description})
+        filter = source_metric.filter.gsub(/(?<=resource.labels.namespace=\")(\w+)(?=\")/, tgt_env.short_name.downcase)
+        copied_metric = logging_client.create_metric(source_metric.name, filter, {description: source_metric.description})
         @logger.info("Created new metric in #{tgt_env.short_name}:\n#{metric_to_str(copied_metric)}")
       end
     end
