@@ -187,7 +187,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
   constructor(props: SignInProps) {
     super(props);
     this.state = {
-      currentStep: props.initialStep ? props.initialStep : SignInStep.INSTITUTIONAL_AFFILIATION,
+      currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
       invitationKey: null,
       termsOfServiceVersion: null,
       // This defines the profile state for a new user flow. This will get passed to each
