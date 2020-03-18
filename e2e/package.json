@@ -7,7 +7,7 @@
   "license": "BSD",
   "scripts": {
     "test": "cross-env WORKBENCH_ENV=dev INCOGNITO=true jest --detectOpenHandles",
-    "test:headful": "cross-env WORKBENCH_ENV=dev HEADLESS=false INCOGNITO=true jest --detectOpenHandles --runInBand",
+    "test:debug": "cross-env WORKBENCH_ENV=dev HEADLESS=false INCOGNITO=true jest --detectOpenHandles --runInBand",
     "test-local": "cross-env WORKBENCH_ENV=local jest",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn run lint --fix",

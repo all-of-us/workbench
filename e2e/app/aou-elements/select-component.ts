@@ -66,7 +66,7 @@ export default class SelectComponent {
 
   private dropdownXpath(): string {
     if (this.label === undefined) {
-      return '//*[contains(concat(" ", normalize-space(@class), " "), "p-dropdown")]';
+      return '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]';
     }
     return `//*[contains(normalize-space(text()), "${this.label}")]` +
        `/ancestor::node()[${this.nodeLevel}]//*[contains(concat(" ", normalize-space(@class), " ")," p-dropdown ")]`;
