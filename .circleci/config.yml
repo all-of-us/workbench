@@ -261,7 +261,7 @@ jobs:
   puppeteer-e2e-test:
     <<: *defaults
     docker:
-      - image: circleci/node:13.10.1-browsers # circleci/node:12.16.1
+      - image: circleci/node:13.10.1-browsers
         environment:
           NODE_ENV: development
     working_directory: ~/workbench
@@ -281,23 +281,12 @@ jobs:
           paths:
             - ~/.cache/yarn
           key: ui-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
-      #- run:
-          #working_directory: ~/workbench/e2e
-          #name: Install headless Chrome dependencies
-          #command: |
-            #sudo apt-get install -yq \
-              #gconf-service libasound2 libatk1.0-0 libatk-bridge2.0-0 libc6 libcairo2 libcups2 libdbus-1-3 \
-              #libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 \
-              #libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 \
-              #libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates \
-              #fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
       - run:
           name: Update environment variables
           command: |
             echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
             echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
             echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
-            echo 'export CONTACT_EMAIL=hermione.owner@quality.firecloud.org' >> $BASH_ENV
             source $BASH_ENV
       - run:
           name: Run e2e tests (Puppeteer and Jest)
@@ -404,7 +393,6 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
-      - puppeteer-e2e-test # to test Puppeteer tests start and run. To be removed before PR merge.
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
@@ -415,11 +403,11 @@ workflows:
           requires:
             - ui-build-test
       # Run Puppeteer tests after ui and api deployed to "test" on master merges.
-      #- puppeteer-e2e-test:
-          #<<: *filter_master
-          #requires:
-            #- api-deploy-to-test
-            #- ui-deploy-to-test
+      - puppeteer-e2e-test:
+          <<: *filter_master
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
   deploy-staging:
     jobs:
       - api-local-test:
