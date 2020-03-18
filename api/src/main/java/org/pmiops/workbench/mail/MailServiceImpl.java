@@ -88,7 +88,7 @@ public class MailServiceImpl implements MailService {
         new MandrillMessage()
             .to(Collections.singletonList(validatedRecipient(contactEmail)))
             .html(buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user)))
-            .subject("Your new All of Us Account")
+            .subject("Your new All of Us Researcher Workbench Account")
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
 
     sendWithRetries(msg, String.format("Welcome for %s", user.getName()));
@@ -176,6 +176,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.PASSWORD, password)
         .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().admin.loginUrl)
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.REGISTRATION_IMG, getRegistrationImage())
         .put(EmailSubstitutionField.BULLET_1, cloudStorageService.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageService.getImageUrl("bullet_2.png"))
         .build();
@@ -317,6 +318,10 @@ public class MailServiceImpl implements MailService {
 
   private String getAllOfUsLogo() {
     return cloudStorageServiceProvider.get().getImageUrl("all_of_us_logo.png");
+  }
+
+  private String getRegistrationImage() {
+    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.png");
   }
 
   // TODO choose desired date format
