@@ -45,8 +45,7 @@ public class AggregationUtils {
     boolean isGender = GenderOrSexType.GENDER.equals(genderOrSexType);
     boolean isAgeAtConsent = AgeType.AGE_AT_CONSENT.equals(ageType);
     // Added order to gender/sex and race buckets. Therefore the UI code can expect consistent
-    // results
-    // between BQ(sql ordered by gender/sex, race, age) and elastic
+    // results between BQ(sql ordered by gender/sex, race, age) and elastic
     TermsAggregationBuilder termsAggregationBuilder =
         AggregationBuilders.terms(GENDER_OR_SEX + ageRange)
             .field(isGender ? "gender_concept_name" : "sex_at_birth_concept_name")
