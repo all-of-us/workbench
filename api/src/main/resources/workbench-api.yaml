@@ -3189,6 +3189,21 @@ paths:
             and ethnicity.
           schema:
             "$ref": "#/definitions/ParticipantDemographics"
+  "/v1/cohortbuilder/{cdrVersionId}/dataFilters":
+    parameters:
+      - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns data filter options per cdr version
+
+'
+      operationId: findDataFilters
+      responses:
+        200:
+          description: A collection of data filter options
+          schema:
+            "$ref": "#/definitions/DataFiltersResponse"
 definitions:
   ArchivalStatus:
     type: string
@@ -3909,7 +3924,7 @@ definitions:
         type: string
       approved:
         type: boolean
-        default: 
+        default:
       ancestry:
         type: boolean
         default: false
@@ -6026,7 +6041,7 @@ definitions:
 
 '
         type: boolean
-        default: 
+        default:
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of
@@ -6527,7 +6542,7 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
-        default: 
+        default:
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer
@@ -6570,7 +6585,7 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
-        default: 
+        default:
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer
@@ -6906,6 +6921,32 @@ definitions:
         description: Reveals if this criteria is standard or source.
         type: boolean
         default: false
+  DataFiltersResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DataFilter"
+  DataFilter:
+    type: object
+    required:
+    - dataFilterId
+    - displayName
+    - name
+    properties:
+      dataFilterId:
+        description: unique id
+        type: integer
+        format: int64
+      displayName:
+        description: display name
+        type: string
+      name:
+        description: name
+        type: string
   CriteriaMenuOption:
     type: object
     required:
@@ -7100,10 +7141,10 @@ definitions:
       searchParameters:
       - value: E9293
         domainId: Condition
-        conceptId: 
+        conceptId:
       - value: E979-E979.9
-        domainId: 
-        conceptId: 
+        domainId:
+        conceptId:
       modifiers:
       - name: age_at_event
         operator: GTE >=
@@ -7213,7 +7254,7 @@ definitions:
       parentExample:
         value: E979-E979.9
         subtype: BP_EHR
-        domainId: 
+        domainId:
   Attribute:
     type: object
     required:

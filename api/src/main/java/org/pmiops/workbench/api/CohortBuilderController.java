@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.CriteriaMenuOptionsListResponse;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.DomainType;
@@ -306,6 +307,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     .sorted(Comparator.comparing(CriteriaMenuOption::getDomain))
                     .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<DataFiltersResponse> findDataFilters(Long cdrVersionId) {
+    return ResponseEntity.ok(
+        new DataFiltersResponse().items(cohortBuilderService.findDataFilters(cdrVersionId)));
   }
 
   @Override
