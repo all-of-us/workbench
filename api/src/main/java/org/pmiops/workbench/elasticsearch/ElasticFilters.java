@@ -49,6 +49,8 @@ public final class ElasticFilters {
           CriteriaType.GENDER.toString(), "gender_concept_id",
           CriteriaType.RACE.toString(), "race_concept_id",
           CriteriaType.ETHNICITY.toString(), "ethnicity_concept_id");
+  private static List<AttrName> NUMERIC_AGE_TYPES =
+      ImmutableList.of(AttrName.AGE_AT_CONSENT, AttrName.AGE_AT_CDR);
 
   private final CriteriaLookupUtil criteriaLookupUtil;
 
@@ -113,7 +115,7 @@ public final class ElasticFilters {
         }
       }
 
-      // TODO(freemabd): Handle Blood Pressure and Deceased
+      // TODO(freemabd): Handle Blood Pressure
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField =
             "events." + (param.getStandard() ? "concept_id" : "source_concept_id");
@@ -189,7 +191,8 @@ public final class ElasticFilters {
           throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
       }
       return rq;
-    } else if (AttrName.AGE.equals(attr.getName())) {
+    }
+    if (AttrName.AGE.equals(attr.getName())) {
       rq = QueryBuilders.rangeQuery("birth_datetime");
       // use the low end of the age range to calculate the high end(right) of the date range
       right = ElasticUtils.todayMinusYears(Integer.parseInt(attr.getOperands().get(0)));
@@ -203,14 +206,31 @@ public final class ElasticFilters {
       }
       switch (attr.getOperator()) {
         case BETWEEN:
-          rq.gt(left).lte(right).format("yyyy-MM-dd");
+          rq.gte(left).lte(right).format("yyyy-MM-dd");
           break;
         default:
           throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
       }
       return rq;
     }
-    throw new BadRequestException("attribute name is not an attr name type: " + attr.getName());
+    if (NUMERIC_AGE_TYPES.contains(attr.getName())) {
+      rq =
+          QueryBuilders.rangeQuery(
+              AttrName.AGE_AT_CONSENT.equals(attr.getName()) ? "age_at_consent" : "age_at_cdr");
+      left = Integer.parseInt(attr.getOperands().get(0));
+      if (attr.getOperands().size() > 1) {
+        right = Integer.parseInt(attr.getOperands().get(1));
+      }
+      switch (attr.getOperator()) {
+        case BETWEEN:
+          rq.gte(left).lte(right);
+          break;
+        default:
+          throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
+      }
+      return rq;
+    }
+    throw new BadRequestException("Attribute name is not an attr name type: " + attr.getName());
   }
 
   private static QueryBuilder dateModifierToQuery(Modifier mod) {

@@ -241,7 +241,9 @@ public class ElasticFiltersTest {
   private static final QueryBuilder nonNestedQuery(QueryBuilder... inners) {
     BoolQueryBuilder innerBuilder = QueryBuilders.boolQuery();
     for (QueryBuilder in : inners) {
-      if (in.toString().contains("is_deceased") && in.toString().contains("birth_datetime")) {
+      if (in.toString().contains("birth_datetime")
+          || in.toString().contains("age_at_consent")
+          || in.toString().contains("age_at_cdr")) {
         innerBuilder.should(in);
       } else {
         BoolQueryBuilder b = QueryBuilders.boolQuery().filter(in);
@@ -907,7 +909,7 @@ public class ElasticFiltersTest {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     Object left = now.minusYears(34).minusYears(1).toLocalDate();
     Object right = now.minusYears(20).toLocalDate();
-    SearchParameter ethParam =
+    SearchParameter ageParam =
         new SearchParameter()
             .domain(DomainType.PERSON.toString())
             .type(CriteriaType.AGE.toString())
@@ -925,15 +927,47 @@ public class ElasticFiltersTest {
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
-                        .addItemsItem(new SearchGroupItem().addSearchParametersItem(ethParam))));
+                        .addItemsItem(new SearchGroupItem().addSearchParametersItem(ageParam))));
     BoolQueryBuilder ageBuilder =
         QueryBuilders.boolQuery()
             .filter(QueryBuilders.termQuery("is_deceased", false))
             .filter(
                 QueryBuilders.rangeQuery("birth_datetime")
-                    .gt(left)
+                    .gte(left)
                     .lte(right)
                     .format("yyyy-MM-dd"));
+    assertThat(resp).isEqualTo(nonNestedQuery(ageBuilder));
+  }
+
+  @Test
+  public void testAgeAtConsentQuery() {
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    Object left = 20;
+    Object right = 34;
+    SearchParameter ageAtConsentParam =
+        new SearchParameter()
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.AGE.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true)
+            .addAttributesItem(
+                new Attribute()
+                    .name(AttrName.AGE_AT_CONSENT)
+                    .operator(Operator.BETWEEN)
+                    .operands(ImmutableList.of("20", "34")));
+    QueryBuilder resp =
+        ElasticFilters.fromCohortSearch(
+            cbCriteriaDao,
+            new SearchRequest()
+                .addIncludesItem(
+                    new SearchGroup()
+                        .addItemsItem(
+                            new SearchGroupItem().addSearchParametersItem(ageAtConsentParam))));
+    BoolQueryBuilder ageBuilder =
+        QueryBuilders.boolQuery()
+            .filter(QueryBuilders.termQuery("is_deceased", false))
+            .filter(QueryBuilders.rangeQuery("age_at_consent").gte(left).lte(right));
     assertThat(resp).isEqualTo(nonNestedQuery(ageBuilder));
   }
 
@@ -979,7 +1013,7 @@ public class ElasticFiltersTest {
             .filter(QueryBuilders.termQuery("is_deceased", false))
             .filter(
                 QueryBuilders.rangeQuery("birth_datetime")
-                    .gt(left)
+                    .gte(left)
                     .lte(right)
                     .format("yyyy-MM-dd"));
     assertThat(resp)

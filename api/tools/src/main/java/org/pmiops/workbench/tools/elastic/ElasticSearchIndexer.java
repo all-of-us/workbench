@@ -306,9 +306,11 @@ public final class ElasticSearchIndexer {
   }
 
   private String getPersonBigQuerySQL(String bqDataset, int inverseProb) throws IOException {
+    // Synth dataset doesn't contain sex_at_birth, so we use gender as a fix
+    String resourceName =
+        bqDataset.contains("synthetic") ? "bigquery/es_synth_person.sql" : "bigquery/es_person.sql";
     String esPersonBQTemplate =
-        Resources.toString(
-            Resources.getResource("bigquery/es_person.sql"), Charset.defaultCharset());
+        Resources.toString(Resources.getResource(resourceName), Charset.defaultCharset());
     return esPersonBQTemplate
         .replaceAll("\\{BQ_DATASET\\}", bqDataset)
         .replaceAll("\\{PERSON_ID_MOD\\}", Integer.toString(inverseProb));

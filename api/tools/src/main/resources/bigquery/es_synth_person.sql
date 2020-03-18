@@ -14,7 +14,7 @@ SELECT p.person_id                                             _id,
        case
            when ec.concept_name is null then 'Unknown'
            else ec.concept_name end as                         ethnicity_concept_name,
-       p.sex_at_birth_concept_id,
+       p.gender_concept_id          as                         sex_at_birth_concept_id,
        case
            when sc.concept_name is null then 'Unknown'
            else sc.concept_name end as                         sex_at_birth_concept_name,
@@ -191,7 +191,7 @@ FROM `{BQ_DATASET}.person` p
          LEFT JOIN
      `{BQ_DATASET}.concept` sc
      ON
-         p.sex_at_birth_concept_id = sc.concept_id
+         p.gender_concept_id = sc.concept_id
          LEFT JOIN
      `{BQ_DATASET}.death` death
      ON
