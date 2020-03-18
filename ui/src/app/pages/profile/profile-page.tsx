@@ -128,24 +128,15 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     }
   }
 
-  async saveProfile() {
+  async saveProfile(profile: Profile): Promise<Profile> {
     const {profileState: {reload}} = this.props;
 
-    this.setState({updating: true});
-
-    try {
-      await profileApi().updateProfile(this.state.currentProfile);
-      await reload();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      this.setState({updating: false});
+    // updating is only used to control spinner display. If the demographic survey modal
+    // is open (and, by extension, it is causing this save), a spinner is being displayed over
+    // that modal, so no need to show one here.
+    if (!this.state.showDemographicSurveyModal) {
+      this.setState({updating: true});
     }
-  }
-
-  async saveDemographicSurvey(profile: Profile): Promise<Profile> {
-    const {profileState: {reload}} = this.props;
-    this.setState({updating: true});
 
     try {
       await profileApi().updateProfile(profile);
@@ -382,7 +373,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 data-test-id='save profile'
                 type='purplePrimary'
                 style={{marginLeft: 40}}
-                onClick={() => this.saveProfile()}
+                onClick={() => this.saveProfile(currentProfile)}
                 disabled={!!errors || fp.isEqual(profile, currentProfile)}
               >
                 Save Profile
@@ -487,7 +478,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               this.setState({showDemographicSurveyModal: false});
             }}
             onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
-              const savedProfile = await this.saveDemographicSurvey(profileWithUpdatedDemographicSurvey);
+              const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
               this.setState({showDemographicSurveyModal: false});
               return savedProfile;
             }}

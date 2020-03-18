@@ -93,7 +93,7 @@ describe('ProfilePageComponent', () => {
 
     const errorModal = wrapper.find('Modal[data-test-id="update-profile-error"]');
     // Ensure the error modal contains explanatory intro text.
-    expect(errorModal.getDOMNode().textContent).toContain('An error occurred while creating your account');
+    expect(errorModal.getDOMNode().textContent).toContain('An error occurred while updating your profile');
     // Ensure the error modal contains the server-side error message.
     expect(errorModal.getDOMNode().textContent).toContain('Could not create account: invalid institutional affiliation');
   });
