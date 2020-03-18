@@ -12,13 +12,15 @@ class DeveloperEnvironment
     @output = { 'tools' =>  []}
   end
 
+  DEFAULT_VERSION_FLAG = '-v'
+
   def list
     input_yaml = YAML.load(IO.read(@input_file))
     @logger.debug(input_yaml)
 
     # Verify these are safe
     all_commands = input_yaml['tools'].map do |t|
-      "#{t['tool']} #{t['flag'] || '-v'}"
+      "#{t['tool']} #{t['flag'] || DEFAULT_VERSION_FLAG}"
     end.join("\n")
     puts("Based on input file #{@input_file}, script will run the following commands:\n" +
              "#{all_commands}\nIs this safe? [y/N]")
@@ -71,7 +73,7 @@ class DeveloperEnvironment
       number_regex = Regexp.new(number_regex_string)
     end
     if tool['flag'].nil? || tool['flag'].empty?
-      flag = '-v'
+      flag = DEFAULT_VERSION_FLAG
     else
       flag = tool['flag']
     end
