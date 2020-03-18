@@ -35,4 +35,13 @@ public interface InstitutionService {
    */
   boolean validateAffiliation(
       @Nullable DbVerifiedInstitutionalAffiliation dbAffiliation, String contactEmail);
+
+  /**
+   * Checks whether a given email address is a valid member of an Institution.
+   *
+   * @param institution
+   * @param contactEmail
+   * @return boolean – is the contact email a valid member
+   */
+  boolean validateInstitutionalEmail(Institution institution, String contactEmail);
 }

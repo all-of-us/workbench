@@ -4,6 +4,8 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.CheckEmailResponse;
+import org.pmiops.workbench.model.CheckInstitutionResponse;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
 import org.pmiops.workbench.model.GetPublicInstitutionDetailsResponse;
 import org.pmiops.workbench.model.Institution;
@@ -56,14 +58,33 @@ public class InstitutionController implements InstitutionApiDelegate {
     return ResponseEntity.ok(response);
   }
 
-  // note: this endpoint is publicly accessible because it is needed for account creation
-
+  /**
+   * This API is publicly-accessible since it is called during account creation.
+   * @return
+   */
   @Override
   public ResponseEntity<GetPublicInstitutionDetailsResponse> getPublicInstitutionDetails() {
     final GetPublicInstitutionDetailsResponse response =
         new GetPublicInstitutionDetailsResponse()
             .institutions(institutionService.getPublicInstitutionDetails());
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * This API is publicly-accessible since it is called during account creation.
+   * @return
+   */
+  public ResponseEntity<CheckEmailResponse> checkEmail(String email, String institutionShortName) {
+    final Institution institution =
+        institutionService
+            .getInstitution(institutionShortName)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Could not find Institution '%s'", institutionShortName)));
+    return ResponseEntity.ok(
+        new CheckEmailResponse()
+            .isValidMember(institutionService.validateInstitutionalEmail(institution, email)));
   }
 
   @Override

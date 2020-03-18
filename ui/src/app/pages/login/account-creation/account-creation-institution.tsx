@@ -5,7 +5,7 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {Error as ErrorDiv} from 'app/components/inputs';
+import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
@@ -13,13 +13,15 @@ import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from '
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
-import {reportError} from 'app/utils/errors';
+import {isAbortError, reportError} from 'app/utils/errors';
 import {
+  CheckEmailResponse,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {ValidationIcon} from 'app/components/icons';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -43,21 +45,25 @@ export interface Props {
 
 interface State {
   profile: Profile;
-  emailFailedValidation: boolean;
   loadingInstitutions: boolean;
   institutions: Array<PublicInstitutionDetails>;
-  dataLoadError: boolean;
+  institutionLoadError: boolean;
+  checkEmailResponse?: CheckEmailResponse;
+  checkEmailError: boolean;
 }
 
 export class AccountCreationInstitution extends React.Component<Props, State> {
+
+  private aborter = new AbortController();
+
   constructor(props: Props) {
     super(props);
     this.state = {
       profile: props.profile,
-      emailFailedValidation: false,
-      institutions: [],
       loadingInstitutions: true,
-      dataLoadError: false,
+      institutions: [],
+      institutionLoadError: false,
+      checkEmailError: false,
     };
   }
 
@@ -71,45 +77,79 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     } catch (e) {
       this.setState({
         loadingInstitutions: false,
-        dataLoadError: true
+        institutionLoadError: true
       });
       reportError(e);
     }
   }
 
-  validateContactEmailInline() {
-    const {profile: { contactEmail } } = this.state;
+  componentWillUnmount(): void {
+    this.aborter.abort();
+  }
 
-    if (isBlank(contactEmail)) {
-      // Allow a blank email to pass inline validation: it will still block overall form
-      // submission via the validate() config below.
-      this.setState({emailFailedValidation: false});
-      return;
-    }
+  onEmailBlur() {
+    this.checkEmail();
+  }
 
-    const result = validate.single(contactEmail, { email: true } );
-    if (result === undefined) {
-      this.setState({emailFailedValidation: false});
-    } else {
-      this.setState({emailFailedValidation: true});
+  /**
+   * Checks that the entered email address is a valid member of the chosen institution.
+   */
+  async checkEmail() {
+    // Cancel any outstanding API calls.
+    this.aborter.abort();
+
+    const {
+      profile: {
+        contactEmail,
+        verifiedInstitutionalAffiliation: {institutionShortName}
+      }
+    } = this.state;
+
+    try {
+      const result = await institutionApi().checkEmail(institutionShortName, contactEmail,
+        {signal: this.aborter.signal});
+      this.setState({checkEmailResponse: result});
+    } catch (e) {
+      if (isAbortError(e)) {
+        // Ignore abort errors.
+      } else {
+        this.setState({
+          checkEmailError: true
+        });
+      }
     }
   }
 
+  isEmailValid() {
+    const {
+      checkEmailResponse,
+      profile: {
+        contactEmail,
+        verifiedInstitutionalAffiliation: {institutionShortName}
+      }
+    } = this.state;
+
+    if (!institutionShortName || isBlank(contactEmail) || checkEmailResponse == null) {
+      return undefined;
+    }
+
+    return checkEmailResponse.isValidMember;
+  }
+
   updateContactEmail(contactEmail: string) {
-    this.setState({emailFailedValidation: false});
     this.setState(fp.set(['profile', 'contactEmail'], contactEmail));
   }
 
   // Visible for testing.
   public validate(): {[key: string]: Array<string>} {
     const validationCheck = {
-      'verifiedInstitutionalAffiliation.institutionShortName': {
+      'profile.verifiedInstitutionalAffiliation.institutionShortName': {
         presence: {
           allowEmpty: false,
           message: '^You must select an institution to continue',
         }
       },
-      contactEmail: {
+      'profile.contactEmail': {
         presence: {
           allowEmpty: false,
           message: '^Email address cannot be blank',
@@ -118,7 +158,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           message: '^Email address is invalid'
         }
       },
-      'verifiedInstitutionalAffiliation.institutionalRoleEnum': {
+      'profile.verifiedInstitutionalAffiliation.institutionalRoleEnum': {
         presence: {
           allowEmpty: false,
           message: '^Institutional role cannot be blank',
@@ -126,7 +166,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       },
     };
     if (this.state.profile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER) {
-      validationCheck['verifiedInstitutionalAffiliation.institutionalRoleOtherText'] = {
+      validationCheck['profile.verifiedInstitutionalAffiliation.institutionalRoleOtherText'] = {
         presence: {
           allowEmpty: false,
           message: '^Institutional role text cannot be blank',
@@ -134,7 +174,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       };
     }
 
-    return validate(this.state.profile, validationCheck);
+    return validate(this.state, validationCheck);
   }
 
   getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
@@ -211,7 +251,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                   this.updateAffiliationValue('institutionalRoleEnum', undefined);
                   this.updateAffiliationValue('institutionalRoleOtherText', undefined);
                 }}/>
-            {this.state.dataLoadError &&
+            {this.state.institutionLoadError &&
             <ErrorDiv data-test-id='data-load-error'>
               An error occurred loading the institution list. Please try again or contact
               <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
@@ -235,12 +275,17 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                     This will be the primary email contact for your new account.
                                   </div>
                                 </div>}
-                                invalid={this.state.emailFailedValidation}
-                                onBlur={() => this.validateContactEmailInline()}
-                                onChange={email => this.updateContactEmail(email)}/>
-            {this.state.emailFailedValidation &&
-              <ErrorDiv data-test-id='invalid-email-error'>
-                Error: email address is invalid
+                                invalid={!this.isEmailValid()}
+                                onBlur={() => this.onEmailBlur()}
+                                onChange={email => this.updateContactEmail(email)}>
+              <div style={{...inputStyles.iconArea}}>
+                <ValidationIcon validSuccess={this.isEmailValid()}/>
+              </div>
+            </TextInputWithLabel>
+            {this.state.checkEmailError &&
+              <ErrorDiv data-test-id='check-email-error'>
+                An error occurred checking institution membership of this email. Please try again or
+                contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
               </ErrorDiv>
             }
             <div style={{marginTop: '.5rem'}}>
