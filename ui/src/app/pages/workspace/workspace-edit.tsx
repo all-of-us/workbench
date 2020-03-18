@@ -21,21 +21,23 @@ import {
   ResearchPurposeItems,
   researchPurposeQuestions,
   SpecificPopulationItem,
-  SpecificPopulationItems, toolTipText, toolTipTextDataUseAgreement, toolTipTextDemographic,
+  SpecificPopulationItems,
+  toolTipText,
+  toolTipTextDataUseAgreement,
+  toolTipTextDemographic,
   toolTipTextStigmatization
 } from 'app/pages/workspace/workspace-edit-text';
 import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-summary';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {colorWithWhiteness} from 'app/styles/colors';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
+  reactStyles,
   ReactWrapperBase,
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
   withRouteConfigData
 } from 'app/utils';
-import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
@@ -50,7 +52,8 @@ import {
   DisseminateResearchEnum,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
-  Workspace, WorkspaceAccessLevel
+  Workspace,
+  WorkspaceAccessLevel
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
@@ -307,6 +310,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             reasonForAllOfUs: '',
           }
         };
+      }
+
+      if (!fp.includes(DisseminateResearchEnum.OTHER, workspace.researchPurpose.disseminateResearchFindingList)) {
+        workspace.researchPurpose.otherDisseminateResearchFindings = '';
+      }
+
+      if (!workspace.researchPurpose.population) {
+        workspace.researchPurpose.populationDetails = [];
       }
 
       // Replace potential nulls with empty string or empty array

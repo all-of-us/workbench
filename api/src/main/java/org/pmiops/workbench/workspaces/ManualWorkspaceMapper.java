@@ -26,6 +26,7 @@ import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.stereotype.Service;
 
 // We should migrate over to the Mapstruct supported WorkspaceMapper
@@ -33,9 +34,12 @@ import org.springframework.stereotype.Service;
 public class ManualWorkspaceMapper {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final WorkspaceMapper workspaceMapper;
 
-  public ManualWorkspaceMapper(Provider<WorkbenchConfig> workbenchConfigProvider) {
+  public ManualWorkspaceMapper(Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceMapper workspaceMapper) {
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceMapper = workspaceMapper;
   }
 
   public static WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
@@ -47,7 +51,7 @@ public class ManualWorkspaceMapper {
   }
 
   public Workspace toApiWorkspace(DbWorkspace workspace) {
-    ResearchPurpose researchPurpose = createResearchPurpose(workspace);
+    ResearchPurpose researchPurpose = workspaceMapper.workspaceToResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
     Workspace result =
@@ -79,7 +83,7 @@ public class ManualWorkspaceMapper {
   }
 
   public Workspace toApiWorkspace(DbWorkspace workspace, FirecloudWorkspace fcWorkspace) {
-    ResearchPurpose researchPurpose = createResearchPurpose(workspace);
+    ResearchPurpose researchPurpose = workspaceMapper.workspaceToResearchPurpose(workspace);
 
     Workspace result =
         new Workspace()
@@ -183,68 +187,6 @@ public class ManualWorkspaceMapper {
         Optional.ofNullable(purpose.getResearchOutcomeList())
             .map(researchOutcoming -> researchOutcoming.stream().collect(Collectors.toSet()))
             .orElse(new HashSet<ResearchOutcomeEnum>()));
-  }
-
-  private ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
-    ResearchPurpose researchPurpose =
-        new ResearchPurpose()
-            .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
-            .diseaseOfFocus(workspace.getDiseaseOfFocus())
-            .methodsDevelopment(workspace.getMethodsDevelopment())
-            .controlSet(workspace.getControlSet())
-            .ancestry(workspace.getAncestry())
-            .commercialPurpose(workspace.getCommercialPurpose())
-            .socialBehavioral(workspace.getSocialBehavioral())
-            .educational(workspace.getEducational())
-            .drugDevelopment(workspace.getDrugDevelopment())
-            .populationHealth(workspace.getPopulationHealth())
-            .otherPurpose(workspace.getOtherPurpose())
-            .otherPurposeDetails(workspace.getOtherPurposeDetails())
-            .population(workspace.getPopulation())
-            .ethics(workspace.getEthics())
-            .reasonForAllOfUs(workspace.getReasonForAllOfUs())
-            .intendedStudy(workspace.getIntendedStudy())
-            .scientificApproach(workspace.getScientificApproach())
-            .anticipatedFindings(workspace.getAnticipatedFindings())
-            .additionalNotes(workspace.getAdditionalNotes())
-            .reviewRequested(workspace.getReviewRequested())
-            .approved(workspace.getApproved())
-            .otherPopulationDetails(workspace.getOtherPopulationDetails())
-            .disseminateResearchFindingList(
-                Optional.ofNullable(workspace.getDisseminateResearchEnumSet())
-                    .map(
-                        disseminateResearchEnums ->
-                            disseminateResearchEnums.stream().collect(Collectors.toList()))
-                    .orElse(new ArrayList<DisseminateResearchEnum>()))
-            .researchOutcomeList(
-                Optional.ofNullable(workspace.getResearchOutcomeEnumSet())
-                    .map(
-                        researchOutcomeEnums ->
-                            researchOutcomeEnums.stream().collect(Collectors.toList()))
-                    .orElse(new ArrayList<ResearchOutcomeEnum>()))
-            .populationDetails(
-                workspace.getPopulationDetails().stream()
-                    .map(DbStorageEnums::specificPopulationFromStorage)
-                    .collect(Collectors.toList()));
-
-    if (workspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
-      researchPurpose.setOtherDisseminateResearchFindings(workspace.getDisseminateResearchOther());
-    }
-
-    if (workspace.getTimeRequested() != null) {
-      researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
-    }
-
-    // population field is a guard on (specific) population details
-    final List<SpecificPopulationEnum> specificPopulationDetails;
-    if (workspace.getPopulation()) {
-      specificPopulationDetails = new ArrayList<>(workspace.getSpecificPopulationsEnum());
-    } else {
-      specificPopulationDetails = new ArrayList<>();
-    }
-    researchPurpose.setPopulationDetails(specificPopulationDetails);
-
-    return researchPurpose;
   }
 
   public RecentWorkspace buildRecentWorkspace(

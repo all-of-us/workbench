@@ -6,9 +6,11 @@ import java.util.Set;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.CdrVersion;
+import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
@@ -21,13 +23,23 @@ public interface WorkspaceMapper {
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
-  @Mapping(target = "dataAccessLevel", source = "dbWorkspace.dataAccessLevelEnum")
+  @Mapping(target = "dataAccessLevel", source = "dbWorkspace.dataAccessLevelEnum") // we might be able to remove this?
   @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "id", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "fcWorkspace.createdBy")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
+
+  @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "id", source = "firecloudName")
+  @Mapping(target = "namespace", source = "workspaceNamespace")
+  @Mapping(target = "creator", source = "creator.username")
+  @Mapping(target = "cdrVersionId", source = "cdrVersion")
+  Workspace toApiWorkspace(DbWorkspace dbWorkspace);
+
+  //RecentWorkspace toApiRecentWorkspace(DbUserRecentWorkspace dbUserRecentWorkspace);
 
   // This method is simply merging the research purpose, which covers only a subset of the fields
   // in the DbWorkspace source.
