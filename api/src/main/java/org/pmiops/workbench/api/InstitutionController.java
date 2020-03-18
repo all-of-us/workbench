@@ -5,7 +5,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CheckEmailResponse;
-import org.pmiops.workbench.model.CheckInstitutionResponse;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
 import org.pmiops.workbench.model.GetPublicInstitutionDetailsResponse;
 import org.pmiops.workbench.model.Institution;
@@ -60,6 +59,7 @@ public class InstitutionController implements InstitutionApiDelegate {
 
   /**
    * This API is publicly-accessible since it is called during account creation.
+   *
    * @return
    */
   @Override
@@ -72,16 +72,17 @@ public class InstitutionController implements InstitutionApiDelegate {
 
   /**
    * This API is publicly-accessible since it is called during account creation.
+   *
    * @return
    */
-  public ResponseEntity<CheckEmailResponse> checkEmail(String email, String institutionShortName) {
+  public ResponseEntity<CheckEmailResponse> checkEmail(final String shortName, final String email) {
     final Institution institution =
         institutionService
-            .getInstitution(institutionShortName)
+            .getInstitution(shortName)
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format("Could not find Institution '%s'", institutionShortName)));
+                        String.format("Could not find Institution '%s'", shortName)));
     return ResponseEntity.ok(
         new CheckEmailResponse()
             .isValidMember(institutionService.validateInstitutionalEmail(institution, email)));

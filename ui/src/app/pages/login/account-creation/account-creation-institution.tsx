@@ -5,6 +5,7 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
+import {ValidationIcon} from 'app/components/icons';
 import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -21,7 +22,6 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {ValidationIcon} from 'app/components/icons';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -35,6 +35,27 @@ const styles = reactStyles({
   },
 });
 
+/**
+ * Create a custom validate.js validator to validate against a CheckEmailResponse API response
+ * object. This validator should be enabled when the state object has a non-empty email and
+ * institute. It requires that the CheckEmailResponse has returned and indicates that the
+ * entered email address is a valid member of the institution.
+ *
+ * @param value
+ * @param options
+ * @param key
+ * @param attributes
+ */
+validate.validators.checkEmailResponse = (value: CheckEmailResponse, options, key, attributes) => {
+  if (value == null) {
+    return '^Institutional membership check has not completed';
+  }
+  if (value && value.isValidMember) {
+    return null;
+  } else {
+    return '^Email address is not a member of the selected institution';
+  }
+};
 
 export interface Props {
   profile: Profile;
@@ -54,7 +75,7 @@ interface State {
 
 export class AccountCreationInstitution extends React.Component<Props, State> {
 
-  private aborter = new AbortController();
+  private aborter: AbortController;
 
   constructor(props: Props) {
     super(props);
@@ -84,7 +105,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
   }
 
   componentWillUnmount(): void {
-    this.aborter.abort();
+    if (this.aborter) {
+      this.aborter.abort();
+    }
   }
 
   onEmailBlur() {
@@ -95,15 +118,24 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
    * Checks that the entered email address is a valid member of the chosen institution.
    */
   async checkEmail() {
-    // Cancel any outstanding API calls.
-    this.aborter.abort();
-
     const {
       profile: {
         contactEmail,
         verifiedInstitutionalAffiliation: {institutionShortName}
       }
     } = this.state;
+
+    // Cancel any outstanding API calls.
+    if (this.aborter) {
+      this.aborter.abort();
+    }
+    this.aborter = new AbortController();
+    this.setState({checkEmailResponse: null});
+
+    // Early-exit with no result if either input is blank.
+    if (!institutionShortName || isBlank(contactEmail)) {
+      return;
+    }
 
     try {
       const result = await institutionApi().checkEmail(institutionShortName, contactEmail,
@@ -165,6 +197,13 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
         }
       },
     };
+    if (!isBlank(this.state.profile.verifiedInstitutionalAffiliation.institutionShortName) &&
+        !isBlank(this.state.profile.contactEmail)) {
+      validationCheck['checkEmailResponse'] = {
+        checkEmailResponse: {}
+      };
+    }
+
     if (this.state.profile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER) {
       validationCheck['profile.verifiedInstitutionalAffiliation.institutionalRoleOtherText'] = {
         presence: {
@@ -278,9 +317,13 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                 invalid={!this.isEmailValid()}
                                 onBlur={() => this.onEmailBlur()}
                                 onChange={email => this.updateContactEmail(email)}>
-              <div style={{...inputStyles.iconArea}}>
-                <ValidationIcon validSuccess={this.isEmailValid()}/>
-              </div>
+              <TooltipTrigger content={<div data-test-id='email-invalid-tooltip'>
+                Email address is not a valid member of the selected institution.
+              </div>} disabled={this.isEmailValid()}>
+                <div style={{...inputStyles.iconArea}}>
+                    <ValidationIcon validSuccess={this.isEmailValid()}/>
+                </div>
+              </TooltipTrigger>
             </TextInputWithLabel>
             {this.state.checkEmailError &&
               <ErrorDiv data-test-id='check-email-error'>

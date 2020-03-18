@@ -2408,7 +2408,7 @@ paths:
           description: The updated Institution.
           schema:
             "$ref": "#/definitions/Institution"
-  "/v1/institutions/{shortName}/checkEmail/{email}":
+  "/v1/institutions/{shortName}/checkEmail/{email}/":
     parameters:
     - in: path
       name: shortName

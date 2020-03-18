@@ -59,6 +59,9 @@ export const styles = {
     marginLeft: '-30px',
     minWidth: '30px',
     minHeight: '28px',
+    // Without explicit vertical align, this div is top-aligned when empty, which can cause some
+    // excess space above the input element and layout jitter when an icon becomes shown.
+    verticalAlign: 'middle',
   }
 };
 

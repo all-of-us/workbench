@@ -26,6 +26,10 @@ function component(): ReactWrapper {
   return mount(<AccountCreationInstitution {...props}/>);
 }
 
+function getInstance(wrapper: AnyWrapper): AccountCreationInstitution {
+  return wrapper.find(AccountCreationInstitution).instance() as AccountCreationInstitution;
+}
+
 function getInstitutionDropdown(wrapper: AnyWrapper): Dropdown {
   return wrapper.find('Dropdown[data-test-id="institution-dropdown"]').instance() as Dropdown;
 }
@@ -115,16 +119,35 @@ it('should reset role value & options when institution is selected', async() => 
 });
 
 
-it('should validate form', async() => {
+it('should show validation errors in an empty form', async() => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
-  const reactComponent = wrapper.find(AccountCreationInstitution).instance() as AccountCreationInstitution;
-  const errors = reactComponent.validate();
+  const errors = getInstance(wrapper).validate();
+  expect(errors['profile.verifiedInstitutionalAffiliation.institutionShortName'].length).toBeGreaterThan(0);
+  expect(errors['profile.verifiedInstitutionalAffiliation.institutionalRoleEnum'].length).toBeGreaterThan(0);
+  expect(errors['profile.contactEmail'].length).toBeGreaterThan(0);
+});
 
-  expect(errors['verifiedInstitutionalAffiliation.institutionShortName'].length).toBeGreaterThan(0);
-  expect(errors['verifiedInstitutionalAffiliation.institutionalRoleEnum'].length).toBeGreaterThan(0);
-  expect(errors['contactEmail'].length).toBeGreaterThan(0);
+it('should validate email affiliation when inst and email are specified', async() => {
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  // Choose 'Broad' and enter an email address.
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Broad'});
+  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@asdf.com'}});
+
+  // Email address is entered, but the input hasn't been blurred. The form should know that a
+  // response is required, but the API request hasn't been sent and returned yet.
+  expect(getInstance(wrapper).validate()['checkEmailResponse'])
+    .toContain('Institutional membership check has not completed');
+
+  // Once we blur the input, the API request is sent. Since asdf.com is not a member, it will
+  // block form submission.
+  getEmailInput(wrapper).simulate('blur');
+  await waitOneTickAndUpdate(wrapper);
+  expect(getInstance(wrapper).validate()['checkEmailResponse'])
+    .toContain('Email address is not a member of the selected institution');
 });
 
 it('should call callback with correct form data', async() => {
@@ -132,20 +155,18 @@ it('should call callback with correct form data', async() => {
   props.onComplete = (formProfile: Profile) => {
     profile = formProfile;
   };
-  // Fill in all fields with reasonable data.
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
+  // Fill in all fields with reasonable data.
   getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@vumc.org'}});
+  getEmailInput(wrapper).simulate('blur');
+  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.UNDERGRADUATE});
+  // Await one tick for the APi response to update state and allow form submission.
+  await waitOneTickAndUpdate(wrapper);
 
-  const emailField = getEmailInput(wrapper);
-  emailField.simulate('change', {target: {value: 'asdf@asdf.com'}});
-
-  const roleDropdown = getRoleDropdown(wrapper);
-  roleDropdown.props.onChange({originalEvent: undefined, value: InstitutionalRole.UNDERGRADUATE});
-
-  // Click the button.
   getSubmitButton(wrapper).simulate('click');
 
-  expect(profile).toBeDefined();
+  expect(profile).toBeTruthy();
 });

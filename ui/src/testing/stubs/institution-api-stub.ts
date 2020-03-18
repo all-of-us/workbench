@@ -1,4 +1,5 @@
 import {
+  CheckEmailResponse,
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
   Institution,
@@ -87,4 +88,22 @@ export class InstitutionApiStub extends InstitutionApi {
     });
   }
 
+  async checkEmail(shortName: string, email: string, options?: any): Promise<CheckEmailResponse> {
+    const domain = email.substring(email.lastIndexOf('@') + 1);
+
+    const institution = this.institutions.find(x => x.shortName === shortName);
+    if (!institution) {
+      throw new Response('No institution found', {status: 404});
+    }
+
+    const response: CheckEmailResponse = {
+      isValidMember: false
+    };
+    if (institution.emailAddresses && institution.emailAddresses.includes(email)) {
+      response.isValidMember = true;
+    } else if (institution.emailDomains && institution.emailDomains.includes(domain)) {
+      response.isValidMember = true;
+    }
+    return response;
+  }
 }
