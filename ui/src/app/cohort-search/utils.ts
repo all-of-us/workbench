@@ -1,8 +1,9 @@
 import {TitleCasePipe} from '@angular/common';
 import {
+  AgeType,
   CriteriaSubType,
   CriteriaType,
-  DomainType,
+  DomainType, GenderOrSexType,
   SearchGroup,
   SearchGroupItem,
   SearchParameter,
@@ -143,6 +144,26 @@ export function subTypeToTitle(subtype: string): string {
       break;
   }
   return subtype;
+}
+
+export function ageTypeToText(ageType: AgeType) {
+  switch (ageType) {
+    case AgeType.AGE:
+      return 'Current Age';
+    case AgeType.AGEATCDR:
+      return 'Age at CDR';
+    case AgeType.AGEATCONSENT:
+      return 'Age  at Consent';
+  }
+}
+
+export function genderOrSexTypeToText(genderOrSexType: GenderOrSexType) {
+  switch (genderOrSexType) {
+    case GenderOrSexType.GENDER:
+      return 'Gender';
+    case GenderOrSexType.SEXATBIRTH:
+      return 'Sex at Birth';
+  }
 }
 
 export function highlightMatches(

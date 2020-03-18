@@ -71,12 +71,14 @@ const styles = reactStyles({
     background: colors.white,
     marginBottom: 0,
     marginTop: 0,
+    padding: '0 0.4rem'
   },
   cardHeader: {
     color: colors.primary,
-    fontSize: '13px',
+    fontSize: '12px',
+    fontWeight: 600,
     borderBottom: 'none',
-    padding: '0.5rem 0.75rem',
+    padding: '0.5rem 0',
   },
   error: {
     background: colors.warning,
@@ -96,6 +98,25 @@ const styles = reactStyles({
     marginBottom: '0.25rem',
     padding: '3px 5px'
   },
+  menuButton: {
+    border: `1px solid ${colorWithWhiteness(colors.black, .8)}`,
+    borderRadius: '0.125rem',
+    color: colors.primary,
+    fontSize: '11px',
+    fontWeight: 100,
+    height: '1.25rem',
+    lineHeight: '0.75rem',
+    marginRight: '0.25rem',
+    padding: '0.25rem',
+    textAlign: 'left',
+    verticalAlign: 'middle',
+    width: '35%',
+  },
+  refreshButton: {
+    background: 'none',
+    border: `1px solid ${colors.accent}`,
+    color: colors.accent
+  }
 });
 
 interface Props {
@@ -107,12 +128,18 @@ interface Props {
 }
 
 interface State {
+  ageType: AgeType;
   apiCallCheck: number;
   apiError: boolean;
   chartData: any;
+  currentGraphOptions: {
+    ageType: AgeType,
+    genderOrSexType: GenderOrSexType
+  };
   deleting: boolean;
   description: string;
   existingCohorts: Array<string>;
+  genderOrSexType: GenderOrSexType;
   initializing: boolean;
   loading: boolean;
   name: string;
@@ -126,16 +153,21 @@ interface State {
 
 export const ListOverview = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
-    dropdown: any;
+    saveMenu: any;
+    genderOrSexMenu: any;
+    ageMenu: any;
     constructor(props: Props) {
       super(props);
       this.state = {
+        ageType: AgeType.AGE,
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
+        currentGraphOptions: {ageType: AgeType.AGE, genderOrSexType: GenderOrSexType.GENDER},
         deleting: false,
         description: undefined,
         existingCohorts: [],
+        genderOrSexType: GenderOrSexType.GENDER,
         initializing: true,
         loading: true,
         name: undefined,
@@ -162,22 +194,22 @@ export const ListOverview = withCurrentWorkspace()(
     getTotalCount() {
       try {
         const {searchRequest} = this.props;
+        const {ageType, genderOrSexType} = this.state;
         const localCheck = this.state.apiCallCheck + 1;
-        this.setState({apiCallCheck: localCheck});
+        this.setState({apiCallCheck: localCheck, currentGraphOptions: {ageType, genderOrSexType}});
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = mapRequest(searchRequest);
         if (request.includes.length > 0) {
-          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER],
-            AgeType[AgeType.AGE], request).then(response => {
-              if (localCheck === this.state.apiCallCheck) {
-                this.setState({
-                  chartData: response.items,
-                  total: response.items.reduce((sum, data) => sum + data.count, 0),
-                  loading: false,
-                  initializing: false
-                });
-              }
-            });
+          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request).then(response => {
+            if (localCheck === this.state.apiCallCheck) {
+              this.setState({
+                chartData: response.items,
+                total: response.items.reduce((sum, data) => sum + data.count, 0),
+                loading: false,
+                initializing: false
+              });
+            }
+          });
         } else {
           this.setState({chartData: [], total: 0, loading: false, initializing: false});
         }
@@ -308,25 +340,35 @@ export const ListOverview = withCurrentWorkspace()(
 
     render() {
       const {cohort} = this.props;
-      const {apiError, chartData, deleting, description, existingCohorts, loading, name, nameTouched, saveModalOpen, saveError,
-        saving, stackChart, total} = this.state;
+      const {ageType, apiError, chartData, currentGraphOptions, deleting, description, existingCohorts, genderOrSexType, loading,
+        name, nameTouched, saveModalOpen, saveError, saving, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
       const disableSave = loading || saving || this.definitionErrors || !total;
+      const disableRefresh = {ageType, genderOrSexType} === currentGraphOptions;
       const invalid = nameTouched && (!name || !name.trim());
       const nameConflict = !!name && existingCohorts.includes(name.trim());
       const saveDisabled = invalid || !name || nameConflict || saving;
       const showTotal = total !== undefined && total !== null;
-      const items = [
+      const saveItems = [
         {label: 'Save', command: () => this.saveCohort(), disabled: !this.props.cohortChanged},
         {label: 'Save as', command: () => this.openSaveModal()},
+      ];
+      const genderOrSexItems = [
+        {label: 'Gender', command: () => this.setState({genderOrSexType: GenderOrSexType.GENDER})},
+        {label: 'Sex at Birth', command: () => this.setState({genderOrSexType: GenderOrSexType.SEXATBIRTH})},
+      ];
+      const ageItems = [
+        {label: 'Current Age', command: () => this.setState({ageType: AgeType.AGE})},
+        {label: 'Age at Consent', command: () => this.setState({ageType: AgeType.AGEATCONSENT})},
+        {label: 'Age at CDR', command: () => this.setState({ageType: AgeType.AGEATCDR})},
       ];
       return <React.Fragment>
         <div>
           <div style={styles.overviewHeader}>
             <div style={{width: '100%'}}>
               {!!cohort.id ? <React.Fragment>
-                <Menu appendTo={document.body} model={items} popup={true} ref={el => this.dropdown = el} />
-                <Button type='primary' style={styles.saveButton} onClick={(event) => this.dropdown.toggle(event)} disabled={disableSave}>
+                <Menu appendTo={document.body} model={saveItems} popup={true} ref={el => this.saveMenu = el} />
+                <Button type='primary' style={styles.saveButton} onClick={(event) => this.saveMenu.toggle(event)} disabled={disableSave}>
                   Save Cohort <ClrIcon shape='caret down' />
                 </Button>
               </React.Fragment>
@@ -374,17 +416,27 @@ export const ListOverview = withCurrentWorkspace()(
             <div style={styles.cardContainer}>
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
+                  Results by
+                </div>
+                <div>
+                  <Menu appendTo={document.body} model={genderOrSexItems} popup={true} ref={el => this.genderOrSexMenu = el} />
+                  <button style={styles.menuButton} onClick={(event) => this.genderOrSexMenu.toggle(event)}>
+                    {genderOrSexType} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
+                  </button>
+                  <Menu appendTo={document.body} model={ageItems} popup={true} ref={el => this.ageMenu = el} />
+                  <button style={styles.menuButton} onClick={(event) => this.ageMenu.toggle(event)}>
+                    {ageType} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
+                  </button>
+                  <button style={disableRefresh ? {...styles.refreshButton, ...styles.disabled} : styles.refreshButton}
+                    onClick={() => this.getTotalCount()}>REFRESH</button>
+                </div>
+                <div style={styles.cardHeader}>
                   Results by Gender Identity
                 </div>
-                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
-                  'Graphs',
-                  'Hover',
-                  'Graphs - Gender - Cohort Builder'
-                )}>
+                <div style={{padding: '0.5rem 0.75rem'}}
+                  onMouseEnter={() => triggerEvent('Graphs', 'Hover', 'Graphs - Gender - Cohort Builder')}>
                   {!!chartData.length && <GenderChart data={chartData} />}
                 </div>
-              </div>
-              <div style={styles.card}>
                 <div style={styles.cardHeader}>
                   Results By Gender Identity, Age Range, and Race
                   <ClrIcon shape='sort-by'
