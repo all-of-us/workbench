@@ -48,16 +48,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     super(page);
   }
 
-  /**
-   * Take a full-page screenshot, save file in .png format in logs/screenshots directory.
-   * @param fileName
-   */
-  async takeScreenshot(fileName: string) {
-    const timestamp = new Date().getTime();
-    const screenshotFile = `screenshots/${fileName}_${timestamp}.png`;
-    await this.page.screenshot({path: screenshotFile, fullPage: true});
-  }
-
   protected async isSignedIn(): Promise<boolean> {
     await this.page.waitForSelector(selectors.signedInIndicator);
     await this.page.waitForSelector(selectors.logo, {visible: true});
@@ -94,7 +84,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   async navTo(targetPage: SideNavLink) {
     await this.openSideNav();
     const angleIconXpath = clrIconXpath('', 'angle');
-    await this.page.waitForXPath(angleIconXpath, {timeout: 2000});
+    await this.page.waitForXPath(angleIconXpath, {timeout: 30000});
     const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${targetPage}")]`;
     // try to find target sidenav link. Get the first element from ElementHandle array
     const [applink] = await this.page.$x(appLinkXpath);
@@ -139,13 +129,23 @@ export default abstract class AuthenticatedPage extends BasePage {
   /**
    * Open sidenav dropdown.
    */
-  async openSideNav() {
-    const is = await this.isSideNavDropdownOpen();
-    if (!is) {
-      // click bars icon to open dropdown
-      const icon = await findIcon(this.page, '', 'bars');
-      await icon.click();
-    }
+  async openSideNav(retries: number = 2): Promise<void> {
+    const click = async () => {
+      const is = await this.isSideNavDropdownOpen();
+      if (!is) {
+        // click bars icon to open dropdown
+        const icon = await findIcon(this.page, '', 'bars');
+        await icon.click();
+      } else {
+        return;
+      }
+      if (retries <= 0) {
+        return;
+      }
+      retries --;
+      await this.page.waitFor(1000).then(click); // one second pause before try again
+    };
+    return click();
   }
 
   /**

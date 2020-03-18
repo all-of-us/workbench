@@ -1,30 +1,35 @@
 import {Page} from 'puppeteer';
+import BaseElement from './base-element';
 
 export default class SelectComponent {
 
-  constructor(private readonly page: Page, private readonly label?: string) {
+  constructor(private readonly page: Page, private readonly label?: string, private readonly nodeLevel?: number) {
     this.page = page;
     this.label = label || undefined;
+    this.nodeLevel = nodeLevel || 1;
   }
 
-  async select(textValue: string) {
+  async select(textValue: string): Promise<string> {
     await this.open(2); // with 2 retries
-    const selector = this.componentXpath() + `//li[@class='p-dropdown-item'][normalize-space(.)="${textValue}"]`;
-    const selectValue = await this.page.waitForXPath(selector, { visible: true });
+    const selector = this.dropdownXpath() + `//li[contains(normalize-space(text()), "${textValue}")]`;
+    const elemt = await this.page.waitForXPath(selector, { visible: true });
+    const selectValue = new BaseElement(this.page, elemt);
+    const str = await selectValue.getTextContent();
     await selectValue.click();
     // need to make sure dropdown is disappeared, so it cannot interfere with clicking on elements below.
     await this.waitUntilDropdownClosed();
+    return str;
   }
 
   async getSelectedValue(): Promise<unknown> {
-    const selector = this.componentXpath() + '/label';
+    const selector = this.dropdownXpath() + '/label';
     const displayedValue = await this.page.waitForXPath(selector, { visible: true });
     const innerText = await displayedValue.getProperty('innerText');
     return await innerText.jsonValue();
   }
 
   // open Select dropdown with retries
-  async open(retries: number): Promise<void> {
+  private async open(retries: number): Promise<void> {
     const click = async () => {
       const is = await this.isOpen();
       if (!is) {
@@ -42,7 +47,7 @@ export default class SelectComponent {
   }
 
   private async toggleOpenClose(): Promise<void> {
-    const selector = this.componentXpath() + '/*[@class="p-dropdown-trigger"]';
+    const selector = this.dropdownXpath() + '/*[@class="p-dropdown-trigger"]';
     const dropdownTrigger = await this.page.waitForXPath(selector, { visible: true });
     await dropdownTrigger.hover();
     await dropdownTrigger.click();
@@ -50,7 +55,8 @@ export default class SelectComponent {
   }
 
   private async isOpen() {
-    const selector = this.componentXpath() + '/*[contains(normalize-space(@class),"p-dropdown-panel")]';
+    const selector = this.dropdownXpath() +
+       '/*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown-panel ")]';
     const panel = await this.page.waitForXPath(selector);
     const classNameString = await (await panel.getProperty('className')).jsonValue();
     const splits = classNameString.toString().split(' ');
@@ -58,15 +64,17 @@ export default class SelectComponent {
     return splits.includes('p-input-overlay-visible');
   }
 
-  private componentXpath(): string {
+  private dropdownXpath(): string {
     if (this.label === undefined) {
-      return '//*[contains(normalize-space(@class),"p-dropdown")]';
+      return '//*[contains(concat(" ", normalize-space(@class), " "), "p-dropdown")]';
     }
-    return `//*[child::*[normalize-space()="${this.label}"]]/*[contains(normalize-space(@class),"p-dropdown")]`;
+    return `//*[contains(normalize-space(text()), "${this.label}")]` +
+       `/ancestor::node()[${this.nodeLevel}]//*[contains(concat(" ", normalize-space(@class), " ")," p-dropdown ")]`;
   }
 
   private async waitUntilDropdownClosed() {
-    const xpath = this.componentXpath() + '/*[contains(normalize-space(@class), "p-input-overlay-visible")]';
+    const xpath = this.dropdownXpath() +
+       '/*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]';
     await this.page.waitForXPath(xpath, {hidden: true}).catch((err) => {
       console.error('Select dropdown is not closed.');
       throw err;

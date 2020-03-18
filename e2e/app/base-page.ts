@@ -1,4 +1,5 @@
-import {ElementHandle, Page, Response} from 'puppeteer';
+import {ElementHandle, Frame, Page, Response} from 'puppeteer';
+import * as fs from 'fs';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -13,6 +14,21 @@ export default abstract class BasePage {
   protected constructor(page: Page, timeout?) {
     this.page = page;
     this.timeout = timeout || this.DEFAULT_TIMEOUT_MILLISECONDS;
+  }
+
+  /**
+   * Take a full-page screenshot, save file in .png format in logs/screenshot directory.
+   * @param fileName
+   */
+  async takeScreenshot(fileName: string) {
+    const dir = 'logs/screenshot';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+    const timestamp = new Date().getTime();
+    const screenshotFile = `${dir}/${fileName}_${timestamp}.png`;
+    await this.page.screenshot({path: screenshotFile, fullPage: true});
+    console.log('screenshot taken: ' + screenshotFile);
   }
 
   async getPageTitle() : Promise<string> {
@@ -49,8 +65,6 @@ export default abstract class BasePage {
       this.page.waitForNavigation({waitUntil: 'load'}),
       this.page.waitForNavigation({waitUntil: 'domcontentloaded'}),
       this.page.waitForNavigation({waitUntil: 'networkidle0', timeout: 60000}),
-      // information to aid troubleshooting
-      page.once('load', () => console.log('waitForNavigation function: page loaded.')),
     ]);
   }
 
@@ -221,6 +235,26 @@ export default abstract class BasePage {
     return await this.page.evaluate(elem => {
       return elem !== null;
     }, element);
+  }
+
+  /**
+   * Wait for iframe with a name.
+   * @param {Page} page
+   * @param {string}frameName
+   */
+  async waitForFrame(page: Page, frameName: string): Promise<any> {
+    let fulfill;
+    const promise = new Promise(x => fulfill = x);
+    checkFrame();
+    return promise;
+
+    function checkFrame() {
+      const frame: Frame = page.frames().find(f => f.name() === frameName);
+      if (frame)
+        fulfill(frame);
+      else
+        page.once('frameattached', checkFrame);
+    }
   }
 
 

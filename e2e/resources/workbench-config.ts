@@ -4,7 +4,7 @@ const _ = require('lodash');
 const env = process.env.WORKBENCH_ENV || 'dev';
 
 const userCredential = {
-  registrationContactEmail: process.env.CONTACT_EMAIL,
+  contactEmail: 'hermione.owner@quality.firecloud.org',
   userEmail: process.env.USER_NAME,
   userPassword: process.env.PASSWORD,
   userInvitationkey: process.env.INVITATION_KEY,

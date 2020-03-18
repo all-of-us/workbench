@@ -1,4 +1,4 @@
-import {Page, WaitForSelectorOptions} from 'puppeteer';
+import {JSHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
 import {findButton} from './xpath-finder';
@@ -22,6 +22,17 @@ export default class Button extends BaseElement {
       }
     }
     return element;
+  }
+
+  /**
+   * Wait for button is clicable (enabled).
+   */
+  async waitForEnabled(): Promise<JSHandle> {
+    const handle = this.element.asElement();
+    return await handle.evaluateHandle((e) => {
+      const style = window.getComputedStyle(e);
+      return style.getPropertyValue('cursor') === 'pointer';
+    }, this.element);
   }
 
 }

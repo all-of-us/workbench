@@ -1,7 +1,8 @@
 import BaseElement from '../../app/aou-elements/base-element';
-import CreateAccountPage, {INSTITUTION_AFFILIATION} from '../../app/create-account-page';
+import SelectComponent from '../../app/aou-elements/select-component';
+import Textbox from '../../app/aou-elements/textbox';
+import CreateAccountPage, {FIELD_LABEL, INSTITUTION_ROLE_VALUE, INSTITUTION_VALUE} from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 const configs = require('../../resources/workbench-config');
 
@@ -10,30 +11,14 @@ jest.setTimeout(2 * 60 * 1000);
 
 describe('User registration tests:', () => {
 
-  let browser;
-  let page;
-
-  beforeAll(async () => {
-    browser = await PuppeteerLaunch();
-  });
-
-  beforeEach(async () => {
-    page = await browser.newPage();
-    await page.setDefaultNavigationTimeout(60000);
-  });
-
   afterEach(async () => {
-    await page.close();
-  });
-
-  afterAll(async () => {
-    await browser.close();
+    await jestPuppeteer.resetBrowser();
   });
 
 
   test('Entered invalid invitation key', async () => {
     const loginPage = new GoogleLoginPage(page);
-    await loginPage.goto();
+    await loginPage.load();
 
     const createAccountButton = await loginPage.createAccountButton();
     await createAccountButton.click();
@@ -56,7 +41,7 @@ describe('User registration tests:', () => {
 
   test('Loading Terms of Use and Privacy statement page', async () => {
     const loginPage = new GoogleLoginPage(page);
-    await loginPage.goto();
+    await loginPage.load();
 
     // Click the create account button to start new-user-registration flow.
     const createAccountButton = await loginPage.createAccountButton();
@@ -110,7 +95,7 @@ describe('User registration tests:', () => {
 
   test('Loading User information page', async () => {
     const loginPage = new GoogleLoginPage(page);
-    await loginPage.goto();
+    await loginPage.load();
 
     // Click the create account button to start new-user-registration flow.
     const createAccountButton = await loginPage.createAccountButton();
@@ -122,7 +107,7 @@ describe('User registration tests:', () => {
 
     // Step 2: Accepting Terms of Service.
     await page.waitForFunction(() => {
-      return document.querySelectorAll('.tos-pdf-page[data-page-number]').length === 9
+      return document.querySelectorAll('.tos-pdf-page[data-page-number]').length > 1
     }, {timeout: 30000});
 
     await createAccountPage.scrollToLastPdfPage();
@@ -133,35 +118,47 @@ describe('User registration tests:', () => {
     const agreementPageButton = await createAccountPage.getNextButton();
     await agreementPageButton.click();
 
-    // Step 3: Enter user information. Should be on Create your account: Step 1 of 2 page
-    expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
+    // Step 1 of 3: Enter Institution information
+    const nextButton = await createAccountPage.getNextButton();
+    expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
-    // the NEXT button on User Information page should be disabled until all required fields are filled
-    const userInforPageButton = await createAccountPage.getNextButton();
-    const cursor = await userInforPageButton.isCursorNotAllowed();
-    expect(cursor).toEqual(true);
+    const institutionSelect = new SelectComponent(page, 'Select your institution');
+    await institutionSelect.select(INSTITUTION_VALUE.VANDERBILT);
+
+    const emailAddress = await Textbox.forLabel(page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
+    await emailAddress.type(configs.contactEmail);
+
+    const roleSelect = new SelectComponent(page, 'describes your role');
+    await roleSelect.select(INSTITUTION_ROLE_VALUE.RESEARCH_ASSISTANT);
+
+    await nextButton.waitForEnabled();
+    await nextButton.focus();
+    expect(await nextButton.isCursorNotAllowed()).toEqual(false);
+    await nextButton.clickWithEval();
+
+    // Step 2 of 3: Enter user information.
+    expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
 
     // verify username domain
     expect(await createAccountPage.getUsernameDomain()).toBe(configs.userEmailDomain);
 
-    const radioButtonYesSelected = await (await createAccountPage.areYouAffiliatedRadioButton(true)).isSelected();
-    expect(radioButtonYesSelected).toBe(true);
-    let radioButtonNoSelected = await (await createAccountPage.areYouAffiliatedRadioButton(false)).isSelected();
-    expect(radioButtonNoSelected).toBe(false);
-    // select No radiobutton
-    await (await createAccountPage.areYouAffiliatedRadioButton(false)).select();
-    radioButtonNoSelected = await (await createAccountPage.areYouAffiliatedRadioButton(false)).isSelected();
-    expect(radioButtonNoSelected).toBe(true);
-    await createAccountPage.selectInstitution(INSTITUTION_AFFILIATION.INDUSTRY);
-
     // verify all input fields are visible and editable on this page
-    const allInputs = await page.$$('input', { visible: true });
+    const allInputs = await page.$$('input');
     for (const aInput of allInputs) {
       const elem = new BaseElement(page, aInput);
       const isDisabled = await elem.isDisabled();
       expect(isDisabled).toBe(false);
+      const value = await elem.getTextContent();
+      expect(value).toBe(''); // empty value
       await elem.dispose();
     }
+
+    // the NEXT button on User Information page should be disabled until all required fields are filled
+    const userInforPageButton = await createAccountPage.getNextButton();
+    await userInforPageButton.isDisplayed();
+    const cursor = await userInforPageButton.isCursorNotAllowed();
+    expect(cursor).toEqual(true);
+
   });
 
 

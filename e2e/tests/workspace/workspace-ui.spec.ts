@@ -1,5 +1,5 @@
 import BaseElement from '../../app/aou-elements/base-element';
-import {PageUrl, SideNavLink} from '../../app/authenticated-page';
+import {SideNavLink} from '../../app/authenticated-page';
 import HomePage from '../../app/home-page';
 import WorkspaceCard from '../../app/workspace-card';
 import WorkspacesPage from '../../app/workspaces-page';
@@ -11,13 +11,12 @@ jest.setTimeout(2 * 60 * 1000);
 
 describe('Workspace ui tests', () => {
 
-  beforeAll(async () => {
-    // all tests are using same incognito page. sign-in is only required once at the beginning.
+  beforeEach(async () => {
     await signIn(page);
   });
 
   afterEach(async () => {
-    await jestPuppeteer.resetPage();
+    await jestPuppeteer.resetBrowser();
   });
 
   test('Workspace cards all have same ui size', async () => {
@@ -41,7 +40,7 @@ describe('Workspace ui tests', () => {
   // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
   test('Click Create New Workspace link on My Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
-    await workspaces.loadPageUrl(PageUrl.WORKSPACES);
+    await workspaces.load();
     const workspaceEdit = await workspaces.clickCreateNewWorkspace();
     const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
     expect(await workspaceNameTextbox.isVisible()).toBe(true);

@@ -39,7 +39,7 @@ export default class HomePage extends AuthenticatedPage {
     const onPageUrl = this.page.url();
     const homeUrl = PageUrl.HOME.toString();
     if (onPageUrl !== homeUrl) {
-      // only load Home URL if current page is not on Home page
+      // only load Home URL if current page is not the Home page
       await this.gotoUrl(homeUrl);
       await this.waitForLoad();
     }

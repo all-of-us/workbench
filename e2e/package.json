@@ -6,8 +6,8 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "cross-env WORKBENCH_ENV=dev INCOGNITO=true jest --detectOpenHandles --forceExit",
-    "test:incognito": "cross-env WORKBENCH_ENV=dev HEADLESS=false INCOGNITO=true jest --detectOpenHandles --runInBand --forceExit",
+    "test": "cross-env WORKBENCH_ENV=dev INCOGNITO=true jest --detectOpenHandles",
+    "test:headful": "cross-env WORKBENCH_ENV=dev HEADLESS=false INCOGNITO=true jest --detectOpenHandles --runInBand",
     "test-local": "cross-env WORKBENCH_ENV=local jest",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn run lint --fix",
@@ -17,9 +17,6 @@
   "jest": {
     "verbose": true,
     "preset": "jest-puppeteer",
-    "roots": [
-      "<rootDir>/tests"
-    ],
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"
     },
@@ -29,7 +26,9 @@
     "testPathIgnorePatterns": [
       "/node_modules/"
     ],
-    "testRegex": "(tests/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "testMatch": [
+      "<rootDir>/**/tests/**/*.spec.ts"
+    ],
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/(?!tests)"
     ],
