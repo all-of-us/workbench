@@ -414,11 +414,11 @@ workflows:
           requires:
             - ui-build-test
       # Run Puppeteer tests after ui and api deployed to "test" on master merges.
-      - puppeteer-e2e-test:
-          <<: *filter_master
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
+      #- puppeteer-e2e-test:
+          #<<: *filter_master
+          #requires:
+            #- api-deploy-to-test
+            #- ui-deploy-to-test
   deploy-staging:
     jobs:
       - api-local-test:
