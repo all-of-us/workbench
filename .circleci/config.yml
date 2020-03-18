@@ -261,7 +261,7 @@ jobs:
   puppeteer-e2e-test:
     <<: *defaults
     docker:
-      - image: circleci/node:12.16.1
+      - image: circleci/node:13.10.1-browsers # circleci/node:12.16.1
         environment:
           NODE_ENV: development
     working_directory: ~/workbench
