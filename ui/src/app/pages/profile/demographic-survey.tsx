@@ -40,9 +40,10 @@ const styles = reactStyles({
 
 export interface Props {
   profile: Profile;
-  onPreviousClick?: Function;
-  onCancelClick?: Function;
-  onSubmit: Function;
+  // Required if enablePrevious is true.
+  onPreviousClick?: (profile: Profile) => void;
+  onCancelClick?: (profile: Profile) => void;
+  onSubmit: (profile: Profile, captchaToken: string) => Promise<Profile>;
   enableCaptcha: boolean;
   enablePrevious: boolean;
 }
@@ -50,7 +51,6 @@ export interface Props {
 interface State {
   captcha: boolean;
   captchaToken: string;
-  errors: Array<string>;
   loading: boolean;
   profile: Profile;
 }
@@ -62,7 +62,6 @@ export class DemographicSurvey extends React.Component<Props, State> {
     this.state = {
       captcha: false,
       captchaToken: '',
-      errors: [],
       loading: false,
       profile: {...this.props.profile},
     };
@@ -99,7 +98,8 @@ export class DemographicSurvey extends React.Component<Props, State> {
       lgbtqIdentity: {
         length: {
           maximum: 255,
-          tooLong: 'is too long for our system. Please reduce to 255 or fewer characters.'
+          tooLong: '^LGBTQ identity description is too long for our system. ' +
+              'Please reduce to 255 or fewer characters.'
         }
       },
     };
@@ -238,18 +238,18 @@ or another sexual and/or gender minority?'>
           <Button type='primary'
                   disabled={
                     loading
-                    || (errors && errors.length > 0)
+                    || (errors && Object.keys(errors).length > 0)
                     || (!environment.enableCaptcha && !this.props.enableCaptcha && !captcha)
                   }
                   onClick={async() => {
                     this.setState({loading: true});
                     try {
-                      const profile = await this.props.onSubmit(this.state.profile, captchaToken);
+                      const savedProfile = await this.props.onSubmit(this.state.profile, captchaToken);
                       // If the submit fails, then profile is null, and the try will apparently not
                       // always break in time to prevent these next lines from executing. so we
                       // null-check and don't null out the profile if it doesn't exist.
-                      if (!!profile) {
-                        this.setState({profile: profile, loading: false});
+                      if (!!savedProfile) {
+                        this.setState({profile: savedProfile, loading: false});
                       } else {
                         this.setState({loading: false});
                       }

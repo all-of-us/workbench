@@ -1,4 +1,4 @@
-import {mount, ReactWrapper} from "enzyme";
+import {mount, ReactWrapper} from 'enzyme';
 import * as React from "react";
 
 import {serverConfigStore} from 'app/utils/navigation';

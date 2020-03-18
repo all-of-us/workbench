@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {DemographicSurvey} from 'app/pages/profile/demographics-survey';
+import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
