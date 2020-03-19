@@ -3446,6 +3446,32 @@ definitions:
           this domain
         type: integer
         format: int64
+  DataFiltersResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DataFilter"
+  DataFilter:
+    type: object
+    required:
+    - dataFilterId
+    - displayName
+    - name
+    properties:
+      dataFilterId:
+        description: unique id
+        type: integer
+        format: int64
+      displayName:
+        description: display name
+        type: string
+      name:
+        description: name
+        type: string
   SurveyModule:
     type: object
     required:
