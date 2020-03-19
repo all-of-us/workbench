@@ -304,7 +304,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             otherPurpose: false,
             otherPurposeDetails: '',
             ethics: false,
-            population: false,
             populationDetails: [],
             populationHealth: false,
             reviewRequested: false,
@@ -627,6 +626,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       try {
         this.setState({loading: true});
         let workspace = this.state.workspace;
+        if (!this.state.populationChecked) {
+          workspace.researchPurpose.populationDetails = [];
+        }
+        
         if (this.isMode(WorkspaceEditMode.Create)) {
           workspace =
             await workspacesApi().createWorkspace(this.state.workspace);

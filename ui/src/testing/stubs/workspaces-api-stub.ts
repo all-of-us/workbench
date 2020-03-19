@@ -53,7 +53,6 @@ function buildWorkspaceStub(suffix): Workspace {
       methodsDevelopment: false,
       otherPurpose: false,
       otherPurposeDetails: '',
-      population: true,
       populationDetails: [SpecificPopulationEnum.AGEOLDERMORETHAN75, SpecificPopulationEnum.RACENHPI],
       populationHealth: false,
       researchOutcomeList: [],

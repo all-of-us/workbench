@@ -97,7 +97,6 @@ export class WorkspacesServiceStub {
         methodsDevelopment: false,
         otherPurpose: false,
         otherPurposeDetails: '',
-        population: false,
         populationDetails: [],
         populationHealth: false,
         ethics: false,
