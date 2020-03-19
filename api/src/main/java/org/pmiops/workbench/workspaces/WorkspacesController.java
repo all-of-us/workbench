@@ -303,7 +303,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setName(reqWorkspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
     if (reqWorkspace.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -440,7 +440,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (researchPurpose != null) {
       // Note: this utility does not set the "review requested" bit or time. This is currently
       // immutable on a workspace, see RW-4132.
-      manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
     }
 
     if (workspace.getBillingAccountName() != null) {
@@ -565,7 +565,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);

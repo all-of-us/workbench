@@ -1,7 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -22,7 +20,6 @@ import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -36,8 +33,8 @@ public class ManualWorkspaceMapper {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceMapper workspaceMapper;
 
-  public ManualWorkspaceMapper(Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceMapper workspaceMapper) {
+  public ManualWorkspaceMapper(
+      Provider<WorkbenchConfig> workbenchConfigProvider, WorkspaceMapper workspaceMapper) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceMapper = workspaceMapper;
   }
@@ -126,7 +123,7 @@ public class ManualWorkspaceMapper {
     result.setName(workspace.getName());
 
     if (workspace.getResearchPurpose() != null) {
-      setResearchPurposeDetails(result, workspace.getResearchPurpose());
+      workspaceMapper.mergeResearchPurposeIntoWorkspace(result, workspace.getResearchPurpose());
       result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
       if (workspace.getResearchPurpose().getTimeRequested() != null) {
         result.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
@@ -158,6 +155,7 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setAncestry(purpose.getAncestry());
     dbWorkspace.setCommercialPurpose(purpose.getCommercialPurpose());
     dbWorkspace.setPopulation(purpose.getPopulation());
+    // TODO eric: needs conditional
     if (purpose.getPopulation()) {
       dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(purpose.getPopulationDetails()));
     }
@@ -179,10 +177,12 @@ public class ManualWorkspaceMapper {
             .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toSet()))
             .orElse(new HashSet<DisseminateResearchEnum>()));
 
+    // TODO eric: also missing
     if (dbWorkspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
       dbWorkspace.setDisseminateResearchOther(purpose.getOtherDisseminateResearchFindings());
     }
 
+    // TODO eric: also missing
     dbWorkspace.setResearchOutcomeEnumSet(
         Optional.ofNullable(purpose.getResearchOutcomeList())
             .map(researchOutcoming -> researchOutcoming.stream().collect(Collectors.toSet()))
