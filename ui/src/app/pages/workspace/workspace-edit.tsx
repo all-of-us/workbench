@@ -354,11 +354,15 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         return false;
       }
       const rp = this.props.workspace.researchPurpose;
-      return rp.ancestry || rp.controlSet ||
-          rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment ||
-          rp.methodsDevelopment || rp.populationHealth || rp.socialBehavioral;
+      return this.isResearchPurposeSelected(rp);
     }
 
+    isResearchPurposeSelected(researchPurpose) {
+      return researchPurpose.ancestry || researchPurpose.controlSet ||
+          researchPurpose.diseaseFocusedResearch || researchPurpose.ethics ||
+          researchPurpose.drugDevelopment || researchPurpose.methodsDevelopment ||
+          researchPurpose.populationHealth || researchPurpose.socialBehavioral;
+    }
     getLiveCdrVersions(): Array<CdrVersion> {
       const cdrResp = this.props.cdrVersionListResponse;
       const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
@@ -853,22 +857,33 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           <FlexRow>
             <FlexColumn>
               <FlexColumn  style={styles.researchPurposeRow}>
+                <FlexRow>
                 <CheckBox
+                  manageOwnState={false}
                   data-test-id='researchPurpose-checkbox'
                   style={{...styles.checkboxStyle, marginLeft: '0.6rem'}}
-                  label={this.researchPurposeLabel}
-                  labelStyle={styles.shortDescription}
-                  checked={this.primaryPurposeIsSelected}
+                  checked={this.isResearchPurposeSelected(this.state.workspace.researchPurpose)}
                   onChange={v => this.setState({
                     selectResearchPurpose: v,
                     showResearchPurpose: !this.state.showResearchPurpose})}/>
+                  <div style={styles.shortDescription}>
+                    Research purpose
+                    <button style={{border: 'none'}}
+                            onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
+                      {!this.state.showResearchPurpose &&
+                      <i className='pi pi-angle-right' style={{verticalAlign: 'middle'}}></i>}
+                      {this.state.showResearchPurpose &&
+                      <i className='pi pi-angle-down' style={{verticalAlign: 'middle'}}></i>}
+                    </button>
+                  </div>
+                </FlexRow>
                   {this.state.showResearchPurpose && <FlexColumn>
                     <div style={{...styles.text, marginLeft: '1.9rem'}}>
                       Choose options below to describe your research purpose
                     </div>
                     <div style={{marginLeft: '2rem'}}>
                   {ResearchPurposeItems.map(
-                    (rp, i) => this.makePrimaryPurposeForm(rp, i, !this.state.selectResearchPurpose))}
+                    (rp, i) => this.makePrimaryPurposeForm(rp, i, !this.state.showResearchPurpose))}
                   </div></FlexColumn>}
               </FlexColumn>
 
