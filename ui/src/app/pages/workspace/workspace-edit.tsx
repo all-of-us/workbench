@@ -354,10 +354,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         return false;
       }
       const rp = this.props.workspace.researchPurpose;
-      return this.isResearchPurposeSelected(rp);
+      return this.researchPurposeCategoriesSelected(rp);
     }
 
-    isResearchPurposeSelected(researchPurpose) {
+    researchPurposeCategoriesSelected(researchPurpose) {
       return researchPurpose.ancestry || researchPurpose.controlSet ||
         researchPurpose.diseaseFocusedResearch || researchPurpose.ethics ||
         researchPurpose.drugDevelopment || researchPurpose.methodsDevelopment ||
@@ -411,9 +411,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       this.setState({selectResearchPurpose: false});
     }
 
-    get isResearchPurposeCheck() {
+    get researchPurposeCheck() {
       return this.state.selectResearchPurpose ||
-        this.isResearchPurposeSelected(this.state.workspace.researchPurpose);
+        this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose);
     }
     /**
      * Creates a form element containing the checkbox, header, and description
@@ -574,7 +574,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     updatePrimaryPurpose(cateogry, value) {
       this.updateResearchPurpose(cateogry, value);
-      if (!value && !this.isResearchPurposeSelected(this.state)) {
+      if (!value && !this.researchPurposeCategoriesSelected(this.state)) {
         this.setState({selectResearchPurpose: false});
       }
 
@@ -875,7 +875,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   data-test-id='researchPurpose-checkbox'
                   manageOwnState={false}
                   style={{...styles.checkboxStyle, marginLeft: '0.6rem', marginTop: '0.1rem'}}
-                  checked={this.isResearchPurposeCheck}
+                  checked={this.researchPurposeCheck}
                   onChange={v => this.onResearchPurposeChange(v)}/>
                   <div style={{...styles.shortDescription, marginLeft: '-0.5rem'}}>
                     <button style={{...styles.shortDescription, border: 'none'}} data-test-id='research-purpose-button'
