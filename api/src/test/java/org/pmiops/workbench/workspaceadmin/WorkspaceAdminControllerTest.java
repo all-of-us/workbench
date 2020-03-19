@@ -203,7 +203,7 @@ public class WorkspaceAdminControllerTest {
     dbWorkspace.setPopulationHealth(researchPurpose.getPopulationHealth());
     dbWorkspace.setEducational(researchPurpose.getEducational());
     dbWorkspace.setDrugDevelopment(researchPurpose.getDrugDevelopment());
-    dbWorkspace.setPopulation(researchPurpose.getPopulation());
+
     dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(researchPurpose.getPopulationDetails()));
     dbWorkspace.setAdditionalNotes(researchPurpose.getAdditionalNotes());
     dbWorkspace.setReasonForAllOfUs(researchPurpose.getReasonForAllOfUs());

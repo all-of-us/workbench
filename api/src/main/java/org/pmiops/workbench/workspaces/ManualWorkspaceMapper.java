@@ -154,11 +154,6 @@ public class ManualWorkspaceMapper {
     dbWorkspace.setControlSet(purpose.getControlSet());
     dbWorkspace.setAncestry(purpose.getAncestry());
     dbWorkspace.setCommercialPurpose(purpose.getCommercialPurpose());
-    dbWorkspace.setPopulation(purpose.getPopulation());
-    // TODO eric: needs conditional
-    if (purpose.getPopulation()) {
-      dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(purpose.getPopulationDetails()));
-    }
     dbWorkspace.setSocialBehavioral(purpose.getSocialBehavioral());
     dbWorkspace.setPopulationHealth(purpose.getPopulationHealth());
     dbWorkspace.setEthics(purpose.getEthics());

@@ -99,7 +99,6 @@ public class DbWorkspace {
   private boolean controlSet;
   private boolean ancestry;
   private boolean commercialPurpose;
-  private boolean population;
   private Set<Short> populationDetailsSet = new HashSet<>();
   private boolean socialBehavioral;
   private boolean populationHealth;
@@ -368,15 +367,6 @@ public class DbWorkspace {
 
   public void setOtherPurposeDetails(String otherPurposeDetails) {
     this.otherPurposeDetails = otherPurposeDetails;
-  }
-
-  @Column(name = "rp_population")
-  public boolean getPopulation() {
-    return this.population;
-  }
-
-  public void setPopulation(boolean population) {
-    this.population = population;
   }
 
   @ElementCollection(fetch = FetchType.EAGER)

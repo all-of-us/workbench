@@ -62,7 +62,6 @@ public class TestMockFactory {
                 .populationHealth(true)
                 .educational(true)
                 .drugDevelopment(true)
-                .population(false)
                 .populationDetails(Collections.emptyList())
                 .additionalNotes("additional notes")
                 .reasonForAllOfUs("reason for aou")

@@ -109,7 +109,6 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setControlSet(true);
     sourceDbWorkspace.setAncestry(false);
     sourceDbWorkspace.setCommercialPurpose(false);
-    sourceDbWorkspace.setPopulation(false);
     sourceDbWorkspace.setSpecificPopulationsEnum(
         ImmutableSet.of(SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL));
     sourceDbWorkspace.setSocialBehavioral(false);
@@ -173,7 +172,6 @@ public class WorkspaceMapperTest {
         .isEqualTo(sourceDbWorkspace.getOtherPopulationDetails());
     assertThat(rp.getOtherPurpose()).isEqualTo(sourceDbWorkspace.getOtherPurpose());
     assertThat(rp.getOtherPurposeDetails()).isEqualTo(sourceDbWorkspace.getOtherPurposeDetails());
-    assertThat(rp.getPopulation()).isEqualTo(sourceDbWorkspace.getPopulation());
     assertThat(rp.getPopulationDetails())
         .containsExactlyElementsIn(sourceDbWorkspace.getSpecificPopulationsEnum());
     assertThat(rp.getPopulationHealth()).isEqualTo(sourceDbWorkspace.getPopulationHealth());

@@ -185,6 +185,7 @@ export interface WorkspaceEditState {
   showResearchPurpose: boolean;
   billingAccounts: Array<BillingAccount>;
   showCreateBillingAccountModal: boolean;
+  populationChecked: boolean;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -206,7 +207,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
         billingAccounts: [],
-        showCreateBillingAccountModal: false
+        showCreateBillingAccountModal: false,
+        populationChecked: props.workspace.researchPurpose.populationDetails.length > 0
       };
     }
 
@@ -314,10 +316,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
       if (!fp.includes(DisseminateResearchEnum.OTHER, workspace.researchPurpose.disseminateResearchFindingList)) {
         workspace.researchPurpose.otherDisseminateResearchFindings = '';
-      }
-
-      if (!workspace.researchPurpose.population) {
-        workspace.researchPurpose.populationDetails = [];
       }
 
       // Replace potential nulls with empty string or empty array
@@ -495,7 +493,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               key={sub.label}
               checked={this.specificPopulationCheckboxSelected(sub.shortName)}
               onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
-              disabled={!this.state.workspace.researchPurpose.population}/></FlexRow>)}
+              disabled={!this.state.populationChecked}/></FlexRow>)}
       </div>;
     }
 
@@ -549,7 +547,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     get isSpecificPopulationValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
       return (
-          !researchPurpose.population ||
+          !this.state.populationChecked ||
           (
               researchPurpose.populationDetails &&
               researchPurpose.populationDetails.length !== 0
@@ -946,8 +944,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
-                         onChange={v => this.updateResearchPurpose('population', true)}
-                         checked={this.state.workspace.researchPurpose.population}/>
+                         onChange={v => this.setState({populationChecked: true})}
+                         checked={this.state.populationChecked}/>
             <label style={styles.text}>Yes, my study will focus on one or more specific
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
@@ -969,7 +967,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     labelStyle={styles.text}
                     checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
-                    disabled={!this.state.workspace.researchPurpose.population}
+                    disabled={!this.state.populationChecked}
                 />
                 <TextInput type='text' autoFocus placeholder='Please specify'
                            value={this.state.workspace.researchPurpose.otherPopulationDetails}
@@ -988,8 +986,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           <div style={{marginTop: '0.5rem'}}>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-no'
-                         onChange={v => this.updateResearchPurpose('population', false)}
-                         checked={!this.state.workspace.researchPurpose.population}/>
+                         onChange={v => this.setState({populationChecked: false})}
+                         checked={!this.state.populationChecked}/>
             <label style={styles.text}>No, my study will not center on underrepresented populations.
               I am interested in a diverse sample in general, or I am focused on populations that
               have been well represented in prior research.</label>
