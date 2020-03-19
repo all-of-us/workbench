@@ -533,6 +533,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return <div><strong>{item.label} *</strong>
         {item.subCategory.map((sub, index) => <FlexRow>
           <CheckBox
+              manageOwnState={false}
               wrapperStyle={styles.checkboxRow}
               data-test-id={sub.shortName + '-checkbox'}
               style={styles.checkboxStyle}
