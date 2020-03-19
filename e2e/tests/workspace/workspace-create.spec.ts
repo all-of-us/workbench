@@ -22,6 +22,7 @@ describe('Workspace creation tests:', () => {
   test('User can create a simple workspace with some default values', async () => {
     const workspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
     const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName, 'Use All of Us free credits',);
     // check Data page is loaded
     const dataPage = new DataPage(page);

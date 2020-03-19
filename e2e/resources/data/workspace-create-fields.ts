@@ -12,7 +12,7 @@ export const defaultFields = [{
   value: 'Puppeteerdriver'
 }, {
   label: 'Email Address',
-  value: configs.registrationContactEmail
+  value: configs.contactEmail
 }, {
   label: 'Street Address 1',
   value: faker.address.streetName()

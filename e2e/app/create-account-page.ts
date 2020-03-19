@@ -3,23 +3,33 @@ import {defaultFieldValues} from '../resources/data/user-registration-fields';
 import Button from './aou-elements/button';
 import Checkbox from './aou-elements/checkbox';
 import ClrIconLink from './aou-elements/clr-icon-link';
-import RadioButton from './aou-elements/radiobutton';
 import SelectComponent from './aou-elements/select-component';
 import Textarea from './aou-elements/textarea';
 import Textbox from './aou-elements/textbox';
 import BasePage from './base-page';
 
-
+const configs = require('../resources/workbench-config');
 const faker = require('faker/locale/en_US');
 
 export const PAGE = {
   TITLE: 'Sign In',
 };
 
-export const INSTITUTION_AFFILIATION = {
+export const INSTITUTION_VALUE = {
+  VANDERBILT: 'Vanderbilt University Medical Center',
+  BROAD: 'Broad Institute',
+  VERILY: 'Verily LLC',
+  NATIONAL_INSTITUTE_HEALTH: 'National Institute of Health',
+  WONDROS: 'Wondros'
+};
+
+export const INSTITUTION_ROLE_VALUE = {
   EARLY_CAREER_TENURE_TRACK_RESEARCHER: 'Early career tenure-track researcher',
   UNDERGRADUATE_STUDENT: 'Undergraduate (Bachelor level) student',
   INDUSTRY: 'Industry',
+  RESEARCH_ASSISTANT: 'Research Assistant (pre-doctoral)',
+  RESEARCH_ASSOCIATE: 'Research associate (post-doctoral; early/mid career)',
+  SENIOR_RESEARCHER: 'Senior Researcher (PI/Team Lead, senior scientist)',
 };
 
 export const EDUCATION_LEVEL = {
@@ -34,6 +44,7 @@ export const FIELD_LABEL = {
   RESEARCH_BACKGROUND: 'describe your research background, experience, and research interests',
   EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YEAR_OF_BIRTH: 'Year of Birth',
+  INSTITUTION_EMAIL: 'institutional email address',
 };
 
 export default class CreateAccountPage extends BasePage {
@@ -80,25 +91,12 @@ export default class CreateAccountPage extends BasePage {
     return await Textbox.forLabel(this.page, {text: FIELD_LABEL.INSTITUTION_NAME});
   }
 
-  // true for select Yes radiobutton. false for select No radiobutton.
-  async areYouAffiliatedRadioButton(yesOrNo: boolean): Promise<RadioButton> {
-    let selector;
-    if (yesOrNo) {
-      selector = '//input[@id="show-institution-yes"]';
-    } else {
-      selector = '//input[@id="show-institution-no"]';
-    }
-    const radio = new RadioButton(this.page);
-    await radio.withXpath(selector);
-    return radio;
-  }
-
   async getResearchBackgroundTextarea(): Promise<Textarea> {
     return await Textarea.forLabel(this.page, {normalizeSpace: FIELD_LABEL.RESEARCH_BACKGROUND});
   }
 
   async getUsernameDomain(): Promise<unknown> {
-    const elem = await this.page.waitForXPath('//*[input[@id="username"]]/i');
+    const elem = await this.page.waitForXPath('//*[./input[@id="username"]]/i');
     return await (await elem.getProperty('innerText')).jsonValue();
   }
 
@@ -129,19 +127,29 @@ export default class CreateAccountPage extends BasePage {
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = new SelectComponent(this.page, FIELD_LABEL.EDUCATION_LEVEL);
+    const dropdown = new SelectComponent(this.page, FIELD_LABEL.EDUCATION_LEVEL, 2);
     await dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = new SelectComponent(this.page, FIELD_LABEL.YEAR_OF_BIRTH);
+    const dropdown = new SelectComponent(this.page, FIELD_LABEL.YEAR_OF_BIRTH, 2);
     await dropdown.select(year);
   }
 
   // Combined steps to make test code cleaner and shorter
 
-  // Step 1: Enter Invitation key
+  // Step 1: Fill out Institution
+  async fillOutInstitution() {
+    const institutionSelect = new SelectComponent(this.page, 'Select your institution');
+    await institutionSelect.select(INSTITUTION_VALUE.BROAD);
+    const emailAddress = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
+    await emailAddress.type(configs.contactEmail);
+    const roleSelect = new SelectComponent(this.page, 'describes your role');
+    await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
+  }
+
+  // Step 2: Enter Invitation key
   async fillOutInvitationKey(invitationKey: string) {
     await this.getInvitationKeyInput()
     .then(invitationKeyInput => invitationKeyInput.type(invitationKey))
@@ -149,7 +157,7 @@ export default class CreateAccountPage extends BasePage {
     .then(submitButton => submitButton.click());
   }
 
-  // Step 2: Accepting Terms of Use and Privacy statement.
+  // Step 3: Accepting Terms of Use and Privacy statement.
   async acceptTermsOfUseAgreement() {
     await this.getPrivacyStatementCheckbox();
     await this.getTermsOfUseCheckbox();
@@ -166,10 +174,6 @@ export default class CreateAccountPage extends BasePage {
   async fillOutUserInformation() {
     const newUserName = await this.fillInFormFields(defaultFieldValues);
     await (await this.getResearchBackgroundTextarea()).type(faker.lorem.word());
-    // a different dropdown selection depending on Yes or No radiobutton was selected
-    await (await this.areYouAffiliatedRadioButton(true)).click();
-    await (await this.getInstitutionNameInput()).type(faker.company.companyName());
-    await this.selectInstitution(INSTITUTION_AFFILIATION.EARLY_CAREER_TENURE_TRACK_RESEARCHER);
     return newUserName;
   }
 

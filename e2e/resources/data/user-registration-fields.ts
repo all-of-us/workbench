@@ -1,5 +1,4 @@
 const faker = require('faker/locale/en_US');
-const configs = require('../workbench-config');
 
 const newUserName = `aoutestuser${Math.floor(Math.random() * 1000)}${Math.floor(Date.now() / 1000)}`;
 
@@ -12,9 +11,6 @@ export const defaultFieldValues = [{
 }, {
   label: 'Last Name',
   value: 'Puppeteerdriver'
-}, {
-  label: 'Email Address',
-  value: configs.registrationContactEmail
 }, {
   label: 'Street Address 1',
   value: faker.address.streetName()

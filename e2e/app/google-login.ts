@@ -37,7 +37,7 @@ export default class GoogleLoginPage extends BasePage {
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.loginButton, {visible: true});
+    return await this.page.waitForXPath(selectors.loginButton, {visible: true, timeout: 10000});
   }
 
   /**
@@ -89,8 +89,13 @@ export default class GoogleLoginPage extends BasePage {
   /**
    * Open All-of-Us Google login page.
    */
-  async goto(): Promise<void> {
-    await this.page.goto(configs.uiBaseUrl + configs.loginUrlPath, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 0});
+  async load(): Promise<void> {
+    const url = configs.uiBaseUrl + configs.loginUrlPath;
+    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 30000}).catch((err) => {
+      console.error('Google login page not found. ' + err);
+      this.takeScreenshot('GoogleLoginNotFound');
+      throw err;
+    });
   }
 
   /**
@@ -102,15 +107,15 @@ export default class GoogleLoginPage extends BasePage {
   async login(email?: string, paswd?: string) {
     const user = email || configs.userEmail;
     const pwd = paswd || configs.userPassword;
-
-    await this.goto();
-
-    const googleButton = await this.loginButton();
+    await this.load();
+    const googleButton = await this.loginButton().catch((err) => {
+      console.error('Google login button not found. ' + err);
+      throw err;
+    });
     await Promise.all([
       googleButton.click(),
       this.page.waitForNavigation(),
     ]);
-
     if (!user || user.trim().length === 0) {
       console.warn('Login user email: value is empty!!!')
     }
@@ -124,7 +129,7 @@ export default class GoogleLoginPage extends BasePage {
       // Handle "Enter Recovery Email" prompt if found exists
       const recoverEmail = await this.page.$x('//input[@type="email" and @aria-label="Enter recovery email address"]');
       if (recoverEmail.length > 0) {
-        await recoverEmail[0].type(process.env.CONTACT_EMAIL);
+        await recoverEmail[0].type(configs.contactEmail);
         await Promise.all([
           this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
           this.page.waitForNavigation(),
@@ -142,8 +147,9 @@ export default class GoogleLoginPage extends BasePage {
     return await findButton(this.page, {text: 'Create Account'}, {visible: true});
   }
 
-
   static async logIn(page: Page): Promise<HomePage> {
+    await page.setUserAgent(configs.puppeteerUserAgent);
+    await page.setDefaultNavigationTimeout(60000);
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
     const home = new HomePage(page);
