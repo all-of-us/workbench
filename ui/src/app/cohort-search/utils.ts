@@ -218,7 +218,7 @@ function genSuffix(): string {
 
 export function parseCohortDefinition(json: string) {
   const data = JSON.parse(json);
-  const sr = {};
+  const sr = {dataFilters: data.datafilters || []};
   for (const role of ['includes', 'excludes']) {
     sr[role] = data[role].map(grp => {
       grp.items = grp.items.map(item => {
@@ -267,6 +267,7 @@ export function mapRequest(sr: any) {
   return <SearchRequest>{
     includes: grpFilter('includes'),
     excludes: grpFilter('excludes'),
+    dataFilters: sr.dataFilters
   };
 }
 

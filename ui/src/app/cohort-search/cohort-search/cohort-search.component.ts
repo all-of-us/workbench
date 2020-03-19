@@ -24,7 +24,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   count: number;
   error = false;
   overview = false;
-  criteria = {includes: [], excludes: []};
+  criteria = {includes: [], excludes: [], dataFilters: []};
   updateCount = 0;
   cohort: any;
   resolve: Function;
@@ -53,7 +53,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
             }
           });
       } else {
-        this.cohort = {criteria: '{"includes":[],"excludes":[]}'};
+        this.cohort = {criteria: '{"includes":[],"excludes":[], dataFilters: []}'};
       }
     });
 
