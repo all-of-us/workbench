@@ -14,6 +14,7 @@ import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
@@ -160,9 +161,10 @@ interface State {
 
 export const ListOverview = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
-    saveMenu: any;
-    genderOrSexMenu: any;
-    ageMenu: any;
+    private aborter = new AbortController();
+    private ageMenu: any;
+    private genderOrSexMenu: any;
+    private saveMenu: any;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -198,23 +200,34 @@ export const ListOverview = withCurrentWorkspace()(
       }
     }
 
+    componentWillUnmount(): void {
+      this.aborter.abort();
+    }
+
     getTotalCount() {
+      const {loading, refreshing} = this.state;
+      if (loading || refreshing) {
+        this.aborter.abort();
+        this.aborter = new AbortController();
+      }
       const {searchRequest} = this.props;
       if (searchRequest.includes.length > 0) {
-        this.setState({loading: true, apiError: false})
+        this.setState({loading: true, apiError: false});
         this.callApi()
           .then(response => {
             this.setState({
               chartData: response.items,
+              initializing: false,
+              loading: false,
               total: response.items.reduce((sum, data) => sum + data.count, 0),
-              initializing: false
             });
           })
           .catch(error => {
-            console.error(error);
-            this.setState({apiError: true});
-          })
-          .finally(() => this.setState({loading: false}));
+            if (!isAbortError(error)) {
+              console.error(error);
+              this.setState({apiError: true, loading: false});
+            }
+          });
       } else {
         this.setState({chartData: [], total: 0, initializing: false});
       }
@@ -227,7 +240,11 @@ export const ListOverview = withCurrentWorkspace()(
           const {ageType, genderOrSexType} = this.state;
           this.setState({chartData: response.items, currentGraphOptions: {ageType, genderOrSexType}});
         })
-        .catch(error => console.error(error))
+        .catch(error => {
+          if (!isAbortError(error)) {
+            console.error(error);
+          }
+        })
         .finally(() => this.setState({refreshing: false}));
     }
 
@@ -236,7 +253,8 @@ export const ListOverview = withCurrentWorkspace()(
       const {ageType, genderOrSexType} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const request = mapRequest(searchRequest);
-      return cohortBuilderApi().getDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request);
+      return cohortBuilderApi()
+        .getDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
     }
 
     get hasActiveItems() {
@@ -441,10 +459,8 @@ export const ListOverview = withCurrentWorkspace()(
           {!!total && !this.definitionErrors && !loading && !!chartData &&
             <div style={styles.cardContainer}>
               <div style={styles.card}>
-                <div style={styles.cardHeader}>
-                  Results by
-                </div>
-                <div>
+                <div style={styles.cardHeader}>Results by</div>
+                <div style={refreshing ? styles.disabled : {}}>
                   <Menu appendTo={document.body} model={genderOrSexItems} popup={true} ref={el => this.genderOrSexMenu = el} />
                   <button style={styles.menuButton} onClick={(event) => this.genderOrSexMenu.toggle(event)}>
                     {genderOrSexTypeToText(genderOrSexType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
