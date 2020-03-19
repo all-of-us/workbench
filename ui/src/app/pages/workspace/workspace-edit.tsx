@@ -629,7 +629,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (!this.state.populationChecked) {
           workspace.researchPurpose.populationDetails = [];
         }
-        
+
         if (this.isMode(WorkspaceEditMode.Create)) {
           workspace =
             await workspacesApi().createWorkspace(this.state.workspace);

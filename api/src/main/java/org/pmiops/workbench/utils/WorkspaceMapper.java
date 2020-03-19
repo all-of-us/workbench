@@ -2,21 +2,14 @@ package org.pmiops.workbench.utils;
 
 import static org.mapstruct.NullValuePropertyMappingStrategy.*;
 
-import com.google.common.collect.ImmutableSet;
-import java.util.List;
-import java.util.Set;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValueMappingStrategy;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 
@@ -61,10 +54,19 @@ public interface WorkspaceMapper {
   @Mapping(target = "approved", ignore = true)
   @Mapping(target = "reviewRequested", ignore = true)
   @Mapping(target = "timeRequested", ignore = true)
-  @Mapping(target = "specificPopulationsEnum", source = "populationDetails", nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
-  @Mapping(target = "disseminateResearchEnumSet", source = "disseminateResearchFindingList", nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
+  @Mapping(
+      target = "specificPopulationsEnum",
+      source = "populationDetails",
+      nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
+  @Mapping(
+      target = "disseminateResearchEnumSet",
+      source = "disseminateResearchFindingList",
+      nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
   @Mapping(target = "disseminateResearchOther", source = "otherDisseminateResearchFindings")
-  @Mapping(target = "researchOutcomeEnumSet", source = "researchOutcomeList", nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
+  @Mapping(
+      target = "researchOutcomeEnumSet",
+      source = "researchOutcomeList",
+      nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
