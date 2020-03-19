@@ -403,7 +403,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       </div>;
     }
 
-    researchPurposeChange(checked) {
+    onResearchPurposeChange(checked) {
       if (checked) {
         this.setState({showResearchPurpose: true, selectResearchPurpose: true});
         return;
@@ -876,7 +876,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   manageOwnState={false}
                   style={{...styles.checkboxStyle, marginLeft: '0.6rem', marginTop: '0.1rem'}}
                   checked={this.isResearchPurposeCheck}
-                  onChange={v => this.researchPurposeChange(v)}/>
+                  onChange={v => this.onResearchPurposeChange(v)}/>
                   <div style={{...styles.shortDescription, marginLeft: '-0.5rem'}}>
                     <button style={{...styles.shortDescription, border: 'none'}} data-test-id='research-purpose-button'
                             onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
