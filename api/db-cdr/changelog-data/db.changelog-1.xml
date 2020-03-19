@@ -25,6 +25,7 @@
     <delete tableName="cb_criteria_relationship"/>
     <delete tableName="cb_criteria_ancestor"/>
     <delete tableName="cb_person"/>
+    <delete tableName="cb_data_filter"/>
 
     <loadData tableName="domain_info" file="csv/domain_info.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>
@@ -284,6 +285,13 @@
       <column name="dob" type="DATE"/>
       <column name="age_at_consent" type="NUMERIC"/>
       <column name="age_at_cdr" type="NUMERIC"/>
+    </loadData>
+
+    <loadData tableName="cb_data_filter" file="csv/cb_data_filter.csv" encoding="UTF-8"
+      quotchar='"'>
+      <column name="data_filter_id" type="NUMERIC"/>
+      <column name="display_name" type="STRING"/>
+      <column name="name" type="STRING"/>
     </loadData>
 
   </changeSet>
