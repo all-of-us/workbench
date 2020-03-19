@@ -51,10 +51,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceServiceTest {
 
   @TestConfiguration
-  @Import({
-      ManualWorkspaceMapper.class,
-      WorkspaceMapper.class
-  })
+  @Import({ManualWorkspaceMapper.class, WorkspaceMapper.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {

@@ -1,10 +1,8 @@
 package org.pmiops.workbench.workspaces;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.Etags;
@@ -12,13 +10,10 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.RecentWorkspace;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
