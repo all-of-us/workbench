@@ -128,6 +128,10 @@ public class SearchRequests {
     return genderRequest(MALE_CONCEPT_ID);
   }
 
+  public static SearchRequest malesWithEHRData() {
+    return genderRequest(MALE_CONCEPT_ID).addDataFiltersItem("HAS_EHR_DATA");
+  }
+
   public static SearchRequest females() {
     return genderRequest(FEMALE_CONCEPT_ID);
   }

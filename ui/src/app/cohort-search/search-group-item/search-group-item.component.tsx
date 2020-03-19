@@ -190,6 +190,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         const request = {
           includes: [],
           excludes: [],
+          dataFilters: [],
           [role]: [{items: [mappedItem], temporal: false}]
         };
         await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.updateSearchRequest('count', count, false));

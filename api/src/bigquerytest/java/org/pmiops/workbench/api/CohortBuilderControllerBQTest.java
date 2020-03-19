@@ -914,6 +914,46 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsICD9ConditionOccurrenceChildHasEHRData() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
+    searchRequest.addDataFiltersItem("HAS_EHR_DATA");
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionOccurrenceChildHasPMData() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
+    searchRequest.addDataFiltersItem("HAS_PHYSICAL_MEASUREMENT_DATA");
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionOccurrenceChildHasPPISurveyData() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
+    searchRequest.addDataFiltersItem("HAS_PPI_SURVEY_DATA");
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionOccurrenceChildHasEHRAndPPISurveyData() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
+    searchRequest.addDataFiltersItem("HAS_EHR_DATA").addDataFiltersItem("HAS_PPI_SURVEY_DATA");
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void temporalGroupExceptions() {
     SearchGroupItem icd9SGI =
         new SearchGroupItem().type(DomainType.CONDITION.toString()).addSearchParametersItem(icd9());
@@ -1942,11 +1982,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getDemoChartInfoGenderAgeAtConsent() {
+  public void getDemoChartInfoGenderAgeAtConsentWithEHRData() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+    searchRequest.addDataFiltersItem("HAS_EHR_DATA");
 
     DemoChartInfoListResponse response =
         controller
