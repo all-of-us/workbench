@@ -73,6 +73,7 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -104,6 +105,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
   private final ManualWorkspaceMapper manualWorkspaceMapper;
+  private final WorkspaceMapper workspaceMapper;
   private final FreeTierBillingService freeTierBillingService;
 
   private FireCloudService fireCloudService;
@@ -125,6 +127,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
       ManualWorkspaceMapper manualWorkspaceMapper,
+      WorkspaceMapper workspaceMapper,
       FreeTierBillingService freeTierBillingService) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
@@ -139,6 +142,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.manualWorkspaceMapper = manualWorkspaceMapper;
+    this.workspaceMapper = workspaceMapper;
     this.freeTierBillingService = freeTierBillingService;
   }
 
@@ -195,7 +199,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(manualWorkspaceMapper.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
               currentWorkspace.setAccessLevel(
                   ManualWorkspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;

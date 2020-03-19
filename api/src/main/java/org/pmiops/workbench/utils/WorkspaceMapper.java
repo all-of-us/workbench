@@ -21,9 +21,6 @@ public interface WorkspaceMapper {
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
-  @Mapping(
-      target = "dataAccessLevel",
-      source = "dbWorkspace.dataAccessLevelEnum") // we might be able to remove this?
   @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "id", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
