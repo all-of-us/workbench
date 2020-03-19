@@ -13,6 +13,7 @@ import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -203,10 +204,7 @@ public class WorkspaceAdminControllerTest {
     dbWorkspace.setEducational(researchPurpose.getEducational());
     dbWorkspace.setDrugDevelopment(researchPurpose.getDrugDevelopment());
     dbWorkspace.setPopulation(researchPurpose.getPopulation());
-    dbWorkspace.setPopulationDetails(
-        researchPurpose.getPopulationDetails().stream()
-            .map(DbStorageEnums::specificPopulationToStorage)
-            .collect(Collectors.toSet()));
+    dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(researchPurpose.getPopulationDetails()));
     dbWorkspace.setAdditionalNotes(researchPurpose.getAdditionalNotes());
     dbWorkspace.setReasonForAllOfUs(researchPurpose.getReasonForAllOfUs());
     dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());

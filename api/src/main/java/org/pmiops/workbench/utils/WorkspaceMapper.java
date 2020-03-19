@@ -1,8 +1,11 @@
 package org.pmiops.workbench.utils;
 
+import static org.mapstruct.NullValuePropertyMappingStrategy.*;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Set;
+import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -19,8 +22,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 
 @Mapper(
     componentModel = "spring",
-    nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT,
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT,
+    collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     uses = {CommonMappers.class})
 public interface WorkspaceMapper {
 
@@ -56,18 +58,15 @@ public interface WorkspaceMapper {
   @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
-  @Mapping(target = "specificPopulationsEnum", source = "populationDetails")
-  @Mapping(target = "disseminateResearchEnumSet", source = "disseminateResearchFindingList")
+  @Mapping(target = "approved", ignore = true)
+  @Mapping(target = "reviewRequested", ignore = true)
+  @Mapping(target = "timeRequested", ignore = true)
+  @Mapping(target = "specificPopulationsEnum", source = "populationDetails", nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
+  @Mapping(target = "disseminateResearchEnumSet", source = "disseminateResearchFindingList", nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
   @Mapping(target = "disseminateResearchOther", source = "otherDisseminateResearchFindings")
-  @Mapping(target = "researchOutcomeEnumSet", source = "researchOutcomeList")
+  @Mapping(target = "researchOutcomeEnumSet", source = "researchOutcomeList", nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
-
-  default Set<Short> map(List<SpecificPopulationEnum> value) {
-    return value.stream()
-        .map(DbStorageEnums::specificPopulationToStorage)
-        .collect(ImmutableSet.toImmutableSet());
-  }
 
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());
