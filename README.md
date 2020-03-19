@@ -526,8 +526,8 @@ Once you have JUnit installed, go to the test file you want to run, right click 
 
 Choose `Edit Configurations...` from the dropdown at the left side of the top the menu bar
 and choose `Templates` -> `Remote`.  Click `Create configuration` in the top right.  This
-will create a Remote Configuration which you can name how you like.  Edit this configuration
-to choose port *8001*.
+will create a Remote Configuration which you can name how you like.  Ensure that this 
+configuration uses the port the API is listening on, *8001*.
 
 When this configuration is selected, clicking the debug icon (looks like a green bug) will
 cause the running API process to stop at breakpoints you have set for inspection.
