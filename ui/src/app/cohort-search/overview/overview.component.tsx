@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
-import {mapRequest} from 'app/cohort-search/utils';
+import {ageTypeToText, genderOrSexTypeToText, mapRequest} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {ClrIcon} from 'app/components/icons';
@@ -102,6 +102,7 @@ const styles = reactStyles({
     border: `1px solid ${colorWithWhiteness(colors.black, .8)}`,
     borderRadius: '0.125rem',
     color: colors.primary,
+    cursor: 'pointer',
     fontSize: '11px',
     fontWeight: 100,
     height: '1.25rem',
@@ -115,7 +116,8 @@ const styles = reactStyles({
   refreshButton: {
     background: 'none',
     border: `1px solid ${colors.accent}`,
-    color: colors.accent
+    color: colors.accent,
+    cursor: 'pointer'
   }
 });
 
@@ -344,7 +346,7 @@ export const ListOverview = withCurrentWorkspace()(
         name, nameTouched, saveModalOpen, saveError, saving, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
       const disableSave = loading || saving || this.definitionErrors || !total;
-      const disableRefresh = {ageType, genderOrSexType} === currentGraphOptions;
+      const disableRefresh = ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
       const invalid = nameTouched && (!name || !name.trim());
       const nameConflict = !!name && existingCohorts.includes(name.trim());
       const saveDisabled = invalid || !name || nameConflict || saving;
@@ -354,13 +356,19 @@ export const ListOverview = withCurrentWorkspace()(
         {label: 'Save as', command: () => this.openSaveModal()},
       ];
       const genderOrSexItems = [
-        {label: 'Gender', command: () => this.setState({genderOrSexType: GenderOrSexType.GENDER})},
-        {label: 'Sex at Birth', command: () => this.setState({genderOrSexType: GenderOrSexType.SEXATBIRTH})},
+        {
+          label: genderOrSexTypeToText(GenderOrSexType.GENDER),
+          command: () => this.setState({genderOrSexType: GenderOrSexType.GENDER})
+        },
+        {
+          label: genderOrSexTypeToText(GenderOrSexType.SEXATBIRTH),
+          command: () => this.setState({genderOrSexType: GenderOrSexType.SEXATBIRTH})
+        },
       ];
       const ageItems = [
-        {label: 'Current Age', command: () => this.setState({ageType: AgeType.AGE})},
-        {label: 'Age at Consent', command: () => this.setState({ageType: AgeType.AGEATCONSENT})},
-        {label: 'Age at CDR', command: () => this.setState({ageType: AgeType.AGEATCDR})},
+        {label: ageTypeToText(AgeType.AGE), command: () => this.setState({ageType: AgeType.AGE})},
+        {label: ageTypeToText(AgeType.AGEATCONSENT), command: () => this.setState({ageType: AgeType.AGEATCONSENT})},
+        {label: ageTypeToText(AgeType.AGEATCDR), command: () => this.setState({ageType: AgeType.AGEATCDR})},
       ];
       return <React.Fragment>
         <div>
@@ -421,24 +429,24 @@ export const ListOverview = withCurrentWorkspace()(
                 <div>
                   <Menu appendTo={document.body} model={genderOrSexItems} popup={true} ref={el => this.genderOrSexMenu = el} />
                   <button style={styles.menuButton} onClick={(event) => this.genderOrSexMenu.toggle(event)}>
-                    {genderOrSexType} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
+                    {genderOrSexTypeToText(genderOrSexType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
                   </button>
                   <Menu appendTo={document.body} model={ageItems} popup={true} ref={el => this.ageMenu = el} />
                   <button style={styles.menuButton} onClick={(event) => this.ageMenu.toggle(event)}>
-                    {ageType} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
+                    {ageTypeToText(ageType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
                   </button>
                   <button style={disableRefresh ? {...styles.refreshButton, ...styles.disabled} : styles.refreshButton}
-                    onClick={() => this.getTotalCount()}>REFRESH</button>
+                    onClick={() => this.setState({loading: true}, () => this.getTotalCount())}>REFRESH</button>
                 </div>
                 <div style={styles.cardHeader}>
-                  Results by Gender Identity
+                  {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}
                 </div>
                 <div style={{padding: '0.5rem 0.75rem'}}
                   onMouseEnter={() => triggerEvent('Graphs', 'Hover', 'Graphs - Gender - Cohort Builder')}>
                   {!!chartData.length && <GenderChart data={chartData} />}
                 </div>
                 <div style={styles.cardHeader}>
-                  Results By Gender Identity, Age Range, and Race
+                  {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}, {ageTypeToText(currentGraphOptions.ageType)}, and Race
                   <ClrIcon shape='sort-by'
                     className={stackChart ? 'is-info' : ''}
                     onClick={() => this.toggleChartMode()} />
