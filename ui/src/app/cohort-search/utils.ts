@@ -160,7 +160,7 @@ export function ageTypeToText(ageType: AgeType) {
 export function genderOrSexTypeToText(genderOrSexType: GenderOrSexType) {
   switch (genderOrSexType) {
     case GenderOrSexType.GENDER:
-      return 'Gender';
+      return 'Gender Identity';
     case GenderOrSexType.SEXATBIRTH:
       return 'Sex at Birth';
   }

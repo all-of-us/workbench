@@ -80,6 +80,10 @@ const styles = reactStyles({
     borderBottom: 'none',
     padding: '0.5rem 0',
   },
+  chartSpinner: {
+    marginLeft: 'calc(50% - 50px)',
+    marginTop: 'calc(50% - 75px)',
+  },
   error: {
     background: colors.warning,
     color: colors.white,
@@ -146,6 +150,7 @@ interface State {
   loading: boolean;
   name: string;
   nameTouched: boolean;
+  refreshing: boolean;
   saveError: boolean;
   saveModalOpen: boolean;
   saving: boolean;
@@ -171,9 +176,10 @@ export const ListOverview = withCurrentWorkspace()(
         existingCohorts: [],
         genderOrSexType: GenderOrSexType.GENDER,
         initializing: true,
-        loading: true,
+        loading: false,
         name: undefined,
         nameTouched: false,
+        refreshing: false,
         saveError: false,
         saveModalOpen: false,
         saving: false,
@@ -188,37 +194,49 @@ export const ListOverview = withCurrentWorkspace()(
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if (!this.state.initializing && this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
-        this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
     }
 
     getTotalCount() {
-      try {
-        const {searchRequest} = this.props;
-        const {ageType, genderOrSexType} = this.state;
-        const localCheck = this.state.apiCallCheck + 1;
-        this.setState({apiCallCheck: localCheck, currentGraphOptions: {ageType, genderOrSexType}});
-        const {cdrVersionId} = currentWorkspaceStore.getValue();
-        const request = mapRequest(searchRequest);
-        if (request.includes.length > 0) {
-          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request).then(response => {
-            if (localCheck === this.state.apiCallCheck) {
-              this.setState({
-                chartData: response.items,
-                total: response.items.reduce((sum, data) => sum + data.count, 0),
-                loading: false,
-                initializing: false
-              });
-            }
-          });
-        } else {
-          this.setState({chartData: [], total: 0, loading: false, initializing: false});
-        }
-      } catch (error) {
-        console.error(error);
-        this.setState({apiError: true, loading: false});
+      const {searchRequest} = this.props;
+      if (searchRequest.includes.length > 0) {
+        this.setState({loading: true, apiError: false})
+        this.callApi()
+          .then(response => {
+            this.setState({
+              chartData: response.items,
+              total: response.items.reduce((sum, data) => sum + data.count, 0),
+              initializing: false
+            });
+          })
+          .catch(error => {
+            console.error(error);
+            this.setState({apiError: true});
+          })
+          .finally(() => this.setState({loading: false}));
+      } else {
+        this.setState({chartData: [], total: 0, initializing: false});
       }
+    }
+
+    refreshGraphs() {
+      this.setState({refreshing: true});
+      this.callApi()
+        .then(response => {
+          const {ageType, genderOrSexType} = this.state;
+          this.setState({chartData: response.items, currentGraphOptions: {ageType, genderOrSexType}});
+        })
+        .catch(error => console.error(error))
+        .finally(() => this.setState({refreshing: false}));
+    }
+
+    callApi() {
+      const {searchRequest} = this.props;
+      const {ageType, genderOrSexType} = this.state;
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const request = mapRequest(searchRequest);
+      return cohortBuilderApi().getDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request);
     }
 
     get hasActiveItems() {
@@ -343,7 +361,7 @@ export const ListOverview = withCurrentWorkspace()(
     render() {
       const {cohort} = this.props;
       const {ageType, apiError, chartData, currentGraphOptions, deleting, description, existingCohorts, genderOrSexType, loading,
-        name, nameTouched, saveModalOpen, saveError, saving, stackChart, total} = this.state;
+        name, nameTouched, refreshing, saveModalOpen, saveError, saving, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
       const disableSave = loading || saving || this.definitionErrors || !total;
       const disableRefresh = ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
@@ -436,29 +454,35 @@ export const ListOverview = withCurrentWorkspace()(
                     {ageTypeToText(ageType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
                   </button>
                   <button style={disableRefresh ? {...styles.refreshButton, ...styles.disabled} : styles.refreshButton}
-                    onClick={() => this.setState({loading: true}, () => this.getTotalCount())}>REFRESH</button>
+                    onClick={() => this.refreshGraphs()}>REFRESH</button>
                 </div>
-                <div style={styles.cardHeader}>
-                  {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}
-                </div>
-                <div style={{padding: '0.5rem 0.75rem'}}
-                  onMouseEnter={() => triggerEvent('Graphs', 'Hover', 'Graphs - Gender - Cohort Builder')}>
-                  {!!chartData.length && <GenderChart data={chartData} />}
-                </div>
-                <div style={styles.cardHeader}>
-                  {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}, {ageTypeToText(currentGraphOptions.ageType)}, and Race
-                  <ClrIcon shape='sort-by'
-                    className={stackChart ? 'is-info' : ''}
-                    onClick={() => this.toggleChartMode()} />
-                </div>
-                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
-                  'Graphs',
-                  'Hover',
-                  'Graphs - Gender Age Race - Cohort Builder'
-                )}>
-                  {!!chartData.length &&
-                    <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
-                </div>
+                {refreshing ?
+                  <div style={{height: '15rem'}}>
+                    <Spinner style={styles.chartSpinner} size={75}/>
+                  </div> :
+                  <React.Fragment>
+                    <div style={styles.cardHeader}>
+                      {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}
+                    </div>
+                    <div style={{padding: '0.5rem 0.75rem'}}
+                      onMouseEnter={() => triggerEvent('Graphs', 'Hover', 'Graphs - Gender - Cohort Builder')}>
+                      {!!chartData.length && <GenderChart data={chartData} />}
+                    </div>
+                    <div style={styles.cardHeader}>
+                      {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}, {ageTypeToText(currentGraphOptions.ageType)}, and Race
+                      <ClrIcon shape='sort-by'
+                        className={stackChart ? 'is-info' : ''}
+                        onClick={() => this.toggleChartMode()} />
+                    </div>
+                    <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                      'Graphs',
+                      'Hover',
+                      'Graphs - Gender Age Race - Cohort Builder'
+                    )}>
+                      {!!chartData.length && <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
+                    </div>
+                  </React.Fragment>
+                }
               </div>
             </div>
           }
