@@ -404,6 +404,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     onResearchPurposeChange(checked) {
+      // If Checkbox is selected expand the research purpose categories
       if (checked) {
         this.setState({showResearchPurpose: true, selectResearchPurpose: true});
         return;
@@ -412,6 +413,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     get researchPurposeCheck() {
+      // If any one of the Research Purpose is selected or if the user has explicitly selected the research purpose
       return this.state.selectResearchPurpose ||
         this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose);
     }
@@ -575,6 +577,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     updatePrimaryPurpose(cateogry, value) {
       this.updateResearchPurpose(cateogry, value);
       if (!value && !this.researchPurposeCategoriesSelected(this.state)) {
+        // If all research purpose cateogries are unselected un check the Research Purpose checkbox
         this.setState({selectResearchPurpose: false});
       }
 
