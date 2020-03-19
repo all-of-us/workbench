@@ -31,22 +31,23 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     this.createAccount = this.createAccount.bind(this);
   }
 
-  async createAccount(profile, captchaToken) {
+  async createAccount(profile, captchaToken): Promise<Profile> {
     const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
 
-    profileApi().createAccount({
-      profile: profile,
-      captchaVerificationToken: captchaToken,
-      invitationKey: invitationKey,
-      termsOfServiceVersion: termsOfServiceVersion
-    }).then((newProfile) => {
+    try {
+      const newProfile = await profileApi().createAccount({
+        profile: profile,
+        captchaVerificationToken: captchaToken,
+        invitationKey: invitationKey,
+        termsOfServiceVersion: termsOfServiceVersion
+      });
       onComplete(newProfile);
       return newProfile;
-    }).catch(async(error) => {
+    } catch (error) {
       reportError(error);
       const errorResponse = await convertAPIError(error);
       this.setState({createAccountErrorResponse: errorResponse});
-    });
+    }
   }
 
   render() {

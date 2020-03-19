@@ -2,11 +2,12 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {serverConfigStore} from 'app/utils/navigation';
-import {DemographicSurvey, Props} from 'src/app/pages/profile/demographic-survey';
+import {DemographicSurvey, Props} from 'app/pages/profile/demographic-survey';
 import {Ethnicity, GenderIdentity, ProfileApi, Race, SexAtBirth} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {Profile} from "generated/fetch";
 
 let props: Props;
 const defaultConfig = {gsuiteDomain: 'researchallofus.org', requireInstitutionalVerification: false};
@@ -21,7 +22,7 @@ beforeEach(() => {
     profile: createEmptyProfile(),
     onPreviousClick: () => {},
     onCancelClick: () => {},
-    onSubmit: () => {},
+    onSubmit: () => Promise.resolve(createEmptyProfile()),
     enableCaptcha: false,
     enablePrevious: false
   };
