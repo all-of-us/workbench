@@ -11,11 +11,21 @@ const defaultLaunchOpts = {
     '--disable-setuid-sandbox',
     '--disable-dev-shm-usage',
     '--disable-gpu',
-    '--disable-background-timer-throttling',
-    '--disable-backgrounding-occluded-windows',
+    '--disable-background-timer-throttling',//
+    '--disable-backgrounding-occluded-windows',//
     '--disable-renderer-backgrounding',
     '--disable-web-security',
-    '--disable-features=IsolateOrigins,site-per-process',
+    '--disable-breakpad',
+    '--disable-component-extensions-with-background-pages',
+    '--disable-extensions',
+    '--disable-features=TranslateUI,BlinkGenPropertyTrees,IsolateOrigins,site-per-process',
+    '--disable-ipc-flooding-protection',
+    '--enable-features=NetworkService,NetworkServiceInProcess',
+    '--force-color-profile=srgb',
+    '--hide-scrollbars',
+    '--metrics-recording-only',
+    '--mute-audio',
+    '--headless',
   ]
 };
 
