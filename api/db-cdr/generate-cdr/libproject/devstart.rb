@@ -101,6 +101,7 @@ def publish_cdr(cmd_name, args)
     # account user. Ideally the activation would be hermetic within the docker
     # session, or else we would revert the active account after running.
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
+    common.status "******** gcloud auth activate-service-account -q --key-file #{key_file.path} ******"
 
     source_dataset = "#{env.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
     ingest_dataset = "#{env.fetch(:ingest_cdr_project)}:#{op.opts.bq_dataset}"
