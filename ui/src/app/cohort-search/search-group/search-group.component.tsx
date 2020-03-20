@@ -7,6 +7,7 @@ import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-searc
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {RenameModal} from 'app/components/rename-modal';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -14,7 +15,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
+import {DomainType, ResourceType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
 import {InputSwitch} from 'primereact/inputswitch';
 import {Menu} from 'primereact/menu';
 import {TieredMenu} from 'primereact/tieredmenu';
@@ -210,6 +211,7 @@ interface State {
   inputTouched: boolean;
   loading: boolean;
   overlayStyle: any;
+  renaming: boolean;
 }
 
 export const SearchGroup = withCurrentWorkspace()(
@@ -232,7 +234,8 @@ export const SearchGroup = withCurrentWorkspace()(
         inputError: false,
         inputTouched: false,
         loading: false,
-        overlayStyle: undefined
+        overlayStyle: undefined,
+        renaming: false
       };
     }
 
@@ -354,6 +357,14 @@ export const SearchGroup = withCurrentWorkspace()(
       const searchRequest = searchRequestStore.getValue();
       searchRequest[role] = searchRequest[role].filter(grp => grp.id !== group.id);
       searchRequestStore.next(searchRequest);
+    }
+
+    rename(newName: string) {
+      const {group, index, role} = this.props;
+      const searchRequest = searchRequestStore.getValue();
+      searchRequest[role][index] = {...group, name: newName};
+      searchRequestStore.next(searchRequest);
+      this.setState({renaming: false});
     }
 
     setOverlayPosition() {
@@ -479,6 +490,7 @@ export const SearchGroup = withCurrentWorkspace()(
 
     get groupMenuItems() {
       return [
+        {label: 'Edit group name', command: () => this.setState({renaming: true})},
         {label: 'Suppress group from total count', command: () => this.hide('hidden')},
         {label: 'Delete group', command: () => this.remove()},
       ];
@@ -498,8 +510,9 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     render() {
-      const {group: {id, items, mention, status, temporal, time, timeValue}, index, role} = this.props;
-      const {count, error, inputError, inputTouched, loading, overlayStyle} = this.state;
+      const {group: {id, items, mention, name, status, temporal, time, timeValue}, index, role} = this.props;
+      const {count, error, inputError, inputTouched, loading, overlayStyle, renaming} = this.state;
+      const groupName = !!name ? name : `Group ${index + 1}`;
       const showGroupCount = !loading && !error && this.hasActiveItems && (!temporal || !this.temporalError) && count !== undefined;
       const showGroupError = error || !this.hasActiveItems || (temporal && this.temporalError);
       return <React.Fragment>
@@ -515,7 +528,7 @@ export const SearchGroup = withCurrentWorkspace()(
             <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}}onClick={(e) => this.groupMenu.toggle(e)}>
               <ClrIcon style={{color: colors.accent}} shape='ellipsis-vertical'/>
             </Clickable>
-            Group {index + 1}
+            {groupName}
           </div>
           {/* Temporal mention dropdown */}
           {temporal && <div style={styles.cardBlock}>
@@ -636,6 +649,9 @@ export const SearchGroup = withCurrentWorkspace()(
             </React.Fragment>}
           </div>
         </div>}
+        {renaming && <RenameModal existingNames={[]} oldName={name || 'this group'} hideDescription={true}
+          onCancel={() => this.setState({renaming: false})}
+          onRename={(v) => this.rename(v)} resourceType={ResourceType.COHORTSEARCHGROUP} />}
       </React.Fragment>;
     }
   }
