@@ -36,11 +36,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace);
 
-  // RecentWorkspace toApiRecentWorkspace(DbUserRecentWorkspace dbUserRecentWorkspace);
-
-  // This method is simply merging the research purpose, which covers only a subset of the fields
-  // in the DbWorkspace source.
-
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
   @Mapping(target = "researchOutcomeList", source = "researchOutcomeEnumSet")

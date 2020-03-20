@@ -98,7 +98,6 @@ describe('WorkspaceEdit', () => {
   it('pre-fills "specific populations" form elements when editing', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
-    workspace.researchPurpose.population = true;
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN];
 
     routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
