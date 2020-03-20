@@ -5,19 +5,22 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {Button, Clickable} from 'app/components/buttons';
-import { FlexColumn, FlexRow } from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import { getRegistrationTasksMap } from 'app/pages/homepage/registration-dashboard';
-import { ProfileRegistrationStepStatus } from 'app/pages/profile/profile-registration-step-status';
+import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
+import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
+import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import {InstitutionalAffiliation, InstitutionalRole, Profile} from 'generated/fetch';
+import {ErrorResponse, InstitutionalAffiliation, InstitutionalRole, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   h1: {
@@ -44,6 +47,11 @@ const styles = reactStyles({
     borderRadius: 8,
     padding: 21
   },
+  title: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: 600
+  },
   uneditableProfileElement: {
     paddingLeft: '0.5rem',
     marginRight: 20,
@@ -69,9 +77,23 @@ const validators = {
   areaOfResearch: required,
 };
 
+interface ProfilePageProps {
+  profileState: {
+    profile: Profile;
+    reload: () => {};
+  };
+}
+
+interface ProfilePageState {
+  currentProfile: Profile;
+  saveProfileErrorResponse: ErrorResponse;
+  showDemographicSurveyModal: boolean;
+  updating: boolean;
+}
+
 export const ProfilePage = withUserProfile()(class extends React.Component<
-  { profileState: { profile: Profile, reload: Function } },
-  { profileEdits: Profile, updating: boolean }
+    ProfilePageProps,
+    ProfilePageState
 > {
   static displayName = 'ProfilePage';
 
@@ -79,7 +101,9 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     super(props);
 
     this.state = {
-      profileEdits: props.profileState.profile || {},
+      currentProfile: props.profileState.profile || this.createInitialProfile(),
+      saveProfileErrorResponse: null,
+      showDemographicSurveyModal: false,
       updating: false
     };
   }
@@ -89,24 +113,41 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
+  createInitialProfile(): Profile {
+    return {
+      ...this.props.profileState.profile,
+      demographicSurvey: {}
+    };
+  }
+
   componentDidUpdate(prevProps) {
     const {profileState: {profile}} = this.props;
 
     if (!fp.isEqual(prevProps.profileState.profile, profile)) {
-      this.setState({profileEdits: profile}); // for when profile loads after component load
+      this.setState({currentProfile: profile}); // for when profile loads after component load
     }
   }
 
-  async saveProfile() {
+  async saveProfile(profile: Profile): Promise<Profile> {
     const {profileState: {reload}} = this.props;
 
-    this.setState({updating: true});
+    // updating is only used to control spinner display. If the demographic survey modal
+    // is open (and, by extension, it is causing this save), a spinner is being displayed over
+    // that modal, so no need to show one here.
+    if (!this.state.showDemographicSurveyModal) {
+      this.setState({updating: true});
+    }
 
     try {
-      await profileApi().updateProfile(this.state.profileEdits);
+      await profileApi().updateProfile(profile);
       await reload();
-    } catch (e) {
-      console.error(e);
+      return profile;
+    } catch (error) {
+      reportError(error);
+      const errorResponse = await convertAPIError(error);
+      this.setState({saveProfileErrorResponse: errorResponse});
+      console.error(error);
+      return Promise.reject();
     } finally {
       this.setState({updating: false});
     }
@@ -114,13 +155,13 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
   render() {
     const {profileState: {profile}} = this.props;
-    const {profileEdits, updating} = this.state;
+    const {currentProfile, saveProfileErrorResponse, updating, showDemographicSurveyModal} = this.state;
     const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, requireInstitutionalVerification} =
       serverConfigStore.getValue();
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
       institutionalAffiliations = []
-    } = profileEdits;
+    } = currentProfile;
     const errors = validate({
       givenName, familyName, currentPosition, organization, areaOfResearch
     }, validators, {
@@ -145,8 +186,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       const errorText = profile && errors && errors[valueKey];
 
       const inputProps = {
-        value: fp.get(valueKey, profileEdits) || '',
-        onChange: v => this.setState(fp.set(['profileEdits', ...valueKey], v)),
+        value: fp.get(valueKey, currentProfile) || '',
+        onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
         invalid: !!errorText,
         ...props
       };
@@ -168,14 +209,14 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
     const removeOldInstitutionalAffiliation = (affiliation: InstitutionalAffiliation) => {
       this.setState(fp.update(
-        ['profileEdits', 'institutionalAffiliations'],
+        ['currentProfile', 'institutionalAffiliations'],
         fp.pull(affiliation)
       ));
     };
 
     const addEmptyOldInstitutionalAffiliation = () => {
       this.setState(fp.update(
-        ['profileEdits', 'institutionalAffiliations'],
+        ['currentProfile', 'institutionalAffiliations'],
         affiliation => fp.concat(affiliation, {institution: '', role: ''})));
     };
 
@@ -320,7 +361,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           {renderInstitutionalAffiliationComponents()}
           <div style={{marginTop: 100, display: 'flex'}}>
             <Button type='link'
-              onClick={() => this.setState({profileEdits: profile})}
+              onClick={() => this.setState({currentProfile: profile})}
             >
               Discard Changes
             </Button>
@@ -332,8 +373,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 data-test-id='save profile'
                 type='purplePrimary'
                 style={{marginLeft: 40}}
-                onClick={() => this.saveProfile()}
-                disabled={!!errors || fp.isEqual(profile, profileEdits)}
+                onClick={() => this.saveProfile(currentProfile)}
+                disabled={!!errors || fp.isEqual(profile, currentProfile)}
               >
                 Save Profile
               </Button>
@@ -353,6 +394,16 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               {usdElement(profile.freeTierDollarQuota - profile.freeTierUsage)}
             </FlexColumn>
           </FlexRow>}
+          <div>
+            <div style={styles.title}>Optional Demographics Survey</div>
+            <Button
+                type={'link'}
+                onClick={() => {
+                  this.setState({showDemographicSurveyModal: true});
+                }}
+                data-test-id={'demographics-survey-button'}
+            >Update Survey</Button>
+          </div>
           <ProfileRegistrationStepStatus
             title='Google 2-Step Verification'
             wasBypassed={!!profile.twoFactorAuthBypassTime}
@@ -419,8 +470,40 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </a>
           </ProfileRegistrationStepStatus>}
         </div>
-
       </div>
+      {showDemographicSurveyModal && <Modal width={850}>
+        <DemographicSurvey
+            profile={currentProfile}
+            onCancelClick={() => {
+              this.setState({showDemographicSurveyModal: false});
+            }}
+            onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
+              const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
+              this.setState({showDemographicSurveyModal: false});
+              return savedProfile;
+            }}
+            enableCaptcha={false}
+            enablePrevious={false}
+        />
+      </Modal>}
+      {saveProfileErrorResponse &&
+        <Modal data-test-id='update-profile-error'>
+          <ModalTitle>Error creating account</ModalTitle>
+          <ModalBody>
+            <div>An error occurred while updating your profile. The following message was returned:</div>
+            <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+              "{saveProfileErrorResponse.message}"
+            </div>
+            <div>
+              Please try again or contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick = {() => this.setState({saveProfileErrorResponse: null})}
+                    type='primary'>Close</Button>
+          </ModalFooter>
+        </Modal>
+      }
     </div>;
   }
 });
