@@ -1,6 +1,5 @@
 import {mount, ReactWrapper, shallow, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
-import {Document, Page} from 'react-pdf';
 import AccountCreationTos, {AccountCreationTosProps} from './account-creation-tos';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
@@ -29,25 +28,6 @@ beforeEach(() => {
 it('should render', async() => {
   const wrapper = mount(<AccountCreationTos {...props} />);
   expect(wrapper.exists()).toBeTruthy();
-});
-
-// TODO: this test is really about the PDF rendering, which should be bumped out when we encapsulate
-// PDF rendering into its own component.
-it('should load PDF pages', async() => {
-  const wrapper = shallow(<AccountCreationTos {...props} />).shallow();
-
-  // Initially we should have a document and no pages.
-  expect(wrapper.find(Document).length).toEqual(1);
-  expect(wrapper.find(Page).length).toEqual(0);
-
-  // Simulate the PDF document loading and calling the 'onLoadSuccess' prop to indicate we have
-  // 10 pages in the PDF.
-  const pdfDocument = wrapper.find(Document);
-  const onSuccess = pdfDocument.prop('onLoadSuccess') as (data: object) => {};
-  onSuccess({numPages: 10});
-
-  // We should now be rendering a <Page> component for each of the pages.
-  expect(wrapper.find(Page).length).toEqual(10);
 });
 
 it('should enable checkboxes and next button with user input', async() => {

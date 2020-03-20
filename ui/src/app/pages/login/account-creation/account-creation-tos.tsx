@@ -1,11 +1,10 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {CheckBox} from 'app/components/inputs';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {PdfViewer} from 'app/components/pdf-viewer';
 import colors from 'app/styles/colors';
 import {reactStyles, withWindowSize} from 'app/utils';
 import * as React from 'react';
-import {Document, Page} from 'react-pdf';
 
 const baseCheckboxLabelStyle = {
   color: colors.primary,
@@ -53,7 +52,6 @@ interface AccountCreationTosState {
 
 export const AccountCreationTos = withWindowSize()(
   class extends React.Component<AccountCreationTosProps, AccountCreationTosState> {
-
     // Tracks whether this component has created an intersection observer to track the last page
     // visibility yet.
     hasCreatedIntersectionObserver = false;
@@ -82,7 +80,7 @@ export const AccountCreationTos = withWindowSize()(
       }
       this.hasCreatedIntersectionObserver = true;
       const intersectionCallback: IntersectionObserverCallback = (
-        entries: IntersectionObserverEntry[], unusedObserver: IntersectionObserver) => {
+          entries: IntersectionObserverEntry[], unusedObserver: IntersectionObserver) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             this.setState({hasReadEntireTos: true});
@@ -93,44 +91,21 @@ export const AccountCreationTos = withWindowSize()(
       observer.observe(this.lastPage);
     }
 
+    private setLastPageRef(ref) {
+      this.lastPage = ref;
+    }
+
     render() {
-      const {numPages, loadingPdf, hasReadEntireTos, hasAckedTermsOfService, hasAckedPrivacyStatement} = this.state;
+      const {hasReadEntireTos, hasAckedTermsOfService, hasAckedPrivacyStatement} = this.state;
 
       return <FlexColumn data-test-id='account-creation-tos'
                          style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
-        {/* TODO: all of this PDF rendering stuff should be broken out into a separate component. */}
-        <div style={{flex: '1 1 0', overflowY: 'auto'}}>
-          {loadingPdf && <SpinnerOverlay/>}
-          <Document data-test-id='tos-pdf-document' file={this.props.pdfPath}
-                    loading=''
-                    onLoadSuccess={data => this.setState(
-                      {numPages: data.numPages, loadingPdf: false})}
-          >
-            {
-              Array.from(
-                new Array(numPages),
-                (el, index) => (
-                  // We can't set inline styles on the react-pdf Page element, so instead we set a
-                  // className and specify some style overrides in src/styles.css
-                  <Page
-                    renderAnnotationLayer={false}
-                    renderTextLayer={false}
-                    loading=''
-                    className='tos-pdf-page'
-                    width={Math.max(500, this.props.windowSize.width * .75)}
-                    key={`page_${index + 1}`}
-                    pageNumber={index + 1}
-                    inputRef={index === numPages - 1 ? (ref) => {
-                      this.lastPage = ref;
-                    } : undefined}
-                    onRenderSuccess={index === numPages - 1 ? () => this.handleLastPageRender() :
-                      undefined}
-                  />
-                ),
-              )
-            }
-          </Document>
-        </div>
+        <PdfViewer
+            handleLastPageRender={() => this.handleLastPageRender()}
+            pdfPath={this.props.pdfPath}
+            setLastPageRef={(ref) => this.setLastPageRef(ref)}
+            windowSize={this.props.windowSize}
+        />
         <FlexRow
           style={{display: 'inline-flex', padding: '1rem', maxWidth: '1000px', margin: 'auto'}}>
           <div style={{flex: 3}}>
