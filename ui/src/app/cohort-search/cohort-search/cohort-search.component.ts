@@ -53,7 +53,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
             }
           });
       } else {
-        this.cohort = {criteria: '{"includes":[],"excludes":[], dataFilters: []}'};
+        this.cohort = {criteria: '{"includes":[],"excludes":[],"dataFilters":[]}'};
       }
     });
 
