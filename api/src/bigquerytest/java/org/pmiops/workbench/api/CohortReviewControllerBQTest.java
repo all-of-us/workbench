@@ -70,6 +70,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -95,6 +96,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortQueryBuilder.class,
     SearchGroupItemQueryBuilder.class,
     ManualWorkspaceMapper.class,
+    WorkspaceMapperImpl.class,
     CommonMappers.class
   })
   @MockBean({
