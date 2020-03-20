@@ -102,7 +102,7 @@ export class WorkspaceResearchSummary extends React.Component<Props, State > {
         <div data-test-id='characterMessage'
              style={{color: textColor, marginLeft: 'auto'}}>
           {1000 - researchValue.length} characters remaining</div>}
-        {researchValue.length === 1000 &&
+        {researchValue && researchValue.length === 1000 &&
         <label data-test-id='characterLimit' style={{color: colors.danger}}>
           You have reached the character limit for this question</label>}
 
