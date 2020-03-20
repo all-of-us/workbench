@@ -7062,13 +7062,6 @@ definitions:
         - - type: A Crit Type
             searchParameters:
             - value: A value
-  DataFilter:
-    description: 'A filter for which data to search'
-    type: string
-    enum:
-      - HAS_EHR_DATA
-      - HAS_PPI_SURVEY_DATA
-      - HAS_PHYSICAL_MEASUREMENT_DATA
   SearchGroup:
     description: 'A SearchGroup is a container for groups of criteria which are `OR`ed
       together.
