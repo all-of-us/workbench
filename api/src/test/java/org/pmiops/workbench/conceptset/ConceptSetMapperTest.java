@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Surveys;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -26,7 +27,10 @@ public class ConceptSetMapperTest {
   private DbConceptSet dbConceptSet;
 
   @TestConfiguration
-  @Import({ConceptSetMapperImpl.class})
+  @Import({
+      ConceptSetMapperImpl.class,
+      CommonMappers.class
+  })
   static class Configuration {}
 
   @Before
