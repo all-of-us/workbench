@@ -70,6 +70,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortCloningService.class,
     CohortQueryBuilder.class,
     SearchGroupItemQueryBuilder.class,
-    ManualWorkspaceMapper.class
+    ManualWorkspaceMapper.class,
+    CommonMappers.class
   })
   @MockBean({
     FireCloudService.class,
