@@ -147,8 +147,7 @@ export interface ResearchPurposeQuestion {
 export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
   {
     header: ' What is the primary purpose of your project?',
-    description: <div>All fields required unless indicated as optional. Your response will be
-      displayed publicly</div>
+    description: <div></div>
   }, {
     header: <div> Please provide a summary of your research purpose by responding to the
       questions below.</div>,
@@ -271,9 +270,9 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
       {label: 'Older adults (65-74)', shortName: SpecificPopulationEnum.AGEOLDER},
       {label: 'Older adults (75+) ', shortName: SpecificPopulationEnum.AGEOLDERMORETHAN75}]
   }, {
-    label: 'Sex',
+    label: 'Sex At Birth',
     shortName: SpecificPopulationEnum.SEX,
-    ubrLabel: 'Sex',
+    ubrLabel: 'Sex At Birth',
     ubrDescription: 'Intersex',
     subCategory: [
       {
@@ -322,7 +321,7 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
       shortName: SpecificPopulationEnum.DISABILITYSTATUS
     }]
   }, {
-    label: 'Access to care',
+    label: 'Access To care',
     shortName: SpecificPopulationEnum.ACCESSTOCARE,
     ubrLabel: 'Access to Care',
     ubrDescription: 'Limited access to care; Cannot easily obtain or access medical care',
@@ -413,3 +412,8 @@ export const researchOutcomes = [
     shortName: ResearchOutcomeEnum.NONEAPPLY
   }
 ];
+
+export const RequestForReviewFooter = 'Note: The RAB is available to you at any time to help ' +
+    'address questions about potentially stigmatizing research. As your research progresses, ' +
+    'should any new concerns arise based on study outcomes, please contact the RAB for ' +
+    'assistance through the User Support menu in your workspace.';

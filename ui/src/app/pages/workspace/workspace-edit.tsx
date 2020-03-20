@@ -15,6 +15,7 @@ import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
   disseminateFindings,
   PrimaryPurposeItems,
+  RequestForReviewFooter,
   researchOutcomes,
   ResearchPurposeDescription,
   ResearchPurposeItem,
@@ -839,8 +840,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
               description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
-              Therefore, please provide sufficiently detailed responses at a 5th grade reading
-              level.  Your responses will not be used to make decisions about data access. <br/><br/>
+              <br/><br/>
               <i>Note that you are required to create separate Workspaces for each project
                 for which you access All of Us data, hence the responses below are expected
                 to be specific to the project for which you are creating this particular
@@ -905,7 +905,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                               description={researchPurposeQuestions[5].description} style={{width: '50rem'}} index='3.'>
           <FlexRow>
             <FlexColumn style={styles.flexColumnBy2}>
-              {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings) + 1).map(
+              {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
                 (rp, i) => this.makeDisseminateForm(rp, i))}
             </FlexColumn>
             <FlexColumn style={styles.flexColumnBy2}>
@@ -1043,6 +1043,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   have no concerns at this time about potential stigmatization based on my study.</label>
                 </FlexRow>
               </FlexColumn>
+              <label style={{...styles.text, paddingTop: '0.5rem'}}>{RequestForReviewFooter}</label>
             </FlexColumn>
           </FlexRow>
         </WorkspaceEditSection>
