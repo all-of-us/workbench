@@ -30,20 +30,17 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
@@ -77,13 +74,7 @@ public class UserServiceTest {
   @Autowired private UserDao userDao;
 
   @TestConfiguration
-  @Import({
-    UserServiceImpl.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
-    PublicInstitutionDetailsMapperImpl.class
-  })
-  static class Configuration {
+  static class Configuration extends UserServiceTestConfiguration {
     @Bean
     Clock clock() {
       return PROVIDED_CLOCK;

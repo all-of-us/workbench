@@ -47,7 +47,6 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
@@ -61,9 +60,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Concept;
@@ -88,6 +84,7 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
@@ -189,16 +186,12 @@ public class CohortsControllerTest {
     ConceptSetService.class,
     ConceptService.class,
     NotebooksServiceImpl.class,
-    UserServiceImpl.class,
     WorkspacesController.class,
     CohortsController.class,
     ConceptSetsController.class,
     WorkspaceMapperImpl.class,
     ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
-    PublicInstitutionDetailsMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -217,7 +210,7 @@ public class CohortsControllerTest {
     UserServiceAuditor.class,
     FreeTierBillingService.class
   })
-  static class Configuration {
+  static class Configuration extends UserServiceTestConfiguration {
 
     @Bean
     Cloudbilling cloudbilling() {

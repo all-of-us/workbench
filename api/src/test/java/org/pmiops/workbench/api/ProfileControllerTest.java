@@ -36,7 +36,6 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -48,11 +47,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
@@ -83,6 +79,7 @@ import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -157,18 +154,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
-    UserServiceImpl.class,
     ProfileService.class,
     ProfileController.class,
     ProfileMapperImpl.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class,
     CaptchaVerificationService.class,
-    PublicInstitutionDetailsMapperImpl.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class
+    VerifiedInstitutionalAffiliationMapperImpl.class,
   })
-  static class Configuration {
+  static class Configuration extends UserServiceTestConfiguration {
     @Bean
     @Primary
     Clock clock() {

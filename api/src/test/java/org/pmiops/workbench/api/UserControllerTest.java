@@ -21,20 +21,17 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -61,10 +58,6 @@ public class UserControllerTest {
   @TestConfiguration
   @Import({
     UserController.class,
-    UserServiceImpl.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
-    PublicInstitutionDetailsMapperImpl.class
   })
   @MockBean({
     FireCloudService.class,
@@ -73,7 +66,7 @@ public class UserControllerTest {
     AdminActionHistoryDao.class,
     UserServiceAuditor.class
   })
-  static class Configuration {
+  static class Configuration extends UserServiceTestConfiguration {
 
     @Bean
     @Scope("prototype")

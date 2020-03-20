@@ -36,7 +36,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -46,9 +45,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -62,6 +58,7 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -113,13 +110,9 @@ public class ClusterControllerTest {
   @TestConfiguration
   @Import({
     ClusterController.class,
-    UserServiceImpl.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
     WorkspaceMapperImpl.class,
-    PublicInstitutionDetailsMapperImpl.class
   })
-  static class Configuration {
+  static class Configuration extends UserServiceTestConfiguration {
 
     @Bean
     @Scope("prototype")

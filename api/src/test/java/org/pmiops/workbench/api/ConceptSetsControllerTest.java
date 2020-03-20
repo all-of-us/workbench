@@ -40,7 +40,6 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -54,9 +53,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
@@ -72,6 +68,7 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
@@ -224,17 +221,13 @@ public class ConceptSetsControllerTest {
     CohortCloningService.class,
     CohortFactoryImpl.class,
     ConceptSetMapperImpl.class,
-    UserServiceImpl.class,
     ConceptSetsController.class,
     ConceptService.class,
     WorkspacesController.class,
     ConceptSetService.class,
     WorkspaceMapperImpl.class,
     ManualWorkspaceMapper.class,
-    LogsBasedMetricServiceFakeImpl.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
-    PublicInstitutionDetailsMapperImpl.class
+    LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -250,7 +243,7 @@ public class ConceptSetsControllerTest {
     UserServiceAuditor.class,
     FreeTierBillingService.class
   })
-  static class Configuration {
+  static class Configuration extends UserServiceTestConfiguration {
 
     @Bean
     Cloudbilling cloudbilling() {
