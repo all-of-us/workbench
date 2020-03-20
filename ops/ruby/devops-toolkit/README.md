@@ -67,6 +67,42 @@ To use it, do
 bundle install
 ```
 
+## Tasks
+A variety of tasks (sub-commands) are available via the required `-t` option. Here  are their
+brief descriptions:
+- `delete-all-service-account-keys`: Delete all the keys for the servie accounts and environments
+supplied. This action will interfere with any other users of this service account, so use with care.
+Main use case is cleaning up after debugging sessions where the process with a breakpoint is killed
+instead of allowed to continue and remove the key(s) that it created.
+    - usage: `./devops.rb --task delete-all-service-account-keys
+                          --envs-file ~/inputs/target_envs.json`
+- `list-all-service-account-keys`: Lists all the known service account keys for the supplied
+service accounts & environments.
+    - usage: `./devops.rb --task list-all-service-account-keys
+                          --envs-file monitoring_env_targets.json`
+- `list-dashboards`: Visit all the Stackdriver Dashboards in all the supplied environments and log
+summary information.
+    - usage: `./devops.rb -t list-dashboards
+              -e monitoring_env_targets.json`
+- `list-dev-tools`: Gather information about installed tools, including version and installation
+location. Additionally retrieve system, user, and OS information. Use case for this is getting info
+on the systems of a group of developers collaborating on a project to make sure none of them are too
+far ahead or behind.
+    - usage: `./devops.rb -t list-dev-tools
+                          -i ./tasks/input/aou-workbench-dev-tools.yaml
+                          -o ~/aou-dev-tools.yaml`
+-  `inventory`: List information about a variety of monitoring assets, including dashboards, metrics,
+logs-based, metrics, and alerting policies. This option may be broken into individual list options in
+the future.
+    - usage: `./devops.rb -tinventory
+              -e monitoring_env_targets.json`
+- `replicate-dashboard`: Given a dashboard identifier and containing project, this tool creates new
+dashboards in all passed-in target environments. A few fields are updated for each copy including the
+`namespace` for the metric filters and an environment short name suffix in the title, such as `[test]`.
+    - usage: `./devops.rb --task replicate-dashboard
+              --envs-file monitoring_env_targets.json
+              --source-uri=100000000000000
+              --source-env=qa`
 ## Design Decisions
 I should justify some of the  directions I've taken here, since they're departures to varying
 degrees from how we've traditionally done things.
