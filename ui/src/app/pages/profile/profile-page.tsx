@@ -17,7 +17,7 @@ import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registrat
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {convertAPIError, reportError} from "app/utils/errors";
+import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {ErrorResponse, InstitutionalAffiliation, InstitutionalRole, Profile} from 'generated/fetch';
