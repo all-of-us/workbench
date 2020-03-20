@@ -227,10 +227,10 @@ export default abstract class BasePage {
    * @param fileName
    */
   async takeScreenshot(fileName: string) {
-    const dir = 'logs/screenshot';
-    await fse.ensureDir(dir);
+    const SCREENSHOT_DIR = 'logs/screenshot';
+    await fse.ensureDir(SCREENSHOT_DIR);
     const timestamp = new Date().getTime();
-    const screenshotFile = `${dir}/${fileName}_${timestamp}.png`;
+    const screenshotFile = `${SCREENSHOT_DIR}/${fileName}_${timestamp}.png`;
     await this.page.screenshot({path: screenshotFile, fullPage: true});
     console.log('screenshot taken: ' + screenshotFile);
   }

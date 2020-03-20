@@ -92,10 +92,10 @@ export default class GoogleLoginPage extends BasePage {
   async load(): Promise<void> {
     const url = configs.uiBaseUrl + configs.loginUrlPath;
     try {
-      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 30000});
+      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 20000});
     } catch (err) {
       console.error('Google login page not found. ' + err);
-      await this.takeScreenshot('GoogleLoginNotFound');
+      await this.takeScreenshot('GoogleLoginPageNotFound');
       throw err;
     }
   }
