@@ -3189,6 +3189,19 @@ paths:
             and ethnicity.
           schema:
             "$ref": "#/definitions/ParticipantDemographics"
+  "/v1/cohortbuilder/{cdrVersionId}/dataFilters":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: Returns data filter options per cdr version
+      operationId: findDataFilters
+      responses:
+        200:
+          description: A collection of data filter options
+          schema:
+            "$ref": "#/definitions/DataFiltersResponse"
 definitions:
   ArchivalStatus:
     type: string
@@ -3433,6 +3446,32 @@ definitions:
           this domain
         type: integer
         format: int64
+  DataFiltersResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DataFilter"
+  DataFilter:
+    type: object
+    required:
+    - dataFilterId
+    - displayName
+    - name
+    properties:
+      dataFilterId:
+        description: unique id
+        type: integer
+        format: int64
+      displayName:
+        description: display name
+        type: string
+      name:
+        description: name
+        type: string
   SurveyModule:
     type: object
     required:

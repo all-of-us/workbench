@@ -25,17 +25,19 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbPerson;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapperImpl;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
+import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -52,6 +54,7 @@ import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.DomainType;
@@ -92,7 +95,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroupItemQueryBuilder.class,
     CdrVersionService.class,
     CriteriaMapperImpl.class,
-    AgeTypeCountMapperImpl.class
+    AgeTypeCountMapperImpl.class,
+    DataFilterMapperImpl.class
   })
   @MockBean({FireCloudService.class})
   static class Configuration {
@@ -126,11 +130,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CriteriaMapper criteriaMapper;
 
-  @Autowired private AgeTypeCountMapper ageTypeCountMapper;
-
   @Autowired private FireCloudService firecloudService;
 
   @Autowired private PersonDao personDao;
+
+  @Autowired private CBDataFilterDao cbDataFilterDao;
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
@@ -358,6 +362,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     dbPerson1 = personDao.save(DbPerson.builder().addAgeAtConsent(55).addAgeAtCdr(56).build());
     dbPerson2 = personDao.save(DbPerson.builder().addAgeAtConsent(22).addAgeAtCdr(22).build());
     dbPerson3 = personDao.save(DbPerson.builder().addAgeAtConsent(34).addAgeAtCdr(35).build());
+    cbDataFilterDao.save(
+        DbDataFilter.builder()
+            .addDataFilterId(1L)
+            .addDisplayName("displayName1")
+            .addName("name1")
+            .build());
+    cbDataFilterDao.save(
+        DbDataFilter.builder()
+            .addDataFilterId(2L)
+            .addDisplayName("displayName2")
+            .addName("name2")
+            .build());
   }
 
   @After
@@ -788,6 +804,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertTrue(options.contains(option2));
     assertTrue(options.contains(option3));
     assertTrue(options.contains(option4));
+  }
+
+  @Test
+  public void findDataFilters() {
+    List<DataFilter> filters =
+        controller.findDataFilters(cdrVersion.getCdrVersionId()).getBody().getItems();
+    assertTrue(
+        filters.contains(
+            new DataFilter().dataFilterId(1L).displayName("displayName1").name("name1")));
+    assertTrue(
+        filters.contains(
+            new DataFilter().dataFilterId(2L).displayName("displayName2").name("name2")));
   }
 
   @Test
