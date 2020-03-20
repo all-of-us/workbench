@@ -40,7 +40,7 @@ describe('Login tests:', () => {
   test('Entered wrong password', async () => {
     const INCORRECT_PASSWORD = 'wrongpassword123';
     const loginPage = new GoogleLoginPage(page);
-    await loginPage.goto();
+    await loginPage.load();
 
     const naviPromise = page.waitForNavigation({waitUntil: 'networkidle0'});
     const googleButton = await loginPage.loginButton();

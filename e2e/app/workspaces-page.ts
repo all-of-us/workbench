@@ -29,6 +29,14 @@ export default class WorkspacesPage extends AuthenticatedPage {
     }
   }
 
+  /**
+   * Load 'Your Workspaces' page and ensure page load is completed.
+   */
+  async load(): Promise<this> {
+    await this.loadPageUrl(PageUrl.WORKSPACES);
+    return this;
+  }
+
   async getCreateNewWorkspaceButton() {
     return findButton(this.page, {normalizeSpace: FIELD_LABEL.CREATE_NEW_WORKSPACE}, {visible: true});
   }
@@ -44,7 +52,6 @@ export default class WorkspacesPage extends AuthenticatedPage {
   * 4: return
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    await this.loadPageUrl(PageUrl.WORKSPACES);
     const link = await this.getCreateNewWorkspaceButton();
     await Promise.all([
       this.page.waitForNavigation( { waitUntil: ['domcontentloaded','networkidle0']} ),

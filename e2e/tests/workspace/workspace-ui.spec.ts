@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 import BaseElement from '../../app/aou-elements/base-element';
-import {PageUrl, SideNavLink} from '../../app/authenticated-page';
+import {SideNavLink} from '../../app/authenticated-page';
 import HomePage from '../../app/home-page';
 import WorkspaceCard from '../../app/workspace-card';
 import WorkspacesPage from '../../app/workspaces-page';
@@ -43,7 +43,7 @@ describe('Workspace ui tests', () => {
   // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
   test('Click Create New Workspace link on My Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
-    await workspaces.loadPageUrl(PageUrl.WORKSPACES);
+    await workspaces.load();
     const workspaceEdit = await workspaces.clickCreateNewWorkspace();
     const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
     expect(await workspaceNameTextbox.isVisible()).toBe(true);
@@ -51,7 +51,7 @@ describe('Workspace ui tests', () => {
 
   test('Check Workspace card on Your Workspaces page', async () => {
     const home = new HomePage(page);
-    await home.waitForLoad();
+    await home.load();
     await home.navTo(SideNavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
