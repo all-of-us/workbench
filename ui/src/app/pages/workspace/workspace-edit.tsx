@@ -49,6 +49,7 @@ import {
   DataAccessLevel,
   DisseminateResearchEnum,
   ResearchOutcomeEnum,
+  ResearchPurpose,
   SpecificPopulationEnum,
   Workspace, WorkspaceAccessLevel
 } from 'generated/fetch';
@@ -357,7 +358,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return this.researchPurposeCategoriesSelected(rp);
     }
 
-    researchPurposeCategoriesSelected(researchPurpose) {
+    researchPurposeCategoriesSelected(researchPurpose: ResearchPurpose) {
       return researchPurpose.ancestry || researchPurpose.controlSet ||
         researchPurpose.diseaseFocusedResearch || researchPurpose.ethics ||
         researchPurpose.drugDevelopment || researchPurpose.methodsDevelopment ||
@@ -403,7 +404,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       </div>;
     }
 
-    onResearchPurposeChange(checked) {
+    onResearchPurposeChange(checked: boolean) {
       // If Checkbox is selected expand the research purpose categories
       if (checked) {
         this.setState({showResearchPurpose: true, selectResearchPurpose: true});
@@ -412,10 +413,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       this.setState({selectResearchPurpose: false});
     }
 
-    get researchPurposeCheck() {
+    get researchPurposeCheck(): boolean {
       // If any one of the Research Purpose is selected or if the user has explicitly selected the research purpose
       return this.state.selectResearchPurpose ||
         this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose);
+    }
+
+    get iconClass(): string {
+      return this.state.showResearchPurpose ? 'pi pi-angle-down' : 'pi pi-angle-right';
     }
     /**
      * Creates a form element containing the checkbox, header, and description
@@ -576,7 +581,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     updatePrimaryPurpose(cateogry, value) {
       this.updateResearchPurpose(cateogry, value);
-      if (!value && !this.researchPurposeCategoriesSelected(this.state)) {
+      if (!value && !this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose)) {
         // If all research purpose cateogries are unselected un check the Research Purpose checkbox
         this.setState({selectResearchPurpose: false});
       }
@@ -881,14 +886,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   checked={this.researchPurposeCheck}
                   onChange={v => this.onResearchPurposeChange(v)}/>
                   <div style={{...styles.shortDescription, marginLeft: '-0.5rem'}}>
-                    <button style={{...styles.shortDescription, border: 'none'}} data-test-id='research-purpose-button'
+                    <button style={{...styles.shortDescription, border: 'none'}}
+                            data-test-id='research-purpose-button'
                             onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
                       Research purpose
-                      {!this.state.showResearchPurpose &&
-                      <i className='pi pi-angle-right' style={{verticalAlign: 'middle'}}></i>}
-                      {this.state.showResearchPurpose &&
-                      <i className='pi pi-angle-down' style={{verticalAlign: 'middle'}}></i>}
-                    </button>
+                      <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
+                     </button>
                   </div>
                 </FlexRow>
                   {this.state.showResearchPurpose && <FlexColumn data-test-id='research-purpose-categories'>
