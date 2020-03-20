@@ -23,12 +23,14 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
+import {TooltipTrigger} from '../../components/popups';
 
 const styles = reactStyles({
   code: {
     color: colors.dark,
     fontWeight: 'bold',
-    marginRight: '0.25rem'
+    marginRight: '0.25rem',
+    whiteSpace: 'nowrap'
   },
   count: {
     alignItems: 'center',
@@ -40,9 +42,10 @@ const styles = reactStyles({
     height: '0.625rem',
     justifyContent: 'center',
     lineHeight: 'normal',
-    marginLeft: '0.25rem',
+    margin: '0 0.25rem',
     minWidth: '0.675rem',
-    padding: '0 4px'
+    padding: '0 4px',
+    verticalAlign: 'middle'
   },
   error: {
     background: colors.warning,
@@ -61,6 +64,7 @@ const styles = reactStyles({
     cursor: 'pointer',
     flex: '0 0 1.25rem',
     height: '1.25rem',
+    lineHeight: '1rem',
     padding: 0,
     width: '1.25rem',
   },
@@ -68,6 +72,11 @@ const styles = reactStyles({
     float: 'left',
     fontWeight: 'bold',
     padding: '0.5rem',
+  },
+  name: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   },
   returnLink: {
     background: 'transparent',
@@ -94,15 +103,14 @@ const styles = reactStyles({
     fontWeight: 'bolder',
     backgroundColor: 'rgba(101,159,61,0.2)',
     padding: '2px 0',
+    whiteSpace: 'nowrap'
   },
   selectIcon: {
     color: colors.select,
     margin: '5px'
   },
-  selectedIcon: {
-    color: colors.select,
+  selected: {
     cursor: 'not-allowed',
-    margin: '5px',
     opacity: 0.4
   },
   treeContainer: {
@@ -120,6 +128,9 @@ const styles = reactStyles({
   },
   treeNodeContent: {
     cursor: 'pointer',
+    display: 'flex',
+    flexFlow: 'row nowrap',
+    lineHeight: '1.25rem',
     margin: 0,
     paddingLeft: '0.25rem',
     width: '90%'
@@ -142,12 +153,15 @@ interface TreeNodeState {
   empty: boolean;
   error: boolean;
   expanded: boolean;
+  hover: boolean;
   loading: boolean;
   searchMatch: boolean;
   selected: boolean;
+  truncated: boolean;
 }
 
 class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
+  name: HTMLDivElement;
   subscription: Subscription;
   constructor(props) {
     super(props);
@@ -156,9 +170,11 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       empty: false,
       error: false,
       expanded: false,
+      hover: false,
       loading: false,
       searchMatch: false,
-      selected: false
+      selected: false,
+      truncated: false
     };
   }
 
@@ -187,6 +203,8 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         subtreeSelectedStore.next(undefined);
       }
     }));
+    const {offsetWidth, scrollWidth} = this.name;
+    this.setState({truncated: scrollWidth > offsetWidth});
   }
 
   componentDidUpdate(prevProps: Readonly<TreeNodeProps>): void {
@@ -221,7 +239,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               }, () => this.setState({error: true}));
           } else {
             this.setState({empty: resp.items.length === 0, children: resp.items, loading: false});
-            if (!empty && domainId === DomainType.SURVEY.toString() && !resp.items[0].group) {
+            if (resp.items.length > 0 && domainId === DomainType.SURVEY.toString() && !resp.items[0].group) {
               // save questions in the store so we can display them along with answers if selected
               const questions = ppiQuestions.getValue();
               questions[id] = {count, name};
@@ -348,7 +366,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   render() {
     const {fullTree, node, node: {code, count, domainId, id, group, hasAttributes, name, selectable}, searchTerms} = this.props;
-    const {children, expanded, loading, searchMatch, selected} = this.state;
+    const {children, expanded, hover, loading, searchMatch, selected} = this.state;
     const nodeChildren = fullTree ? node.children : children;
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
@@ -361,22 +379,28 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             : <ClrIcon style={{color: colors.disabled}} shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16' onClick={() => this.toggleExpanded()}/>}
         </button>}
-        <div style={styles.treeNodeContent}>
+        <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
+          onMouseEnter={() => this.setState({hover: true})}
+          onMouseLeave={() => this.setState({hover: false})}>
           {selectable && <button style={styles.iconButton}>
             {hasAttributes
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={() => attributesStore.next(node)}/>
               : selected
-                ? <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+                ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}} shape='check-circle' size='20'/>
                 : <ClrIcon style={styles.selectIcon} shape='plus-circle' size='20' onClick={() => this.select()}/>
             }
           </button>}
-          <div style={{display: 'inline-block'}}>
-            <span style={styles.code}>{code}</span>
-            <span style={searchMatch ? styles.searchMatch : {}}>{displayName}</span>
-            {this.showCount && <span style={styles.count}>{count.toLocaleString()}</span>}
-          </div>
+          <div style={styles.code}>{code}</div>
+          <TooltipTrigger content={<div>{displayName}</div>} disabled={!this.state.truncated}>
+            <div style={styles.name} ref={(e) => this.name = e}>
+              <span style={searchMatch ? styles.searchMatch : {}}>{this.state.truncated.toString()} {displayName}</span>
+            </div>
+          </TooltipTrigger>
+          {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
+            <span style={styles.count}>{count.toLocaleString()}</span>
+          </div>}
         </div>
       </div>
       {!!nodeChildren && nodeChildren.length > 0 && <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
@@ -422,13 +446,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   componentDidMount(): void {
     this.loadRootNodes();
   }
-
-  // componentDidUpdate(prevProps: Readonly<Props>): void {
-  //   const {searchTerms} = this.props;
-  //   if (prevProps.searchTerms !== searchTerms) {
-  //     this.setState({searchTerms});
-  //   }
-  // }
 
   loadRootNodes() {
     const {node: {domainId, id, isStandard, type}, wizard: {fullTree}} = this.props;

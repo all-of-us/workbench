@@ -110,6 +110,7 @@ class SearchBarOption extends React.Component<OptionProps, OptionState> {
     const {offsetWidth, scrollWidth} = this.container;
     this.setState({truncated: scrollWidth > offsetWidth});
   }
+
   render() {
     const {highlighted, onClick, option: {name}, searchTerm} = this.props;
     const {hover} = this.state;
