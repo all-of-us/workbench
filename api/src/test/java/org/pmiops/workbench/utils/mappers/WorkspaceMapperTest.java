@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -63,7 +65,15 @@ public class WorkspaceMapperTest {
   @TestConfiguration
   @Import({WorkspaceMapperImpl.class, CommonMappers.class})
   @MockBean({WorkspaceDao.class})
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.enableBillingLockout = false;
+      return workbenchConfig;
+    }
+  }
 
   @Before
   public void setUp() {

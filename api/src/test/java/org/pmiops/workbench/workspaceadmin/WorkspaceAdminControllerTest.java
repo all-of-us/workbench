@@ -41,6 +41,7 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -66,7 +67,11 @@ public class WorkspaceAdminControllerTest {
   private static final String WORKSPACE_NAME = "name";
 
   @TestConfiguration
-  @Import({WorkspaceAdminController.class, WorkspaceMapperImpl.class})
+  @Import({
+      WorkspaceAdminController.class,
+      WorkspaceMapperImpl.class,
+      CommonMappers.class
+  })
   @MockBean({
     CloudStorageService.class,
     NotebooksService.class,
