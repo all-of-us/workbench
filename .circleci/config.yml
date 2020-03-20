@@ -258,7 +258,7 @@ jobs:
           paths:
             - ui
 
-  // Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
+  # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   puppeteer-e2e-test:
     <<: *defaults
     docker:
