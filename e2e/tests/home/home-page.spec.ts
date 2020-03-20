@@ -27,47 +27,6 @@ describe('Home page ui tests', () => {
     await browser.close();
   });
 
-  test('Homepage is the landing page after Sign In', async () => {
-    // Enable networks requests inspection
-    await page.setRequestInterception(true);
-
-    // Following network requests expected to happen
-    const targetRequestUrls = [
-      configs.apiBaseUrl+'/workspaces',
-      configs.apiBaseUrl+'/workspaces/user-recent-workspaces',
-      configs.apiBaseUrl+'/workspaces/user-recent-resources',
-    ];
-    const requestsUrls = [];
-    const pageErrors = [];
-
-    page.on('request', request => {
-      request.continue();
-    });
-
-    // Catch console log errors
-    page.on('pageerror', err => {
-      pageErrors.push(`${err.toString()}`);
-    });
-
-    page.on('response', response => {
-      const request = response.request();
-      const url = request.url().split('?')[0].split('#')[0];
-      requestsUrls.push(url);
-      // const status = response.status();
-      // console.log('request url:', url, 'status:', status);
-    });
-
-    await GoogleLoginPage.logIn(page);
-    const title = await page.title();
-    expect(title).toMatch('Homepage');
-
-    // Check targeted api succeeded
-    expect(requestsUrls).toEqual(expect.arrayContaining(targetRequestUrls));
-    // Expect zero page error
-    expect(pageErrors.length).toEqual(0);
-
-    await page.setRequestInterception(false);
-  });
 
   test('Workspace cards have same ui size', async () => {
     await GoogleLoginPage.logIn(page);
