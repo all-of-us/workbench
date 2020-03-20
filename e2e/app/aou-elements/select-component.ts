@@ -14,11 +14,11 @@ export default class SelectComponent {
     const selector = this.dropdownXpath() + `//li[contains(normalize-space(text()), "${textValue}")]`;
     const selectValue = await this.page.waitForXPath(selector, { visible: true });
     const selectElement = new BaseElement(this.page, selectValue);
-    const str = await selectElement.getTextContent();
+    const textContent = await selectElement.getTextContent();
     await selectValue.click();
     // need to make sure dropdown is disappeared, so it cannot interfere with clicking on elements below.
     await this.waitUntilDropdownClosed();
-    return str;
+    return textContent;
   }
 
   async getSelectedValue(): Promise<unknown> {

@@ -48,17 +48,16 @@ describe('User registration tests:', () => {
     await createAccountPage.waitForTextExists('Enter your Invitation Key:');
     await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
 
-    // Step 2: Accepting Terms of Service.
+    // Step 2: Terms of Service.
     await page.waitForFunction(() => {
       return document.querySelectorAll('.tos-pdf-page[data-page-number]').length > 1
     }, {timeout: 5000});
-
     await createAccountPage.acceptTermsOfUseAgreement();
     let nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
-    // Step 3: Enter Institution
+    // Step 3: Enter institution affiliation details
     await createAccountPage.fillOutInstitution();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();

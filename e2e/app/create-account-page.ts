@@ -32,8 +32,9 @@ export const INSTITUTION_ROLE_VALUE = {
   SENIOR_RESEARCHER: 'Senior Researcher (PI/Team Lead, senior scientist)',
 };
 
-export const EDUCATION_LEVEL = {
+export const EDUCATION_LEVEL_VALUE = {
   DOCTORATE: 'Doctorate',
+  // other option values here
 };
 
 export const FIELD_LABEL = {
@@ -139,7 +140,7 @@ export default class CreateAccountPage extends BasePage {
 
   // Combined steps to make test code cleaner and shorter
 
-  // Step 1: Fill out Institution
+  // Step 1: Fill out institution affiliation details
   async fillOutInstitution() {
     const institutionSelect = new SelectComponent(this.page, 'Select your institution');
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
@@ -149,7 +150,7 @@ export default class CreateAccountPage extends BasePage {
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
 
-  // Step 2: Enter Invitation key
+  // Step 2: Fill out Invitation key
   async fillOutInvitationKey(invitationKey: string) {
     await this.getInvitationKeyInput()
     .then(invitationKeyInput => invitationKeyInput.type(invitationKey))
@@ -170,14 +171,14 @@ export default class CreateAccountPage extends BasePage {
     await (await this.getTermsOfUseCheckbox()).check();
   }
 
-  // Step 3: Enter user default information
+  // Step 3: Fill out user information with default values
   async fillOutUserInformation() {
     const newUserName = await this.fillInFormFields(defaultFieldValues);
     await (await this.getResearchBackgroundTextarea()).type(faker.lorem.word());
     return newUserName;
   }
 
-  // Step 4: Enter demographic survey default information (All Survey Fields are optional)
+  // Step 4: Fill out demographic survey information with default values
   async fillOutDemographicSurvey() {
     const demograpicsSurveyPageHeader = 'Optional Demographics Survey';
     await this.waitForTextExists(demograpicsSurveyPageHeader);
@@ -189,7 +190,7 @@ export default class CreateAccountPage extends BasePage {
       await ck.click();
     }
     await this.selectYearOfBirth('1955');
-    await this.selectEducationLevel(EDUCATION_LEVEL.DOCTORATE);
+    await this.selectEducationLevel(EDUCATION_LEVEL_VALUE.DOCTORATE);
   }
 
 }
