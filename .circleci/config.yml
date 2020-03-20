@@ -257,7 +257,8 @@ jobs:
           root: .
           paths:
             - ui
-  
+
+  // Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   puppeteer-e2e-test:
     <<: *defaults
     docker:
@@ -402,7 +403,7 @@ workflows:
           <<: *filter_master
           requires:
             - ui-build-test
-      # Run Puppeteer tests after ui and api deployed to "test" on master merges.
+      # After merge PR to master branch, run Puppeteer tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           <<: *filter_master
           requires:
