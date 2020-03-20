@@ -33,6 +33,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -69,6 +70,7 @@ public class WorkspaceAuditorTest {
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class,
     ManualWorkspaceMapper.class,
+    CommonMappers.class,
     ActionAuditTestConfig.class
   })
   static class Config {}

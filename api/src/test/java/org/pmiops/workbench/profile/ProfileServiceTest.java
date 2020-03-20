@@ -17,6 +17,7 @@ import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -43,7 +44,8 @@ public class ProfileServiceTest {
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class
+    VerifiedInstitutionalAffiliationMapperImpl.class,
+    CommonMappers.class
   })
   static class Configuration {}
 

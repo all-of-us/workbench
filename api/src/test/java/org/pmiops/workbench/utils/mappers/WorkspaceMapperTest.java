@@ -61,7 +61,7 @@ public class WorkspaceMapperTest {
   @Autowired private WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
-  @Import({WorkspaceMapperImpl.class})
+  @Import({WorkspaceMapperImpl.class, CommonMappers.class})
   @MockBean({WorkspaceDao.class})
   static class Configuration {}
 

@@ -37,6 +37,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -51,7 +52,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceServiceTest {
 
   @TestConfiguration
-  @Import({ManualWorkspaceMapper.class, WorkspaceMapper.class})
+  @Import({ManualWorkspaceMapper.class, WorkspaceMapper.class, CommonMappers.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {

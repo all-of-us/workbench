@@ -76,6 +76,7 @@ import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -156,6 +157,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     ProfileMapperImpl.class,
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
+    CommonMappers.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
     CaptchaVerificationService.class,
     PublicInstitutionDetailsMapperImpl.class,

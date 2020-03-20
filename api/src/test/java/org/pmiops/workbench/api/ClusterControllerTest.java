@@ -64,6 +64,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -117,6 +118,7 @@ public class ClusterControllerTest {
     InstitutionServiceImpl.class,
     InstitutionMapperImpl.class,
     WorkspaceMapperImpl.class,
+    CommonMappers.class,
     PublicInstitutionDetailsMapperImpl.class
   })
   static class Configuration {
