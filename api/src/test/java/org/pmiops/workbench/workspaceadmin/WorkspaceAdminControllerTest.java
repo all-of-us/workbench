@@ -69,11 +69,7 @@ public class WorkspaceAdminControllerTest {
   private static final String WORKSPACE_NAME = "name";
 
   @TestConfiguration
-  @Import({
-      WorkspaceAdminController.class,
-      WorkspaceMapperImpl.class,
-      CommonMappers.class
-  })
+  @Import({WorkspaceAdminController.class, WorkspaceMapperImpl.class, CommonMappers.class})
   @MockBean({
     CloudStorageService.class,
     NotebooksService.class,

@@ -27,10 +27,7 @@ public class ConceptSetMapperTest {
   private DbConceptSet dbConceptSet;
 
   @TestConfiguration
-  @Import({
-      ConceptSetMapperImpl.class,
-      CommonMappers.class
-  })
+  @Import({ConceptSetMapperImpl.class, CommonMappers.class})
   static class Configuration {}
 
   @Before

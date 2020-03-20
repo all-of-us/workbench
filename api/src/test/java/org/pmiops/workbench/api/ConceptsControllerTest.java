@@ -262,10 +262,10 @@ public class ConceptsControllerTest {
 
   @TestConfiguration
   @Import({
-      WorkspaceServiceImpl.class,
-      ManualWorkspaceMapper.class,
-      WorkspaceMapperImpl.class,
-      CommonMappers.class
+    WorkspaceServiceImpl.class,
+    ManualWorkspaceMapper.class,
+    WorkspaceMapperImpl.class,
+    CommonMappers.class
   })
   @MockBean({
     BigQueryService.class,
