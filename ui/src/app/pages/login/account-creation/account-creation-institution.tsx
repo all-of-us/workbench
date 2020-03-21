@@ -110,6 +110,17 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     }
   }
 
+  onInstitutionChange(shortName: string): void {
+    this.updateAffiliationValue('institutionShortName', shortName);
+    // Clear out any existing values for role when the institution changes.
+    this.updateAffiliationValue('institutionalRoleEnum', undefined);
+    this.updateAffiliationValue('institutionalRoleOtherText', undefined);
+
+    // Clear the email validation response, in case the email had previously been validated against
+    // the prior institution.
+    this.setState({checkEmailResponse: null});
+  }
+
   onEmailBlur() {
     this.checkEmail();
   }
@@ -152,6 +163,13 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     }
   }
 
+  /**
+   * Indicates whether the currently-entered email is a valid member of the indicated institution.
+   * This controls the display of the "validity icon" next to the email input.
+   *
+   * Note: this does *not* check for format correctness of the indicated email. That is checked
+   * separately at the form-level via validate.js
+   */
   isEmailValid() {
     const {
       checkEmailResponse,
@@ -172,7 +190,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     this.setState(fp.set(['profile', 'contactEmail'], contactEmail));
   }
 
-  // Visible for testing.
+  /**
+   * Runs client-side validation against the form inputs, and returns an object containing errors
+   * strings, if empty. If validation passes, undefined is returned.
+   *
+   * Visible for testing.
+   */
   public validate(): {[key: string]: Array<string>} {
     const validationCheck = {
       'profile.verifiedInstitutionalAffiliation.institutionShortName': {
@@ -284,12 +307,8 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 style={styles.wideInputSize}
                 options={institutions.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
                 value={institutionShortName}
-                onChange={(e) => {
-                  this.updateAffiliationValue('institutionShortName', e.value);
-                  // Clear out any existing values for role when the institution changes.
-                  this.updateAffiliationValue('institutionalRoleEnum', undefined);
-                  this.updateAffiliationValue('institutionalRoleOtherText', undefined);
-                }}/>
+                onChange={(e) => this.onInstitutionChange(e.value)}
+            />
             {this.state.institutionLoadError &&
             <ErrorDiv data-test-id='data-load-error'>
               An error occurred loading the institution list. Please try again or contact

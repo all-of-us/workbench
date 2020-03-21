@@ -150,6 +150,29 @@ it('should validate email affiliation when inst and email are specified', async(
     .toContain('Email address is not a member of the selected institution');
 });
 
+it('should clear email validation when institution is changed', async() => {
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Broad'});
+  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@broadinstitute.org'}});
+  // Blur the email input field and wait for the API request to complete.
+  getEmailInput(wrapper).simulate('blur');
+  await waitOneTickAndUpdate(wrapper);
+  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.EARLYCAREER});
+
+  // At this point, the form should be ready to submit.
+  expect(getInstance(wrapper).validate()).toBeUndefined();
+
+  // ... Mimic changing the institution & role, but leaving email as-is.
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Verily'});
+  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.PREDOCTORAL});
+
+  // The form should be blocked now due to lack of email verification.
+  expect(getInstance(wrapper).validate()['checkEmailResponse']).toBeTruthy();
+});
+
+
 it('should call callback with correct form data', async() => {
   let profile: Profile = null;
   props.onComplete = (formProfile: Profile) => {

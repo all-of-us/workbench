@@ -22,6 +22,14 @@ public class InstitutionController implements InstitutionApiDelegate {
     this.institutionService = institutionService;
   }
 
+  private Institution getInstitutionImpl(final String shortName) {
+    return institutionService
+        .getInstitution(shortName)
+        .orElseThrow(
+            () ->
+                new NotFoundException(String.format("Could not find Institution '%s'", shortName)));
+  }
+
   @Override
   @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Institution> createInstitution(final Institution institution) {
@@ -38,15 +46,7 @@ public class InstitutionController implements InstitutionApiDelegate {
   @Override
   @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Institution> getInstitution(final String shortName) {
-    final Institution institution =
-        institutionService
-            .getInstitution(shortName)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Could not find Institution '%s'", shortName)));
-
-    return ResponseEntity.ok(institution);
+    return ResponseEntity.ok(getInstitutionImpl(shortName));
   }
 
   @Override
@@ -58,9 +58,9 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   /**
-   * This API is publicly-accessible since it is called during account creation.
+   * Note: this API is publicly-accessible since it is called during account creation.
    *
-   * @return
+   * @return Returns publicly-accessible details about all institutions currently in the system.
    */
   @Override
   public ResponseEntity<GetPublicInstitutionDetailsResponse> getPublicInstitutionDetails() {
@@ -71,21 +71,17 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   /**
-   * This API is publicly-accessible since it is called during account creation.
+   * Note: this API is publicly-accessible since it is called during account creation.
    *
-   * @return
+   * @return Returns whether the email is a valid institutional member.
    */
+  @Override
   public ResponseEntity<CheckEmailResponse> checkEmail(final String shortName, final String email) {
-    final Institution institution =
-        institutionService
-            .getInstitution(shortName)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Could not find Institution '%s'", shortName)));
     return ResponseEntity.ok(
         new CheckEmailResponse()
-            .isValidMember(institutionService.validateInstitutionalEmail(institution, email)));
+            .isValidMember(
+                institutionService.validateInstitutionalEmail(
+                    getInstitutionImpl(shortName), email)));
   }
 
   @Override

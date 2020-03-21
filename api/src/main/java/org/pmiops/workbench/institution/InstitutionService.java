@@ -25,12 +25,13 @@ public interface InstitutionService {
       final String shortName, final Institution institutionToUpdate);
 
   /**
-   * Validates that the user's institutional affiliation is valid, by pattern-matching the user's
-   * contact email against the institution's set of whitelisted email domains or addresses. If the
-   * user has no affiliation (null) then it will return false
+   * Checks that the user's institutional affiliation is valid by calling
+   * validateInstitutionalEmail. See Javadoc below for implementation notes.
+   *
+   * <p>If dbAffiliation is null, this method will return false.
    *
    * @param dbAffiliation the user's declared affiliation
-   * @param contactEmail the contact email to verify
+   * @param contactEmail the contact email to validate
    * @return boolean - does the affiliation pass validation?
    */
   boolean validateAffiliation(
@@ -39,8 +40,12 @@ public interface InstitutionService {
   /**
    * Checks whether a given email address is a valid member of an Institution.
    *
-   * @param institution
-   * @param contactEmail
+   * <p>Validation is done by comparing the contact email to the institution's set of whitelisted
+   * email domains and addresses. An exact match on either the domain or the email address is
+   * required.
+   *
+   * @param institution the institution to validate against
+   * @param contactEmail contact email to validate
    * @return boolean – is the contact email a valid member
    */
   boolean validateInstitutionalEmail(Institution institution, String contactEmail);
