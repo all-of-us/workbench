@@ -272,6 +272,7 @@ jobs:
       - run:
           name: Fetch Submodules
           command: git submodule update --init --recursive
+      - run: mkdir -p e2e/test-results
       - restore_cache:
           keys:
           - e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
@@ -297,7 +298,7 @@ jobs:
       - store_artifacts:
           path: e2e/logs
       - store_test_results:
-          path: test-results
+          path: e2e/test-results
       
   ui-deploy-to-test:
     <<: *defaults
