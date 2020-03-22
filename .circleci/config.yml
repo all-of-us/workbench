@@ -266,7 +266,7 @@ jobs:
         environment:
           NODE_ENV: development
     working_directory: ~/workbench
-    parallelism: 4
+    parallelism: 6
     steps:
       - checkout
       - run:
@@ -279,7 +279,7 @@ jobs:
           - e2e-test-cache-
       - run: 
           working_directory: ~/workbench/e2e
-          command: yarn cache clean && yarn install --verbose --frozen-lockfile
+          command: yarn cache clean && yarn install --frozen-lockfile
       - save_cache:
           paths:
             - ~/.cache/yarn
