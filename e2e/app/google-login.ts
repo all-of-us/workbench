@@ -23,21 +23,21 @@ export default class GoogleLoginPage extends BasePage {
    * Login email input field.
    */
   async email(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.emailInput, {visible: true, timeout: 5000});
+    return await this.page.waitForXPath(selectors.emailInput, {visible: true});
   }
 
   /**
    * Login password input field.
    */
   async password(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.passwordInput, {visible: true, timeout: 5000});
+    return await this.page.waitForXPath(selectors.passwordInput, {visible: true});
   }
 
   /**
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.loginButton, {visible: true, timeout: 10000});
+    return await this.page.waitForXPath(selectors.loginButton, {visible: true});
   }
 
   /**
@@ -92,7 +92,7 @@ export default class GoogleLoginPage extends BasePage {
   async load(): Promise<void> {
     const url = configs.uiBaseUrl + configs.loginUrlPath;
     try {
-      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 20000});
+      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 60000});
     } catch (err) {
       console.error('Google login page not found. ' + err);
       await this.takeScreenshot('GoogleLoginPageNotFound');
