@@ -295,9 +295,7 @@ jobs:
           name: Run e2e tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
           command: |
-            TESTS = $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname)
-            echo ${TESTS}
-            yarn --silent test:ci ${TESTS}
+            yarn --silent test:ci $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname)
       - store_artifacts:
           path: e2e/logs
       - store_test_results:
