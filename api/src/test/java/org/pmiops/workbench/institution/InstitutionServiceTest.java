@@ -19,6 +19,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -31,7 +32,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import({
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
-  PublicInstitutionDetailsMapperImpl.class
+  PublicInstitutionDetailsMapperImpl.class,
+  InstitutionUserInstructionsMapperImpl.class
 })
 public class InstitutionServiceTest {
   @Autowired private InstitutionService service;
@@ -337,6 +339,83 @@ public class InstitutionServiceTest {
     assertThat(service.validateAffiliation(updatedAffiliation, user.getContactEmail())).isTrue();
   }
 
+  @Test
+  public void getInstitutionUserInstructions_empty() {
+    assertThat(service.getInstitutionUserInstructions(testInst.getShortName())).isEmpty();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void getInstitutionUserInstructions_instNotFound() {
+    service.getInstitutionUserInstructions("not found");
+  }
+
+  @Test
+  public void setInstitutionUserInstructions() {
+    final String instructions = "Do some science";
+    final InstitutionUserInstructions inst =
+        new InstitutionUserInstructions()
+            .institutionShortName(testInst.getShortName())
+            .instructions(instructions);
+    assertThat(service.setInstitutionUserInstructions(inst)).isTrue();
+    assertThat(service.getInstitutionUserInstructions(testInst.getShortName()))
+        .hasValue(instructions);
+  }
+
+  @Test
+  public void setInstitutionUserInstructions_replace() {
+    final String instructions1 = "Do some science";
+    final InstitutionUserInstructions inst =
+        new InstitutionUserInstructions()
+            .institutionShortName(testInst.getShortName())
+            .instructions(instructions1);
+    assertThat(service.setInstitutionUserInstructions(inst)).isTrue();
+    assertThat(service.getInstitutionUserInstructions(testInst.getShortName()))
+        .hasValue(instructions1);
+
+    final String instructions2 = "Do some science and then publish a paper";
+    inst.instructions(instructions2);
+    assertThat(service.setInstitutionUserInstructions(inst)).isTrue();
+    assertThat(service.getInstitutionUserInstructions(testInst.getShortName()))
+        .hasValue(instructions2);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void setInstitutionUserInstructions_instNotFound() {
+    final String instructions = "Do some science";
+    final InstitutionUserInstructions inst =
+        new InstitutionUserInstructions()
+            .institutionShortName("not found")
+            .instructions(instructions);
+    service.setInstitutionUserInstructions(inst);
+  }
+
+  @Test
+  public void deleteInstitutionUserInstructions() {
+    final String instructions1 = "Do some science";
+    final InstitutionUserInstructions inst =
+        new InstitutionUserInstructions()
+            .institutionShortName(testInst.getShortName())
+            .instructions(instructions1);
+    assertThat(service.setInstitutionUserInstructions(inst)).isTrue();
+    assertThat(service.getInstitutionUserInstructions(testInst.getShortName()))
+        .hasValue(instructions1);
+
+    assertThat(service.deleteInstitutionUserInstructions(testInst.getShortName())).isTrue();
+    assertThat(service.getInstitutionUserInstructions(testInst.getShortName())).isEmpty();
+
+    assertThat(service.deleteInstitutionUserInstructions(testInst.getShortName())).isFalse();
+  }
+
+  @Test
+  public void deleteInstitutionUserInstructions_empty() {
+    assertThat(service.deleteInstitutionUserInstructions(testInst.getShortName())).isFalse();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void deleteInstitutionUserInstructions_instNotFound() {
+    service.deleteInstitutionUserInstructions("not found");
+  }
+
   // Institutions' email domains and addresses are Lists but have no inherent order,
   // so they can't be directly compared for equality
   private void assertEqualInstitutions(Institution actual, final Institution expected) {
@@ -355,7 +434,7 @@ public class InstitutionServiceTest {
 
   private DbVerifiedInstitutionalAffiliation createAffiliation(
       final DbUser user, final String instName) {
-    final DbInstitution inst = service.getDbInstitution(instName).get();
+    final DbInstitution inst = service.getDbInstitutionOrThrow(instName);
     final DbVerifiedInstitutionalAffiliation affiliation =
         new DbVerifiedInstitutionalAffiliation()
             .setUser(user)

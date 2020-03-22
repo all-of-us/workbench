@@ -23,7 +23,8 @@ import org.springframework.test.context.junit4.SpringRunner;
   VerifiedInstitutionalAffiliationMapperImpl.class,
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
-  PublicInstitutionDetailsMapperImpl.class
+  PublicInstitutionDetailsMapperImpl.class,
+  InstitutionUserInstructionsMapperImpl.class,
 })
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -69,7 +70,7 @@ public class VerifiedInstitutionalAffiliationMapperTest {
         new DbVerifiedInstitutionalAffiliation()
             .setUser(dbUser)
             .setInstitution(
-                institutionService.getDbInstitution(testInstitution.getShortName()).get())
+                institutionService.getDbInstitutionOrThrow(testInstitution.getShortName()))
             .setInstitutionalRoleEnum(InstitutionalRole.FELLOW)
             .setInstitutionalRoleOtherText("A fine fellow, specifically");
 

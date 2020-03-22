@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="changelog-133-institution-user-instructions">
+
+    <createTable tableName="institution_user_instructions">
+      <column name="institution_user_instructions_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="institution_id" type="bigint">
+        <constraints nullable="false"
+                     unique="true"
+                     foreignKeyName="fk_institution_user_instructions"
+                     references="institution(institution_id)"
+                     deleteCascade="true"/>
+      </column>
+      <column name="user_instructions" type="TEXT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex tableName="institution_user_instructions"
+                 indexName="fk_institution_user_instructions_idx">
+      <column name="institution_id"/>
+    </createIndex>
+
+  </changeSet>
+</databaseChangeLog>

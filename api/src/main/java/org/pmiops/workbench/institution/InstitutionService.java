@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
 
 public interface InstitutionService {
@@ -15,7 +16,8 @@ public interface InstitutionService {
 
   Optional<Institution> getInstitution(final String shortName);
 
-  Optional<DbInstitution> getDbInstitution(final String shortName);
+  // throws NotFoundException if the DbInstitution is not found
+  DbInstitution getDbInstitutionOrThrow(final String shortName);
 
   Institution createInstitution(final Institution institutionToCreate);
 
@@ -49,4 +51,10 @@ public interface InstitutionService {
    * @return boolean – is the contact email a valid member
    */
   boolean validateInstitutionalEmail(Institution institution, String contactEmail);
+
+  Optional<String> getInstitutionUserInstructions(final String shortName);
+
+  boolean setInstitutionUserInstructions(final InstitutionUserInstructions instructions);
+
+  boolean deleteInstitutionUserInstructions(final String shortName);
 }
