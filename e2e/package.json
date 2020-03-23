@@ -7,9 +7,9 @@
   "license": "BSD",
   "scripts": {
     "test": "WORKBENCH_ENV=dev jest --detectOpenHandles",
-    "test:debug": "WORKBENCH_ENV=dev PUPPETEER_HEADLESS=false jest --detectOpenHandles --runInBand",
+    "test:debug": "WORKBENCH_ENV=dev PUPPETEER_HEADLESS=false jest --detectOpenHandles --maxWorkers=2",
     "test-local": "WORKBENCH_ENV=local jest",
-    "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev INCOGNITO=true jest --ci --maxWorkers=2 --forceExit",
+    "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev INCOGNITO=true jest --ci --runInBand --forceExit",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn run lint --fix",
     "build": "tsc --build --clean",

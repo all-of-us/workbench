@@ -1,22 +1,15 @@
 import * as puppeteer from 'puppeteer';
+import {getChromeFlags} from './chrome-startup-flags';
+
+const isHeadless = !process.env.PUPPETEER_HEADLESS;
 
 const defaultLaunchOpts = {
-  headless: !process.env.PUPPETEER_HEADLESS,
+  headless: isHeadless,
   slowMo: 10,
   defaultViewport: null,
   devtools: false,
-  ignoreDefaultArgs: ['--disable-extensions'],
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-    '--disable-background-timer-throttling',
-    '--disable-backgrounding-occluded-windows',
-    '--disable-renderer-backgrounding',
-    '--disable-web-security',
-    '--disable-features=IsolateOrigins,site-per-process',
-  ]
+  ignoreDefaultArgs: true,
+  args: getChromeFlags(isHeadless)
 };
 
 export default async (opts?): Promise<puppeteer.Browser> => {
