@@ -509,6 +509,14 @@ export const SearchGroup = withCurrentWorkspace()(
       return '';
     }
 
+    get existingGroupNames() {
+      const {group, role} = this.props;
+      const searchRequest = searchRequestStore.getValue();
+      return searchRequest[role]
+        .filter(grp => grp.id !== group.id && !!grp.name)
+        .map(grp => grp.name);
+    }
+
     render() {
       const {group: {id, items, mention, name, status, temporal, time, timeValue}, index, role} = this.props;
       const {count, error, inputError, inputTouched, loading, overlayStyle, renaming} = this.state;
@@ -649,7 +657,9 @@ export const SearchGroup = withCurrentWorkspace()(
             </React.Fragment>}
           </div>
         </div>}
-        {renaming && <RenameModal existingNames={[]} oldName={name || 'this group'} hideDescription={true}
+        {renaming && <RenameModal existingNames={this.existingGroupNames}
+          oldName={name || 'this group'}
+          hideDescription={true}
           onCancel={() => this.setState({renaming: false})}
           onRename={(v) => this.rename(v)} resourceType={ResourceType.COHORTSEARCHGROUP} />}
       </React.Fragment>;
