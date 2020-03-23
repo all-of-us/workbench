@@ -357,14 +357,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
               })}
             </FlexRow>
           </FlexColumn>
-          <div style={styles.bottomBanner}>
-            <div style={styles.logo}>
-              <img src='/assets/images/all-of-us-logo-footer.svg'/>
-            </div>
-            <div style={styles.bottomLinks}>Copyright ©2018</div>
-            <div style={styles.bottomLinks}>Privacy Policy</div>
-            <div style={styles.bottomLinks}>Terms of Service</div>
-          </div>
         </div>
       </FlexColumn>
       {quickTour &&
