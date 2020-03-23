@@ -120,7 +120,6 @@ interface Props {
 interface State {
   criteriaMenuOptions: any;
   index: number;
-  updateGroups: number;
 }
 
 export class SearchGroupList extends React.Component<Props, State> {
@@ -131,7 +130,6 @@ export class SearchGroupList extends React.Component<Props, State> {
     this.state = {
       criteriaMenuOptions: {programTypes: [], domainTypes: []},
       index: 0,
-      updateGroups: 0
     };
   }
 
@@ -147,14 +145,6 @@ export class SearchGroupList extends React.Component<Props, State> {
     });
     if (role === 'excludes') {
       this.subscription.add(searchRequestStore.subscribe(sr => this.setState({index: sr.includes.length + 1})));
-    }
-  }
-
-  componentDidUpdate(prevProps: Readonly<Props>): void {
-    if (this.props.updated > prevProps.updated) {
-      // Trigger child search-groups to update props
-      const {updateGroups} = this.state;
-      // this.setState({updateGroups: updateGroups + 1});
     }
   }
 
