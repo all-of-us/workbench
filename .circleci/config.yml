@@ -266,7 +266,7 @@ jobs:
         environment:
           NODE_ENV: development
     working_directory: ~/workbench
-    parallelism: 6
+    parallelism: 10
     steps:
       - checkout
       - run:

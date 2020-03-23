@@ -58,10 +58,10 @@ export default class GoogleLoginPage extends BasePage {
     await emailInput.focus();
     await emailInput.type(userEmail);
     const nextButton = await this.page.waitForXPath(selectors.NextButton);
-
+    await this.takeScreenshot('enter_email');
     await Promise.all([
       nextButton.click(),
-      this.page.waitForNavigation(),
+      this.page.waitForNavigation( {timeout: 0} ),
     ]);
   }
 
