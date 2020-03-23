@@ -58,14 +58,14 @@ public class UserControllerTest {
   @TestConfiguration
   @Import({
     UserController.class,
+    UserServiceTestConfiguration.class,
   })
   @MockBean({
     FireCloudService.class,
     ComplianceService.class,
     DirectoryService.class,
     AdminActionHistoryDao.class,
-    UserServiceAuditor.class,
-    UserServiceTestConfiguration.class,
+    UserServiceAuditor.class
   })
   static class Configuration {
 
