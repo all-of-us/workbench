@@ -11,13 +11,8 @@ export default class ChromeDriver {
     '--disable-setuid-sandbox',
     '--disable-dev-shm-usage',
     '--disable-gpu',
-    '--disable-background-timer-throttling',
-    '--disable-backgrounding-occluded-windows',
-    '--disable-renderer-backgrounding',
     '--disable-web-security',
-    '--disable-features=IsolateOrigins,site-per-process',
-    '--proxy-server="direct://"',
-    '--proxy-bypass-list=*',
+    '--disable-features=TranslateUI,BlinkGenPropertyTrees,IsolateOrigins,site-per-process',
   ];
 
   launchOpts = {
