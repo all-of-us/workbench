@@ -51,6 +51,7 @@ export default class GoogleLoginPage extends BasePage {
     } catch(e) {
       const randomLink = await this.page.$x('//*[@role="link"]//*[text()="Use another account"]');
       if (randomLink.length > 0) {
+        await this.takeScreenshot('useAnotherAccountPageFound');
         await randomLink[0].click();
       }
       emailInput = await this.email()
