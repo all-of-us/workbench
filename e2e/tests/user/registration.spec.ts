@@ -61,7 +61,7 @@ describe('User registration tests:', () => {
     await createAccountPage.fillOutInstitution();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
-    await nextButton.click();
+    await nextButton.clickWithEval();
 
     // Step 4: Enter user information
     await createAccountPage.fillOutUserInformation();
