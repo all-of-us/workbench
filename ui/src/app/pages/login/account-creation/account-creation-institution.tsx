@@ -5,7 +5,8 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {Error as ErrorDiv} from 'app/components/inputs';
+import {ValidationIcon} from 'app/components/icons';
+import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
@@ -13,8 +14,9 @@ import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from '
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
-import {reportError} from 'app/utils/errors';
+import {isAbortError, reportError} from 'app/utils/errors';
 import {
+  CheckEmailResponse,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -33,6 +35,27 @@ const styles = reactStyles({
   },
 });
 
+/**
+ * Create a custom validate.js validator to validate against a CheckEmailResponse API response
+ * object. This validator should be enabled when the state object has a non-empty email and
+ * institute. It requires that the CheckEmailResponse has returned and indicates that the
+ * entered email address is a valid member of the institution.
+ *
+ * @param value
+ * @param options
+ * @param key
+ * @param attributes
+ */
+validate.validators.checkEmailResponse = (value: CheckEmailResponse, options, key, attributes) => {
+  if (value == null) {
+    return '^Institutional membership check has not completed';
+  }
+  if (value && value.isValidMember) {
+    return null;
+  } else {
+    return '^Email address is not a member of the selected institution';
+  }
+};
 
 export interface Props {
   profile: Profile;
@@ -43,21 +66,25 @@ export interface Props {
 
 interface State {
   profile: Profile;
-  emailFailedValidation: boolean;
   loadingInstitutions: boolean;
   institutions: Array<PublicInstitutionDetails>;
-  dataLoadError: boolean;
+  institutionLoadError: boolean;
+  checkEmailResponse?: CheckEmailResponse;
+  checkEmailError: boolean;
 }
 
 export class AccountCreationInstitution extends React.Component<Props, State> {
+
+  private aborter: AbortController;
+
   constructor(props: Props) {
     super(props);
     this.state = {
       profile: props.profile,
-      emailFailedValidation: false,
-      institutions: [],
       loadingInstitutions: true,
-      dataLoadError: false,
+      institutions: [],
+      institutionLoadError: false,
+      checkEmailError: false,
     };
   }
 
@@ -71,45 +98,118 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     } catch (e) {
       this.setState({
         loadingInstitutions: false,
-        dataLoadError: true
+        institutionLoadError: true
       });
       reportError(e);
     }
   }
 
-  validateContactEmailInline() {
-    const {profile: { contactEmail } } = this.state;
+  componentWillUnmount(): void {
+    if (this.aborter) {
+      this.aborter.abort();
+    }
+  }
 
-    if (isBlank(contactEmail)) {
-      // Allow a blank email to pass inline validation: it will still block overall form
-      // submission via the validate() config below.
-      this.setState({emailFailedValidation: false});
+  onInstitutionChange(shortName: string): void {
+    this.updateAffiliationValue('institutionShortName', shortName);
+    // Clear out any existing values for role when the institution changes.
+    this.updateAffiliationValue('institutionalRoleEnum', undefined);
+    this.updateAffiliationValue('institutionalRoleOtherText', undefined);
+
+    // Clear the email validation response, in case the email had previously been validated against
+    // the prior institution.
+    this.setState({checkEmailResponse: null}, () => {
+      // Trigger an email-verification check, in case the user has entered or changed their email and
+      // such a check hasn't yet been sent.
+      this.checkEmail();
+    });
+
+  }
+
+  onEmailBlur() {
+    this.checkEmail();
+  }
+
+  /**
+   * Checks that the entered email address is a valid member of the chosen institution.
+   */
+  async checkEmail() {
+    const {
+      profile: {
+        contactEmail,
+        verifiedInstitutionalAffiliation: {institutionShortName}
+      }
+    } = this.state;
+
+    // Cancel any outstanding API calls.
+    if (this.aborter) {
+      this.aborter.abort();
+    }
+    this.aborter = new AbortController();
+    this.setState({checkEmailResponse: null});
+
+    // Early-exit with no result if either input is blank.
+    if (!institutionShortName || isBlank(contactEmail)) {
       return;
     }
 
-    const result = validate.single(contactEmail, { email: true } );
-    if (result === undefined) {
-      this.setState({emailFailedValidation: false});
-    } else {
-      this.setState({emailFailedValidation: true});
+    try {
+      const result = await institutionApi().checkEmail(institutionShortName, contactEmail,
+        {signal: this.aborter.signal});
+      this.setState({checkEmailResponse: result});
+    } catch (e) {
+      if (isAbortError(e)) {
+        // Ignore abort errors.
+      } else {
+        this.setState({
+          checkEmailError: true
+        });
+      }
     }
   }
 
+  /**
+   * Indicates whether the currently-entered email is a valid member of the indicated institution.
+   * This controls the display of the "validity icon" next to the email input.
+   *
+   * Note: this does *not* check for format correctness of the indicated email. That is checked
+   * separately at the form-level via validate.js
+   */
+  isEmailValid() {
+    const {
+      checkEmailResponse,
+      profile: {
+        contactEmail,
+        verifiedInstitutionalAffiliation: {institutionShortName}
+      }
+    } = this.state;
+
+    if (!institutionShortName || isBlank(contactEmail) || checkEmailResponse == null) {
+      return undefined;
+    }
+
+    return checkEmailResponse.isValidMember;
+  }
+
   updateContactEmail(contactEmail: string) {
-    this.setState({emailFailedValidation: false});
     this.setState(fp.set(['profile', 'contactEmail'], contactEmail));
   }
 
-  // Visible for testing.
+  /**
+   * Runs client-side validation against the form inputs, and returns an object containing errors
+   * strings, if empty. If validation passes, undefined is returned.
+   *
+   * Visible for testing.
+   */
   public validate(): {[key: string]: Array<string>} {
     const validationCheck = {
-      'verifiedInstitutionalAffiliation.institutionShortName': {
+      'profile.verifiedInstitutionalAffiliation.institutionShortName': {
         presence: {
           allowEmpty: false,
           message: '^You must select an institution to continue',
         }
       },
-      contactEmail: {
+      'profile.contactEmail': {
         presence: {
           allowEmpty: false,
           message: '^Email address cannot be blank',
@@ -118,15 +218,22 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           message: '^Email address is invalid'
         }
       },
-      'verifiedInstitutionalAffiliation.institutionalRoleEnum': {
+      'profile.verifiedInstitutionalAffiliation.institutionalRoleEnum': {
         presence: {
           allowEmpty: false,
           message: '^Institutional role cannot be blank',
         }
       },
     };
+    if (!isBlank(this.state.profile.verifiedInstitutionalAffiliation.institutionShortName) &&
+        !isBlank(this.state.profile.contactEmail)) {
+      validationCheck['checkEmailResponse'] = {
+        checkEmailResponse: {}
+      };
+    }
+
     if (this.state.profile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER) {
-      validationCheck['verifiedInstitutionalAffiliation.institutionalRoleOtherText'] = {
+      validationCheck['profile.verifiedInstitutionalAffiliation.institutionalRoleOtherText'] = {
         presence: {
           allowEmpty: false,
           message: '^Institutional role text cannot be blank',
@@ -134,7 +241,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       };
     }
 
-    return validate(this.state.profile, validationCheck);
+    return validate(this.state, validationCheck);
   }
 
   getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
@@ -205,13 +312,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 style={styles.wideInputSize}
                 options={institutions.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
                 value={institutionShortName}
-                onChange={(e) => {
-                  this.updateAffiliationValue('institutionShortName', e.value);
-                  // Clear out any existing values for role when the institution changes.
-                  this.updateAffiliationValue('institutionalRoleEnum', undefined);
-                  this.updateAffiliationValue('institutionalRoleOtherText', undefined);
-                }}/>
-            {this.state.dataLoadError &&
+                onChange={(e) => this.onInstitutionChange(e.value)}
+            />
+            {this.state.institutionLoadError &&
             <ErrorDiv data-test-id='data-load-error'>
               An error occurred loading the institution list. Please try again or contact
               <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
@@ -235,12 +338,21 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                     This will be the primary email contact for your new account.
                                   </div>
                                 </div>}
-                                invalid={this.state.emailFailedValidation}
-                                onBlur={() => this.validateContactEmailInline()}
-                                onChange={email => this.updateContactEmail(email)}/>
-            {this.state.emailFailedValidation &&
-              <ErrorDiv data-test-id='invalid-email-error'>
-                Error: email address is invalid
+                                invalid={!this.isEmailValid()}
+                                onBlur={() => this.onEmailBlur()}
+                                onChange={email => this.updateContactEmail(email)}>
+              <TooltipTrigger content={<div data-test-id='email-invalid-tooltip'>
+                Email address is not a valid member of the selected institution.
+              </div>} disabled={this.isEmailValid()}>
+                <div style={{...inputStyles.iconArea}}>
+                    <ValidationIcon validSuccess={this.isEmailValid()}/>
+                </div>
+              </TooltipTrigger>
+            </TextInputWithLabel>
+            {this.state.checkEmailError &&
+              <ErrorDiv data-test-id='check-email-error'>
+                An error occurred checking institution membership of this email. Please try again or
+                contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
               </ErrorDiv>
             }
             <div style={{marginTop: '.5rem'}}>

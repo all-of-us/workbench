@@ -2324,23 +2324,17 @@ paths:
       tags:
       - institution
       description: 'Gets the list of all Institutions. Requires INSTITUTION_ADMIN
-        authority.
-
-'
+        authority.'
       operationId: getInstitutions
       responses:
         200:
-          description: 'A list of all Institutions
-
-'
+          description: 'A list of all Institutions'
           schema:
             "$ref": "#/definitions/GetInstitutionsResponse"
     post:
       tags:
       - institution
-      description: 'Create an Institution. Requires INSTITUTION_ADMIN authority.
-
-'
+      description: 'Create an Institution. Requires INSTITUTION_ADMIN authority.'
       operationId: createInstitution
       parameters:
       - in: body
@@ -2351,25 +2345,19 @@ paths:
           "$ref": "#/definitions/Institution"
       responses:
         200:
-          description: 'The Institution created by this operation.
-
-'
+          description: 'The Institution created by this operation.'
           schema:
             "$ref": "#/definitions/Institution"
   "/v1/institutions/publicDetails":
     get:
       tags:
       - institution
-      description: 'Gets the public details for the list of all Institutions.
-
-'
+      description: 'Gets the public details for the list of all Institutions.'
       operationId: getPublicInstitutionDetails
       security: []
       responses:
         200:
-          description: 'A list of all Institutions
-
-'
+          description: 'A list of all Institutions'
           schema:
             "$ref": "#/definitions/GetPublicInstitutionDetailsResponse"
   "/v1/institutions/{shortName}":
@@ -2378,45 +2366,35 @@ paths:
       name: shortName
       required: true
       type: string
-      description: A short unique name for the Institution used as an identifier,
-        such as 'VUMC'
+      description: 'A short unique name for the Institution used as an identifier,
+        such as "VUMC"'
     get:
       tags:
       - institution
       description: 'Gets the Institution corresponding to the shortName ID. Requires
-        INSTITUTION_ADMIN authority.
-
-'
+        INSTITUTION_ADMIN authority.'
       operationId: getInstitution
       responses:
         200:
-          description: 'The Institution corresponding to the shortName ID.
-
-'
+          description: 'The Institution corresponding to the shortName ID.'
           schema:
             "$ref": "#/definitions/Institution"
     delete:
       tags:
       - institution
       description: 'Deletes the Institution corresponding to the shortName ID. Requires
-        INSTITUTION_ADMIN authority.
-
-'
+        INSTITUTION_ADMIN authority.'
       operationId: deleteInstitution
       responses:
         204:
           description: 'Successful deletion of the Institution corresponding to the
-            shortName ID.
-
-'
+            shortName ID.'
         409:
           description: Could not delete the Institution because it has verified affiliations.
     patch:
       tags:
       - institution
-      description: 'Updates an Institution. Requires INSTITUTION_ADMIN authority.
-
-'
+      description: 'Updates an Institution. Requires INSTITUTION_ADMIN authority.'
       operationId: updateInstitution
       parameters:
       - in: body
@@ -2427,11 +2405,33 @@ paths:
           "$ref": "#/definitions/Institution"
       responses:
         200:
-          description: 'The updated Institution.
-
-'
+          description: The updated Institution.
           schema:
             "$ref": "#/definitions/Institution"
+  "/v1/institutions/{shortName}/checkEmail/{email}/":
+    parameters:
+    - in: path
+      name: shortName
+      type: string
+      description: 'The short name / key of the institution to check, e.g. "VUMC"'
+      required: true
+    - in: path
+      name: email
+      type: string
+      description: Institutional contact email address to check.
+      required: true
+    get:
+      tags:
+        - institution
+      operationId: checkEmail
+      description: Checks whether the given email address is a verified member of an institution.
+      x-aou-note: This endpoint is publicly-accessible and called by clients during user registration.
+      security: []
+      responses:
+        200:
+          description: Whether the email is a valid member of the institution.
+          schema:
+            "$ref": "#/definitions/CheckEmailResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/getDataTableQuery":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -5269,6 +5269,14 @@ definitions:
         default: false
     example:
       isTaken: false
+
+  CheckEmailResponse:
+    type: object
+    properties:
+      isValidMember:
+        description: Whether the requested email address is a valid member of the institution.
+        type: boolean
+
   WorkspaceResponse:
     type: object
     required:
@@ -5279,6 +5287,7 @@ definitions:
         "$ref": "#/definitions/Workspace"
       accessLevel:
         "$ref": "#/definitions/WorkspaceAccessLevel"
+
   UserListResponse:
     type: object
     required:

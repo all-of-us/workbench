@@ -111,9 +111,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     if (dbAffiliation == null) {
       return false;
     }
+    return validateInstitutionalEmail(
+        institutionMapper.dbToModel(dbAffiliation.getInstitution()), contactEmail);
+  }
 
-    final Institution inst = institutionMapper.dbToModel(dbAffiliation.getInstitution());
-
+  @Override
+  public boolean validateInstitutionalEmail(Institution institution, String contactEmail) {
     try {
       // TODO RW-4489: UserService should handle initial email validation
       new InternetAddress(contactEmail).validate();
@@ -121,11 +124,11 @@ public class InstitutionServiceImpl implements InstitutionService {
       return false;
     }
 
-    if (inst.getEmailAddresses().contains(contactEmail)) {
+    if (institution.getEmailAddresses().contains(contactEmail)) {
       return true;
     }
 
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
-    return inst.getEmailDomains().contains(contactEmailDomain);
+    return institution.getEmailDomains().contains(contactEmailDomain);
   }
 }
