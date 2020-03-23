@@ -147,7 +147,7 @@ export interface ResearchPurposeQuestion {
 export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
   {
     header: ' What is the primary purpose of your project?',
-    description: <div></div>
+    description: ''
   }, {
     header: <div> Please provide a summary of your research purpose by responding to the
       questions below.</div>,
@@ -270,9 +270,9 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
       {label: 'Older adults (65-74)', shortName: SpecificPopulationEnum.AGEOLDER},
       {label: 'Older adults (75+) ', shortName: SpecificPopulationEnum.AGEOLDERMORETHAN75}]
   }, {
-    label: 'Sex At Birth',
+    label: 'Sex at Birth',
     shortName: SpecificPopulationEnum.SEX,
-    ubrLabel: 'Sex At Birth',
+    ubrLabel: 'Sex at Birth',
     ubrDescription: 'Intersex',
     subCategory: [
       {
@@ -321,7 +321,7 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
       shortName: SpecificPopulationEnum.DISABILITYSTATUS
     }]
   }, {
-    label: 'Access To care',
+    label: 'Access to care',
     shortName: SpecificPopulationEnum.ACCESSTOCARE,
     ubrLabel: 'Access to Care',
     ubrDescription: 'Limited access to care; Cannot easily obtain or access medical care',
