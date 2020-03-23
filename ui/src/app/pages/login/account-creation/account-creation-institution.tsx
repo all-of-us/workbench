@@ -118,11 +118,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
 
     // Clear the email validation response, in case the email had previously been validated against
     // the prior institution.
-    this.setState({checkEmailResponse: null});
+    this.setState({checkEmailResponse: null}, () => {
+      // Trigger an email-verification check, in case the user has entered or changed their email and
+      // such a check hasn't yet been sent.
+      this.checkEmail();
+    });
 
-    // Trigger an email-verification check, in case the user has entered or changed their email and
-    // such a check hasn't yet been sent.
-    this.checkEmail();
   }
 
   onEmailBlur() {
