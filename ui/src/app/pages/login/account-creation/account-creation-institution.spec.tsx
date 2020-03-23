@@ -172,6 +172,27 @@ it('should clear email validation when institution is changed', async() => {
   expect(getInstance(wrapper).validate()['checkEmailResponse']).toBeTruthy();
 });
 
+it('should trigger email check when email is filled in before choosing institution', async() => {
+  // This test ensures that a user can fill in their email address first, then choose an
+  // institution, and still be able to complete the form. This ensures that the institution change
+  // can trigger a checkEmail request.
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@broadinstitute.org'}});
+  getEmailInput(wrapper).simulate('blur');
+  // This shouldn't strictly be needed here, since we expect the API request not to be sent due to
+  // no institution being chosen. But for consistency w/ other tests, it's included.
+  await waitOneTickAndUpdate(wrapper);
+
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Broad'});
+  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.EARLYCAREER});
+  await waitOneTickAndUpdate(wrapper);
+
+  // At this point, the form should be ready to submit.
+  expect(getInstance(wrapper).validate()).toBeUndefined();
+});
+
 
 it('should call callback with correct form data', async() => {
   let profile: Profile = null;
