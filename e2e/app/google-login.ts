@@ -67,6 +67,7 @@ export default class GoogleLoginPage extends BasePage {
    * @param pwd
    */
   async enterPassword(pwd: string) : Promise<void> {
+    await this.takeScreenshot('enterPassword');
     const input = await this.password();
     await input.focus();
     await input.type(pwd);
