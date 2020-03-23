@@ -14,7 +14,9 @@ export default class ChromeDriver {
     '--disable-background-timer-throttling',
     '--disable-backgrounding-occluded-windows',
     '--disable-renderer-backgrounding',
-    '--proxy-server=\'direct://\'',
+    '--disable-web-security',
+    '--disable-features=IsolateOrigins,site-per-process',
+    '--proxy-server="direct://"',
     '--proxy-bypass-list=*',
   ];
 

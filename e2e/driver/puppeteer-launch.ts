@@ -16,6 +16,8 @@ const defaultLaunchOpts = {
     '--disable-renderer-backgrounding',
     '--disable-web-security',
     '--disable-features=IsolateOrigins,site-per-process',
+    '--proxy-server="direct://"',
+    '--proxy-bypass-list=*',
   ]
 };
 
