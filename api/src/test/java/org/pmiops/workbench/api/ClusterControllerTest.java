@@ -111,8 +111,9 @@ public class ClusterControllerTest {
   @Import({
     ClusterController.class,
     WorkspaceMapperImpl.class,
+    UserServiceTestConfiguration.class,
   })
-  static class Configuration extends UserServiceTestConfiguration {
+  static class Configuration {
 
     @Bean
     @Scope("prototype")

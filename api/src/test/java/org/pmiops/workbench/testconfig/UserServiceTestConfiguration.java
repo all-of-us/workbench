@@ -7,7 +7,7 @@ import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 
-// Collect the imports necessary for tests which refer to UserService in one place
+// Collect the imports necessary for tests to access UserServiceImpl in one place
 
 @TestConfiguration
 @Import({

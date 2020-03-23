@@ -131,7 +131,7 @@ public class CohortsControllerTest {
           .domainId("Condition")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_2 =
       new Concept()
@@ -144,7 +144,7 @@ public class CohortsControllerTest {
           .domainId("Condition")
           .countValue(789L)
           .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
@@ -192,6 +192,7 @@ public class CohortsControllerTest {
     WorkspaceMapperImpl.class,
     ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class,
+    UserServiceTestConfiguration.class,
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -210,7 +211,7 @@ public class CohortsControllerTest {
     UserServiceAuditor.class,
     FreeTierBillingService.class
   })
-  static class Configuration extends UserServiceTestConfiguration {
+  static class Configuration {
 
     @Bean
     Cloudbilling cloudbilling() {

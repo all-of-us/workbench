@@ -104,7 +104,7 @@ public class ConceptSetsControllerTest {
           .domainId("Condition")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_2 =
       new Concept()
@@ -117,7 +117,7 @@ public class ConceptSetsControllerTest {
           .domainId("Measurement")
           .countValue(456L)
           .prevalence(0.3F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_3 =
       new Concept()
@@ -130,7 +130,7 @@ public class ConceptSetsControllerTest {
           .domainId("Condition")
           .countValue(789L)
           .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_4 =
       new Concept()
@@ -144,7 +144,7 @@ public class ConceptSetsControllerTest {
           .domainId("Condition")
           .countValue(7890L)
           .prevalence(0.9F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_SURVEY_CONCEPT_1 =
       new Concept()
@@ -157,7 +157,7 @@ public class ConceptSetsControllerTest {
           .domainId("Observation")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
@@ -227,7 +227,8 @@ public class ConceptSetsControllerTest {
     ConceptSetService.class,
     WorkspaceMapperImpl.class,
     ManualWorkspaceMapper.class,
-    LogsBasedMetricServiceFakeImpl.class
+    LogsBasedMetricServiceFakeImpl.class,
+    UserServiceTestConfiguration.class,
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -243,7 +244,7 @@ public class ConceptSetsControllerTest {
     UserServiceAuditor.class,
     FreeTierBillingService.class
   })
-  static class Configuration extends UserServiceTestConfiguration {
+  static class Configuration {
 
     @Bean
     Cloudbilling cloudbilling() {

@@ -41,6 +41,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
@@ -73,8 +74,9 @@ public class UserServiceTest {
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
 
+  @Import(UserServiceTestConfiguration.class)
   @TestConfiguration
-  static class Configuration extends UserServiceTestConfiguration {
+  static class Configuration {
     @Bean
     Clock clock() {
       return PROVIDED_CLOCK;

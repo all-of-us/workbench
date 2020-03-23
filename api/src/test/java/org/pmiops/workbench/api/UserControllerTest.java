@@ -64,9 +64,10 @@ public class UserControllerTest {
     ComplianceService.class,
     DirectoryService.class,
     AdminActionHistoryDao.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    UserServiceTestConfiguration.class,
   })
-  static class Configuration extends UserServiceTestConfiguration {
+  static class Configuration {
 
     @Bean
     @Scope("prototype")

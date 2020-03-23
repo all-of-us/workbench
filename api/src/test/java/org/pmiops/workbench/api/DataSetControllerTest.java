@@ -276,6 +276,7 @@ public class DataSetControllerTest {
     WorkspaceMapperImpl.class,
     ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class,
+    UserServiceTestConfiguration.class,
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -300,7 +301,7 @@ public class DataSetControllerTest {
     Zendesk.class,
     FreeTierBillingService.class
   })
-  static class Configuration extends UserServiceTestConfiguration {
+  static class Configuration {
 
     @Bean(END_USER_CLOUD_BILLING)
     Cloudbilling endUserCloudbilling() {
@@ -523,7 +524,7 @@ public class DataSetControllerTest {
             .domainId("Observation")
             .countValue(123L)
             .prevalence(0.2F)
-            .conceptSynonyms(new ArrayList<String>()));
+            .conceptSynonyms(new ArrayList<>()));
 
     ConceptSet conceptSurveySet =
         new ConceptSet()

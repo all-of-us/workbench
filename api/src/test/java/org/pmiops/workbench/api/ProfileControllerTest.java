@@ -159,8 +159,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     ProfileMapperImpl.class,
     CaptchaVerificationService.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
+    UserServiceTestConfiguration.class,
   })
-  static class Configuration extends UserServiceTestConfiguration {
+  static class Configuration {
     @Bean
     @Primary
     Clock clock() {
@@ -389,7 +390,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
@@ -412,7 +413,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("zeta");
     first.setInstitution("Zeta");
@@ -435,7 +436,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
@@ -446,7 +447,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     affiliations.add(second);
     profile.setInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
-    affiliations = new ArrayList<InstitutionalAffiliation>();
+    affiliations = new ArrayList<>();
     affiliations.add(first);
     profile.setInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
@@ -460,7 +461,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
