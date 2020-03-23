@@ -225,19 +225,15 @@ export class SearchGroupList extends React.Component<Props, State> {
     wizardStore.next(context);
   }
 
-  get title() {
-    const {role} = this.props;
-    const prefix = role === 'excludes' ? 'And ' : '';
-    return prefix + role.slice(0, -1) + ` Participants`;
-  }
-
   render() {
     const {groups, role, updated, updateRequest} = this.props;
     const {index} = this.state;
     return <React.Fragment>
       <style>{css}</style>
       <div style={{display: 'flex', alignItems: 'center'}}>
-        <h2 style={styles.listHeader}>{this.title}</h2>
+        <h2 style={styles.listHeader}>
+          {role === 'excludes' && <span>And</span>} {role.slice(0, -1)} Participants
+        </h2>
       </div>
       {groups.map((group, g) => <div key={g}>
         <SearchGroup group={group} index={g + index} role={role} updated={updated} updateRequest={updateRequest}/>
