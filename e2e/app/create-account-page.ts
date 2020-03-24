@@ -75,14 +75,13 @@ export default class CreateAccountPage extends BasePage {
 
   async getPdfPage(): Promise<JSHandle> {
     const pdfPage =  await this.page.waitForFunction(() => {
-      return document.querySelectorAll('.tos-pdf-page[data-page-number]').length > 1
+      return document.querySelectorAll('.pdf-page[data-page-number]').length > 1
     });
     return pdfPage;
   }
 
   async scrollToLastPdfPage(): Promise<ElementHandle> {
-    await this.getPdfPage();
-    const selector = '.react-pdf__Document :last-child.react-pdf__Page.tos-pdf-page';
+    const selector = '.react-pdf__Document :last-child.react-pdf__Page.pdf-page';
     const pdfPage = await this.page.waitForSelector(selector);
     await this.page.evaluate(el => el.scrollIntoView(), pdfPage);
     return pdfPage;
