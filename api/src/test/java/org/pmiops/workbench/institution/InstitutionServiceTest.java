@@ -33,6 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
+  InstitutionUserInstructionsMapperImpl.class
 })
 public class InstitutionServiceTest {
   @Autowired private InstitutionService service;

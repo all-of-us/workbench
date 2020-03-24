@@ -7,8 +7,6 @@ import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
-import org.owasp.html.HtmlPolicyBuilder;
-import org.owasp.html.PolicyFactory;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -32,6 +30,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final InstitutionMapper institutionMapper;
+  private final InstitutionUserInstructionsMapper institutionUserInstructionsMapper;
   private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
 
   @Autowired
@@ -40,11 +39,13 @@ public class InstitutionServiceImpl implements InstitutionService {
       InstitutionUserInstructionsDao institutionUserInstructionsDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       InstitutionMapper institutionMapper,
+      InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
       PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
     this.institutionDao = institutionDao;
     this.institutionUserInstructionsDao = institutionUserInstructionsDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.institutionMapper = institutionMapper;
+    this.institutionUserInstructionsMapper = institutionUserInstructionsMapper;
     this.publicInstitutionDetailsMapper = publicInstitutionDetailsMapper;
   }
 
@@ -151,7 +152,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public void setInstitutionUserInstructions(final InstitutionUserInstructions userInstructions) {
 
-    final DbInstitutionUserInstructions dbInstructions = modelToDb(userInstructions);
+    final DbInstitutionUserInstructions dbInstructions =
+        institutionUserInstructionsMapper.modelToDb(userInstructions, this);
 
     // if a DbInstitutionUserInstructions entry already exists for this Institution, retrieve its ID
     // so the call to save() replaces it
@@ -164,19 +166,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                     existingDbEntry.getInstitutionUserInstructionsId()));
 
     institutionUserInstructionsDao.save(dbInstructions);
-  }
-
-  // this does not call a mapper because every field is special-cased
-  private DbInstitutionUserInstructions modelToDb(InstitutionUserInstructions modelObject) {
-    final long institutionId =
-        getDbInstitutionOrThrow(modelObject.getInstitutionShortName()).getInstitutionId();
-    final PolicyFactory removeAllTags = new HtmlPolicyBuilder().toFactory();
-    final String sanitizedInstructions =
-        removeAllTags.sanitize(modelObject.getInstructions()).trim();
-
-    return new DbInstitutionUserInstructions()
-        .setInstitutionId(institutionId)
-        .setUserInstructions(sanitizedInstructions);
   }
 
   @Override
