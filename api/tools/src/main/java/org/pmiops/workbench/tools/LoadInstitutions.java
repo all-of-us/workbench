@@ -13,7 +13,6 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.InstitutionUserInstructionsMapperImpl;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.boot.CommandLineRunner;
@@ -25,7 +24,6 @@ import org.springframework.context.annotation.Import;
 @Import({
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
-  InstitutionUserInstructionsMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
 })
 public class LoadInstitutions {

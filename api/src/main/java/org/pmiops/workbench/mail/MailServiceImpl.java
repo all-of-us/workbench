@@ -200,6 +200,7 @@ public class MailServiceImpl implements MailService {
       final String instructions) {
     final CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.INSTRUCTIONS, instructions)
         .build();
   }
