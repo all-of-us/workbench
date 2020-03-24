@@ -5,7 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableList;
 import javax.inject.Provider;
 import org.junit.Test;
-import org.junit.jupiter.api.Tag;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -22,7 +22,7 @@ import org.zendesk.client.v2.Zendesk;
 import org.zendesk.client.v2.model.Request;
 
 // Run nightly only, as it creates a Zendesk request on every run without cleanup (spammy).
-@Tag("nightly")
+@Category(NightlyTests.class)
 @RunWith(SpringRunner.class)
 public class ZendeskIntegrationTest extends BaseIntegrationTest {
 
