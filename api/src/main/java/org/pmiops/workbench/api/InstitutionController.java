@@ -105,15 +105,8 @@ public class InstitutionController implements InstitutionApiDelegate {
   @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<InstitutionUserInstructions> setInstitutionUserInstructions(
       final InstitutionUserInstructions instructions) {
-    if (institutionService.setInstitutionUserInstructions(instructions)) {
-      return ResponseEntity.ok(instructions);
-    } else {
-      final String msg =
-          String.format(
-              "Could not set user instructions for institution %s",
-              instructions.getInstitutionShortName());
-      throw new BadRequestException(msg);
-    }
+    institutionService.setInstitutionUserInstructions(instructions);
+    return ResponseEntity.ok(instructions);
   }
 
   @Override

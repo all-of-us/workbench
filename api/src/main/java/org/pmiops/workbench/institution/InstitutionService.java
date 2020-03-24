@@ -52,9 +52,31 @@ public interface InstitutionService {
    */
   boolean validateInstitutionalEmail(Institution institution, String contactEmail);
 
+  /**
+   * Retrieve the optional text block of user instructions to fill the instructions email sent after
+   * a user in this institution creates an account. Throws NotFoundException if the Institution does
+   * not exist.
+   *
+   * @param shortName the short name (key) used to refer to this institution in the API
+   * @return The text block of user instructions, or Empty if it is not present.
+   */
   Optional<String> getInstitutionUserInstructions(final String shortName);
 
-  boolean setInstitutionUserInstructions(final InstitutionUserInstructions instructions);
+  /**
+   * Create or update the text block of user instructions to be included in the instructions email
+   * sent after a user in this institution creates an account. Sanitizes inputs to remove all HTML
+   * tags. Throws NotFoundException if the Institution does not exist.
+   *
+   * @param instructions The institution to update along with the text to include in the email
+   */
+  void setInstitutionUserInstructions(final InstitutionUserInstructions instructions);
 
+  /**
+   * Delete the text block of user instructions to be included in the instructions email for this
+   * institution, if it exists. Throws NotFoundException if the Institution does not exist.
+   *
+   * @param shortName the short name (key) used to refer to this institution in the API
+   * @return whether user instructions were deleted
+   */
   boolean deleteInstitutionUserInstructions(final String shortName);
 }

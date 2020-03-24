@@ -149,8 +149,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public boolean setInstitutionUserInstructions(
-      final InstitutionUserInstructions userInstructions) {
+  public void setInstitutionUserInstructions(final InstitutionUserInstructions userInstructions) {
 
     final DbInstitutionUserInstructions dbInstructions = modelToDb(userInstructions);
 
@@ -165,7 +164,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                     existingDbEntry.getInstitutionUserInstructionsId()));
 
     institutionUserInstructionsDao.save(dbInstructions);
-    return true;
   }
 
   // this does not call a mapper because every field is special-cased

@@ -355,7 +355,7 @@ public class InstitutionServiceTest {
         new InstitutionUserInstructions()
             .institutionShortName(testInst.getShortName())
             .instructions(instructions);
-    assertThat(service.setInstitutionUserInstructions(inst)).isTrue();
+    service.setInstitutionUserInstructions(inst);
     assertThat(service.getInstitutionUserInstructions(testInst.getShortName()))
         .hasValue(instructions);
   }
@@ -367,13 +367,13 @@ public class InstitutionServiceTest {
         new InstitutionUserInstructions()
             .institutionShortName(testInst.getShortName())
             .instructions(instructions1);
-    assertThat(service.setInstitutionUserInstructions(inst)).isTrue();
+    service.setInstitutionUserInstructions(inst);
     assertThat(service.getInstitutionUserInstructions(testInst.getShortName()))
         .hasValue(instructions1);
 
     final String instructions2 = "Do some science and then publish a paper";
     inst.instructions(instructions2);
-    assertThat(service.setInstitutionUserInstructions(inst)).isTrue();
+    service.setInstitutionUserInstructions(inst);
     assertThat(service.getInstitutionUserInstructions(testInst.getShortName()))
         .hasValue(instructions2);
   }
@@ -395,7 +395,7 @@ public class InstitutionServiceTest {
         new InstitutionUserInstructions()
             .institutionShortName(testInst.getShortName())
             .instructions(instructions1);
-    assertThat(service.setInstitutionUserInstructions(inst)).isTrue();
+    service.setInstitutionUserInstructions(inst);
     assertThat(service.getInstitutionUserInstructions(testInst.getShortName()))
         .hasValue(instructions1);
 
