@@ -291,8 +291,8 @@ spotless {
 configurations {
   integrationCompile.extendsFrom testCompile
   integrationRuntime.extendsFrom testRuntime
-  bigquerytestCompile.extendsFrom testCompile
-  bigquerytestRuntime.extendsFrom testRuntime
+  bigQueryTestCompile.extendsFrom testCompile
+  bigQueryTestRuntime.extendsFrom testRuntime
 
   toolsImplementation.extendsFrom implementation
   toolsRuntimeOnly.extendsFrom runtimeOnly
@@ -337,7 +337,7 @@ sourceSets {
       srcDirs = ['tools/src/main/java']
     }
   }
-  bigquerytest {
+  bigQueryTest {
     resources {
       srcDir "bigquerytest/resources"
       srcDir "config/"
@@ -522,18 +522,28 @@ compileJava {
   options.compilerArgs << '-Xlint:unchecked'
 }
 
-task integration(type: Test) {
+task integrationTest(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
   testClassesDirs = sourceSets.integration.output.classesDirs
   classpath = sourceSets.integration.runtimeClasspath
+  useJUnitPlatform{
+		excludeTags 'nightly'
+	}
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
 
-task bigquerytest(type: Test) {
+task nightlyIntegrationTest(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
-  testClassesDirs = sourceSets.bigquerytest.output.classesDirs
-  classpath = sourceSets.bigquerytest.runtimeClasspath
+  testClassesDirs = sourceSets.integration.output.classesDirs
+  classpath = sourceSets.integration.runtimeClasspath
+  // Leave "nightly" tag, but run everything else as well.
+}
+
+task bigQueryTest(type: Test) {
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  testClassesDirs = sourceSets.bigQueryTest.output.classesDirs
+  classpath = sourceSets.bigQueryTest.runtimeClasspath
 }
 
 tasks.withType(Test) {
