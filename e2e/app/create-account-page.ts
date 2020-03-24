@@ -1,4 +1,4 @@
-import {ElementHandle, Page} from 'puppeteer';
+import {ElementHandle, JSHandle, Page} from 'puppeteer';
 import {defaultFieldValues} from '../resources/data/user-registration-fields';
 import Button from './aou-elements/button';
 import Checkbox from './aou-elements/checkbox';
@@ -73,7 +73,15 @@ export default class CreateAccountPage extends BasePage {
     return await Button.forLabel(this.page, {text: 'Next'});
   }
 
+  async getPdfPage(): Promise<JSHandle> {
+    const pdfPage =  await this.page.waitForFunction(() => {
+      return document.querySelectorAll('.tos-pdf-page[data-page-number]').length > 1
+    });
+    return pdfPage;
+  }
+
   async scrollToLastPdfPage(): Promise<ElementHandle> {
+    await this.getPdfPage();
     const selector = '.react-pdf__Document :last-child.react-pdf__Page.tos-pdf-page';
     const pdfPage = await this.page.waitForSelector(selector);
     await this.page.evaluate(el => el.scrollIntoView(), pdfPage);
