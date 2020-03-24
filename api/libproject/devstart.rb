@@ -108,6 +108,8 @@ def run_inline_or_log(dry_run, args)
 end
 
 def must_get_env_value(env, key)
+  puts ENVIRONMENTS.fetch(env)
+
   unless ENVIRONMENTS.fetch(env, {}).has_key?(key)
     raise ArgumentError.new("env '#{env}' lacks key #{key}")
   end
@@ -1084,10 +1086,11 @@ def create_auth_domain(cmd_name, args)
   token = token.chomp
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
+  api_base_url = get_server_config(op.opts.project)["apiBaseUrl"]
 
   domain_name = get_auth_domain(op.opts.project)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
-     https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}}
+     #{api_base_url}/v1/auth-domain/#{domain_name}}
 end
 
 Common.register_command({
@@ -1944,6 +1947,11 @@ def get_billing_config(project)
   return JSON.parse(File.read("config/#{config_json}"))["billing"]
 end
 
+def get_server_config(project)
+  config_json = must_get_env_value(project, :config_json)
+  return JSON.parse(File.read("config/#{config_json}"))["server"]
+end
+
 def get_billing_project_prefix(project)
   return get_billing_config(project)["projectNamePrefix"]
 end
@@ -2237,8 +2245,8 @@ def setup_cloud_project(cmd_name, *args)
   gcc.validate
 
   # create_project_resources(gcc)
-  # setup_project_data(gcc, op.opts.cdr_db_name)
-  deploy_gcs_artifacts(cmd_name, %W{--project #{gcc.project}})
+  setup_project_data(gcc, op.opts.cdr_db_name)
+  # deploy_gcs_artifacts(cmd_name, %W{--project #{gcc.project}})
 end
 
 Common.register_command({
