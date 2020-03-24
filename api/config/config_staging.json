@@ -46,6 +46,7 @@
     "gSuiteDomain": "staging.fake-research-aou.org"
   },
   "server": {
+    "clientBaseUrl": "https:\/\/all-of-us-rw-staging.appspot.com",
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-staging.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",

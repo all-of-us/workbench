@@ -46,6 +46,7 @@
     "gSuiteDomain": "fake-research-aou.org"
   },
   "server": {
+    "clientBaseUrl": "https:\/\/all-of-us-workbench-test.appspot.com",
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
     "projectId": "all-of-us-workbench-test",
