@@ -13,13 +13,13 @@ import org.pmiops.workbench.model.InstitutionUserInstructions;
 @Mapper(componentModel = "spring")
 public interface InstitutionUserInstructionsMapper {
   @Mapping(target = "institutionUserInstructionsId", ignore = true)
-  @Mapping(target = "institutionId", ignore = true) // set by setDbInstitutionId()
-  @Mapping(target = "userInstructions", source = "instructions")
+  @Mapping(target = "institutionId", ignore = true) // set by setFields()
+  @Mapping(target = "userInstructions", ignore = true) // set by setFields()
   DbInstitutionUserInstructions modelToDb(
       InstitutionUserInstructions modelObject, @Context InstitutionService institutionService);
 
   @AfterMapping
-  default void setDbInstitutionId(
+  default void setFields(
       @MappingTarget DbInstitutionUserInstructions target,
       InstitutionUserInstructions modelObject,
       @Context InstitutionService institutionService) {
