@@ -38,7 +38,7 @@ export const PdfViewer = withWindowSize()( class extends React.Component<Props, 
 
     return <div style={{flex: '1 1 0', overflowY: 'auto'}}>
       {loading && <SpinnerOverlay/>}
-      <Document data-test-id='tos-pdf-document'
+      <Document data-test-id='pdf-document'
                 file={this.props.pdfPath}
                 loading=''
                 onLoadSuccess={
@@ -54,8 +54,8 @@ export const PdfViewer = withWindowSize()( class extends React.Component<Props, 
                   <Page
                       renderAnnotationLayer={false}
                       renderTextLayer={false}
-                      loading={''}
-                      className={'pdf-page'}
+                      loading=''
+                      className='pdf-page'
                       width={Math.max(500, this.props.windowSize.width * .75)}
                       key={`page_${index + 1}`}
                       pageNumber={index + 1}

@@ -2,9 +2,9 @@ import {shallow} from 'enzyme';
 import * as React from 'react';
 import {Document, Page} from 'react-pdf';
 
-import {PdfViewer, Props} from 'app/components/pdf-viewer';
+import {PdfViewer} from 'app/components/pdf-viewer';
 
-let props: Props = {
+let props = {
   pdfPath: '/assets/documents/fake-document-path.pdf',
   windowSize: {width: 1700, height: 0}
 };

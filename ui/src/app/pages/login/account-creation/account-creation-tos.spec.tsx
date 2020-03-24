@@ -1,6 +1,6 @@
 import {mount, ReactWrapper, shallow, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
-import AccountCreationTos, {AccountCreationTosProps} from './account-creation-tos';
+import {AccountCreationTos, AccountCreationTosProps} from 'app/pages/login/account-creation/account-creation-tos';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 const getPrivacyCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
@@ -19,7 +19,6 @@ const onCompleteSpy = jest.fn();
 beforeEach(() => {
   jest.clearAllMocks();
   props = {
-    windowSize: {width: 1700, height: 0},
     onComplete: onCompleteSpy,
     pdfPath: '/assets/documents/fake-document-path.pdf'
   };
@@ -31,9 +30,7 @@ it('should render', async() => {
 });
 
 it('should enable checkboxes and next button with user input', async() => {
-  // Note: since AccountCreationTos is exported as withWindowSize(...), we need to shallow-render
-  // an extra time to get to the real AccountCreationTos component.
-  const wrapper = shallow(<AccountCreationTos {...props} />).shallow();
+  const wrapper = mount(<AccountCreationTos {...props} />);
 
   expect(getPrivacyCheckbox(wrapper).prop('disabled')).toBeTruthy();
   expect(getTosCheckbox(wrapper).prop('disabled')).toBeTruthy();
@@ -58,7 +55,7 @@ it('should enable checkboxes and next button with user input', async() => {
 });
 
 it('should call onComplete when next button is pressed', async() => {
-  const wrapper = shallow(<AccountCreationTos {...props} />).shallow();
+  const wrapper = mount(<AccountCreationTos {...props} />);
 
   wrapper.setState({hasReadEntireTos: true});
   getPrivacyCheckbox(wrapper).simulate('change', {target: {checked: true}});
