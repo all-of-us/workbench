@@ -15,6 +15,7 @@ import {
 } from 'app/cohort-search/search-state.service';
 import {domainToTitle, subTypeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -23,7 +24,6 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
-import {TooltipTrigger} from '../../components/popups';
 
 const styles = reactStyles({
   code: {
@@ -150,11 +150,11 @@ interface TreeNodeProps {
 
 interface TreeNodeState {
   children: Array<any>;
-  empty: boolean;
   error: boolean;
   expanded: boolean;
   hover: boolean;
   loading: boolean;
+  parentSelected: boolean;
   searchMatch: boolean;
   selected: boolean;
   truncated: boolean;
@@ -167,11 +167,11 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     super(props);
     this.state = {
       children: undefined,
-      empty: false,
       error: false,
       expanded: false,
       hover: false,
       loading: false,
+      parentSelected: false,
       searchMatch: false,
       selected: false,
       truncated: false
@@ -191,6 +191,13 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
     this.subscription.add(selectionsStore.subscribe(selections => {
       this.setState({selected: selections.includes(this.paramId)});
+    }));
+
+    this.subscription.add(groupSelectionsStore.subscribe(groupIds => {
+      const parentSelected = groupIds.some(id => node.path.split('.')
+        .filter(pathId => pathId !== node.id.toString())
+        .includes(id.toString()));
+      this.setState({parentSelected});
     }));
 
     this.subscription.add(subtreeSelectedStore.subscribe(id => {
@@ -220,7 +227,6 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   loadChildren() {
     const {node: {count, domainId, id, isStandard, name, type}} = this.props;
-    const {empty} = this.state;
     // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
     if (domainId === DomainType.SURVEY.toString()) {
       this.trackEvent();
@@ -228,30 +234,29 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    try {
-      cohortBuilderApi().findCriteriaBy(cdrId, domainId, criteriaType, isStandard, id)
-        .then(resp => {
-          if (resp.items.length === 0 && domainId === DomainType.DRUG.toString()) {
-            cohortBuilderApi()
-              .findCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
-              .then(rxResp => {
-                this.setState({empty: rxResp.items.length === 0, children: rxResp.items, loading: false});
-              }, () => this.setState({error: true}));
-          } else {
-            this.setState({empty: resp.items.length === 0, children: resp.items, loading: false});
-            if (resp.items.length > 0 && domainId === DomainType.SURVEY.toString() && !resp.items[0].group) {
-              // save questions in the store so we can display them along with answers if selected
-              const questions = ppiQuestions.getValue();
-              questions[id] = {count, name};
-              ppiQuestions.next(questions);
-            }
+    cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, id)
+      .then(resp => {
+        if (resp.items.length === 0 && domainId === DomainType.DRUG.toString()) {
+          cohortBuilderApi()
+            .findCriteriaBy(+cdrVersionId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
+            .then(rxResp => {
+              this.setState({children: rxResp.items, loading: false});
+            }, () => this.setState({error: true}));
+        } else {
+          this.setState({children: resp.items, loading: false});
+          if (resp.items.length > 0 && domainId === DomainType.SURVEY.toString() && !resp.items[0].group) {
+            // save questions in the store so we can display them along with answers if selected
+            const questions = ppiQuestions.getValue();
+            questions[id] = {count, name};
+            ppiQuestions.next(questions);
           }
-        });
-    } catch (error) {
-      console.error(error);
-      this.setState({error: true, loading: false});
-      subtreeSelectedStore.next(undefined);
-    }
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.setState({error: true, loading: false});
+        subtreeSelectedStore.next(undefined);
+      });
   }
 
   searchChildren() {
@@ -306,21 +311,15 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       (selectable || (subtype === CriteriaSubType.LAB.toString() && group && code !== null) || type === CriteriaType.CPT4.toString());
   }
 
-  select() {
-    const {node, node: {conceptId, domainId, group, id, name, parentId, subtype, value}} = this.props;
+  select(event: Event) {
+    event.stopPropagation();
+    const {node, node: {conceptId, domainId, group, id, parentId, subtype, value}} = this.props;
+    let {node: {name}} = this.props;
     let selections = selectionsStore.getValue();
     if (!selections.includes(this.paramId)) {
       if (group) {
         const groups = [...groupSelectionsStore.getValue(), id];
         groupSelectionsStore.next(groups);
-      }
-      let modifiedName = name;
-      if (domainId === DomainType.SURVEY.toString()) {
-        // get PPI question from store
-        const question = ppiQuestions.getValue()[parentId];
-        if (question) {
-          modifiedName = question.name + ' - ' + modifiedName;
-        }
       }
       let attributes = [];
       if (subtype === CriteriaSubType.BP.toString()) {
@@ -336,25 +335,20 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           operands: [value]
         });
       } else if (domainId === DomainType.SURVEY.toString() && !group) {
-        if (conceptId === 1585747) {
-          attributes.push({
-            name: AttrName.NUM,
-            operator: Operator.EQUAL,
-            operands: [value]
-          });
-        } else {
-          attributes.push({
-            name: AttrName.CAT,
-            operator: Operator.IN,
-            operands: [value]
-          });
+        const question = ppiQuestions.getValue()[parentId];
+        if (question) {
+          name = `${question.name} - ${name}`;
         }
+        const attribute = conceptId === 1585747
+          ? {name: AttrName.NUM, operator: Operator.EQUAL, operands: [value]}
+          : {name: AttrName.CAT, operator: Operator.IN, operands: [value]};
+        attributes.push(attribute);
       }
       const param = {
         ...node as Object,
         parameterId: this.paramId,
-        attributes: attributes,
-        name: modifiedName
+        attributes,
+        name
       };
       const wizard = wizardStore.getValue();
       wizard.item.searchParameters.push(param);
@@ -366,7 +360,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   render() {
     const {fullTree, node, node: {code, count, domainId, id, group, hasAttributes, name, selectable}, searchTerms} = this.props;
-    const {children, expanded, hover, loading, searchMatch, selected} = this.state;
+    const {children, error, expanded, hover, loading, parentSelected, searchMatch, selected} = this.state;
     const nodeChildren = fullTree ? node.children : children;
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
@@ -376,7 +370,8 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         {group && <button style={styles.iconButton}>
           {loading
             ? <Spinner size={16}/>
-            : <ClrIcon style={{color: colors.disabled}} shape={'angle ' + (expanded ? 'down' : 'right')}
+            : <ClrIcon style={{color: colors.disabled}}
+              shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16' onClick={() => this.toggleExpanded()}/>}
         </button>}
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
@@ -387,15 +382,18 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={() => attributesStore.next(node)}/>
-              : selected
-                ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}} shape='check-circle' size='20'/>
-                : <ClrIcon style={styles.selectIcon} shape='plus-circle' size='20' onClick={() => this.select()}/>
+              : selected || parentSelected
+                ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}}
+                    shape='check-circle' size='20'/>
+                : <ClrIcon style={styles.selectIcon}
+                    shape='plus-circle' size='20'
+                    onClick={(e) => this.select(e)}/>
             }
           </button>}
           <div style={styles.code}>{code}</div>
           <TooltipTrigger content={<div>{displayName}</div>} disabled={!this.state.truncated}>
             <div style={styles.name} ref={(e) => this.name = e}>
-              <span style={searchMatch ? styles.searchMatch : {}}>{this.state.truncated.toString()} {displayName}</span>
+              <span style={searchMatch ? styles.searchMatch : {}}>{displayName}</span>
             </div>
           </TooltipTrigger>
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
@@ -403,12 +401,19 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           </div>}
         </div>
       </div>
-      {!!nodeChildren && nodeChildren.length > 0 && <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
-        {nodeChildren.map((child, c) => <TreeNode key={c}
-                                                  expand={() => this.setState({expanded: true})}
-                                                  fullTree={fullTree}
-                                                  node={child}
-                                                  searchTerms={searchTerms}/>)}
+      {!!nodeChildren && nodeChildren.length > 0 &&
+        <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
+          {nodeChildren.map((child, c) => <TreeNode key={c}
+                                                      expand={() => this.setState({expanded: true})}
+                                                      fullTree={fullTree}
+                                                      node={child}
+                                                      searchTerms={searchTerms}/>)
+          }
+        </div>
+      }
+      {error && <div style={styles.error}>
+        <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
+        Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
       </div>}
     </React.Fragment>;
   }
@@ -425,7 +430,6 @@ interface Props {
 
 interface State {
   children: any;
-  empty: boolean;
   error: boolean;
   ingredients: any;
   loading: boolean;
@@ -436,7 +440,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     super(props);
     this.state = {
       children: undefined,
-      empty: false,
       error: false,
       ingredients: undefined,
       loading: true,
@@ -482,20 +485,20 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       .finally(() => this.setState({loading: false}));
   }
 
-  addChildToParent(child, itemList) {
-    for (const item of itemList) {
-      if (!item.group) {
+  addChildToParent(child, nodeList) {
+    for (const node of nodeList) {
+      if (!node.group) {
         continue;
       }
-      if (item.id === child.parentId) {
-        item.children.push(child);
-        return itemList;
+      if (node.id === child.parentId) {
+        node.children.push(child);
+        return nodeList;
       }
-      if (item.children.length) {
-        const childList = this.addChildToParent(child, item.children);
-        if (childList) {
-          item.children = childList;
-          return itemList;
+      if (node.children.length) {
+        const nodeChildren = this.addChildToParent(child, node.children);
+        if (nodeChildren) {
+          node.children = nodeChildren;
+          return nodeList;
         }
       }
     }
@@ -518,14 +521,9 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       && domainId !== DomainType.VISIT.toString();
   }
 
-  get hasError() {
-    const {empty, error, loading} = this.state;
-    return !loading && (empty || error);
-  }
-
   render() {
     const {back, node, searchTerms, setSearchTerms, wizard: {fullTree}} = this.props;
-    const {children, ingredients, loading} = this.state;
+    const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
       {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
         <SearchBar node={node}
@@ -533,7 +531,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           setIngredients={(i) => this.setState({ingredients: i})}
           setInput={(v) => setSearchTerms(v)}/>
       </div>}
-      <div style={this.showHeader
+      {!loading && <div style={this.showHeader
         ? {...styles.treeContainer, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}
         : styles.treeContainer}>
         {this.showHeader && <div style={styles.treeHeader}>
@@ -542,15 +540,15 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           </div>}
           <button style={styles.returnLink} onClick={() => back()}>Return to list</button>
         </div>}
-        {this.hasError && <div style={styles.error}>
+        {error && <div style={styles.error}>
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle' />
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
-        {!loading && !!children && children.map((child, c) => <TreeNode key={c}
+        {!!children && children.map((child, c) => <TreeNode key={c}
                                                                 fullTree={fullTree}
                                                                 node={child}
                                                                 searchTerms={searchTerms}/>)}
-    </div>
+      </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
   }
