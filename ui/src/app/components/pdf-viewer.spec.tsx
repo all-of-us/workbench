@@ -4,9 +4,9 @@ import {Document, Page} from 'react-pdf';
 
 import {PdfViewer, Props} from 'app/components/pdf-viewer';
 
-let props = {
-  windowSize: {width: 1700, height: 0},
-  pdfPath: '/assets/documents/fake-document-path.pdf'
+let props: Props = {
+  pdfPath: '/assets/documents/fake-document-path.pdf',
+  windowSize: {width: 1700, height: 0}
 };
 
 it('should load PDF pages', async() => {

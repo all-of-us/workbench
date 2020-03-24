@@ -80,7 +80,9 @@ export const AccountCreationTos = withWindowSize()(
       }
       this.hasCreatedIntersectionObserver = true;
       const intersectionCallback: IntersectionObserverCallback = (
-          entries: IntersectionObserverEntry[], unusedObserver: IntersectionObserver) => {
+        entries: IntersectionObserverEntry[],
+        unusedObserver: IntersectionObserver
+      ) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             this.setState({hasReadEntireTos: true});

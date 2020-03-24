@@ -29,6 +29,10 @@ export const PdfViewer = withWindowSize()( class extends React.Component<Props, 
     };
   }
 
+  unusedCallback() {
+    return;
+  }
+
   render() {
     const {loading, numPages} = this.state;
 
@@ -50,18 +54,18 @@ export const PdfViewer = withWindowSize()( class extends React.Component<Props, 
                   <Page
                       renderAnnotationLayer={false}
                       renderTextLayer={false}
-                      loading=''
-                      className='tos-pdf-page'
+                      loading={''}
+                      className={'pdf-page'}
                       width={Math.max(500, this.props.windowSize.width * .75)}
                       key={`page_${index + 1}`}
                       pageNumber={index + 1}
                       inputRef={index === numPages - 1
                           ? (ref) => this.props.setLastPageRef(ref)
-                          : undefined
+                          : () => this.unusedCallback()
                       }
                       onRenderSuccess={index === numPages - 1
                           ? () => this.props.handleLastPageRender()
-                          : undefined
+                          : () => this.unusedCallback()
                       }
                   />
               ),
