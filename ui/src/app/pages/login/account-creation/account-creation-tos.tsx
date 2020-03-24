@@ -124,7 +124,11 @@ export class AccountCreationTos extends React.Component<
             <CheckBox data-test-id='privacy-statement-check'
                       checked={false}
                       disabled={!hasReadEntireTos}
-                      onChange={checked => this.setState({hasAckedPrivacyStatement: checked})}
+                      onChange={checked => {
+                        debugger;
+                        this.setState({hasAckedPrivacyStatement: checked});
+                        console.log(this.state.hasAckedPrivacyStatement);
+                      }}
                       style={styles.checkbox}
                       labelStyle={hasReadEntireTos ?
                         styles.checkboxLabel :

@@ -48,6 +48,7 @@ it('should enable checkboxes and next button with user input', async() => {
   expect(getNextButton(wrapper).prop('disabled')).toBeTruthy();
 
   // Now, simulate checking both boxes, which should enable the "next" button.
+  debugger;
   getPrivacyCheckbox(wrapper).simulate('change', {target: {checked: true}});
   getTosCheckbox(wrapper).simulate('change', {target: {checked: true}});
 
