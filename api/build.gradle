@@ -563,7 +563,7 @@ tasks.withType(Test) {
   }
 }
 
-integration {
+integrationTest {
   // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
 }
