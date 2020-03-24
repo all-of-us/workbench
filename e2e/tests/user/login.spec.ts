@@ -49,7 +49,7 @@ describe('Login tests:', () => {
 
     await loginPage.enterEmail(configs.userEmail);
     await loginPage.enterPassword(INCORRECT_PASSWORD);
-    const button = await page.waitForXPath(selectors.NextButton);
+    const button = await page.waitForXPath(selectors.NextButton, {visible: true});
     await button.click();
 
     const err = await loginPage.waitForTextExists('Wrong password. Try again');

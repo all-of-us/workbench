@@ -3,6 +3,8 @@ import GoogleLoginPage from '../app/google-login';
 import HomePage from '../app/home-page';
 import {getChromeFlags} from './chrome-startup-flags';
 
+const isHeadless = !process.env.PUPPETEER_HEADLESS;
+
 export default class ChromeDriver {
 
   static userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36';
@@ -12,7 +14,7 @@ export default class ChromeDriver {
     devtools: false,
     slowMo: 10,
     defaultViewport: null,
-    args: getChromeFlags(),
+    args: getChromeFlags(isHeadless),
     ignoreDefaultArgs: true,
   };
 

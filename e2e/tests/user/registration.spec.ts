@@ -6,7 +6,7 @@ const configs = require('../../resources/workbench-config');
 // set timeout globally per suite, not per test.
 jest.setTimeout(2 * 60 * 1000);
 
-describe('User registration tests:', () => {
+describe.skip('User registration tests:', () => {
 
   let browser;
   let incognitoContext;
@@ -49,9 +49,6 @@ describe('User registration tests:', () => {
     await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
 
     // Step 2: Terms of Service.
-    await page.waitForFunction(() => {
-      return document.querySelectorAll('.tos-pdf-page[data-page-number]').length > 1
-    }, {timeout: 5000});
     await createAccountPage.acceptTermsOfUseAgreement();
     let nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();

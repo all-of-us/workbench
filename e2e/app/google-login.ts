@@ -23,21 +23,21 @@ export default class GoogleLoginPage extends BasePage {
    * Login email input field.
    */
   async email(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.emailInput, {visible: true, timeout: 5000});
+    return await this.page.waitForXPath(selectors.emailInput, {visible: true});
   }
 
   /**
    * Login password input field.
    */
   async password(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.passwordInput, {visible: true, timeout: 5000});
+    return await this.page.waitForXPath(selectors.passwordInput, {visible: true});
   }
 
   /**
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.loginButton, {visible: true, timeout: 10000});
+    return await this.page.waitForXPath(selectors.loginButton, {visible: true});
   }
 
   /**
@@ -57,11 +57,10 @@ export default class GoogleLoginPage extends BasePage {
     }
     await emailInput.focus();
     await emailInput.type(userEmail);
-    const nextButton = await this.page.waitForXPath(selectors.NextButton);
-
+    const nextButton = await this.page.waitForXPath(selectors.NextButton, {visible: true});
     await Promise.all([
-      nextButton.click(),
       this.page.waitForNavigation(),
+      nextButton.click(),
     ]);
   }
 
@@ -79,10 +78,10 @@ export default class GoogleLoginPage extends BasePage {
    * Click Next button to submit login credential.
    */
   async submit() : Promise<void> {
-    const button = await this.page.waitForXPath(selectors.NextButton);
+    const button = await this.page.waitForXPath(selectors.NextButton, {visible: true});
     await Promise.all([
-      button.click(),
       this.page.waitForNavigation(),
+      button.click(),
     ]);
   }
 
@@ -92,7 +91,7 @@ export default class GoogleLoginPage extends BasePage {
   async load(): Promise<void> {
     const url = configs.uiBaseUrl + configs.loginUrlPath;
     try {
-      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 20000});
+      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded']});
     } catch (err) {
       console.error('Google login page not found. ' + err);
       await this.takeScreenshot('GoogleLoginPageNotFound');
@@ -115,8 +114,8 @@ export default class GoogleLoginPage extends BasePage {
       throw err;
     });
     await Promise.all([
-      googleButton.click(),
       this.page.waitForNavigation(),
+      googleButton.click(),
     ]);
     if (!user || user.trim().length === 0) {
       console.warn('Login user email: value is empty!!!')
@@ -133,8 +132,8 @@ export default class GoogleLoginPage extends BasePage {
       if (recoverEmail.length > 0) {
         await recoverEmail[0].type(configs.contactEmail);
         await Promise.all([
-          this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
           this.page.waitForNavigation(),
+          this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
         ]);
       }
     }
