@@ -2,7 +2,7 @@ version: 2
 
 defaults: &defaults
   docker:
-    - image: allofustest/workbench:buildimage-0.0.15
+    - image: allofustest/workbench:buildimage-0.0.16
   working_directory: ~/workbench
 java_defaults: &java_defaults
   <<: *defaults
@@ -53,14 +53,14 @@ jobs:
           command: ./gradlew spotlessCheck
       - save_cache:
           paths:
-            - /.gradle
+            - ~/.gradle
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
   api-local-test:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.15
+      - image: allofustest/workbench:buildimage-0.0.16
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
@@ -103,7 +103,7 @@ jobs:
           command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
       - save_cache:
           paths:
-            - /.gradle
+            - ~/.gradle
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -176,7 +176,7 @@ jobs:
           command: ./project.rb integration
       - save_cache:
           paths:
-            - /.gradle
+            - ~/.gradle
             - ~/.m2
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
@@ -207,7 +207,7 @@ jobs:
           command: ./project.rb bigquerytest
       - save_cache:
           paths:
-            - /.gradle
+            - ~/.gradle
             - ~/.m2
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
@@ -258,6 +258,44 @@ jobs:
           paths:
             - ui
 
+  # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
+  puppeteer-e2e-test:
+    <<: *defaults
+    docker:
+      - image: circleci/node:13.10.1-browsers
+        environment:
+          NODE_ENV: development
+    working_directory: ~/workbench
+    steps:
+      - checkout
+      - run:
+          name: Fetch Submodules
+          command: git submodule update --init --recursive
+      - restore_cache:
+          keys:
+          - e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          - e2e-test-cache-
+      - run: 
+          working_directory: ~/workbench/e2e
+          command: yarn cache clean && yarn install --verbose --frozen-lockfile
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+          key: e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - run:
+          name: Update environment variables
+          command: |
+            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
+            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
+            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Run e2e tests (Puppeteer and Jest)
+          working_directory: ~/workbench/e2e
+          command: yarn --silent test:ci
+      - store_artifacts:
+          path: e2e/logs
+      
   ui-deploy-to-test:
     <<: *defaults
     steps:
@@ -365,6 +403,12 @@ workflows:
           <<: *filter_master
           requires:
             - ui-build-test
+      # After merge PR to master branch, run Puppeteer tests after ui and api deployed to "test" env successfully.
+      - puppeteer-e2e-test:
+          <<: *filter_master
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
   deploy-staging:
     jobs:
       - api-local-test:
@@ -398,6 +442,7 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-build-test
+
   integration-test:
     triggers:
       - schedule:

@@ -1,0 +1,16 @@
+{
+  "environments": [
+    {
+      "short_name": "qa",
+      "project_id": "my-qa-gcp-project",
+      "project_number": 11111111,
+      "service_account": "devops-service-account@my-qa-gcp-project.iam.gserviceaccount.com"
+    },
+    {
+      "short_name": "scratch",
+      "project_id": "my-scratch-gcp-project",
+      "project_number": 22222222,
+      "service_account": "devops-service-account@my-scratch-gcp-project.iam.gserviceaccount.com"
+    }
+  ]
+}

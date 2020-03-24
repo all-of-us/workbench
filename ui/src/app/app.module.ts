@@ -42,7 +42,7 @@ import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-detai
 import {HomepageComponent} from './pages/homepage/homepage';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignInComponent} from './pages/login/sign-in';
-import {DataUseAgreementComponent} from './pages/profile/data-use-agreement';
+import {DataUserCodeOfConductComponent} from './pages/profile/data-user-code-of-conduct';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
@@ -75,6 +75,7 @@ import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-noteb
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
+import {UserDisabledComponent} from 'app/pages/user-disabled';
 
 
 
@@ -144,7 +145,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,
-    DataUseAgreementComponent,
+    DataUserCodeOfConductComponent,
     DetailPageComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
@@ -159,6 +160,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SignInComponent,
     TablePage,
     TextModalComponent,
+    UserDisabledComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,

@@ -100,7 +100,7 @@ const styles = reactStyles({
 
 interface Props {
   searchRequest: any;
-  updateCriteria: any;
+  updateCount: any;
   updateSaving: Function;
 }
 
@@ -112,6 +112,7 @@ interface State {
   deleting: boolean;
   description: string;
   existingCohorts: Array<string>;
+  initializing: boolean;
   loading: boolean;
   name: string;
   nameTouched: boolean;
@@ -135,6 +136,7 @@ export const ListOverview = withCurrentWorkspace()(
         deleting: false,
         description: undefined,
         existingCohorts: [],
+        initializing: true,
         loading: true,
         name: undefined,
         nameTouched: false,
@@ -150,11 +152,11 @@ export const ListOverview = withCurrentWorkspace()(
       if (currentCohortStore.getValue()) {
         this.setState({cohort: currentCohortStore.getValue()});
       }
+      this.getTotalCount();
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      const {updateCriteria: {update, recalculate}} = this.props;
-      if (update > prevProps.updateCriteria.update && recalculate && !this.definitionErrors) {
+      if (!this.state.initializing && this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
         this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
@@ -174,12 +176,13 @@ export const ListOverview = withCurrentWorkspace()(
                 this.setState({
                   chartData: response.items,
                   total: response.items.reduce((sum, data) => sum + data.count, 0),
-                  loading: false
+                  loading: false,
+                  initializing: false
                 });
               }
             });
         } else {
-          this.setState({chartData: [], total: 0, loading: false});
+          this.setState({chartData: [], total: 0, loading: false, initializing: false});
         }
       } catch (error) {
         console.error(error);
@@ -200,8 +203,7 @@ export const ListOverview = withCurrentWorkspace()(
 
     get hasTemporalError() {
       const {searchRequest} = this.props;
-      const activeGroups = searchRequest.includes
-        .filter(grp => grp.temporal && grp.status === 'active');
+      const activeGroups = searchRequest.includes.filter(grp => grp.temporal && grp.status === 'active');
       return activeGroups.some(grp => {
         const activeItems = grp.items.reduce((acc, it) => {
           if (it.status === 'active') {
@@ -209,8 +211,7 @@ export const ListOverview = withCurrentWorkspace()(
           }
           return acc;
         }, [0, 0]);
-        const inputError = grp.time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
-          (grp.timeValue === null || grp.timeValue < 0);
+        const inputError = grp.time !== TemporalTime.DURINGSAMEENCOUNTERAS && (isNaN(parseInt(grp.timeValue, 10)) || grp.timeValue < 0);
         return activeItems.includes(0) || inputError;
       });
     }
@@ -443,10 +444,10 @@ export const ListOverview = withCurrentWorkspace()(
 })
 export class OverviewComponent extends ReactWrapperBase {
   @Input('searchRequest') searchRequest: Props['searchRequest'];
-  @Input('updateCriteria') updateCriteria: Props['updateCriteria'];
+  @Input('updateCount') updateCount: Props['updateCount'];
   @Input('updateSaving') updateSaving: Props['updateSaving'];
 
   constructor() {
-    super(ListOverview, ['searchRequest', 'updateCriteria', 'updateSaving']);
+    super(ListOverview, ['searchRequest', 'updateCount', 'updateSaving']);
   }
 }

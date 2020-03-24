@@ -7,9 +7,10 @@ import {
   RecentWorkspaceResponse,
   ResearchPurposeReviewRequest,
   ShareWorkspaceRequest,
+  SpecificPopulationEnum,
   UserRole,
   Workspace,
-  WorkspaceAccessLevel,
+  WorkspaceAccessLevel, WorkspaceBillingUsageResponse,
   WorkspaceListResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
@@ -52,8 +53,8 @@ function buildWorkspaceStub(suffix): Workspace {
       methodsDevelopment: false,
       otherPurpose: false,
       otherPurposeDetails: '',
-      population: false,
-      populationDetails: [],
+      population: true,
+      populationDetails: [SpecificPopulationEnum.AGEOLDERMORETHAN75, SpecificPopulationEnum.RACENHPI],
       populationHealth: false,
       researchOutcomeList: [],
       ethics: false,
@@ -310,6 +311,12 @@ export class WorkspacesApiStub extends WorkspacesApi {
   updateRecentWorkspaces(workspaceNamespace: string, workspaceId: string, options?: any): Promise<RecentWorkspaceResponse> {
     return new Promise<RecentWorkspaceResponse>(resolve => {
       resolve(recentWorkspaceStubs);
+    });
+  }
+
+  getBillingUsage(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceBillingUsageResponse> {
+    return new Promise<WorkspaceBillingUsageResponse>(resolve => {
+      resolve({cost: 5.5});
     });
   }
 }

@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -80,7 +81,6 @@ import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -96,9 +96,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
@@ -128,6 +125,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
@@ -233,6 +231,8 @@ public class DataSetControllerTest {
 
   @Autowired FireCloudService fireCloudService;
 
+  @Autowired FreeTierBillingService freeTierBillingService;
+
   @Autowired CohortQueryBuilder cohortQueryBuilder;
 
   @Autowired TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
@@ -271,15 +271,12 @@ public class DataSetControllerTest {
     ConceptSetService.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
-    UserServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
     ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
-    PublicInstitutionDetailsMapperImpl.class
+    UserServiceTestConfiguration.class,
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -294,6 +291,7 @@ public class DataSetControllerTest {
     DataSetService.class,
     DataSetMapper.class,
     FireCloudService.class,
+    FreeTierBillingService.class,
     DirectoryService.class,
     NotebooksService.class,
     CohortQueryBuilder.class,
@@ -344,6 +342,8 @@ public class DataSetControllerTest {
 
   private DataSetController dataSetController;
 
+  private BasicFormatterImpl sqlFormatter = new BasicFormatterImpl();
+
   @Before
   public void setUp() throws Exception {
     testMockFactory = new TestMockFactory();
@@ -385,6 +385,7 @@ public class DataSetControllerTest {
             cloudStorageService,
             cloudBillingProvider,
             mockZendeskProvider,
+            freeTierBillingService,
             CLOCK,
             notebooksService,
             userService,
@@ -523,7 +524,7 @@ public class DataSetControllerTest {
             .domainId("Observation")
             .countValue(123L)
             .prevalence(0.2F)
-            .conceptSynonyms(new ArrayList<String>()));
+            .conceptSynonyms(new ArrayList<>()));
 
     ConceptSet conceptSurveySet =
         new ConceptSet()
@@ -735,12 +736,9 @@ public class DataSetControllerTest {
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     String prefix = "dataset_00000000_condition_";
-    assertThat(response.getCode())
-        .isEqualTo(
-            "import pandas\nimport os\n\n"
-                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
-                + prefix
-                + "sql = \"\"\"SELECT PERSON_ID FROM `"
+    String formattedSql =
+        sqlFormatter.format(
+            "SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
@@ -748,11 +746,20 @@ public class DataSetControllerTest {
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
                 + ".person` person WHERE "
-                + NAMED_PARAMETER_VALUE.getValue()
-                + " IN (2, 5)))"
-                + "\"\"\"\n"
-                + "\n"
+                + NAMED_PARAMETER_VALUE.getValue());
+
+    assertThat(response.getCode())
+        .contains(
+            "import pandas\nimport os\n\n"
+                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
                 + prefix
+                + "sql = \"\"\"");
+
+    assertThat(response.getCode()).contains(formattedSql);
+
+    assertThat(response.getCode())
+        .contains(
+            prefix
                 + "df = pandas.read_gbq("
                 + prefix
                 + "sql, dialect=\"standard\")"
@@ -782,12 +789,9 @@ public class DataSetControllerTest {
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     String prefix = "dataset_00000000_condition_";
-    assertThat(response.getCode())
-        .isEqualTo(
-            "library(bigrquery)\n\n"
-                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
-                + prefix
-                + "sql <- paste(\"SELECT PERSON_ID FROM `"
+    String formatSql =
+        sqlFormatter.format(
+            "SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
@@ -795,19 +799,14 @@ public class DataSetControllerTest {
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
                 + ".person` person WHERE "
-                + NAMED_PARAMETER_VALUE.getValue()
-                + " IN (2, 5)))"
-                + "\", sep=\"\")\n"
-                + "\n"
+                + NAMED_PARAMETER_VALUE.getValue());
+    assertThat(response.getCode())
+        .contains(
+            "library(bigrquery)\n"
+                + "\n# This query represents dataset \"blah\" for domain \"condition\"\n"
                 + prefix
-                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
-                + prefix
-                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")"
-                + "\n"
-                + "\n"
-                + "head("
-                + prefix
-                + "df, 5)");
+                + "sql <- paste(\"");
+    assertThat(response.getCode()).contains(formatSql);
   }
 
   @Test
@@ -881,7 +880,9 @@ public class DataSetControllerTest {
             .generateCode(
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-    assertThat(response.getCode()).contains("UNION DISTINCT");
+
+    assertThat(response.getCode()).containsMatch("UNION");
+    assertThat(response.getCode()).containsMatch("DISTINCT SELECT");
   }
 
   @Test
@@ -920,12 +921,15 @@ public class DataSetControllerTest {
          }
        }
     */
-    assertThat(response.getCode())
-        .contains(
-            "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
+
+    String queryToVerify =
+        sqlFormatter.format(
+            "SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person");
+    assertThat(response.getCode()).contains("person_sql = ");
+    assertThat(response.getCode().contains(queryToVerify));
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
-    assertThat(response.getCode()).contains("WHERE person.PERSON_ID");
+    assertThat(response.getCode()).contains("person.PERSON_ID IN (");
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();

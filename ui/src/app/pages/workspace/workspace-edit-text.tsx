@@ -139,11 +139,15 @@ export const toolTipText = {
     for. </div>,
 };
 
-export const researchPurposeQuestions = [
+export interface ResearchPurposeQuestion {
+  header: React.ReactNode;
+  description: React.ReactNode;
+}
+
+export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
   {
     header: ' What is the primary purpose of your project?',
-    description: <div>All fields required unless indicated as optional. Your response will be
-      displayed publicly</div>
+    description: ''
   }, {
     header: <div> Please provide a summary of your research purpose by responding to the
       questions below.</div>,
@@ -158,7 +162,7 @@ export const researchPurposeQuestions = [
     description: <div>If you are exploring the data at this stage to formalize a specific
       research question, please describe the reason for exploring the data, and the scientific
       question you hope to be able to answer using the data. <br/>
-      (Free text; 500 Character limit)</div>
+      (Free text; 1000 Character limit)</div>
   }, {
     header: 'What are the scientific approaches you plan to use for your study? Describe the ' +
     'datasets, research methods and tools you will use to answer your scientific question(s). \n',
@@ -266,9 +270,9 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
       {label: 'Older adults (65-74)', shortName: SpecificPopulationEnum.AGEOLDER},
       {label: 'Older adults (75+) ', shortName: SpecificPopulationEnum.AGEOLDERMORETHAN75}]
   }, {
-    label: 'Sex',
+    label: 'Sex at Birth',
     shortName: SpecificPopulationEnum.SEX,
-    ubrLabel: 'Sex',
+    ubrLabel: 'Sex at Birth',
     ubrDescription: 'Intersex',
     subCategory: [
       {
@@ -408,3 +412,8 @@ export const researchOutcomes = [
     shortName: ResearchOutcomeEnum.NONEAPPLY
   }
 ];
+
+export const RequestForReviewFooter = 'Note: The RAB is available to you at any time to help ' +
+    'address questions about potentially stigmatizing research. As your research progresses, ' +
+    'should any new concerns arise based on study outcomes, please contact the RAB for ' +
+    'assistance through the User Support menu in your workspace.';

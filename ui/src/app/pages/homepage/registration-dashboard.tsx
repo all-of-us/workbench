@@ -65,12 +65,12 @@ function redirectToNiH(): void {
   const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
           encodeURIComponent(
             window.location.origin.toString() + '/nih-callback?token={token}');
-  window.location.assign(url);
+  window.open(url, '_blank');
 }
 
 async function redirectToTraining() {
   await profileApi().updatePageVisits({page: 'moodle'});
-  window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
+  window.open(environment.trainingUrl + '/static/data-researcher.html?saml=on', '_blank');
 }
 
 interface RegistrationTask {
@@ -103,10 +103,22 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     },
     onClick: redirectToGoogleSecurity
   }, {
+    key: 'eraCommons',
+    completionPropsKey: 'eraCommonsLinked',
+    title: 'Connect Your eRA Commons Account',
+    description: 'Connect your account to the eRA Commons account. The application instructions will guide you through this.',
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
+    },
+    onClick: redirectToNiH
+  }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
-    title: 'Complete Online Training',
-    description: 'Complete mandatory compliance training courses on how data should be used and handled.',
+    title: 'Complete Ethics training',
+    description: <div>Complete ethics training courses to understand the privacy safeguards and the
+      compliance requirements for using the <i>All of Us</i> Dataset.</div>,
     buttonText: 'Complete training',
     featureFlag: serverConfigStore.getValue().enableComplianceTraining,
     completedText: 'Completed',
@@ -115,28 +127,17 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     },
     onClick: redirectToTraining
   }, {
-    key: 'eraCommons',
-    completionPropsKey: 'eraCommonsLinked',
-    title: 'Login to eRA Commons',
-    description: 'Link to your eRA Commons account to the workbench to gain full access to data and tools.',
-    buttonText: 'Login',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
-    },
-    onClick: redirectToNiH
-  }, {
-    key: 'dataUseAgreement',
-    completionPropsKey: 'dataUseAgreementCompleted',
-    title: 'Data Use Agreement',
-    description: <span>Sign our data use agreement consenting to the <i>All of Us</i> data use policy.</span>,
+    key: 'dataUserCodeOfConduct',
+    completionPropsKey: 'dataUserCodeOfConductCompleted',
+    title: 'Data User Code of Conduct',
+    description: <span>Sign the data user code of conduct consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
     completionTimestamp: (profile: Profile) => {
       return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
     },
-    onClick: () => navigate(['data-use-agreement'])
+    onClick: () => navigate(['data-code-of-conduct'])
   }
 ] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
 || registrationTask.featureFlag) : (() => {
@@ -155,7 +156,7 @@ export interface RegistrationDashboardProps {
   trainingCompleted: boolean;
   firstVisitTraining: boolean;
   twoFactorAuthCompleted: boolean;
-  dataUseAgreementCompleted: boolean;
+  dataUserCodeOfConductCompleted: boolean;
 }
 
 interface State {
@@ -253,7 +254,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     // it within the registration box.
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
-      <div style={styles.mainHeader}>Getting Started</div>
+      <div style={styles.mainHeader}>Complete Registration</div>
       {canUnsafeSelfBypass &&
         <div data-test-id='self-bypass'
              style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>

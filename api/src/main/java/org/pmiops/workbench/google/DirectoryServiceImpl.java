@@ -134,6 +134,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
 
     return new Directory.Builder(
             httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(delegatedCreds))
+        .setApplicationName(APPLICATION_NAME)
         .build();
   }
 

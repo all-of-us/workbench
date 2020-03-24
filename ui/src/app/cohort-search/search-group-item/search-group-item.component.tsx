@@ -1,19 +1,18 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {MODIFIERS_MAP} from 'app/cohort-search/constant';
-import {encountersStore, initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {encountersStore, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getTypeAndStandard, mapGroupItem, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {RenameModal} from 'app/components/rename-modal';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CriteriaType, DomainType, Modifier, ModifierType, ResourceType, SearchRequest} from 'generated/fetch';
+import {CriteriaType, DomainType, Modifier, ModifierType, ResourceType, SearchGroupItem as Item, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
@@ -121,23 +120,26 @@ class SearchGroupItemParameter extends React.Component<{parameter: any}, {toolti
   }
 }
 
+interface ItemProp extends Item {
+  count: number;
+  status: string;
+}
+
 interface Props {
-  role: keyof SearchRequest;
   groupId: string;
-  item: any;
+  item: ItemProp;
   index: number;
+  role: keyof SearchRequest;
   updateGroup: Function;
   workspace: WorkspaceData;
 }
 
 interface State {
-  count: number;
   encounters: any;
   error: boolean;
   loading: boolean;
   paramListOpen: boolean;
   renaming: boolean;
-  status: string;
   timeout: Timeout;
 }
 
@@ -147,21 +149,23 @@ export const SearchGroupItem = withCurrentWorkspace()(
     constructor(props: Props) {
       super(props);
       this.state = {
-        count: null,
         encounters: encountersStore.getValue(),
         error: false,
         loading: true,
         paramListOpen: false,
         renaming: false,
-        status: props.item.status,
         timeout: null
       };
     }
 
     componentDidMount(): void {
-      const {item: {modifiers}, workspace: {cdrVersionId}} = this.props;
+      const {item: {count, modifiers}, workspace: {cdrVersionId}} = this.props;
       const {encounters} = this.state;
-      this.getItemCount();
+      if (count !== undefined) {
+        this.setState({loading: false});
+      } else {
+        this.getItemCount();
+      }
       if (!!modifiers && modifiers.some(mod => mod.name === ModifierType.ENCOUNTERS) && !encounters) {
         cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]).then(res => {
           encountersStore.next(res.items);
@@ -170,22 +174,26 @@ export const SearchGroupItem = withCurrentWorkspace()(
       }
     }
 
-    async getItemCount() {
-      const {index, item, role, updateGroup} = this.props;
-      // prevent multiple group count calls when initializing multiple items simultaneously (on cohort edit or clone)
-      const init = initExisting.getValue();
-      if (!init || (init && index === 0)) {
-        updateGroup(true);
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      const {item: {searchParameters}} = this.props;
+      if (prevProps.item.searchParameters !== searchParameters) {
+        this.setState({loading: true}, () => this.getItemCount());
       }
+    }
+
+    async getItemCount() {
+      const {item, role, updateGroup} = this.props;
       try {
+        updateGroup();
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const mappedItem = mapGroupItem(item, false);
         const request = {
           includes: [],
           excludes: [],
+          dataFilters: [],
           [role]: [{items: [mappedItem], temporal: false}]
         };
-        await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.setState({count}));
+        await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.updateSearchRequest('count', count, false));
       } catch (error) {
         console.error(error);
         this.setState({error: true});
@@ -196,25 +204,19 @@ export const SearchGroupItem = withCurrentWorkspace()(
 
     enable() {
       triggerEvent('Enable', 'Click', 'Enable - Suppress Criteria - Cohort Builder');
-      this.setState({status: 'active'});
-      this.props.item.status = 'active';
-      this.updateSearchRequest(true);
+      this.updateSearchRequest('status', 'active', true);
     }
 
     suppress() {
       triggerEvent('Suppress', 'Click', 'Snowman - Suppress Criteria - Cohort Builder');
-      this.setState({status: 'hidden'});
-      this.props.item.status = 'hidden';
-      this.updateSearchRequest(true);
+      this.updateSearchRequest('status', 'hidden', true);
     }
 
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
-      this.setState({status: 'pending'});
-      this.props.item.status = 'pending';
-      this.updateSearchRequest(false, true);
+      this.updateSearchRequest('status', 'pending', true);
       const timeout = setTimeout(() => {
-        this.updateSearchRequest(true);
+        this.updateSearchRequest(null, null, false, true);
       }, 10000);
       this.setState({timeout});
     }
@@ -222,18 +224,15 @@ export const SearchGroupItem = withCurrentWorkspace()(
     undo() {
       triggerEvent('Undo', 'Click', 'Undo - Delete Criteria - Cohort Builder');
       clearTimeout(this.state.timeout);
-      this.setState({status: 'active'});
-      this.props.item.status = 'active';
-      this.updateSearchRequest(true);
+      this.updateSearchRequest('status', 'active', true);
     }
 
     rename(newName: string) {
-      this.props.item.name = newName;
-      this.updateSearchRequest(false);
+      this.updateSearchRequest('name', newName, false);
       this.setState({renaming: false});
     }
 
-    updateSearchRequest(recalculate: boolean, remove?: boolean) {
+    updateSearchRequest(property: string, value: any, recalculate: boolean, remove?: boolean) {
       const sr = searchRequestStore.getValue();
       const {item, groupId, role, updateGroup} = this.props;
       const groupIndex = sr[role].findIndex(grp => grp.id === groupId);
@@ -244,9 +243,11 @@ export const SearchGroupItem = withCurrentWorkspace()(
             sr[role][groupIndex].items = sr[role][groupIndex].items.filter(it => it.id !== item.id);
             searchRequestStore.next(sr);
           } else {
-            sr[role][groupIndex].items[itemIndex] = item;
+            sr[role][groupIndex].items[itemIndex] = {...item, [property]: value};
             searchRequestStore.next(sr);
-            updateGroup(recalculate);
+            if (recalculate) {
+              updateGroup();
+            }
           }
         }
       }
@@ -255,14 +256,13 @@ export const SearchGroupItem = withCurrentWorkspace()(
     launchWizard() {
       triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
       const {groupId, item, role} = this.props;
-      const {count} = this.state;
       const _item = JSON.parse(JSON.stringify(item));
       const {fullTree, id, searchParameters} = _item;
       const selections = searchParameters.map(sp => sp.parameterId);
       selectionsStore.next(selections);
       const domain = _item.type;
       const {type, standard} = getTypeAndStandard(searchParameters, domain);
-      const context = {item: _item, domain, type, role, groupId, itemId: id, fullTree, standard, count};
+      const context = {item: _item, domain, type, role, groupId, itemId: id, fullTree, standard, count: item.count};
       wizardStore.next(context);
     }
 
@@ -281,12 +281,12 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     render() {
-      const {item: {modifiers, name, searchParameters, type}} = this.props;
-      const {count, paramListOpen, error, loading, renaming, status} = this.state;
+      const {item: {count, modifiers, name, searchParameters, status, type}} = this.props;
+      const {error, loading, paramListOpen, renaming} = this.state;
       const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
-      const titleDisplay = type === DomainType.PERSON ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
+      const titleDisplay = type === DomainType.PERSON.toString() ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
       const itemName = !!name ? name : `Contains ${titleDisplay} ${codeDisplay}`;
-      const showCount = !loading && status !== 'hidden' && count !== null;
+      const showCount = !loading && status !== 'hidden' && count !== undefined;
       const actionItems = [
         {label: 'Edit criteria name', command: () => this.setState({renaming: true})},
         {label: 'Edit criteria', command: () => this.launchWizard()},
@@ -346,19 +346,3 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  selector: 'app-list-search-group-item',
-  template: '<div #root></div>'
-})
-export class SearchGroupItemComponent extends ReactWrapperBase {
-  @Input('role') role: Props['role'];
-  @Input('groupId') groupId: Props['groupId'];
-  @Input('item') item: Props['item'];
-  @Input('index') index: Props['index'];
-  @Input('updateGroup') updateGroup: Props['updateGroup'];
-
-  constructor() {
-    super(SearchGroupItem, ['role', 'groupId', 'item', 'index', 'updateGroup']);
-  }
-}

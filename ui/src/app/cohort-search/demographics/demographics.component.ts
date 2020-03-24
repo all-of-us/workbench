@@ -382,7 +382,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
             modifiers: []
           }],
           temporal: false
-        }]
+        }],
+        dataFilters: []
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
         if (init) {

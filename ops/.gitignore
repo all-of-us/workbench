@@ -1,2 +1,4 @@
 *key.json
 *.orig
+Gemfile.lock
+dev-tools-list.yaml

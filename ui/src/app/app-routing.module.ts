@@ -6,7 +6,8 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
-import {DataUseAgreementComponent} from 'app/pages/profile/data-use-agreement';
+import {DataUserCodeOfConductComponent} from 'app/pages/profile/data-user-code-of-conduct';
+import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
@@ -34,6 +35,7 @@ import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
+import {DisabledGuard} from './guards/disabled-guard.service';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
@@ -50,10 +52,14 @@ const routes: Routes = [
     component: CookiePolicyComponent,
     data: {title: 'Cookie Policy'}
   }, {
+    path: 'user-disabled',
+    component: UserDisabledComponent,
+    data: {title: 'Disabled'}
+  }, {
     path: '',
     component: SignedInComponent,
-    canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, RegistrationGuard],
+    canActivate: [SignInGuard, DisabledGuard],
+    canActivateChild: [SignInGuard, DisabledGuard, RegistrationGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -65,9 +71,9 @@ const routes: Routes = [
         component: HomepageComponent,
         data: {title: 'Homepage'},
       }, {
-        path: 'data-use-agreement',
-        component: DataUseAgreementComponent,
-        data: {title: 'Data Use Agreement'}
+        path: 'data-code-of-conduct',
+        component: DataUserCodeOfConductComponent,
+        data: {title: 'Data User Code of Conduct'}
       }, {
         path: 'library',
         component: WorkspaceLibraryComponent,
@@ -308,6 +314,7 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
+    DisabledGuard,
     RegistrationGuard,
     SignInGuard,
   ]

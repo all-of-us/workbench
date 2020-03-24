@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -27,7 +28,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -36,7 +36,6 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -48,10 +47,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
+import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
@@ -59,18 +56,30 @@ import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.Ethnicity;
+import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
+import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.profile.AddressMapperImpl;
+import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
+import org.pmiops.workbench.profile.PageVisitMapperImpl;
+import org.pmiops.workbench.profile.ProfileMapperImpl;
+import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -110,6 +119,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
+  private static final double FREE_TIER_USAGE = 100D;
+  private static final double FREE_TIER_LIMIT = 300D;
+
   @MockBean private FireCloudService fireCloudService;
   @MockBean private DirectoryService directoryService;
   @MockBean private CloudStorageService cloudStorageService;
@@ -138,15 +150,16 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @TestConfiguration
   @Import({
-    UserServiceImpl.class,
+    AddressMapperImpl.class,
+    DemographicSurveyMapperImpl.class,
+    InstitutionalAffiliationMapperImpl.class,
+    PageVisitMapperImpl.class,
     ProfileService.class,
     ProfileController.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class,
+    ProfileMapperImpl.class,
     CaptchaVerificationService.class,
-    PublicInstitutionDetailsMapperImpl.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class
+    VerifiedInstitutionalAffiliationMapperImpl.class,
+    UserServiceTestConfiguration.class,
   })
   static class Configuration {
     @Bean
@@ -178,6 +191,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Override
   public void setUp() throws IOException {
     super.setUp();
+
+    // Most tests should run with institutional verification off by default.
+    config.featureFlags.requireInstitutionalVerification = false;
 
     fakeClock.setInstant(NOW);
 
@@ -303,13 +319,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testSubmitDemographicSurvey_success() {
-    createUser();
-    assertThat(profileController.submitDemographicsSurvey().getStatusCode())
-        .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
-  }
-
-  @Test
   public void testSubmitDataUseAgreement_success() {
     createUser();
     String duaInitials = "NIH";
@@ -381,7 +390,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
@@ -404,7 +413,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("zeta");
     first.setInstitution("Zeta");
@@ -427,7 +436,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
@@ -438,7 +447,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     affiliations.add(second);
     profile.setInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
-    affiliations = new ArrayList<InstitutionalAffiliation>();
+    affiliations = new ArrayList<>();
     affiliations.add(first);
     profile.setInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
@@ -452,7 +461,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
@@ -729,6 +738,60 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     profileController.deleteProfile();
     verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
+  }
+
+  @Test
+  public void testFreeTierLimits() {
+    createUser();
+    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+
+    when(freeTierBillingService.getUserCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
+    when(freeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
+
+    Profile profile = profileController.getMe().getBody();
+    assertProfile(
+        profile,
+        PRIMARY_EMAIL,
+        CONTACT_EMAIL,
+        FAMILY_NAME,
+        GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED,
+        TIMESTAMP,
+        false);
+    assertThat(profile.getFreeTierUsage()).isEqualTo(FREE_TIER_USAGE);
+    assertThat(profile.getFreeTierDollarQuota()).isEqualTo(FREE_TIER_LIMIT);
+  }
+
+  @Test
+  public void testUpdateProfile_updateDemographicSurvey() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+
+    DemographicSurvey demographicSurvey = profile.getDemographicSurvey();
+    demographicSurvey.addRaceItem(Race.AA);
+    demographicSurvey.setEthnicity(Ethnicity.HISPANIC);
+    demographicSurvey.setIdentifiesAsLgbtq(true);
+    demographicSurvey.setLgbtqIdentity("very");
+    demographicSurvey.addGenderIdentityListItem(GenderIdentity.NONE_DESCRIBE_ME);
+    demographicSurvey.addSexAtBirthItem(SexAtBirth.FEMALE);
+    demographicSurvey.setYearOfBirth(new BigDecimal(2000));
+    demographicSurvey.setEducation(Education.NO_EDUCATION);
+    demographicSurvey.setDisability(false);
+
+    profile.setDemographicSurvey(demographicSurvey);
+
+    profileController.updateProfile(profile);
+
+    Profile updatedProfile = profileController.getMe().getBody();
+    assertProfile(
+        updatedProfile,
+        PRIMARY_EMAIL,
+        CONTACT_EMAIL,
+        FAMILY_NAME,
+        GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED,
+        TIMESTAMP,
+        false);
   }
 
   private Profile createUser() {

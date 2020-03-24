@@ -21,7 +21,7 @@ export class RegistrationGuard implements CanActivate, CanActivateChild {
     if (route.routeConfig.path === 'nih-callback' ||
         route.routeConfig.path === '' ||
         route.routeConfig.path.startsWith('admin/') ||
-        route.routeConfig.path.startsWith('data-use-agreement')) {
+        route.routeConfig.path.startsWith('data-code-of-conduct')) {
       // Leave /admin unguarded in order to allow bootstrapping of verified users.
       return Observable.from([true]);
     }

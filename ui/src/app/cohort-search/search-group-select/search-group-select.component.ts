@@ -110,7 +110,6 @@ export class SearchGroupSelectComponent implements OnInit {
       type,
       searchParameters: [],
       modifiers: [],
-      count: null,
       temporalGroup: 0,
       isRequesting: false,
       status: 'active',

@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
@@ -50,13 +51,16 @@ public class WorkspaceMapperTest {
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   private static final int CDR_VERSION_ID = 2;
   private static final String FIRECLOUD_BUCKET_NAME = "my-favorite-bucket";
+  private static final ImmutableSet<SpecificPopulationEnum> SPECIFIC_POPULATIONS =
+      ImmutableSet.of(SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY);
+  private static final ImmutableSet<ResearchOutcomeEnum> RESEARCH_OUTCOMES =
+      ImmutableSet.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
+  private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
 
-  private Workspace sourceClientWorkspace;
   private DbWorkspace sourceDbWorkspace;
   private FirecloudWorkspace sourceFirecloudWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
-  @Autowired private WorkspaceDao mockWorkspaceDao;
 
   @TestConfiguration
   @Import({WorkspaceMapperImpl.class})
@@ -126,6 +130,10 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setTimeRequested(DB_CREATION_TIMESTAMP);
     sourceDbWorkspace.setBillingStatus(BillingStatus.ACTIVE);
     sourceDbWorkspace.setBillingAccountName(BILLING_ACCOUNT_NAME);
+    sourceDbWorkspace.setSpecificPopulationsEnum(SPECIFIC_POPULATIONS);
+    sourceDbWorkspace.setResearchOutcomeEnumSet(RESEARCH_OUTCOMES);
+    sourceDbWorkspace.setDisseminateResearchEnumSet(Collections.emptySet());
+    sourceDbWorkspace.setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER);
   }
 
   @Test
@@ -178,5 +186,10 @@ public class WorkspaceMapperTest {
     assertThat(rp.getTimeRequested())
         .isEqualTo(sourceDbWorkspace.getTimeRequested().toInstant().toEpochMilli());
     assertThat(rp.getTimeReviewed()).isNull();
+
+    assertThat(rp.getPopulationDetails()).containsAllIn(SPECIFIC_POPULATIONS);
+    assertThat(rp.getResearchOutcomeList()).containsAllIn(RESEARCH_OUTCOMES);
+    assertThat(rp.getDisseminateResearchFindingList()).isEmpty();
+    assertThat(rp.getOtherDisseminateResearchFindings()).isEqualTo(DISSEMINATE_FINDINGS_OTHER);
   }
 }

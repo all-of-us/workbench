@@ -1,13 +1,16 @@
 import {Page} from 'puppeteer';
-import Home from '../../app/home';
-import WorkspacePage from '../../app/workspace-page';
-import AouElement from '../../driver/AouElement';
+import BaseElement from '../../app/aou-elements/base-element';
+import {SideNavLink} from '../../app/authenticated-page';
+import HomePage from '../../app/home-page';
+import WorkspaceCard from '../../app/workspace-card';
+import WorkspacesPage from '../../app/workspaces-page';
 
-const Chrome = require('../../driver/ChromeDriver');
-jest.setTimeout(60 * 1000);
+const Chrome = require('../../driver/chrome-driver');
 
-describe('Edit Workspace page', () => {
+// set timeout globally per suite, not per test.
+jest.setTimeout(2 * 60 * 1000);
 
+describe('Workspace ui tests', () => {
   let page: Page;
 
   beforeEach(async () => {
@@ -18,132 +21,48 @@ describe('Edit Workspace page', () => {
     await Chrome.teardown();
   });
 
-  // Click CreateNewWorkspace link in Home page => Open Create Workspace page
-  test('Home page: Click link Create-New-Workspace', async () => {
-    const home = new Home(page);
-    const link = await home.getCreateNewWorkspaceLink();
-    expect(await link.boxModel() != null).toBe(true);
-    await link.click();
 
-    const workspace = new WorkspacePage(page);
-    await workspace.waitUntilPageReady();
-
-    // expect Workspace-Name Input text field exists and is NOT readOnly
-    const nameInput = new AouElement(await workspace.inputTextWorkspaceName());
-    expect(await nameInput.isVisible()).toBe(true);
-    expect(await nameInput.isReadOnly()).toBe(false);
-
-    // expect DataSet Select field exists
-    const dataSetSelect = new AouElement(await workspace.select_dataSet());
-    expect(await dataSetSelect.isVisible()).toBe(true);
-  }, 60 * 1000);
-
-  // Click CreateNewWorkspace link in My Workpsaces page => Open Create Workspace page
-  test('My Workspaces page: Click link Create-New-Workspace', async () => {
-    const workspace = new WorkspacePage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
-    await workspace.waitUntilPageReady();
-  }, 60 * 1000);
-
-  // Checking all fields out-of-box
-  test('Create Workspace page: Question 1', async () => {
-    const workspace = new WorkspacePage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
-    await workspace.waitUntilPageReady();
-
-    // expand Disease purpose section if needed
-    const expandIcon = await workspace.getResearchPurposeExpandIcon();
-    if (expandIcon !== undefined) {
-      await (expandIcon[0]).click();
+  test('Workspace cards all have same ui size', async () => {
+    const cards = await WorkspaceCard.getAllCards(page);
+    let width;
+    let height;
+    for (const card of cards) {
+      const cardElem = new BaseElement(page, card.asElementHandle());
+      expect(await cardElem.isVisible()).toBe(true);
+      const size = await cardElem.getSize();
+      if (width === undefined) {
+        width = size.width; // Initialize width and height with first card element's size, compare with rest cards
+        height = size.height;
+      } else {
+        expect(size.height).toEqual(height);
+        expect(size.width).toEqual(width);
+      }
     }
-    // Disease-focused research checkbox
-    const diseaseName = workspace.diseaseName();
-    let cbox = (await diseaseName.checkbox());
-    expect(await cbox.isVisible()).toBe(true);
-    expect(await cbox.getProp('checked')).toBe(false);
-    expect(await cbox.getProp('disabled')).toBe(false);
-    const txtField = await diseaseName.textfield();
-    expect(await txtField.isVisible()).toBe(true);
-    expect(await txtField.getProp('disabled')).toBe(true);
+  });
 
-    // Set the checkbox checked
-    await page.evaluate(elem => elem.click(), await (await diseaseName.checkbox()).asElement() );
-    // TODO wait async for checked and disabled checking or test will fail
-    await page.waitFor(1000);
-    cbox = await diseaseName.checkbox();
-    expect(await cbox.getProp('checked')).toBe(true);
-    expect(await txtField.getProp('disabled')).toBe(false);
+  // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
+  test('Click Create New Workspace link on My Workspaces page', async () => {
+    const workspaces = new WorkspacesPage(page);
+    await workspaces.load();
+    const workspaceEdit = await workspaces.clickCreateNewWorkspace();
+    const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
+    expect(await workspaceNameTextbox.isVisible()).toBe(true);
+  });
 
-    // check all other fields in Question #1. What is the primary purpose of your project?
-    expect(await (await workspace.question1PopulationHealth().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1MethodsDevelopment().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1DrugTherapeuticsDevelopment().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1ForProfit().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1ResearchControl().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1EducationalPurpose().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1GeneticResearch().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1SocialBehavioralResearch().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1OtherPurpose().checkbox()).isVisible()).toBe(true);
-    expect(await (await workspace.question1OtherPurpose().textarea()).isVisible()).toBe(true);
-  }, 60 * 1000);
+  test('Check Workspace card on Your Workspaces page', async () => {
+    const home = new HomePage(page);
+    await home.load();
+    await home.navTo(SideNavLink.YOUR_WORKSPACES);
+    await new WorkspacesPage(page).waitForLoad();
 
-  test('Create Workspace page: Question 2', async () => {
-    const workspace = new WorkspacePage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
+    await WorkspaceCard.getAllCards(page);
+    const anyCard = await WorkspaceCard.getAnyCard(page);
+    const cardName = await anyCard.getResourceCardName();
+    expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
+    expect(await anyCard.getEllipsisIcon()).toBeTruthy();
+    const links = await anyCard.getPopupLinkTextsArray();
+    expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
+  });
 
-    const reasonTextarea = new AouElement(await workspace.question2ScientificReason());
-    expect(await reasonTextarea.getProp('disabled')).toBe(false);
-    expect(await reasonTextarea.getProp('value')).toEqual('');
-
-    const approachesTextarea = new AouElement(await workspace.question2ScientificApproaches());
-    expect(await approachesTextarea.getProp('disabled')).toBe(false);
-    expect(await approachesTextarea.getProp('value')).toEqual('');
-
-    const findingsTextarea = new AouElement(await workspace.question2AnticipatedFindings());
-    expect(await findingsTextarea.getProp('disabled')).toBe(false);
-    expect(await findingsTextarea.getProp('value')).toEqual('');
-
-  }, 60 * 1000);
-
-  test.skip('Create Workspace page: Question 3', async () => {
-    const workspace = new WorkspacePage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
-
-    // TODO
-  }, 60 * 1000);
-
-  test.skip('Create Workspace page: Question 4', async () => {
-    const workspace = new WorkspacePage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
-
-    // TODO
-  }, 60 * 1000);
-
-  test('Create Workspace page: Question 5 Population of interest', async () => {
-    const workspace = new WorkspacePage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
-
-    expect(await (workspace.radioButtonNotCenterOnUnrepresentedPopulation()).isChecked()).toBe(true);
-  }, 60 * 1000);
-
-  test('Create Workspace page: Question 6 Request for Review of Research Purpose Description', async () => {
-    const workspace = new WorkspacePage(page);
-    await workspace.goURL();
-    await workspace.click_button_CreateNewWorkspace();
-
-    expect(!! (await (workspace.radioButtonRequestReviewYes()).get())).toBe(true);
-    expect(!! (await (workspace.radioButtonRequestReviewNo()).get())).toBe(true);
-    expect(
-       await (workspace.radioButtonRequestReviewNo()).get()
-       .then(elem => elem.getProperty('checked'))
-       .then(elemhandle => elemhandle.jsonValue())
-    ).toBe(true);
-  }, 60 * 1000);
 
 });

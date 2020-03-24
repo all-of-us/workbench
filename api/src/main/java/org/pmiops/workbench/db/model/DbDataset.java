@@ -205,10 +205,10 @@ public class DbDataset {
 
   @Transient
   public PrePackagedConceptSetEnum getPrePackagedConceptSetEnum() {
-    return DbStorageEnums.prePackageConceptSetsFromStorage(prePackagedConceptSet);
+    return DbStorageEnums.prePackagedConceptSetsFromStorage(prePackagedConceptSet);
   }
 
   public void setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum domain) {
-    this.prePackagedConceptSet = DbStorageEnums.prePackageConceptSetsToStorage(domain);
+    this.prePackagedConceptSet = DbStorageEnums.prePackagedConceptSetsToStorage(domain);
   }
 }

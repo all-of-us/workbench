@@ -70,7 +70,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   { accessTasksLoaded: boolean,
     accessTasksRemaining: boolean,
     betaAccessGranted: boolean,
-    dataUseAgreementCompleted: boolean,
+    dataUserCodeOfConductCompleted: boolean,
     eraCommonsError: string,
     eraCommonsLinked: boolean,
     firstVisit: boolean,
@@ -91,7 +91,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       accessTasksLoaded: false,
       accessTasksRemaining: undefined,
       betaAccessGranted: undefined,
-      dataUseAgreementCompleted: undefined,
+      dataUserCodeOfConductCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
       firstVisit: undefined,
@@ -184,8 +184,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
       this.setState({
         eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
-        dataUseAgreementCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
-          (() => !!(getRegistrationTasksMap()['dataUseAgreement']
+        dataUserCodeOfConductCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
+          (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))() : true)
       });
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
@@ -225,7 +225,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsLinked, eraCommonsError, firstVisitTraining, trainingCompleted, quickTour,
-      videoLink, twoFactorAuthCompleted, dataUseAgreementCompleted
+      videoLink, twoFactorAuthCompleted, dataUserCodeOfConductCompleted
     } = this.state;
 
     const quickTourResources = [
@@ -275,7 +275,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                             firstVisitTraining={firstVisitTraining}
                                             betaAccessGranted={betaAccessGranted}
                                             twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                          dataUseAgreementCompleted={dataUseAgreementCompleted}/>
+                                          dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
                     ) : (
                         <React.Fragment>
                           <FlexColumn>

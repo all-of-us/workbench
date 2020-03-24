@@ -1,4 +1,4 @@
-import {ErrorCode} from 'generated/fetch';
+import {ErrorCode, ErrorResponse} from 'generated/fetch';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 let stackdriverReporter: StackdriverErrorReporter;
@@ -33,7 +33,7 @@ export function isAbortError(e: Error) {
 }
 
 // convert error response from API JSON to ErrorResponse object, otherwise, report parse error
-export async function convertAPIError(e) {
+export async function convertAPIError(e): Promise<ErrorResponse> {
   try {
     const {errorClassName = null,
       errorCode = null,

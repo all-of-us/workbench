@@ -21,6 +21,7 @@ beforeEach(() => {
     profile: createEmptyProfile(),
     invitationKey: '',
     onComplete: (profile: Profile) => {},
+    onPreviousClick: (profile: Profile) => {}
   };
 });
 

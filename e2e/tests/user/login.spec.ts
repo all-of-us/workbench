@@ -1,15 +1,12 @@
 import GoogleLoginPage, {selectors} from '../../app/google-login';
-import BasePage from '../../app/mixin/basepage';
-import {waitUntilFindTexts} from '../../driver/waitFuncs';
-import PuppeteerLaunch from '../../services/puppeteer-launch';
-require('../../driver/waitFuncs');
+import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
-jest.setTimeout(60 * 1000);
+const configs = require('../../resources/workbench-config');
 
-const configs = require('../../resources/config');
+// set timeout globally per suite, not per test.
+jest.setTimeout(2 * 60 * 1000);
 
-describe.skip('Login tests:', () => {
-
+describe('Login tests:', () => {
   let browser;
   let incognitoContext;
   let page;
@@ -33,31 +30,29 @@ describe.skip('Login tests:', () => {
     await browser.close();
   });
 
-  test('Open \'/workspaces\' page before login redirects to login', async () => {
+  test('Open AoU Workspaces page before login redirects to login page', async () => {
     const url = configs.uiBaseUrl + configs.workspacesUrlPath;
     const loginPage = new GoogleLoginPage(page);
     await page.goto(url, {waitUntil: 'networkidle0'});
-    await page.waitFor(2000);
     expect(await loginPage.loginButton).toBeTruthy();
   });
 
-  test('Wrong password', async () => {
+  test('Entered wrong password', async () => {
     const INCORRECT_PASSWORD = 'wrongpassword123';
     const loginPage = new GoogleLoginPage(page);
-    await loginPage.goto();
+    await loginPage.load();
 
     const naviPromise = page.waitForNavigation({waitUntil: 'networkidle0'});
-    const googleButton = await loginPage.loginButton;
+    const googleButton = await loginPage.loginButton();
     await googleButton.click();
     await naviPromise;
 
     await loginPage.enterEmail(configs.userEmail);
     await loginPage.enterPassword(INCORRECT_PASSWORD);
-    const button = await page.waitForXPath(selectors.passwordNextButton);
+    const button = await page.waitForXPath(selectors.NextButton, {visible: true});
     await button.click();
 
-    const passwordPage = new BasePage(page);
-    const err = await waitUntilFindTexts(page, 'Wrong password. Try again');
+    const err = await loginPage.waitForTextExists('Wrong password. Try again');
     expect(err).toBeTruthy();
   });
 

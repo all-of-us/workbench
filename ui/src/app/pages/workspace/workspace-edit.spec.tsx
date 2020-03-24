@@ -1,15 +1,17 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {mount} from 'enzyme';
 import {DisseminateResearchEnum, ResearchOutcomeEnum,
   SpecificPopulationEnum,UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditSection} from './workspace-edit';
+import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
+import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 
 jest.mock('app/utils/navigation', () => ({
   ...(require.requireActual('app/utils/navigation')),
@@ -40,9 +42,9 @@ describe('WorkspaceEdit', () => {
       // fields in the workspace form.
       researchPurpose: {
         ...workspaceStubs[0].researchPurpose,
-        intendedStudy: 'greyscale',
-        anticipatedFindings: 'everything',
-        scientificApproach: 'science',
+        intendedStudy: 'intendedStudy ',
+        anticipatedFindings: 'anticipatedFindings ',
+        scientificApproach: 'scientificApproach ',
         drugDevelopment: true,
         disseminateResearchFindingList: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
         researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN]
@@ -109,6 +111,39 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
     expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
       .first().prop('checked')).toEqual(true);
+  });
+
+  it('should clear all selected specific populations if NO underrepresented populations study is selected', async () => {
+    // Set the workspace state to represent a workspace which is studying a
+    // specific population group.
+    workspace.researchPurpose.population = true;
+    workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
+      SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
+
+    routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
+      .first().prop('checked')).toEqual(true);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+      .first().prop('checked')).toEqual(true);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
+      .first().prop('checked')).toEqual(true);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`)
+      .first().prop('checked')).toEqual(true);
+
+    wrapper.find('[data-test-id="specific-population-no"]').first().simulate('click');
+
+    // Selecting no for specific population should clear/un select all checkboxes under YES
+    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
+      .first().prop('checked')).toEqual(false);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+      .first().prop('checked')).toEqual(false);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
+      .first().prop('checked')).toEqual(false);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`)
+      .first().prop('checked')).toEqual(false);
   });
 
   it('supports disable save button if Research Outcome is not answered', async () => {
@@ -195,5 +230,50 @@ describe('WorkspaceEdit', () => {
     expect(navigate).toHaveBeenCalled();
 
     jest.useRealTimers();
+  });
+
+  it ('should show warning message if research purpose summary Intended study have answer less than 50 characters', async() => {
+    const wrapper = component();
+    // Intended Study Text
+    const text  = 'intended Study text';
+    // since its a new page the characters box for Intended study should say 1000 characters remaining
+    let intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
+      .toBe('1000 characters remaining');
+
+    intendedStudySection.find('textarea#intendedStudyText').simulate('change', {target: {value: text}});
+
+    intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    const charsRemaining = 1000 - text.length;
+
+    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
+      .toContain(charsRemaining);
+
+    // Warning message will appear onBlur
+
+    intendedStudySection.find('textarea#intendedStudyText').simulate('blur');
+    expect(wrapper.find('[data-test-id="warningMsg"]').get(0).props.children)
+      .toContain('The description you entered seems too short.');
+  });
+
+  it ('should show error message if research purpose summary has reached 1000 characters', async() => {
+    const wrapper = component();
+    // Intended Study Text
+    const testInput = fp.repeat(1000, 'a');
+    // since its a new page the characters box for Intended study should say 1000 characters remaining
+    let intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
+      .toBe('1000 characters remaining');
+
+    intendedStudySection.find('textarea#intendedStudyText').simulate('change', {target: {value: testInput}});
+
+    intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    const charsRemaining = 1000 - testInput.length;
+
+    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
+      .toContain(charsRemaining);
+
+    expect(wrapper.find('[data-test-id="characterLimit"]').get(0).props.children)
+      .toContain('You have reached the character limit for this question');
   });
 });

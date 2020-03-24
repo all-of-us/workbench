@@ -59,6 +59,9 @@ export const styles = {
     marginLeft: '-30px',
     minWidth: '30px',
     minHeight: '28px',
+    // Without explicit vertical align, this div is top-aligned when empty, which can cause some
+    // excess space above the input element and layout jitter when an icon becomes shown.
+    verticalAlign: 'middle',
   }
 };
 
@@ -79,13 +82,14 @@ export const ValidationError = ({children}) => {
   >{children}</div>;
 };
 
-export const TextInput = React.forwardRef(({style = {}, onChange, ...props}:
-      {style?: React.CSSProperties, onChange: Function, [key: string]: any},
+export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...props}:
+      {style?: React.CSSProperties, onChange: Function, onBlur: Function, [key: string]: any},
                                            ref: React.Ref<HTMLInputElement>) => {
   return <input
     {...props}
     ref = {ref}
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
+    onBlur={onBlur ? (e => onBlur(e.target.value)) : undefined}
     type='text'
     style={{
       width: '100%', height: '1.5rem',

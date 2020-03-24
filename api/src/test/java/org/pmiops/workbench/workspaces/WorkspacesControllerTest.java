@@ -97,6 +97,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -119,6 +120,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.BillingStatus;
@@ -154,6 +156,7 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
@@ -266,6 +269,7 @@ public class WorkspacesControllerTest {
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
     DataSetServiceImpl.class,
+    FreeTierBillingService.class,
     ReviewQueryBuilder.class,
     ConceptSetService.class,
     ConceptSetsController.class,
@@ -275,7 +279,6 @@ public class WorkspacesControllerTest {
     LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
-    FreeTierBillingService.class,
     BillingProjectBufferService.class,
     CohortMaterializationService.class,
     ConceptBigQueryService.class,
@@ -284,6 +287,7 @@ public class WorkspacesControllerTest {
     CloudStorageService.class,
     BigQueryService.class,
     CohortQueryBuilder.class,
+    MailService.class,
     UserService.class,
     UserRecentResourceService.class,
     ConceptService.class,
@@ -346,7 +350,8 @@ public class WorkspacesControllerTest {
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Autowired Zendesk mockZendesk;
-  @Autowired FreeTierBillingService freeTierBillingService;
+  @SpyBean @Autowired FreeTierBillingService freeTierBillingService;
+  @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
@@ -768,6 +773,9 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
+    doReturn(false)
+        .when(freeTierBillingService)
+        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
     // Creating the workspace with a user provided billing account
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -812,15 +820,13 @@ public class WorkspacesControllerTest {
             workspace.getId(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
-    workspaceDao.save(dbWorkspace);
-
     doReturn(true)
         .when(freeTierBillingService)
         .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    workspace.setEtag("\"2\"");
+    workspace.setEtag("\"1\"");
     request.setWorkspace(workspace);
     Workspace response =
         workspacesController
@@ -2987,6 +2993,41 @@ public class WorkspacesControllerTest {
             .lastLockedBy("UNKNOWN");
 
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testGetBillingUsageWithNoSpend() {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
+        workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
+    assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(0.0d);
+  }
+
+  @Test
+  public void testGetBillingUsage() {
+    Double cost = new Double(150.50d);
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    DbWorkspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            ws.getNamespace(),
+            ws.getId(),
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    workspaceFreeTierUsageDao.updateCost(dbWorkspace, cost);
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
+        workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
+    assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(cost);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testGetBillingUsageWithoutAccess() {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
+    workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
   }
 
   @Test

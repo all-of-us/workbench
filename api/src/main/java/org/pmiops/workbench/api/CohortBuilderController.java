@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.CriteriaMenuOptionsListResponse;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.DomainType;
@@ -309,6 +310,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<DataFiltersResponse> findDataFilters(Long cdrVersionId) {
+    return ResponseEntity.ok(
+        new DataFiltersResponse().items(cohortBuilderService.findDataFilters(cdrVersionId)));
+  }
+
+  @Override
   public ResponseEntity<CriteriaListResponse> getStandardCriteriaByDomainAndConceptId(
       Long cdrVersionId, String domain, Long conceptId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
@@ -359,7 +366,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
         && !isApproximate(request)) {
       try {
-        return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request)));
+        return ResponseEntity.ok(
+            response.items(
+                elasticSearchService.demoChartInfo(
+                    new ParticipantCriteria(request, genderOrSexType, ageType))));
       } catch (IOException e) {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }

@@ -257,10 +257,7 @@ public class InstitutionServiceTest {
                 .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org")));
 
     final DbUser user = createUser("user@broad.org");
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
-
-    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isTrue();
+    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isTrue();
   }
 
   @Test
@@ -275,10 +272,7 @@ public class InstitutionServiceTest {
                     Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")));
 
     final DbUser user = createUser("external-researcher@sanger.uk");
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
-
-    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isTrue();
+    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isTrue();
   }
 
   @Test
@@ -288,10 +282,7 @@ public class InstitutionServiceTest {
             new Institution().shortName("Broad").displayName("The Broad Institute"));
 
     final DbUser user = userDao.save(new DbUser());
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
-
-    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isFalse();
+    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
   }
 
   @Test
@@ -303,10 +294,7 @@ public class InstitutionServiceTest {
             .emailDomains(Lists.newArrayList("broad.org", "mit.edu"));
 
     final DbUser user = createUser("external-researcher@sanger.uk");
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
-
-    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isFalse();
+    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
   }
 
   public void test_emailValidation_malformed() {
@@ -318,10 +306,7 @@ public class InstitutionServiceTest {
                 .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org")));
 
     final DbUser user = createUser("user@hacker@broad.org");
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
-
-    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isFalse();
+    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
   }
 
   @Test
