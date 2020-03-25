@@ -531,8 +531,8 @@ task integrationTest(type: Test) {
   testClassesDirs = sourceSets.integration.output.classesDirs
   classpath = sourceSets.integration.runtimeClasspath
   useJUnit {
-		excludeCategories 'org.pmiops.workbench.NightlyTests'
-	}
+    excludeCategories 'org.pmiops.workbench.NightlyTests'
+  }
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
