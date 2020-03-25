@@ -53,12 +53,6 @@ export class AccountCreationTos extends React.Component<
   AccountCreationTosProps,
   AccountCreationTosState
 > {
-  // Tracks whether this component has created an intersection observer to track the last page
-  // visibility yet.
-  hasCreatedIntersectionObserver = false;
-  // Once the last page has been loaded, this contains a reference to the page's DOM element.
-  lastPage: HTMLElement;
-
   constructor(props: AccountCreationTosProps) {
     super(props);
     this.state = {
@@ -70,43 +64,14 @@ export class AccountCreationTos extends React.Component<
     };
   }
 
-  /**
-   * Handles the onRenderSuccess callback from the Page element at the end of the document.
-   * This sets up the intersection listener which will change state when the user scrolls to the
-   * end of the document.
-   */
-  private handleLastPageRender() {
-    if (this.hasCreatedIntersectionObserver) {
-      return;
-    }
-    this.hasCreatedIntersectionObserver = true;
-    const intersectionCallback: IntersectionObserverCallback = (
-      entries: IntersectionObserverEntry[],
-      unusedObserver: IntersectionObserver
-    ) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          this.setState({hasReadEntireTos: true});
-        }
-      }
-    };
-    const observer = new IntersectionObserver(intersectionCallback);
-    observer.observe(this.lastPage);
-  }
-
-  private setLastPageRef(ref) {
-    this.lastPage = ref;
-  }
-
   render() {
     const {hasReadEntireTos, hasAckedTermsOfService, hasAckedPrivacyStatement} = this.state;
 
     return <FlexColumn data-test-id='account-creation-tos'
                        style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
       <PdfViewer
-          handleLastPageRender={() => this.handleLastPageRender()}
+          onLastPageRender={() => this.setState({hasReadEntireTos: true})}
           pdfPath={this.props.pdfPath}
-          setLastPageRef={(ref) => this.setLastPageRef(ref)}
       />
       <FlexRow
         style={{display: 'inline-flex', padding: '1rem', maxWidth: '1000px', margin: 'auto'}}>

@@ -5,9 +5,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {withWindowSize} from 'app/utils';
 
 export interface Props {
-  handleLastPageRender: () => void;
+  onLastPageRender: () => void;
   pdfPath: string;
-  setLastPageRef: (ref) => void;
   windowSize: {
     width: number,
     height: number
@@ -15,18 +14,57 @@ export interface Props {
 }
 
 interface State {
+  hasReadEntirePdf: boolean;
   loading: boolean;
   numPages: number;
 }
 
 export const PdfViewer = withWindowSize()( class extends React.Component<Props, State> {
+  // Tracks whether this component has created an intersection observer to track the last page
+  // visibility yet.
+  hasCreatedIntersectionObserver = false;
+  // Once the last page has been loaded, this contains a reference to the page's DOM element.
+  lastPage: HTMLElement;
+
   constructor(props) {
     super(props);
 
     this.state = {
+      hasReadEntirePdf: false,
       loading: true,
       numPages: 0
     };
+  }
+
+  /**
+   * Handles the onRenderSuccess callback from the Page element at the end of the document.
+   * This sets up the intersection listener which will change state when the user scrolls to the
+   * end of the document.
+   */
+  private handleLastPageRender() {
+    if (this.hasCreatedIntersectionObserver) {
+      return;
+    }
+    this.hasCreatedIntersectionObserver = true;
+    const intersectionCallback: IntersectionObserverCallback = (
+        entries: IntersectionObserverEntry[],
+        unusedObserver: IntersectionObserver
+    ) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          if (!this.state.hasReadEntirePdf) {
+            this.props.onLastPageRender();
+          }
+          this.setState({hasReadEntirePdf: true});
+        }
+      }
+    };
+    const observer = new IntersectionObserver(intersectionCallback);
+    observer.observe(this.lastPage);
+  }
+
+  private setLastPageRef(ref) {
+    this.lastPage = ref;
   }
 
   unusedCallback() {
@@ -60,11 +98,11 @@ export const PdfViewer = withWindowSize()( class extends React.Component<Props, 
                       key={`page_${index + 1}`}
                       pageNumber={index + 1}
                       inputRef={index === numPages - 1
-                          ? (ref) => this.props.setLastPageRef(ref)
+                          ? (ref) => this.setLastPageRef(ref)
                           : () => this.unusedCallback()
                       }
                       onRenderSuccess={index === numPages - 1
-                          ? () => this.props.handleLastPageRender()
+                          ? () => this.handleLastPageRender()
                           : () => this.unusedCallback()
                       }
                   />
