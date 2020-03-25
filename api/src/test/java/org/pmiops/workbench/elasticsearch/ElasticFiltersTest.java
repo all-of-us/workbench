@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ElasticFiltersTest {
 
+  private static final ImmutableList<String> NO_DATA_FILTERS = ImmutableList.of();
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
 
@@ -310,7 +311,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery(
                     "events.concept_id", ImmutableList.of("21600002", "21600009"))));
   }
@@ -337,7 +338,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery(
                     "events.source_concept_id", ImmutableList.of("771", "772", "773"))));
   }
@@ -417,7 +418,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery(
                     "events.source_concept_id", ImmutableList.of("77", "7771", "777"))));
   }
@@ -444,7 +445,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery(
                     "events.source_concept_id", ImmutableList.of("7771", "777"))));
   }
@@ -474,7 +475,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("7771")),
                 QueryBuilders.rangeQuery("events.value_as_number").gte(1.0F).lte(1.0F)));
   }
@@ -503,7 +504,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777")),
                 QueryBuilders.termsQuery(
                     "events.value_as_source_concept_id", ImmutableList.of("1"))));
@@ -528,7 +529,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
                 QueryBuilders.rangeQuery("events.age_at_start").gte(18)));
   }
@@ -553,7 +554,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
                 QueryBuilders.rangeQuery("events.start_date").gte("12/25/1988").lte("12/27/1988")));
   }
@@ -577,7 +578,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
                 QueryBuilders.termsQuery("events.visit_concept_id", ImmutableList.of("123"))));
   }
@@ -601,7 +602,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQueryOccurrences(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 13,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
   }
@@ -628,7 +629,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId))));
   }
 
@@ -658,7 +659,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
                 QueryBuilders.rangeQuery("events.value_as_number").gte(left).lte(right)));
   }
@@ -692,7 +693,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
                 QueryBuilders.rangeQuery("events.value_as_number").gte(left).lte(right)));
   }
@@ -868,7 +869,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
                 QueryBuilders.termsQuery("events.value_as_concept_id", ImmutableList.of(operand))));
   }
@@ -902,7 +903,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId)),
                 QueryBuilders.termsQuery(
                     "events.value_as_concept_id", ImmutableList.of(operand1, operand2))));
@@ -929,7 +930,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                ImmutableList.of(),
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId))));
   }
 
