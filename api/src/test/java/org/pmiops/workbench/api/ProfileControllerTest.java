@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -62,6 +63,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
@@ -484,18 +486,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testMe_verifiedInstitutionalAffiliation() {
     config.featureFlags.requireInstitutionalVerification = true;
 
-    final Institution broad =
-        new Institution()
-            .shortName("Broad")
-            .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
-    institutionService.createInstitution(broad);
-
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-        new VerifiedInstitutionalAffiliation()
-            .institutionShortName(broad.getShortName())
-            .institutionDisplayName(broad.getDisplayName())
-            .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
+        createVerifiedInstitutionalAffiliation();
+
     createAccountRequest
         .getProfile()
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
@@ -678,6 +671,82 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void sendUserInstructions_none() throws MessagingException {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    createUser();
+    verify(mailService).sendWelcomeEmail(any(), any(), any());
+
+    // don't send the user instructions email if there are no instructions
+    verifyNoMoreInteractions(mailService);
+  }
+
+  @Test
+  public void sendUserInstructions_sanitized() throws MessagingException {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    final String rawInstructions =
+        "<html><script>window.alert('hacked');</script></html>"
+            + "Wash your hands for 20 seconds"
+            + "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} "
+            + "div {color: 'red'}</STYLE>\n"
+            + "<img src=\"https://eviltrackingpixel.com\" />\n";
+
+    final String sanitizedInstructions = "Wash your hands for 20 seconds";
+
+    final InstitutionUserInstructions instructions =
+        new InstitutionUserInstructions()
+            .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
+            .instructions(rawInstructions);
+    institutionService.setInstitutionUserInstructions(instructions);
+
+    createUser();
+    verify(mailService).sendWelcomeEmail(any(), any(), any());
+    verify(mailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
+  }
+
+  @Test
+  public void sendUserInstructions_deleted() throws MessagingException {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    final InstitutionUserInstructions instructions =
+        new InstitutionUserInstructions()
+            .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
+            .instructions("whatever");
+    institutionService.setInstitutionUserInstructions(instructions);
+
+    institutionService.deleteInstitutionUserInstructions(
+        verifiedInstitutionalAffiliation.getInstitutionShortName());
+
+    createUser();
+    verify(mailService).sendWelcomeEmail(any(), any(), any());
+
+    // don't send the user instructions email if the instructions have been deleted
+    verifyNoMoreInteractions(mailService);
+  }
+
+  @Test
   public void testUpdateNihToken() {
     when(fireCloudService.postNihCallback(any()))
         .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
@@ -839,5 +908,19 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
+  }
+
+  private VerifiedInstitutionalAffiliation createVerifiedInstitutionalAffiliation() {
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+    institutionService.createInstitution(broad);
+
+    return new VerifiedInstitutionalAffiliation()
+        .institutionShortName(broad.getShortName())
+        .institutionDisplayName(broad.getDisplayName())
+        .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
   }
 }

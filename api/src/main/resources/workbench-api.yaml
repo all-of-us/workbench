@@ -2432,6 +2432,43 @@ paths:
           description: Whether the email is a valid member of the institution.
           schema:
             "$ref": "#/definitions/CheckEmailResponse"
+  "/v1/institutions/instructionsEmail":
+    post:
+      tags:
+        - institution
+      description: 'Sets or updates the Institution-specific user instructions to be sent
+        by email after registration. Requires INSTITUTION_ADMIN authority.'
+      operationId: setInstitutionUserInstructions
+      parameters:
+        - in: body
+          name: userInstructions
+          description: 'Text to include in an email sent to users for an Institution after they are registered.'
+          schema:
+            "$ref": "#/definitions/InstitutionUserInstructions"
+      responses:
+        200:
+          description: 'Successfully set or updated the Institution-specific user instructions to be sent
+            by email after registration.'
+          schema:
+            "$ref": "#/definitions/InstitutionUserInstructions"
+  "/v1/institutions/instructionsEmail/{shortName}":
+    parameters:
+      - in: path
+        name: shortName
+        required: true
+        type: string
+        description: 'A short unique name for the Institution used as an identifier,
+          such as "VUMC"'
+    delete:
+      tags:
+        - institution
+      description: 'Remove the Institution-specific user instructions to be sent
+        by email after registration. Requires INSTITUTION_ADMIN authority.'
+      operationId: deleteInstitutionUserInstructions
+      responses:
+        204:
+          description: 'Successfully removed the Institution-specific user instructions to be sent
+            by email after registration.'
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/getDataTableQuery":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3402,8 +3439,8 @@ definitions:
       creationTime:
         type: integer
         format: int64
-        description: 
-          Milliseconds since the UNIX epoch. This timestamp is derived from the deid dataset name. 
+        description:
+          Milliseconds since the UNIX epoch. This timestamp is derived from the deid dataset name.
           Ex - deid_output_20191004 -> 2019-10-04 00:00:00Z
   DomainInfo:
     type: object
@@ -5600,6 +5637,19 @@ definitions:
           enumerated OrganizationTypes, or OrganizationType.OTHER if it is not
 
 '
+  InstitutionUserInstructions:
+    type: object
+    description: Institution-specific instructions for users to perform after registration.
+    required:
+      - institutionShortName
+      - instructions
+    properties:
+      institutionShortName:
+        type: string
+        description: The short unique name for the Institution used as an identifier, such as 'VUMC'.
+      instructions:
+        type: string
+        description: Text to include in an email sent to this Institution's users after they are registered.
   GetInstitutionsResponse:
     type: object
     required:

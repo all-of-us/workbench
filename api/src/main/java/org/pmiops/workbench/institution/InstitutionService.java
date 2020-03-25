@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
 
 public interface InstitutionService {
@@ -15,7 +16,8 @@ public interface InstitutionService {
 
   Optional<Institution> getInstitution(final String shortName);
 
-  Optional<DbInstitution> getDbInstitution(final String shortName);
+  // throws NotFoundException if the DbInstitution is not found
+  DbInstitution getDbInstitutionOrThrow(final String shortName);
 
   Institution createInstitution(final Institution institutionToCreate);
 
@@ -49,4 +51,32 @@ public interface InstitutionService {
    * @return boolean – is the contact email a valid member
    */
   boolean validateInstitutionalEmail(Institution institution, String contactEmail);
+
+  /**
+   * Retrieve the optional text block of user instructions to fill the instructions email sent after
+   * a user in this institution creates an account. Throws NotFoundException if the Institution does
+   * not exist.
+   *
+   * @param shortName the short name (key) used to refer to this institution in the API
+   * @return The text block of user instructions, or Empty if it is not present.
+   */
+  Optional<String> getInstitutionUserInstructions(final String shortName);
+
+  /**
+   * Create or update the text block of user instructions to be included in the instructions email
+   * sent after a user in this institution creates an account. Sanitizes inputs to remove all HTML
+   * tags. Throws NotFoundException if the Institution does not exist.
+   *
+   * @param instructions The institution to update along with the text to include in the email
+   */
+  void setInstitutionUserInstructions(final InstitutionUserInstructions instructions);
+
+  /**
+   * Delete the text block of user instructions to be included in the instructions email for this
+   * institution, if it exists. Throws NotFoundException if the Institution does not exist.
+   *
+   * @param shortName the short name (key) used to refer to this institution in the API
+   * @return whether user instructions were deleted
+   */
+  boolean deleteInstitutionUserInstructions(final String shortName);
 }
