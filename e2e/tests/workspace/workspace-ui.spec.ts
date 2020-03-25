@@ -24,6 +24,11 @@ describe('Workspace ui tests', () => {
 
   test('Workspace cards all have same ui size', async () => {
     const cards = await WorkspaceCard.getAllCards(page);
+    if (cards.length === 0) {
+      // stops if no workspace card
+      return;
+    }
+
     let width;
     let height;
     for (const card of cards) {
@@ -55,7 +60,12 @@ describe('Workspace ui tests', () => {
     await home.navTo(SideNavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
-    await WorkspaceCard.getAllCards(page);
+    const cards = await WorkspaceCard.getAllCards(page);
+    if (cards.length === 0) {
+      // stops if no workspace card
+      return;
+    }
+
     const anyCard = await WorkspaceCard.getAnyCard(page);
     const cardName = await anyCard.getResourceCardName();
     expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));

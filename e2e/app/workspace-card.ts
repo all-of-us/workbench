@@ -31,10 +31,11 @@ export default class WorkspaceCard extends BaseElement {
     return resourceCards;
   }
 
-  static async getAnyCard(page: Page): Promise<WorkspaceCard> {
+  static async getAnyCard(page: Page): Promise<WorkspaceCard | null> {
     const cards = await this.getAllCards(page);
     if (cards.length === 0) {
-      throw new Error('FAILED to find any Workspace card on page.');
+      console.info('Found 0 Workspace card on page.');
+      return null;
     }
     const anyCard = _.shuffle(cards)[0];
     return anyCard;

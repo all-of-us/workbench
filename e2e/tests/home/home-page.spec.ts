@@ -32,6 +32,11 @@ describe('Home page ui tests', () => {
     await GoogleLoginPage.logIn(page);
 
     const cards = await WorkspaceCard.getAllCards(page);
+    if (cards.length === 0) {
+      // stops if no workspace card
+      return;
+    }
+
     let width;
     let height;
     for (const card of cards) {
@@ -98,7 +103,11 @@ describe('Home page ui tests', () => {
   test('Check Workspace card on Home page', async () => {
     await GoogleLoginPage.logIn(page);
 
-    await WorkspaceCard.getAllCards(page);
+    const cards = await WorkspaceCard.getAllCards(page);
+    if (cards.length === 0) {
+      // stops if no workspace card
+      return;
+    }
     const anyCard = await WorkspaceCard.getAnyCard(page);
     const cardName = await anyCard.getResourceCardName();
     expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
