@@ -99,6 +99,7 @@ const styles = reactStyles({
 });
 
 interface Props {
+  cohortChanged: boolean;
   searchRequest: any;
   updateCount: any;
   updateSaving: Function;
@@ -319,8 +320,7 @@ export const ListOverview = withCurrentWorkspace()(
       const saveDisabled = invalid || !name || nameConflict || saving;
       const showTotal = total !== undefined && total !== null;
       const items = [
-        {label: 'Save', command: () => this.saveCohort(),
-          disabled: cohort && cohort.criteria === this.criteria},
+        {label: 'Save', command: () => this.saveCohort(), disabled: !this.props.cohortChanged},
         {label: 'Save as', command: () => this.openSaveModal()},
       ];
       return <React.Fragment>
@@ -443,11 +443,12 @@ export const ListOverview = withCurrentWorkspace()(
   template: '<div #root></div>',
 })
 export class OverviewComponent extends ReactWrapperBase {
+  @Input('cohortChanged') cohortChanged: Props['cohortChanged'];
   @Input('searchRequest') searchRequest: Props['searchRequest'];
   @Input('updateCount') updateCount: Props['updateCount'];
   @Input('updateSaving') updateSaving: Props['updateSaving'];
 
   constructor() {
-    super(ListOverview, ['searchRequest', 'updateCount', 'updateSaving']);
+    super(ListOverview, ['cohortChanged', 'searchRequest', 'updateCount', 'updateSaving']);
   }
 }

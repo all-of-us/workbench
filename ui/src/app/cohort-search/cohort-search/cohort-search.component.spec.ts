@@ -17,8 +17,6 @@ import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
 import {SearchGroupListComponent} from 'app/cohort-search/search-group-list/search-group-list.component';
-import {SearchGroupSelectComponent} from 'app/cohort-search/search-group-select/search-group-select.component';
-import {SearchGroupComponent} from 'app/cohort-search/search-group/search-group.component';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
 import {TreeComponent} from 'app/cohort-search/tree/tree.component';
@@ -59,12 +57,10 @@ describe('CohortSearchComponent', () => {
         OverviewComponent,
         SearchBarComponent,
         SearchGroupListComponent,
-        SearchGroupComponent,
         ListSearchComponent,
         SelectionInfoComponent,
         TreeComponent,
         SafeHtmlPipe,
-        SearchGroupSelectComponent,
         ValidatorErrorsComponent,
       ],
       imports: [

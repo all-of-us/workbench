@@ -272,7 +272,7 @@ export function mapRequest(sr: any) {
 }
 
 export function mapGroup(group: any) {
-  const {id, temporal, mention, time, timeValue} = group;
+  const {id, temporal, mention, name, time, timeValue} = group;
   const items = group.items.reduce((acc, it) => {
     if (it.status === 'active') {
       acc.push(mapGroupItem(it, temporal));
@@ -280,6 +280,9 @@ export function mapGroup(group: any) {
     return acc;
   }, []);
   let searchGroup = <SearchGroup>{id, items, temporal};
+  if (name) {
+    searchGroup.name = name;
+  }
   if (temporal) {
     searchGroup = {...searchGroup, mention, time, timeValue: parseInt(timeValue, 10)};
   }

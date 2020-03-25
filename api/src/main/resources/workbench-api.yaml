@@ -4489,6 +4489,7 @@ definitions:
     enum:
     - NOTEBOOK
     - COHORT
+    - COHORT_SEARCH_GROUP
     - COHORT_SEARCH_ITEM
     - COHORT_REVIEW
     - CONCEPT_SET
@@ -7074,6 +7075,9 @@ definitions:
     properties:
       id:
         description: Unique within the cohort definition
+        type: string
+      name:
+        description: optional custom name set by user
         type: string
       temporal:
         description: indicates if this search group relates to time
