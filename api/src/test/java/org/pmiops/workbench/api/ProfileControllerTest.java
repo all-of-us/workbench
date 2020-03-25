@@ -246,6 +246,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testCreateAccount_invitationKeyMismatch() {
     createUser();
 
+    config.access.requireInvitationKey = true;
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
