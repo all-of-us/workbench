@@ -1,5 +1,6 @@
 package org.pmiops.workbench.opsgenie;
 
+import com.google.common.collect.ImmutableList;
 import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
@@ -53,6 +54,8 @@ public class OpsGenieServiceImpl implements OpsGenieService {
             egressEvent.getTimeWindowDuration(),
             egressEvent.getEgressMibThreshold(),
             egressEvent.getEgressMib()));
+    request.setTags(ImmutableList.of("high-egress-event"));
+
     // Set the alias, which is Opsgenie's string key for alert de-duplication. See
     // https://docs.opsgenie.com/docs/alert-deduplication
     request.setAlias(egressEvent.getProjectName() + " | " + egressEvent.getVmName());
