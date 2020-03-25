@@ -23,7 +23,10 @@
     "bufferCapacity": 300,
     "bufferRefillProjectsPerTask": 5,
     "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-perf-1@all-of-us-rw-perf.iam.gserviceaccount.com",
@@ -85,7 +88,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": true,
-    "requireInvitationKey": true
+    "requireInvitationKey": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -97,7 +100,7 @@
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false,
+    "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
@@ -106,7 +109,7 @@
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
     "queueName": "rdrQueue",
-    "exportObjectsPerTask" : 10
+    "exportObjectsPerTask": 10
   },
   "captcha": {
     "enableCaptcha": false
