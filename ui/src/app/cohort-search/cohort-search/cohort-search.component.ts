@@ -32,6 +32,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   modalOpen = false;
   saving = false;
   updateGroupListsCount = 0;
+  cohortChanged = false;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -60,6 +61,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     searchRequestStore.subscribe(sr => {
       this.criteria = sr;
       this.overview = sr.includes.length || sr.excludes.length;
+      this.cohortChanged = !!this.cohort && this.cohort.criteria !== JSON.stringify(mapRequest(this.criteria));
       this.updateGroupListsCount++;
     });
     this.updateWrapperDimensions();
@@ -73,8 +75,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   }
 
   canDeactivate(): Promise<boolean> | boolean {
-    const criteria = JSON.stringify(mapRequest(this.criteria));
-    return criteria === this.cohort.criteria || this.saving || this.showWarningModal();
+    return !this.cohortChanged || this.saving || this.showWarningModal();
   }
 
   async showWarningModal() {

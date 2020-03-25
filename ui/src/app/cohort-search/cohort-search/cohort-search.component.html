@@ -28,6 +28,7 @@
     <div class="col-xl-4 col-lg-12" id="list-charts">
       <app-list-overview
         *ngIf="overview"
+        [cohortChanged]="cohortChanged"
         [searchRequest]="criteria"
         [updateCount]="updateCount"
         [updateSaving]="updateSaving"></app-list-overview>

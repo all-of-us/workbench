@@ -21,8 +21,6 @@ import {OptionInfoComponent} from './option-info/option-info.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchBarComponent} from './search-bar/search-bar.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
-import {SearchGroupSelectComponent} from './search-group-select/search-group-select.component';
-import {SearchGroupComponent} from './search-group/search-group.component';
 import {SelectionInfoComponent} from './selection-info/selection-info.component';
 import {TreeComponent} from './tree/tree.component';
 
@@ -71,12 +69,10 @@ const routes: Routes = [{
     OverviewComponent,
     SearchBarComponent,
     SearchGroupListComponent,
-    SearchGroupComponent,
     ListSearchComponent,
     SelectionInfoComponent,
     TreeComponent,
     SafeHtmlPipe,
-    SearchGroupSelectComponent,
   ],
   providers: [TitleCasePipe]
 })
