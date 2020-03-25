@@ -1,11 +1,14 @@
 package org.pmiops.workbench.opsgenie;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
+import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +28,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class OpsGenieServiceTest {
   private static WorkbenchConfig workbenchConfig;
-  private EgressEvent egressEvent;
+  private static final EgressEvent egressEvent =
+      new EgressEvent()
+          .projectName("aou-rw-test-c7dec260")
+          .vmName("aou-rw-1")
+          .egressMib(120.7)
+          .egressMibThreshold(100.0)
+          .timeWindowDuration(600L);
 
   @MockBean private AlertApi mockAlertApi;
   @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
@@ -44,19 +53,13 @@ public class OpsGenieServiceTest {
   @Before
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.server.clientBaseUrl = "https://workbench.researchallofus.org";
-
-    egressEvent =
-        new EgressEvent()
-            .projectName("aou-rw-test-c7dec260")
-            .vmName("aou-rw-1")
-            .egressMib(120.7)
-            .egressMibThreshold(100.0)
-            .timeWindowDuration(600L);
+    workbenchConfig.server.uiBaseUrl = "https://workbench.researchallofus.org";
   }
 
   @Test
   public void createEgressEventAlert() throws ApiException {
+    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+
     opsGenieService.createEgressEventAlert(egressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
 
@@ -64,6 +67,6 @@ public class OpsGenieServiceTest {
     assertThat(request.getDescription()).contains("Workspace project: aou-rw-test-c7dec260");
     assertThat(request.getDescription())
         .contains("https://workbench.researchallofus.org/admin/workspaces/aou-rw-test-c7dec260/");
-    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 - aou-rw-1");
+    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | aou-rw-1");
   }
 }

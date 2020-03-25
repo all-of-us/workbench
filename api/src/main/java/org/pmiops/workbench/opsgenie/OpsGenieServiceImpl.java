@@ -3,6 +3,7 @@ package org.pmiops.workbench.opsgenie;
 import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
+import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -32,11 +33,14 @@ public class OpsGenieServiceImpl implements OpsGenieService {
         new StringBuilder()
             .append(String.format("Workspace project: %s\n", egressEvent.getProjectName()))
             .append(String.format("VM name: %s\n", egressEvent.getVmName()))
-            .append(String.format("Egress amount: %.2f Mib\n\n", egressEvent.getEgressMib()))
+            .append(
+                String.format(
+                    "Egress detected: %.2f Mib in %d secs\n\n",
+                    egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration()))
             .append(
                 String.format(
                     "Admin link (PMI-Ops): %s/admin/workspaces/%s/\n",
-                    workbenchConfig.server.clientBaseUrl, egressEvent.getProjectName()))
+                    workbenchConfig.server.uiBaseUrl, egressEvent.getProjectName()))
             .append("Playbook: https://broad.io/aou-high-egress-event")
             .toString());
     // Add a note with some more specific details about the alerting criteria and threshold. Notes
@@ -51,20 +55,25 @@ public class OpsGenieServiceImpl implements OpsGenieService {
             egressEvent.getEgressMib()));
     // Set the alias, which is Opsgenie's string key for alert de-duplication. See
     // https://docs.opsgenie.com/docs/alert-deduplication
-    request.setAlias(egressEvent.getProjectName() + " - " + egressEvent.getVmName());
+    request.setAlias(egressEvent.getProjectName() + " | " + egressEvent.getVmName());
     return request;
   }
 
   @Override
   public void createEgressEventAlert(EgressEvent egressEvent) {
     try {
-      this.alertApiProvider
-          .get()
-          .createAlert(egressEventToOpsGenieAlert(egressEvent, workbenchConfigProvider.get()));
+      SuccessResponse response =
+          this.alertApiProvider
+              .get()
+              .createAlert(egressEventToOpsGenieAlert(egressEvent, workbenchConfigProvider.get()));
+      logger.info(
+          String.format(
+              "Successfully created or updated Opsgenie alert for high-egress event on project %s (Opsgenie request ID %s)",
+              egressEvent.getProjectName(), response.getRequestId()));
     } catch (ApiException e) {
       logger.severe(
           String.format(
-              "Error creating OpsGenie alert for egress event on project %s: %s",
+              "Error creating Opsgenie alert for egress event on project %s: %s",
               egressEvent.getProjectName(), e.getMessage()));
       e.printStackTrace();
     }

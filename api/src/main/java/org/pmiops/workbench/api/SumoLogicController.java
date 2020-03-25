@@ -19,6 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Implements an inbound API that is called by the Broad Institute's SumoLogic installation to
+ * report high-egress events detected by SumoLogic. See http://broad.io/vpc-egress-alerting for more
+ * details on the end-to-end data flow.
+ */
 @RestController
 public class SumoLogicController implements SumoLogicApiDelegate {
 
