@@ -5,19 +5,19 @@ SELECT p.person_id                                             _id,
        p.gender_concept_id,
        case
            when gc.concept_name is null then 'Unknown'
-           else gc.concept_name end as                         gender_concept_name,
+           else gc.concept_name end                    as      gender_concept_name,
        p.race_concept_id,
        case
            when rc.concept_name is null then 'Unknown'
-           else rc.concept_name end as                         race_concept_name,
+           else rc.concept_name end                    as      race_concept_name,
        p.ethnicity_concept_id,
        case
            when ec.concept_name is null then 'Unknown'
-           else ec.concept_name end as                         ethnicity_concept_name,
+           else ec.concept_name end                    as      ethnicity_concept_name,
        p.sex_at_birth_concept_id,
        case
            when sc.concept_name is null then 'Unknown'
-           else sc.concept_name end as                         sex_at_birth_concept_name,
+           else sc.concept_name end                    as      sex_at_birth_concept_name,
        condition_concept_ids,
        condition_source_concept_ids,
        observation_concept_ids,
@@ -29,9 +29,11 @@ SELECT p.person_id                                             _id,
        measurement_concept_ids,
        measurement_source_concept_ids,
        visit_concept_ids,
-       death.person_id is not null  as                         is_deceased,
+       death.person_id is not null                     as      is_deceased,
+       CAST(cbp.has_ehr_data as BOOL)                  as      has_ehr_data,
+       CAST(cbp.has_physical_measurement_data as BOOL) as      has_physical_measurement_data,
        ARRAY_CONCAT(observations, conditions, drugs, procedures,
-                    measurements)   AS                         events
+                    measurements)                      AS      events
 FROM `{BQ_DATASET}.person` p
          LEFT JOIN (
     SELECT ob.person_id                                                             person_id,

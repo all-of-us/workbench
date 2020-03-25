@@ -77,8 +77,12 @@ public final class ElasticFilters {
         filter.mustNot(searchGroupToFilter(sg));
       }
     }
+    BoolQueryBuilder b = QueryBuilders.boolQuery();
+    for (String dataFilter : req.getDataFilters()) {
+      b.filter(QueryBuilders.termQuery(dataFilter, true));
+    }
     processed = true;
-    return filter;
+    return req.getDataFilters().isEmpty() ? filter : filter.filter(b);
   }
 
   /**
