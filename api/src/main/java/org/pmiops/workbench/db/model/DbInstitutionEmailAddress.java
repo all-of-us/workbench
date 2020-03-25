@@ -54,10 +54,16 @@ public class DbInstitutionEmailAddress {
     return this;
   }
 
+  // logical equality: data members without the ID field
+
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     DbInstitutionEmailAddress that = (DbInstitutionEmailAddress) o;
 

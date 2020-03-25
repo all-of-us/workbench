@@ -51,19 +51,25 @@ public class DbInstitutionUserInstructions {
     return this;
   }
 
+  // logical equality: data members without the ID field
+
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     DbInstitutionUserInstructions that = (DbInstitutionUserInstructions) o;
 
-    return Objects.equals(institutionUserInstructionsId, that.institutionUserInstructionsId)
+    return Objects.equals(institutionId, that.institutionId)
         && Objects.equals(userInstructions, that.userInstructions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(institutionUserInstructionsId, userInstructions);
+    return Objects.hash(institutionId, userInstructions);
   }
 }
