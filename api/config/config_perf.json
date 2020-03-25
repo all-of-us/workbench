@@ -100,7 +100,7 @@
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false,
+    "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
