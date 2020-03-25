@@ -4,10 +4,10 @@ import {AccountCreationTos, AccountCreationTosProps} from 'app/pages/login/accou
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 const getPrivacyCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
-  return wrapper.find('CheckBox[data-test-id="privacy-statement-check"]');
+  return wrapper.find('input[data-test-id="privacy-statement-check"]');
 };
 const getTosCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
-  return wrapper.find('CheckBox[data-test-id="terms-of-service-check"]');
+  return wrapper.find('input[data-test-id="terms-of-service-check"]');
 };
 const getNextButton = (wrapper: AnyWrapper ): AnyWrapper => {
   return wrapper.find('[data-test-id="next-button"]');
