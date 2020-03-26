@@ -1,6 +1,6 @@
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
-import {Button, Link, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -34,10 +34,12 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
+  renderUSD,
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
-  withRouteConfigData
+  withRouteConfigData,
+  withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
@@ -51,6 +53,7 @@ import {
   CdrVersionListResponse,
   DataAccessLevel,
   DisseminateResearchEnum,
+  Profile,
   ResearchOutcomeEnum,
   ResearchPurpose,
   SpecificPopulationEnum,
@@ -59,6 +62,7 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
+import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
@@ -80,6 +84,15 @@ export const styles = reactStyles({
   flexColumnBy2: {
     flex: '1 1 0',
     marginLeft: '1rem'
+  },
+  freeCreditBalance: {
+    height: '44px',
+    width: '189.45px',
+    color: '#262262',
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+    letterSpacing: '0',
+    lineHeight: '22px',
   },
   infoIcon: {
     height: '16px',
@@ -168,6 +181,9 @@ export interface WorkspaceEditProps {
   cdrVersionListResponse: CdrVersionListResponse;
   workspace: WorkspaceData;
   cancel: Function;
+  profileState: {
+    profile: Profile;
+  };
 }
 
 
@@ -190,7 +206,7 @@ export interface WorkspaceEditState {
   populationChecked: boolean;
 }
 
-export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
+export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -210,7 +226,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showStigmatizationDetails: false,
         billingAccounts: [],
         showCreateBillingAccountModal: false,
-        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false,
       };
     }
 
@@ -807,8 +823,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             intendedStudy,
             scientificApproach
           }
-        },
+        }
       } = this.state;
+      const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
+      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
+      // defined below in the OverlayPanel declaration
+      let freeTierBalancePanel: OverlayPanel;
       const errors = validate({
         name,
         billingAccountName,
@@ -891,21 +911,37 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
               Select account
             </div>
-            <Dropdown style={{width: '14rem'}}
-                      value={this.state.workspace.billingAccountName}
-                      options={this.buildBillingAccountOptions()}
-                      onChange={e => {
-                        if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
-                          this.setState({
-                            showCreateBillingAccountModal: true
-                          });
-                        } else {
-                          this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
-                        }
-                      }}
-            />
-          </WorkspaceEditSection>
-        }
+            <FlexRow>
+              <Dropdown style={{width: '14rem'}}
+                        value={this.state.workspace.billingAccountName}
+                        options={this.buildBillingAccountOptions()}
+                        onChange={e => {
+                          if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                            this.setState({
+                              showCreateBillingAccountModal: true
+                            });
+                          } else {
+                            this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
+                          }
+                        }}
+              />
+              <FlexColumn>
+                {freeTierCreditsBalance > 0.0 && <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>
+                  <div style={{
+                    display: 'inline-block',
+                    color: colors.accent,
+                    padding: '0.5rem 0.5rem 0.5rem 0.75rem'}}>
+                    View FREE credits balance
+                  </div>
+                </Clickable>}
+                <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true}>
+                  <div style={styles.freeCreditBalance}>
+                      FREE CREDIT BALANCE {renderUSD(freeTierCreditsBalance)}
+                  </div>
+                </OverlayPanel>
+              </FlexColumn>
+            </FlexRow>
+          </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
               description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
