@@ -71,7 +71,7 @@ public class CommonMappers {
     return DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
   }
 
-  public BillingStatus billingStatus(BillingStatus billingStatus) {
+  public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       return BillingStatus.ACTIVE;
     } else {

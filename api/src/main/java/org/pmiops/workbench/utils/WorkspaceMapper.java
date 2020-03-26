@@ -43,6 +43,9 @@ public interface WorkspaceMapper {
   @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
+  // I believe the following fields are ignored because they are only meant to be set once
+  // My intent was to keep the same functionality as in the original mapper so I left it in
+  // but we should be handling special business case logic like this in our controller/services
   @Mapping(target = "approved", ignore = true)
   @Mapping(target = "reviewRequested", ignore = true)
   @Mapping(target = "timeRequested", ignore = true)

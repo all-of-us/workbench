@@ -114,7 +114,7 @@ public class ClusterControllerTest {
     ClusterController.class,
     WorkspaceMapperImpl.class,
     CommonMappers.class,
-    PublicInstitutionDetailsMapperImpl.class
+    PublicInstitutionDetailsMapperImpl.class,
     UserServiceTestConfiguration.class,
   })
   static class Configuration {
