@@ -71,6 +71,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -226,6 +227,7 @@ public class ConceptSetsControllerTest {
     WorkspacesController.class,
     ConceptSetService.class,
     WorkspaceMapperImpl.class,
+    CommonMappers.class,
     ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class,
     UserServiceTestConfiguration.class,

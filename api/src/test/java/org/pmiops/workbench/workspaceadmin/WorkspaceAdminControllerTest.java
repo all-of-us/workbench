@@ -13,13 +13,14 @@ import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -41,11 +42,13 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -66,12 +69,20 @@ public class WorkspaceAdminControllerTest {
   private static final String WORKSPACE_NAME = "name";
 
   @TestConfiguration
-  @Import({WorkspaceAdminController.class, WorkspaceMapperImpl.class})
+  @Import({WorkspaceAdminController.class, WorkspaceMapperImpl.class, CommonMappers.class})
   @MockBean({
     CloudStorageService.class,
     NotebooksService.class,
   })
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.enableBillingLockout = false;
+      return workbenchConfig;
+    }
+  }
 
   @Before
   public void setUp() {
@@ -202,11 +213,8 @@ public class WorkspaceAdminControllerTest {
     dbWorkspace.setPopulationHealth(researchPurpose.getPopulationHealth());
     dbWorkspace.setEducational(researchPurpose.getEducational());
     dbWorkspace.setDrugDevelopment(researchPurpose.getDrugDevelopment());
-    dbWorkspace.setPopulation(researchPurpose.getPopulation());
-    dbWorkspace.setPopulationDetails(
-        researchPurpose.getPopulationDetails().stream()
-            .map(DbStorageEnums::specificPopulationToStorage)
-            .collect(Collectors.toSet()));
+
+    dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(researchPurpose.getPopulationDetails()));
     dbWorkspace.setAdditionalNotes(researchPurpose.getAdditionalNotes());
     dbWorkspace.setReasonForAllOfUs(researchPurpose.getReasonForAllOfUs());
     dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());

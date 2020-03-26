@@ -99,7 +99,6 @@ public class DbWorkspace {
   private boolean controlSet;
   private boolean ancestry;
   private boolean commercialPurpose;
-  private boolean population;
   private Set<Short> populationDetailsSet = new HashSet<>();
   private boolean socialBehavioral;
   private boolean populationHealth;
@@ -370,23 +369,14 @@ public class DbWorkspace {
     this.otherPurposeDetails = otherPurposeDetails;
   }
 
-  @Column(name = "rp_population")
-  public boolean getPopulation() {
-    return this.population;
-  }
-
-  public void setPopulation(boolean population) {
-    this.population = population;
-  }
-
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "specific_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "specific_population")
-  public Set<Short> getPopulationDetails() {
+  private Set<Short> getPopulationDetails() {
     return populationDetailsSet;
   }
 
-  public void setPopulationDetails(Set<Short> newPopulationDetailsSet) {
+  private void setPopulationDetails(Set<Short> newPopulationDetailsSet) {
     this.populationDetailsSet = newPopulationDetailsSet;
   }
 

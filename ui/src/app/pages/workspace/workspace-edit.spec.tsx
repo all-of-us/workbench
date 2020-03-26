@@ -98,7 +98,6 @@ describe('WorkspaceEdit', () => {
   it('pre-fills "specific populations" form elements when editing', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
-    workspace.researchPurpose.population = true;
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN];
 
     routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
@@ -116,7 +115,6 @@ describe('WorkspaceEdit', () => {
   it('should clear all selected specific populations if NO underrepresented populations study is selected', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
-    workspace.researchPurpose.population = true;
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
       SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
 
@@ -134,16 +132,12 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
 
     wrapper.find('[data-test-id="specific-population-no"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
 
-    // Selecting no for specific population should clear/un select all checkboxes under YES
-    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
-      .first().prop('checked')).toEqual(false);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
-      .first().prop('checked')).toEqual(false);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
-      .first().prop('checked')).toEqual(false);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`)
-      .first().prop('checked')).toEqual(false);
+    wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(workspacesApi.workspaces[0].researchPurpose.populationDetails.length).toBe(0);
   });
 
   it ('should select Research Purpose checkbox if sub category is selected', async () => {

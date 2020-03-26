@@ -48,7 +48,9 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
@@ -82,6 +84,7 @@ import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -159,6 +162,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     ProfileService.class,
     ProfileController.class,
     ProfileMapperImpl.class,
+    InstitutionServiceImpl.class,
+    InstitutionMapperImpl.class,
+    CommonMappers.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class,
     CaptchaVerificationService.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
     UserServiceTestConfiguration.class,

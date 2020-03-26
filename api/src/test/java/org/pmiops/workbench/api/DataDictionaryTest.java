@@ -30,6 +30,7 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -53,7 +54,7 @@ public class DataDictionaryTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @TestConfiguration
-  @Import({DataSetController.class, DataSetMapperImpl.class})
+  @Import({DataSetController.class, DataSetMapperImpl.class, CommonMappers.class})
   @MockBean({
     BigQueryService.class,
     CohortDao.class,

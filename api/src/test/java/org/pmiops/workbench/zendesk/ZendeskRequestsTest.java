@@ -52,7 +52,6 @@ public class ZendeskRequestsTest {
                             .populationHealth(true)
                             .educational(true)
                             .drugDevelopment(true)
-                            .population(true)
                             .populationDetails(
                                 ImmutableList.copyOf(SpecificPopulationEnum.values()))
                             .additionalNotes("additional notes")

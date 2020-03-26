@@ -30,7 +30,7 @@ public class CohortMapperTest {
   @Autowired private UserDao mockUserDao;
 
   @TestConfiguration
-  @Import({CohortMapperImpl.class})
+  @Import({CohortMapperImpl.class, CommonMappers.class})
   @MockBean({UserDao.class})
   static class Configuration {}
 

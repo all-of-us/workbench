@@ -1,31 +1,24 @@
 package org.pmiops.workbench.workspaces;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.RecentWorkspace;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.stereotype.Service;
 
 // We should migrate over to the Mapstruct supported WorkspaceMapper
@@ -33,9 +26,12 @@ import org.springframework.stereotype.Service;
 public class ManualWorkspaceMapper {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final WorkspaceMapper workspaceMapper;
 
-  public ManualWorkspaceMapper(Provider<WorkbenchConfig> workbenchConfigProvider) {
+  public ManualWorkspaceMapper(
+      Provider<WorkbenchConfig> workbenchConfigProvider, WorkspaceMapper workspaceMapper) {
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceMapper = workspaceMapper;
   }
 
   public static WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
@@ -46,40 +42,8 @@ public class ManualWorkspaceMapper {
     }
   }
 
-  public Workspace toApiWorkspace(DbWorkspace workspace) {
-    ResearchPurpose researchPurpose = createResearchPurpose(workspace);
-    FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
-
-    Workspace result =
-        new Workspace()
-            .etag(Etags.fromVersion(workspace.getVersion()))
-            .lastModifiedTime(workspace.getLastModifiedTime().getTime())
-            .creationTime(workspace.getCreationTime().getTime())
-            .dataAccessLevel(workspace.getDataAccessLevelEnum())
-            .billingStatus(workspace.getBillingStatus())
-            .name(workspace.getName())
-            .id(workspaceId.getWorkspaceName())
-            .namespace(workspaceId.getWorkspaceNamespace())
-            .published(workspace.getPublished())
-            .researchPurpose(researchPurpose);
-
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      result.billingStatus(BillingStatus.ACTIVE);
-    }
-
-    if (workspace.getCreator() != null) {
-      result.setCreator(workspace.getCreator().getUsername());
-    }
-
-    if (workspace.getCdrVersion() != null) {
-      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
-    }
-
-    return result;
-  }
-
   public Workspace toApiWorkspace(DbWorkspace workspace, FirecloudWorkspace fcWorkspace) {
-    ResearchPurpose researchPurpose = createResearchPurpose(workspace);
+    ResearchPurpose researchPurpose = workspaceMapper.workspaceToResearchPurpose(workspace);
 
     Workspace result =
         new Workspace()
@@ -122,7 +86,7 @@ public class ManualWorkspaceMapper {
     result.setName(workspace.getName());
 
     if (workspace.getResearchPurpose() != null) {
-      setResearchPurposeDetails(result, workspace.getResearchPurpose());
+      workspaceMapper.mergeResearchPurposeIntoWorkspace(result, workspace.getResearchPurpose());
       result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
       if (workspace.getResearchPurpose().getTimeRequested() != null) {
         result.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
@@ -142,117 +106,12 @@ public class ManualWorkspaceMapper {
     return result;
   }
 
-  /**
-   * This probably doesn't belong in a mapper service but it makes the refactoring easier atm. Sets
-   * user-editable research purpose detail fields.
-   */
-  public void setResearchPurposeDetails(DbWorkspace dbWorkspace, ResearchPurpose purpose) {
-    dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
-    dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
-    dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
-    dbWorkspace.setControlSet(purpose.getControlSet());
-    dbWorkspace.setAncestry(purpose.getAncestry());
-    dbWorkspace.setCommercialPurpose(purpose.getCommercialPurpose());
-    dbWorkspace.setPopulation(purpose.getPopulation());
-    if (purpose.getPopulation()) {
-      dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(purpose.getPopulationDetails()));
-    }
-    dbWorkspace.setSocialBehavioral(purpose.getSocialBehavioral());
-    dbWorkspace.setPopulationHealth(purpose.getPopulationHealth());
-    dbWorkspace.setEthics(purpose.getEthics());
-    dbWorkspace.setEducational(purpose.getEducational());
-    dbWorkspace.setDrugDevelopment(purpose.getDrugDevelopment());
-    dbWorkspace.setOtherPurpose(purpose.getOtherPurpose());
-    dbWorkspace.setOtherPurposeDetails(purpose.getOtherPurposeDetails());
-    dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
-    dbWorkspace.setReasonForAllOfUs(purpose.getReasonForAllOfUs());
-    dbWorkspace.setIntendedStudy(purpose.getIntendedStudy());
-    dbWorkspace.setScientificApproach(purpose.getScientificApproach());
-    dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
-    dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
-    dbWorkspace.setDisseminateResearchEnumSet(
-        Optional.ofNullable(purpose.getDisseminateResearchFindingList())
-            .map(disseminateResearch -> disseminateResearch.stream().collect(Collectors.toSet()))
-            .orElse(new HashSet<DisseminateResearchEnum>()));
-
-    if (dbWorkspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
-      dbWorkspace.setDisseminateResearchOther(purpose.getOtherDisseminateResearchFindings());
-    }
-
-    dbWorkspace.setResearchOutcomeEnumSet(
-        Optional.ofNullable(purpose.getResearchOutcomeList())
-            .map(researchOutcoming -> researchOutcoming.stream().collect(Collectors.toSet()))
-            .orElse(new HashSet<ResearchOutcomeEnum>()));
-  }
-
-  private ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
-    ResearchPurpose researchPurpose =
-        new ResearchPurpose()
-            .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
-            .diseaseOfFocus(workspace.getDiseaseOfFocus())
-            .methodsDevelopment(workspace.getMethodsDevelopment())
-            .controlSet(workspace.getControlSet())
-            .ancestry(workspace.getAncestry())
-            .commercialPurpose(workspace.getCommercialPurpose())
-            .socialBehavioral(workspace.getSocialBehavioral())
-            .educational(workspace.getEducational())
-            .drugDevelopment(workspace.getDrugDevelopment())
-            .populationHealth(workspace.getPopulationHealth())
-            .otherPurpose(workspace.getOtherPurpose())
-            .otherPurposeDetails(workspace.getOtherPurposeDetails())
-            .population(workspace.getPopulation())
-            .ethics(workspace.getEthics())
-            .reasonForAllOfUs(workspace.getReasonForAllOfUs())
-            .intendedStudy(workspace.getIntendedStudy())
-            .scientificApproach(workspace.getScientificApproach())
-            .anticipatedFindings(workspace.getAnticipatedFindings())
-            .additionalNotes(workspace.getAdditionalNotes())
-            .reviewRequested(workspace.getReviewRequested())
-            .approved(workspace.getApproved())
-            .otherPopulationDetails(workspace.getOtherPopulationDetails())
-            .disseminateResearchFindingList(
-                Optional.ofNullable(workspace.getDisseminateResearchEnumSet())
-                    .map(
-                        disseminateResearchEnums ->
-                            disseminateResearchEnums.stream().collect(Collectors.toList()))
-                    .orElse(new ArrayList<DisseminateResearchEnum>()))
-            .researchOutcomeList(
-                Optional.ofNullable(workspace.getResearchOutcomeEnumSet())
-                    .map(
-                        researchOutcomeEnums ->
-                            researchOutcomeEnums.stream().collect(Collectors.toList()))
-                    .orElse(new ArrayList<ResearchOutcomeEnum>()))
-            .populationDetails(
-                workspace.getPopulationDetails().stream()
-                    .map(DbStorageEnums::specificPopulationFromStorage)
-                    .collect(Collectors.toList()));
-
-    if (workspace.getDisseminateResearchEnumSet().contains(DisseminateResearchEnum.OTHER)) {
-      researchPurpose.setOtherDisseminateResearchFindings(workspace.getDisseminateResearchOther());
-    }
-
-    if (workspace.getTimeRequested() != null) {
-      researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
-    }
-
-    // population field is a guard on (specific) population details
-    final List<SpecificPopulationEnum> specificPopulationDetails;
-    if (workspace.getPopulation()) {
-      specificPopulationDetails = new ArrayList<>(workspace.getSpecificPopulationsEnum());
-    } else {
-      specificPopulationDetails = new ArrayList<>();
-    }
-    researchPurpose.setPopulationDetails(specificPopulationDetails);
-
-    return researchPurpose;
-  }
-
   public RecentWorkspace buildRecentWorkspace(
       DbUserRecentWorkspace userRecentWorkspace,
       DbWorkspace dbWorkspace,
       WorkspaceAccessLevel accessLevel) {
     return new RecentWorkspace()
-        .workspace(toApiWorkspace(dbWorkspace))
+        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
         .accessedTime(userRecentWorkspace.getLastAccessDate().toString())
         .accessLevel(accessLevel);
   }

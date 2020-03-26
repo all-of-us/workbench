@@ -3960,7 +3960,6 @@ definitions:
     - controlSet
     - ancestry
     - commercialPurpose
-    - population
     - reviewRequested
     - socialBehavioral
     - populationHealth
@@ -4013,9 +4012,6 @@ definitions:
         default: false
       otherPurposeDetails:
         type: string
-      population:
-        type: boolean
-        default: false
       ethics:
         type: boolean
         default: false

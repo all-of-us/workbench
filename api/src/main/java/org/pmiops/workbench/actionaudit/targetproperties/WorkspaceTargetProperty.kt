@@ -47,8 +47,6 @@ constructor(
             { it.researchPurpose.methodsDevelopment?.toString() }),
     OTHER_POPULATION_DETAILS("other_population_details",
             { it.researchPurpose.otherPopulationDetails }),
-    POPULATION("population",
-            { it.researchPurpose.population?.toString() }),
     POPULATION_DETAILS("population_details",
             { it.researchPurpose.getPopulationDetails()
                 ?.map(org.pmiops.workbench.model.SpecificPopulationEnum::toString)

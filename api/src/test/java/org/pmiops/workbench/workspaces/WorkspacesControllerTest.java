@@ -166,6 +166,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -262,6 +263,7 @@ public class WorkspacesControllerTest {
     NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
+    CommonMappers.class,
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
@@ -609,7 +611,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getPopulationHealth()).isTrue();
     assertThat(workspace2.getResearchPurpose().getEducational()).isTrue();
     assertThat(workspace2.getResearchPurpose().getDrugDevelopment()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getPopulation()).isFalse();
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
     assertThat(workspace2.getResearchPurpose().getReasonForAllOfUs()).isEqualTo("reason for aou");
     assertThat(workspace2.getResearchPurpose().getIntendedStudy()).isEqualTo("intended study");
@@ -992,7 +993,6 @@ public class WorkspacesControllerTest {
     assertThat(updatedRp.getPopulationHealth()).isFalse();
     assertThat(updatedRp.getSocialBehavioral()).isFalse();
     assertThat(updatedRp.getDrugDevelopment()).isFalse();
-    assertThat(updatedRp.getPopulation()).isFalse();
     assertThat(updatedRp.getAdditionalNotes()).isNull();
     assertThat(updatedRp.getReviewRequested()).isTrue();
   }
@@ -1146,7 +1146,6 @@ public class WorkspacesControllerTest {
 
     final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
-    modPurpose.setPopulation(true);
     modPurpose.setPopulationDetails(
         ImmutableList.of(
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));

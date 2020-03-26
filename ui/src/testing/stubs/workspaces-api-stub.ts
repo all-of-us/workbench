@@ -7,7 +7,7 @@ import {
   RecentWorkspaceResponse,
   ResearchPurposeReviewRequest,
   ShareWorkspaceRequest,
-  SpecificPopulationEnum,
+  SpecificPopulationEnum, UpdateWorkspaceRequest,
   UserRole,
   Workspace,
   WorkspaceAccessLevel, WorkspaceBillingUsageResponse,
@@ -53,7 +53,6 @@ function buildWorkspaceStub(suffix): Workspace {
       methodsDevelopment: false,
       otherPurpose: false,
       otherPurposeDetails: '',
-      population: true,
       populationDetails: [SpecificPopulationEnum.AGEOLDERMORETHAN75, SpecificPopulationEnum.RACENHPI],
       populationHealth: false,
       researchOutcomeList: [],
@@ -201,6 +200,19 @@ export class WorkspacesApiStub extends WorkspacesApi {
       this.workspaces.push(workspace);
       this.workspaceAccess.set(workspace.id, WorkspaceAccessLevel.OWNER);
       resolve(workspace);
+    });
+  }
+
+  updateWorkspace(workspaceNamespace: string,
+    workspaceId: string, body?: UpdateWorkspaceRequest, options?: any): Promise<Workspace> {
+    return new Promise(resolve => {
+      const originalItemIndex = this.workspaces.findIndex(w => w.namespace === workspaceNamespace && w.id === workspaceId);
+      if (originalItemIndex === -1) {
+        throw new Error(`workspace ${workspaceNamespace}/${workspaceId} not found`);
+      }
+      this.workspaces.splice(originalItemIndex, 1);
+      this.workspaces.push(body.workspace);
+      resolve(body.workspace);
     });
   }
 
