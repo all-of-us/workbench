@@ -145,6 +145,41 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(false);
   });
 
+  it ('should select Research Purpose checkbox if sub category is selected', async () => {
+    const wrapper = component();
+
+    // Research Purpose should not be selected and sub categories should be collapsed by default
+    expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first()
+      .prop('checked')).toBe(false);
+
+    expect(wrapper.find('[data-test-id="research-purpose-categories"]').length).toBe(0);
+
+    // Click the arrow icon to expand the research purpose sub categories
+    wrapper.find('[data-test-id="research-purpose-button"]').first().simulate('click');
+
+    // Select any sub category for Research Purpose
+    wrapper.find('[data-test-id="ancestry-checkbox"]').first()
+      .simulate('change', { target: { checked: true } });
+
+    // Research Purpose checkbox should be selected now
+    expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked')).toBe(true);
+
+    wrapper.find('[data-test-id="ancestry-checkbox"]').first()
+      .simulate('change', { target: { checked: false } });
+
+    // Un-selecting the sub categories should unselect the research purpose checkbox
+    // BUT THE SUB CATEGORIES SHOULD STILL BE VISIBLE
+    expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked')).toBe(false);
+    expect(wrapper.find('[data-test-id="research-purpose-categories"]').length).not.toBe(0);
+
+
+    // Clicking the icon should collapse all the research purpose sub-categories
+    wrapper.find('[data-test-id="research-purpose-button"]').first().simulate('click');
+    expect(wrapper.find('[data-test-id="research-purpose-categories"]').length).toBe(0);
+
+
+  });
+
   it('supports disable save button if Research Outcome is not answered', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     workspace.researchPurpose.researchOutcomeList = []
