@@ -81,20 +81,20 @@ public class AuthDomainControllerTest {
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService =
         new UserServiceImpl(
+            Providers.of(config),
             userProvider,
-            userDao,
-            adminActionHistoryDao,
-            userTermsOfServiceDao,
-            userDataUseAgreementDao,
             clock,
             new FakeLongRandom(12345),
+            mockUserServiceAuditAdapter,
+            userDao,
+            adminActionHistoryDao,
+            userDataUseAgreementDao,
+            userTermsOfServiceDao,
+            verifiedInstitutionalAffiliationDao,
             fireCloudService,
-            Providers.of(config),
             complianceService,
             directoryService,
-            mockUserServiceAuditAdapter,
-            institutionService,
-            verifiedInstitutionalAffiliationDao);
+            institutionService);
     this.authDomainController =
         new AuthDomainController(
             fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);

@@ -67,6 +67,7 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -189,6 +190,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final InstitutionService institutionService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
   private final CaptchaVerificationService captchaVerificationService;
+  private final DemographicSurveyMapper demographicSurveyMapper;
 
   @Autowired
   ProfileController(
@@ -206,7 +208,8 @@ public class ProfileController implements ProfileApiDelegate {
       ProfileAuditor profileAuditor,
       InstitutionService institutionService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
-      CaptchaVerificationService captchaVerificationService) {
+      CaptchaVerificationService captchaVerificationService,
+      DemographicSurveyMapper demographicSurveyMapper) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -222,6 +225,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.institutionService = institutionService;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.captchaVerificationService = captchaVerificationService;
+    this.demographicSurveyMapper = demographicSurveyMapper;
   }
 
   @Override
@@ -380,7 +384,8 @@ public class ProfileController implements ProfileApiDelegate {
             profile.getProfessionalUrl(),
             profile.getDegrees(),
             FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
-            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(profile.getDemographicSurvey()),
+            demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
+                profile.getDemographicSurvey()),
             profile.getInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
                 .collect(Collectors.toList()),
@@ -391,13 +396,28 @@ public class ProfileController implements ProfileApiDelegate {
       userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
     }
 
+    final MailService mail = mailServiceProvider.get();
+
     try {
-      mailServiceProvider
-          .get()
-          .sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
+      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
+
+    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
+      institutionService
+          .getInstitutionUserInstructions(
+              profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName())
+          .ifPresent(
+              instructions -> {
+                try {
+                  mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions);
+                } catch (MessagingException e) {
+                  throw new WorkbenchException(e);
+                }
+              });
+    }
+
     // Note: Avoid getProfileResponse() here as this is not an authenticated request.
     final Profile createdProfile = profileService.getProfile(user);
     profileAuditor.fireCreateAction(createdProfile);
@@ -419,12 +439,6 @@ public class ProfileController implements ProfileApiDelegate {
       user = saveUserWithConflictHandling(user);
     }
     return getProfileResponse(user);
-  }
-
-  @Override
-  public ResponseEntity<Profile> submitDemographicsSurvey() {
-    // TODO: RW-2517.
-    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 
   @Override
@@ -605,6 +619,21 @@ public class ProfileController implements ProfileApiDelegate {
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
+
+    DbDemographicSurvey dbDemographicSurvey =
+        demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
+            updatedProfile.getDemographicSurvey());
+
+    if (user.getDemographicSurveyCompletionTime() == null && dbDemographicSurvey != null) {
+      user.setDemographicSurveyCompletionTime(now);
+    }
+
+    if (dbDemographicSurvey != null && dbDemographicSurvey.getUser() == null) {
+      dbDemographicSurvey.setUser(user);
+    }
+
+    user.setDemographicSurvey(dbDemographicSurvey);
+
     user.setLastModifiedTime(now);
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {

@@ -112,6 +112,39 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
   });
 
+  it('should clear all selected specific populations if NO underrepresented populations study is selected', async () => {
+    // Set the workspace state to represent a workspace which is studying a
+    // specific population group.
+    workspace.researchPurpose.population = true;
+    workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
+      SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
+
+    routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
+      .first().prop('checked')).toEqual(true);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+      .first().prop('checked')).toEqual(true);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
+      .first().prop('checked')).toEqual(true);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`)
+      .first().prop('checked')).toEqual(true);
+
+    wrapper.find('[data-test-id="specific-population-no"]').first().simulate('click');
+
+    // Selecting no for specific population should clear/un select all checkboxes under YES
+    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
+      .first().prop('checked')).toEqual(false);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+      .first().prop('checked')).toEqual(false);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
+      .first().prop('checked')).toEqual(false);
+    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`)
+      .first().prop('checked')).toEqual(false);
+  });
+
   it('supports disable save button if Research Outcome is not answered', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     workspace.researchPurpose.researchOutcomeList = []

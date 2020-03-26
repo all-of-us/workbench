@@ -4,7 +4,7 @@ const _ = require('lodash');
 const env = process.env.WORKBENCH_ENV || 'dev';
 
 const userCredential = {
-  registrationContactEmail: process.env.CONTACT_EMAIL,
+  contactEmail: 'hermione.owner@quality.firecloud.org',
   userEmail: process.env.USER_NAME,
   userPassword: process.env.PASSWORD,
   userInvitationkey: process.env.INVITATION_KEY,
@@ -45,8 +45,8 @@ const staging = {
 
 // workbench stable environment
 const stable = {
-  uiBaseUrl: process.env.PRODUCTION_LOGIN_URL,
-  apiBaseUrl: process.env.PRODUCTION_API_URL,
+  uiBaseUrl: process.env.STABLE_LOGIN_URL,
+  apiBaseUrl: process.env.STABLE_API_URL,
   userEmailDomain: '@stable.fake-research-aou.org',
 };
 

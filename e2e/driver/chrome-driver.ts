@@ -1,28 +1,21 @@
 import * as Puppeteer from 'puppeteer';
 import GoogleLoginPage from '../app/google-login';
 import HomePage from '../app/home-page';
+import {getChromeFlags} from './chrome-startup-flags';
+
+const isHeadless = !process.env.PUPPETEER_HEADLESS;
 
 export default class ChromeDriver {
 
   static userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36';
-
-  chromeSwitches = [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-    '--disable-background-timer-throttling',
-    '--disable-backgrounding-occluded-windows',
-    '--disable-renderer-backgrounding',
-  ];
 
   launchOpts = {
     headless: !process.env.PUPPETEER_HEADLESS,
     devtools: false,
     slowMo: 10,
     defaultViewport: null,
-    args: this.chromeSwitches,
-    ignoreDefaultArgs: ['--disable-extensions'],
+    args: getChromeFlags(isHeadless),
+    ignoreDefaultArgs: true,
   };
 
   browser: Puppeteer.Browser;

@@ -40,7 +40,7 @@ describe('Login tests:', () => {
   test('Entered wrong password', async () => {
     const INCORRECT_PASSWORD = 'wrongpassword123';
     const loginPage = new GoogleLoginPage(page);
-    await loginPage.goto();
+    await loginPage.load();
 
     const naviPromise = page.waitForNavigation({waitUntil: 'networkidle0'});
     const googleButton = await loginPage.loginButton();
@@ -49,7 +49,7 @@ describe('Login tests:', () => {
 
     await loginPage.enterEmail(configs.userEmail);
     await loginPage.enterPassword(INCORRECT_PASSWORD);
-    const button = await page.waitForXPath(selectors.NextButton);
+    const button = await page.waitForXPath(selectors.NextButton, {visible: true});
     await button.click();
 
     const err = await loginPage.waitForTextExists('Wrong password. Try again');

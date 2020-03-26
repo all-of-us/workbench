@@ -190,6 +190,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         const request = {
           includes: [],
           excludes: [],
+          dataFilters: [],
           [role]: [{items: [mappedItem], temporal: false}]
         };
         await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.updateSearchRequest('count', count, false));
@@ -279,6 +280,17 @@ export const SearchGroupItem = withCurrentWorkspace()(
       }
     }
 
+    get existingItemNames() {
+      const {item, groupId, role} = this.props;
+      const searchRequest = searchRequestStore.getValue();
+      const group = searchRequest[role].find(grp => grp.id === groupId);
+      return !!group
+        ? group.items
+          .filter(it => it.id !== item.id && !!it.name)
+          .map(it => it.name)
+        : [];
+    }
+
     render() {
       const {item: {count, modifiers, name, searchParameters, status, type}} = this.props;
       const {error, loading, paramListOpen, renaming} = this.state;
@@ -338,7 +350,9 @@ export const SearchGroupItem = withCurrentWorkspace()(
             {modifiers.map((mod, m) => <div key={m} style={styles.parameter}>{this.modifierDisplay(mod)}</div>)}
           </React.Fragment>}
         </div>
-        {renaming && <RenameModal existingNames={[]} oldName={name || 'this item'} hideDescription={true}
+        {renaming && <RenameModal existingNames={this.existingItemNames}
+          oldName={name || 'this item'}
+          hideDescription={true}
           onCancel={() => this.setState({renaming: false})}
           onRename={(v) => this.rename(v)} resourceType={ResourceType.COHORTSEARCHITEM} />}
       </React.Fragment>;

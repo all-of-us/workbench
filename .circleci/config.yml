@@ -149,6 +149,7 @@ jobs:
           command: |
             ./project.rb gradle dependencyCheckAnalyze --info
 
+  # TODO(RW-4645): Upgrade to Circle 2.1 and leverage shared commands to reduce duplication.
   api-integration-test:
     <<: *java_defaults
     steps:
@@ -174,6 +175,30 @@ jobs:
       - run:
           working_directory: ~/workbench/api
           command: ./project.rb integration
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/.m2
+          key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
+
+  api-nightly-integration-test:
+    <<: *java_defaults
+    steps:
+      - checkout
+      - run:
+          name: Fetch Submodules
+          command: git submodule update --init --recursive
+      - restore_cache:
+          keys:
+          - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
+          - api-integration-cache-
+      - run:
+          working_directory: ~/workbench
+          # Used to call gsutil from the circle environment.
+          command: ci/activate_creds.sh api/circle-sa-key.json
+      - run:
+          working_directory: ~/workbench/api
+          command: ./project.rb nightly-integration
       - save_cache:
           paths:
             - ~/.gradle
@@ -258,6 +283,44 @@ jobs:
           paths:
             - ui
 
+  # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
+  puppeteer-e2e-test:
+    <<: *defaults
+    docker:
+      - image: circleci/node:13.10.1-browsers
+        environment:
+          NODE_ENV: development
+    working_directory: ~/workbench
+    steps:
+      - checkout
+      - run:
+          name: Fetch Submodules
+          command: git submodule update --init --recursive
+      - restore_cache:
+          keys:
+          - e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          - e2e-test-cache-
+      - run: 
+          working_directory: ~/workbench/e2e
+          command: yarn cache clean && yarn install --verbose --frozen-lockfile
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+          key: e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - run:
+          name: Update environment variables
+          command: |
+            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
+            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
+            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Run e2e tests (Puppeteer and Jest)
+          working_directory: ~/workbench/e2e
+          command: yarn --silent test:ci
+      - store_artifacts:
+          path: e2e/logs
+      
   ui-deploy-to-test:
     <<: *defaults
     steps:
@@ -365,6 +428,12 @@ workflows:
           <<: *filter_master
           requires:
             - ui-build-test
+      # After merge PR to master branch, run Puppeteer tests after ui and api deployed to "test" env successfully.
+      - puppeteer-e2e-test:
+          <<: *filter_master
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
   deploy-staging:
     jobs:
       - api-local-test:
@@ -398,7 +467,7 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-build-test
-  integration-test:
+  nightly-tests:
     triggers:
       - schedule:
           # Run this command once every day at 4:00AM UTC
@@ -408,17 +477,7 @@ workflows:
               only:
                 - master
     jobs:
-      - api-integration-test
-  bigquery-test:
-    triggers:
-      - schedule:
-          # Run this command once every day at 4:00AM UTC
-          cron: "0 4 * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
+      - api-nightly-integration-test
       - api-bigquery-test
 
 experimental:

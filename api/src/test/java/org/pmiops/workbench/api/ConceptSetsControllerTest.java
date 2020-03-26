@@ -40,7 +40,6 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -54,9 +53,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
@@ -72,6 +68,7 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -108,7 +105,7 @@ public class ConceptSetsControllerTest {
           .domainId("Condition")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_2 =
       new Concept()
@@ -121,7 +118,7 @@ public class ConceptSetsControllerTest {
           .domainId("Measurement")
           .countValue(456L)
           .prevalence(0.3F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_3 =
       new Concept()
@@ -134,7 +131,7 @@ public class ConceptSetsControllerTest {
           .domainId("Condition")
           .countValue(789L)
           .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_4 =
       new Concept()
@@ -148,7 +145,7 @@ public class ConceptSetsControllerTest {
           .domainId("Condition")
           .countValue(7890L)
           .prevalence(0.9F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_SURVEY_CONCEPT_1 =
       new Concept()
@@ -161,7 +158,7 @@ public class ConceptSetsControllerTest {
           .domainId("Observation")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
@@ -225,7 +222,6 @@ public class ConceptSetsControllerTest {
     CohortCloningService.class,
     CohortFactoryImpl.class,
     ConceptSetMapperImpl.class,
-    UserServiceImpl.class,
     ConceptSetsController.class,
     ConceptService.class,
     WorkspacesController.class,
@@ -234,9 +230,7 @@ public class ConceptSetsControllerTest {
     CommonMappers.class,
     ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class,
-    InstitutionServiceImpl.class,
-    InstitutionMapperImpl.class,
-    PublicInstitutionDetailsMapperImpl.class
+    UserServiceTestConfiguration.class,
   })
   @MockBean({
     BillingProjectBufferService.class,

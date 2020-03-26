@@ -206,12 +206,12 @@ public final class SearchGroupItemQueryBuilder {
         }
         if (!bpConceptIds.isEmpty()) {
           String standardParam =
-              addQueryParameterValue(
+              QueryParameterUtil.addQueryParameterValue(
                   queryParams, QueryParameterValue.int64(param.getStandard() ? 1 : 0));
           // if blood pressure we need to add named parameters for concept ids
           QueryParameterValue cids =
               QueryParameterValue.array(bpConceptIds.stream().toArray(Long[]::new), Long.class);
-          String conceptIdsParam = addQueryParameterValue(queryParams, cids);
+          String conceptIdsParam = QueryParameterUtil.addQueryParameterValue(queryParams, cids);
           queryParts.add(String.format(bpSql.toString(), standardParam, conceptIdsParam) + ")\n");
         }
       }
@@ -239,12 +239,12 @@ public final class SearchGroupItemQueryBuilder {
       case AGE:
         Attribute attribute = param.getAttributes().get(0);
         String ageNamedParameter1 =
-            addQueryParameterValue(
+            QueryParameterUtil.addQueryParameterValue(
                 queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
         String finalParam = ageNamedParameter1;
         if (attribute.getOperands().size() > 1) {
           String ageNamedParameter2 =
-              addQueryParameterValue(
+              QueryParameterUtil.addQueryParameterValue(
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
           finalParam = finalParam + AND + ageNamedParameter2;
         }
@@ -263,7 +263,8 @@ public final class SearchGroupItemQueryBuilder {
                 .map(SearchParameter::getConceptId)
                 .toArray(Long[]::new);
         String namedParameter =
-            addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds, Long.class));
+            QueryParameterUtil.addQueryParameterValue(
+                queryParams, QueryParameterValue.array(conceptIds, Long.class));
 
         CriteriaType criteriaType = CriteriaType.fromValue(param.getType());
         return DEMO_BASE
@@ -331,15 +332,18 @@ public final class SearchGroupItemQueryBuilder {
     String conditions = SAME_ENC;
     if (TemporalTime.WITHIN_X_DAYS_OF.equals(searchGroup.getTime())) {
       String parameterName =
-          addQueryParameterValue(params, QueryParameterValue.int64(searchGroup.getTimeValue()));
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.int64(searchGroup.getTimeValue()));
       conditions = String.format(WITHIN_X_DAYS_OF, parameterName, parameterName);
     } else if (TemporalTime.X_DAYS_BEFORE.equals(searchGroup.getTime())) {
       String parameterName =
-          addQueryParameterValue(params, QueryParameterValue.int64(searchGroup.getTimeValue()));
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.int64(searchGroup.getTimeValue()));
       conditions = String.format(X_DAYS_BEFORE, parameterName);
     } else if (TemporalTime.X_DAYS_AFTER.equals(searchGroup.getTime())) {
       String parameterName =
-          addQueryParameterValue(params, QueryParameterValue.int64(searchGroup.getTimeValue()));
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.int64(searchGroup.getTimeValue()));
       conditions = String.format(X_DAYS_AFTER, parameterName);
     }
     return String.format(
@@ -395,10 +399,11 @@ public final class SearchGroupItemQueryBuilder {
       SearchParameter parameter,
       Attribute attribute) {
     String standardParam =
-        addQueryParameterValue(
+        QueryParameterUtil.addQueryParameterValue(
             queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
     String conceptIdParam =
-        addQueryParameterValue(queryParams, QueryParameterValue.int64(parameter.getConceptId()));
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(parameter.getConceptId()));
     return String.format(
         VALUE_AS_NUMBER,
         standardParam,
@@ -413,12 +418,13 @@ public final class SearchGroupItemQueryBuilder {
       SearchParameter parameter,
       Attribute attribute) {
     String standardParam =
-        addQueryParameterValue(
+        QueryParameterUtil.addQueryParameterValue(
             queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
     String conceptIdParam =
-        addQueryParameterValue(queryParams, QueryParameterValue.int64(parameter.getConceptId()));
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(parameter.getConceptId()));
     String operandsParam =
-        addQueryParameterValue(
+        QueryParameterUtil.addQueryParameterValue(
             queryParams,
             QueryParameterValue.array(
                 attribute.getOperands().stream().map(s -> Long.parseLong(s)).toArray(Long[]::new),
@@ -438,12 +444,12 @@ public final class SearchGroupItemQueryBuilder {
   private static String getOperandsExpression(
       Map<String, QueryParameterValue> queryParams, Attribute attribute) {
     String operandsParam1 =
-        addQueryParameterValue(
+        QueryParameterUtil.addQueryParameterValue(
             queryParams, QueryParameterValue.float64(new Double(attribute.getOperands().get(0))));
     String valueExpression;
     if (attribute.getOperator().equals(Operator.BETWEEN)) {
       String operandsParam2 =
-          addQueryParameterValue(
+          QueryParameterUtil.addQueryParameterValue(
               queryParams, QueryParameterValue.float64(new Double(attribute.getOperands().get(1))));
       valueExpression = operandsParam1 + AND + operandsParam2;
     } else {
@@ -498,7 +504,7 @@ public final class SearchGroupItemQueryBuilder {
       List<String> modifierParamList = new ArrayList<>();
       for (String operand : modifier.getOperands()) {
         String modifierParameter =
-            addQueryParameterValue(
+            QueryParameterUtil.addQueryParameterValue(
                 queryParams,
                 (isAgeAtEvent(modifier) || isEncounters(modifier))
                     ? QueryParameterValue.int64(new Long(operand))
@@ -539,7 +545,8 @@ public final class SearchGroupItemQueryBuilder {
       List<String> modifierParamList = new ArrayList<>();
       for (String operand : occurrences.getOperands()) {
         String modifierParameter =
-            addQueryParameterValue(queryParams, QueryParameterValue.int64(new Long(operand)));
+            QueryParameterUtil.addQueryParameterValue(
+                queryParams, QueryParameterValue.int64(new Long(operand)));
         modifierParamList.add(modifierParameter);
       }
       modifierSql.append(
@@ -560,10 +567,11 @@ public final class SearchGroupItemQueryBuilder {
       int standardOrSource) {
     if (!childConceptIds.isEmpty()) {
       String standardParam =
-          addQueryParameterValue(queryParams, QueryParameterValue.int64(standardOrSource));
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams, QueryParameterValue.int64(standardOrSource));
       QueryParameterValue cids =
           QueryParameterValue.array(childConceptIds.stream().toArray(Long[]::new), Long.class);
-      String conceptIdsParam = addQueryParameterValue(queryParams, cids);
+      String conceptIdsParam = QueryParameterUtil.addQueryParameterValue(queryParams, cids);
       for (int i = 0; i < queryParts.size(); i++) {
         String part = queryParts.get(i);
         if (part.equals(STANDARD_SQL)) {
@@ -592,15 +600,6 @@ public final class SearchGroupItemQueryBuilder {
 
   private static boolean isEncounters(Modifier modifier) {
     return modifier.getName().equals(ModifierType.ENCOUNTERS);
-  }
-
-  /** Generate a unique parameter name and add it to the parameter map provided. */
-  private static String addQueryParameterValue(
-      Map<String, QueryParameterValue> queryParameterValueMap,
-      QueryParameterValue queryParameterValue) {
-    String parameterName = "p" + queryParameterValueMap.size();
-    queryParameterValueMap.put(parameterName, queryParameterValue);
-    return "@" + parameterName;
   }
 
   /** Validate attributes */

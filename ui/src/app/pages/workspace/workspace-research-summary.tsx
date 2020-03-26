@@ -94,17 +94,18 @@ export class WorkspaceResearchSummary extends React.Component<Props, State > {
           The description you entered seems too short. Please consider adding more descriptive
           details to help the Program and your fellow Researchers understand your work.
         </label>}
-        {researchValue.length === 1000 &&
-        <label data-test-id='characterLimit' style={{color: colors.danger}}>
-          You have reached the character limit for this question</label>}
-        {researchValue &&
-        <div data-test-id='characterMessage'
-             style={{color: textColor, marginLeft: 'auto'}}>
-          {1000 - researchValue.length} characters remaining</div>}
         {!researchValue &&
         <div data-test-id='characterMessage'
              style={{color: textColor, marginLeft: 'auto'}}>1000
           characters remaining</div>}
+         {researchValue &&
+        <div data-test-id='characterMessage'
+             style={{color: textColor, marginLeft: 'auto'}}>
+          {1000 - researchValue.length} characters remaining</div>}
+        {researchValue && researchValue.length === 1000 &&
+        <label data-test-id='characterLimit' style={{color: colors.danger}}>
+          You have reached the character limit for this question</label>}
+
       </FlexRow>
     </WorkspaceEditSection>;
   }

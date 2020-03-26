@@ -420,18 +420,33 @@ Common.register_command({
 })
 
 
+def run_nightly_integration_tests(cmd_name, *args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  ServiceAccountContext.new(TEST_PROJECT).run do
+    get_gsuite_admin_key(TEST_PROJECT)
+    common.run_inline %W{gradle nightlyIntegrationTest} + args
+  end
+end
+
+Common.register_command({
+  :invocation => "nightly-integration",
+  :description => "Runs nightly tests, including integration tests.",
+  :fn => ->(*args) { run_nightly_tests("nightly", *args) }
+})
+
 def run_integration_tests(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
     get_gsuite_admin_key(TEST_PROJECT)
-    common.run_inline %W{gradle integration} + args
+    common.run_inline %W{gradle integrationTest} + args
   end
 end
 
 Common.register_command({
   :invocation => "integration",
-  :description => "Runs integration tests.",
+  :description => "Runs integration tests. Excludes nightly-only tests.",
   :fn => ->(*args) { run_integration_tests("integration", *args) }
 })
 
@@ -439,7 +454,7 @@ def run_bigquery_tests(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
-    common.run_inline %W{gradle bigquerytest} + args
+    common.run_inline %W{gradle bigQueryTest} + args
   end
 end
 

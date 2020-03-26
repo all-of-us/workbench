@@ -472,17 +472,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/account/submit-demographic-survey":
-    post:
-      tags:
-      - profile
-      description: Submits demographic survey responses.
-      operationId: submitDemographicsSurvey
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            "$ref": "#/definitions/Profile"
   "/v1/auth-domain/{groupName}":
     post:
       tags:
@@ -2335,23 +2324,17 @@ paths:
       tags:
       - institution
       description: 'Gets the list of all Institutions. Requires INSTITUTION_ADMIN
-        authority.
-
-'
+        authority.'
       operationId: getInstitutions
       responses:
         200:
-          description: 'A list of all Institutions
-
-'
+          description: 'A list of all Institutions'
           schema:
             "$ref": "#/definitions/GetInstitutionsResponse"
     post:
       tags:
       - institution
-      description: 'Create an Institution. Requires INSTITUTION_ADMIN authority.
-
-'
+      description: 'Create an Institution. Requires INSTITUTION_ADMIN authority.'
       operationId: createInstitution
       parameters:
       - in: body
@@ -2362,25 +2345,19 @@ paths:
           "$ref": "#/definitions/Institution"
       responses:
         200:
-          description: 'The Institution created by this operation.
-
-'
+          description: 'The Institution created by this operation.'
           schema:
             "$ref": "#/definitions/Institution"
   "/v1/institutions/publicDetails":
     get:
       tags:
       - institution
-      description: 'Gets the public details for the list of all Institutions.
-
-'
+      description: 'Gets the public details for the list of all Institutions.'
       operationId: getPublicInstitutionDetails
       security: []
       responses:
         200:
-          description: 'A list of all Institutions
-
-'
+          description: 'A list of all Institutions'
           schema:
             "$ref": "#/definitions/GetPublicInstitutionDetailsResponse"
   "/v1/institutions/{shortName}":
@@ -2389,45 +2366,35 @@ paths:
       name: shortName
       required: true
       type: string
-      description: A short unique name for the Institution used as an identifier,
-        such as 'VUMC'
+      description: 'A short unique name for the Institution used as an identifier,
+        such as "VUMC"'
     get:
       tags:
       - institution
       description: 'Gets the Institution corresponding to the shortName ID. Requires
-        INSTITUTION_ADMIN authority.
-
-'
+        INSTITUTION_ADMIN authority.'
       operationId: getInstitution
       responses:
         200:
-          description: 'The Institution corresponding to the shortName ID.
-
-'
+          description: 'The Institution corresponding to the shortName ID.'
           schema:
             "$ref": "#/definitions/Institution"
     delete:
       tags:
       - institution
       description: 'Deletes the Institution corresponding to the shortName ID. Requires
-        INSTITUTION_ADMIN authority.
-
-'
+        INSTITUTION_ADMIN authority.'
       operationId: deleteInstitution
       responses:
         204:
           description: 'Successful deletion of the Institution corresponding to the
-            shortName ID.
-
-'
+            shortName ID.'
         409:
           description: Could not delete the Institution because it has verified affiliations.
     patch:
       tags:
       - institution
-      description: 'Updates an Institution. Requires INSTITUTION_ADMIN authority.
-
-'
+      description: 'Updates an Institution. Requires INSTITUTION_ADMIN authority.'
       operationId: updateInstitution
       parameters:
       - in: body
@@ -2438,11 +2405,70 @@ paths:
           "$ref": "#/definitions/Institution"
       responses:
         200:
-          description: 'The updated Institution.
-
-'
+          description: The updated Institution.
           schema:
             "$ref": "#/definitions/Institution"
+  "/v1/institutions/{shortName}/checkEmail/{email}/":
+    parameters:
+    - in: path
+      name: shortName
+      type: string
+      description: 'The short name / key of the institution to check, e.g. "VUMC"'
+      required: true
+    - in: path
+      name: email
+      type: string
+      description: Institutional contact email address to check.
+      required: true
+    get:
+      tags:
+        - institution
+      operationId: checkEmail
+      description: Checks whether the given email address is a verified member of an institution.
+      x-aou-note: This endpoint is publicly-accessible and called by clients during user registration.
+      security: []
+      responses:
+        200:
+          description: Whether the email is a valid member of the institution.
+          schema:
+            "$ref": "#/definitions/CheckEmailResponse"
+  "/v1/institutions/instructionsEmail":
+    post:
+      tags:
+        - institution
+      description: 'Sets or updates the Institution-specific user instructions to be sent
+        by email after registration. Requires INSTITUTION_ADMIN authority.'
+      operationId: setInstitutionUserInstructions
+      parameters:
+        - in: body
+          name: userInstructions
+          description: 'Text to include in an email sent to users for an Institution after they are registered.'
+          schema:
+            "$ref": "#/definitions/InstitutionUserInstructions"
+      responses:
+        200:
+          description: 'Successfully set or updated the Institution-specific user instructions to be sent
+            by email after registration.'
+          schema:
+            "$ref": "#/definitions/InstitutionUserInstructions"
+  "/v1/institutions/instructionsEmail/{shortName}":
+    parameters:
+      - in: path
+        name: shortName
+        required: true
+        type: string
+        description: 'A short unique name for the Institution used as an identifier,
+          such as "VUMC"'
+    delete:
+      tags:
+        - institution
+      description: 'Remove the Institution-specific user instructions to be sent
+        by email after registration. Requires INSTITUTION_ADMIN authority.'
+      operationId: deleteInstitutionUserInstructions
+      responses:
+        204:
+          description: 'Successfully removed the Institution-specific user instructions to be sent
+            by email after registration.'
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/getDataTableQuery":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3189,6 +3215,19 @@ paths:
             and ethnicity.
           schema:
             "$ref": "#/definitions/ParticipantDemographics"
+  "/v1/cohortbuilder/{cdrVersionId}/dataFilters":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: Returns data filter options per cdr version
+      operationId: findDataFilters
+      responses:
+        200:
+          description: A collection of data filter options
+          schema:
+            "$ref": "#/definitions/DataFiltersResponse"
 definitions:
   ArchivalStatus:
     type: string
@@ -3400,7 +3439,9 @@ definitions:
       creationTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
+        description:
+          Milliseconds since the UNIX epoch. This timestamp is derived from the deid dataset name.
+          Ex - deid_output_20191004 -> 2019-10-04 00:00:00Z
   DomainInfo:
     type: object
     required:
@@ -3433,6 +3474,32 @@ definitions:
           this domain
         type: integer
         format: int64
+  DataFiltersResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DataFilter"
+  DataFilter:
+    type: object
+    required:
+    - dataFilterId
+    - displayName
+    - name
+    properties:
+      dataFilterId:
+        description: unique id
+        type: integer
+        format: int64
+      displayName:
+        description: display name
+        type: string
+      name:
+        description: name
+        type: string
   SurveyModule:
     type: object
     required:
@@ -3908,7 +3975,7 @@ definitions:
         type: string
       approved:
         type: boolean
-        default: 
+        default:
       ancestry:
         type: boolean
         default: false
@@ -4455,6 +4522,7 @@ definitions:
     enum:
     - NOTEBOOK
     - COHORT
+    - COHORT_SEARCH_GROUP
     - COHORT_SEARCH_ITEM
     - COHORT_REVIEW
     - CONCEPT_SET
@@ -5237,6 +5305,14 @@ definitions:
         default: false
     example:
       isTaken: false
+
+  CheckEmailResponse:
+    type: object
+    properties:
+      isValidMember:
+        description: Whether the requested email address is a valid member of the institution.
+        type: boolean
+
   WorkspaceResponse:
     type: object
     required:
@@ -5247,6 +5323,7 @@ definitions:
         "$ref": "#/definitions/Workspace"
       accessLevel:
         "$ref": "#/definitions/WorkspaceAccessLevel"
+
   UserListResponse:
     type: object
     required:
@@ -5556,6 +5633,19 @@ definitions:
           enumerated OrganizationTypes, or OrganizationType.OTHER if it is not
 
 '
+  InstitutionUserInstructions:
+    type: object
+    description: Institution-specific instructions for users to perform after registration.
+    required:
+      - institutionShortName
+      - instructions
+    properties:
+      institutionShortName:
+        type: string
+        description: The short unique name for the Institution used as an identifier, such as 'VUMC'.
+      instructions:
+        type: string
+        description: Text to include in an email sent to this Institution's users after they are registered.
   GetInstitutionsResponse:
     type: object
     required:
@@ -6022,7 +6112,7 @@ definitions:
 
 '
         type: boolean
-        default: 
+        default:
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of
@@ -6523,7 +6613,7 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
-        default: 
+        default:
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer
@@ -6566,7 +6656,7 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
-        default: 
+        default:
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer
@@ -6983,6 +7073,7 @@ definitions:
     required:
     - includes
     - excludes
+    - dataFilters
     properties:
       includes:
         type: array
@@ -6992,6 +7083,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/SearchGroup"
+      dataFilters:
+        type: array
+        items:
+          type: string
     example:
       typical:
         include:
@@ -7026,6 +7121,9 @@ definitions:
     properties:
       id:
         description: Unique within the cohort definition
+        type: string
+      name:
+        description: optional custom name set by user
         type: string
       temporal:
         description: indicates if this search group relates to time
@@ -7096,10 +7194,10 @@ definitions:
       searchParameters:
       - value: E9293
         domainId: Condition
-        conceptId: 
+        conceptId:
       - value: E979-E979.9
-        domainId: 
-        conceptId: 
+        domainId:
+        conceptId:
       modifiers:
       - name: age_at_event
         operator: GTE >=
@@ -7209,7 +7307,7 @@ definitions:
       parentExample:
         value: E979-E979.9
         subtype: BP_EHR
-        domainId: 
+        domainId:
   Attribute:
     type: object
     required:
@@ -7412,318 +7510,3 @@ definitions:
         format: int64
       conceptName:
         type: string
-  ArchivalStatus:
-    type: string
-    description: CDR archival status; archived CDRs cannot be used for new workspaces.
-    enum:
-      - LIVE
-      - ARCHIVED
-  DataAccessLevel:
-    type: string
-    description: levels of access to data in the curated data repository
-    enum:
-      - unregistered
-      - registered
-      - protected
-  RdrEntity:
-    type: string
-    description: Entities send to RDR
-    enum:
-      - USER
-      - WORKSPACE
-  Degree:
-    type: string
-    enum:
-      - PHD
-      - MD
-      - JD
-      - EDD
-      - MSN
-      - MS
-      - MA
-      - MBA
-      - ME
-      - BA
-      - BS
-      - BSN
-      - NONE
-  Domain:
-    type: string
-    description: a domain for concepts corresponding to a table in the OMOP schema
-    enum:
-      - OBSERVATION
-      - PROCEDURE
-      - DRUG
-      - CONDITION
-      - MEASUREMENT
-      - DEVICE
-      - DEATH
-      - VISIT
-      - SURVEY
-      - PERSON
-      - PHYSICALMEASUREMENT
-  Surveys:
-    type: string
-    description: a survey for concepts
-    enum:
-      - THE BASICS
-      - LIFESTYLE
-      - OVERALL HEALTH
-  Race:
-    type: string
-    enum:
-      - AIAN
-      - ASIAN
-      - AA
-      - NHOPI
-      - WHITE
-      - NONE
-      - PREFER_NO_ANSWER
-  Ethnicity:
-    type: string
-    enum:
-      - HISPANIC
-      - NOT_HISPANIC
-      - PREFER_NO_ANSWER
-  GenderIdentity:
-    type: string
-    enum:
-      - MAN
-      - WOMAN
-      - NON_BINARY
-      - TRANSGENDER
-      - NONE_DESCRIBE_ME
-      - PREFER_NO_ANSWER
-  SexAtBirth:
-    type: string
-    enum:
-      - MALE
-      - FEMALE
-      - INTERSEX
-      - NONE_OF_THESE_DESCRIBE_ME
-      - PREFER_NO_ANSWER
-  SexualOrientation:
-    type: string
-    enum:
-      - GAY
-      - LESBIAN
-      - STRAIGHT
-      - BISEXUAL
-      - NONE_OF_THESE_DESCRIBE_ME
-      - PREFER_NO_ANSWER
-  Education:
-    type: string
-    enum:
-      - NO_EDUCATION
-      - GRADES_1_12
-      - UNDERGRADUATE
-      - COLLEGE_GRADUATE
-      - MASTER
-      - DOCTORATE
-  Disability:
-    type: string
-    enum:
-      - true
-      - false
-  NonAcademicAffiliation:
-    type: string
-    enum:
-      - INDUSTRY
-      - EDUCATIONAL_INSTITUTION
-      - COMMUNITY_SCIENTIST
-      - FREE_TEXT
-    description: 'This enum is used by the older Institutional Affiliation flow associated
-      with the Demographic Survey. The corresponding Verified Institutional Affiliation
-      (newer flow) enum is OrganizationType. The two have slightly different values
-      and are therefore NOT COMPATIBLE. This enum may be deleted in the future.
-
-      '
-  IndustryRole:
-    type: string
-    enum:
-      - PRE_DOCTORAL
-      - POST_DOCTORAL
-      - EARLY
-      - PI
-      - FREE_TEXT
-    description: 'This enum is used by the older Institutional Affiliation flow associated
-      with the Demographic Survey. The corresponding Verified Institutional Affiliation
-      (newer flow) enum is the UI-only InstitutionalRole_IND_HCNP. The two have slightly
-      different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.
-
-      '
-  EducationalRole:
-    type: string
-    enum:
-      - TEACHER
-      - STUDENT
-      - ADMIN
-      - FREE_TEXT
-    description: 'This enum is used by the older Institutional Affiliation flow associated
-      with the Demographic Survey. The corresponding Verified Institutional Affiliation
-      (newer flow) enum is the UI-only InstitutionalRole_EDU. The two have slightly
-      different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.
-
-      '
-  AcademicRole:
-    type: string
-    enum:
-      - UNDERGRADUATE
-      - TRAINEE
-      - FELLOW
-      - EARLY_CAREER
-      - NON_TENURE
-      - MID_CAREER
-      - LATE_CAREER
-      - PROJECT_PERSONNEL
-    description: 'This enum is used by the older Institutional Affiliation flow associated
-      with the Demographic Survey. The corresponding Verified Institutional Affiliation
-      (newer flow) enum is the UI-only InstitutionalRole_ARI. The two have slightly
-      different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.
-
-      '
-  FeaturedWorkspaceCategory:
-    type: string
-    enum:
-      - PHENOTYPE_LIBRARY
-      - TUTORIAL_WORKSPACES
-  CdrVersionListResponse:
-    type: object
-    required:
-      - items
-      - defaultCdrVersionId
-    properties:
-      items:
-        type: array
-        items:
-          "$ref": "#/definitions/CdrVersion"
-      defaultCdrVersionId:
-        type: string
-        description: ID of the CDR versions that should be used by the user by default
-  CdrVersion:
-    type: object
-    required:
-      - cdrVersionId
-      - name
-      - dataAccessLevel
-      - creationTime
-    properties:
-      cdrVersionId:
-        type: string
-      name:
-        type: string
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
-      archivalStatus:
-        "$ref": "#/definitions/ArchivalStatus"
-      creationTime:
-        type: integer
-        format: int64
-        description: Milliseconds since the UNIX epoch.
-  DomainInfo:
-    type: object
-    required:
-      - domain
-      - name
-      - description
-      - standardConceptCount
-      - allConceptCount
-      - participantCount
-    properties:
-      domain:
-        description: the domain ID
-        "$ref": "#/definitions/Domain"
-      name:
-        description: display name of the domain
-        type: string
-      description:
-        description: description of the domain
-        type: string
-      standardConceptCount:
-        description: number of standard concepts in this domain
-        type: integer
-        format: int64
-      allConceptCount:
-        description: number of concepts in this domain (standard or non-standard)
-        type: integer
-        format: int64
-      participantCount:
-        description: number of participants with data in the CDR for a concept in
-          this domain
-        type: integer
-        format: int64
-  SurveyModule:
-    type: object
-    required:
-      - conceptId
-      - name
-      - description
-      - questionCount
-      - participantCount
-      - orderNumber
-    properties:
-      conceptId:
-        description: the concept ID for the survey module
-        type: integer
-        format: int64
-      name:
-        description: display name of the module
-        type: string
-      description:
-        description: description of the module
-        type: string
-      questionCount:
-        description: number of questions in the module
-        type: integer
-        format: int64
-      participantCount:
-        description: number of participants with data in the CDR for questions in
-          this module
-        type: integer
-        format: int64
-      orderNumber:
-        description: survey release order number
-        type: integer
-        format: int32
-  FeaturedWorkspace:
-    type: object
-    properties:
-      name:
-        type: string
-        description: the name of the workspace
-      namespace:
-        type: string
-        description: the namespace of the workspace
-      id:
-        type: string
-        description: the Firecloud id of the workspace
-      category:
-        "$ref": "#/definitions/FeaturedWorkspaceCategory"
-        description: The category that this workspace belongs to
-  ErrorResponse:
-    type: object
-    properties:
-      message:
-        description: General error message for the response.
-        type: string
-      statusCode:
-        type: integer
-        description: HTTP status code
-      errorClassName:
-        type: string
-      errorCode:
-        description: Short description of the type of error
-        "$ref": "#/definitions/ErrorCode"
-      errorUniqueId:
-        type: string
-        description: Unique ID for this error response, for correlation with backend
-          logs
-  ErrorCode:
-    type: string
-    description: Short parsable error descriptions
-    enum:
-      - PARSE_ERROR
-      - USER_DISABLED

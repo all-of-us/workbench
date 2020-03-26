@@ -1,7 +1,7 @@
 import {SearchRequest} from 'generated/fetch';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
-export const initSearchRequest = {includes: [], excludes: []} as SearchRequest;
+export const initSearchRequest = {includes: [], excludes: [], dataFilters: []} as SearchRequest;
 export const searchRequestStore = new BehaviorSubject<any>(initSearchRequest);
 export const selectionsStore = new BehaviorSubject<any>([]);
 export const groupSelectionsStore = new BehaviorSubject<any>([]);

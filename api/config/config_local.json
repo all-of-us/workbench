@@ -23,7 +23,10 @@
     "bufferCapacity": 2,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-test-1@all-of-us-workbench-test.iam.gserviceaccount.com"
@@ -47,6 +50,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
+    "uiBaseUrl": "http:\/\/localhost:4200",
     "publicApiKeyForErrorReports": "",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Local",
@@ -82,7 +86,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": true,
-    "requireInvitationKey": true
+    "requireInvitationKey": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -98,12 +102,12 @@
     "enableCBAgeTypeOptions": true
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-local"
+    "logName": "workbench-action-audit-local"
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
     "queueName": "rdrQueueTest",
-    "exportObjectsPerTask" : 10
+    "exportObjectsPerTask": 10
   },
   "captcha": {
     "enableCaptcha": true

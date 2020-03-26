@@ -522,6 +522,16 @@ To run tests in IntelliJ, go to your preferences, click plugins, and make sure y
 
 Once you have JUnit installed, go to the test file you want to run, right click on the test file, and select `Run` or `Debug` to run or debug the tests. To run or debug on a specific test class or method, open the file, and test running options should appear as green triangles pointing right on the side bar. Clicking that will open a dialog allowing you to run that specific class or method.
 
+### Debugging a Running API in IntelliJ
+
+Choose `Edit Configurations...` from the dropdown at the left side of the top the menu bar
+and choose `Templates` -> `Remote`.  Click `Create configuration` in the top right.  This
+will create a Remote Configuration which you can name how you like.  Ensure that this 
+configuration uses the port the API is listening on, *8001*.
+
+When this configuration is selected, clicking the debug icon (looks like a green bug) will
+cause the running API process to stop at breakpoints you have set for inspection.
+
 ## DevOps
 The `devops` toolkit is described [here](ops/ruby/devops-framework/README.md). Other
 documentation (including the playbook) is available for oncall engineers. This toolkit

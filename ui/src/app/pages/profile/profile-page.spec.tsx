@@ -1,4 +1,4 @@
-import {mount} from 'enzyme';
+import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {TextInput} from 'app/components/inputs';
@@ -8,12 +8,22 @@ import {ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {ProfilePage} from './profile-page';
+import {ProfilePage} from 'app/pages/profile/profile-page';
+import SpyInstance = jest.SpyInstance;
 
 
 describe('ProfilePageComponent', () => {
+  function getSubmitButton(wrapper: ReactWrapper): ReactWrapper {
+    return wrapper.find('[data-test-id="submit-button"]');
+  }
+
+  function getDemographicSurveyButton(wrapper: ReactWrapper): ReactWrapper {
+    return wrapper.find('[data-test-id="demographics-survey-button"]')
+  }
 
   const profile = ProfileStubVariables.PROFILE_STUB;
+
+  let mockUpdateProfile: SpyInstance;
 
   const component = () => {
     return mount(<ProfilePage/>);
@@ -26,6 +36,8 @@ describe('ProfilePageComponent', () => {
     const profileApi = new ProfileApiStub();
 
     registerApiClient(ProfileApi, profileApi);
+    mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
+
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
@@ -63,4 +75,26 @@ describe('ProfilePageComponent', () => {
     expect(wrapper.find(TextInput).first().prop('invalid')).toBeTruthy();
   });
 
+  it('should handle error when creating an account', async() => {
+    const errorResponseJson = {
+      message: 'Could not create account: invalid institutional affiliation',
+      statusCode: 412
+    };
+    mockUpdateProfile.mockRejectedValueOnce(
+        new Response(JSON.stringify(errorResponseJson), {status: 412}));
+
+    const wrapper = component();
+
+    getDemographicSurveyButton(wrapper).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    getSubmitButton(wrapper).simulate('click');
+    // We need to await one tick to allow async processing of the error response to resolve.
+    await waitOneTickAndUpdate(wrapper);
+
+    const errorModal = wrapper.find('Modal[data-test-id="update-profile-error"]');
+    // Ensure the error modal contains explanatory intro text.
+    expect(errorModal.getDOMNode().textContent).toContain('An error occurred while updating your profile');
+    // Ensure the error modal contains the server-side error message.
+    expect(errorModal.getDOMNode().textContent).toContain('Could not create account: invalid institutional affiliation');
+  });
 });

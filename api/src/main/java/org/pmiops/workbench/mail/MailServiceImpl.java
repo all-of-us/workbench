@@ -44,6 +44,7 @@ public class MailServiceImpl implements MailService {
   private static final String BETA_ACCESS_TEXT = "A new user has requested beta access: ";
 
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
+  private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String BETA_ACCESS_RESOURCE = "emails/betaaccessemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
       "emails/dollarthresholdemail/content.html";
@@ -88,10 +89,23 @@ public class MailServiceImpl implements MailService {
         new MandrillMessage()
             .to(Collections.singletonList(validatedRecipient(contactEmail)))
             .html(buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user)))
-            .subject("Your new All of Us Account")
+            .subject("Your new All of Us Researcher Workbench Account")
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
 
     sendWithRetries(msg, String.format("Welcome for %s", user.getName()));
+  }
+
+  @Override
+  public void sendInstitutionUserInstructions(String contactEmail, String userInstructions)
+      throws MessagingException {
+    final MandrillMessage msg =
+        new MandrillMessage()
+            .to(Collections.singletonList(validatedRecipient(contactEmail)))
+            .html(buildHtml(INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(userInstructions)))
+            .subject("Instructions from your institution on using the Researcher Workbench")
+            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+
+    sendWithRetries(msg, String.format("Welcome for %s", contactEmail));
   }
 
   @Override
@@ -176,8 +190,18 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.PASSWORD, password)
         .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().admin.loginUrl)
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.REGISTRATION_IMG, getRegistrationImage())
         .put(EmailSubstitutionField.BULLET_1, cloudStorageService.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageService.getImageUrl("bullet_2.png"))
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(
+      final String instructions) {
+    final CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.INSTRUCTIONS, instructions)
         .build();
   }
 
@@ -317,6 +341,10 @@ public class MailServiceImpl implements MailService {
 
   private String getAllOfUsLogo() {
     return cloudStorageServiceProvider.get().getImageUrl("all_of_us_logo.png");
+  }
+
+  private String getRegistrationImage() {
+    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.jpg");
   }
 
   // TODO choose desired date format

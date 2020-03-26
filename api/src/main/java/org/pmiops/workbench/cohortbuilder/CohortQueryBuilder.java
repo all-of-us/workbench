@@ -49,10 +49,10 @@ public class CohortQueryBuilder {
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n"
           + "from `${projectId}.${dataSetId}.cb_review_all_events` cb_review_all_events\n"
-          + "where\n";
+          + "where cb_review_all_events.person_id in (${innerSql})";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
-      "and domain = '${domain}'\n"
+      "and domain = ${domain}\n"
           + "and standard_concept_id != 0 \n"
           + "group by name, conceptId\n"
           + "order by count desc, name asc\n"
@@ -62,14 +62,14 @@ public class CohortQueryBuilder {
       "select rand() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n"
           + "from `${projectId}.${dataSetId}.person` person\n"
           + "left join `${projectId}.${dataSetId}.death` death on (person.person_id = death.person_id)\n"
-          + "where\n";
+          + "where person.person_id in (${innerSql})";
 
   private static final String RANDOM_SQL_ORDER_BY = "order by x\nlimit";
 
   private static final String OFFSET_SUFFIX = " offset ";
 
   private static final String ID_SQL_TEMPLATE =
-      "select person_id\n from `${projectId}.${dataSetId}.person` person\n where\n";
+      "select person_id\n from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n where\n";
 
   private static final String UNION_TEMPLATE = "union all\n";
 
@@ -100,6 +100,7 @@ public class CohortQueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     StringBuilder queryBuilder = new StringBuilder(COUNT_SQL_TEMPLATE);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -121,6 +122,7 @@ public class CohortQueryBuilder {
             .replace("${ageRange2}", getAgeRangeSql(45, 64, participantCriteria.getAgeType()));
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
     queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
@@ -135,14 +137,21 @@ public class CohortQueryBuilder {
    */
   public QueryJobConfiguration buildDomainChartInfoCounterQuery(
       ParticipantCriteria participantCriteria, DomainType domainType, int chartLimit) {
+    StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
+    String searchPersonSql = queryBuilder.toString();
+    queryBuilder =
+        new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE.replace("${innerSql}", searchPersonSql));
+    String paramName =
+        QueryParameterUtil.addQueryParameterValue(
+            params, QueryParameterValue.string(domainType.name()));
     String endSqlTemplate =
         DOMAIN_CHART_INFO_SQL_GROUP_BY
             .replace("${limit}", Integer.toString(chartLimit))
             .replace("${tableId}", "standard_concept_id")
-            .replace("${domain}", domainType.name());
-    StringBuilder queryBuilder = new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE);
-    Map<String, QueryParameterValue> params = new HashMap<>();
-    addWhereClause(participantCriteria, REVIEW_TABLE, queryBuilder, params);
+            .replace("${domain}", paramName);
     queryBuilder.append(endSqlTemplate);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
@@ -158,9 +167,13 @@ public class CohortQueryBuilder {
       endSql += OFFSET_SUFFIX + offset;
     }
     Map<String, QueryParameterValue> params = new HashMap<>();
-    StringBuilder queryBuilder = new StringBuilder(RANDOM_SQL_TEMPLATE);
-    addWhereClause(participantCriteria, PERSON_TABLE, queryBuilder, params);
-    queryBuilder.append(endSql.replace("${mainTable}", PERSON_TABLE));
+    StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
+    String searchPersonSql = queryBuilder.toString();
+
+    queryBuilder = new StringBuilder(RANDOM_SQL_TEMPLATE.replace("${innerSql}", searchPersonSql));
+    queryBuilder.append(endSql);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -174,7 +187,7 @@ public class CohortQueryBuilder {
   public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria) {
     Map<String, QueryParameterValue> params = new HashMap<>();
     StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
-    addWhereClause(participantCriteria, PERSON_TABLE, queryBuilder, params);
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -257,6 +270,19 @@ public class CohortQueryBuilder {
       queryParts = new ArrayList<>();
     }
     return joiner;
+  }
+
+  private void addDataFilters(
+      List<String> dataFilters,
+      StringBuilder queryBuilder,
+      Map<String, QueryParameterValue> params) {
+    dataFilters.stream()
+        .forEach(
+            df -> {
+              String paramName =
+                  QueryParameterUtil.addQueryParameterValue(params, QueryParameterValue.int64(1));
+              queryBuilder.append(" and " + df + " = " + paramName + "\n");
+            });
   }
 
   /**

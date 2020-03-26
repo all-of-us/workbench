@@ -137,7 +137,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionTimestamp: (profile: Profile) => {
       return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
     },
-    onClick: () => navigate(['data-use-agreement'])
+    onClick: () => navigate(['data-code-of-conduct'])
   }
 ] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
 || registrationTask.featureFlag) : (() => {

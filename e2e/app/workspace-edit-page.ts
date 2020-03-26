@@ -229,7 +229,6 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     await Promise.all([
       createButton.click(),
       this.waitUntilNoSpinner(),
-      this.page.waitForNavigation(),
     ]);
   }
 

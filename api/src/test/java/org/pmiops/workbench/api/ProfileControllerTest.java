@@ -8,10 +8,12 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -35,7 +37,6 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -51,7 +52,6 @@ import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.InstitutionalAffiliationMapperImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
@@ -59,14 +59,21 @@ import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.Ethnicity;
+import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
+import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.profile.AddressMapperImpl;
@@ -77,6 +84,7 @@ import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -151,7 +159,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
-    UserServiceImpl.class,
     ProfileService.class,
     ProfileController.class,
     ProfileMapperImpl.class,
@@ -160,8 +167,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     CommonMappers.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
     CaptchaVerificationService.class,
-    PublicInstitutionDetailsMapperImpl.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class
+    VerifiedInstitutionalAffiliationMapperImpl.class,
+    UserServiceTestConfiguration.class,
   })
   static class Configuration {
     @Bean
@@ -248,6 +255,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testCreateAccount_invitationKeyMismatch() {
     createUser();
 
+    config.access.requireInvitationKey = true;
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
@@ -318,13 +326,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         "Username should be at least 3 characters and not more than 64 characters");
     profileController.createAccount(accountRequest);
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
-  }
-
-  @Test
-  public void testSubmitDemographicSurvey_success() {
-    createUser();
-    assertThat(profileController.submitDemographicsSurvey().getStatusCode())
-        .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @Test
@@ -399,7 +400,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
@@ -422,7 +423,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("zeta");
     first.setInstitution("Zeta");
@@ -445,7 +446,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
@@ -456,7 +457,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     affiliations.add(second);
     profile.setInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
-    affiliations = new ArrayList<InstitutionalAffiliation>();
+    affiliations = new ArrayList<>();
     affiliations.add(first);
     profile.setInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
@@ -470,7 +471,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
@@ -492,18 +493,9 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testMe_verifiedInstitutionalAffiliation() {
     config.featureFlags.requireInstitutionalVerification = true;
 
-    final Institution broad =
-        new Institution()
-            .shortName("Broad")
-            .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
-    institutionService.createInstitution(broad);
-
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-        new VerifiedInstitutionalAffiliation()
-            .institutionShortName(broad.getShortName())
-            .institutionDisplayName(broad.getDisplayName())
-            .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
+        createVerifiedInstitutionalAffiliation();
+
     createAccountRequest
         .getProfile()
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
@@ -686,6 +678,82 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void sendUserInstructions_none() throws MessagingException {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    createUser();
+    verify(mailService).sendWelcomeEmail(any(), any(), any());
+
+    // don't send the user instructions email if there are no instructions
+    verifyNoMoreInteractions(mailService);
+  }
+
+  @Test
+  public void sendUserInstructions_sanitized() throws MessagingException {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    final String rawInstructions =
+        "<html><script>window.alert('hacked');</script></html>"
+            + "Wash your hands for 20 seconds"
+            + "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} "
+            + "div {color: 'red'}</STYLE>\n"
+            + "<img src=\"https://eviltrackingpixel.com\" />\n";
+
+    final String sanitizedInstructions = "Wash your hands for 20 seconds";
+
+    final InstitutionUserInstructions instructions =
+        new InstitutionUserInstructions()
+            .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
+            .instructions(rawInstructions);
+    institutionService.setInstitutionUserInstructions(instructions);
+
+    createUser();
+    verify(mailService).sendWelcomeEmail(any(), any(), any());
+    verify(mailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
+  }
+
+  @Test
+  public void sendUserInstructions_deleted() throws MessagingException {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    final InstitutionUserInstructions instructions =
+        new InstitutionUserInstructions()
+            .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
+            .instructions("whatever");
+    institutionService.setInstitutionUserInstructions(instructions);
+
+    institutionService.deleteInstitutionUserInstructions(
+        verifiedInstitutionalAffiliation.getInstitutionShortName());
+
+    createUser();
+    verify(mailService).sendWelcomeEmail(any(), any(), any());
+
+    // don't send the user instructions email if the instructions have been deleted
+    verifyNoMoreInteractions(mailService);
+  }
+
+  @Test
   public void testUpdateNihToken() {
     when(fireCloudService.postNihCallback(any()))
         .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
@@ -771,6 +839,38 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getFreeTierDollarQuota()).isEqualTo(FREE_TIER_LIMIT);
   }
 
+  @Test
+  public void testUpdateProfile_updateDemographicSurvey() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+
+    DemographicSurvey demographicSurvey = profile.getDemographicSurvey();
+    demographicSurvey.addRaceItem(Race.AA);
+    demographicSurvey.setEthnicity(Ethnicity.HISPANIC);
+    demographicSurvey.setIdentifiesAsLgbtq(true);
+    demographicSurvey.setLgbtqIdentity("very");
+    demographicSurvey.addGenderIdentityListItem(GenderIdentity.NONE_DESCRIBE_ME);
+    demographicSurvey.addSexAtBirthItem(SexAtBirth.FEMALE);
+    demographicSurvey.setYearOfBirth(new BigDecimal(2000));
+    demographicSurvey.setEducation(Education.NO_EDUCATION);
+    demographicSurvey.setDisability(false);
+
+    profile.setDemographicSurvey(demographicSurvey);
+
+    profileController.updateProfile(profile);
+
+    Profile updatedProfile = profileController.getMe().getBody();
+    assertProfile(
+        updatedProfile,
+        PRIMARY_EMAIL,
+        CONTACT_EMAIL,
+        FAMILY_NAME,
+        GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED,
+        TIMESTAMP,
+        false);
+  }
+
   private Profile createUser() {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
@@ -815,5 +915,19 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
+  }
+
+  private VerifiedInstitutionalAffiliation createVerifiedInstitutionalAffiliation() {
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+    institutionService.createInstitution(broad);
+
+    return new VerifiedInstitutionalAffiliation()
+        .institutionShortName(broad.getShortName())
+        .institutionDisplayName(broad.getDisplayName())
+        .institutionalRoleEnum(InstitutionalRole.PROJECT_PERSONNEL);
   }
 }

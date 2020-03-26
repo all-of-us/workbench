@@ -47,6 +47,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api.workbench.researchallofus.org",
+    "uiBaseUrl": "https:\/\/workbench.researchallofus.org",
     "publicApiKeyForErrorReports": "AIzaSyBSPcQ0FcR99GLXaqX4Ujpoj3JUDSP689g",
     "projectId": "all-of-us-rw-prod",
     "shortName": "Prod",
