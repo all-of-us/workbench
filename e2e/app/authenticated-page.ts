@@ -167,8 +167,8 @@ export default abstract class AuthenticatedPage extends BasePage {
     try {
       if (jValue) {
         await this.page.waitFor((selector) => {
-          const len = document.querySelectorAll(selector).length;
-          return len === 0
+          const selectorLength = document.querySelectorAll(selector).length;
+          return selectorLength === 0;
         }, {timeout: 90000}, selectr2);
       }
     } catch (err) {
@@ -178,8 +178,8 @@ export default abstract class AuthenticatedPage extends BasePage {
       const finishTime = performance.now();
       const diff = Math.floor(((finishTime - startTime) / 1000) % 60);
       if (diff > 60) {
-        // if timeout exceeds 60 seconds without error thrown, it shows page loading is slow
-        console.info(`WARNING: waitUntilNoSpinner took more than 60 seconds. ${diff} seconds.`);
+        // if timeout exceeds 60 seconds without error thrown, it tells me page loading is slower.
+        console.info(`WARNING: waitUntilNoSpinner took ${diff} seconds.`);
       } else {
         console.info(`waitUntilNoSpinner took ${diff} seconds.`);
       }
