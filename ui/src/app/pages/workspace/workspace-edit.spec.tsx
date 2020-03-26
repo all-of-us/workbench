@@ -115,7 +115,6 @@ describe('WorkspaceEdit', () => {
   it('should clear all selected specific populations if NO underrepresented populations study is selected', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
-    workspace.researchPurpose.population = true;
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
       SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
 
