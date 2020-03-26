@@ -32,7 +32,6 @@ const styles = reactStyles({
     top: '60px',
     right: 0,
     height: 'calc(100% - 60px)',
-    minHeight: 'calc(100vh - 156px)',
     width: 'calc(14rem + 55px)',
     overflow: 'hidden',
     color: colors.primary,
