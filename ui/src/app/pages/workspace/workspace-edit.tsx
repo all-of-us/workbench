@@ -408,9 +408,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       // If Checkbox is selected expand the research purpose categories
       if (checked) {
         this.setState({showResearchPurpose: true, selectResearchPurpose: true});
-        return;
+      } else {
+        this.setState({selectResearchPurpose: false});
       }
-      this.setState({selectResearchPurpose: false});
     }
 
     get researchPurposeCheck(): boolean {
