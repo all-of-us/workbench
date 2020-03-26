@@ -7,6 +7,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
+import {FooterTypeEnum} from 'app/components/footer';
 import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
 import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
@@ -55,6 +56,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   private inactivityInterval: Timeout;
   private logoutTimer: Timeout;
   private inactivityModalTimer: Timeout;
+
+  footerTypeEnum = FooterTypeEnum;
 
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
 

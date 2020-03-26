@@ -19,6 +19,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
 import {BugReportComponent} from 'app/components/bug-report';
+import {FooterComponent} from 'app/components/footer';
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
@@ -41,7 +42,8 @@ describe('SignedInComponent', () => {
         SignedInComponent,
         RoutingSpinnerComponent,
         TextModalComponent,
-        NavBarComponent
+        NavBarComponent,
+        FooterComponent
       ],
       providers: [
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
