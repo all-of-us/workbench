@@ -740,9 +740,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<DbWorkspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream()
-            .map(workspaceMapper::toApiWorkspace)
-            .collect(Collectors.toList()));
+        workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
