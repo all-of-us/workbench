@@ -718,6 +718,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         navigateToWorkspace();
 
       } catch (error) {
+        console.log(error);
         error = await error.json();
 
         console.log(error);

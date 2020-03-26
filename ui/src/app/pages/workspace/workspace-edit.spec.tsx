@@ -132,8 +132,11 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
 
     wrapper.find('[data-test-id="specific-population-no"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
     expect(workspacesApi.workspaces[0].researchPurpose.populationDetails.length).toBe(0);
   });
 
