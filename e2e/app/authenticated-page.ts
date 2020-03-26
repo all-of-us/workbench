@@ -161,12 +161,28 @@ export default abstract class AuthenticatedPage extends BasePage {
     }, {timeout: 1000}, selectr1);
     const jValue = await spinner.jsonValue();
 
-    // wait maximum 60 seconds for spinner disappear if spinner existed
+    // wait maximum 90 seconds for spinner disappear if spinner existed
     const selectr2 = 'svg[style*="spin"], .spinner:empty';
-    if (jValue) {
-      await this.page.waitFor((selector) => {
-        return document.querySelectorAll(selector).length === 0
-      }, {timeout: 60000}, selectr2);
+    const startTime = performance.now();
+    try {
+      if (jValue) {
+        await this.page.waitFor((selector) => {
+          const selectorLength = document.querySelectorAll(selector).length;
+          return selectorLength === 0;
+        }, {timeout: 90000}, selectr2);
+      }
+    } catch (err) {
+      await this.takeScreenshot('TimedOutWaitForSpinnerStop');
+      throw err;
+    } finally {
+      const finishTime = performance.now();
+      const diff = Math.floor(((finishTime - startTime) / 1000) % 60);
+      if (diff > 60) {
+        // if timeout exceeds 60 seconds without error thrown, it tells me page loading is slower.
+        console.info(`WARNING: waitUntilNoSpinner took ${diff} seconds.`);
+      } else {
+        console.info(`waitUntilNoSpinner took ${diff} seconds.`);
+      }
     }
     // final 1 second wait for page render to finish
     if (jValue) {
