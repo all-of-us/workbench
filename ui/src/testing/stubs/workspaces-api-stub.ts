@@ -204,7 +204,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   updateWorkspace(workspaceNamespace: string,
-                 workspaceId: string, body?: UpdateWorkspaceRequest, options?: any): Promise<Workspace> {
+    workspaceId: string, body?: UpdateWorkspaceRequest, options?: any): Promise<Workspace> {
     return new Promise(resolve => {
       const originalItemIndex = this.workspaces.findIndex(w => w.namespace === workspaceNamespace && w.id === workspaceId);
       if (originalItemIndex === -1) {
