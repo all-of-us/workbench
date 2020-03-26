@@ -163,10 +163,16 @@ export default abstract class AuthenticatedPage extends BasePage {
 
     // wait maximum 60 seconds for spinner disappear if spinner existed
     const selectr2 = 'svg[style*="spin"], .spinner:empty';
-    if (jValue) {
-      await this.page.waitFor((selector) => {
-        return document.querySelectorAll(selector).length === 0
-      }, {timeout: 60000}, selectr2);
+    try {
+      if (jValue) {
+        await this.page.waitFor((selector) => {
+          const len = document.querySelectorAll(selector).length;
+          return len === 0
+        }, {timeout: 60000}, selectr2);
+      }
+    } catch (err) {
+      await this.takeScreenshot('waitForSpinnerFailed');
+      throw err;
     }
     // final 1 second wait for page render to finish
     if (jValue) {
