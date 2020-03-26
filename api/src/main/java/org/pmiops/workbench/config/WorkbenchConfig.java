@@ -141,7 +141,10 @@ public class WorkbenchConfig {
   }
 
   public static class ServerConfig {
+    // Base URL for the App Engine API service (e.g. backend server).
     public String apiBaseUrl;
+    // Base URL for the App Engine UI service (e.g. webapp / client).
+    public String uiBaseUrl;
     public String publicApiKeyForErrorReports;
     public String projectId;
     public String shortName;

@@ -50,6 +50,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
+    "uiBaseUrl": "http:\/\/localhost:4200",
     "publicApiKeyForErrorReports": "",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Local",

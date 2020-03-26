@@ -21,6 +21,7 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventRequest;
+import org.pmiops.workbench.opsgenie.OpsGenieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -35,8 +36,9 @@ public class SumoLogicControllerTest {
 
   private static final String API_KEY = "12345";
 
-  @MockBean private EgressEventAuditor egressEventAuditor;
-  @MockBean private CloudStorageService cloudStorageService;
+  @MockBean private EgressEventAuditor mockEgressEventAuditor;
+  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private OpsGenieService mockOpsGenieService;
   private static WorkbenchConfig config;
 
   @Autowired private SumoLogicController sumoLogicController;
@@ -72,7 +74,8 @@ public class SumoLogicControllerTest {
     request = new EgressEventRequest();
     request.setEventsJsonArray(mapper.writeValueAsString(Arrays.asList(event)));
 
-    when(cloudStorageService.getCredentialsBucketString(SumoLogicController.SUMOLOGIC_KEY_FILENAME))
+    when(mockCloudStorageService.getCredentialsBucketString(
+            SumoLogicController.SUMOLOGIC_KEY_FILENAME))
         .thenReturn(API_KEY);
   }
 
@@ -80,7 +83,7 @@ public class SumoLogicControllerTest {
   public void testLogsApiKeyFailure() {
     assertThrows(
         UnauthorizedException.class, () -> sumoLogicController.logEgressEvent("bad-key", request));
-    verify(egressEventAuditor).fireBadApiKey("bad-key", request);
+    verify(mockEgressEventAuditor).fireBadApiKey("bad-key", request);
   }
 
   @Test
@@ -88,13 +91,14 @@ public class SumoLogicControllerTest {
     request.setEventsJsonArray("bad-json");
     assertThrows(
         BadRequestException.class, () -> sumoLogicController.logEgressEvent(API_KEY, request));
-    verify(egressEventAuditor).fireFailedToParseEgressEventRequest(request);
+    verify(mockEgressEventAuditor).fireFailedToParseEgressEventRequest(request);
   }
 
   @Test
   public void testLogsSingleEvent() {
     sumoLogicController.logEgressEvent(API_KEY, request);
-    verify(egressEventAuditor).fireEgressEvent(event);
+    verify(mockEgressEventAuditor).fireEgressEvent(event);
+    verify(mockOpsGenieService).createEgressEventAlert(event);
   }
 
   @Test
@@ -102,6 +106,7 @@ public class SumoLogicControllerTest {
     EgressEvent event2 = new EgressEvent();
     request.setEventsJsonArray(mapper.writeValueAsString(Arrays.asList(event, event2)));
     sumoLogicController.logEgressEvent(API_KEY, request);
-    verify(egressEventAuditor, times(2)).fireEgressEvent(any());
+    verify(mockEgressEventAuditor, times(2)).fireEgressEvent(any());
+    verify(mockOpsGenieService, times(2)).createEgressEventAlert(any());
   }
 }

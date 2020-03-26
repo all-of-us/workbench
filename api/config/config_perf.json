@@ -53,6 +53,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-perf.appspot.com",
+    "uiBaseUrl": "https:\/\/all-of-us-rw-perf.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyB44pugxPbfevF_fb7GichIv9D9ee5-nNk",
     "projectId": "all-of-us-rw-perf",
     "shortName": "Perf",

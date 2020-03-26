@@ -457,6 +457,8 @@ dependencies {
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
   compile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
 
+  compile "com.opsgenie.integration:sdk:2+"
+
   // Force these dependencies to safe versions, Zendesk client depends on this.
   compile 'io.netty:netty-codec-http:4.1.44.Final'
   compile 'com.typesafe.netty:netty-reactive-streams:2.0.4'
@@ -481,7 +483,7 @@ dependencies {
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
-  
+
   compile 'com.github.fge:json-patch:1.9'
   toolsCompile 'commons-cli:commons-cli:1.4'
   toolsCompile 'com.opencsv:opencsv:4.6'

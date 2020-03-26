@@ -14,10 +14,16 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventRequest;
+import org.pmiops.workbench.opsgenie.OpsGenieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Implements an inbound API that is called by the Broad Institute's SumoLogic installation to
+ * report high-egress events detected by SumoLogic. See http://broad.io/vpc-egress-alerting for more
+ * details on the end-to-end data flow.
+ */
 @RestController
 public class SumoLogicController implements SumoLogicApiDelegate {
 
@@ -26,15 +32,18 @@ public class SumoLogicController implements SumoLogicApiDelegate {
   private static final Logger log = Logger.getLogger(SumoLogicController.class.getName());
   private final EgressEventAuditor egressEventAuditor;
   private final CloudStorageService cloudStorageService;
+  private final OpsGenieService opsGenieService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   SumoLogicController(
       EgressEventAuditor egressEventAuditor,
       CloudStorageService cloudStorageService,
+      OpsGenieService opsGenieService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.egressEventAuditor = egressEventAuditor;
     this.cloudStorageService = cloudStorageService;
+    this.opsGenieService = opsGenieService;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -107,5 +116,6 @@ public class SumoLogicController implements SumoLogicApiDelegate {
             "Received an egress event from project %s (%.2fMib, VM %s)",
             event.getProjectName(), event.getEgressMib(), event.getVmName()));
     this.egressEventAuditor.fireEgressEvent(event);
+    this.opsGenieService.createEgressEventAlert(event);
   }
 }

@@ -50,6 +50,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-staging.appspot.com",
+    "uiBaseUrl": "https:\/\/all-of-us-rw-staging.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
