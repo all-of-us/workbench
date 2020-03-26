@@ -96,19 +96,6 @@ describe('Home page ui tests', () => {
   });
 
   test('Check Workspace card on Home page', async () => {
-    page
-    .on('request', request =>
-      console.log(`request initiated: ${request.url()}`))
-    // .on('console', message =>
-    //   console.log(`console error: ${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
-    // .on('pageerror', ({ message }) => console.log(`page error: ${message}`))
-    .on('response', response =>
-       console.log(`response: ${response.status()} ${response.url()}`))
-    .on('requestfinished', request =>
-       console.log(`request finished: ${request.url()} `))
-    .on('requestfailed', request =>
-       console.log(`request failed: ${request.url()} ${request.failure().errorText} `));
-
     await GoogleLoginPage.logIn(page);
 
     await WorkspaceCard.getAllCards(page);

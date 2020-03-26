@@ -161,17 +161,17 @@ export default abstract class AuthenticatedPage extends BasePage {
     }, {timeout: 1000}, selectr1);
     const jValue = await spinner.jsonValue();
 
-    // wait maximum 60 seconds for spinner disappear if spinner existed
+    // wait maximum 90 seconds for spinner disappear if spinner existed
     const selectr2 = 'svg[style*="spin"], .spinner:empty';
     try {
       if (jValue) {
         await this.page.waitFor((selector) => {
           const len = document.querySelectorAll(selector).length;
           return len === 0
-        }, {timeout: 60000}, selectr2);
+        }, {timeout: 90000}, selectr2);
       }
     } catch (err) {
-      await this.takeScreenshot('waitForSpinnerFailed');
+      await this.takeScreenshot('TimedOutWaitForSpinnerStop');
       throw err;
     }
     // final 1 second wait for page render to finish
