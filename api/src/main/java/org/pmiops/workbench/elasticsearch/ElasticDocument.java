@@ -92,6 +92,8 @@ public class ElasticDocument {
           .put("measurement_source_concept_ids", esType(ElasticType.KEYWORD))
           .put("visit_concept_ids", esType(ElasticType.KEYWORD))
           .put("is_deceased", esType(ElasticType.BOOLEAN))
+          .put("has_ehr_data", esType(ElasticType.BOOLEAN))
+          .put("has_physical_measurement_data", esType(ElasticType.BOOLEAN))
           .put("events", NESTED_FOREIGN_SCHEMA)
           .build();
 

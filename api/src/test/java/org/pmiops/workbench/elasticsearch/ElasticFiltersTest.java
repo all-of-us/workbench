@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableList;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -42,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ElasticFiltersTest {
 
+  private static final ImmutableList<String> NO_DATA_FILTERS = ImmutableList.of();
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
 
@@ -219,23 +221,31 @@ public class ElasticFiltersTest {
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
-  private static final QueryBuilder singleNestedQuery(QueryBuilder... inners) {
-    return singleNestedQueryOccurrences(1, inners);
+  private static final QueryBuilder singleNestedQuery(
+      List<String> dataFilters, QueryBuilder... inners) {
+    return singleNestedQueryOccurrences(dataFilters, 1, inners);
   }
 
-  private static final QueryBuilder singleNestedQueryOccurrences(int n, QueryBuilder... inners) {
+  private static final QueryBuilder singleNestedQueryOccurrences(
+      List<String> dataFilters, int n, QueryBuilder... inners) {
     BoolQueryBuilder b = QueryBuilders.boolQuery();
     for (QueryBuilder in : inners) {
       b.filter(in);
     }
-    return QueryBuilders.boolQuery()
-        .filter(
-            QueryBuilders.boolQuery()
-                .should(
-                    QueryBuilders.functionScoreQuery(
-                            QueryBuilders.nestedQuery(
-                                "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
-                        .setMinScore(n)));
+    BoolQueryBuilder b2 =
+        QueryBuilders.boolQuery()
+            .filter(
+                QueryBuilders.boolQuery()
+                    .should(
+                        QueryBuilders.functionScoreQuery(
+                                QueryBuilders.nestedQuery(
+                                    "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
+                            .setMinScore(n)));
+    BoolQueryBuilder b3 = QueryBuilders.boolQuery();
+    for (String dataFilter : dataFilters) {
+      b3.filter(QueryBuilders.termQuery(dataFilter, true));
+    }
+    return dataFilters.isEmpty() ? b2 : b2.filter(b3);
   }
 
   private static final QueryBuilder nonNestedQuery(QueryBuilder... inners) {
@@ -270,10 +280,13 @@ public class ElasticFiltersTest {
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
-                        .addItemsItem(new SearchGroupItem().addSearchParametersItem(leafParam2))));
+                        .addItemsItem(new SearchGroupItem().addSearchParametersItem(leafParam2)))
+                .addDataFiltersItem("has_ehr_data")
+                .addDataFiltersItem("has_physical_measurement_data"));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                ImmutableList.of("has_ehr_data", "has_physical_measurement_data"),
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
   }
 
@@ -298,6 +311,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery(
                     "events.concept_id", ImmutableList.of("21600002", "21600009"))));
   }
@@ -324,6 +338,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery(
                     "events.source_concept_id", ImmutableList.of("771", "772", "773"))));
   }
@@ -403,6 +418,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery(
                     "events.source_concept_id", ImmutableList.of("77", "7771", "777"))));
   }
@@ -429,6 +445,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery(
                     "events.source_concept_id", ImmutableList.of("7771", "777"))));
   }
@@ -458,6 +475,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("7771")),
                 QueryBuilders.rangeQuery("events.value_as_number").gte(1.0F).lte(1.0F)));
   }
@@ -486,6 +504,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777")),
                 QueryBuilders.termsQuery(
                     "events.value_as_source_concept_id", ImmutableList.of("1"))));
@@ -510,6 +529,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
                 QueryBuilders.rangeQuery("events.age_at_start").gte(18)));
   }
@@ -534,6 +554,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
                 QueryBuilders.rangeQuery("events.start_date").gte("12/25/1988").lte("12/27/1988")));
   }
@@ -557,6 +578,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
                 QueryBuilders.termsQuery("events.visit_concept_id", ImmutableList.of("123"))));
   }
@@ -580,7 +602,9 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQueryOccurrences(
-                13, QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
+                NO_DATA_FILTERS,
+                13,
+                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
   }
 
   @Test
@@ -605,6 +629,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId))));
   }
 
@@ -634,6 +659,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
                 QueryBuilders.rangeQuery("events.value_as_number").gte(left).lte(right)));
   }
@@ -667,6 +693,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
                 QueryBuilders.rangeQuery("events.value_as_number").gte(left).lte(right)));
   }
@@ -842,6 +869,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
                 QueryBuilders.termsQuery("events.value_as_concept_id", ImmutableList.of(operand))));
   }
@@ -875,6 +903,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId)),
                 QueryBuilders.termsQuery(
                     "events.value_as_concept_id", ImmutableList.of(operand1, operand2))));
@@ -901,6 +930,7 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
+                NO_DATA_FILTERS,
                 QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId))));
   }
 
