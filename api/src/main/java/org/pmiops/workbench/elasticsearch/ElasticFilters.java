@@ -65,24 +65,23 @@ public final class ElasticFilters {
     Preconditions.checkArgument(!processed);
     childrenByCriteriaGroup = criteriaLookupUtil.buildCriteriaLookupMap(req);
 
-    BoolQueryBuilder filter = QueryBuilders.boolQuery();
+    BoolQueryBuilder parentBuilder = QueryBuilders.boolQuery();
     for (SearchGroup sg : req.getIncludes()) {
-      filter.filter(searchGroupToFilter(sg));
+      parentBuilder.filter(searchGroupToFilter(sg));
     }
     for (SearchGroup sg : req.getExcludes()) {
       // Only case to use mustNot is when both includes and excludes exist together
       if (req.getIncludes().isEmpty()) {
-        filter.filter(searchGroupToFilter(sg));
+        parentBuilder.filter(searchGroupToFilter(sg));
       } else {
-        filter.mustNot(searchGroupToFilter(sg));
+        parentBuilder.mustNot(searchGroupToFilter(sg));
       }
     }
-    BoolQueryBuilder b = QueryBuilders.boolQuery();
-    for (String dataFilter : req.getDataFilters()) {
-      b.filter(QueryBuilders.termQuery(dataFilter, true));
-    }
+    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+    req.getDataFilters().stream()
+        .forEach(df -> queryBuilder.filter(QueryBuilders.termQuery(df, true)));
     processed = true;
-    return req.getDataFilters().isEmpty() ? filter : filter.filter(b);
+    return req.getDataFilters().isEmpty() ? parentBuilder : parentBuilder.filter(queryBuilder);
   }
 
   /**
