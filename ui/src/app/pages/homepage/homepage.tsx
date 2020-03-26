@@ -54,7 +54,7 @@ export const styles = reactStyles({
     marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
   quickTourCardsRow: {
-    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
+    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem', marginBottom: '1rem'
   },
   quickTourLabel: {
     fontSize: 22, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',

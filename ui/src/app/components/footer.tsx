@@ -37,6 +37,18 @@ const styles = reactStyles({
   }
 });
 
+const FooterAnchorTag = ({style = {}, href, ...props}) => {
+  return <StyledAnchorTag style={{...styles.footerAnchor, ...style}} href={href} {...props}>
+    {props.children}
+  </StyledAnchorTag>;
+};
+
+const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
+  return <FooterAnchorTag style={style} href={href} target='_blank' {...props}>{props.children}</FooterAnchorTag>;
+};
+
+
+
 const FooterTemplate = ({style = {}, ...props}) => {
   return <div style={{...styles.footerTemplate, ...style}} {...props}>
     <FlexRow>
@@ -72,43 +84,44 @@ const WorkbenchFooter = withUserProfile()(
     constructor(props) {
       super(props);
     }
+
     render() {
       return <FooterTemplate>
         <FlexRow style={{justifyContent: 'space-between', width: '100%', height: '100%'}}>
           <FooterSection style={styles.workbenchFooterItem} header='Quick Links'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
-                <StyledAnchorTag style={styles.footerAnchor} href='/'>Home</StyledAnchorTag>
-                <StyledAnchorTag style={styles.footerAnchor} href='library'>Featured Workspaces</StyledAnchorTag>
-                <StyledAnchorTag style={styles.footerAnchor} href='workspaces'>Your workspaces</StyledAnchorTag>
+                <FooterAnchorTag href='/'>Home</FooterAnchorTag>
+                <FooterAnchorTag href='library'>Featured Workspaces</FooterAnchorTag>
+                <FooterAnchorTag href='workspaces'>Your workspaces</FooterAnchorTag>
               </FlexColumn>
               <FlexColumn style={{width: '50%'}}>
-                <StyledAnchorTag style={styles.footerAnchor} href={environment.publicUiUrl} target='_blank'>
+                <NewTabFooterAnchorTag href={environment.publicUiUrl}>
                   Data Browser
-                </StyledAnchorTag>
-                <StyledAnchorTag style={styles.footerAnchor} href='https://researchallofus.org' target='_blank'>
+                </NewTabFooterAnchorTag>
+                <NewTabFooterAnchorTag href='https://researchallofus.org'>
                   Research Hub
-                </StyledAnchorTag>
+                </NewTabFooterAnchorTag>
               </FlexColumn>
             </FlexRow>
           </FooterSection>
           <FooterSection style={styles.workbenchFooterItem} header='User Support'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
-                <StyledAnchorTag style={styles.footerAnchor} target='_blank' href={gettingStartedUrl}>
+                <NewTabFooterAnchorTag href={gettingStartedUrl}>
                   Getting Started
-                </StyledAnchorTag>
-                <StyledAnchorTag style={styles.footerAnchor} target='_blank' href={documentationUrl}>
+                </NewTabFooterAnchorTag>
+                <NewTabFooterAnchorTag href={documentationUrl}>
                   Documentation
-                </StyledAnchorTag>
-                <StyledAnchorTag style={styles.footerAnchor} target='_blank' href={communityForumUrl}>
+                </NewTabFooterAnchorTag>
+                <NewTabFooterAnchorTag href={communityForumUrl}>
                   Community Forum
-                </StyledAnchorTag>
+                </NewTabFooterAnchorTag>
               </FlexColumn>
               <FlexColumn style={{width: '50%'}}>
-                <StyledAnchorTag style={styles.footerAnchor}  target='_blank' href={faqUrl}>
+                <NewTabFooterAnchorTag href={faqUrl}>
                   FAQs
-                </StyledAnchorTag>
+                </NewTabFooterAnchorTag>
                 <Link style={styles.footerAnchor} onClick={() => {
                   openZendeskWidget(
                     this.props.profileState.profile.givenName,
@@ -139,17 +152,16 @@ const RegistrationFooter = ({style = {}, ...props}) => {
   return <FooterTemplate {...props}>
     <FlexColumn>
       <FlexRow style={{...styles.footerSectionHeader, width: '25rem'}}>
-        <StyledAnchorTag style={styles.footerAnchor} href={environment.publicUiUrl} target='_blank'>
+        <NewTabFooterAnchorTag href={environment.publicUiUrl}>
           Data Browser
-        </StyledAnchorTag>
-        <StyledAnchorTag style={{...styles.footerAnchor, marginLeft: '1.5rem'}} href='https://researchallofus.org'
-                         target='_blank'>
+        </NewTabFooterAnchorTag>
+        <NewTabFooterAnchorTag style={{marginLeft: '1.5rem'}} href='https://researchallofus.org'>
           Research Hub
-        </StyledAnchorTag>
+        </NewTabFooterAnchorTag>
         <div style={{marginLeft: '1.5rem'}}>
-          Contact Us: <StyledAnchorTag style={styles.footerAnchor} href={'mailto:' + supportEmailAddress}>
+          Contact Us: <FooterAnchorTag href={'mailto:' + supportEmailAddress}>
             {supportEmailAddress}
-          </StyledAnchorTag>
+          </FooterAnchorTag>
         </div>
       </FlexRow>
       <div style={{...styles.footerAside, alignSelf: 'flex-start', marginTop: '1rem'}}>The All of Us logo is a service
