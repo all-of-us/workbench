@@ -432,7 +432,7 @@ end
 Common.register_command({
   :invocation => "nightly-integration",
   :description => "Runs nightly tests, including integration tests.",
-  :fn => ->(*args) { run_nightly_tests("nightly", *args) }
+  :fn => ->(*args) { run_nightly_integration_tests("nightly", *args) }
 })
 
 def run_integration_tests(cmd_name, *args)
