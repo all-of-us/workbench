@@ -163,6 +163,7 @@ export default abstract class AuthenticatedPage extends BasePage {
 
     // wait maximum 90 seconds for spinner disappear if spinner existed
     const selectr2 = 'svg[style*="spin"], .spinner:empty';
+    const startTime = performance.now();
     try {
       if (jValue) {
         await this.page.waitFor((selector) => {
@@ -173,6 +174,15 @@ export default abstract class AuthenticatedPage extends BasePage {
     } catch (err) {
       await this.takeScreenshot('TimedOutWaitForSpinnerStop');
       throw err;
+    } finally {
+      const finishTime = performance.now();
+      const diff = Math.floor(((finishTime - startTime) / 1000) % 60);
+      if (diff > 60) {
+        // if timeout exceeds 60 seconds without error thrown, it shows page loading is slow
+        console.info(`WARNING: waitUntilNoSpinner took more than 60 seconds. ${diff} seconds.`);
+      } else {
+        console.info(`waitUntilNoSpinner took ${diff} seconds.`);
+      }
     }
     // final 1 second wait for page render to finish
     if (jValue) {
