@@ -12,8 +12,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -51,6 +51,7 @@ public class UserController implements UserApiDelegate {
   private final Provider<WorkbenchConfig> configProvider;
   private final UserService userService;
   private final FireCloudService fireCloudService;
+  private final FreeTierBillingService freeTierBillingService;
 
   private final Provider<Cloudbilling> cloudBillingProvider;
 
@@ -58,13 +59,15 @@ public class UserController implements UserApiDelegate {
   public UserController(
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> configProvider,
-      FireCloudService fireCloudService,
       UserService userService,
+      FireCloudService fireCloudService,
+      FreeTierBillingService freeTierBillingService,
       @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> cloudBillingProvider) {
     this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.userService = userService;
     this.fireCloudService = fireCloudService;
+    this.freeTierBillingService = freeTierBillingService;
     this.cloudBillingProvider = cloudBillingProvider;
   }
 
@@ -135,16 +138,28 @@ public class UserController implements UserApiDelegate {
     return ResponseEntity.ok(response);
   }
 
-  private BillingAccount freeTierBillingAccount() {
-    return new BillingAccount()
-        .isFreeTier(true)
-        .displayName("Use All of Us free credits")
-        .name(configProvider.get().billing.freeTierBillingAccountName())
-        .isOpen(true);
-  }
-
   @Override
   public ResponseEntity<WorkbenchListBillingAccountsResponse> listBillingAccounts() {
+    final List<BillingAccount> billingAccounts = Lists.newArrayList();
+
+    // if we show the free credits account, it goes first
+
+    if (freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
+      billingAccounts.add(
+          new BillingAccount()
+              .isFreeTier(true)
+              .displayName("Use All of Us free credits")
+              .name(configProvider.get().billing.freeTierBillingAccountName())
+              .isOpen(true));
+    }
+
+    billingAccounts.addAll(getCloudbillingAccounts());
+
+    return ResponseEntity.ok(
+        new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts));
+  }
+
+  private List<BillingAccount> getCloudbillingAccounts() {
     ListBillingAccountsResponse response;
     try {
       response = cloudBillingProvider.get().billingAccounts().list().execute();
@@ -152,24 +167,19 @@ public class UserController implements UserApiDelegate {
       throw new ServerErrorException("Could not retrieve billing accounts list from Google Cloud");
     }
 
-    List<BillingAccount> billingAccounts =
-        Stream.concat(
-                Stream.of(freeTierBillingAccount()),
-                Optional.ofNullable(response.getBillingAccounts()).orElse(Collections.emptyList())
-                    .stream()
-                    .map(
-                        googleBillingAccount ->
-                            new BillingAccount()
-                                .isFreeTier(false)
-                                .displayName(googleBillingAccount.getDisplayName())
-                                .name(googleBillingAccount.getName())
-                                .isOpen(
-                                    Optional.ofNullable(googleBillingAccount.getOpen())
-                                        .orElse(false))))
-            .collect(Collectors.toList());
+    return Optional.ofNullable(response.getBillingAccounts())
+        .map(List::stream)
+        .map(s -> s.map(this::mapCloudBillingAccount).collect(Collectors.toList()))
+        .orElse(Collections.emptyList());
+  }
 
-    return ResponseEntity.ok(
-        new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts));
+  private BillingAccount mapCloudBillingAccount(
+      com.google.api.services.cloudbilling.model.BillingAccount cloudbillingAccount) {
+    return new BillingAccount()
+        .isFreeTier(false)
+        .displayName(cloudbillingAccount.getDisplayName())
+        .name(cloudbillingAccount.getName())
+        .isOpen(Optional.ofNullable(cloudbillingAccount.getOpen()).orElse(false));
   }
 
   private PaginationToken getPaginationTokenFromPageToken(String pageToken) {

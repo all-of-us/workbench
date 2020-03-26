@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 
@@ -20,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
@@ -42,6 +44,7 @@ import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -63,6 +66,8 @@ public class UserControllerTest {
   private static DbUser user = new DbUser();
   private static long incrementedUserId = 1;
   private static final Cloudbilling testCloudbilling = TestMockFactory.createMockedCloudbilling();
+  private static final FreeTierBillingService freeTierBillingService =
+      mock(FreeTierBillingService.class);
 
   @TestConfiguration
   @Import({
@@ -74,12 +79,11 @@ public class UserControllerTest {
     ComplianceService.class,
     DirectoryService.class,
     AdminActionHistoryDao.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
   })
   static class Configuration {
-
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig workbenchConfig() {
       return config;
     }
@@ -90,7 +94,7 @@ public class UserControllerTest {
     }
 
     @Bean
-    @Scope("prototype")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return user;
     }
@@ -101,8 +105,15 @@ public class UserControllerTest {
     }
 
     @Bean(END_USER_CLOUD_BILLING)
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     Cloudbilling getCloudBilling() {
       return testCloudbilling;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    FreeTierBillingService getFreeTierBillingService() {
+      return freeTierBillingService;
     }
   }
 
@@ -253,11 +264,12 @@ public class UserControllerTest {
   }
 
   @Test
-  public void listBillingAccount_nullCloudResponse() throws IOException {
+  public void listBillingAccount_nullCloudResponseFreeTier() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
 
-    // the list always starts with the free tier account
+    when(freeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+
     final BillingAccount freeTierBillingAccount =
         new BillingAccount()
             .isFreeTier(true)
@@ -265,18 +277,39 @@ public class UserControllerTest {
             .name("billingAccounts/free-tier")
             .isOpen(true);
 
+    // when the user has free credits remaining, we show the free tier account first
+    final List<BillingAccount> expected = Lists.newArrayList(freeTierBillingAccount);
+
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
 
     final WorkbenchListBillingAccountsResponse response =
         userController.listBillingAccounts().getBody();
-    assertThat(response.getBillingAccounts()).isEqualTo(Lists.newArrayList(freeTierBillingAccount));
+    assertThat(response.getBillingAccounts()).isEqualTo(expected);
+  }
+
+  @Test
+  public void listBillingAccount_nullCloudResponseExpiredFreeTier() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+
+    // when the user has no free credits remaining, we do not show the free tier account
+    when(freeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEmpty();
   }
 
   @Test
   public void listBillingAccounts() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
+
+    when(freeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     final com.google.api.services.cloudbilling.model.BillingAccount cloudbillingAccount1 =
         new com.google.api.services.cloudbilling.model.BillingAccount()
@@ -295,7 +328,6 @@ public class UserControllerTest {
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
 
-    // the list always starts with the free tier account
     final BillingAccount freeTierBillingAccount =
         new BillingAccount()
             .isFreeTier(true)
@@ -316,6 +348,8 @@ public class UserControllerTest {
             .displayName("Account 2 - Open")
             .isFreeTier(false)
             .isOpen(true);
+
+    // when the user has free credits remaining, we show the free tier account first
 
     final List<BillingAccount> expectedWorkbenchBillingAccounts =
         Lists.newArrayList(
