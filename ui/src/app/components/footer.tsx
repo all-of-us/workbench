@@ -33,7 +33,8 @@ const styles = reactStyles({
     padding: '1rem'
   },
   workbenchFooterItem: {
-    width: '30%'
+    width: '18rem',
+    marginRight: '2rem'
   }
 });
 
@@ -87,7 +88,7 @@ const WorkbenchFooter = withUserProfile()(
 
     render() {
       return <FooterTemplate>
-        <FlexRow style={{justifyContent: 'space-between', width: '100%', height: '100%'}}>
+        <FlexRow style={{justifyContent: 'flex-start', width: '100%', height: '100%'}}>
           <FooterSection style={styles.workbenchFooterItem} header='Quick Links'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
