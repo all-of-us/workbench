@@ -22,7 +22,7 @@ describe('Workspace ui tests', () => {
   });
 
 
-  test.skip('Workspace cards all have same ui size', async () => {
+  test('Workspace cards all have same ui size', async () => {
     const cards = await WorkspaceCard.getAllCards(page);
     let width;
     let height;
@@ -41,7 +41,7 @@ describe('Workspace ui tests', () => {
   });
 
   // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
-  test.skip('Click Create New Workspace link on My Workspaces page', async () => {
+  test('Click Create New Workspace link on My Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
     await workspaces.load();
     const workspaceEdit = await workspaces.clickCreateNewWorkspace();
