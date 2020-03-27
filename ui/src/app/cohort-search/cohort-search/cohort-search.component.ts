@@ -30,7 +30,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   resolve: Function;
   modalPromise: Promise<boolean> | null = null;
   modalOpen = false;
-  saving = false;
+  updatingCohort = false;
   updateGroupListsCount = 0;
   cohortChanged = false;
 
@@ -58,12 +58,12 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
       }
     });
 
-    searchRequestStore.subscribe(sr => {
+    this.subscription.add(searchRequestStore.subscribe(sr => {
       this.criteria = sr;
       this.overview = sr.includes.length || sr.excludes.length;
       this.cohortChanged = !!this.cohort && this.cohort.criteria !== JSON.stringify(mapRequest(this.criteria));
       this.updateGroupListsCount++;
-    });
+    }));
     this.updateWrapperDimensions();
   }
 
@@ -71,11 +71,11 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);
-    searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
+    searchRequestStore.next({includes: [], excludes: [], dataFilters: []} as SearchRequest);
   }
 
   canDeactivate(): Promise<boolean> | boolean {
-    return !this.cohortChanged || this.saving || this.showWarningModal();
+    return !this.cohortChanged || this.updatingCohort || this.showWarningModal();
   }
 
   async showWarningModal() {
@@ -106,7 +106,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     setTimeout(() => this.updateCount++);
   }
 
-  updateSaving = (flag: boolean) => {
-    this.saving = flag;
+  updating = () => {
+    this.updatingCohort = true;
   }
 }
