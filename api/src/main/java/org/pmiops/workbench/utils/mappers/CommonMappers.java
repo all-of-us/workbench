@@ -34,6 +34,13 @@ public class CommonMappers {
     return null;
   }
 
+  public String timestampToString(Timestamp timestamp) {
+    if (timestamp != null) {
+      return timestamp.toString();
+    }
+    return null;
+  }
+
   public Timestamp timestamp(Long timestamp) {
     if (timestamp != null) {
       return new Timestamp(timestamp);
