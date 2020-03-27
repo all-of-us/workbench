@@ -24,7 +24,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 @Mapper(
     componentModel = "spring",
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
-    uses = {CommonMappers.class, WorkspaceDao.class})
+    uses = {CommonMappers.class})
 public interface WorkspaceMapper {
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")

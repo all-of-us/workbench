@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -858,7 +859,7 @@ public class WorkspacesControllerTest {
     request.setWorkspace(workspace);
 
     BadRequestException exception =
-        Assertions.assertThrows(
+        assertThrows(
             BadRequestException.class,
             () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
     assertThat(exception.getErrorResponse().getMessage())
@@ -887,7 +888,7 @@ public class WorkspacesControllerTest {
     request.setWorkspace(workspace);
 
     BadRequestException exception =
-        Assertions.assertThrows(
+        assertThrows(
             BadRequestException.class,
             () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
     assertThat(exception.getErrorResponse().getMessage())
@@ -3099,7 +3100,7 @@ public class WorkspacesControllerTest {
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
-    Assertions.assertThrows(
+    assertThrows(
         ForbiddenException.class,
         () ->
             workspacesController.cloneNotebook(
@@ -3116,7 +3117,7 @@ public class WorkspacesControllerTest {
 
     NotebookRename request = new NotebookRename().name("a").newName("b");
 
-    Assertions.assertThrows(
+    assertThrows(
         ForbiddenException.class,
         () ->
             workspacesController.renameNotebook(
@@ -3137,7 +3138,7 @@ public class WorkspacesControllerTest {
             .toWorkspaceNamespace(workspace.getNamespace())
             .newName("x");
 
-    Assertions.assertThrows(
+    assertThrows(
         ForbiddenException.class,
         () ->
             workspacesController.copyNotebook(
