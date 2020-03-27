@@ -1,5 +1,8 @@
 package org.pmiops.workbench.captcha;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -13,16 +16,11 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import java.io.IOException;
-
 public class CaptchaVerificationServiceTest extends BaseControllerTest {
 
   final String prodAllOfUsUrl = "https://workbench.researchallofus.org/login";
   final String testAllOfUsUrl = "https://all-of-us-workbench-test.appspot.com";
   final String responseToken = "responseToken";
-
 
   @MockBean private CloudStorageService cloudStorageService;
   @MockBean private WorkbenchConfig configProvider;
@@ -30,6 +28,7 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
 
   @MockBean private WorkbenchConfig.AdminConfig adminConfig;
   @Autowired private CaptchaVerificationServiceImpl captchaVerificationService;
+
   @TestConfiguration
   @Import({CaptchaVerificationServiceImpl.class, CaptchaApi.class})
   static class Configuration {}
@@ -47,8 +46,7 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
     response.setHostname(hostName);
     response.setSuccess(true);
     try {
-      Mockito.when(captchaApiProvider.verify("key", responseToken))
-          .thenReturn(response);
+      Mockito.when(captchaApiProvider.verify("key", responseToken)).thenReturn(response);
     } catch (ApiException ex) {
 
     }
@@ -57,9 +55,10 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
   @Test
   public void testCreateAccount_invalidHostName() {
     try {
-      // This should return false since the host name can either be google test hostname or one of AllOfUs urls
+      // This should return false since the host name can either be google test hostname or one of
+      // AllOfUs urls
       captchaVerificationService.mockLoginUrl("hostname");
-      boolean captchaSuccess  = captchaVerificationService.verifyCaptcha(responseToken);
+      boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
       assertThat(captchaSuccess).isFalse();
     } catch (ApiException e) {
       e.printStackTrace();
@@ -68,22 +67,21 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
   }
 
   /**
-   * For any of the AllOfUs urls not using captcha test keys, the hostName should match
-   * exactly with that send by google Captcha server
+   * For any of the AllOfUs urls not using captcha test keys, the hostName should match exactly with
+   * that send by google Captcha server
    */
   @Test
   public void testCreateAccount_nonCaptchaTestHosts() {
     try {
       mockCaptchaResponse("workbench.researchallofus.org", true);
       captchaVerificationService.mockLoginUrl(prodAllOfUsUrl);
-      boolean captchaSuccess  = captchaVerificationService.verifyCaptcha(responseToken);
+      boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
       assertThat(captchaSuccess).isTrue();
     } catch (ApiException e) {
       e.printStackTrace();
       assertThat(false);
     }
   }
-
 
   @Test
   public void testCreateAccount_googleTestKey() {
@@ -91,17 +89,16 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
       // AllOfUs prod url should not be using google test captcha keys
       mockCaptchaResponse("testkey.google.com", true);
       captchaVerificationService.mockLoginUrl(prodAllOfUsUrl);
-      boolean captchaSuccess  = captchaVerificationService.verifyCaptcha(responseToken);
+      boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
       assertThat(captchaSuccess).isFalse();
 
       // AllOfUs test url should be using google test captcha keys
       captchaVerificationService.mockLoginUrl(testAllOfUsUrl);
-      captchaSuccess  = captchaVerificationService.verifyCaptcha(responseToken);
+      captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
       assertThat(captchaSuccess).isTrue();
     } catch (ApiException e) {
       e.printStackTrace();
       assertThat(false);
     }
   }
-
 }
