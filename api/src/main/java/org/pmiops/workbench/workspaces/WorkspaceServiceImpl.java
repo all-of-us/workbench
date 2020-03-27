@@ -244,7 +244,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    workspaceResponse.setWorkspace(manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
   }
@@ -579,7 +579,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(manualWorkspaceMapper.toApiUserRole(user, entry.getValue()));
+        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()

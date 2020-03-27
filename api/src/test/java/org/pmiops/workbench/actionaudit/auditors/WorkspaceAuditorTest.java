@@ -105,7 +105,7 @@ public class WorkspaceAuditorTest {
     workspace1.setDataAccessLevel(DataAccessLevel.REGISTERED);
     workspace1.setPublished(false);
 
-    dbWorkspace1 = manualWorkspaceMapper.toDbWorkspace(workspace1);
+    dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(WORKSPACE_1_DB_ID);
     dbWorkspace1.setLastAccessedTime(new Timestamp(now));
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));

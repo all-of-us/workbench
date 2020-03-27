@@ -42,91 +42,22 @@ public class ManualWorkspaceMapper {
     }
   }
 
-  public Workspace toApiWorkspace(DbWorkspace workspace, FirecloudWorkspace fcWorkspace) {
-    ResearchPurpose researchPurpose = workspaceMapper.workspaceToResearchPurpose(workspace);
-
-    Workspace result =
-        new Workspace()
-            .etag(Etags.fromVersion(workspace.getVersion()))
-            .lastModifiedTime(workspace.getLastModifiedTime().getTime())
-            .creationTime(workspace.getCreationTime().getTime())
-            .dataAccessLevel(workspace.getDataAccessLevelEnum())
-            .name(workspace.getName())
-            .id(fcWorkspace.getName())
-            .namespace(fcWorkspace.getNamespace())
-            .researchPurpose(researchPurpose)
-            .published(workspace.getPublished())
-            .googleBucketName(fcWorkspace.getBucketName())
-            .billingStatus(workspace.getBillingStatus())
-            .billingAccountName(workspace.getBillingAccountName())
-            .billingAccountType(workspace.getBillingAccountType());
-
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      result.billingStatus(BillingStatus.ACTIVE);
-    }
-
-    if (fcWorkspace.getCreatedBy() != null) {
-      result.setCreator(fcWorkspace.getCreatedBy());
-    }
-
-    if (workspace.getCdrVersion() != null) {
-      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
-    }
-
-    return result;
-  }
-
-  public DbWorkspace toDbWorkspace(Workspace workspace) {
-    DbWorkspace result = new DbWorkspace();
-
-    if (workspace.getDataAccessLevel() != null) {
-      result.setDataAccessLevelEnum(workspace.getDataAccessLevel());
-    }
-
-    result.setName(workspace.getName());
-
-    if (workspace.getResearchPurpose() != null) {
-      workspaceMapper.mergeResearchPurposeIntoWorkspace(result, workspace.getResearchPurpose());
-      result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
-      if (workspace.getResearchPurpose().getTimeRequested() != null) {
-        result.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
-      }
-      result.setApproved(workspace.getResearchPurpose().getApproved());
-    }
-
-    return result;
-  }
-
-  public UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry aclEntry) {
-    UserRole result = new UserRole();
-    result.setEmail(user.getUsername());
-    result.setGivenName(user.getGivenName());
-    result.setFamilyName(user.getFamilyName());
-    result.setRole(WorkspaceAccessLevel.fromValue(aclEntry.getAccessLevel()));
-    return result;
-  }
-
   public RecentWorkspace buildRecentWorkspace(
       DbUserRecentWorkspace userRecentWorkspace,
       DbWorkspace dbWorkspace,
       WorkspaceAccessLevel accessLevel) {
+    System.out.println(
+        workspaceMapper.toApiRecentWorkspace(userRecentWorkspace, dbWorkspace, accessLevel).equals(
+            new RecentWorkspace()
+                .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
+                .accessedTime(userRecentWorkspace.getLastAccessDate().toString())
+                .accessLevel(accessLevel)
+        ));
+
     return new RecentWorkspace()
         .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
         .accessedTime(userRecentWorkspace.getLastAccessDate().toString())
         .accessLevel(accessLevel);
   }
 
-  public List<RecentWorkspace> buildRecentWorkspaceList(
-      List<DbUserRecentWorkspace> userRecentWorkspaces,
-      Map<Long, DbWorkspace> dbWorkspacesByWorkspaceId,
-      Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId) {
-    return userRecentWorkspaces.stream()
-        .map(
-            userRecentWorkspace ->
-                buildRecentWorkspace(
-                    userRecentWorkspace,
-                    dbWorkspacesByWorkspaceId.get(userRecentWorkspace.getWorkspaceId()),
-                    workspaceAccessLevelsByWorkspaceId.get(userRecentWorkspace.getWorkspaceId())))
-        .collect(Collectors.toList());
-  }
 }

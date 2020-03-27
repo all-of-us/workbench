@@ -9,8 +9,10 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -69,6 +71,10 @@ public class CommonMappers {
 
   public Short dataAccessLevelToStorage(DataAccessLevel dataAccessLevel) {
     return DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
+  }
+
+  public WorkspaceAccessLevel fcAccessLevelToApiAccessLevel(FirecloudWorkspaceAccessEntry acl) {
+    return WorkspaceAccessLevel.fromValue(acl.getAccessLevel());
   }
 
   public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {

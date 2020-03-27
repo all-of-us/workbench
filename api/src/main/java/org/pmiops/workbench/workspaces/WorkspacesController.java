@@ -297,18 +297,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    DbWorkspace reqWorkspace = manualWorkspaceMapper.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
-    dbWorkspace.setName(reqWorkspace.getName());
+    dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
+    dbWorkspace.setName(workspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
-    if (reqWorkspace.getReviewRequested()) {
+    if (workspace.getResearchPurpose().getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
-    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
+    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
@@ -336,7 +335,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     maybeFileZendeskReviewRequest(createdWorkspace);
     return createdWorkspace;
@@ -471,7 +470,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
   }
 
   @Override
@@ -985,8 +984,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        manualWorkspaceMapper.buildRecentWorkspaceList(
-            userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
+        userRecentWorkspaces.stream()
+            .map(
+                userRecentWorkspace ->
+                    manualWorkspaceMapper.buildRecentWorkspace(
+                        userRecentWorkspace,
+                        dbWorkspacesById.get(userRecentWorkspace.getWorkspaceId()),
+                        workspaceAccessLevelsById.get(userRecentWorkspace.getWorkspaceId())))
+            .collect(Collectors.toList());
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
