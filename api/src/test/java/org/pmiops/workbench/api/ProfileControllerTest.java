@@ -822,7 +822,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
     DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
 
-    when(freeTierBillingService.getUserCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
+    when(freeTierBillingService.getCachedFreeTierUsage(dbUser)).thenReturn(FREE_TIER_USAGE);
     when(freeTierBillingService.getUserFreeTierDollarLimit(dbUser)).thenReturn(FREE_TIER_LIMIT);
 
     Profile profile = profileController.getMe().getBody();

@@ -64,6 +64,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('displays workspaces create page', async () => {
+    currentWorkspaceStore.next(undefined);
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Create a new Workspace');
@@ -71,6 +72,9 @@ describe('WorkspaceEdit', () => {
     // Ensure the 'drug development' checkbox is not checked when creating.
     expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked'))
       .toEqual(false);
+
+    expect(wrapper.find('[data-test-id="specific-population-no"]').first().prop('checked'))
+      .toEqual(true);
   });
 
   it('displays workspaces duplicate page', async () => {

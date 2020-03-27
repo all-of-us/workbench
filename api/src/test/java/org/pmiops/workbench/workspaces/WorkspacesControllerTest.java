@@ -210,7 +210,7 @@ public class WorkspacesControllerTest {
           .domainId("Condition")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_2 =
       new Concept()
@@ -223,7 +223,7 @@ public class WorkspacesControllerTest {
           .domainId("Condition")
           .countValue(456L)
           .prevalence(0.3F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_3 =
       new Concept()
@@ -236,7 +236,7 @@ public class WorkspacesControllerTest {
           .domainId("Measurement")
           .countValue(256L)
           .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
   private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
@@ -775,7 +775,8 @@ public class WorkspacesControllerTest {
 
     doReturn(false)
         .when(freeTierBillingService)
-        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+        .userHasRemainingFreeTierCredits(
+            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
     // Creating the workspace with a user provided billing account
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -796,7 +797,8 @@ public class WorkspacesControllerTest {
 
     doReturn(false)
         .when(freeTierBillingService)
-        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+        .userHasRemainingFreeTierCredits(
+            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
@@ -822,7 +824,8 @@ public class WorkspacesControllerTest {
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doReturn(true)
         .when(freeTierBillingService)
-        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+        .userHasRemainingFreeTierCredits(
+            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
@@ -2503,8 +2506,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testEmptyFireCloudWorkspaces() {
-    when(fireCloudService.getWorkspaces(any()))
-        .thenReturn(new ArrayList<FirecloudWorkspaceResponse>());
+    when(fireCloudService.getWorkspaces(any())).thenReturn(new ArrayList<>());
     try {
       ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response =
           workspacesController.getWorkspaces();

@@ -22,7 +22,10 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.Period;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.mail.MessagingException;
 import org.junit.After;
@@ -541,11 +544,13 @@ public class FreeTierBillingServiceTest {
     createWorkspace(user1, SINGLE_WORKSPACE_TEST_PROJECT);
 
     // we have not yet had a chance to cache this usage
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user1)).isNull();
+    assertThat(freeTierBillingService.getCachedFreeTierUsage(user1)).isNull();
+    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
 
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    assertWithinBillingTolerance(freeTierBillingService.getUserCachedFreeTierUsage(user1), 100.01);
+    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user1), 100.01);
+    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isFalse();
 
     createWorkspace(user1, "another project");
 
@@ -554,12 +559,12 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableResult(costs)).when(bigQueryService).executeQuery(any());
 
     // we have not yet cached the new workspace costs
-    assertWithinBillingTolerance(freeTierBillingService.getUserCachedFreeTierUsage(user1), 100.01);
+    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user1), 100.01);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     final double expectedTotalCachedFreeTierUsage = 1000.0 + 100.01;
     assertWithinBillingTolerance(
-        freeTierBillingService.getUserCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
+        freeTierBillingService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
 
     final double user2Costs = 999.0;
     final DbUser user2 = createUser("another user");
@@ -572,9 +577,38 @@ public class FreeTierBillingServiceTest {
     freeTierBillingService.checkFreeTierBillingUsage();
 
     assertWithinBillingTolerance(
-        freeTierBillingService.getUserCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserCachedFreeTierUsage(user2), user2Costs);
+        freeTierBillingService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
+    assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user2), user2Costs);
+    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user2)).isFalse();
+  }
+
+  @Test
+  public void userHasRemainingFreeTierCredits_newUser() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    final DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
+    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
+  }
+
+  @Test
+  public void userHasRemainingFreeTierCredits() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+
+    final DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user1, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    // 99.99 < 100.0
+    doReturn(mockBQTableSingleResult(99.99)).when(bigQueryService).executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
+
+    // 100.01 > 100.0
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isFalse();
+
+    // 100.01 < 200.0
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
+    assertThat(freeTierBillingService.userHasRemainingFreeTierCredits(user1)).isTrue();
   }
 
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {
