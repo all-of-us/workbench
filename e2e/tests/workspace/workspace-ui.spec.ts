@@ -22,7 +22,7 @@ describe('Workspace ui tests', () => {
   });
 
 
-  test('Workspace cards all have same ui size', async () => {
+  test.skip('Workspace cards all have same ui size', async () => {
     const cards = await WorkspaceCard.getAllCards(page);
     let width;
     let height;
@@ -41,7 +41,7 @@ describe('Workspace ui tests', () => {
   });
 
   // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
-  test('Click Create New Workspace link on My Workspaces page', async () => {
+  test.skip('Click Create New Workspace link on My Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
     await workspaces.load();
     const workspaceEdit = await workspaces.clickCreateNewWorkspace();
@@ -56,11 +56,12 @@ describe('Workspace ui tests', () => {
     await new WorkspacesPage(page).waitForLoad();
 
     await WorkspaceCard.getAllCards(page);
-    const anyCard = await WorkspaceCard.getAnyCard(page);
-    const cardName = await anyCard.getWorkspaceName();
-    expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
-    expect(await anyCard.getEllipsisIcon()).toBeTruthy();
-    const links = await anyCard.getPopupLinkTextsArray();
+    const card = await WorkspaceCard.getAnyCard(page);
+    const workspaceName = await card.getWorkspaceName();
+    expect(workspaceName).toMatch(new RegExp(/^[a-zA-Z]+/));
+
+    expect(await card.getEllipsisIcon()).toBeTruthy();
+    const links = await card.getPopupLinkTextsArray();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 

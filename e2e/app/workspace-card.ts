@@ -42,9 +42,10 @@ export default class WorkspaceCard extends BaseElement {
   }
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
+    const selector = `.//*[@data-test-id="workspace-card-name" and text()="${workspaceName}"]`;
     const allCards = await this.getAllCards(page);
     for (const card of allCards) {
-      const children = await card.asElementHandle().$x(`.//*[@data-test-id="workspace-card-name" and text()="${workspaceName}"]`);
+      const children = await card.asElementHandle().$x(selector);
       if (children.length > 0) {
         return card; // matched workspace name, found the Workspace card.
       }
@@ -60,8 +61,8 @@ export default class WorkspaceCard extends BaseElement {
 
   async getWorkspaceName(): Promise<unknown> {
     const selector = './/*[@data-test-id="workspace-card-name"]';
-    const cardNameElem = await this.element.$x(selector);
-    const jHandle = await cardNameElem[0].getProperty('innerText');
+    const workspaceNameElemt = await this.element.$x(selector);
+    const jHandle = await workspaceNameElemt[0].getProperty('innerText');
     const name = await jHandle.jsonValue();
     await jHandle.dispose();
     return name;
