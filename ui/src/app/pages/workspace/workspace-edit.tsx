@@ -210,7 +210,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showStigmatizationDetails: false,
         billingAccounts: [],
         showCreateBillingAccountModal: false,
-        populationChecked: props.workspace.researchPurpose.populationDetails.length > 0
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false
       };
     }
 
@@ -1020,7 +1020,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <hr/>
           </div>
           <div style={{marginTop: '0.5rem'}}>
-            <RadioButton name='population' style={{marginRight: '0.5rem'}}
+            <RadioButton name='population'
+                         style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
                          checked={!this.state.populationChecked}/>
