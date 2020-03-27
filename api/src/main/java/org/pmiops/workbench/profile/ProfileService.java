@@ -49,7 +49,7 @@ public class ProfileService {
 
     Profile profile = profileMapper.dbUserToProfile(user);
 
-    profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));
+    profile.setFreeTierUsage(freeTierBillingService.getCachedFreeTierUsage(user));
     profile.setFreeTierDollarQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
 
     verifiedInstitutionalAffiliationDao

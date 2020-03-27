@@ -3,12 +3,12 @@ package org.pmiops.workbench.billing;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Sets;
-import java.time.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
+import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -59,10 +60,6 @@ public class FreeTierBillingService {
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
-  }
-
-  public boolean userHasFreeTierCredits(DbUser user) {
-    return getUserFreeTierDollarLimit(user) > workspaceFreeTierUsageDao.totalCostByUser(user);
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -230,11 +227,27 @@ public class FreeTierBillingService {
    * have created. This is NOT live BigQuery data: it is only as recent as the last
    * checkFreeTierBillingUsage cron job, recorded as last_update_time in the DB.
    *
+   * <p>Note: return value may be null, to enable direct assignment to the nullable Profile field
+   *
    * @param user the user as represented in our database
    * @return the total USD amount spent in workspaces created by this user, represented as a double
    */
-  public Double getUserCachedFreeTierUsage(DbUser user) {
+  @Nullable
+  public Double getCachedFreeTierUsage(DbUser user) {
     return workspaceFreeTierUsageDao.totalCostByUser(user);
+  }
+
+  /**
+   * Does this user have remaining free tier credits? Compare the user-specific free tier limit (may
+   * be the system default) to the amount they have used.
+   *
+   * @param user the user as represented in our database
+   * @return whether the user has remaining credits
+   */
+  public boolean userHasRemainingFreeTierCredits(DbUser user) {
+    return Optional.ofNullable(getCachedFreeTierUsage(user))
+        .map(usage -> getUserFreeTierDollarLimit(user) > usage)
+        .orElse(true);
   }
 
   /**
@@ -245,11 +258,7 @@ public class FreeTierBillingService {
    * @return the US dollar amount, represented as a double
    */
   public double getUserFreeTierDollarLimit(DbUser user) {
-    final Double override = user.getFreeTierCreditsLimitDollarsOverride();
-    if (override != null) {
-      return override;
-    }
-
-    return workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit;
+    return Optional.ofNullable(user.getFreeTierCreditsLimitDollarsOverride())
+        .orElse(workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit);
   }
 }

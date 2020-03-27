@@ -775,7 +775,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     if (newBillingAccountName.equals(
         workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
       workspace.setBillingStatus(
-          freeTierBillingService.userHasFreeTierCredits(workspace.getCreator())
+          freeTierBillingService.userHasRemainingFreeTierCredits(workspace.getCreator())
               ? BillingStatus.ACTIVE
               : BillingStatus.INACTIVE);
     } else {
