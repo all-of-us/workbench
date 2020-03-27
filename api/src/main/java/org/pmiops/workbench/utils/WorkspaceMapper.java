@@ -6,7 +6,6 @@ import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;

@@ -58,7 +58,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
