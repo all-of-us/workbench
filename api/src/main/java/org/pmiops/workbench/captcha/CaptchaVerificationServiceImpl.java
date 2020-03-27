@@ -18,6 +18,10 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
 
   final String urlPattern = "https://%s/login";
 
+  // In case of environments using automation test like  local/Test etc we will be using google
+  // captcha test keys
+  // https://developers.google.com/recaptcha/docs/faq#id-like-to-run-automated-tests-with-recaptcha.-what-should-i-do
+  // which will send the following as the hostName if successful
   final String googleTestHost = "testkey.google.com";
 
   private CloudStorageService cloudStorageService;
