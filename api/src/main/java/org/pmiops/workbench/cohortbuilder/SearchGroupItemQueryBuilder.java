@@ -210,7 +210,7 @@ public final class SearchGroupItemQueryBuilder {
                   queryParams, QueryParameterValue.int64(param.getStandard() ? 1 : 0));
           // if blood pressure we need to add named parameters for concept ids
           QueryParameterValue cids =
-              QueryParameterValue.array(bpConceptIds.stream().toArray(Long[]::new), Long.class);
+              QueryParameterValue.array(bpConceptIds.toArray(new Long[0]), Long.class);
           String conceptIdsParam = QueryParameterUtil.addQueryParameterValue(queryParams, cids);
           queryParts.add(String.format(bpSql.toString(), standardParam, conceptIdsParam) + ")\n");
         }
@@ -241,18 +241,17 @@ public final class SearchGroupItemQueryBuilder {
         String ageNamedParameter1 =
             QueryParameterUtil.addQueryParameterValue(
                 queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
-        String finalParam = ageNamedParameter1;
         if (attribute.getOperands().size() > 1) {
           String ageNamedParameter2 =
               QueryParameterUtil.addQueryParameterValue(
                   queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
-          finalParam = finalParam + AND + ageNamedParameter2;
+          ageNamedParameter1 = ageNamedParameter1 + AND + ageNamedParameter2;
         }
         return String.format(
             AGE_SQL,
             AGE_COLUMN_SQL_MAP.get(attribute.getName()),
             OperatorUtils.getSqlOperator(attribute.getOperator()),
-            finalParam);
+            ageNamedParameter1);
       case GENDER:
       case SEX:
       case ETHNICITY:
@@ -427,7 +426,7 @@ public final class SearchGroupItemQueryBuilder {
         QueryParameterUtil.addQueryParameterValue(
             queryParams,
             QueryParameterValue.array(
-                attribute.getOperands().stream().map(s -> Long.parseLong(s)).toArray(Long[]::new),
+                attribute.getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
                 Long.class));
     // if the search parameter is ppi/survey then we need to use different column.
     return String.format(
@@ -513,25 +512,25 @@ public final class SearchGroupItemQueryBuilder {
       }
       if (isAgeAtEvent(modifier)) {
         modifierSql.append(AGE_AT_EVENT_SQL_TEMPLATE);
-        modifierSql.append(
-            OperatorUtils.getSqlOperator(modifier.getOperator())
-                + " "
-                + String.join(AND, modifierParamList)
-                + "\n");
+        modifierSql
+            .append(OperatorUtils.getSqlOperator(modifier.getOperator()))
+            .append(" ")
+            .append(String.join(AND, modifierParamList))
+            .append("\n");
       } else if (isEncounters(modifier)) {
         modifierSql.append(ENCOUNTERS_SQL_TEMPLATE);
-        modifierSql.append(
-            OperatorUtils.getSqlOperator(modifier.getOperator())
-                + " ("
-                + modifierParamList.get(0)
-                + ")\n");
+        modifierSql
+            .append(OperatorUtils.getSqlOperator(modifier.getOperator()))
+            .append(" (")
+            .append(modifierParamList.get(0))
+            .append(")\n");
       } else {
         modifierSql.append(EVENT_DATE_SQL_TEMPLATE);
-        modifierSql.append(
-            OperatorUtils.getSqlOperator(modifier.getOperator())
-                + " "
-                + String.join(AND, modifierParamList)
-                + "\n");
+        modifierSql
+            .append(OperatorUtils.getSqlOperator(modifier.getOperator()))
+            .append(" ")
+            .append(String.join(AND, modifierParamList))
+            .append("\n");
       }
     }
     return modifierSql.toString();
@@ -549,12 +548,12 @@ public final class SearchGroupItemQueryBuilder {
                 queryParams, QueryParameterValue.int64(new Long(operand)));
         modifierParamList.add(modifierParameter);
       }
-      modifierSql.append(
-          OCCURRENCES_SQL_TEMPLATE
-              + OperatorUtils.getSqlOperator(occurrences.getOperator())
-              + " "
-              + String.join(AND, modifierParamList)
-              + "\n");
+      modifierSql
+          .append(OCCURRENCES_SQL_TEMPLATE)
+          .append(OperatorUtils.getSqlOperator(occurrences.getOperator()))
+          .append(" ")
+          .append(String.join(AND, modifierParamList))
+          .append("\n");
     }
     return modifierSql.toString();
   }
@@ -570,7 +569,7 @@ public final class SearchGroupItemQueryBuilder {
           QueryParameterUtil.addQueryParameterValue(
               queryParams, QueryParameterValue.int64(standardOrSource));
       QueryParameterValue cids =
-          QueryParameterValue.array(childConceptIds.stream().toArray(Long[]::new), Long.class);
+          QueryParameterValue.array(childConceptIds.toArray(new Long[0]), Long.class);
       String conceptIdsParam = QueryParameterUtil.addQueryParameterValue(queryParams, cids);
       for (int i = 0; i < queryParts.size(); i++) {
         String part = queryParts.get(i);
