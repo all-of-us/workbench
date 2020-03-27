@@ -17,6 +17,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +39,19 @@ import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -65,6 +73,7 @@ import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
+import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
@@ -83,6 +92,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
@@ -123,6 +133,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
+  private final CohortReviewService cohortReviewService;
+  private final ConceptSetService conceptSetService;
+  private final DataSetDao dataSetDao;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final LogsBasedMetricService logsBasedMetricService;
@@ -141,6 +154,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
+      CohortReviewService cohortReviewService,
+      ConceptSetService conceptSetService,
+      DataSetDao dataSetDao,
       UserDao userDao,
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
@@ -157,6 +173,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
+    this.cohortReviewService = cohortReviewService;
+    this.conceptSetService = conceptSetService;
+    this.dataSetDao = dataSetDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -1008,6 +1027,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceMapper.toApiRecentWorkspace(dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResourceResponse> getDataPageItems(String workspaceNamespace, String workspaceId) {
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    DbWorkspace workspace =
+        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+    Set<DbCohort> cohorts = workspace.getCohorts();
+    // TODO: Convert cohorts to resources
+    List<DbCohortReview> reviews =
+        cohortReviewService.getRequiredWithCohortReviews(workspaceNamespace, workspaceId);
+    // TODO convert cohort reviews to resources
+    List<DbConceptSet> conceptSets =
+        conceptSetService.findByWorkspaceId(workspace.getWorkspaceId());
+    // TODO: Convert concept sets to resources
+    List<DbDataset> dataSets =
+        dataSetDao.findByWorkspaceIdAndInvalid(workspace.getWorkspaceId(), false);
+    throw new ServerErrorException("not supported");
   }
 
   private <T> T recordOperationTime(Supplier<T> operation, String operationName) {

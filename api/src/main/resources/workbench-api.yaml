@@ -804,6 +804,20 @@ paths:
           description: Workspace deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/get-data-page-items":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+      - workspaces
+      description: Gets all items shown on the data page of the workspcae
+      operationId: getDataPageItems
+      responses:
+        200:
+          description: Returns all data page objects in a workspace.
+          schema:
+            "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -1732,7 +1746,7 @@ paths:
         200:
           description: A list of resources order by last access time desc order
           schema:
-            "$ref": "#/definitions/RecentResourceResponse"
+            "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/update":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -1759,7 +1773,7 @@ paths:
         200:
           description: Successfully added/updated
           schema:
-            "$ref": "#/definitions/RecentResource"
+            "$ref": "#/definitions/WorkspaceResource"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/delete":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -5392,11 +5406,11 @@ definitions:
 
 '
         type: string
-  RecentResourceResponse:
+  WorkspaceResourceResponse:
     type: array
     items:
-      "$ref": "#/definitions/RecentResource"
-  RecentResource:
+      "$ref": "#/definitions/WorkspaceResource"
+  WorkspaceResource:
     type: object
     properties:
       workspaceId:
