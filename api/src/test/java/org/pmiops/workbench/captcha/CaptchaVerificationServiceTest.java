@@ -39,6 +39,8 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
     super.setUp();
     Mockito.when(cloudStorageService.getCaptchaServerKey()).thenReturn("key");
     mockCaptchaResponse("hostName", true);
+    captchaVerificationService.mockUseTestCaptcha(true);
+
   }
 
   private void mockCaptchaResponse(String hostName, boolean success) {
@@ -58,6 +60,7 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
       // This should return false since the host name can either be google test hostname or one of
       // AllOfUs urls
       captchaVerificationService.mockLoginUrl("hostname");
+      captchaVerificationService.mockUseTestCaptcha(false);
       boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
       assertThat(captchaSuccess).isFalse();
     } catch (ApiException e) {
@@ -75,6 +78,8 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
     try {
       mockCaptchaResponse("workbench.researchallofus.org", true);
       captchaVerificationService.mockLoginUrl(prodAllOfUsUrl);
+      captchaVerificationService.mockUseTestCaptcha(false);
+
       boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
       assertThat(captchaSuccess).isTrue();
     } catch (ApiException e) {

@@ -255,5 +255,6 @@ public class WorkbenchConfig {
 
   public static class CaptchaConfig {
     public boolean enableCaptcha;
+    public boolean useTestCaptcha;
   }
 }

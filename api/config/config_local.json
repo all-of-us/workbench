@@ -110,6 +110,7 @@
     "exportObjectsPerTask": 10
   },
   "captcha": {
-    "enableCaptcha": true
+    "enableCaptcha": true,
+    "useTestCaptcha": true
   }
 }
