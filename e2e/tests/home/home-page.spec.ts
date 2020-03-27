@@ -50,7 +50,7 @@ describe('Home page ui tests', () => {
       }
 
       // check workspace name has characters
-      const cardName = await card.getResourceCardName();
+      const cardName = await card.getWorkspaceName();
       expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
       // check ellipsis icon existed

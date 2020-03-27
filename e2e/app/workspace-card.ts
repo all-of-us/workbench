@@ -25,8 +25,9 @@ export default class WorkspaceCard extends BaseElement {
   // **********************
 
   static async getAllCards(page: Page): Promise<WorkspaceCard[]> {
+    await page.waitForXPath(WorkspaceCard.cardRootXpath, {visible: true});
     const cards = await page.$x(this.cardRootXpath);
-    // transform to WorkspaceResourceCard object
+    // transform to WorkspaceCard object
     const resourceCards = cards.map(card => new WorkspaceCard(page).asCardElement(card));
     return resourceCards;
   }
@@ -41,15 +42,15 @@ export default class WorkspaceCard extends BaseElement {
   }
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
-    const cards = await page.$x(WorkspaceCard.cardRootXpath);
-    for (const card of cards) {
-      const children = await card.$x(`.//*[@data-test-id="workspace-card-name" and text()="${workspaceName}"]`);
+    const allCards = await this.getAllCards(page);
+    for (const card of allCards) {
+      const children = await card.asElementHandle().$x(`.//*[@data-test-id="workspace-card-name" and text()="${workspaceName}"]`);
       if (children.length > 0) {
-        return new WorkspaceCard(page).asCardElement(card);
+        return card; // matched workspace name, found the Workspace card.
       }
-      await card.dispose();
+      await card.dispose(); // not it, dispose the ElementHandle.
     }
-    return null;
+    return null; // not found
   }
 
 
@@ -57,8 +58,9 @@ export default class WorkspaceCard extends BaseElement {
     super(page);
   }
 
-  async getResourceCardName(): Promise<unknown> {
-    const cardNameElem = await this.element.$x('.//*[@data-test-id="workspace-card-name"]');
+  async getWorkspaceName(): Promise<unknown> {
+    const selector = './/*[@data-test-id="workspace-card-name"]';
+    const cardNameElem = await this.element.$x(selector);
     const jHandle = await cardNameElem[0].getProperty('innerText');
     const name = await jHandle.jsonValue();
     await jHandle.dispose();

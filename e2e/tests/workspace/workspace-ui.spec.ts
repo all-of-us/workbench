@@ -57,7 +57,7 @@ describe('Workspace ui tests', () => {
 
     await WorkspaceCard.getAllCards(page);
     const anyCard = await WorkspaceCard.getAnyCard(page);
-    const cardName = await anyCard.getResourceCardName();
+    const cardName = await anyCard.getWorkspaceName();
     expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
     expect(await anyCard.getEllipsisIcon()).toBeTruthy();
     const links = await anyCard.getPopupLinkTextsArray();
