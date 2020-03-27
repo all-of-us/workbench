@@ -3,16 +3,7 @@ import * as React from 'react';
 
 import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
-import {
-  attributesStore,
-  groupSelectionsStore,
-  ppiQuestions,
-  scrollStore,
-  selectionsStore,
-  subtreePathStore,
-  subtreeSelectedStore,
-  wizardStore
-} from 'app/cohort-search/search-state.service';
+import {attributesStore,  ppiQuestions} from 'app/cohort-search/search-state.service';
 import {domainToTitle, subTypeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
@@ -23,7 +14,6 @@ import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
-import {Subscription} from 'rxjs/Subscription';
 
 const styles = reactStyles({
   code: {
@@ -142,10 +132,15 @@ interface NodeProp extends Criteria {
 }
 
 interface TreeNodeProps {
+  autocompleteSelection: any;
   expand?: Function;
   fullTree: boolean;
+  groupSelections: Array<number>;
   node: NodeProp;
+  scrollToMatch: Function;
   searchTerms: string;
+  select: Function;
+  selections: Array<string>;
 }
 
 interface TreeNodeState {
@@ -154,15 +149,12 @@ interface TreeNodeState {
   expanded: boolean;
   hover: boolean;
   loading: boolean;
-  parentSelected: boolean;
   searchMatch: boolean;
-  selected: boolean;
   truncated: boolean;
 }
 
 class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   name: HTMLDivElement;
-  subscription: Subscription;
   constructor(props) {
     super(props);
     this.state = {
@@ -171,58 +163,27 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       expanded: false,
       hover: false,
       loading: false,
-      parentSelected: false,
       searchMatch: false,
-      selected: false,
       truncated: false
     };
   }
 
   componentDidMount(): void {
-    const {node} = this.props;
-    const {error} = this.state;
-    this.subscription = subtreePathStore.subscribe(path => {
-      const expanded = path.includes(node.id.toString());
-      this.setState({expanded});
-      if (expanded && !this.state.children) {
-        this.loadChildren();
-      }
-    });
-
-    this.subscription.add(selectionsStore.subscribe(selections => {
-      this.setState({selected: selections.includes(this.paramId)});
-    }));
-
-    this.subscription.add(groupSelectionsStore.subscribe(groupIds => {
-      const parentSelected = groupIds.some(id => node.path.split('.')
-        .filter(pathId => pathId !== node.id.toString())
-        .includes(id.toString()));
-      this.setState({parentSelected});
-    }));
-
-    this.subscription.add(subtreeSelectedStore.subscribe(id => {
-      const selected = id === node.id;
-      this.setState({searchMatch: selected});
-      if (selected) {
-        setTimeout(() => scrollStore.next(node.id));
-      }
-      if (error && id !== undefined) {
-        subtreeSelectedStore.next(undefined);
-      }
-    }));
+    if (!!this.props.autocompleteSelection) {
+      this.checkAutocomplete();
+    }
     const {offsetWidth, scrollWidth} = this.name;
     this.setState({truncated: scrollWidth > offsetWidth});
   }
 
   componentDidUpdate(prevProps: Readonly<TreeNodeProps>): void {
-    const {node: {domainId, group}} = this.props;
-    if ( domainId === DomainType.PHYSICALMEASUREMENT.toString() && group && this.props.searchTerms !== prevProps.searchTerms) {
+    const {autocompleteSelection, node: {domainId, group}, searchTerms} = this.props;
+    if (domainId === DomainType.PHYSICALMEASUREMENT.toString() && group && searchTerms !== prevProps.searchTerms) {
       this.searchChildren();
     }
-  }
-
-  componentWillUnmount(): void {
-    this.subscription.unsubscribe();
+    if (!!autocompleteSelection && autocompleteSelection !== prevProps.autocompleteSelection) {
+      this.checkAutocomplete();
+    }
   }
 
   loadChildren() {
@@ -255,7 +216,6 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       .catch(error => {
         console.error(error);
         this.setState({error: true, loading: false});
-        subtreeSelectedStore.next(undefined);
       });
   }
 
@@ -269,6 +229,20 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     } else {
       this.setState({expanded: false});
     }
+  }
+
+  checkAutocomplete() {
+    const {autocompleteSelection, node: {id}, scrollToMatch} = this.props;
+    const subtree = autocompleteSelection.path.split('.');
+    const expanded = subtree.includes(id.toString());
+    const searchMatch = subtree[subtree.length - 1] === id.toString();
+    if (expanded && !this.state.children) {
+      this.loadChildren();
+    }
+    if (searchMatch) {
+      setTimeout(() => scrollToMatch(id));
+    }
+    this.setState({expanded, searchMatch});
   }
 
   trackEvent() {
@@ -313,14 +287,9 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   select(event: Event) {
     event.stopPropagation();
-    const {node, node: {conceptId, domainId, group, id, parentId, subtype, value}} = this.props;
+    const {node, node: {conceptId, domainId, group, parentId, subtype, value}, select, selections} = this.props;
     let {node: {name}} = this.props;
-    let selections = selectionsStore.getValue();
     if (!selections.includes(this.paramId)) {
-      if (group) {
-        const groups = [...groupSelectionsStore.getValue(), id];
-        groupSelectionsStore.next(groups);
-      }
       let attributes = [];
       if (subtype === CriteriaSubType.BP.toString()) {
         Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
@@ -350,18 +319,17 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         attributes,
         name
       };
-      const wizard = wizardStore.getValue();
-      wizard.item.searchParameters.push(param);
-      selections = [this.paramId, ...selections];
-      selectionsStore.next(selections);
-      wizardStore.next(wizard);
+      select(param);
     }
   }
 
   render() {
-    const {fullTree, node, node: {code, count, domainId, id, group, hasAttributes, name, selectable}, searchTerms} = this.props;
-    const {children, error, expanded, hover, loading, parentSelected, searchMatch, selected} = this.state;
+    const {autocompleteSelection, fullTree, groupSelections, node,
+      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selections}
+      = this.props;
+    const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = fullTree ? node.children : children;
+    const selected = selections.includes(this.paramId) || groupSelections.includes(parentId);
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
@@ -382,7 +350,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={() => attributesStore.next(node)}/>
-              : selected || parentSelected
+              : selected
                 ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}}
                     shape='check-circle' size='20'/>
                 : <ClrIcon style={styles.selectIcon}
@@ -404,10 +372,15 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
           {nodeChildren.map((child, c) => <TreeNode key={c}
+                                                      autocompleteSelection={autocompleteSelection}
                                                       expand={() => this.setState({expanded: true})}
                                                       fullTree={fullTree}
+                                                      groupSelections={groupSelections}
                                                       node={child}
-                                                      searchTerms={searchTerms}/>)
+                                                      scrollToMatch={scrollToMatch}
+                                                      searchTerms={searchTerms}
+                                                      select={(s) => select(s)}
+                                                      selections={selections}/>)
           }
         </div>
       }
@@ -420,15 +393,21 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 }
 
 interface Props {
+  autocompleteSelection: any;
   back: Function;
+  groupSelections: Array<number>;
   node: Criteria;
+  scrollToMatch: Function;
   searchTerms: string;
+  select: Function;
   selections: Array<string>;
+  selectOption: Function;
   setSearchTerms: Function;
   wizard: any;
 }
 
 interface State {
+  autocompleteSelection: any;
   children: any;
   error: boolean;
   ingredients: any;
@@ -439,6 +418,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   constructor(props: Props) {
     super(props);
     this.state = {
+      autocompleteSelection: undefined,
       children: undefined,
       error: false,
       ingredients: undefined,
@@ -480,7 +460,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
       .catch(error => {
         console.error(error);
         this.setState({error: true});
-        subtreeSelectedStore.next(undefined);
       })
       .finally(() => this.setState({loading: false}));
   }
@@ -522,12 +501,14 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   render() {
-    const {back, node, searchTerms, setSearchTerms, wizard: {fullTree}} = this.props;
+    const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selections, selectOption, setSearchTerms,
+      wizard: {fullTree}} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
       {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
         <SearchBar node={node}
           searchTerms={searchTerms}
+          selectOption={selectOption}
           setIngredients={(i) => this.setState({ingredients: i})}
           setInput={(v) => setSearchTerms(v)}/>
       </div>}
@@ -545,9 +526,14 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
         {!!children && children.map((child, c) => <TreeNode key={c}
-                                                                fullTree={fullTree}
-                                                                node={child}
-                                                                searchTerms={searchTerms}/>)}
+                                                    autocompleteSelection={autocompleteSelection}
+                                                    fullTree={fullTree}
+                                                    groupSelections={groupSelections}
+                                                    node={child}
+                                                    scrollToMatch={scrollToMatch}
+                                                    searchTerms={searchTerms}
+                                                    select={(s) => select(s)}
+                                                    selections={selections}/>)}
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
@@ -559,14 +545,31 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   template: '<div #root style="display: inline"></div>'
 })
 export class CriteriaTreeComponent extends ReactWrapperBase {
+  @Input('autocompleteSelection') autocompleteSelection: Props['autocompleteSelection'];
   @Input('back') back: Props['back'];
+  @Input('groupSelections') groupSelections: Props['groupSelections'];
   @Input('node') node: Props['node'];
+  @Input('scrollToMatch') scrollToMatch: Props['scrollToMatch'];
   @Input('searchTerms') searchTerms: Props['searchTerms'];
+  @Input('select') select: Props['select'];
   @Input('selections') selections: Props['selections'];
+  @Input('selectOption') selectOption: Props['selectOption'];
   @Input('setSearchTerms') setSearchTerms: Props['setSearchTerms'];
   @Input('wizard') wizard: Props['wizard'];
 
   constructor() {
-    super(CriteriaTree, ['back', 'node', 'searchTerms', 'selections', 'setSearchTerms', 'wizard']);
+    super(CriteriaTree, [
+      'autocompleteSelection',
+      'back',
+      'groupSelections',
+      'node',
+      'scrollToMatch',
+      'searchTerms',
+      'select',
+      'selections',
+      'selectOption',
+      'setSearchTerms',
+      'wizard'
+    ]);
   }
 }

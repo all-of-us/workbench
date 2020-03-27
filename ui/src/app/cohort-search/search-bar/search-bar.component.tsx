@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -133,6 +132,7 @@ interface Props {
   node: Criteria;
   searchTerms: string;
   setIngredients: Function;
+  selectOption: Function;
   setInput: Function;
 }
 
@@ -170,7 +170,7 @@ export class SearchBar extends React.Component<Props, State> {
   componentDidMount() {
     document.addEventListener('click', (e) => {
       if (!!this.dropdown && !this.dropdown.contains(e.target as Node)) {
-        this.setState({options: []});
+        this.setState({options: null});
       }
     });
   }
@@ -216,10 +216,10 @@ export class SearchBar extends React.Component<Props, State> {
 
   selectOption(option: any) {
     if (option) {
-      const {setIngredients} = this.props;
-      this.props.setInput(option.name);
-      this.setState({options: null, optionSelected: true});
-      if (option.type === CriteriaType[CriteriaType.BRAND]) {
+      const {selectOption, setIngredients, setInput} = this.props;
+      setInput(option.name);
+      this.setState({highlightedOption: null, options: null, optionSelected: true});
+      if (option.type === CriteriaType.BRAND.toString()) {
         const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
         cohortBuilderApi().findDrugIngredientByConceptId(cdrId, option.conceptId)
           .then(resp => {
@@ -227,15 +227,12 @@ export class SearchBar extends React.Component<Props, State> {
               const ingredients = resp.items.map(it => it.name);
               setIngredients(ingredients);
               // just grabbing the first one on the list for now
-              const {path, id} = resp.items[0];
-              subtreePathStore.next(path.split('.'));
-              subtreeSelectedStore.next(id);
+              selectOption(resp.items[0]);
             }
           });
       } else {
         setIngredients(null);
-        subtreePathStore.next(option.path.split('.'));
-        subtreeSelectedStore.next(option.id);
+        selectOption(option);
       }
     }
   }

@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {attributesStore, groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {attributesStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -142,6 +142,7 @@ const styles = reactStyles({
 
 interface Props {
   hierarchy: Function;
+  select: Function;
   selections: Array<string>;
   wizard: any;
   workspace: WorkspaceData;
@@ -172,6 +173,12 @@ export const ListSearch = withCurrentWorkspace()(
         ingredients: {},
         hoverId: undefined
       };
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      if (this.props.selections !== prevProps.selections) {
+        console.log(this.props.selections);
+      }
     }
 
     handleInput = (event: any) => {
@@ -215,19 +222,8 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     selectItem = (row: any) => {
-      const {wizard} = this.props;
-      let {selections} = this.props;
-      const parameterId = this.getParamId(row);
-      if (!selections.includes(parameterId)) {
-        if (row.group) {
-          const groups = [...groupSelectionsStore.getValue(), row.id];
-          groupSelectionsStore.next(groups);
-        }
-        wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
-        selections = [parameterId, ...selections];
-        selectionsStore.next(selections);
-        wizardStore.next(wizard);
-      }
+      const param = {parameterId: this.getParamId(row), ...row, attributes: []};
+      this.props.select(param);
     }
 
     launchAttributes = (row: any) => {
@@ -293,7 +289,7 @@ export const ListSearch = withCurrentWorkspace()(
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
-      const selected = !attributes && !brand && this.isSelected(row);
+      const selected = !attributes && !brand && this.props.selections.includes(this.getParamId(row));
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
@@ -421,9 +417,10 @@ export const ListSearch = withCurrentWorkspace()(
 })
 export class ListSearchComponent extends ReactWrapperBase {
   @Input('hierarchy') hierarchy: Props['hierarchy'];
+  @Input('select') select: Props['select'];
   @Input('selections') selections: Props['selections'];
   @Input('wizard') wizard: Props['wizard'];
   constructor() {
-    super(ListSearch, ['hierarchy', 'selections', 'wizard']);
+    super(ListSearch, ['hierarchy', 'select', 'selections', 'wizard']);
   }
 }

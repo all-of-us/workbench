@@ -1,14 +1,5 @@
 import {Component, OnDestroy, OnInit } from '@angular/core';
-import {
-  attributesStore,
-  groupSelectionsStore,
-  scrollStore,
-  searchRequestStore,
-  selectionsStore,
-  subtreePathStore,
-  subtreeSelectedStore,
-  wizardStore
-} from 'app/cohort-search/search-state.service';
+import {attributesStore, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
@@ -29,11 +20,10 @@ export class ModalComponent implements OnInit, OnDestroy {
   readonly domainType = DomainType;
   readonly criteriaType = CriteriaType;
   subscription: Subscription;
-  selections = {};
-  selectionIds: Array<string>;
-  selectionList: Array<any>;
+  selectionIds: Array<string> = [];
+  selections: Array<any> = [];
+  groupSelections: Array<number> = [];
   open = false;
-  noSelection = true;
   title = '';
   mode = 'list';
   backMode: string;
@@ -46,6 +36,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   hierarchyNode: any;
   publicUiUrl = environment.publicUiUrl;
   treeSearchTerms = '';
+  autocompleteSelection: any;
 
   constructor() {}
 
@@ -55,8 +46,6 @@ export class ModalComponent implements OnInit, OnDestroy {
       .subscribe(wizard => {
         // reset to default each time the modal is opened
         this.wizard = wizard;
-        this.selectionList = wizard.item.searchParameters;
-        this.noSelection = this.selectionList.length === 0;
         if (!this.open) {
           this.title = wizard.domain === DomainType.PERSON ? typeToTitle(wizard.type) : domainToTitle(wizard.domain);
           if (this.initTree) {
@@ -75,11 +64,6 @@ export class ModalComponent implements OnInit, OnDestroy {
           this.open = true;
         }
       });
-
-    this.subscription.add(selectionsStore.subscribe(list => this.selectionIds = list));
-    this.subscription.add(subtreeSelectedStore.subscribe(
-      sel => this.loadingSubtree = sel !== undefined));
-    this.subscription.add(scrollStore.filter(id => !!id).subscribe(id => this.setScroll(id)));
     this.subscription.add(attributesStore
       .filter(crit => !!crit)
       .subscribe(criterion => {
@@ -89,7 +73,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       }));
   }
 
-  setScroll(id: string) {
+  setScroll = (id: string) => {
     const nodeId = `node${id}`;
     const node = document.getElementById(nodeId);
     if (node) {
@@ -104,29 +88,31 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   close() {
     wizardStore.next(undefined);
-    selectionsStore.next([]);
-    subtreePathStore.next([]);
     attributesStore.next( undefined);
-    groupSelectionsStore.next([]);
     this.attributesNode = undefined;
+    this.autocompleteSelection = undefined;
     this.hierarchyNode = undefined;
     this.loadingSubtree = false;
+    this.selectionIds = [];
+    this.selections = [];
+    this.treeSearchTerms = '';
     this.open = false;
   }
 
   back = () => {
     switch (this.mode) {
       case 'tree':
-        subtreePathStore.next([]);
-        subtreeSelectedStore.next(undefined);
-        this.hierarchyNode = undefined;
-        this.treeSearchTerms = '';
+        this.autocompleteSelection = undefined;
         this.backMode = 'list';
+        this.hierarchyNode = undefined;
         this.mode = 'list';
+        this.selectionIds = [];
+        this.selections = [];
+        this.treeSearchTerms = '';
         break;
       default:
-        this.mode = this.backMode;
         this.attributesNode = undefined;
+        this.mode = this.backMode;
         break;
     }
   }
@@ -235,9 +221,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   showHierarchy = (criterion: any) => {
+    this.loadingSubtree = true;
     this.treeSearchTerms = criterion.name;
-    subtreePathStore.next(criterion.path.split('.'));
-    subtreeSelectedStore.next(criterion.id);
+    this.autocompleteSelection = criterion;
     this.hierarchyNode = {
       domainId: criterion.domainId,
       type: criterion.type,
@@ -254,10 +240,31 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   get disableFlag() {
-    return this.noSelection || this.modifiersDisabled;
+    return this.selections.length === 0 || this.modifiersDisabled;
   }
 
   setTreeSearchTerms = (input: string) => {
     this.treeSearchTerms = input;
+  }
+
+  setAutocompleteSelection = (selection: any) => {
+    this.loadingSubtree = true;
+    this.autocompleteSelection = selection;
+  }
+
+  addSelection = (param: any) => {
+    this.selectionIds.push(param.parameterId);
+    this.selections.push(param);
+    if (param.group) {
+      this.groupSelections.push(param.id);
+    }
+  }
+
+  removeSelection = (param: any) => {
+    this.selectionIds = this.selectionIds.filter(id => id !== param.parameterId);
+    this.selections = this.selections.filter(sel => sel.parameterId !== param.parameterId);
+    if (param.group) {
+      this.groupSelections = this.groupSelections.filter(id => id !== param.id);
+    }
   }
 }
