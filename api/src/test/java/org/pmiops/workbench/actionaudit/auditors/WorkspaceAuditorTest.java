@@ -35,7 +35,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -60,7 +59,6 @@ public class WorkspaceAuditorTest {
 
   @Autowired private WorkspaceAuditor workspaceAuditor;
   @Autowired private WorkspaceMapper workspaceMapper;
-  @Autowired private ManualWorkspaceMapper manualWorkspaceMapper;
   @MockBean private Provider<DbUser> mockUserProvider;
   @MockBean private ActionAuditService mockActionAuditService;
 
@@ -71,7 +69,6 @@ public class WorkspaceAuditorTest {
   @Import({
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class,
     CommonMappers.class,
     ActionAuditTestConfig.class
   })

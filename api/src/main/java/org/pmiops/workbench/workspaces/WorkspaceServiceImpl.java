@@ -104,7 +104,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
-  private final ManualWorkspaceMapper manualWorkspaceMapper;
   private final WorkspaceMapper workspaceMapper;
   private final FreeTierBillingService freeTierBillingService;
 
@@ -126,7 +125,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
-      ManualWorkspaceMapper manualWorkspaceMapper,
       WorkspaceMapper workspaceMapper,
       FreeTierBillingService freeTierBillingService) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
@@ -141,7 +139,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
-    this.manualWorkspaceMapper = manualWorkspaceMapper;
     this.workspaceMapper = workspaceMapper;
     this.freeTierBillingService = freeTierBillingService;
   }
@@ -195,15 +192,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return dbWorkspaces.stream()
         .filter(DbWorkspace::isActive)
         .map(
-            dbWorkspace -> {
-              String fcWorkspaceAccessLevel =
-                  fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
-              WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
-              currentWorkspace.setAccessLevel(
-                  ManualWorkspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
-              return currentWorkspace;
-            })
+            dbWorkspace ->
+                workspaceMapper.toApiWorkspaceResponse(
+                    dbWorkspace, fcWorkspaces.get(dbWorkspace.getFirecloudUuid())))
         .collect(Collectors.toList());
   }
 

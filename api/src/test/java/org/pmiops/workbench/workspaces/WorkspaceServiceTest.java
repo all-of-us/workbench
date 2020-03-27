@@ -53,7 +53,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceServiceTest {
 
   @TestConfiguration
-  @Import({ManualWorkspaceMapper.class, WorkspaceMapperImpl.class, CommonMappers.class})
+  @Import({WorkspaceMapperImpl.class, CommonMappers.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
@@ -67,7 +67,6 @@ public class WorkspaceServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private UserDao userDao;
   @Autowired private UserRecentWorkspaceDao userRecentWorkspaceDao;
-  @Autowired private ManualWorkspaceMapper manualWorkspaceMapper;
   @Autowired private WorkspaceMapper workspaceMapper;
   @Autowired private Provider<WorkbenchConfig> mockWorkbenchConfigProvider;
 
@@ -107,7 +106,6 @@ public class WorkspaceServiceTest {
             userRecentWorkspaceDao,
             mockWorkbenchConfigProvider,
             workspaceDao,
-            manualWorkspaceMapper,
             workspaceMapper,
             freeTierBillingService);
 
