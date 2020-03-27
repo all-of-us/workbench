@@ -277,7 +277,6 @@ public class WorkspacesControllerTest {
     ConceptSetsController.class,
     ConceptSetMapperImpl.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({

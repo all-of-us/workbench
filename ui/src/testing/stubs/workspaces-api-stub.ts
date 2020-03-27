@@ -75,8 +75,7 @@ function buildRecentWorkspaceStub(suffix: string): RecentWorkspace {
   const workspaceStub = buildWorkspaceStub(suffix);
   return {
     workspace: workspaceStub,
-    accessLevel: WorkspaceAccessLevel.OWNER,
-    accessedTime: 'now'
+    accessLevel: WorkspaceAccessLevel.OWNER
   };
 }
 

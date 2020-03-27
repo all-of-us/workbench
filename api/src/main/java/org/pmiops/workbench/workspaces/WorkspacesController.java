@@ -5,7 +5,6 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -123,12 +122,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final BillingProjectBufferService billingProjectBufferService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
-  private final Provider<Cloudbilling> cloudbillingProvider;
   private final CloudStorageService cloudStorageService;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final LogsBasedMetricService logsBasedMetricService;
-  private final ManualWorkspaceMapper manualWorkspaceMapper;
   private final NotebooksService notebooksService;
   private final UserDao userDao;
   private final Provider<DbUser> userProvider;
@@ -148,7 +145,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
-      Provider<Cloudbilling> cloudBillingProvider,
       Provider<Zendesk> zendeskProvider,
       FreeTierBillingService freeTierBillingService,
       Clock clock,
@@ -157,7 +153,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
-      ManualWorkspaceMapper manualWorkspaceMapper,
       LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
@@ -167,7 +162,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.cloudStorageService = cloudStorageService;
-    this.cloudbillingProvider = cloudBillingProvider;
     this.zendeskProvider = zendeskProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
@@ -175,7 +169,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
-    this.manualWorkspaceMapper = manualWorkspaceMapper;
     this.logsBasedMetricService = logsBasedMetricService;
   }
 
@@ -297,18 +290,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    DbWorkspace reqWorkspace = manualWorkspaceMapper.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
-    dbWorkspace.setName(reqWorkspace.getName());
+    dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
+    dbWorkspace.setName(workspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
-    if (reqWorkspace.getReviewRequested()) {
+    if (workspace.getResearchPurpose().getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
-    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
+    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
@@ -336,7 +328,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     maybeFileZendeskReviewRequest(createdWorkspace);
     return createdWorkspace;
@@ -471,7 +463,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
   }
 
   @Override
@@ -985,8 +977,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        manualWorkspaceMapper.buildRecentWorkspaceList(
-            userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
+        userRecentWorkspaces.stream()
+            .map(
+                userRecentWorkspace ->
+                    workspaceMapper.toApiRecentWorkspace(
+                        dbWorkspacesById.get(userRecentWorkspace.getWorkspaceId()),
+                        workspaceAccessLevelsById.get(userRecentWorkspace.getWorkspaceId())))
+            .collect(Collectors.toList());
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
@@ -1008,8 +1005,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        manualWorkspaceMapper.buildRecentWorkspace(
-            userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
+        workspaceMapper.toApiRecentWorkspace(dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
