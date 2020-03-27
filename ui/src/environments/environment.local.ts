@@ -6,7 +6,7 @@ export const environment: Environment = {
   displayTag: 'Local->Local',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'http://localhost:8081',
-  captchaSiteKey: '6LdtP9wUAAAAANDDWvO8UYsrm4HSVSaWCEYLomEx',
+  captchaSiteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
   clientId: testEnvironmentBase.clientId,
   trainingUrl: 'https://aoudev.nnlm.gov',
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',

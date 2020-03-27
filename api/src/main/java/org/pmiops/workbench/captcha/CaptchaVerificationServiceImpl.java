@@ -1,9 +1,16 @@
 package org.pmiops.workbench.captcha;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import com.google.common.annotations.VisibleForTesting;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
 import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -17,7 +24,19 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
 
   final String urlPattern = "https://%s/login";
 
-  final String localHostUrlPattern = "http://%s:4200/login";
+  final List<String> nonTestCaptchaURLs = new ArrayList<String>(Arrays.asList(
+      "https://workbench.researchallofus.org/login",
+      "https://all-of-us-rw-stable.appspot.com/login"
+  ));
+
+  final List<String> testCaptchaURLs = new ArrayList<String>(Arrays.asList(
+      "http://localhost:4200/login",
+      "https://all-of-us-workbench-test.appspot.com",
+      "https://all-of-us-rw-staging.appspot.com/login",
+      "https://all-of-us-rw-perf.appspot.com/login"
+  ));
+
+  final String googleTestHost = "testkey.google.com";
 
   private CloudStorageService cloudStorageService;
   final Provider<WorkbenchConfig> configProvider;
@@ -34,6 +53,13 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
     this.cloudStorageService = cloudStorageService;
     this.configProvider = configProvider;
     this.captchaApiProvider = captchaApiProvider;
+  }
+
+  @VisibleForTesting
+  public void mockLoginUrl(String loginUrl) {
+    WorkbenchConfig.AdminConfig adminConfig= new WorkbenchConfig.AdminConfig();
+    adminConfig.loginUrl = loginUrl;
+    configProvider.get().admin = adminConfig;
   }
 
   /**
@@ -61,10 +87,18 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
     String captchaHostname = response.getHostname();
     String uiUrl = configProvider.get().admin.loginUrl;
 
-    // check if the UI URL has the host as send by Captcha Response
-    boolean captchaHostNameMatchUI =
-        String.format(urlPattern, captchaHostname).equals(uiUrl)
-            || String.format(localHostUrlPattern, captchaHostname).equals(uiUrl);
+    boolean captchaHostNameMatchUI = false;
+    // Production/Stable should  not use google test Key and the domainName should match with the
+    // one return from Captcha Response
+    if (nonTestCaptchaURLs.contains(uiUrl)) {
+      // check if the UI URL has the host as send by Captcha Response
+      captchaHostNameMatchUI =
+          String.format(urlPattern, captchaHostname).equals(uiUrl);
+    } else {
+      // If URL is using google test key it should match one of AllOfUs urls(local/test/staging)
+      captchaHostNameMatchUI = captchaHostname.equals(googleTestHost)
+          && testCaptchaURLs.contains(uiUrl);
+    }
     if (!captchaHostNameMatchUI) {
       log.log(
           Level.SEVERE, String.format("Captcha Host Name %s does not match UI", captchaHostname));

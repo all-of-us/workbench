@@ -4,7 +4,7 @@ export const environment: Environment = {
   displayTag: 'Stable',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'https://api-dot-all-of-us-rw-stable.appspot.com',
-  captchaSiteKey: '',
+  captchaSiteKey: '6LcKXeQUAAAAAEK734FfI8O3BTzCMhewzmI2sBeC',
   clientId: '56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com',
   leoApiUrl: 'https://notebooks.firecloud.org',
   publicUiUrl: 'https://www.databrowser.stable.fake-research-aou.org',

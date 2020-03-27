@@ -4,7 +4,7 @@ export const environment: Environment = {
   displayTag: 'Perf',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'https://api-dot-all-of-us-rw-perf.appspot.com',
-  captchaSiteKey: '',
+  captchaSiteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
   clientId: '63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com',
   leoApiUrl: 'https://leonardo.dsde-perf.broadinstitute.org',
   // There is no perf environment for the data browser
