@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit } from '@angular/core';
-import {attributesStore, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
@@ -64,13 +64,6 @@ export class ModalComponent implements OnInit, OnDestroy {
           this.open = true;
         }
       });
-    this.subscription.add(attributesStore
-      .filter(crit => !!crit)
-      .subscribe(criterion => {
-        this.backMode = this.mode;
-        this.attributesNode = criterion;
-        this.mode = 'attributes';
-      }));
   }
 
   setScroll = (id: string) => {
@@ -88,7 +81,6 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   close() {
     wizardStore.next(undefined);
-    attributesStore.next( undefined);
     this.attributesNode = undefined;
     this.autocompleteSelection = undefined;
     this.hierarchyNode = undefined;
@@ -250,6 +242,12 @@ export class ModalComponent implements OnInit, OnDestroy {
   setAutocompleteSelection = (selection: any) => {
     this.loadingSubtree = true;
     this.autocompleteSelection = selection;
+  }
+
+  setAttributes = (criterion: any) => {
+    this.backMode = this.mode;
+    this.attributesNode = criterion;
+    this.mode = 'attributes';
   }
 
   addSelection = (param: any) => {

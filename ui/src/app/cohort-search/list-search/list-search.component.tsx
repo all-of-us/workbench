@@ -1,5 +1,7 @@
 import {Component, Input} from '@angular/core';
-import {attributesStore} from 'app/cohort-search/search-state.service';
+import * as React from 'react';
+import {Key} from 'ts-key-enum';
+
 import {domainToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -12,8 +14,6 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType} from 'generated/fetch';
-import * as React from 'react';
-import {Key} from 'ts-key-enum';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -144,6 +144,7 @@ interface Props {
   hierarchy: Function;
   select: Function;
   selections: Array<string>;
+  setAttributes: Function;
   wizard: any;
   workspace: WorkspaceData;
 }
@@ -226,10 +227,6 @@ export const ListSearch = withCurrentWorkspace()(
       this.props.select(param);
     }
 
-    launchAttributes = (row: any) => {
-      attributesStore.next(row);
-    }
-
     showHierarchy = (row: any) => {
       this.trackEvent('More Info');
       this.props.hierarchy(row);
@@ -299,7 +296,7 @@ export const ListSearch = withCurrentWorkspace()(
         <td style={{...columnStyle, textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
           {row.selectable && <div style={{...styles.selectDiv}}>
             {attributes &&
-              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.launchAttributes(row)}/>
+              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.props.setAttributes(row)}/>
             }
             {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
             {unselected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='16' onClick={() => this.selectItem(row)}/>}
@@ -419,8 +416,9 @@ export class ListSearchComponent extends ReactWrapperBase {
   @Input('hierarchy') hierarchy: Props['hierarchy'];
   @Input('select') select: Props['select'];
   @Input('selections') selections: Props['selections'];
+  @Input('setAttributes') setAttributes: Props['setAttributes'];
   @Input('wizard') wizard: Props['wizard'];
   constructor() {
-    super(ListSearch, ['hierarchy', 'select', 'selections', 'wizard']);
+    super(ListSearch, ['hierarchy', 'select', 'selections', 'setAttributes', 'wizard']);
   }
 }

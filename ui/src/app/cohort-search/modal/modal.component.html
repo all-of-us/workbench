@@ -80,6 +80,7 @@
                       [select]="addSelection"
                       [selections]="selectionIds"
                       [selectOption]="setAutocompleteSelection"
+                      [setAttributes]="setAttributes"
                       [setSearchTerms]="setTreeSearchTerms"
                       [wizard]="wizard"></crit-tree>
                   </div>
@@ -88,6 +89,7 @@
                     <crit-list-search [hierarchy]="showHierarchy"
                       [select]="addSelection"
                       [selections]="selectionIds"
+                      [setAttributes]="setAttributes"
                       [wizard]="wizard"></crit-list-search>
                   </div>
                   <!-- Modifiers Page -->
@@ -99,8 +101,9 @@
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">
                     <crit-attributes-page *ngIf="attributesNode"
+                      [close]="back"
                       [node]="attributesNode"
-                      [close]="back"></crit-attributes-page>
+                      [select]="addSelection"></crit-attributes-page>
                   </div>
                 </div>
               </ng-container>

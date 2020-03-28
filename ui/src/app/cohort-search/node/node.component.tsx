@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
-import {attributesStore,  ppiQuestions} from 'app/cohort-search/search-state.service';
+import {ppiQuestions} from 'app/cohort-search/search-state.service';
 import {domainToTitle, subTypeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
@@ -141,6 +141,7 @@ interface TreeNodeProps {
   searchTerms: string;
   select: Function;
   selections: Array<string>;
+  setAttributes: Function;
 }
 
 interface TreeNodeState {
@@ -325,8 +326,8 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   render() {
     const {autocompleteSelection, fullTree, groupSelections, node,
-      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selections}
-      = this.props;
+      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selections,
+      setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = fullTree ? node.children : children;
     const selected = selections.includes(this.paramId) || groupSelections.includes(parentId);
@@ -349,7 +350,7 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             {hasAttributes
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
-                  onClick={() => attributesStore.next(node)}/>
+                  onClick={() => setAttributes(node)}/>
               : selected
                 ? <ClrIcon style={{...styles.selectIcon, ...styles.selected}}
                     shape='check-circle' size='20'/>
@@ -380,7 +381,8 @@ class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                                                       scrollToMatch={scrollToMatch}
                                                       searchTerms={searchTerms}
                                                       select={(s) => select(s)}
-                                                      selections={selections}/>)
+                                                      selections={selections}
+                                                      setAttributes={setAttributes}/>)
           }
         </div>
       }
@@ -402,6 +404,7 @@ interface Props {
   select: Function;
   selections: Array<string>;
   selectOption: Function;
+  setAttributes: Function;
   setSearchTerms: Function;
   wizard: any;
 }
@@ -501,8 +504,8 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   render() {
-    const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selections, selectOption, setSearchTerms,
-      wizard: {fullTree}} = this.props;
+    const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selections, selectOption, setAttributes,
+      setSearchTerms, wizard: {fullTree}} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
       {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
@@ -533,7 +536,8 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                                                     scrollToMatch={scrollToMatch}
                                                     searchTerms={searchTerms}
                                                     select={(s) => select(s)}
-                                                    selections={selections}/>)}
+                                                    selections={selections}
+                                                    setAttributes={setAttributes}/>)}
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
     </React.Fragment>;
@@ -554,6 +558,7 @@ export class CriteriaTreeComponent extends ReactWrapperBase {
   @Input('select') select: Props['select'];
   @Input('selections') selections: Props['selections'];
   @Input('selectOption') selectOption: Props['selectOption'];
+  @Input('setAttributes') setAttributes: Props['setAttributes'];
   @Input('setSearchTerms') setSearchTerms: Props['setSearchTerms'];
   @Input('wizard') wizard: Props['wizard'];
 
@@ -568,6 +573,7 @@ export class CriteriaTreeComponent extends ReactWrapperBase {
       'select',
       'selections',
       'selectOption',
+      'setAttributes',
       'setSearchTerms',
       'wizard'
     ]);
