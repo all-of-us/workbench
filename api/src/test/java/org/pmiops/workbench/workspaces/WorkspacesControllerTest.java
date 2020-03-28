@@ -1875,44 +1875,6 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceWithNotebooks() throws Exception {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName("billing-account");
-
-    ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-    req.setWorkspace(modWorkspace);
-
-    FirecloudWorkspace fcWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-    fcWorkspace.setBucketName("bucket2");
-    String f1 = NotebooksService.withNotebookExtension("notebooks/f1");
-    String f2 = NotebooksService.withNotebookExtension("notebooks/f2 with spaces");
-    String f3 = "foo/f3.vcf";
-    // Note: mockBlob cannot be inlined into thenReturn() due to Mockito nuances.
-    List<Blob> blobs =
-        ImmutableList.of(
-            mockBlob(BUCKET_NAME, f1), mockBlob(BUCKET_NAME, f2), mockBlob(BUCKET_NAME, f3));
-    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(blobs);
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController
-        .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-        .getBody()
-        .getWorkspace();
-    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f1), BlobId.of("bucket2", f1));
-    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f2), BlobId.of("bucket2", f2));
-    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
-  }
-
-  @Test
   public void testCloneWorkspaceDifferentOwner() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2142,36 +2104,6 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
-  }
-
-  @Test(expected = FailedPreconditionException.class)
-  public void testCloneWithMassiveNotebook() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-
-    ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-    req.setWorkspace(modWorkspace);
-    FirecloudWorkspace fcWorkspace =
-        testMockFactory.createFcWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-    fcWorkspace.setBucketName("bucket2");
-    stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
-    Blob bigNotebook =
-        mockBlob(BUCKET_NAME, NotebooksService.withNotebookExtension("notebooks/nb"));
-    when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
-    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(ImmutableList.of(bigNotebook));
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController
-        .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-        .getBody()
-        .getWorkspace();
   }
 
   @Test
