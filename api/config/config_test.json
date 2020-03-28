@@ -96,7 +96,7 @@
     "enableBillingLockout": true,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
-    "sendFreeTierAlertEmails": false,
+    "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false

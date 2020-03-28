@@ -90,10 +90,10 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
-    "enableBillingLockout": false,
+    "enableBillingLockout": true,
     "enableSumoLogicEventHandling": false,
     "useKeylessDelegatedCredentials": false,
-    "sendFreeTierAlertEmails": false,
+    "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": false,
     "requireInstitutionalVerification": false,
     "enableCBAgeTypeOptions": false
