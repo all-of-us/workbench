@@ -5,44 +5,54 @@ import static com.google.common.truth.Truth.assertThat;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.pmiops.workbench.api.BaseControllerTest;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
 import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.junit4.SpringRunner;
 
-public class CaptchaVerificationServiceTest extends BaseControllerTest {
+@RunWith(SpringRunner.class)
+public class CaptchaVerificationServiceTest {
 
   final String prodAllOfUsUrl = "https://workbench.researchallofus.org/login";
   final String testAllOfUsUrl = "https://all-of-us-workbench-test.appspot.com";
   final String responseToken = "responseToken";
 
   @MockBean private CloudStorageService cloudStorageService;
-  @MockBean private WorkbenchConfig configProvider;
   @MockBean private CaptchaApi captchaApiProvider;
 
-  @MockBean private WorkbenchConfig.AdminConfig adminConfig;
   @Autowired private CaptchaVerificationServiceImpl captchaVerificationService;
+
+  private static WorkbenchConfig config;
 
   @TestConfiguration
   @Import({CaptchaVerificationServiceImpl.class, CaptchaApi.class})
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig workbenchConfig() {
+      return config;
+    }
+  }
 
   @Before
-  @Override
   public void setUp() throws IOException {
-    super.setUp();
+    config = WorkbenchConfig.createEmptyConfig();
+    config.admin.loginUrl = "hostname";
     Mockito.when(cloudStorageService.getCaptchaServerKey()).thenReturn("key");
     try {
       mockCaptchaResponse("hostName", true);
     } catch (ApiException ex) {
       ex.printStackTrace();
-      ;
     }
   }
 
@@ -50,7 +60,7 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
     CaptchaVerificationResponse response = new CaptchaVerificationResponse();
     response.setHostname(hostName);
     response.setSuccess(true);
-    captchaVerificationService.mockUseTestCaptcha(true);
+    config.captcha.useTestCaptcha = true;
     Mockito.when(captchaApiProvider.verify("key", responseToken)).thenReturn(response);
   }
 
@@ -58,8 +68,7 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
   public void testCreateAccount_invalidHostName() throws ApiException {
     // This should return false since the host name can either be google test hostname or one of
     // AllOfUs urls
-    captchaVerificationService.mockLoginUrl("hostname");
-    captchaVerificationService.mockUseTestCaptcha(false);
+    config.captcha.useTestCaptcha = false;
     boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
     assertThat(captchaSuccess).isFalse();
   }
@@ -71,8 +80,8 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
   @Test
   public void testCreateAccount_nonCaptchaTestHosts() throws ApiException {
     mockCaptchaResponse("workbench.researchallofus.org", true);
-    captchaVerificationService.mockLoginUrl(prodAllOfUsUrl);
-    captchaVerificationService.mockUseTestCaptcha(false);
+    config.admin.loginUrl = prodAllOfUsUrl;
+    config.captcha.useTestCaptcha = false;
 
     boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
     assertThat(captchaSuccess).isTrue();
@@ -82,14 +91,14 @@ public class CaptchaVerificationServiceTest extends BaseControllerTest {
   public void testCreateAccount_googleTestKey() throws ApiException {
     // AllOfUs prod url should not be using google test captcha keys
     mockCaptchaResponse("testkey.google.com", true);
-    captchaVerificationService.mockUseTestCaptcha(false);
-    captchaVerificationService.mockLoginUrl(prodAllOfUsUrl);
+    config.admin.loginUrl = prodAllOfUsUrl;
+    config.captcha.useTestCaptcha = false;
     boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
     assertThat(captchaSuccess).isFalse();
 
     // AllOfUs test url should be using google test captcha keys
-    captchaVerificationService.mockLoginUrl(testAllOfUsUrl);
-    captchaVerificationService.mockUseTestCaptcha(true);
+    config.admin.loginUrl = testAllOfUsUrl;
+    config.captcha.useTestCaptcha = true;
 
     captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
     assertThat(captchaSuccess).isTrue();
