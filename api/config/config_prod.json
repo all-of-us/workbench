@@ -96,7 +96,8 @@
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false,
     "requireInstitutionalVerification": false,
-    "enableCBAgeTypeOptions": false
+    "enableCBAgeTypeOptions": false,
+    "enableV2DataUserCodeOfConduct": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-prod"

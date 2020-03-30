@@ -1,5 +1,5 @@
 import {Button} from 'app/components/buttons';
-import {FlexColumn} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -34,8 +34,8 @@ const InitialsAgreement = (props) => {
   </div>;
 };
 
-export function getDataUseAgreementWidget(submitting, initialWork,
-  initialName, initialSanctions, errors, profile) {
+export function getDataUseAgreementWidgetV1(submitting, initialWork, initialName,
+                                            initialSanctions, errors, profile) {
   return <FlexColumn style={{
     borderRadius: '1rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.8),
