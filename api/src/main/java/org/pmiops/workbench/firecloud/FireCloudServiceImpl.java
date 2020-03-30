@@ -330,7 +330,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .namespace(toProject)
             .name(toName)
             // We copy only the notebooks/ subdirectory as a heuristic to avoid unintentionally
-            // performing a deep copy of workspace blobs.
+            // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
                 ImmutableList.of(
