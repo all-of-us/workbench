@@ -38,8 +38,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   treeSearchTerms = '';
   autocompleteSelection: any;
 
-  constructor() {}
-
   ngOnInit() {
     this.subscription = wizardStore
       .filter(wizard => !!wizard)
@@ -115,6 +113,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
     }
     const searchRequest = searchRequestStore.getValue();
+    item.searchParameters = this.selections;
     if (groupId) {
       const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
       if (groupIndex > -1) {
@@ -251,11 +250,15 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   addSelection = (param: any) => {
-    this.selectionIds.push(param.parameterId);
-    this.selections.push(param);
-    if (param.group) {
-      this.groupSelections.push(param.id);
+    if (this.selectionIds.includes(param.parameterId)) {
+      this.selections = this.selections.filter(p => p.parameterId !== param.parameterId);
+    } else {
+      this.selectionIds.push(param.parameterId);
+      if (param.group) {
+        this.groupSelections.push(param.id);
+      }
     }
+    this.selections.push(param);
   }
 
   removeSelection = (param: any) => {

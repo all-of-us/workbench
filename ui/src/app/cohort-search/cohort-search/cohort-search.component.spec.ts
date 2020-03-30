@@ -11,7 +11,7 @@ import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.com
 import {ModalComponent} from 'app/cohort-search/modal/modal.component';
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
-import {NodeComponent} from 'app/cohort-search/node/node.component';
+import {NodeComponent} from 'app/cohort-search/tree-node/tree-node.component';
 import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
 import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
