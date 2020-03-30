@@ -93,7 +93,7 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
-    "enableBillingLockout": false,
+    "enableBillingLockout": true,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": false,
     "sendFreeTierAlertEmails": true,
