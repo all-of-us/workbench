@@ -176,12 +176,6 @@ export const ListSearch = withCurrentWorkspace()(
       };
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.selections !== prevProps.selections) {
-        console.log(this.props.selections);
-      }
-    }
-
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
       if (key === Key.Enter && value !== '') {

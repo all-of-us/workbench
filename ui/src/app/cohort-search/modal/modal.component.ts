@@ -96,9 +96,6 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.backMode = 'list';
         this.hierarchyNode = undefined;
         this.mode = 'list';
-        this.selectionIds = [];
-        this.selections = [];
-        this.treeSearchTerms = '';
         break;
       default:
         this.attributesNode = undefined;
@@ -253,12 +250,12 @@ export class ModalComponent implements OnInit, OnDestroy {
     if (this.selectionIds.includes(param.parameterId)) {
       this.selections = this.selections.filter(p => p.parameterId !== param.parameterId);
     } else {
-      this.selectionIds.push(param.parameterId);
+      this.selectionIds = [...this.selectionIds, param.parameterId];
       if (param.group) {
-        this.groupSelections.push(param.id);
+        this.groupSelections = [...this.groupSelections, param.parameterId];
       }
     }
-    this.selections.push(param);
+    this.selections = [...this.selections, param];
   }
 
   removeSelection = (param: any) => {

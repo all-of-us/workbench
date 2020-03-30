@@ -3,13 +3,11 @@ import * as React from 'react';
 
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {TreeNode} from 'app/cohort-search/tree-node/tree-node.component';
-import {domainToTitle, subTypeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, DomainType} from 'generated/fetch';
 
@@ -102,10 +100,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
   loadRootNodes() {
     const {node: {domainId, id, isStandard, type}} = this.props;
-    // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
-    if (domainId === DomainType.SURVEY.toString()) {
-      this.trackEvent();
-    }
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
@@ -151,16 +145,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         }
       }
     }
-  }
-
-  trackEvent() {
-    const {node: {domainId, name, subtype}} = this.props;
-    const formattedName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
-    triggerEvent(
-      'Cohort Builder Search',
-      'Click',
-      `${domainToTitle(domainId)} - ${formattedName} - Expand`
-    );
   }
 
   get showHeader() {

@@ -152,10 +152,6 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   loadChildren() {
     const {node: {count, domainId, id, isStandard, name, type}} = this.props;
-    // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
-    if (domainId === DomainType.SURVEY.toString()) {
-      this.trackEvent();
-    }
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
@@ -204,29 +200,23 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       this.loadChildren();
     }
     if (searchMatch) {
-      setTimeout(() => scrollToMatch(id));
+      scrollToMatch(id);
     }
     this.setState({expanded, searchMatch});
   }
 
-  trackEvent() {
-    const {node: {domainId, name, parentId, subtype}} = this.props;
-    if (parentId === 0 && this.state.expanded) {
-      const formattedName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `${domainToTitle(domainId)} - ${formattedName} - Expand`
-      );
-    }
-  }
-
   toggleExpanded() {
-    const {node: {domainId, group}} = this.props;
+    const {node: {domainId, group, name, parentId, subtype}} = this.props;
     if (group) {
       const {children, expanded} = this.state;
-      if (domainId !== DomainType.PHYSICALMEASUREMENT.toString() && !expanded && !children) {
-        this.loadChildren();
+      if (!expanded) {
+        if (parentId === 0) {
+          const labelName = domainId === DomainType.SURVEY.toString() ? name : subTypeToTitle(subtype);
+          triggerEvent('Cohort Builder Search', 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
+        }
+        if (domainId !== DomainType.PHYSICALMEASUREMENT.toString() && !children) {
+          this.loadChildren();
+        }
       }
       this.setState({expanded: !expanded});
     }
@@ -234,7 +224,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   get paramId() {
     const {node: {code, conceptId, domainId, id}} = this.props;
-    return `param${conceptId && !(domainId === DomainType.SURVEY.toString()) ? (conceptId + code) : id}`;
+    return `param${!!conceptId && domainId !== DomainType.SURVEY.toString() ? (conceptId + code) : id}`;
   }
 
   get isPMCat() {
