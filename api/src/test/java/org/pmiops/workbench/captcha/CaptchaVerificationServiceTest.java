@@ -45,15 +45,11 @@ public class CaptchaVerificationServiceTest {
   }
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() throws IOException, ApiException {
     config = WorkbenchConfig.createEmptyConfig();
     config.admin.loginUrl = "hostname";
     Mockito.when(cloudStorageService.getCaptchaServerKey()).thenReturn("key");
-    try {
-      mockCaptchaResponse("hostName", true);
-    } catch (ApiException ex) {
-      ex.printStackTrace();
-    }
+    mockCaptchaResponse("hostName", true);
   }
 
   private void mockCaptchaResponse(String hostName, boolean success) throws ApiException {
@@ -89,7 +85,7 @@ public class CaptchaVerificationServiceTest {
 
   @Test
   public void testCreateAccount_googleTestKey() throws ApiException {
-    config.admin.loginUrl = testUrl;
+    mockCaptchaResponse(testUrl, true);
     config.captcha.useTestCaptcha = true;
 
     boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
