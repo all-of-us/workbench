@@ -22,5 +22,6 @@ export const testEnvironmentBase = {
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,
-  enableNewConceptTabs: false
+  enableNewConceptTabs: false,
+  enableSignedInFooter: true
 };
