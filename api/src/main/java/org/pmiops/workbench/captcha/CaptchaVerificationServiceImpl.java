@@ -17,7 +17,11 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
 
   final String urlPattern = "https://%s/login";
 
-  final String localHostUrlPattern = "http://%s:4200/login";
+  // In case of environments using automation test like  local/Test etc we will be using google
+  // captcha test keys
+  // https://developers.google.com/recaptcha/docs/faq#id-like-to-run-automated-tests-with-recaptcha.-what-should-i-do
+  // which will send the following as the hostName if successful
+  final String googleTestHost = "testkey.google.com";
 
   private CloudStorageService cloudStorageService;
   final Provider<WorkbenchConfig> configProvider;
@@ -60,11 +64,18 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
     }
     String captchaHostname = response.getHostname();
     String uiUrl = configProvider.get().admin.loginUrl;
+    boolean usingTestCaptcha = configProvider.get().captcha.useTestCaptcha;
+    boolean captchaHostNameMatchUI = false;
 
-    // check if the UI URL has the host as send by Captcha Response
-    boolean captchaHostNameMatchUI =
-        String.format(urlPattern, captchaHostname).equals(uiUrl)
-            || String.format(localHostUrlPattern, captchaHostname).equals(uiUrl);
+    // Production/Stable should  not use google test Key and the domainName should match with the
+    // one return from Captcha Response
+    if (!usingTestCaptcha) {
+      // check if the UI URL has the host as send by Captcha Response
+      captchaHostNameMatchUI = String.format(urlPattern, captchaHostname).equals(uiUrl);
+    } else {
+      // Captcha returns host as testkey.google.com, if test keys are used
+      captchaHostNameMatchUI = captchaHostname.equals(googleTestHost);
+    }
     if (!captchaHostNameMatchUI) {
       log.log(
           Level.SEVERE, String.format("Captcha Host Name %s does not match UI", captchaHostname));
