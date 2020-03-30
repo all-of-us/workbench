@@ -24,7 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class CaptchaVerificationServiceTest {
 
   final String prodAllOfUsUrl = "https://workbench.researchallofus.org/login";
-  final String testAllOfUsUrl = "https://all-of-us-workbench-test.appspot.com";
+  final String testUrl = "testkey.google.com";
   final String responseToken = "responseToken";
 
   @MockBean private CloudStorageService cloudStorageService;
@@ -66,9 +66,9 @@ public class CaptchaVerificationServiceTest {
 
   @Test
   public void testCreateAccount_invalidHostName() throws ApiException {
-    // This should return false since the host name can either be google test hostname or one of
     // AllOfUs urls
     config.captcha.useTestCaptcha = false;
+    config.admin.loginUrl = "fakeHostName";
     boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
     assertThat(captchaSuccess).isFalse();
   }
@@ -89,18 +89,10 @@ public class CaptchaVerificationServiceTest {
 
   @Test
   public void testCreateAccount_googleTestKey() throws ApiException {
-    // AllOfUs prod url should not be using google test captcha keys
-    mockCaptchaResponse("testkey.google.com", true);
-    config.admin.loginUrl = prodAllOfUsUrl;
-    config.captcha.useTestCaptcha = false;
-    boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
-    assertThat(captchaSuccess).isFalse();
-
-    // AllOfUs test url should be using google test captcha keys
-    config.admin.loginUrl = testAllOfUsUrl;
+    config.admin.loginUrl = testUrl;
     config.captcha.useTestCaptcha = true;
 
-    captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
+    boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
     assertThat(captchaSuccess).isTrue();
   }
 }

@@ -1,9 +1,6 @@
 package org.pmiops.workbench.captcha;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -20,14 +17,6 @@ import org.springframework.stereotype.Service;
 public class CaptchaVerificationServiceImpl implements CaptchaVerificationService {
 
   final String urlPattern = "https://%s/login";
-
-  final List<String> testCaptchaURLs =
-      new ArrayList<String>(
-          Arrays.asList(
-              "http://localhost:4200/login",
-              "https://all-of-us-workbench-test.appspot.com",
-              "https://all-of-us-rw-staging.appspot.com/login",
-              "https://all-of-us-rw-perf.appspot.com/login"));
 
   // In case of environments using automation test like  local/Test etc we will be using google
   // captcha test keys
@@ -100,10 +89,8 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
       // check if the UI URL has the host as send by Captcha Response
       captchaHostNameMatchUI = String.format(urlPattern, captchaHostname).equals(uiUrl);
     } else {
-      // If URL is using google test key hence the host return will always be testkey.google.com
-      // hence check if the UI url in config matches one of AllOfUs urls(local/test/staging/perf)
-      captchaHostNameMatchUI =
-          captchaHostname.equals(googleTestHost) && testCaptchaURLs.contains(uiUrl);
+      // Captcha returns host as testkey.google.com, if test keys are used
+      captchaHostNameMatchUI = captchaHostname.equals(googleTestHost);
     }
     if (!captchaHostNameMatchUI) {
       log.log(
