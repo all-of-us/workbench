@@ -72,6 +72,7 @@ public class CaptchaVerificationServiceTest {
   /**
    * For any of the AllOfUs urls not using captcha test keys, the hostName should match exactly with
    * that send by google Captcha server
+   * @throws ApiException
    */
   @Test
   public void testCreateAccount_nonCaptchaTestHosts() throws ApiException {
@@ -82,7 +83,7 @@ public class CaptchaVerificationServiceTest {
     boolean captchaSuccess = captchaVerificationService.verifyCaptcha(responseToken);
     assertThat(captchaSuccess).isTrue();
   }
-
+  
   @Test
   public void testCreateAccount_googleTestKey() throws ApiException {
     mockCaptchaResponse(testUrl, true);
