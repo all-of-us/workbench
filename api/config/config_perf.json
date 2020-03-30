@@ -97,7 +97,7 @@
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
     "enableBillingLockout": false,
-    "enableSumoLogicEventHandling": false,
+    "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": false,
     "enableMoodleV2Api": false,
