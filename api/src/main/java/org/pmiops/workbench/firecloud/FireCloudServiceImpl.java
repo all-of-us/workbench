@@ -42,6 +42,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceRequestClone;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -164,13 +165,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
     apiClient.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
     return apiClient;
-  }
-
-  private void checkAndAddRegistered(FirecloudWorkspaceIngest workspaceIngest) {
-    // TODO: add concept of controlled auth domain.
-    FirecloudManagedGroupRef registeredDomain = new FirecloudManagedGroupRef();
-    registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
-    workspaceIngest.setAuthorizationDomain(ImmutableList.of(registeredDomain));
   }
 
   @Override
@@ -315,10 +309,15 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public FirecloudWorkspace createWorkspace(String projectName, String workspaceName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    FirecloudWorkspaceIngest workspaceIngest = new FirecloudWorkspaceIngest();
-    workspaceIngest.setName(workspaceName);
-    workspaceIngest.setNamespace(projectName);
-    checkAndAddRegistered(workspaceIngest);
+    FirecloudWorkspaceIngest workspaceIngest =
+        new FirecloudWorkspaceIngest()
+            .namespace(projectName)
+            .name(workspaceName)
+            .authorizationDomain(
+                ImmutableList.of(
+                    new FirecloudManagedGroupRef()
+                        .membersGroupName(configProvider.get().firecloud.registeredDomainName)));
+
     return retryHandler.run((context) -> workspacesApi.createWorkspace(workspaceIngest));
   }
 
@@ -326,12 +325,20 @@ public class FireCloudServiceImpl implements FireCloudService {
   public FirecloudWorkspace cloneWorkspace(
       String fromProject, String fromName, String toProject, String toName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    FirecloudWorkspaceIngest workspaceIngest = new FirecloudWorkspaceIngest();
-    workspaceIngest.setNamespace(toProject);
-    workspaceIngest.setName(toName);
-    checkAndAddRegistered(workspaceIngest);
+    FirecloudWorkspaceRequestClone cloneRequest =
+        new FirecloudWorkspaceRequestClone()
+            .namespace(toProject)
+            .name(toName)
+            // We copy only the notebooks/ subdirectory as a heuristic to avoid unintentionally
+            // propagating copies of large data files elswhere in the bucket.
+            .copyFilesWithPrefix("notebooks/")
+            .authorizationDomain(
+                ImmutableList.of(
+                    new FirecloudManagedGroupRef()
+                        .membersGroupName(configProvider.get().firecloud.registeredDomainName)));
+
     return retryHandler.run(
-        (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest));
+        (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, cloneRequest));
   }
 
   @Override

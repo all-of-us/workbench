@@ -1,6 +1,5 @@
 package org.pmiops.workbench.workspaces;
 
-import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -55,7 +53,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -108,8 +105,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
-  // If we later decide to tune this value, consider moving to the WorkbenchConfig.
-  private static final int MAX_CLONE_FILE_SIZE_MB = 100;
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
 
   private Retryer<Boolean> retryer =
@@ -516,30 +511,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             fromWorkspaceId,
             toFcWorkspaceId.getWorkspaceNamespace(),
             toFcWorkspaceId.getWorkspaceName());
-
-    // In the future, we may want to allow callers to specify whether files
-    // should be cloned at all (by default, yes), else they are currently stuck
-    // if someone accidentally adds a large file or if there are too many to
-    // feasibly copy within a single API request.
-    for (Blob b : cloudStorageService.getBlobList(fromBucket)) {
-      if (b.getSize() != null && b.getSize() / 1e6 > MAX_CLONE_FILE_SIZE_MB) {
-        throw new FailedPreconditionException(
-            String.format(
-                "workspace %s/%s contains a file larger than %dMB: '%s'; cannot clone - please "
-                    + "remove this file, reduce its size, or contact the workspace owner",
-                fromWorkspaceNamespace, fromWorkspaceId, MAX_CLONE_FILE_SIZE_MB, b.getName()));
-      }
-
-      try {
-        retryer.call(() -> copyBlob(toFcWorkspace.getBucketName(), b));
-      } catch (RetryException | ExecutionException e) {
-        log.log(
-            Level.SEVERE,
-            "Could not copy notebooks into new workspace's bucket "
-                + toFcWorkspace.getBucketName());
-        throw new WorkbenchException(e);
-      }
-    }
 
     // The final step in the process is to clone the AoU representation of the
     // workspace. The implication here is that we may generate orphaned
