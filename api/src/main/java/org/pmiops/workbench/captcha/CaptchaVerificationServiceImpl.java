@@ -1,6 +1,5 @@
 package org.pmiops.workbench.captcha;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -41,20 +40,6 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
     this.captchaApiProvider = captchaApiProvider;
   }
 
-  @VisibleForTesting
-  public void mockLoginUrl(String loginUrl) {
-    WorkbenchConfig.AdminConfig adminConfig = new WorkbenchConfig.AdminConfig();
-    adminConfig.loginUrl = loginUrl;
-    configProvider.get().admin = adminConfig;
-  }
-
-  @VisibleForTesting
-  public void mockUseTestCaptcha(boolean useTestCaptcha) {
-    WorkbenchConfig.CaptchaConfig captchaConfig = new WorkbenchConfig.CaptchaConfig();
-    captchaConfig.useTestCaptcha = useTestCaptcha;
-
-    configProvider.get().captcha = captchaConfig;
-  }
 
   /**
    * Calls google api to verify Captcha Response by sending the captcha Server key associated with
