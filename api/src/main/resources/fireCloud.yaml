@@ -1113,6 +1113,8 @@ definitions:
         description: The list of groups in the Authorization Domain (empty if no AD is set)
       attributes:
         type: object
+        additionalProperties:
+          type: string
       copyFilesWithPrefix:
         type: string
         description: Used for clone operations only; the prefix for files to copy between source and destination workspace buckets
