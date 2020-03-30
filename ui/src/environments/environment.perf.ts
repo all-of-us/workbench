@@ -23,5 +23,6 @@ export const environment: Environment = {
   enableCaptcha: false,
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: false,
-  enableNewConceptTabs: false
+  enableNewConceptTabs: false,
+  enableSignedInFooter: false
 };

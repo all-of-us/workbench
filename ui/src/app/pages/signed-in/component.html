@@ -43,5 +43,5 @@
                 [closeFunction]="closeInactivityModal"></app-text-modal>
   </div>
 
-  <app-footer *ngIf="!minimizeChrome" [type]="footerTypeEnum.Workbench"></app-footer>
+  <app-footer *ngIf="!minimizeChrome && enableSignedInFooter" [type]="footerTypeEnum.Workbench"></app-footer>
 </div>
