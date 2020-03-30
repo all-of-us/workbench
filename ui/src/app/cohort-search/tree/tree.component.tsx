@@ -101,7 +101,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   loadRootNodes() {
-    const {node: {domainId, id, isStandard, type}, wizard: {fullTree}} = this.props;
+    const {node: {domainId, id, isStandard, type}} = this.props;
     // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
     if (domainId === DomainType.SURVEY.toString()) {
       this.trackEvent();
@@ -109,10 +109,10 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
     this.setState({loading: true});
     const {cdrVersionId} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === DomainType.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    const parentId = fullTree ? null : id;
+    const parentId = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? null : id;
     cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
     .then(resp => {
-      if (fullTree) {
+      if (domainId === DomainType.PHYSICALMEASUREMENT.toString()) {
         let children = [];
         resp.items.forEach(child => {
           child['children'] = [];
@@ -172,7 +172,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
 
   render() {
     const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selections, selectOption, setAttributes,
-      setSearchTerms, wizard: {fullTree}} = this.props;
+      setSearchTerms} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
       {node.domainId !== DomainType.VISIT.toString() && <div style={styles.searchBarContainer}>
@@ -197,7 +197,6 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
         </div>}
         {!!children && children.map((child, c) => <TreeNode key={c}
                                                             autocompleteSelection={autocompleteSelection}
-                                                            fullTree={fullTree}
                                                             groupSelections={groupSelections}
                                                             node={child}
                                                             scrollToMatch={scrollToMatch}

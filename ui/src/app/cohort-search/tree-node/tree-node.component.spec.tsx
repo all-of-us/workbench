@@ -36,7 +36,6 @@ describe('TreeNode', () => {
   });
   it('should create', () => {
     const wrapper = mount(<TreeNode autocompleteSelection={undefined}
-                                      fullTree={false}
                                       groupSelections={[]}
                                       node={treeNodeStub}
                                       scrollToMatch={() => {}}

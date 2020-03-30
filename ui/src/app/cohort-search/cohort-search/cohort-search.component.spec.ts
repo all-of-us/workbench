@@ -10,16 +10,12 @@ import {GenderChartComponent} from 'app/cohort-search/gender-chart/gender-chart.
 import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
 import {ModalComponent} from 'app/cohort-search/modal/modal.component';
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
-import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
-import {NodeComponent} from 'app/cohort-search/tree-node/tree-node.component';
-import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
 import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
-import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
 import {SearchGroupListComponent} from 'app/cohort-search/search-group-list/search-group-list.component';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
-import {TreeComponent} from 'app/cohort-search/tree/tree.component';
+import {CriteriaTreeComponent} from 'app/cohort-search/tree/tree.component';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
 import {HelpSidebarComponent} from 'app/components/help-sidebar';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -46,20 +42,16 @@ describe('CohortSearchComponent', () => {
         CohortSearchComponent,
         ComboChartComponent,
         ConfirmDeleteModalComponent,
+        CriteriaTreeComponent,
         GenderChartComponent,
         DemographicsComponent,
         HelpSidebarComponent,
         ModalComponent,
         ModifierPageComponent,
-        NodeInfoComponent,
-        NodeComponent,
-        OptionInfoComponent,
         OverviewComponent,
-        SearchBarComponent,
         SearchGroupListComponent,
         ListSearchComponent,
         SelectionInfoComponent,
-        TreeComponent,
         SafeHtmlPipe,
         ValidatorErrorsComponent,
       ],

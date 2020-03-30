@@ -98,7 +98,6 @@ export interface NodeProp extends Criteria {
 interface TreeNodeProps {
   autocompleteSelection: any;
   expand?: Function;
-  fullTree: boolean;
   groupSelections: Array<number>;
   node: NodeProp;
   scrollToMatch: Function;
@@ -223,10 +222,10 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   toggleExpanded() {
-    const {fullTree, node: {group}} = this.props;
+    const {node: {domainId, group}} = this.props;
     if (group) {
       const {children, expanded} = this.state;
-      if (!fullTree && !expanded && !children) {
+      if (domainId !== DomainType.PHYSICALMEASUREMENT.toString() && !expanded && !children) {
         this.loadChildren();
       }
       this.setState({expanded: !expanded});
@@ -289,11 +288,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   render() {
-    const {autocompleteSelection, fullTree, groupSelections, node,
+    const {autocompleteSelection, groupSelections, node,
       node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selections,
       setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
-    const nodeChildren = fullTree ? node.children : children;
+    const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
     const selected = selections.includes(this.paramId) || groupSelections.includes(parentId);
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
@@ -339,7 +338,6 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {nodeChildren.map((child, c) => <TreeNode key={c}
                                                       autocompleteSelection={autocompleteSelection}
                                                       expand={() => this.setState({expanded: true})}
-                                                      fullTree={fullTree}
                                                       groupSelections={groupSelections}
                                                       node={child}
                                                       scrollToMatch={scrollToMatch}

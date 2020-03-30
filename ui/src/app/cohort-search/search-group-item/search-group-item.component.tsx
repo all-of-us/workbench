@@ -257,12 +257,12 @@ export const SearchGroupItem = withCurrentWorkspace()(
       triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
       const {groupId, item, role} = this.props;
       const _item = JSON.parse(JSON.stringify(item));
-      const {fullTree, id, searchParameters} = _item;
+      const {id, searchParameters} = _item;
       const selections = searchParameters.map(sp => sp.parameterId);
       selectionsStore.next(selections);
       const domain = _item.type;
       const {type, standard} = getTypeAndStandard(searchParameters, domain);
-      const context = {item: _item, domain, type, role, groupId, itemId: id, fullTree, standard, count: item.count};
+      const context = {item: _item, domain, type, role, groupId, itemId: id, standard, count: item.count};
       wizardStore.next(context);
     }
 
