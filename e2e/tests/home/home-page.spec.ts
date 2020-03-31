@@ -1,35 +1,22 @@
 import NewClrIconLink from '../../app/aou-elements/clr-icon-link';
 import Link from '../../app/aou-elements/link';
 import BaseElement from '../../app/aou-elements/base-element';
-import GoogleLoginPage from '../../app/google-login';
-import {FIELD_LABEL as editPageFieldLabel} from '../../app/home-page';
+import HomePage, {FIELD_LABEL as editPageFieldLabel} from '../../app/home-page';
 import WorkspaceCard from '../../app/workspace-card';
 import WorkspaceEditPage from '../../app/workspace-edit-page';
 import WorkspacesPage from '../../app/workspaces-page';
-import launchBrowser from '../../driver/puppeteer-launch';
-
-// set timeout per suite, not per test.
-jest.setTimeout(4 * 60 * 1000);
-
-const configs = require('../../resources/workbench-config');
+import {signIn} from '../app';
 
 describe('Home page ui tests', () => {
-  let browser;
-  let page;
-
   beforeEach(async () => {
-    browser = await launchBrowser();
-    page = await browser.newPage();
-    await page.setUserAgent(configs.puppeteerUserAgent);
+    await signIn(page);
   });
 
   afterEach(async () => {
-    await browser.close();
+    await jestPuppeteer.resetPage();
   });
    
   test('Check visibility of Workspace cards', async () => {
-    await GoogleLoginPage.logIn(page);
-
     const cards = await WorkspaceCard.getAllCards(page);
     let width;
     let height;
@@ -61,13 +48,10 @@ describe('Home page ui tests', () => {
       const links = await card.getPopupLinkTextsArray();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }
-
   });
 
    // Click See All Workspaces link => Opens Your Workspaces page
   test('Click on See All Workspace link', async () => {
-    await GoogleLoginPage.logIn(page);
-
     const seeAllWorkspacesLink = await Link.forLabel(page, editPageFieldLabel.SEE_ALL_WORKSPACES);
     await seeAllWorkspacesLink.click();
     const workspaces = new WorkspacesPage(page);
@@ -78,7 +62,7 @@ describe('Home page ui tests', () => {
 
    // Click Create New Workspace link => Opens Create Workspace page
   test('Click on Create New Workspace link', async () => {
-    const home = await GoogleLoginPage.logIn(page);
+    const home = new HomePage(page);
     await home.getCreateNewWorkspaceLink().then((link) => link.click());
 
     const workspaceEdit = new WorkspaceEditPage(page);
@@ -89,8 +73,6 @@ describe('Home page ui tests', () => {
   });
 
   test('Check Create New Workspace link on Home page', async () => {
-    await GoogleLoginPage.logIn(page);
-
     const anyLink = await NewClrIconLink.forLabel(page, editPageFieldLabel.CREATE_NEW_WORKSPACE, 'plus-circle');
     expect(anyLink).toBeTruthy();
     const classname = await anyLink.getProperty('className');

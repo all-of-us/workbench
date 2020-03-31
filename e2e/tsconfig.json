@@ -1,6 +1,8 @@
 {
-  "compileOnSave": false,
+  "compileOnSave": true,
   "compilerOptions": {
+    "allowUnreachableCode": false,
+    "suppressExcessPropertyErrors": false,
     "moduleResolution": "node",
     "module": "commonjs",
     "importHelpers": true,
@@ -17,6 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     "outDir": "./tsc-out",
     "allowJs": true,
+    "checkJs": true,
     "baseUrl": "./",
     "typeRoots": [
       "./node_modules/@types"
@@ -27,5 +30,6 @@
       "dom"
     ]
   },
-  "exclude": [ "tsc-out", "**/node_modules", "node_modules" ]
+  "inclue": ["/*"],
+  "exclude": [ "tsc-out", "node_modules" ]
 }

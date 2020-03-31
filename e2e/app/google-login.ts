@@ -101,6 +101,7 @@ export default class GoogleLoginPage extends BasePage {
 
   /**
    * Log in All-of-Us Workbench with default username and password.
+   * Short circuit: If page was redirected to Home page, Login to be skipped.
    * (credential stored in .env file)
    * @param email
    * @param paswd
@@ -108,15 +109,37 @@ export default class GoogleLoginPage extends BasePage {
   async login(email?: string, paswd?: string) {
     const user = email || configs.userEmail;
     const pwd = paswd || configs.userPassword;
-    await this.load();
-    const googleButton = await this.loginButton().catch((err) => {
+    await this.load(); // load the Google Sign In page
+
+    // Look for either Google Login button or Create Workspace link.
+    // If it's Login button, perform login workflow. If it's the Create New Workspace link, skip login workflow.
+    try {
+      const homePage = new HomePage(this.page);
+      const elemt1 = await Promise.race([
+        this.loginButton(),
+        homePage.getCreateNewWorkspaceLink()
+      ]);
+      // compare to the Login button
+      const [elemt2] = await this.page.$x(selectors.loginButton);
+      const isLoginButton = await page.evaluate((e1, e2) => e1 === e2, elemt2, elemt1);
+      if (!isLoginButton) {
+        // login not needed because page was redirected to the Home page.
+        console.log('return home page');
+        return await homePage.waitForLoad();
+      }
+    } catch (err) {
+      // none found. ignore error, proceed to wait for the Login button.
+    }
+    console.log('find google login button');
+    const googleLoginButton = await this.loginButton().catch((err) => {
       console.error('Google login button not found. ' + err);
       throw err;
     });
     await Promise.all([
       this.page.waitForNavigation(),
-      googleButton.click(),
+      googleLoginButton.click(),
     ]);
+
     if (!user || user.trim().length === 0) {
       console.warn('Login user email: value is empty!!!')
     }
@@ -150,7 +173,9 @@ export default class GoogleLoginPage extends BasePage {
 
   static async logIn(page: Page): Promise<HomePage> {
     await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(60000);
+    await page.setDefaultNavigationTimeout(120000);
+    await page.setViewport({ width: 1920, height: 1080 }); // should match '--window-size=1920,1080' in jest-puppeteer.config.js
+
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
     const home = new HomePage(page);

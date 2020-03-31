@@ -1,44 +1,55 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended",
-        "tslint-eslint-rules",
-        "tslint-config-prettier"
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended",
+    "tslint-eslint-rules",
+    "tslint-config-prettier"
+  ],
+  "jsRules": {
+    "object-literal-sort-keys": false
+  },
+  "rules": {
+    "file-name-casing": [
+      true,
+      "kebab-case"
     ],
-    "jsRules": {
-        "object-literal-sort-keys": false
+    "member-access": [
+      true,
+      "no-public"
+    ],
+    "object-literal-sort-keys": false,
+    "no-duplicate-imports": {
+      "severity": "error",
+      "options": {
+        "allow-namespace-imports": true
+      }
     },
-    "rules": {
-        "file-name-casing": [
-            true,
-            "kebab-case"
-        ],
-        "member-access": [
-            true,
-            "no-public"
-        ],
-        "object-literal-sort-keys": false,
-        "no-duplicate-imports": {
-            "severity": "error",
-            "options": {
-                "allow-namespace-imports": true
-            }
-        },
-        "no-console": false,
-        "no-require-imports": false,
-        "no-var-requires": false,
-        "interface-name": false,
-        "jsx-no-lambda": false,
-        "object-literal-sort-keys": false,
-        "quotemark": [true, "single", "jsx-double"],
-        "ter-indent": [true, 2],
-        "max-classes-per-file": true,
-        "max-line-length": [true,
-            {
-                "limit": 140,
-                "ignore-pattern": "^import [^,]+ from |^export | implements"
-            }
-        ]
-    }
-
+    "no-console": false,
+    "no-require-imports": false,
+    "no-var-requires": false,
+    "interface-name": false,
+    "jsx-no-lambda": false,
+    "object-literal-sort-keys": false,
+    "quotemark": [
+      true,
+      "single",
+      "jsx-double"
+    ],
+    "ter-indent": [
+      true,
+      2
+    ],
+    "max-classes-per-file": true,
+    "max-line-length": [
+      true,
+      {
+        "limit": 140,
+        "ignore-pattern": "^import [^,]+ from |^export | implements"
+      }
+    ],
+    "no-consecutive-blank-lines": [
+      true,
+      2
+    ]
+  }
 }
