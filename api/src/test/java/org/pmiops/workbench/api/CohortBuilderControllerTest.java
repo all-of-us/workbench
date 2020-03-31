@@ -187,7 +187,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteMatchesSynonyms() {
+  public void findCriteriaAutoCompleteMatchesSynonyms() {
     DbCriteria criteria =
         DbCriteria.builder()
             .addDomainId(DomainType.MEASUREMENT.toString())
@@ -202,7 +202,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .getCriteriaAutoComplete(
+            .findCriteriaAutoComplete(
                 1L,
                 DomainType.MEASUREMENT.toString(),
                 "LP12",
@@ -215,7 +215,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteMatchesCode() {
+  public void findCriteriaAutoCompleteMatchesCode() {
     DbCriteria criteria =
         DbCriteria.builder()
             .addDomainId(DomainType.MEASUREMENT.toString())
@@ -231,7 +231,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .getCriteriaAutoComplete(
+            .findCriteriaAutoComplete(
                 1L,
                 DomainType.MEASUREMENT.toString(),
                 "LP12",
@@ -244,7 +244,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteSnomed() {
+  public void findCriteriaAutoCompleteSnomed() {
     DbCriteria criteria =
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
@@ -259,7 +259,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .getCriteriaAutoComplete(
+            .findCriteriaAutoComplete(
                 1L,
                 DomainType.CONDITION.toString(),
                 "LP12",
@@ -272,9 +272,9 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteExceptions() {
+  public void findCriteriaAutoCompleteExceptions() {
     try {
-      controller.getCriteriaAutoComplete(1L, null, "blah", null, null, null);
+      controller.findCriteriaAutoComplete(1L, null, "blah", null, null, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -283,7 +283,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.getCriteriaAutoComplete(1L, "blah", "blah", "blah", null, null);
+      controller.findCriteriaAutoComplete(1L, "blah", "blah", "blah", null, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -292,7 +292,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.getCriteriaAutoComplete(
+      controller.findCriteriaAutoComplete(
           1L, DomainType.CONDITION.toString(), "blah", "blah", null, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
