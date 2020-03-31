@@ -12,7 +12,9 @@ export class DisabledGuard implements CanActivate, CanActivateChild {
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
     try {
-      // Only grab the first status, otherwise toPromise hangs forever.
+      // The user is not necessarily authenticated at this point - we have to
+      // wait for the sign-in signal before making backend requests.
+      // Only grab the first element from the observable, otherwise toPromise hangs forever.
       const isSignedIn = await this.signInService.isSignedIn$.first().toPromise();
       if (!isSignedIn) {
         return false;
