@@ -190,8 +190,8 @@ it('should clear email validation when institution is changed', async() => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
-  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Broad'});
-  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@broadinstitute.org'}});
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@vumc.org'}});
   // Blur the email input field and wait for the API request to complete.
   getEmailInput(wrapper).simulate('blur');
   await waitOneTickAndUpdate(wrapper);
@@ -215,9 +215,10 @@ it('should trigger email check when email is filled in before choosing instituti
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
-  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@broadinstitute.org'}});
+  getEmailInput(wrapper).simulate('change', {target: {value: 'institution@broadinstitute.org'}});
   getEmailInput(wrapper).simulate('blur');
   // This shouldn't strictly be needed here, since we expect the API request not to be sent due to
+  // no institution being chosen. But for consistency w/ other tests, it's included.
   await waitOneTickAndUpdate(wrapper);
 
   getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Broad'});

@@ -200,10 +200,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     profile: {
       verifiedInstitutionalAffiliation
     }} = this.state;
-    const selectedInstitution = verifiedInstitutionalAffiliation;
-    if (selectedInstitution) {
+    if (verifiedInstitutionalAffiliation && verifiedInstitutionalAffiliation.institutionShortName) {
       const selectedInstitutionObj = fp.find((institution) =>
-          institution.shortName === selectedInstitution.institutionShortName, institutions);
+          institution.shortName === verifiedInstitutionalAffiliation.institutionShortName, institutions);
       if (selectedInstitutionObj.agreementTypeEnum === AgreementType.RESTRICTED) {
         return <div data-test-id='email-error-message' style={{color: colors.danger}}>
           The institution has authorized access only to select members.<br/>
