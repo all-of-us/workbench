@@ -113,7 +113,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
       </div>
 
       {/*Underserved populations section*/}
-      {workspace.researchPurpose.population && <React.Fragment>
+      {workspace.researchPurpose.populationDetails.length > 0 && <React.Fragment>
         <div style={styles.sectionHeader}>Population of interest</div>
         <div style={styles.sectionContentContainer}>
           <div style={{marginTop: '0.5rem'}}>{getSelectedPopulations(workspace.researchPurpose)}</div>

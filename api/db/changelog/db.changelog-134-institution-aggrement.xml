@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="nsaxena" id="changelog-133-add-column-institution-aggrement">
+  <changeSet author="nsaxena" id="changelog-134-institution-aggrement">
       <addColumn tableName="institution">
         <column name="agreement_type_enum" type="tinyint"/>
       </addColumn>  

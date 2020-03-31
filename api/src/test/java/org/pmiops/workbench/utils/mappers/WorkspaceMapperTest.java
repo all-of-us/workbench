@@ -7,14 +7,13 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
@@ -31,6 +30,7 @@ import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -63,9 +63,17 @@ public class WorkspaceMapperTest {
   @Autowired private WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
-  @Import({WorkspaceMapperImpl.class})
+  @Import({WorkspaceMapperImpl.class, CommonMappers.class})
   @MockBean({WorkspaceDao.class})
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.enableBillingLockout = false;
+      return workbenchConfig;
+    }
+  }
 
   @Before
   public void setUp() {
@@ -109,12 +117,8 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setControlSet(true);
     sourceDbWorkspace.setAncestry(false);
     sourceDbWorkspace.setCommercialPurpose(false);
-    sourceDbWorkspace.setPopulation(false);
-    sourceDbWorkspace.setPopulationDetails(
-        ImmutableSet.of(SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL)
-            .stream()
-            .map(DbStorageEnums::specificPopulationToStorage)
-            .collect(Collectors.toSet()));
+    sourceDbWorkspace.setSpecificPopulationsEnum(
+        ImmutableSet.of(SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL));
     sourceDbWorkspace.setSocialBehavioral(false);
     sourceDbWorkspace.setPopulationHealth(true);
     sourceDbWorkspace.setEducational(true);
@@ -176,7 +180,6 @@ public class WorkspaceMapperTest {
         .isEqualTo(sourceDbWorkspace.getOtherPopulationDetails());
     assertThat(rp.getOtherPurpose()).isEqualTo(sourceDbWorkspace.getOtherPurpose());
     assertThat(rp.getOtherPurposeDetails()).isEqualTo(sourceDbWorkspace.getOtherPurposeDetails());
-    assertThat(rp.getPopulation()).isEqualTo(sourceDbWorkspace.getPopulation());
     assertThat(rp.getPopulationDetails())
         .containsExactlyElementsIn(sourceDbWorkspace.getSpecificPopulationsEnum());
     assertThat(rp.getPopulationHealth()).isEqualTo(sourceDbWorkspace.getPopulationHealth());

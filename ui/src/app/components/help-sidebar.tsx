@@ -32,7 +32,6 @@ const styles = reactStyles({
     top: '60px',
     right: 0,
     height: 'calc(100% - 60px)',
-    minHeight: 'calc(100vh - 156px)',
     width: 'calc(14rem + 55px)',
     overflow: 'hidden',
     color: colors.primary,
@@ -82,15 +81,12 @@ const styles = reactStyles({
     transition: 'background 0.2s linear',
     verticalAlign: 'middle'
   },
-  topBar: {
-    width: '14rem',
-    background: colorWithWhiteness(colors.primary, 0.4),
-    color: colors.white,
-    height: '1rem',
-    zIndex: 1
-  },
   closeIcon: {
+    color: colorWithWhiteness(colors.primary, 0.4),
     cursor: 'pointer',
+    position: 'absolute',
+    right: '0.25rem',
+    top: '0.25rem',
     verticalAlign: 'top'
   },
   sectionTitle: {
@@ -439,9 +435,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
-            <div style={styles.topBar}>
-              <ClrIcon shape='caret right' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
-            </div>
+            <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
             <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
               <div style={styles.textSearch}>

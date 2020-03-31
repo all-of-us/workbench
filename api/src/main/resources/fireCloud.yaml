@@ -499,7 +499,7 @@ paths:
           required: true
           in: body
           schema:
-            $ref: '#/definitions/WorkspaceIngest'
+            $ref: '#/definitions/WorkspaceRequestClone'
       responses:
         201:
           description: Successful Request
@@ -1092,6 +1092,32 @@ definitions:
         items:
           $ref: '#/definitions/ManagedGroupRef'
         description: The list of groups to form the Authorization Domain (empty if no Authorization Domain is set)
+
+  WorkspaceRequestClone:
+    description: ''
+    required:
+      - namespace
+      - name
+      - attributes
+    properties:
+      namespace:
+        type: string
+        description: The namespace (billing project) the workspace belongs to
+      name:
+        type: string
+        description: The name of the workspace
+      authorizationDomain:
+        type: array
+        items:
+          $ref: '#/definitions/ManagedGroupRef'
+        description: The list of groups in the Authorization Domain (empty if no AD is set)
+      attributes:
+        type: object
+        additionalProperties:
+          type: string
+      copyFilesWithPrefix:
+        type: string
+        description: Used for clone operations only; the prefix for files to copy between source and destination workspace buckets
 
   # The response object returned from Get or List workspace.
   WorkspaceResponse:

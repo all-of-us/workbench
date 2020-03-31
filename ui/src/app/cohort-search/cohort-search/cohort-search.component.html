@@ -28,9 +28,11 @@
     <div class="col-xl-4 col-lg-12" id="list-charts">
       <app-list-overview
         *ngIf="overview"
+        [cohort]="cohort"
+        [cohortChanged]="cohortChanged"
         [searchRequest]="criteria"
         [updateCount]="updateCount"
-        [updateSaving]="updateSaving"></app-list-overview>
+        [updating]="updating"></app-list-overview>
     </div>
     <div *ngIf="loading" class="spinner root-spinner">
       Loading...

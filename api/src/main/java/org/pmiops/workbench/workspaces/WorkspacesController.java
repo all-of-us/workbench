@@ -1,11 +1,9 @@
 package org.pmiops.workbench.workspaces;
 
-import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -24,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -56,7 +53,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -109,8 +105,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
-  // If we later decide to tune this value, consider moving to the WorkbenchConfig.
-  private static final int MAX_CLONE_FILE_SIZE_MB = 100;
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
 
   private Retryer<Boolean> retryer =
@@ -123,12 +117,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final BillingProjectBufferService billingProjectBufferService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
-  private final Provider<Cloudbilling> cloudbillingProvider;
   private final CloudStorageService cloudStorageService;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final LogsBasedMetricService logsBasedMetricService;
-  private final ManualWorkspaceMapper manualWorkspaceMapper;
   private final NotebooksService notebooksService;
   private final UserDao userDao;
   private final Provider<DbUser> userProvider;
@@ -148,7 +140,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
-      Provider<Cloudbilling> cloudBillingProvider,
       Provider<Zendesk> zendeskProvider,
       FreeTierBillingService freeTierBillingService,
       Clock clock,
@@ -157,7 +148,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
-      ManualWorkspaceMapper manualWorkspaceMapper,
       LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
@@ -167,7 +157,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.cloudStorageService = cloudStorageService;
-    this.cloudbillingProvider = cloudBillingProvider;
     this.zendeskProvider = zendeskProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
@@ -175,7 +164,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
-    this.manualWorkspaceMapper = manualWorkspaceMapper;
     this.logsBasedMetricService = logsBasedMetricService;
   }
 
@@ -297,18 +285,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    DbWorkspace reqWorkspace = manualWorkspaceMapper.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
-    dbWorkspace.setName(reqWorkspace.getName());
+    dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
+    dbWorkspace.setName(workspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
-    if (reqWorkspace.getReviewRequested()) {
+    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
+    if (workspace.getResearchPurpose().getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
-    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
+    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
@@ -336,7 +323,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     maybeFileZendeskReviewRequest(createdWorkspace);
     return createdWorkspace;
@@ -440,7 +427,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (researchPurpose != null) {
       // Note: this utility does not set the "review requested" bit or time. This is currently
       // immutable on a workspace, see RW-4132.
-      manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
     }
 
     if (workspace.getBillingAccountName() != null) {
@@ -471,7 +458,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
   }
 
   @Override
@@ -525,30 +512,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             toFcWorkspaceId.getWorkspaceNamespace(),
             toFcWorkspaceId.getWorkspaceName());
 
-    // In the future, we may want to allow callers to specify whether files
-    // should be cloned at all (by default, yes), else they are currently stuck
-    // if someone accidentally adds a large file or if there are too many to
-    // feasibly copy within a single API request.
-    for (Blob b : cloudStorageService.getBlobList(fromBucket)) {
-      if (b.getSize() != null && b.getSize() / 1e6 > MAX_CLONE_FILE_SIZE_MB) {
-        throw new FailedPreconditionException(
-            String.format(
-                "workspace %s/%s contains a file larger than %dMB: '%s'; cannot clone - please "
-                    + "remove this file, reduce its size, or contact the workspace owner",
-                fromWorkspaceNamespace, fromWorkspaceId, MAX_CLONE_FILE_SIZE_MB, b.getName()));
-      }
-
-      try {
-        retryer.call(() -> copyBlob(toFcWorkspace.getBucketName(), b));
-      } catch (RetryException | ExecutionException e) {
-        log.log(
-            Level.SEVERE,
-            "Could not copy notebooks into new workspace's bucket "
-                + toFcWorkspace.getBucketName());
-        throw new WorkbenchException(e);
-      }
-    }
-
     // The final step in the process is to clone the AoU representation of the
     // workspace. The implication here is that we may generate orphaned
     // Firecloud workspaces / buckets, but a user should not be able to see
@@ -565,7 +528,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -740,9 +703,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<DbWorkspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream()
-            .map(ws -> manualWorkspaceMapper.toApiWorkspace(ws))
-            .collect(Collectors.toList()));
+        workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
@@ -987,8 +948,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        manualWorkspaceMapper.buildRecentWorkspaceList(
-            userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
+        userRecentWorkspaces.stream()
+            .map(
+                userRecentWorkspace ->
+                    workspaceMapper.toApiRecentWorkspace(
+                        dbWorkspacesById.get(userRecentWorkspace.getWorkspaceId()),
+                        workspaceAccessLevelsById.get(userRecentWorkspace.getWorkspaceId())))
+            .collect(Collectors.toList());
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
@@ -1010,8 +976,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        manualWorkspaceMapper.buildRecentWorkspace(
-            userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
+        workspaceMapper.toApiRecentWorkspace(dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }

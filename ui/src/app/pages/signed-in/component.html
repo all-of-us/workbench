@@ -1,43 +1,47 @@
-<app-nav-bar
-  [profile]="profile"
-  [headerImg]="headerImg"
-  [displayTag]="displayTag"
-  [shouldShowDisplayTag]="shouldShowDisplayTag"
-  [bannerAdminActive]="bannerAdminActive"
-  [homeActive]="homeActive"
-  [workspacesActive]="workspacesActive"
-  [libraryActive]="libraryActive"
-  [profileActive]="profileActive"
-  [userAdminActive]="userAdminActive"
-  [workspaceAdminActive]="workspaceAdminActive"
-></app-nav-bar>
+<div class="body">
+  <app-nav-bar
+    [profile]="profile"
+    [headerImg]="headerImg"
+    [displayTag]="displayTag"
+    [shouldShowDisplayTag]="shouldShowDisplayTag"
+    [bannerAdminActive]="bannerAdminActive"
+    [homeActive]="homeActive"
+    [workspacesActive]="workspacesActive"
+    [libraryActive]="libraryActive"
+    [profileActive]="profileActive"
+    [userAdminActive]="userAdminActive"
+    [workspaceAdminActive]="workspaceAdminActive"
+  ></app-nav-bar>
 
-<clr-alert
-    *ngIf="zendeskLoadError"
-    [clrAlertType]="'alert-danger'"
-    [clrAlertAppLevel]="true"
-    [clrAlertClosable]="true">
-  <div clr-alert-item class="alert-item">
-    An error occurred loading the help desk submission form. Please reload the page, or email
-    &nbsp;<a href="mailto:support@researchallofus.org">support@researchallofus.org</a>
-    &nbsp;directly with your support request.
+  <clr-alert
+      *ngIf="zendeskLoadError"
+      [clrAlertType]="'alert-danger'"
+      [clrAlertAppLevel]="true"
+      [clrAlertClosable]="true">
+    <div clr-alert-item class="alert-item">
+      An error occurred loading the help desk submission form. Please reload the page, or email
+      &nbsp;<a href="mailto:support@researchallofus.org">support@researchallofus.org</a>
+      &nbsp;directly with your support request.
+    </div>
+  </clr-alert>
+
+  <div class="content-container">
+    <div class="background-image"></div>
+    <div class="app-container" [class.minimize-chrome]="minimizeChrome">
+      <!--
+        Angular's builtin Router module will attach specific views here
+        based on clicking routerLink elements (above) or router.navigate calls.
+      -->
+      <router-outlet></router-outlet>
+      <app-routing-spinner></app-routing-spinner>
+    </div>
+
+    <app-text-modal *ngIf="showInactivityModal"
+                [title]="'Your session is about to expire'"
+                [body]="inactivityModalText"
+                [buttonText]="'Extend Session'"
+                [closeFunction]="closeInactivityModal"></app-text-modal>
   </div>
-</clr-alert>
 
-<div class="content-container">
-  <div class="background-image"></div>
-  <div class="app-container" [class.minimize-chrome]="minimizeChrome">
-    <!--
-      Angular's builtin Router module will attach specific views here
-      based on clicking routerLink elements (above) or router.navigate calls.
-    -->
-    <router-outlet></router-outlet>
-    <app-routing-spinner></app-routing-spinner>
-  </div>
-
-  <app-text-modal *ngIf="showInactivityModal"
-              [title]="'Your session is about to expire'"
-              [body]="inactivityModalText"
-              [buttonText]="'Extend Session'"
-              [closeFunction]="closeInactivityModal"></app-text-modal>
+  <app-footer *ngIf="!minimizeChrome && enableSignedInFooter" [type]="footerTypeEnum.Workbench"></app-footer>
 </div>

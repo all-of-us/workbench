@@ -8,7 +8,6 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 
 @Mapper(componentModel = "spring")
@@ -37,14 +36,7 @@ public interface VerifiedInstitutionalAffiliationMapper {
       @Context InstitutionService institutionService) {
 
     target.setInstitution(
-        institutionService
-            .getDbInstitution(modelObject.getInstitutionShortName())
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "Could not find Institution '%s'",
-                            modelObject.getInstitutionShortName()))));
+        institutionService.getDbInstitutionOrThrow(modelObject.getInstitutionShortName()));
   }
 
   @Mapping(target = "institutionShortName", source = "institution", qualifiedByName = "shortName")

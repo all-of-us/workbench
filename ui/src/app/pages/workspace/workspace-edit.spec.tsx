@@ -64,6 +64,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('displays workspaces create page', async () => {
+    currentWorkspaceStore.next(undefined);
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Create a new Workspace');
@@ -71,6 +72,9 @@ describe('WorkspaceEdit', () => {
     // Ensure the 'drug development' checkbox is not checked when creating.
     expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked'))
       .toEqual(false);
+
+    expect(wrapper.find('[data-test-id="specific-population-no"]').first().prop('checked'))
+      .toEqual(true);
   });
 
   it('displays workspaces duplicate page', async () => {
@@ -98,7 +102,6 @@ describe('WorkspaceEdit', () => {
   it('pre-fills "specific populations" form elements when editing', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
-    workspace.researchPurpose.population = true;
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN];
 
     routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
@@ -116,7 +119,6 @@ describe('WorkspaceEdit', () => {
   it('should clear all selected specific populations if NO underrepresented populations study is selected', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
-    workspace.researchPurpose.population = true;
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
       SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
 
@@ -134,16 +136,47 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
 
     wrapper.find('[data-test-id="specific-population-no"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
 
-    // Selecting no for specific population should clear/un select all checkboxes under YES
-    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
-      .first().prop('checked')).toEqual(false);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
-      .first().prop('checked')).toEqual(false);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
-      .first().prop('checked')).toEqual(false);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`)
-      .first().prop('checked')).toEqual(false);
+    wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(workspacesApi.workspaces[0].researchPurpose.populationDetails.length).toBe(0);
+  });
+
+  it ('should select Research Purpose checkbox if sub category is selected', async () => {
+    const wrapper = component();
+
+    // Research Purpose should not be selected and sub categories should be collapsed by default
+    expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first()
+      .prop('checked')).toBe(false);
+
+    expect(wrapper.find('[data-test-id="research-purpose-categories"]').length).toBe(0);
+
+    // Click the arrow icon to expand the research purpose sub categories
+    wrapper.find('[data-test-id="research-purpose-button"]').first().simulate('click');
+
+    // Select any sub category for Research Purpose
+    wrapper.find('[data-test-id="ancestry-checkbox"]').first()
+      .simulate('change', { target: { checked: true } });
+
+    // Research Purpose checkbox should be selected now
+    expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked')).toBe(true);
+
+    wrapper.find('[data-test-id="ancestry-checkbox"]').first()
+      .simulate('change', { target: { checked: false } });
+
+    // Un-selecting the sub categories should unselect the research purpose checkbox
+    // BUT THE SUB CATEGORIES SHOULD STILL BE VISIBLE
+    expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked')).toBe(false);
+    expect(wrapper.find('[data-test-id="research-purpose-categories"]').length).not.toBe(0);
+
+
+    // Clicking the icon should collapse all the research purpose sub-categories
+    wrapper.find('[data-test-id="research-purpose-button"]').first().simulate('click');
+    expect(wrapper.find('[data-test-id="research-purpose-categories"]').length).toBe(0);
+
+
   });
 
   it('supports disable save button if Research Outcome is not answered', async () => {

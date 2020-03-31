@@ -23,7 +23,10 @@
     "bufferCapacity": 300,
     "bufferRefillProjectsPerTask": 5,
     "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-perf-1@all-of-us-rw-perf.iam.gserviceaccount.com",
@@ -50,6 +53,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-perf.appspot.com",
+    "uiBaseUrl": "https:\/\/all-of-us-rw-perf.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyB44pugxPbfevF_fb7GichIv9D9ee5-nNk",
     "projectId": "all-of-us-rw-perf",
     "shortName": "Perf",
@@ -85,19 +89,19 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": true,
-    "requireInvitationKey": true
+    "requireInvitationKey": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
-    "enableBillingLockout": false,
-    "enableSumoLogicEventHandling": false,
+    "enableBillingLockout": true,
+    "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
-    "sendFreeTierAlertEmails": false,
+    "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false,
+    "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
@@ -106,9 +110,10 @@
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
     "queueName": "rdrQueue",
-    "exportObjectsPerTask" : 10
+    "exportObjectsPerTask": 10
   },
   "captcha": {
-    "enableCaptcha": false
+    "enableCaptcha": true,
+    "useTestCaptcha": true
   }
 }

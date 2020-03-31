@@ -23,7 +23,10 @@
     "bufferCapacity": 50,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-staging-1@all-of-us-rw-staging.iam.gserviceaccount.com"
@@ -47,6 +50,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-staging.appspot.com",
+    "uiBaseUrl": "https:\/\/all-of-us-rw-staging.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
@@ -82,30 +86,31 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": false,
-    "requireInvitationKey": true
+    "requireInvitationKey": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
-    "enableBillingLockout": false,
-    "enableSumoLogicEventHandling": false,
+    "enableBillingLockout": true,
+    "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
-    "sendFreeTierAlertEmails": false,
+    "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false,
+    "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-staging"
+    "logName": "workbench-action-audit-staging"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-staging.appspot.com",
     "queueName": "rdrQueue",
-    "exportObjectsPerTask" : 10
+    "exportObjectsPerTask": 10
   },
   "captcha": {
-    "enableCaptcha": false
+    "enableCaptcha": true,
+    "useTestCaptcha": true
   }
 }

@@ -308,13 +308,14 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
               )
             }
             {
-              workspace.researchPurpose.population && this.workspaceInfoField(
+              workspace.researchPurpose.populationDetails.length > 0 && this.workspaceInfoField(
                 'Population area(s) of focus',
                 getSelectedPopulations(workspace.researchPurpose)
               )
             }
           </div>
         </div>
+
       }
 
       {cloudStorageTraffic && cloudStorageTraffic.receivedBytes &&

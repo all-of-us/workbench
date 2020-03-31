@@ -60,6 +60,8 @@ export interface Environment {
   enableCaptcha: boolean;
   // Captcha site key registered with the domain
   captchaSiteKey: string;
+  // Enable workbench footer on the signed in pages
+  enableSignedInFooter: boolean;
   // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
   // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
   // to the UI via ConfigController and serverConfigStore.

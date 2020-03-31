@@ -6,8 +6,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
-import java.sql.Timestamp;
-import java.time.Clock;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
@@ -39,7 +37,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
-import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -57,8 +55,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
   private final CloudStorageService cloudStorageService;
+  private final CommonMappers commonMappers;
   private int distinctWorkspacelimit = 5;
-  private Clock clock;
 
   // TODO(jaycarlton): migrate these private functions to MapStruct
   // Converts DB model to client Model
@@ -119,14 +117,14 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
-      Clock clock) {
+      CommonMappers commonMappers) {
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
-    this.clock = clock;
+    this.commonMappers = commonMappers;
   }
 
   @VisibleForTesting
@@ -140,7 +138,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // this is only ever used for Notebooks because we update/add to the cache for the other
     // resources in the backend
     // Because we don't store notebooks in our database the way we do other resources.
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
     String notebookPath;
     if (recentResourceRequest.getNotebookName().startsWith("gs://")) {
@@ -273,8 +270,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       resource.setWorkspaceBillingStatus(BillingStatus.ACTIVE);
     }
     resource.setPermission(
-        ManualWorkspaceMapper.toApiWorkspaceAccessLevel(workspaceDetails.getAccessLevel())
-            .toString());
+        commonMappers.fcWorkspaceResponseToApiWorkspaceAccessLevel(workspaceDetails).toString());
     resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
     resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
     return resource;

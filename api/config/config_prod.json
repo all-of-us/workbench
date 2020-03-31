@@ -23,7 +23,10 @@
     "bufferCapacity": 200,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-prod-1@all-of-us-rw-prod.iam.gserviceaccount.com"
@@ -47,6 +50,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api.workbench.researchallofus.org",
+    "uiBaseUrl": "https:\/\/workbench.researchallofus.org",
     "publicApiKeyForErrorReports": "AIzaSyBSPcQ0FcR99GLXaqX4Ujpoj3JUDSP689g",
     "projectId": "all-of-us-rw-prod",
     "shortName": "Prod",
@@ -89,23 +93,24 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
-    "enableBillingLockout": false,
-    "enableSumoLogicEventHandling": false,
+    "enableBillingLockout": true,
+    "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": false,
-    "sendFreeTierAlertEmails": false,
+    "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": false,
     "requireInstitutionalVerification": false,
     "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-prod"
+    "logName": "workbench-action-audit-prod"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-prod.appspot.com",
     "queueName": "rdrQueue",
-    "exportObjectsPerTask" : 10
+    "exportObjectsPerTask": 10
   },
   "captcha": {
-    "enableCaptcha": false
+    "enableCaptcha": true,
+    "useTestCaptcha": false
   }
 }

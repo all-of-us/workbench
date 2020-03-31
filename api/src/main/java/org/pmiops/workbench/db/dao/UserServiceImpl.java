@@ -78,53 +78,55 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
+  private final Provider<WorkbenchConfig> configProvider;
   private final Provider<DbUser> userProvider;
+  private final Clock clock;
+  private final Random random;
+  private final UserServiceAuditor userServiceAuditor;
+
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
-  private final Clock clock;
-  private final Random random;
+  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
   private final FireCloudService fireCloudService;
-  private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final UserServiceAuditor userServiceAuditor;
   private final InstitutionService institutionService;
-  private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
   public UserServiceImpl(
+      Provider<WorkbenchConfig> configProvider,
       Provider<DbUser> userProvider,
-      UserDao userDao,
-      AdminActionHistoryDao adminActionHistoryDao,
-      UserTermsOfServiceDao userTermsOfServiceDao,
-      UserDataUseAgreementDao userDataUseAgreementDao,
       Clock clock,
       Random random,
+      UserServiceAuditor userServiceAuditor,
+      UserDao userDao,
+      AdminActionHistoryDao adminActionHistoryDao,
+      UserDataUseAgreementDao userDataUseAgreementDao,
+      UserTermsOfServiceDao userTermsOfServiceDao,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditor,
-      InstitutionService institutionService,
-      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
+      InstitutionService institutionService) {
+    this.configProvider = configProvider;
     this.userProvider = userProvider;
-    this.userDao = userDao;
-    this.adminActionHistoryDao = adminActionHistoryDao;
-    this.userTermsOfServiceDao = userTermsOfServiceDao;
-    this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.clock = clock;
     this.random = random;
+    this.userServiceAuditor = userServiceAuditor;
+    this.userDao = userDao;
+    this.adminActionHistoryDao = adminActionHistoryDao;
+    this.userDataUseAgreementDao = userDataUseAgreementDao;
+    this.userTermsOfServiceDao = userTermsOfServiceDao;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.fireCloudService = fireCloudService;
-    this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.userServiceAuditor = userServiceAuditor;
     this.institutionService = institutionService;
-    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
 
   /**

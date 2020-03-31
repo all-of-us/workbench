@@ -396,13 +396,28 @@ public class ProfileController implements ProfileApiDelegate {
       userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
     }
 
+    final MailService mail = mailServiceProvider.get();
+
     try {
-      mailServiceProvider
-          .get()
-          .sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
+      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
+
+    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
+      institutionService
+          .getInstitutionUserInstructions(
+              profile.getVerifiedInstitutionalAffiliation().getInstitutionShortName())
+          .ifPresent(
+              instructions -> {
+                try {
+                  mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions);
+                } catch (MessagingException e) {
+                  throw new WorkbenchException(e);
+                }
+              });
+    }
+
     // Note: Avoid getProfileResponse() here as this is not an authenticated request.
     final Profile createdProfile = profileService.getProfile(user);
     profileAuditor.fireCreateAction(createdProfile);

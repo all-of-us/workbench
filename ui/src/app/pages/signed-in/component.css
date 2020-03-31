@@ -2,11 +2,19 @@ body {
   background-color: #f1f2f2;
 }
 
+.body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /*Footer minimum width*/
+  min-width: 68.5rem
+}
+
 .content-container {
   display: flex;
   /*View height minus top bar.*/
-  min-height: calc(100vh - 4rem);
   position: relative;
+  flex: 1 0 auto;
 }
 
 .app-container {

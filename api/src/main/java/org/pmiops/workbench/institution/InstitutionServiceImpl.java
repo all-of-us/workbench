@@ -8,35 +8,46 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.InstitutionDao;
+import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AgreementType;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
 
   private final InstitutionDao institutionDao;
-  private final InstitutionMapper institutionMapper;
-  private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
+  private final InstitutionUserInstructionsDao institutionUserInstructionsDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
+  private final InstitutionMapper institutionMapper;
+  private final InstitutionUserInstructionsMapper institutionUserInstructionsMapper;
+  private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
 
   @Autowired
   InstitutionServiceImpl(
       InstitutionDao institutionDao,
+      InstitutionUserInstructionsDao institutionUserInstructionsDao,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       InstitutionMapper institutionMapper,
-      PublicInstitutionDetailsMapper publicInstitutionDetailsMapper,
-      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
+      InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
+      PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
     this.institutionDao = institutionDao;
-    this.institutionMapper = institutionMapper;
-    this.publicInstitutionDetailsMapper = publicInstitutionDetailsMapper;
+    this.institutionUserInstructionsDao = institutionUserInstructionsDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
+    this.institutionMapper = institutionMapper;
+    this.institutionUserInstructionsMapper = institutionUserInstructionsMapper;
+    this.publicInstitutionDetailsMapper = publicInstitutionDetailsMapper;
   }
 
   @Override
@@ -59,7 +70,14 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public Optional<DbInstitution> getDbInstitution(final String shortName) {
+  public DbInstitution getDbInstitutionOrThrow(final String shortName) {
+    return getDbInstitution(shortName)
+        .orElseThrow(
+            () ->
+                new NotFoundException(String.format("Could not find Institution '%s'", shortName)));
+  }
+
+  private Optional<DbInstitution> getDbInstitution(final String shortName) {
     return institutionDao.findOneByShortName(shortName);
   }
 
@@ -71,15 +89,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public void deleteInstitution(final String shortName) {
-    final DbInstitution institution =
-        getDbInstitution(shortName)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "Could not delete Institution '%s' because it was not found",
-                            shortName)));
-
+    final DbInstitution institution = getDbInstitutionOrThrow(shortName);
     if (verifiedInstitutionalAffiliationDao.findAllByInstitution(institution).isEmpty()) {
       // no verified user affiliations: safe to delete
       institutionDao.delete(institution);
@@ -136,5 +146,38 @@ public class InstitutionServiceImpl implements InstitutionService {
     // If Institution agreement type is master confirm if the contact email has valid/allowed domain
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
     return institution.getEmailDomains().contains(contactEmailDomain);
+  }
+
+  @Override
+  public Optional<String> getInstitutionUserInstructions(final String shortName) {
+    return institutionUserInstructionsDao
+        .getByInstitutionId(getDbInstitutionOrThrow(shortName).getInstitutionId())
+        .map(DbInstitutionUserInstructions::getUserInstructions);
+  }
+
+  @Override
+  public void setInstitutionUserInstructions(final InstitutionUserInstructions userInstructions) {
+
+    final DbInstitutionUserInstructions dbInstructions =
+        institutionUserInstructionsMapper.modelToDb(userInstructions, this);
+
+    // if a DbInstitutionUserInstructions entry already exists for this Institution, retrieve its ID
+    // so the call to save() replaces it
+
+    institutionUserInstructionsDao
+        .getByInstitutionId(dbInstructions.getInstitutionId())
+        .ifPresent(
+            existingDbEntry ->
+                dbInstructions.setInstitutionUserInstructionsId(
+                    existingDbEntry.getInstitutionUserInstructionsId()));
+
+    institutionUserInstructionsDao.save(dbInstructions);
+  }
+
+  @Override
+  @Transactional // TODO: understand why this is necessary
+  public boolean deleteInstitutionUserInstructions(final String shortName) {
+    final DbInstitution institution = getDbInstitutionOrThrow(shortName);
+    return institutionUserInstructionsDao.deleteByInstitutionId(institution.getInstitutionId()) > 0;
   }
 }

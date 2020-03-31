@@ -8,8 +8,8 @@ import WorkspaceEditPage from '../../app/workspace-edit-page';
 import WorkspacesPage from '../../app/workspaces-page';
 import launchBrowser from '../../driver/puppeteer-launch';
 
-// set timeout globally per suite, not per test.
-jest.setTimeout(2 * 60 * 1000);
+// set timeout per suite, not per test.
+jest.setTimeout(4 * 60 * 1000);
 
 const configs = require('../../resources/workbench-config');
 
@@ -26,9 +26,8 @@ describe('Home page ui tests', () => {
   afterEach(async () => {
     await browser.close();
   });
-
-
-  test('Workspace cards have same ui size', async () => {
+   
+  test('Check visibility of Workspace cards', async () => {
     await GoogleLoginPage.logIn(page);
 
     const cards = await WorkspaceCard.getAllCards(page);
@@ -38,19 +37,34 @@ describe('Home page ui tests', () => {
       const cardElem = new BaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.getSize();
-      if (width === undefined) {
+      expect(size).toBeTruthy();
+      expect(size.height).toBeGreaterThan(1);
+      expect(size.width).toBeGreaterThan(1);
+
+      if (width === undefined || height === undefined) {
         width = size.width; // Initialize width and height with first card element's size, compare with rest cards
         height = size.height;
       } else {
         expect(size.height).toEqual(height);
         expect(size.width).toEqual(width);
       }
+
+      // check workspace name has characters
+      const cardName = await card.getWorkspaceName();
+      expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
+
+      // check ellipsis icon existed
+      expect(await card.getEllipsisIcon()).toBeTruthy();
+
+      // Assumption: test user is workspace Owner.
+      // Check ellipsis popup has right option values
+      const links = await card.getPopupLinkTextsArray();
+      expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }
-    expect(height).toBeGreaterThan(1);
-    expect(width).toBeGreaterThan(1);
+
   });
 
-  // Click See All Workspaces link => Opens Your Workspaces page
+   // Click See All Workspaces link => Opens Your Workspaces page
   test('Click on See All Workspace link', async () => {
     await GoogleLoginPage.logIn(page);
 
@@ -62,7 +76,7 @@ describe('Home page ui tests', () => {
     await seeAllWorkspacesLink.dispose();
   });
 
-  // Click Create New Workspace link => Opens Create Workspace page
+   // Click Create New Workspace link => Opens Create Workspace page
   test('Click on Create New Workspace link', async () => {
     const home = await GoogleLoginPage.logIn(page);
     await home.getCreateNewWorkspaceLink().then((link) => link.click());
@@ -95,16 +109,5 @@ describe('Home page ui tests', () => {
     expect(await anyLink.isVisible()).toBe(false);
   });
 
-  test('Check Workspace card on Home page', async () => {
-    await GoogleLoginPage.logIn(page);
-
-    await WorkspaceCard.getAllCards(page);
-    const anyCard = await WorkspaceCard.getAnyCard(page);
-    const cardName = await anyCard.getResourceCardName();
-    expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
-    expect(await anyCard.getEllipsisIcon()).toBeTruthy();
-    const links = await anyCard.getPopupLinkTextsArray();
-    expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
-  });
 
 });

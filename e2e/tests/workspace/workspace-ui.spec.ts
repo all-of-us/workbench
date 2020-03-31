@@ -56,11 +56,12 @@ describe('Workspace ui tests', () => {
     await new WorkspacesPage(page).waitForLoad();
 
     await WorkspaceCard.getAllCards(page);
-    const anyCard = await WorkspaceCard.getAnyCard(page);
-    const cardName = await anyCard.getResourceCardName();
-    expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
-    expect(await anyCard.getEllipsisIcon()).toBeTruthy();
-    const links = await anyCard.getPopupLinkTextsArray();
+    const card = await WorkspaceCard.getAnyCard(page);
+    const workspaceName = await card.getWorkspaceName();
+    expect(workspaceName).toMatch(new RegExp(/^[a-zA-Z]+/));
+
+    expect(await card.getEllipsisIcon()).toBeTruthy();
+    const links = await card.getPopupLinkTextsArray();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 

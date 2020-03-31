@@ -40,6 +40,7 @@ import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CohortMapper;
 import org.pmiops.workbench.utils.mappers.CohortMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -61,6 +62,7 @@ public class UserMetricsControllerTest {
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
   @Autowired private CohortMapper cohortMapper;
+  @Autowired private CommonMappers commonMappers;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private FakeClock fakeClock = new FakeClock(NOW);
@@ -77,7 +79,7 @@ public class UserMetricsControllerTest {
   private DbWorkspace dbWorkspace2;
 
   @TestConfiguration
-  @Import({CohortMapperImpl.class})
+  @Import({CohortMapperImpl.class, CommonMappers.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
@@ -188,7 +190,7 @@ public class UserMetricsControllerTest {
             mockWorkspaceService,
             mockFireCloudService,
             mockCloudStorageService,
-            fakeClock);
+            commonMappers);
     userMetricsController.setDistinctWorkspaceLimit(5);
   }
 

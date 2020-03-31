@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Authority;
@@ -8,6 +9,7 @@ import org.pmiops.workbench.model.CheckEmailResponse;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
 import org.pmiops.workbench.model.GetPublicInstitutionDetailsResponse;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +20,7 @@ public class InstitutionController implements InstitutionApiDelegate {
   private final InstitutionService institutionService;
 
   @Autowired
-  InstitutionController(InstitutionService institutionService) {
+  InstitutionController(final InstitutionService institutionService) {
     this.institutionService = institutionService;
   }
 
@@ -97,5 +99,25 @@ public class InstitutionController implements InstitutionApiDelegate {
                         String.format("Could not update Institution '%s'", shortName)));
 
     return ResponseEntity.ok(institution);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
+  public ResponseEntity<InstitutionUserInstructions> setInstitutionUserInstructions(
+      final InstitutionUserInstructions instructions) {
+    institutionService.setInstitutionUserInstructions(instructions);
+    return ResponseEntity.ok(instructions);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
+  public ResponseEntity<Void> deleteInstitutionUserInstructions(final String shortName) {
+    if (institutionService.deleteInstitutionUserInstructions(shortName)) {
+      return ResponseEntity.noContent().build();
+    } else {
+      final String msg =
+          String.format("Could not delete user instructions for institution %s", shortName);
+      throw new BadRequestException(msg);
+    }
   }
 }

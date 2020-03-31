@@ -25,6 +25,7 @@ import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -33,10 +34,11 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -57,7 +59,6 @@ public class WorkspaceAuditorTest {
 
   @Autowired private WorkspaceAuditor workspaceAuditor;
   @Autowired private WorkspaceMapper workspaceMapper;
-  @Autowired private ManualWorkspaceMapper manualWorkspaceMapper;
   @MockBean private Provider<DbUser> mockUserProvider;
   @MockBean private ActionAuditService mockActionAuditService;
 
@@ -68,10 +69,18 @@ public class WorkspaceAuditorTest {
   @Import({
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class,
+    CommonMappers.class,
     ActionAuditTestConfig.class
   })
-  static class Config {}
+  static class Config {
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.enableBillingLockout = false;
+      return workbenchConfig;
+    }
+  }
 
   @Before
   public void setUp() {
@@ -93,7 +102,7 @@ public class WorkspaceAuditorTest {
     workspace1.setDataAccessLevel(DataAccessLevel.REGISTERED);
     workspace1.setPublished(false);
 
-    dbWorkspace1 = manualWorkspaceMapper.toDbWorkspace(workspace1);
+    dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(WORKSPACE_1_DB_ID);
     dbWorkspace1.setLastAccessedTime(new Timestamp(now));
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));
@@ -117,7 +126,7 @@ public class WorkspaceAuditorTest {
     workspaceAuditor.fireCreateAction(workspace1, WORKSPACE_1_DB_ID);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(20);
+    assertThat(eventsSent).hasSize(19);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
     assertThat(firstEvent.map(ActionAuditEvent::getActionType).orElse(null))
@@ -145,7 +154,7 @@ public class WorkspaceAuditorTest {
         dbWorkspace1.getWorkspaceId(), dbWorkspace2.getWorkspaceId(), workspace2);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     final Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(14);
+    assertThat(eventsSent).hasSize(13);
 
     // need same actionId for all events
     assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())

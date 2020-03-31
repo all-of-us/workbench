@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -166,6 +166,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -209,7 +210,7 @@ public class WorkspacesControllerTest {
           .domainId("Condition")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_2 =
       new Concept()
@@ -222,7 +223,7 @@ public class WorkspacesControllerTest {
           .domainId("Condition")
           .countValue(456L)
           .prevalence(0.3F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_3 =
       new Concept()
@@ -235,7 +236,7 @@ public class WorkspacesControllerTest {
           .domainId("Measurement")
           .countValue(256L)
           .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
   private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
@@ -262,6 +263,7 @@ public class WorkspacesControllerTest {
     NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
+    CommonMappers.class,
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
@@ -275,7 +277,6 @@ public class WorkspacesControllerTest {
     ConceptSetsController.class,
     ConceptSetMapperImpl.class,
     WorkspaceMapperImpl.class,
-    ManualWorkspaceMapper.class,
     LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
@@ -609,7 +610,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getPopulationHealth()).isTrue();
     assertThat(workspace2.getResearchPurpose().getEducational()).isTrue();
     assertThat(workspace2.getResearchPurpose().getDrugDevelopment()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getPopulation()).isFalse();
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
     assertThat(workspace2.getResearchPurpose().getReasonForAllOfUs()).isEqualTo("reason for aou");
     assertThat(workspace2.getResearchPurpose().getIntendedStudy()).isEqualTo("intended study");
@@ -775,7 +775,8 @@ public class WorkspacesControllerTest {
 
     doReturn(false)
         .when(freeTierBillingService)
-        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+        .userHasRemainingFreeTierCredits(
+            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
     // Creating the workspace with a user provided billing account
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -796,7 +797,8 @@ public class WorkspacesControllerTest {
 
     doReturn(false)
         .when(freeTierBillingService)
-        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+        .userHasRemainingFreeTierCredits(
+            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
@@ -822,7 +824,8 @@ public class WorkspacesControllerTest {
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doReturn(true)
         .when(freeTierBillingService)
-        .userHasFreeTierCredits(argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+        .userHasRemainingFreeTierCredits(
+            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
@@ -992,7 +995,6 @@ public class WorkspacesControllerTest {
     assertThat(updatedRp.getPopulationHealth()).isFalse();
     assertThat(updatedRp.getSocialBehavioral()).isFalse();
     assertThat(updatedRp.getDrugDevelopment()).isFalse();
-    assertThat(updatedRp.getPopulation()).isFalse();
     assertThat(updatedRp.getAdditionalNotes()).isNull();
     assertThat(updatedRp.getReviewRequested()).isTrue();
   }
@@ -1146,7 +1148,6 @@ public class WorkspacesControllerTest {
 
     final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
-    modPurpose.setPopulation(true);
     modPurpose.setPopulationDetails(
         ImmutableList.of(
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
@@ -1874,44 +1875,6 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceWithNotebooks() throws Exception {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName("billing-account");
-
-    ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-    req.setWorkspace(modWorkspace);
-
-    FirecloudWorkspace fcWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-    fcWorkspace.setBucketName("bucket2");
-    String f1 = NotebooksService.withNotebookExtension("notebooks/f1");
-    String f2 = NotebooksService.withNotebookExtension("notebooks/f2 with spaces");
-    String f3 = "foo/f3.vcf";
-    // Note: mockBlob cannot be inlined into thenReturn() due to Mockito nuances.
-    List<Blob> blobs =
-        ImmutableList.of(
-            mockBlob(BUCKET_NAME, f1), mockBlob(BUCKET_NAME, f2), mockBlob(BUCKET_NAME, f3));
-    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(blobs);
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController
-        .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-        .getBody()
-        .getWorkspace();
-    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f1), BlobId.of("bucket2", f1));
-    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f2), BlobId.of("bucket2", f2));
-    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
-  }
-
-  @Test
   public void testCloneWorkspaceDifferentOwner() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2141,36 +2104,6 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
-  }
-
-  @Test(expected = FailedPreconditionException.class)
-  public void testCloneWithMassiveNotebook() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-
-    ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-    req.setWorkspace(modWorkspace);
-    FirecloudWorkspace fcWorkspace =
-        testMockFactory.createFcWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-    fcWorkspace.setBucketName("bucket2");
-    stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
-    Blob bigNotebook =
-        mockBlob(BUCKET_NAME, NotebooksService.withNotebookExtension("notebooks/nb"));
-    when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
-    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(ImmutableList.of(bigNotebook));
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController
-        .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-        .getBody()
-        .getWorkspace();
   }
 
   @Test
@@ -2505,8 +2438,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testEmptyFireCloudWorkspaces() {
-    when(fireCloudService.getWorkspaces(any()))
-        .thenReturn(new ArrayList<FirecloudWorkspaceResponse>());
+    when(fireCloudService.getWorkspaces(any())).thenReturn(new ArrayList<>());
     try {
       ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response =
           workspacesController.getWorkspaces();

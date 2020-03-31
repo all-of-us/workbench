@@ -11,6 +11,9 @@ public interface MailService {
   void sendWelcomeEmail(final String contactEmail, final String password, final User user)
       throws MessagingException;
 
+  void sendInstitutionUserInstructions(final String contactEmail, final String userInstructions)
+      throws MessagingException;
+
   void sendBetaAccessCompleteEmail(final String contactEmail, final String username)
       throws MessagingException;
 

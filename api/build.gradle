@@ -291,8 +291,8 @@ spotless {
 configurations {
   integrationCompile.extendsFrom testCompile
   integrationRuntime.extendsFrom testRuntime
-  bigquerytestCompile.extendsFrom testCompile
-  bigquerytestRuntime.extendsFrom testRuntime
+  bigQueryTestCompile.extendsFrom testCompile
+  bigQueryTestRuntime.extendsFrom testRuntime
 
   toolsImplementation.extendsFrom implementation
   toolsRuntimeOnly.extendsFrom runtimeOnly
@@ -337,7 +337,7 @@ sourceSets {
       srcDirs = ['tools/src/main/java']
     }
   }
-  bigquerytest {
+  bigQueryTest {
     resources {
       srcDir "bigquerytest/resources"
       srcDir "config/"
@@ -457,6 +457,8 @@ dependencies {
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
   compile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
 
+  compile "com.opsgenie.integration:sdk:2+"
+
   // Force these dependencies to safe versions, Zendesk client depends on this.
   compile 'io.netty:netty-codec-http:4.1.44.Final'
   compile 'com.typesafe.netty:netty-reactive-streams:2.0.4'
@@ -481,12 +483,12 @@ dependencies {
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
-  
+
   compile 'com.github.fge:json-patch:1.9'
   toolsCompile 'commons-cli:commons-cli:1.4'
   toolsCompile 'com.opencsv:opencsv:4.6'
 
-  testCompile 'junit:junit:4.13'
+  testCompile 'org.junit.jupiter:junit-jupiter:5.6.1'
   testCompile 'org.mockito:mockito-core:2.18.3'
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
@@ -496,6 +498,10 @@ dependencies {
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.5.3'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.0'
+  testRuntime 'org.junit.vintage:junit-vintage-engine:5.4.0'
+  testCompile "org.jetbrains.kotlin:kotlin-test:1.3.21"
+
   testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:${MOCKITO_KOTLIN_VERSION}"
 
   // Dependencies for Swagger codegen. This should include all dependencies required by Swagger's
@@ -522,18 +528,28 @@ compileJava {
   options.compilerArgs << '-Xlint:unchecked'
 }
 
-task integration(type: Test) {
+task integrationTest(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
   testClassesDirs = sourceSets.integration.output.classesDirs
   classpath = sourceSets.integration.runtimeClasspath
+  useJUnit {
+    excludeCategories 'org.pmiops.workbench.NightlyTests'
+  }
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
 
-task bigquerytest(type: Test) {
+task nightlyIntegrationTest(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
-  testClassesDirs = sourceSets.bigquerytest.output.classesDirs
-  classpath = sourceSets.bigquerytest.runtimeClasspath
+  testClassesDirs = sourceSets.integration.output.classesDirs
+  classpath = sourceSets.integration.runtimeClasspath
+  // Leave "nightly" tag, but run everything else as well.
+}
+
+task bigQueryTest(type: Test) {
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  testClassesDirs = sourceSets.bigQueryTest.output.classesDirs
+  classpath = sourceSets.bigQueryTest.runtimeClasspath
 }
 
 tasks.withType(Test) {
@@ -553,7 +569,7 @@ tasks.withType(Test) {
   }
 }
 
-integration {
+integrationTest {
   // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
 }

@@ -73,6 +73,7 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -103,7 +104,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
-  private final ManualWorkspaceMapper manualWorkspaceMapper;
+  private final WorkspaceMapper workspaceMapper;
   private final FreeTierBillingService freeTierBillingService;
 
   private FireCloudService fireCloudService;
@@ -124,7 +125,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
-      ManualWorkspaceMapper manualWorkspaceMapper,
+      WorkspaceMapper workspaceMapper,
       FreeTierBillingService freeTierBillingService) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
@@ -138,7 +139,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
-    this.manualWorkspaceMapper = manualWorkspaceMapper;
+    this.workspaceMapper = workspaceMapper;
     this.freeTierBillingService = freeTierBillingService;
   }
 
@@ -191,15 +192,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return dbWorkspaces.stream()
         .filter(DbWorkspace::isActive)
         .map(
-            dbWorkspace -> {
-              String fcWorkspaceAccessLevel =
-                  fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
-              WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(manualWorkspaceMapper.toApiWorkspace(dbWorkspace));
-              currentWorkspace.setAccessLevel(
-                  ManualWorkspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
-              return currentWorkspace;
-            })
+            dbWorkspace ->
+                workspaceMapper.toApiWorkspaceResponse(
+                    dbWorkspace, fcWorkspaces.get(dbWorkspace.getFirecloudUuid())))
         .collect(Collectors.toList());
   }
 
@@ -240,7 +235,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    workspaceResponse.setWorkspace(manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
   }
@@ -575,7 +570,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(manualWorkspaceMapper.toApiUserRole(user, entry.getValue()));
+        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()
@@ -771,7 +766,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     if (newBillingAccountName.equals(
         workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
       workspace.setBillingStatus(
-          freeTierBillingService.userHasFreeTierCredits(workspace.getCreator())
+          freeTierBillingService.userHasRemainingFreeTierCredits(workspace.getCreator())
               ? BillingStatus.ACTIVE
               : BillingStatus.INACTIVE);
     } else {

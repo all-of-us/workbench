@@ -23,7 +23,10 @@
     "bufferCapacity": 10,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-stable-1@all-of-us-rw-stable.iam.gserviceaccount.com"
@@ -47,6 +50,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-stable.appspot.com",
+    "uiBaseUrl": "https:\/\/all-of-us-rw-stable.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",
@@ -89,23 +93,24 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
-    "enableBillingLockout": false,
-    "enableSumoLogicEventHandling": false,
+    "enableBillingLockout": true,
+    "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": false,
-    "sendFreeTierAlertEmails": false,
+    "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": false,
     "requireInstitutionalVerification": false,
     "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-stable"
+    "logName": "workbench-action-audit-stable"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-stable.appspot.com",
     "queueName": "rdrQueue",
-    "exportObjectsPerTask" : 10
+    "exportObjectsPerTask": 10
   },
   "captcha": {
-    "enableCaptcha": false
+    "enableCaptcha": true,
+    "useTestCaptcha": false
   }
 }

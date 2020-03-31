@@ -7,7 +7,7 @@ import {AccountCreation} from 'app/pages/login/account-creation/account-creation
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
 import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
-import AccountCreationTos from 'app/pages/login/account-creation/account-creation-tos';
+import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
 import InvitationKey from 'app/pages/login/invitation-key';
 import LoginReactComponent from 'app/pages/login/login';
 import {serverConfigStore} from 'app/utils/navigation';
