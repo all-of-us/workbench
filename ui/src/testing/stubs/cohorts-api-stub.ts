@@ -4,10 +4,10 @@ import {
   CohortAnnotationsResponse,
   CohortsApi,
   EmptyResponse,
-  RecentResource,
   ResourceType,
   Workspace,
-  WorkspaceAccessLevel
+  WorkspaceAccessLevel,
+  WorkspaceResource
 } from 'generated/fetch';
 import {CohortListResponse} from 'generated/fetch/api';
 import {WorkspaceStubVariables} from './workspace-service-stub';
@@ -73,7 +73,7 @@ class CohortStub implements Cohort {
 export class CohortsApiStub extends CohortsApi {
   public workspaces: Workspace[];
   public cohorts: CohortStub[];
-  public resourceList: RecentResource[];
+  public resourceList: WorkspaceResource[];
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });

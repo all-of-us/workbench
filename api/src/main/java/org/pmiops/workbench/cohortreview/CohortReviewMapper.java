@@ -12,7 +12,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     componentModel = "spring",
     uses = {CommonMappers.class})
 public interface CohortReviewMapper {
-  @Mapping(target="etag", source="version")
+  @Mapping(target = "etag", source = "version")
   CohortReview dbModelToClient(DbCohortReview dbCohortReview);
 
   default ReviewStatus reviewStatusFromStorage(Short reviewStatus) {

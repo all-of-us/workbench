@@ -17,7 +17,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +38,13 @@ import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohorts.CohortMapper;
+import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -73,7 +76,6 @@ import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
@@ -92,6 +94,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
@@ -133,9 +136,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
+  private final CohortMapper cohortMapper;
+  private final CohortReviewMapper cohortReviewMapper;
   private final CohortReviewService cohortReviewService;
+  private final ConceptSetMapper conceptSetMapper;
   private final ConceptSetService conceptSetService;
   private final DataSetDao dataSetDao;
+  private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final LogsBasedMetricService logsBasedMetricService;
@@ -154,9 +161,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
+      CohortMapper cohortMapper,
+      CohortReviewMapper cohortReviewMapper,
       CohortReviewService cohortReviewService,
+      ConceptSetMapper conceptSetMapper,
       ConceptSetService conceptSetService,
       DataSetDao dataSetDao,
+      DataSetMapper dataSetMapper,
       UserDao userDao,
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
@@ -173,9 +184,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
+    this.cohortMapper = cohortMapper;
+    this.cohortReviewMapper = cohortReviewMapper;
     this.cohortReviewService = cohortReviewService;
+    this.conceptSetMapper = conceptSetMapper;
     this.conceptSetService = conceptSetService;
     this.dataSetDao = dataSetDao;
+    this.dataSetMapper = dataSetMapper;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -1029,8 +1044,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
 
+  private WorkspaceResource createWorkspaceResourceFromWorkspace(DbWorkspace workspace) {
+    return new WorkspaceResource()
+        .workspaceFirecloudName(workspace.getFirecloudName())
+        .workspaceId(workspace.getWorkspaceId())
+        .workspaceNamespace(workspace.getWorkspaceNamespace())
+        .workspaceBillingStatus(workspace.getBillingStatus());
+  }
+
   @Override
-  public ResponseEntity<WorkspaceResourceResponse> getDataPageItems(String workspaceNamespace, String workspaceId) {
+  public ResponseEntity<WorkspaceResourceResponse> getDataPageItems(
+      String workspaceNamespace, String workspaceId) {
     // This also enforces registered auth domain.
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -1038,16 +1062,56 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace workspace =
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     Set<DbCohort> cohorts = workspace.getCohorts();
+    WorkspaceResourceResponse workspaceResources = new WorkspaceResourceResponse();
+    workspaceResources.addAll(
+        cohorts.stream()
+            .map(cohortMapper::dbModelToClient)
+            .map(
+                cohort ->
+                    createWorkspaceResourceFromWorkspace(workspace)
+                        .cohort(cohort)
+                        .modifiedTime(cohort.getLastModifiedTime().toString()))
+            .collect(Collectors.toList()));
     // TODO: Convert cohorts to resources
     List<DbCohortReview> reviews =
         cohortReviewService.getRequiredWithCohortReviews(workspaceNamespace, workspaceId);
+    workspaceResources.addAll(
+        reviews.stream()
+            .map(cohortReviewMapper::dbModelToClient)
+            .map(
+                cohortReview ->
+                    createWorkspaceResourceFromWorkspace(workspace)
+                        .modifiedTime(cohortReview.getLastModifiedTime().toString())
+                        .cohortReview(cohortReview))
+            .collect(Collectors.toList()));
     // TODO convert cohort reviews to resources
     List<DbConceptSet> conceptSets =
         conceptSetService.findByWorkspaceId(workspace.getWorkspaceId());
+    workspaceResources.addAll(
+        conceptSets.stream()
+            .map(conceptSetMapper::dbModelToClient)
+            .map(
+                conceptSet ->
+                    createWorkspaceResourceFromWorkspace(workspace)
+                        .modifiedTime(conceptSet.getLastModifiedTime().toString())
+                        .conceptSet(conceptSet))
+            .collect(Collectors.toList()));
     // TODO: Convert concept sets to resources
     List<DbDataset> dataSets =
         dataSetDao.findByWorkspaceIdAndInvalid(workspace.getWorkspaceId(), false);
-    throw new ServerErrorException("not supported");
+    workspaceResources.addAll(
+        dataSets.stream()
+            .map(dataSetMapper::dbModelToClient)
+            .map(
+                dataSet ->
+                    createWorkspaceResourceFromWorkspace(workspace)
+                        .dataSet(dataSet)
+                        .modifiedTime(
+                            Optional.ofNullable(dataSet.getLastModifiedTime())
+                                .map(Object::toString)
+                                .orElse(null)))
+            .collect(Collectors.toList()));
+    return ResponseEntity.ok(workspaceResources);
   }
 
   private <T> T recordOperationTime(Supplier<T> operation, String operationName) {

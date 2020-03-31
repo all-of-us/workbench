@@ -57,9 +57,15 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortReviewMapper;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
+import org.pmiops.workbench.cohorts.CohortMapper;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
@@ -205,9 +211,15 @@ public class DataSetControllerTest {
 
   @Autowired CohortFactory cohortFactory;
 
+  @Autowired CohortMapper cohortMapper;
+
   @Autowired CohortMaterializationService cohortMaterializationService;
 
   @Autowired CohortReviewDao cohortReviewDao;
+
+  @Autowired CohortReviewMapper cohortReviewMapper;
+
+  @Autowired CohortReviewService cohortReviewService;
 
   @Autowired ConceptBigQueryService conceptBigQueryService;
 
@@ -265,6 +277,9 @@ public class DataSetControllerTest {
   @TestConfiguration
   @Import({
     CohortFactoryImpl.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    CohortReviewServiceImpl.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
@@ -378,6 +393,13 @@ public class DataSetControllerTest {
             billingProjectBufferService,
             workspaceService,
             cdrVersionDao,
+            cohortMapper,
+            cohortReviewMapper,
+            cohortReviewService,
+            conceptSetMapper,
+            conceptSetService,
+            dataSetDao,
+            dataSetMapper,
             userDao,
             userProvider,
             fireCloudService,
