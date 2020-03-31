@@ -58,7 +58,11 @@
           </div>
           <div class="content left" *ngIf="open">
             <ng-container [ngSwitch]="wizard.domain">
-              <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"></crit-list-demographics>
+              <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"
+                [select]="addSelection"
+                [selectedIds]="selectedIds"
+                [selections]="selections"
+                [wizard]="wizard"></crit-list-demographics>
               <ng-container *ngSwitchDefault>
                 <div *ngIf="loadingSubtree" class="spinner spinner-lg spin-in-overlay">
                   Loading...
@@ -78,17 +82,16 @@
                       [scrollToMatch]="setScroll"
                       [searchTerms]="treeSearchTerms"
                       [select]="addSelection"
-                      [selections]="selectionIds"
+                      [selectedIds]="selectedIds"
                       [selectOption]="setAutocompleteSelection"
                       [setAttributes]="setAttributes"
-                      [setSearchTerms]="setTreeSearchTerms"
-                      [wizard]="wizard"></crit-tree>
+                      [setSearchTerms]="setTreeSearchTerms"></crit-tree>
                   </div>
                   <!-- List View -->
                   <div class="panel-left" [class.show]="mode === 'list'">
                     <crit-list-search [hierarchy]="showHierarchy"
                       [select]="addSelection"
-                      [selections]="selectionIds"
+                      [selectedIds]="selectedIds"
                       [setAttributes]="setAttributes"
                       [wizard]="wizard"></crit-list-search>
                   </div>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import {MODIFIERS_MAP} from 'app/cohort-search/constant';
-import {encountersStore, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {encountersStore, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getTypeAndStandard, mapGroupItem, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -258,8 +258,6 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {groupId, item, role} = this.props;
       const _item = JSON.parse(JSON.stringify(item));
       const {id, searchParameters} = _item;
-      const selections = searchParameters.map(sp => sp.parameterId);
-      selectionsStore.next(selections);
       const domain = _item.type;
       const {type, standard} = getTypeAndStandard(searchParameters, domain);
       const context = {item: _item, domain, type, role, groupId, itemId: id, standard, count: item.count};

@@ -103,7 +103,7 @@ interface TreeNodeProps {
   scrollToMatch: Function;
   searchTerms: string;
   select: Function;
-  selections: Array<string>;
+  selectedIds: Array<string>;
   setAttributes: Function;
 }
 
@@ -241,9 +241,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   select(event: Event) {
     event.stopPropagation();
-    const {node, node: {conceptId, domainId, group, parentId, subtype, value}, select, selections} = this.props;
+    const {node, node: {conceptId, domainId, group, parentId, subtype, value}, select, selectedIds} = this.props;
     let {node: {name}} = this.props;
-    if (!selections.includes(this.paramId)) {
+    if (!selectedIds.includes(this.paramId)) {
       let attributes = [];
       if (subtype === CriteriaSubType.BP.toString()) {
         Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
@@ -279,11 +279,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   render() {
     const {autocompleteSelection, groupSelections, node,
-      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selections,
+      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable}, scrollToMatch, searchTerms, select, selectedIds,
       setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === DomainType.PHYSICALMEASUREMENT.toString() ? node.children : children;
-    const selected = selections.includes(this.paramId) || groupSelections.includes(parentId);
+    const selected = selectedIds.includes(this.paramId) || groupSelections.includes(parentId);
     const displayName = domainId === DomainType.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
@@ -333,7 +333,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                                                       scrollToMatch={scrollToMatch}
                                                       searchTerms={searchTerms}
                                                       select={(s) => select(s)}
-                                                      selections={selections}
+                                                      selectedIds={selectedIds}
                                                       setAttributes={setAttributes}/>)
           }
         </div>

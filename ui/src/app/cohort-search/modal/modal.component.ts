@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -20,8 +20,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   readonly domainType = DomainType;
   readonly criteriaType = CriteriaType;
   subscription: Subscription;
-  selectionIds: Array<string> = [];
-  selections: Array<any> = [];
+  selectedIds: Array<string>;
+  selections: Array<any>;
   groupSelections: Array<number> = [];
   open = false;
   title = '';
@@ -46,6 +46,8 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.wizard = wizard;
         if (!this.open) {
           this.title = wizard.domain === DomainType.PERSON ? typeToTitle(wizard.type) : domainToTitle(wizard.domain);
+          this.selections = wizard.item.searchParameters;
+          this.selectedIds = this.selections.map(s => s.parameterId);
           if (this.initTree) {
             this.hierarchyNode = {
               domainId: wizard.domain,
@@ -83,7 +85,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.autocompleteSelection = undefined;
     this.hierarchyNode = undefined;
     this.loadingSubtree = false;
-    this.selectionIds = [];
+    this.selectedIds = [];
     this.selections = [];
     this.treeSearchTerms = '';
     this.open = false;
@@ -247,10 +249,10 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   addSelection = (param: any) => {
-    if (this.selectionIds.includes(param.parameterId)) {
+    if (this.selectedIds.includes(param.parameterId)) {
       this.selections = this.selections.filter(p => p.parameterId !== param.parameterId);
     } else {
-      this.selectionIds = [...this.selectionIds, param.parameterId];
+      this.selectedIds = [...this.selectedIds, param.parameterId];
       if (param.group) {
         this.groupSelections = [...this.groupSelections, param.parameterId];
       }
@@ -259,7 +261,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   removeSelection = (param: any) => {
-    this.selectionIds = this.selectionIds.filter(id => id !== param.parameterId);
+    this.selectedIds = this.selectedIds.filter(id => id !== param.parameterId);
     this.selections = this.selections.filter(sel => sel.parameterId !== param.parameterId);
     if (param.group) {
       this.groupSelections = this.groupSelections.filter(id => id !== param.id);

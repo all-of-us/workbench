@@ -143,7 +143,7 @@ const styles = reactStyles({
 interface Props {
   hierarchy: Function;
   select: Function;
-  selections: Array<string>;
+  selectedIds: Array<string>;
   setAttributes: Function;
   wizard: any;
   workspace: WorkspaceData;
@@ -255,9 +255,9 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     isSelected = (row: any) => {
-      const {selections} = this.props;
+      const {selectedIds} = this.props;
       const paramId = this.getParamId(row);
-      return selections.includes(paramId);
+      return selectedIds.includes(paramId);
     }
 
     getParamId(row: any) {
@@ -280,7 +280,7 @@ export const ListSearch = withCurrentWorkspace()(
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
-      const selected = !attributes && !brand && this.props.selections.includes(this.getParamId(row));
+      const selected = !attributes && !brand && this.props.selectedIds.includes(this.getParamId(row));
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
@@ -409,10 +409,10 @@ export const ListSearch = withCurrentWorkspace()(
 export class ListSearchComponent extends ReactWrapperBase {
   @Input('hierarchy') hierarchy: Props['hierarchy'];
   @Input('select') select: Props['select'];
-  @Input('selections') selections: Props['selections'];
+  @Input('selectedIds') selectedIds: Props['selectedIds'];
   @Input('setAttributes') setAttributes: Props['setAttributes'];
   @Input('wizard') wizard: Props['wizard'];
   constructor() {
-    super(ListSearch, ['hierarchy', 'select', 'selections', 'setAttributes', 'wizard']);
+    super(ListSearch, ['hierarchy', 'select', 'selectedIds', 'setAttributes', 'wizard']);
   }
 }

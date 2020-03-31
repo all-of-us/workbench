@@ -67,11 +67,10 @@ interface Props {
   scrollToMatch: Function;
   searchTerms: string;
   select: Function;
-  selections: Array<string>;
+  selectedIds: Array<string>;
   selectOption: Function;
   setAttributes: Function;
   setSearchTerms: Function;
-  wizard: any;
 }
 
 interface State {
@@ -155,7 +154,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
   }
 
   render() {
-    const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selections, selectOption, setAttributes,
+    const {autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms, select, selectedIds, selectOption, setAttributes,
       setSearchTerms} = this.props;
     const {children, error, ingredients, loading} = this.state;
     return <React.Fragment>
@@ -186,7 +185,7 @@ export const CriteriaTree = withCurrentWorkspace()(class extends React.Component
                                                             scrollToMatch={scrollToMatch}
                                                             searchTerms={searchTerms}
                                                             select={(s) => select(s)}
-                                                            selections={selections}
+                                                            selectedIds={selectedIds}
                                                             setAttributes={setAttributes}/>)}
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
@@ -206,11 +205,10 @@ export class CriteriaTreeComponent extends ReactWrapperBase {
   @Input('scrollToMatch') scrollToMatch: Props['scrollToMatch'];
   @Input('searchTerms') searchTerms: Props['searchTerms'];
   @Input('select') select: Props['select'];
-  @Input('selections') selections: Props['selections'];
+  @Input('selectedIds') selectedIds: Props['selectedIds'];
   @Input('selectOption') selectOption: Props['selectOption'];
   @Input('setAttributes') setAttributes: Props['setAttributes'];
   @Input('setSearchTerms') setSearchTerms: Props['setSearchTerms'];
-  @Input('wizard') wizard: Props['wizard'];
 
   constructor() {
     super(CriteriaTree, [
@@ -221,11 +219,10 @@ export class CriteriaTreeComponent extends ReactWrapperBase {
       'scrollToMatch',
       'searchTerms',
       'select',
-      'selections',
+      'selectedIds',
       'selectOption',
       'setAttributes',
       'setSearchTerms',
-      'wizard'
     ]);
   }
 }
