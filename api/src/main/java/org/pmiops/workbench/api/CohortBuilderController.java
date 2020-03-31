@@ -146,6 +146,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
     validateDomainAndType(domain, type);
+    validateTerm(term);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
@@ -490,5 +491,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         .findFirst()
         .orElseThrow(
             () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "type", type)));
+  }
+
+  private void validateTerm(String term) {
+    if (term == null || term.trim().isEmpty()) {
+      throw new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "search term", term));
+    }
   }
 }

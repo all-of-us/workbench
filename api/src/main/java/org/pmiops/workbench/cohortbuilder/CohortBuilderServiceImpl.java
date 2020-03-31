@@ -13,7 +13,6 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapper;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.DataFilter;
@@ -88,11 +87,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   private String modifyTermMatch(String term) {
-    if (term == null || term.trim().isEmpty()) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Please provide a valid search term: \"%s\" is not valid.", term));
-    }
     String[] keywords = term.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {
       return "+\"" + keywords[0];
