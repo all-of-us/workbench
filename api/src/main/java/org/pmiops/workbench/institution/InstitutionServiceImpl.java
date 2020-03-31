@@ -11,7 +11,6 @@ import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AgreementType;
@@ -128,15 +127,14 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     // If the Institution has DUA Agreement that is restricted just to few employees
     // Confirm if the email address is in the allowed email list
-    if (institution.getAgreementTypeEnum() !=null && institution.getAgreementTypeEnum().equals(AgreementType.RESTRICTED)) {
+    if (institution.getAgreementTypeEnum() != null
+        && institution.getAgreementTypeEnum().equals(AgreementType.RESTRICTED)) {
       return institution.getEmailAddresses().contains(contactEmail);
     }
 
-    // If Agreement Type is NULL assume DUA Agreement is MASTER and for all employees
-    // If Institution agreement type is master
+    // If Agreement Type is NULL assume DUA Agreement is MASTER
+    // If Institution agreement type is master confirm if the contact email has valid/allowed domain
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
     return institution.getEmailDomains().contains(contactEmailDomain);
-
-    //Else if restricted then check if it is in emailList
   }
 }

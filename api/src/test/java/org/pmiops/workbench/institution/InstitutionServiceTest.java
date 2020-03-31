@@ -40,7 +40,10 @@ public class InstitutionServiceTest {
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final Institution testInst =
-      new Institution().shortName("test").displayName("this is a test").agreementTypeEnum(AgreementType.MASTER);
+      new Institution()
+          .shortName("test")
+          .displayName("this is a test")
+          .agreementTypeEnum(AgreementType.MASTER);
 
   // the mapper converts nulls to empty sets
   private final Institution roundTrippedTestInst =
@@ -255,14 +258,15 @@ public class InstitutionServiceTest {
   @Test
   public void test_emailValidation_address() {
     final Institution inst =
-        service.createInstitution(
-            new Institution()
-                .shortName("Broad")
-                .displayName("The Broad Institute")
-                .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
-                .emailAddresses(
-                    Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")))
-                .agreementTypeEnum(AgreementType.RESTRICTED);
+        service
+            .createInstitution(
+                new Institution()
+                    .shortName("Broad")
+                    .displayName("The Broad Institute")
+                    .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
+                    .emailAddresses(
+                        Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")))
+            .agreementTypeEnum(AgreementType.RESTRICTED);
 
     final DbUser user = createUser("external-researcher@sanger.uk");
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isTrue();
@@ -271,13 +275,14 @@ public class InstitutionServiceTest {
   @Test
   public void test_emailValidation_domain() {
     final Institution inst =
-        service.createInstitution(
-            new Institution()
-                .shortName("Broad")
-                .displayName("The Broad Institute")
-                .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
-                .emailAddresses(
-                    Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")))
+        service
+            .createInstitution(
+                new Institution()
+                    .shortName("Broad")
+                    .displayName("The Broad Institute")
+                    .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
+                    .emailAddresses(
+                        Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")))
             .agreementTypeEnum(AgreementType.MASTER);
 
     final DbUser user = createUser("external-researcher@broad.org");
@@ -287,8 +292,9 @@ public class InstitutionServiceTest {
   @Test
   public void test_emailValidation_null() {
     final Institution inst =
-        service.createInstitution(
-            new Institution().shortName("Broad").displayName("The Broad Institute"))
+        service
+            .createInstitution(
+                new Institution().shortName("Broad").displayName("The Broad Institute"))
             .agreementTypeEnum(AgreementType.MASTER);
 
     final DbUser user = userDao.save(new DbUser());
