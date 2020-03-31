@@ -23,7 +23,10 @@
     "bufferCapacity": 10,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-stable-1@all-of-us-rw-stable.iam.gserviceaccount.com"
@@ -91,7 +94,7 @@
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
     "enableBillingLockout": true,
-    "enableSumoLogicEventHandling": false,
+    "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": false,
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": false,
@@ -99,12 +102,12 @@
     "enableCBAgeTypeOptions": false
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-stable"
+    "logName": "workbench-action-audit-stable"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-stable.appspot.com",
     "queueName": "rdrQueue",
-    "exportObjectsPerTask" : 10
+    "exportObjectsPerTask": 10
   },
   "captcha": {
     "enableCaptcha": true,
