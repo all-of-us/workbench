@@ -143,27 +143,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getCriteriaAutoComplete(
+  public ResponseEntity<CriteriaListResponse> findCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    PageRequest pageRequest =
-        new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
     validateDomainAndType(domain, type);
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(
-            domain, type, standard, modifyTermMatch(term), pageRequest);
-    if (criteriaList.isEmpty()) {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-              domain, type, standard, term, pageRequest);
-    }
-
+    validateTerm(term);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
-                criteriaList.stream()
-                    .map(criteriaMapper::dbModelToClient)
-                    .collect(Collectors.toList())));
+                cohortBuilderService.findCriteriaAutoComplete(
+                    cdrVersionId, domain, term, type, standard, limit)));
   }
 
   @Override
@@ -468,6 +456,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         || allParams.stream().anyMatch(sp -> CriteriaSubType.BP.toString().equals(sp.getSubtype()));
   }
 
+  /** TODO: freemabd - remove this eventually * */
   private String modifyTermMatch(String term) {
     if (term == null || term.trim().isEmpty()) {
       throw new BadRequestException(
@@ -502,5 +491,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         .findFirst()
         .orElseThrow(
             () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "type", type)));
+  }
+
+  private void validateTerm(String term) {
+    if (term == null || term.trim().isEmpty()) {
+      throw new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "search term", term));
+    }
   }
 }

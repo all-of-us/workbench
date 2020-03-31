@@ -3035,7 +3035,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns matches on criteria table by code or name
-      operationId: getCriteriaAutoComplete
+      operationId: findCriteriaAutoComplete
       parameters:
       - in: path
         name: domain

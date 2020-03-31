@@ -49,7 +49,7 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<CriteriaAttributeListResponse>(resolve => resolve({items: []}));
   }
 
-  getCriteriaAutoComplete(): Promise<CriteriaListResponse> {
+  findCriteriaAutoComplete(): Promise<CriteriaListResponse> {
     return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 

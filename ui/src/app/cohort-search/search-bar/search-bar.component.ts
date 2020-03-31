@@ -79,7 +79,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const {domainId, isStandard, type} = this.node;
     const apiCall = domainId === DomainType.DRUG
       ? cohortBuilderApi().getDrugBrandOrIngredientByValue(cdrId, this.searchTerm.value)
-      : cohortBuilderApi().getCriteriaAutoComplete(
+      : cohortBuilderApi().findCriteriaAutoComplete(
         cdrId, domainId, this.searchTerm.value, type, isStandard
       );
     apiCall.then(resp => {

@@ -14,12 +14,19 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapperImpl;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
+import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -47,29 +54,23 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class CohortBuilderControllerTest {
 
   private CohortBuilderController controller;
-
+  private CohortBuilderService cohortBuilderService;
   @Mock private BigQueryService bigQueryService;
-
   @Mock private CloudStorageService cloudStorageService;
-
   @Mock private CohortQueryBuilder cohortQueryBuilder;
-
   @Mock private CdrVersionService cdrVersionService;
-
-  @Mock private CohortBuilderService cohortBuilderService;
-
   @Autowired private CBCriteriaDao cbCriteriaDao;
-
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
-
+  @Autowired private CBDataFilterDao cbDataFilterDao;
+  @Autowired private PersonDao personDao;
   @Autowired private JdbcTemplate jdbcTemplate;
-
+  @Autowired private AgeTypeCountMapper ageTypeCountMapper;
   @Autowired private CriteriaMapper criteriaMapper;
-
+  @Autowired private DataFilterMapper dataFilterMapper;
   @Mock private Provider<WorkbenchConfig> configProvider;
 
   @TestConfiguration
-  @Import({CriteriaMapperImpl.class})
+  @Import({AgeTypeCountMapperImpl.class, CriteriaMapperImpl.class, DataFilterMapperImpl.class})
   static class Configuration {}
 
   @Before
@@ -77,6 +78,15 @@ public class CohortBuilderControllerTest {
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
 
+    cohortBuilderService =
+        new CohortBuilderServiceImpl(
+            cdrVersionService,
+            cbCriteriaDao,
+            cbDataFilterDao,
+            personDao,
+            ageTypeCountMapper,
+            criteriaMapper,
+            dataFilterMapper);
     controller =
         new CohortBuilderController(
             bigQueryService,
@@ -187,7 +197,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteMatchesSynonyms() {
+  public void findCriteriaAutoCompleteMatchesSynonyms() {
     DbCriteria criteria =
         DbCriteria.builder()
             .addDomainId(DomainType.MEASUREMENT.toString())
@@ -202,7 +212,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .getCriteriaAutoComplete(
+            .findCriteriaAutoComplete(
                 1L,
                 DomainType.MEASUREMENT.toString(),
                 "LP12",
@@ -215,7 +225,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteMatchesCode() {
+  public void findCriteriaAutoCompleteMatchesCode() {
     DbCriteria criteria =
         DbCriteria.builder()
             .addDomainId(DomainType.MEASUREMENT.toString())
@@ -231,7 +241,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .getCriteriaAutoComplete(
+            .findCriteriaAutoComplete(
                 1L,
                 DomainType.MEASUREMENT.toString(),
                 "LP12",
@@ -244,7 +254,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteSnomed() {
+  public void findCriteriaAutoCompleteSnomed() {
     DbCriteria criteria =
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
@@ -259,7 +269,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .getCriteriaAutoComplete(
+            .findCriteriaAutoComplete(
                 1L,
                 DomainType.CONDITION.toString(),
                 "LP12",
@@ -272,9 +282,9 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteExceptions() {
+  public void findCriteriaAutoCompleteExceptions() {
     try {
-      controller.getCriteriaAutoComplete(1L, null, "blah", null, null, null);
+      controller.findCriteriaAutoComplete(1L, null, "blah", null, null, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -283,7 +293,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.getCriteriaAutoComplete(1L, "blah", "blah", "blah", null, null);
+      controller.findCriteriaAutoComplete(1L, "blah", "blah", "blah", null, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -292,7 +302,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.getCriteriaAutoComplete(
+      controller.findCriteriaAutoComplete(
           1L, DomainType.CONDITION.toString(), "blah", "blah", null, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
