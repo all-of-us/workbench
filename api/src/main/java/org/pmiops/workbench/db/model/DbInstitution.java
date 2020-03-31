@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.model.AgreementType;
 import org.pmiops.workbench.model.OrganizationType;
 
 @Entity
@@ -24,6 +25,7 @@ public class DbInstitution {
   private String displayName;
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
+  private Short agreementTypeEnum;
   @NotNull private Set<DbInstitutionEmailDomain> emailDomains = Sets.newHashSet();
   @NotNull private Set<DbInstitutionEmailAddress> emailAddresses = Sets.newHashSet();
 
@@ -68,6 +70,16 @@ public class DbInstitution {
 
   public DbInstitution setOrganizationTypeEnum(OrganizationType type) {
     this.organizationTypeEnum = DbStorageEnums.organizationTypeToStorage(type);
+    return this;
+  }
+
+  @Column(name = "agreement_type_enum")
+  public AgreementType getAgreementTypeEnum() {
+    return DbStorageEnums.agreementTypeFromStorage(agreementTypeEnum);
+  }
+
+  public DbInstitution setAgreementTypeEnum(AgreementType agreementType) {
+    this.agreementTypeEnum = DbStorageEnums.agreementTypeToStorage(agreementType);
     return this;
   }
 

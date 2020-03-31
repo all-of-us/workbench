@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.model.AgreementType;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
@@ -441,6 +442,20 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.get(organizationType);
   }
 
+  // Agreement Type
+  private static final BiMap<AgreementType, Short> CLIENT_TO_STORAGE_AGREEMENT_TYPE =
+      ImmutableBiMap.<AgreementType, Short>builder()
+          .put(AgreementType.MASTER, (short) 0)
+          .put(AgreementType.RESTRICTED, (short) 1)
+          .build();
+
+  public static AgreementType agreementTypeFromStorage(Short agreementType) {
+    return CLIENT_TO_STORAGE_AGREEMENT_TYPE.inverse().get(agreementType);
+  }
+
+  public static Short agreementTypeToStorage(AgreementType agreementType) {
+    return CLIENT_TO_STORAGE_AGREEMENT_TYPE.get(agreementType);
+  }
   // PrePackagedConceptSet
   private static final BiMap<PrePackagedConceptSetEnum, Short>
       CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =

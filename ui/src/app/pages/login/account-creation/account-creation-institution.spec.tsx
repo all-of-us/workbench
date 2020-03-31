@@ -38,6 +38,10 @@ function getEmailInput(wrapper: AnyWrapper): AnyWrapper {
   return wrapper.find('[data-test-id="contact-email"]').hostNodes();
 }
 
+function getEmailErrorMessage(wrapper: AnyWrapper): AnyWrapper {
+  return wrapper.find('[data-test-id="email-error-message"]');
+}
+
 function getRoleDropdown(wrapper: AnyWrapper): Dropdown {
   return wrapper.find('Dropdown[data-test-id="role-dropdown"]').instance() as Dropdown;
 }
@@ -129,7 +133,7 @@ it('should show validation errors in an empty form', async() => {
   expect(errors['profile.contactEmail'].length).toBeGreaterThan(0);
 });
 
-it('should validate email affiliation when inst and email are specified', async() => {
+it('should validate email affiliation when inst and email address are specified', async() => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
@@ -145,9 +149,41 @@ it('should validate email affiliation when inst and email are specified', async(
   // Once we blur the input, the API request is sent. Since asdf.com is not a member, it will
   // block form submission.
   getEmailInput(wrapper).simulate('blur');
+
   await waitOneTickAndUpdate(wrapper);
   expect(getInstance(wrapper).validate()['checkEmailResponse'])
     .toContain('Email address is not a member of the selected institution');
+
+  expect(getEmailErrorMessage(wrapper).getDOMNode().textContent).toBe(
+    'The institution has authorized access only to select members.' +
+    'Please click here to request to be added to the institution'
+  );
+});
+
+it('should validate email affiliation when inst and email domain are specified', async() => {
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  // Choose 'Broad' and enter an email address.
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@asdf.com'}});
+
+  // Email address is entered, but the input hasn't been blurred. The form should know that a
+  // response is required, but the API request hasn't been sent and returned yet.
+  expect(getInstance(wrapper).validate()['checkEmailResponse'])
+    .toContain('Institutional membership check has not completed');
+
+  // Once we blur the input, the API request is sent. Since asdf.com is not a member, it will
+  // block form submission.
+  getEmailInput(wrapper).simulate('blur');
+
+  await waitOneTickAndUpdate(wrapper);
+  expect(getInstance(wrapper).validate()['checkEmailResponse'])
+    .toContain('Email address is not a member of the selected institution');
+
+  expect(getEmailErrorMessage(wrapper).getDOMNode().textContent).toBe(
+    'Your email does not match your institution'
+  );
 });
 
 it('should clear email validation when institution is changed', async() => {
@@ -182,7 +218,6 @@ it('should trigger email check when email is filled in before choosing instituti
   getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@broadinstitute.org'}});
   getEmailInput(wrapper).simulate('blur');
   // This shouldn't strictly be needed here, since we expect the API request not to be sent due to
-  // no institution being chosen. But for consistency w/ other tests, it's included.
   await waitOneTickAndUpdate(wrapper);
 
   getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Broad'});

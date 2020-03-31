@@ -5533,9 +5533,7 @@ definitions:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
       who wish to use the system, including the email patterns which we use to validate
-      users.
-
-'
+      users.'
     required:
     - shortName
     - displayName
@@ -5552,15 +5550,14 @@ definitions:
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
-          enumerated OrganizationTypes, or OrganizationType.OTHER if it is not
-
-'
+          enumerated OrganizationTypes, or OrganizationType.OTHER if it is not'
       organizationTypeOtherText:
         type: string
         description: 'The detailed Organization Type of this institution, as text,
-          if its enumerated type is OTHER
-
-'
+          if its enumerated type is OTHER'
+      agreementTypeEnum:
+        "$ref": "#/definitions/AgreementType"
+        description: 'Type of Agreement Institution has signed, Master or restricted to few employees'
       emailAddresses:
         type: array
         description: A list of email addresses which can be validated as members of
@@ -5593,6 +5590,8 @@ definitions:
         type: string
         description: A more descriptive name for the Institution, such as 'Vanderbilt
           University Medical Center'
+      agreementTypeEnum:
+        "$ref": "#/definitions/AgreementType"
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
@@ -5626,6 +5625,14 @@ definitions:
     - EDUCATIONAL_INSTITUTION
     - HEALTH_CENTER_NON_PROFIT
     - OTHER
+
+  AgreementType:
+    type: string
+    description: 'Type of Agreement Institution has signed, Applicable to all employees or restricted to  just few'
+    enum:
+      - MASTER
+      - RESTRICTED
+
   InstitutionalRole:
     type: string
     description: 'The union of the roles researchers can have at Institutions of all

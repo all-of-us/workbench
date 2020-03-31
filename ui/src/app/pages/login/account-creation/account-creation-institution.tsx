@@ -5,8 +5,7 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {ValidationIcon} from 'app/components/icons';
-import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
+import {Error as ErrorDiv} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
@@ -16,6 +15,7 @@ import colors from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {
+  AgreementType,
   CheckEmailResponse,
   InstitutionalRole,
   Profile,
@@ -195,6 +195,27 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     this.setState(fp.set(['profile', 'contactEmail'], contactEmail));
   }
 
+  get displayEmailErrorMessage() {
+    const {institutions,
+    profile: {
+      verifiedInstitutionalAffiliation
+    }} = this.state;
+    const selectedInstitution = verifiedInstitutionalAffiliation;
+    if (selectedInstitution) {
+      const selectedInstitutionObj = fp.find((institution) =>
+          institution.shortName === selectedInstitution.institutionShortName, institutions);
+      if (selectedInstitutionObj.agreementTypeEnum === AgreementType.RESTRICTED) {
+        return <div data-test-id='email-error-message' style={{color: colors.danger}}>
+          The institution has authorized access only to select members.<br/>
+          Please <a href='https://www.researchallofus.org/apply/' target='_blank'>
+          click here</a> to request to be added to the institution</div>;
+      } else {
+        return <div data-test-id='email-error-message' style={{color: colors.danger}}>
+          Your email does not match your institution</div>;
+      }
+    }
+    return '';
+  }
   /**
    * Runs client-side validation against the form inputs, and returns an object containing errors
    * strings, if empty. If validation passes, undefined is returned.
@@ -341,13 +362,6 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                 invalid={!this.isEmailValid()}
                                 onBlur={() => this.onEmailBlur()}
                                 onChange={email => this.updateContactEmail(email)}>
-              <TooltipTrigger content={<div data-test-id='email-invalid-tooltip'>
-                Email address is not a valid member of the selected institution.
-              </div>} disabled={this.isEmailValid()}>
-                <div style={{...inputStyles.iconArea}}>
-                    <ValidationIcon validSuccess={this.isEmailValid()}/>
-                </div>
-              </TooltipTrigger>
             </TextInputWithLabel>
             {this.state.checkEmailError &&
               <ErrorDiv data-test-id='check-email-error'>
@@ -355,6 +369,8 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
               </ErrorDiv>
             }
+            {this.state.checkEmailResponse &&
+            !this.state.checkEmailResponse.isValidMember && this.displayEmailErrorMessage}
             <div style={{marginTop: '.5rem'}}>
               <label style={{...styles.boldText, marginTop: '1rem'}}>
                 Which of the following best describes your role?

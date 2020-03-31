@@ -1,4 +1,5 @@
 import {
+  AgreementType,
   CheckEmailResponse,
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
@@ -11,12 +12,15 @@ export const defaultInstitutions: Array<Institution> = [{
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',
   organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
-  emailDomains: ['vumc.org']
+  emailDomains: ['vumc.org'],
+  agreementTypeEnum: AgreementType.MASTER
 }, {
   shortName: 'Broad',
   displayName: 'Broad Institute',
   organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
-  emailDomains: ['broadinstitute.org']
+  emailDomains: [],
+  emailAddresses: ['institution@broadinstitute.org', 'broad_institution@broadinstitute.org'],
+  agreementTypeEnum: AgreementType.RESTRICTED
 }, {
   shortName: 'Verily',
   displayName: 'Verily LLC',
@@ -73,7 +77,8 @@ export class InstitutionApiStub extends InstitutionApi {
           return {
             shortName: x.shortName,
             displayName: x.displayName,
-            organizationTypeEnum: x.organizationTypeEnum
+            organizationTypeEnum: x.organizationTypeEnum,
+            agreementTypeEnum: x.agreementTypeEnum
           };
         })
       });
