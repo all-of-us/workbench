@@ -41,7 +41,7 @@ describe('TreeNode', () => {
                                       scrollToMatch={() => {}}
                                       searchTerms={''}
                                       select={() => {}}
-                                      selections={[]}
+                                      selectedIds={[]}
                                       setAttributes={() => {}}/>);
     expect(wrapper).toBeTruthy();
   });
