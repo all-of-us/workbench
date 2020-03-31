@@ -13,4 +13,6 @@ public interface CohortBuilderService {
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit);
 
   List<DataFilter> findDataFilters(Long cdrVersionId);
+
+  List<Criteria> findDrugBrandOrIngredientByValue(Long cdrVersionId, String value, Integer limit);
 }

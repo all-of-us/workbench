@@ -86,6 +86,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<Criteria> findDrugBrandOrIngredientByValue(
+      Long cdrVersionId, String value, Integer limit) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    List<DbCriteria> criteriaList =
+        cbCriteriaDao.findDrugBrandOrIngredientByValue(
+            value, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+  }
+
   private String modifyTermMatch(String term) {
     String[] keywords = term.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {

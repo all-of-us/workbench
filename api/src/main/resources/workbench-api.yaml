@@ -3075,7 +3075,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns criteria tree matching value
-      operationId: getDrugBrandOrIngredientByValue
+      operationId: findDrugBrandOrIngredientByValue
       parameters:
       - in: query
         name: value

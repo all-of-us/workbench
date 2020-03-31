@@ -70,7 +70,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
-  private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
@@ -155,18 +154,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByValue(
+  public ResponseEntity<CriteriaListResponse> findDrugBrandOrIngredientByValue(
       Long cdrVersionId, String value, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao.findDrugBrandOrIngredientByValue(
-            value, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
-                criteriaList.stream()
-                    .map(criteriaMapper::dbModelToClient)
-                    .collect(Collectors.toList())));
+                cohortBuilderService.findDrugBrandOrIngredientByValue(cdrVersionId, value, limit)));
   }
 
   @Override
