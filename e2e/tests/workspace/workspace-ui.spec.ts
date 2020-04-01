@@ -1,24 +1,19 @@
-import {Page} from 'puppeteer';
 import BaseElement from '../../app/aou-elements/base-element';
 import {SideNavLink} from '../../app/authenticated-page';
 import HomePage from '../../app/home-page';
 import WorkspaceCard from '../../app/workspace-card';
 import WorkspacesPage from '../../app/workspaces-page';
+import {signIn} from '../app';
 
-const Chrome = require('../../driver/chrome-driver');
-
-// set timeout globally per suite, not per test.
-jest.setTimeout(2 * 60 * 1000);
 
 describe('Workspace ui tests', () => {
-  let page: Page;
 
   beforeEach(async () => {
-    page = await Chrome.setup();
+    await signIn(page);
   });
 
   afterEach(async () => {
-    await Chrome.teardown();
+    await jestPuppeteer.resetBrowser();
   });
 
 

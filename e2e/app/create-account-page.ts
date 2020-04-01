@@ -45,7 +45,7 @@ export const FIELD_LABEL = {
   RESEARCH_BACKGROUND: 'describe your research background, experience, and research interests',
   EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YEAR_OF_BIRTH: 'Year of Birth',
-  INSTITUTION_EMAIL: 'institutional email address',
+  INSTITUTION_EMAIL: 'Your institutional email address',
 };
 
 export default class CreateAccountPage extends BasePage {
@@ -152,7 +152,9 @@ export default class CreateAccountPage extends BasePage {
     const institutionSelect = new SelectComponent(this.page, 'Select your institution');
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
     const emailAddress = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddress.type(configs.contactEmail);
+    await emailAddress.type(configs.broadInstitutionEmail);
+    await emailAddress.pressKeyboard('Tab', { delay: 100 }); // tab out for validation starts
+    await ClrIconLink.forLabel(this.page, FIELD_LABEL.INSTITUTION_EMAIL, 'success-standard');
     const roleSelect = new SelectComponent(this.page, 'describes your role');
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }

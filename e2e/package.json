@@ -7,44 +7,13 @@
   "license": "BSD",
   "scripts": {
     "test": "cross-env WORKBENCH_ENV=dev INCOGNITO=true jest --detectOpenHandles",
-    "test:debug": "cross-env WORKBENCH_ENV=dev HEADLESS=false INCOGNITO=true jest --detectOpenHandles --maxWorkers=2",
+    "test:debug": "cross-env WORKBENCH_ENV=dev HEADLESS=false INCOGNITO=true jest --detectOpenHandles",
     "test-local": "cross-env WORKBENCH_ENV=local INCOGNITO=true jest",
     "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev INCOGNITO=true CI=true jest --ci --runInBand --forceExit",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn run lint --fix",
     "tsc-build": "tsc --skipLibCheck --project tsconfig.json",
     "compile": "rimraf tsc-out/ && yarn run tsc-build"
-  },
-  "jest": {
-    "verbose": true,
-    "preset": "jest-puppeteer",
-    "testTimeout": 240000,
-    "transform": {
-      "\\.(ts|tsx)$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsConfig": "tsconfig.jest.json"
-      }
-    },
-    "testPathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "testMatch": [
-      "<rootDir>/**/tests/**/*.spec.ts"
-    ],
-    "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!tests)"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "spec.ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
   },
   "keywords": [
     "test",

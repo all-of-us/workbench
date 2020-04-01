@@ -1,5 +1,5 @@
 import {ElementHandle, Page, Response} from 'puppeteer';
-import { ensureDir } from 'fs-extra';
+import { ensureDir, writeFile } from 'fs-extra';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -232,7 +232,24 @@ export default abstract class BasePage {
     const timestamp = new Date().getTime();
     const screenshotFile = `${SCREENSHOT_DIR}/${fileName}_${timestamp}.png`;
     await this.page.screenshot({path: screenshotFile, fullPage: true});
-    console.log('screenshot taken: ' + screenshotFile);
+    console.log('Saved screenshot ' + screenshotFile);
+  }
+
+  async writeToFile(file, data) {
+    const LOG_DIR = 'logs/html';
+    await ensureDir(LOG_DIR);
+    const fname = `${LOG_DIR}/${file}-${new Date().getTime()}.html`;
+    return new Promise((resolve, reject) => {
+      writeFile(fname, data, 'utf8', error => {
+        if (error) {
+          console.error(error);
+          reject(false);
+        } else {
+          console.log('Saved file ' + fname);
+          resolve(true);
+        }
+      })
+    });
   }
 
 }

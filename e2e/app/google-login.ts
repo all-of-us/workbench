@@ -8,7 +8,7 @@ const configs = require('../resources/workbench-config');
 export const selectors = {
   loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In with Google")]',
   emailInput: '//input[@type="email"]',
-  NextButton: '//*[text()="Next"]',
+  NextButton: '//*[text()="Next" or @value="Next"]',
   passwordInput: '//input[@type="password"]',
 };
 
@@ -23,21 +23,21 @@ export default class GoogleLoginPage extends BasePage {
    * Login email input field.
    */
   async email(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.emailInput, {visible: true});
+    return this.page.waitForXPath(selectors.emailInput, {visible: true});
   }
 
   /**
    * Login password input field.
    */
   async password(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.passwordInput, {visible: true});
+    return this.page.waitForXPath(selectors.passwordInput, {visible: true});
   }
 
   /**
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(selectors.loginButton, {visible: true});
+    return this.page.waitForXPath(selectors.loginButton, {visible: true});
   }
 
   /**
@@ -45,19 +45,32 @@ export default class GoogleLoginPage extends BasePage {
    * @param email
    */
   async enterEmail(userEmail: string) : Promise<void> {
-    let emailInput: ElementHandle;
-    try {
-      emailInput = await this.email()
-    } catch(e) {
-      const randomLink = await this.page.$x('//*[@role="link"]//*[text()="Use another account"]');
-      if (randomLink.length > 0) {
-        await randomLink[0].click();
-      }
-      emailInput = await this.email()
+    // Handle Google "Use another account" dialog if it exists
+    const anotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
+    const elemt1 = await Promise.race([
+      this.page.waitForXPath(selectors.emailInput, {timeout: 1000}),
+      this.page.waitForXPath(anotherAccountXpath, {timeout: 1000}),
+    ]);
+
+    // compare to the Use another account link
+    const [link] = await this.page.$x(anotherAccountXpath);
+    const isLink = await page.evaluate((e1, e2) => e1 === e2, elemt1, link);
+    if (isLink) {
+      console.log('islink');
+      await Promise.all([
+        this.page.waitForNavigation(),
+        link.click(),
+      ]);
+    } else {
+      console.log('is not islink');
     }
+    const emailInput = await this.email();
     await emailInput.focus();
     await emailInput.type(userEmail);
-    const nextButton = await this.page.waitForXPath(selectors.NextButton, {visible: true});
+    await this.takeScreenshot('enteredEmail');
+    const html = await page.content();
+    await this.writeToFile('emailPage', html);
+    const nextButton = await this.page.waitForXPath(selectors.NextButton);
     await Promise.all([
       this.page.waitForNavigation(),
       nextButton.click(),
@@ -110,27 +123,6 @@ export default class GoogleLoginPage extends BasePage {
     const user = email || configs.userEmail;
     const pwd = paswd || configs.userPassword;
     await this.load(); // load the Google Sign In page
-
-    // Look for either Google Login button or Create Workspace link.
-    // If it's Login button, perform login workflow. If it's the Create New Workspace link, skip login workflow.
-    try {
-      const homePage = new HomePage(this.page);
-      const elemt1 = await Promise.race([
-        this.loginButton(),
-        homePage.getCreateNewWorkspaceLink()
-      ]);
-      // compare to the Login button
-      const [elemt2] = await this.page.$x(selectors.loginButton);
-      const isLoginButton = await page.evaluate((e1, e2) => e1 === e2, elemt2, elemt1);
-      if (!isLoginButton) {
-        // login not needed because page was redirected to the Home page.
-        console.log('return home page');
-        return await homePage.waitForLoad();
-      }
-    } catch (err) {
-      // none found. ignore error, proceed to wait for the Login button.
-    }
-    console.log('find google login button');
     const googleLoginButton = await this.loginButton().catch((err) => {
       console.error('Google login button not found. ' + err);
       throw err;

@@ -5,5 +5,5 @@ import GoogleLoginPage from '../app/google-login';
 export const signIn = async (page: Page) => {
   await GoogleLoginPage.logIn(page);
    // this element exists in DOM after user has logged in
-  await page.waitFor(() => document.querySelector('body#body'));
+  await page.waitFor(() => document.querySelector('app-signed-in app-nav-bar clr-icon') !== null);
 };

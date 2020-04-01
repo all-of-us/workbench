@@ -7,15 +7,18 @@ import WorkspaceEditPage from '../../app/workspace-edit-page';
 import WorkspacesPage from '../../app/workspaces-page';
 import {signIn} from '../app';
 
+
 describe('Home page ui tests', () => {
+
   beforeEach(async () => {
     await signIn(page);
   });
 
   afterEach(async () => {
-    await jestPuppeteer.resetPage();
+    await jestPuppeteer.resetBrowser();
   });
-   
+
+
   test('Check visibility of Workspace cards', async () => {
     const cards = await WorkspaceCard.getAllCards(page);
     let width;

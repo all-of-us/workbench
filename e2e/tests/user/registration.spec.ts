@@ -1,39 +1,20 @@
 import CreateAccountPage from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
-const configs = require('../../resources/workbench-config');
-
-// set timeout globally per suite, not per test.
-jest.setTimeout(2 * 60 * 1000);
-
-describe.skip('User registration tests:', () => {
-
-  let browser;
-  let incognitoContext;
-  let page;
 
 
-  beforeAll(async () => {
-    browser = await PuppeteerLaunch();
-  });
+describe('User registration tests:', () => {
 
   beforeEach(async () => {
-    incognitoContext = await browser.createIncognitoBrowserContext();
-    page = await incognitoContext.newPage();
     await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(60000);
+    await page.setDefaultNavigationTimeout(120000);
   });
 
   afterEach(async () => {
-    await incognitoContext.close();
-  });
-
-  afterAll(async () => {
-    await browser.close();
+    await jestPuppeteer.resetBrowser();
   });
 
 
-  test('Can register new user', async () => {
+  test.skip('Can register new user', async () => {
     // Load the landing page for login.
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
@@ -43,10 +24,6 @@ describe.skip('User registration tests:', () => {
     await createAccountButton.click();
 
     const createAccountPage = new CreateAccountPage(page);
-
-    // Step 1: Enter invitation key.
-    await createAccountPage.waitForTextExists('Enter your Invitation Key:');
-    await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
 
     // Step 2: Terms of Service.
     await createAccountPage.acceptTermsOfUseAgreement();

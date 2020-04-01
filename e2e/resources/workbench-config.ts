@@ -8,6 +8,7 @@ const userCredential = {
   userEmail: process.env.USER_NAME,
   userPassword: process.env.PASSWORD,
   userInvitationkey: process.env.INVITATION_KEY,
+  broadInstitutionEmail: 'aou-dev-registration@broadinstitute.org',
 };
 
 const urlPath = {
