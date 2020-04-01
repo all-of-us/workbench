@@ -203,15 +203,17 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     if (verifiedInstitutionalAffiliation && verifiedInstitutionalAffiliation.institutionShortName) {
       const selectedInstitutionObj = fp.find((institution) =>
           institution.shortName === verifiedInstitutionalAffiliation.institutionShortName, institutions);
+
+      // If Instution has signed Restricted agreement and the email id is not in allowed email ids list
       if (selectedInstitutionObj.agreementTypeEnum === AgreementType.RESTRICTED) {
         return <div data-test-id='email-error-message' style={{color: colors.danger}}>
           The institution has authorized access only to select members.<br/>
           Please <a href='https://www.researchallofus.org/apply/' target='_blank'>
           click here</a> to request to be added to the institution</div>;
-      } else {
-        return <div data-test-id='email-error-message' style={{color: colors.danger}}>
-          Your email does not match your institution</div>;
       }
+      // If institution has MASTER agreement and the domain is not in the allowed list
+      return <div data-test-id='email-error-message' style={{color: colors.danger}}>
+          Your email does not match your institution</div>;
     }
     return '';
   }

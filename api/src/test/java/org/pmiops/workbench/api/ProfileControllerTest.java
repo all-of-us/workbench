@@ -57,6 +57,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.AgreementType;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
@@ -520,7 +521,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
+            .agreementTypeEnum(AgreementType.RESTRICTED);
     institutionService.createInstitution(broad);
 
     // "Broad" is the only institution
@@ -545,7 +547,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.emptyList());
+            .emailAddresses(Collections.emptyList())
+            .agreementTypeEnum(AgreementType.RESTRICTED);
     institutionService.createInstitution(broad);
 
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -922,7 +925,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
+            .agreementTypeEnum(AgreementType.RESTRICTED);
     institutionService.createInstitution(broad);
 
     return new VerifiedInstitutionalAffiliation()
