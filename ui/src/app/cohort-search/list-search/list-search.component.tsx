@@ -254,7 +254,7 @@ export const ListSearch = withCurrentWorkspace()(
           this.setState({ingredients});
           const {workspace: {cdrVersionId}} = this.props;
           cohortBuilderApi()
-            .getDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
+            .findDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
             .then(resp => {
               ingredients[row.id] = {open: true, loading: false, error: false, items: resp.items};
               this.setState({ingredients});
