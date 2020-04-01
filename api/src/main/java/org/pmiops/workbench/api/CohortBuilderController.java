@@ -163,17 +163,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getDrugIngredientByConceptId(
+  public ResponseEntity<CriteriaListResponse> findDrugIngredientByConceptId(
       Long cdrVersionId, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao.findDrugIngredientByConceptId(String.valueOf(conceptId));
     return ResponseEntity.ok(
         new CriteriaListResponse()
-            .items(
-                criteriaList.stream()
-                    .map(criteriaMapper::dbModelToClient)
-                    .collect(Collectors.toList())));
+            .items(cohortBuilderService.findDrugIngredientByConceptId(cdrVersionId, conceptId)));
   }
 
   @Override

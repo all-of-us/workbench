@@ -96,6 +96,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
   }
 
+  @Override
+  public List<Criteria> findDrugIngredientByConceptId(Long cdrVersionId, Long conceptId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    List<DbCriteria> criteriaList = cbCriteriaDao.findDrugIngredientByConceptId(conceptId);
+    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+  }
+
   private String modifyTermMatch(String term) {
     String[] keywords = term.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {

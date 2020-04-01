@@ -3099,7 +3099,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns criteria tree with the specified name
-      operationId: getDrugIngredientByConceptId
+      operationId: findDrugIngredientByConceptId
       parameters:
       - in: path
         name: conceptId
