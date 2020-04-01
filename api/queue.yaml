@@ -1,5 +1,5 @@
 queue:
-- name: rdrQueueTest
+- name: rdrQueue
   rate: 1/m
   bucket_size: 500
   retry_parameters:

@@ -1904,7 +1904,8 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
 
   run_inline_or_log(op.opts.dry_run, %W{
     gcloud app deploy
-      build/staged-app/app.yaml
+      build/staged-app/app.yaml 
+      queue.yaml
   } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +

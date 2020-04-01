@@ -92,7 +92,7 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableRdrExport": false,
+    "enableRdrExport": true,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": false,
