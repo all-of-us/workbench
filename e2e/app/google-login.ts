@@ -46,30 +46,27 @@ export default class GoogleLoginPage extends BasePage {
    */
   async enterEmail(userEmail: string) : Promise<void> {
     // Handle Google "Use another account" dialog if it exists
-    const anotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
+    const useAnotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
     const elemt1 = await Promise.race([
-      this.page.waitForXPath(selectors.emailInput, {timeout: 1000}),
-      this.page.waitForXPath(anotherAccountXpath, {timeout: 1000}),
+      this.page.waitForXPath(selectors.emailInput, {visible: true, timeout: 60000}),
+      this.page.waitForXPath(useAnotherAccountXpath, {visible: true, timeout: 60000}),
     ]);
 
     // compare to the Use another account link
-    const [link] = await this.page.$x(anotherAccountXpath);
+    const [link] = await this.page.$x(useAnotherAccountXpath);
     const isLink = await page.evaluate((e1, e2) => e1 === e2, elemt1, link);
     if (isLink) {
-      console.log('islink');
+      // click " Use another Account " link
       await Promise.all([
         this.page.waitForNavigation(),
         link.click(),
       ]);
-    } else {
-      console.log('is not islink');
     }
+
     const emailInput = await this.email();
     await emailInput.focus();
     await emailInput.type(userEmail);
-    await this.takeScreenshot('enteredEmail');
-    const html = await page.content();
-    await this.writeToFile('emailPage', html);
+
     const nextButton = await this.page.waitForXPath(selectors.NextButton);
     await Promise.all([
       this.page.waitForNavigation(),
@@ -114,7 +111,6 @@ export default class GoogleLoginPage extends BasePage {
 
   /**
    * Log in All-of-Us Workbench with default username and password.
-   * Short circuit: If page was redirected to Home page, Login to be skipped.
    * (credential stored in .env file)
    * @param email
    * @param paswd

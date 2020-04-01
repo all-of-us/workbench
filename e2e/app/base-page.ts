@@ -235,14 +235,14 @@ export default abstract class BasePage {
     console.log('Saved screenshot ' + screenshotFile);
   }
 
-  async writeToFile(file, data) {
+  async saveToFile(fileName, data, suffix: string = 'html') {
     const LOG_DIR = 'logs/html';
     await ensureDir(LOG_DIR);
-    const fname = `${LOG_DIR}/${file}-${new Date().getTime()}.html`;
+    const fname = `${LOG_DIR}/${fileName}-${new Date().getTime()}.${suffix}`;
     return new Promise((resolve, reject) => {
       writeFile(fname, data, 'utf8', error => {
         if (error) {
-          console.error(error);
+          console.error(`save file failed. ` + error);
           reject(false);
         } else {
           console.log('Saved file ' + fname);
@@ -250,6 +250,16 @@ export default abstract class BasePage {
         }
       })
     });
+  }
+
+  /**
+   * Save Html source to a file. Useful for test failure troubleshooting.
+   * @param {Puppeteer.Page} page
+   * @param {string} fileName
+   */
+  async saveHtmlToFile(page, fileName: string) {
+    const html = await page.content();
+    await this.saveToFile(fileName, html);
   }
 
 }
