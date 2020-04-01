@@ -333,8 +333,8 @@ export const DetailTabTable = withCurrentWorkspace()(
     async getParticipantData(getCount: boolean) {
       try {
         const {columns, domain} = this.props;
-        const {page, range, sortField, sortOrder} = this.state;
-        let {lazyLoad, start, totalCount} = this.state;
+        const {range, sortField, sortOrder} = this.state;
+        let {lazyLoad, page, start, totalCount} = this.state;
         const filters = this.getFilters();
         if (filters !== null) {
           const pageFilterRequest = {
@@ -352,7 +352,8 @@ export const DetailTabTable = withCurrentWorkspace()(
               if (lazyLoad) {
                 if (start > totalCount) {
                   // If the data was filtered to a smaller count than the previous start, reset to the last page of the new data
-                  start = Math.floor(totalCount / rowsPerPage) * rowsPerPage;
+                  start = Math.floor((totalCount - 1) / rowsPerPage) * rowsPerPage;
+                  page = start / rowsPerPage;
                   pageFilterRequest.page = Math.floor(totalCount / lazyLoadSize);
                 }
               } else {
@@ -380,7 +381,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           this.callDataApi(pageFilterRequest).then(data => {
             if (lazyLoad) {
               const end = Math.min(range[0] + lazyLoadSize, totalCount);
-              this.setState({data, filteredData: data, loading: false, lazyLoad, range: [range[0], end], start, totalCount});
+              this.setState({data, filteredData: data, loading: false, lazyLoad, page, range: [range[0], end], start, totalCount});
             } else {
               this.setState({data, loading: false, lazyLoad, range: [0, totalCount - 1]});
               this.filterData();
