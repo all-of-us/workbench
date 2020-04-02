@@ -57,7 +57,8 @@ const styles = reactStyles({
 export const ResearchPurpose = withCurrentWorkspace()(
   ({workspace}: {workspace: WorkspaceData}) => {
     const isOwner = WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
-    const selectedResearchPurposeItems = getSelectedResearchPurposeItems(workspace.researchPurpose);
+    const selectedResearchPurposeItems = getSelectedResearchPurposeItems(workspace.researchPurpose, true);
+    const selectedPrimaryPurposeItems = getSelectedResearchPurposeItems(workspace.researchPurpose, false);
     return <FadeBox>
       <div style={styles.mainHeader}>Primary purpose of project
         <Clickable disabled={!isOwner}
@@ -71,8 +72,17 @@ export const ResearchPurpose = withCurrentWorkspace()(
         </Clickable>
       </div>
       <div style={styles.sectionContentContainer}>
+        {selectedResearchPurposeItems && selectedResearchPurposeItems.length > 0 && <div
+             style={styles.sectionSubHeader}>Research Purpose</div>
+        }
         {selectedResearchPurposeItems.map((selectedResearchPurposeItem, i) => <div key={i}>
-          <div style={{marginTop: '1rem'}}>{selectedResearchPurposeItem}</div>
+          <div data-test-id='primaryResearchPurpose'
+               style={{marginTop: i > 0 ? '1rem' : '0.3rem', marginLeft: '1rem'}}>{selectedResearchPurposeItem}</div>
+        </div>)}
+      </div>
+      <div style={styles.sectionContentContainer}>
+        {selectedPrimaryPurposeItems.map((selectedResearchPurposeItem, i) => <div key={i}>
+          <div data-test-id='primaryPurpose' style={{marginTop: '1rem'}}>{selectedResearchPurposeItem}</div>
         </div>)}
       </div>
       <div style={styles.sectionHeader}>Summary of research purpose</div>

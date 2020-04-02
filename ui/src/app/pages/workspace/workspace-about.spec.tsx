@@ -63,6 +63,10 @@ describe('WorkspaceAbout', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists('[data-test-id="researchPurpose"]'))
       .toBeTruthy();
+    // Research Purpose: Drug, Population and Ethics
+    expect(wrapper.find('[data-test-id="primaryResearchPurpose"]').length).toBe(3);
+    // Primary Purpose: Eduction
+    expect(wrapper.find('[data-test-id="primaryPurpose"]').length).toBe(1);
   });
 
   it('should display workspace collaborators', async () => {
