@@ -7,10 +7,10 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {DataUseAgreementContentV1} from 'app/pages/profile/data-use-agreement-content-v1';
 import {getDataUseAgreementWidgetV1} from 'app/pages/profile/data-use-agreement-panel';
 import {
-  dataUseAgreementStyles,
+  dataUserCodeOfConductStyles,
   DuaTextInput,
   InitialsAgreement
-} from 'app/pages/profile/data-use-agreement-styles';
+} from 'app/pages/profile/data-user-code-of-conduct-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
@@ -84,7 +84,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
       };
     }
 
-    submitDataUseAgreement(initials) {
+    submitDataUserCodeOfConduct(initials) {
       this.setState({submitting: true});
       const dataUseAgreementVersion = serverConfigStore.getValue().enableV2DataUserCodeOfConduct ? 3 : 2;
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
@@ -231,7 +231,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                       data-test-id={'submit-ducc-button'}
                       disabled={errors || submitting}
                       onClick={() => {
-                        this.submitDataUseAgreement(initialMonitoring);
+                        this.submitDataUserCodeOfConduct(initialMonitoring);
                       }}
                   >
                     Accept
@@ -242,7 +242,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
           }
         </FlexColumn>;
       } else {
-        return <div style={dataUseAgreementStyles.dataUseAgreementPage}>
+        return <div style={dataUserCodeOfConductStyles.dataUserCodeOfConductPage}>
           <DataUseAgreementContentV1/>
           <div style={{height: '1rem'}}/>
           {getDataUseAgreementWidgetV1.call(this,

@@ -7,7 +7,7 @@ import {
   IndentedOrderedList,
   IndentedUnorderedList,
   SecondHeader
-} from './data-use-agreement-styles';
+} from './data-user-code-of-conduct-styles';
 
 const AOU_DEFINITION_URL = 'https://allofus.nih.gov/about/about-all-us-research-program';
 const CORE_VALUES_URL = 'https://allofus.nih.gov/about/core-values';

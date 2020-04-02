@@ -10,8 +10,8 @@ export const indentedListStyles = {
   margin: '0.5rem 0 0.5rem 1.5rem', listStylePosition: 'outside'
 };
 
-export const dataUseAgreementStyles = reactStyles({
-  dataUseAgreementPage: {
+export const dataUserCodeOfConductStyles = reactStyles({
+  dataUserCodeOfConductPage: {
     paddingTop: '2rem',
     paddingLeft: '3rem',
     paddingBottom: '2rem',
@@ -41,7 +41,7 @@ export const dataUseAgreementStyles = reactStyles({
 });
 
 export const SecondHeader = (props) => {
-  return <h2 style={{...dataUseAgreementStyles.h2, ...props.style}}>{props.children}</h2>;
+  return <h2 style={{...dataUserCodeOfConductStyles.h2, ...props.style}}>{props.children}</h2>;
 };
 
 export const IndentedUnorderedList = (props) => {
@@ -60,7 +60,7 @@ export const DuaTextInput = (props) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   return <TextInput {...fp.omit(['data-test-id'], props)}
                     style={{
-                      ...dataUseAgreementStyles.textInput,
+                      ...dataUserCodeOfConductStyles.textInput,
                       ...props.style
                     }}/>;
 };

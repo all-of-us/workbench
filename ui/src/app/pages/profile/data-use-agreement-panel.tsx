@@ -10,7 +10,7 @@ import {
   IndentedListItem,
   IndentedUnorderedList, InitialsAgreement,
   SecondHeader
-} from './data-use-agreement-styles';
+} from './data-user-code-of-conduct-styles';
 
 export function getDataUseAgreementWidgetV1(submitting, initialWork, initialName,
   initialSanctions, errors, profile) {
@@ -75,7 +75,7 @@ export function getDataUseAgreementWidgetV1(submitting, initialWork, initialName
       <Button
         style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
         disabled={errors || submitting} data-test-id='submit-dua-button'
-        onClick={() => this.submitDataUseAgreement(this.state.initialWorkV1)}>Submit</Button>
+        onClick={() => this.submitDataUserCodeOfConduct(this.state.initialWorkV1)}>Submit</Button>
     </TooltipTrigger>
   </FlexColumn>;
 }
