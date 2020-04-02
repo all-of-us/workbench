@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
+  private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
 
   private CdrVersionService cdrVersionService;
   // dao objects
@@ -74,6 +76,42 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
               domain, type, standard, term, pageRequest);
+    }
+    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Criteria> findCriteriaByDomainAndSearchTerm(
+      Long cdrVersionId, String domain, String term, Integer limit) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    List<DbCriteria> criteriaList;
+    PageRequest pageRequest =
+        new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
+    List<DbCriteria> exactMatchByCode = cbCriteriaDao.findExactMatchByCode(domain, term);
+    boolean isStandard = exactMatchByCode.isEmpty() || exactMatchByCode.get(0).getStandard();
+
+    if (!isStandard) {
+      Map<Boolean, List<DbCriteria>> groups =
+          cbCriteriaDao
+              .findCriteriaByDomainAndTypeAndCode(
+                  domain, exactMatchByCode.get(0).getType(), isStandard, term, pageRequest)
+              .stream()
+              .collect(Collectors.partitioningBy(c -> c.getCode().equals(term)));
+      criteriaList = groups.get(true);
+      criteriaList.addAll(groups.get(false));
+    } else {
+      criteriaList =
+          cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, pageRequest);
+      if (criteriaList.isEmpty() && !term.contains(".")) {
+        criteriaList =
+            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+                domain, isStandard, modifyTermMatch(term), pageRequest);
+      }
+      if (criteriaList.isEmpty() && !term.contains(".")) {
+        criteriaList =
+            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+                domain, !isStandard, modifyTermMatch(term), pageRequest);
+      }
     }
     return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
   }
