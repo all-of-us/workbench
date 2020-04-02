@@ -6,12 +6,16 @@ import {
   RecentWorkspace,
   RecentWorkspaceResponse,
   ResearchPurposeReviewRequest,
+  ResourceType,
   ShareWorkspaceRequest,
-  SpecificPopulationEnum, UpdateWorkspaceRequest,
+  SpecificPopulationEnum,
+  UpdateWorkspaceRequest,
   UserRole,
   Workspace,
-  WorkspaceAccessLevel, WorkspaceBillingUsageResponse,
+  WorkspaceAccessLevel,
+  WorkspaceBillingUsageResponse,
   WorkspaceListResponse,
+  WorkspaceResourceResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
   WorkspacesApi,
@@ -23,6 +27,11 @@ import * as fp from 'lodash/fp';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {CopyRequest, EmptyResponse} from 'generated';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
+import {cohortReviewStubs} from "./cohort-review-service-stub";
+import {exampleCohortStubs} from "./cohorts-api-stub";
+import {DataSetApiStub} from "./data-set-api-stub";
+import {ConceptSetsApiStub} from "./concept-sets-api-stub";
+import {convertToResources} from "../../app/utils/resourceActions";
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -328,6 +337,24 @@ export class WorkspacesApiStub extends WorkspacesApi {
   getBillingUsage(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceBillingUsageResponse> {
     return new Promise<WorkspaceBillingUsageResponse>(resolve => {
       resolve({cost: 5.5});
+    });
+  }
+
+  getDataPageItems(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceResourceResponse> {
+    return new Promise<WorkspaceResourceResponse>(resolve => {
+      const workspaceResources = convertToResources(
+        cohortReviewStubs,
+        workspaceNamespace,
+        workspaceId,
+        WorkspaceAccessLevel.OWNER,
+        ResourceType.COHORTREVIEW)
+        .concat(convertToResources(
+          exampleCohortStubs, workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER, ResourceType.COHORT))
+        .concat(convertToResources(
+          DataSetApiStub.stubDataSets(), workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER, ResourceType.DATASET))
+        .concat(convertToResources(
+          ConceptSetsApiStub.stubConceptSets(), workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER, ResourceType.CONCEPTSET));
+      resolve(workspaceResources);
     });
   }
 }

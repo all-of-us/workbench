@@ -114,13 +114,13 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
 
       results.map(result => result.modifiedTime ? result.modifiedTime = new Date(Number(result.modifiedTime)).toDateString() : null);
       this.setState({
-        existingCohortName: results.filter(resource => resource.cohort !== null)
+        existingCohortName: results.filter(resource => resource.cohort !== null && resource.cohort !== undefined)
           .map(resource => resource.cohort.name),
-        existingCohortReviewName: results.filter(resource => resource.cohortReview !== null)
+        existingCohortReviewName: results.filter(resource => resource.cohortReview !== null  && resource.cohortReview !== undefined)
           .map(resource => resource.cohortReview.cohortName),
-        existingConceptSetName: results.filter(resource => resource.conceptSet !== null)
+        existingConceptSetName: results.filter(resource => resource.conceptSet !== null && resource.conceptSet !== undefined)
           .map(resource => resource.conceptSet.name),
-        existingDataSetName: results.filter(resource => resource.dataSet !== null)
+        existingDataSetName: results.filter(resource => resource.dataSet !== null && resource.dataSet !== undefined)
           .map(resource => resource.dataSet.name),
         resourceList: results
       });
