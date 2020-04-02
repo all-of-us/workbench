@@ -25,13 +25,13 @@ import {
 import * as fp from 'lodash/fp';
 
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
+import {convertToResources} from 'app/utils/resourceActions';
 import {CopyRequest, EmptyResponse} from 'generated';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
-import {cohortReviewStubs} from "./cohort-review-service-stub";
-import {exampleCohortStubs} from "./cohorts-api-stub";
-import {DataSetApiStub} from "./data-set-api-stub";
-import {ConceptSetsApiStub} from "./concept-sets-api-stub";
-import {convertToResources} from "../../app/utils/resourceActions";
+import {cohortReviewStubs} from './cohort-review-service-stub';
+import {exampleCohortStubs} from './cohorts-api-stub';
+import {ConceptSetsApiStub} from './concept-sets-api-stub';
+import {DataSetApiStub} from './data-set-api-stub';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
