@@ -46,8 +46,8 @@ function researchPurposeDivs(primaryPurposeItems: Array<ResearchPurposeItem>, re
         } else if (item.shortName === 'diseaseFocusedResearch') {
           descriptiveContent = <div style={{...styles.researchPurposeItemDescription,
             backgroundColor: colors.white, borderRadius: '3px', padding: '10px'}}>
-        {researchPurpose.diseaseOfFocus}
-      </div>;
+            {researchPurpose.diseaseOfFocus}
+          </div>;
         }
         return <div>{headerContent}{descriptiveContent}</div>;
       });
