@@ -15,6 +15,11 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     uses = {CommonMappers.class})
 public interface DataSetMapper {
 
+  @Mapping(target = "id", source = "dataSetId")
+  @Mapping(target = "conceptSets", ignore = true) // This is stored as a list of ids. Look those up in the controller for entities
+  @Mapping(target = "cohorts", ignore = true) // This is stored as a list of ids. Look those up in the controller for entities
+  @Mapping(target = "domainValuePairs", ignore = true) // This is stored in a subtable, we may not want to fetch all the time
+  @Mapping(target = "etag", source = "version")
   DataSet dbModelToClient(DbDataset dbDataset);
 
   default PrePackagedConceptSetEnum prePackagedConceptSetFromStorage(Short prePackagedConceptSet) {
