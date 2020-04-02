@@ -261,28 +261,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getStandardCriteriaByDomainAndConceptId(
+  public ResponseEntity<CriteriaListResponse> findStandardCriteriaByDomainAndConceptId(
       Long cdrVersionId, String domain, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    // These look ups can be done as one dao call but to make this code testable with the mysql
-    // fulltext search match function and H2 in memory database, it's split into 2 separate calls
-    // Each call is sub second, so having 2 calls and being testable is better than having one call
-    // and it being non-testable.
-    List<String> conceptIds =
-        cbCriteriaDao.findConceptId2ByConceptId1(conceptId).stream()
-            .map(c -> String.valueOf(c))
-            .collect(Collectors.toList());
-    List<DbCriteria> criteriaList = new ArrayList<>();
-    if (!conceptIds.isEmpty()) {
-      criteriaList =
-          cbCriteriaDao.findStandardCriteriaByDomainAndConceptId(domain, true, conceptIds);
-    }
+    validateDomain(domain);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
-                criteriaList.stream()
-                    .map(criteriaMapper::dbModelToClient)
-                    .collect(Collectors.toList())));
+                cohortBuilderService.findStandardCriteriaByDomainAndConceptId(
+                    cdrVersionId, domain, conceptId)));
   }
 
   @Override

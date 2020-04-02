@@ -2971,7 +2971,7 @@ paths:
       description: 'Returns a collection of criteria per concept id
 
 '
-      operationId: getStandardCriteriaByDomainAndConceptId
+      operationId: findStandardCriteriaByDomainAndConceptId
       parameters:
       - in: path
         name: domain
