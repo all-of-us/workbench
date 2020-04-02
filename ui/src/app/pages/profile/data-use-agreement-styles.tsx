@@ -2,6 +2,8 @@ import {styles as headerStyles} from 'app/components/headers';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
+import {TextInput} from "../../components/inputs";
+import * as fp from "lodash/fp";
 
 
 export const indentedListStyles = {
@@ -29,6 +31,12 @@ export const dataUseAgreementStyles = reactStyles({
     fontSize: '0.5rem',
     lineHeight: '1rem',
     color: colors.primary
+  },
+  textInput: {
+    padding: '0 1ex',
+    width: '12rem',
+    fontSize: 10,
+    borderRadius: 6
   }
 });
 
@@ -46,4 +54,22 @@ export const IndentedOrderedList = (props) => {
 
 export const IndentedListItem = (props) => {
   return <li style={{marginTop: '0.5rem', ...props.style}}>{props.children}</li>;
+};
+
+export const DuaTextInput = (props) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  return <TextInput {...fp.omit(['data-test-id'], props)}
+                    style={{
+                      ...dataUseAgreementStyles.textInput,
+                      ...props.style
+                    }}/>;
+};
+
+export const InitialsAgreement = (props) => {
+  return <div style={{display: 'flex', marginTop: '0.5rem'}}>
+    <DuaTextInput onChange={props.onChange} value={props.value}
+                  placeholder='INITIALS' data-test-id='dua-initials-input'
+                  style={{width: '4ex', textAlign: 'center', padding: 0}}/>
+    <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
+  </div>;
 };

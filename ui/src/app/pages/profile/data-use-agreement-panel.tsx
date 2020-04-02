@@ -1,38 +1,16 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {
+  DuaTextInput,
   IndentedListItem,
-  IndentedUnorderedList,
+  IndentedUnorderedList, InitialsAgreement,
   SecondHeader
 } from './data-use-agreement-styles';
-
-const DuaTextInput = (props) => {
-  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-  return <TextInput {...fp.omit(['data-test-id'], props)}
-                    style={{
-                      padding: '0 1ex',
-                      width: '12rem',
-                      fontSize: 10,
-                      borderRadius: 6,
-                      ...props.style
-                    }}/>;
-};
-
-const InitialsAgreement = (props) => {
-  return <div style={{display: 'flex', marginTop: '0.5rem'}}>
-    <DuaTextInput onChange={props.onChange} value={props.value}
-                  placeholder='INITIALS' data-test-id='dua-initials-input'
-                  style={{width: '4ex', textAlign: 'center', padding: 0}}/>
-    <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
-  </div>;
-};
 
 export function getDataUseAgreementWidgetV1(submitting, initialWork, initialName,
                                             initialSanctions, errors, profile) {
