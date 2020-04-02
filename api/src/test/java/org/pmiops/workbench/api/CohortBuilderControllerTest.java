@@ -541,15 +541,23 @@ public class CohortBuilderControllerTest {
 
     assertEquals(
         createResponseCriteria(drugATCCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "drugN", null).getBody().getItems().get(0));
+        controller.findDrugBrandOrIngredientByValue(1L, "drugN", null).getBody().getItems().get(0));
 
     assertEquals(
         createResponseCriteria(drugBrandCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "brandN", null).getBody().getItems().get(0));
+        controller
+            .findDrugBrandOrIngredientByValue(1L, "brandN", null)
+            .getBody()
+            .getItems()
+            .get(0));
 
     assertEquals(
         createResponseCriteria(drugBrandCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "LP6789", null).getBody().getItems().get(0));
+        controller
+            .findDrugBrandOrIngredientByValue(1L, "LP6789", null)
+            .getBody()
+            .getItems()
+            .get(0));
   }
 
   @Test
