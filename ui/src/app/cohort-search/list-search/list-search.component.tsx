@@ -193,7 +193,7 @@ export const ListSearch = withCurrentWorkspace()(
         if (data.length && this.checkSource) {
           sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
           if (sourceMatch) {
-            const stdResp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, sourceMatch.conceptId);
+            const stdResp = await cohortBuilderApi().findStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, sourceMatch.conceptId);
             this.setState({standardData: stdResp.items});
           }
         }
