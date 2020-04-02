@@ -81,8 +81,8 @@ export const ResearchPurpose = withCurrentWorkspace()(
         </div>)}
       </div>
       <div style={styles.sectionContentContainer}>
-        {selectedPrimaryPurposeItems.map((selectedResearchPurposeItem, i) => <div key={i}>
-          <div data-test-id='primaryPurpose' style={{marginTop: '1rem'}}>{selectedResearchPurposeItem}</div>
+        {selectedPrimaryPurposeItems.map((selectedPrimaryPurposeItem, i) => <div key={i}>
+          <div data-test-id='primaryPurpose' style={{marginTop: '1rem'}}>{selectedPrimaryPurposeItem}</div>
         </div>)}
       </div>
       <div style={styles.sectionHeader}>Summary of research purpose</div>
