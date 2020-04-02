@@ -201,7 +201,7 @@ def dev_up()
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
       common.run_inline %W{
-        docker-compose run db-scripts ./run-migrations.sh main
+        docker-compose run db-scripts ./run-migrations.sh update main
       }
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
@@ -276,7 +276,7 @@ def run_local_migrations()
   # Runs migrations against the local database.
   common = Common.new
   Dir.chdir('db') do
-    common.run_inline %W{./run-migrations.sh main}
+    common.run_inline %W{./run-migrations.sh update main}
   end
   Dir.chdir('db-cdr/generate-cdr') do
     common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
@@ -622,7 +622,7 @@ Common.register_command({
 def run_local_all_migrations()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh update main}
 
   init_new_cdr_db %W{--cdr-db-name cdr}
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
@@ -632,6 +632,50 @@ Common.register_command({
   :invocation => "run-local-all-migrations",
   :description => "Runs local data/schema migrations for the cdr and workbench schemas.",
   :fn => ->() { run_local_all_migrations() }
+})
+
+def rollback_db(cmd_name, *args)
+  puts "in rollback_db. cmd_name: #{cmd_name} args: #{args}"
+  ensure_docker_sync
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_typed_option(
+      "--count=[count]",
+      Integer,
+      ->(opts, c) { opts.count = c},
+      "Count of changesets to roll back from end.")
+
+  op.add_typed_option(
+      "--tag [tag]",
+      String,
+      ->(opts, t) { opts.tag = t},
+      "Liquibase changeset tag to roll back to.")
+  op.add_validator ->(opts) {
+    if opts.tag
+      if opts.count
+        raise ArgumentError.new("Tag option is not valid with count")
+      end
+    else
+      unless opts.count
+        raise ArgumentError.new("Either Count or Tag is required")
+      end
+    end
+  }
+  op.parse.validate
+
+  common = Common.new
+  if op.opts.tag
+    common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh rollback main -PliquibaseCommandValue=#{op.opts.tag}}
+  elsif op.opts.count
+    common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh rollbackCount main -PliquibaseCommandValue=#{op.opts.count}}
+  else
+    common.error('Either --tag or --count is required.')
+  end
+end
+
+Common.register_command({
+  :invocation => "rollback-db",
+  :description => "Rollback the database using Liquibase",
+  :fn => ->(*args) { rollback_db('rollback-db', *args) }
 })
 
 def run_local_data_migrations()
@@ -648,7 +692,7 @@ Common.register_command({
 def run_local_rw_migrations()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh update main}
 end
 
 Common.register_command({
