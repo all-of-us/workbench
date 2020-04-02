@@ -6,7 +6,7 @@ import {ageTypeToText, genderOrSexTypeToText, mapRequest} from 'app/cohort-searc
 import {Button, Clickable} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {ClrIcon} from 'app/components/icons';
-import {TextArea, TextInput} from 'app/components/inputs';
+import {CheckBox, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
@@ -16,7 +16,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
-import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
+import {AgeType, Cohort, DataFilter, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
@@ -39,7 +39,8 @@ const styles = reactStyles({
   totalCount: {
     marginTop: 0,
     fontSize: '16px',
-    fontWeight: 'bold'
+    fontWeight: 600,
+    lineHeight: '1.5rem'
   },
   totalError: {
     background: '#f7981c',
@@ -67,8 +68,15 @@ const styles = reactStyles({
     borderBottom: 'none',
     borderTop: 'none',
     borderRadius: '3px',
+    marginTop: '1.25rem'
   },
-  card: {
+  countCard: {
+    background: colorWithWhiteness(colors.light, -0.3),
+    marginBottom: 0,
+    marginTop: 0,
+    padding: '0.25rem 0.4rem'
+  },
+  chartsCard: {
     background: colors.white,
     marginBottom: 0,
     marginTop: 0,
@@ -84,6 +92,16 @@ const styles = reactStyles({
   chartSpinner: {
     marginLeft: 'calc(50% - 50px)',
     marginTop: 'calc(50% - 75px)',
+  },
+  checkbox: {
+    height: '16px',
+    width: '16px',
+    marginRight: '0.25rem',
+    verticalAlign: 'baseline'
+  },
+  dataFilter: {
+    color: colors.primary,
+    fontSize: '12px',
   },
   error: {
     background: colors.warning,
@@ -143,6 +161,7 @@ interface State {
     ageType: AgeType,
     genderOrSexType: GenderOrSexType
   };
+  dataFilters: Array<DataFilter>;
   deleting: boolean;
   description: string;
   existingCohorts: Array<string>;
@@ -173,6 +192,7 @@ export const ListOverview = withCurrentWorkspace()(
         apiError: false,
         chartData: undefined,
         currentGraphOptions: {ageType: AgeType.AGE, genderOrSexType: GenderOrSexType.GENDER},
+        dataFilters: undefined,
         deleting: false,
         description: undefined,
         existingCohorts: [],
@@ -192,6 +212,8 @@ export const ListOverview = withCurrentWorkspace()(
 
     componentDidMount(): void {
       this.getTotalCount();
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      cohortBuilderApi().findDataFilters(+cdrVersionId).then(res => this.setState({dataFilters: res.items}));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -246,6 +268,16 @@ export const ListOverview = withCurrentWorkspace()(
           }
         })
         .finally(() => this.setState({refreshing: false}));
+    }
+
+    handleDataFilterChange(filterName: string, checked: boolean) {
+      const {searchRequest} = this.props;
+      if (checked) {
+        searchRequest.dataFilters.push(filterName);
+      } else {
+        searchRequest.dataFilters = searchRequest.dataFilters.filter(df => df !== filterName);
+      }
+      searchRequestStore.next(searchRequest);
     }
 
     callApi() {
@@ -406,9 +438,9 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort} = this.props;
-      const {ageType, apiError, chartData, currentGraphOptions, deleting, description, existingCohorts, genderOrSexType, loading,
-        name, nameTouched, refreshing, saveModalOpen, saveError, saving, stackChart, total} = this.state;
+      const {cohort, searchRequest} = this.props;
+      const {ageType, apiError, chartData, currentGraphOptions, dataFilters, deleting, description, existingCohorts, genderOrSexType,
+        loading, name, nameTouched, refreshing, saveModalOpen, saveError, saving, stackChart, total} = this.state;
       const disableIcon = loading || !cohort;
       const disableSave = loading || saving || this.definitionErrors || !total;
       const disableRefresh = ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
@@ -455,26 +487,34 @@ export const ListOverview = withCurrentWorkspace()(
                 </Clickable>
               </TooltipTrigger>
             </div>
-            <h2 style={styles.totalCount}>
-              Total Count: &nbsp;
-              {this.definitionErrors ? <span>
-                -- <TooltipTrigger content={this.hasTemporalError ?
-                'Please complete criteria selections before saving temporal relationship.' :
-                `All criteria are suppressed. Un-suppress criteria to update the total count
-                     based on the visible criteria.`}>
-                  <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
-                </TooltipTrigger>
-              </span>
-              : loading ? <Spinner size={18} /> : <span>{showTotal && total.toLocaleString()}</span>}
-            </h2>
           </div>
           {apiError && !this.definitionErrors && <div style={styles.totalError}>
             <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
             Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           </div>}
-          {!!total && !this.definitionErrors && !loading && !!chartData &&
-            <div style={styles.cardContainer}>
-              <div style={styles.card}>
+          <div style={styles.cardContainer}>
+            <div style={styles.countCard}>
+              <h2 style={styles.totalCount}>
+                Total Participant Count: &nbsp;
+                {this.definitionErrors
+                  ? <span>
+                    -- <TooltipTrigger content={this.hasTemporalError ?
+                        'Please complete criteria selections before saving temporal relationship.' :
+                        `All criteria are suppressed. Un-suppress criteria to update the total count
+                         based on the visible criteria.`}>
+                      <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
+                    </TooltipTrigger>
+                  </span>
+                  : loading ? <Spinner size={18} /> : <span>{showTotal && total.toLocaleString()}</span>}
+              </h2>
+              {!!dataFilters && dataFilters.map((dataFilter, d) => <div key={d} style={styles.dataFilter}>
+                <CheckBox style={styles.checkbox}
+                  checked={searchRequest.dataFilters.includes(dataFilter.name)}
+                  onChange={(checked) => this.handleDataFilterChange(dataFilter.name, checked)}/> {dataFilter.displayName}
+              </div>)}
+            </div>
+            {!!total && !this.definitionErrors && !loading && !!chartData &&
+              <div style={styles.chartsCard}>
                 <div style={styles.cardHeader}>Results by</div>
                 <div style={refreshing ? styles.disabled : {}}>
                   <Menu appendTo={document.body}
@@ -522,8 +562,8 @@ export const ListOverview = withCurrentWorkspace()(
                   </React.Fragment>
                 }
               </div>
-            </div>
-          }
+            }
+          </div>
         </div>
         {saveModalOpen && <Modal>
           <ModalTitle style={invalid ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
