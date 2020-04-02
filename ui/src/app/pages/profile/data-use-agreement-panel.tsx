@@ -31,16 +31,16 @@ export function getDataUseAgreementWidgetV1(submitting, initialWork, initialName
       and procedures it describes.
     </div>
     <div>By entering my initials next to each statement below, I agree to these terms:</div>
-    <InitialsAgreement onChange={(v) => this.setState({initialWork: v})} value={initialWork}>
+    <InitialsAgreement onChange={(v) => this.setState({initialWorkV1: v})} value={initialWork}>
       My work will be logged, monitored, and audited by the <i>All of Us</i> Research Program to ensure
       compliance with policies and procedures, as well as the demonstration project charges.
     </InitialsAgreement>
-    <InitialsAgreement onChange={(v) => this.setState({initialName: v})} value={initialName}>
+    <InitialsAgreement onChange={(v) => this.setState({initialNameV1: v})} value={initialName}>
       My name, affiliation, profile information, and research description will be made public.
       My research description will be used by the <AouTitle/> to provide
       participants with meaningful information about the research being conducted.
     </InitialsAgreement>
-    <InitialsAgreement onChange={(v) => this.setState({initialSanctions: v})}
+    <InitialsAgreement onChange={(v) => this.setState({initialSanctionsV1: v})}
                        value={initialSanctions}>
       Access granted by the program in accordance with this agreement is exclusively
       for participation in <i>All of Us</i> demonstration projects. At the conclusion of my
@@ -75,7 +75,7 @@ export function getDataUseAgreementWidgetV1(submitting, initialWork, initialName
       <Button
         style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
         disabled={errors || submitting} data-test-id='submit-dua-button'
-        onClick={() => this.submitDataUseAgreement(this.state.initialWork)}>Submit</Button>
+        onClick={() => this.submitDataUseAgreement(this.state.initialWorkV1)}>Submit</Button>
     </TooltipTrigger>
   </FlexColumn>;
 }

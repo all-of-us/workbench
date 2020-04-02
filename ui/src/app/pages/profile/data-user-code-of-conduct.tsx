@@ -17,6 +17,7 @@ import colors from "../../styles/colors";
 import {Button} from "../../components/buttons";
 import {PdfViewer} from "../../components/pdf-viewer";
 import {SpinnerOverlay} from "../../components/spinners";
+import {TooltipTrigger} from "../../components/popups";
 
 const styles = reactStyles({
   dataUserCodeOfConductPage: {
@@ -43,7 +44,7 @@ const styles = reactStyles({
   }
 });
 
-enum DataUserCodeOfConductPage {
+export enum DataUserCodeOfConductPage {
   CONTENT,
   SIGNATURE
 }
@@ -58,9 +59,11 @@ interface Props {
 
 interface State {
   name: string;
-  initialName: string;
-  initialWork: string;
-  initialSanctions: string;
+  initialNameV1: string;
+  initialWorkV1: string;
+  initialSanctionsV1: string;
+  initialMonitoring: string;
+  initialPublic: string;
   page: DataUserCodeOfConductPage;
   submitting: boolean;
 }
@@ -71,9 +74,11 @@ export const DataUseAgreement = withUserProfile()(
       super(props);
       this.state = {
         name: '',
-        initialName: '',
-        initialWork: '',
-        initialSanctions: '',
+        initialNameV1: '',
+        initialWorkV1: '',
+        initialSanctionsV1: '',
+        initialMonitoring: '',
+        initialPublic: '',
         page: DataUserCodeOfConductPage.CONTENT,
         submitting: false
       };
@@ -90,21 +95,31 @@ export const DataUseAgreement = withUserProfile()(
 
     render() {
       const {profileState: {profile}} = this.props;
-      const {initialName, initialWork, initialSanctions, page, submitting} = this.state;
-      const errors = validate({initialName, initialWork, initialSanctions}, {
-        initialName: {
+      const {initialNameV1, initialWorkV1, initialSanctionsV1, initialMonitoring, initialPublic, page, submitting} = this.state;
+      const errorsV1 = validate({initialNameV1, initialWorkV1, initialSanctionsV1}, {
+        initialNameV1: {
           presence: {allowEmpty: false},
           length: {maximum: 6}
         },
-        initialWork: {
+        initialWorkV1: {
           presence: {allowEmpty: false},
-          equality: {attribute: 'initialName'},
+          equality: {attribute: 'initialNameV1'},
           length: {maximum: 6}
         },
-        initialSanctions: {
+        initialSanctionsV1: {
           presence: {allowEmpty: false},
-          equality: {attribute: 'initialName'},
+          equality: {attribute: 'initialNameV1'},
           length: {maximum: 6}
+        }
+      });
+      const errors = validate({initialMonitoring, initialPublic}, {
+        initialMonitoring: {
+          presence: {allowEmpty: false},
+          length: {maxiumum: 6}
+        },
+        initialPublic: {
+          presence: {allowEmpty: false},
+          equality: {attribute: 'initialMonitoring'}
         }
       });
       if (serverConfigStore.getValue().enableV2DataUserCodeOfConduct) {
@@ -126,6 +141,7 @@ export const DataUseAgreement = withUserProfile()(
                   Back
                 </Button>
                 <Button
+                    data-test-id={'ducc-next-button'}
                     onClick={() => {
                       this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
                     }
@@ -145,17 +161,17 @@ export const DataUseAgreement = withUserProfile()(
                   <DuaTextInput style={{margin: '0 1ex'}}
                      disabled
                      value={profile.givenName + ' ' + profile.familyName}
-                     data-test-id='dua-name-input'/>
+                     data-test-id='ducc-name-input'/>
                    ("Authorized Data User") have personally reviewed this Data User Code of Conduct.
                    I agree to follow each of the policies and prodedures it describes.
                 </div>
                 <div style={styles.smallTopMargin}>
                   By entering my initials next to each statement below, I acknowledge that:
                 </div>
-                <InitialsAgreement>
+                <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
                   My work, including any external data, files, or software I upload into the Researcher Workbench, may be logged and monitored by the <i>All of Us</i> Research Program to ensure compliance with policies and procedures.
                 </InitialsAgreement>
-                <InitialsAgreement>
+                <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
                   My name, affiliation, profile information, and research description will be made public. My research description will be used by the <i>All of Us</i> Research Program to provide participants with meaningful information about the research being conducted.
                 </InitialsAgreement>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
@@ -182,13 +198,13 @@ export const DataUseAgreement = withUserProfile()(
                 <label style={{...styles.bold, ...styles.largeTopMargin}}>Authorized Data user Name</label>
                 <DuaTextInput
                     disabled
-                    data-test-id='dua-username-input'
+                    data-test-id='ducc-username-input'
                     value={profile.givenName + ' ' + profile.familyName}
                 />
                 <label style={{...styles.bold, ...styles.largeTopMargin}}>User ID</label>
                 <DuaTextInput
                     disabled
-                    data-test-id='dua-user-id-input'
+                    data-test-id='ducc-user-id-input'
                     value={profile.username}
                 />
                 <label style={{...styles.bold, ...styles.largeTopMargin}}>Date</label>
@@ -202,13 +218,21 @@ export const DataUseAgreement = withUserProfile()(
                 >
                   Back
                 </Button>
-                <Button
-                    onClick={() => {
-                      this.submitDataUseAgreement(this.state.initialWork)
-                    }}
-                >
-                  Accept
-                </Button>
+                <TooltipTrigger content={errors && <div>
+                  <div>All fields must be initialed</div>
+                  <div>All initials must match</div>
+                  <div>Initials must be six letters or fewer</div>
+                </div>}>
+                  <Button
+                      data-test-id={'submit-ducc-button'}
+                      disabled={errors || submitting}
+                      onClick={() => {
+                        this.submitDataUseAgreement(initialMonitoring)
+                      }}
+                  >
+                    Accept
+                  </Button>
+                </TooltipTrigger>
               </FlexRow>
             </React.Fragment>
           }
@@ -219,10 +243,10 @@ export const DataUseAgreement = withUserProfile()(
           <div style={{height: '1rem'}}/>
           {getDataUseAgreementWidgetV1.call(this,
               submitting,
-              initialWork,
-              initialName,
-              initialSanctions,
-              errors,
+              initialWorkV1,
+              initialNameV1,
+              initialSanctionsV1,
+              errorsV1,
               this.props.profileState.profile)}
         </div>;
       }
