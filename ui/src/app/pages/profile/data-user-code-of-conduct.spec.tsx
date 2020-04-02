@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {DataUseAgreement} from 'app/pages/profile/data-user-code-of-conduct';
+import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {Profile, ProfileApi} from 'generated/fetch';
@@ -19,7 +19,7 @@ describe('DataUseAgreement', () => {
   const updateCache = jest.fn();
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
 
-  const component = () => mount(<DataUseAgreement/>);
+  const component = () => mount(<DataUserCodeOfConduct/>);
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
@@ -37,7 +37,7 @@ describe('DataUseAgreement', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should not allow DataUseAgreement without identical initials - v1', () => {
+  it('should not allow DataUserCodeOfConduct without identical initials - v1', () => {
     serverConfigStore.next({...defaultConfig, enableV2DataUserCodeOfConduct: false});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
@@ -49,7 +49,7 @@ describe('DataUseAgreement', () => {
     expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
   });
 
-  it('should not allow DataUseAgreement with only one field populated - v1', () => {
+  it('should not allow DataUserCodeOfConduct with only one field populated - v1', () => {
     serverConfigStore.next({...defaultConfig, enableV2DataUserCodeOfConduct: false});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
@@ -76,7 +76,7 @@ describe('DataUseAgreement', () => {
 
   });
 
-  it('should submit DataUseAgreement acceptance with version number - v1', async () => {
+  it('should submit DataUserCodeOfConduct acceptance with version number - v1', async () => {
     serverConfigStore.next({...defaultConfig, enableV2DataUserCodeOfConduct: false});
     const wrapper = component();
     const spy = jest.spyOn(profileApi(), 'submitDataUseAgreement');
@@ -101,7 +101,7 @@ describe('DataUseAgreement', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should not allow DataUseAgreement without identical initials', async () => {
+  it('should not allow DataUserCodeOfConduct without identical initials', async () => {
     serverConfigStore.next({...defaultConfig, enableV2DataUserCodeOfConduct: true});
     const wrapper = component();
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
@@ -115,7 +115,7 @@ describe('DataUseAgreement', () => {
     expect(wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')).toBeTruthy();
   });
 
-  it('should not allow DataUseAgreement with only one field populated', async () => {
+  it('should not allow DataUserCodeOfConduct with only one field populated', async () => {
     serverConfigStore.next({...defaultConfig, enableV2DataUserCodeOfConduct: true});
     const wrapper = component();
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
@@ -143,7 +143,7 @@ describe('DataUseAgreement', () => {
 
   });
 
-  it('should submit DataUseAgreement acceptance with version number', async () => {
+  it('should submit DataUserCodeOfConduct acceptance with version number', async () => {
     serverConfigStore.next({...defaultConfig, enableV2DataUserCodeOfConduct: true});
     const wrapper = component();
     const spy = jest.spyOn(profileApi(), 'submitDataUseAgreement');

@@ -1,9 +1,9 @@
 import {styles as headerStyles} from 'app/components/headers';
+import {TextInput} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {TextInput} from "../../components/inputs";
-import * as fp from "lodash/fp";
 
 
 export const indentedListStyles = {

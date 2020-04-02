@@ -1,9 +1,9 @@
 import {Component} from '@angular/core';
-import {profileApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {Profile} from 'generated/fetch';
-import * as React from 'react';
-import {validate} from 'validate.js';
+import {Button} from 'app/components/buttons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {PdfViewer} from 'app/components/pdf-viewer';
+import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {DataUseAgreementContentV1} from 'app/pages/profile/data-use-agreement-content-v1';
 import {getDataUseAgreementWidgetV1} from 'app/pages/profile/data-use-agreement-panel';
 import {
@@ -11,13 +11,13 @@ import {
   DuaTextInput,
   InitialsAgreement
 } from 'app/pages/profile/data-use-agreement-styles';
-import {serverConfigStore} from "app/utils/navigation";
-import {FlexColumn, FlexRow} from "../../components/flex";
-import colors from "../../styles/colors";
-import {Button} from "../../components/buttons";
-import {PdfViewer} from "../../components/pdf-viewer";
-import {SpinnerOverlay} from "../../components/spinners";
-import {TooltipTrigger} from "../../components/popups";
+import {profileApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {serverConfigStore} from 'app/utils/navigation';
+import {Profile} from 'generated/fetch';
+import * as React from 'react';
+import {validate} from 'validate.js';
 
 const styles = reactStyles({
   dataUserCodeOfConductPage: {
@@ -68,7 +68,7 @@ interface State {
   submitting: boolean;
 }
 
-export const DataUseAgreement = withUserProfile()(
+export const DataUserCodeOfConduct = withUserProfile()(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -125,7 +125,7 @@ export const DataUseAgreement = withUserProfile()(
       if (serverConfigStore.getValue().enableV2DataUserCodeOfConduct) {
         return <FlexColumn style={styles.dataUserCodeOfConductPage}>
           {
-            page == DataUserCodeOfConductPage.CONTENT && <React.Fragment>
+            page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
               <div style={{marginTop: '2rem', marginBottom: '1rem'}}>
                 <PdfViewer
                     pdfPath={'assets/documents/data-user-code-of-conduct-v3.pdf'}
@@ -142,9 +142,7 @@ export const DataUseAgreement = withUserProfile()(
                 </Button>
                 <Button
                     data-test-id={'ducc-next-button'}
-                    onClick={() => {
-                      this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
-                    }
+                    onClick={() => this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
                 >
                   Accept
                 </Button>
@@ -152,7 +150,7 @@ export const DataUseAgreement = withUserProfile()(
             </React.Fragment>
           }
           {
-            page == DataUserCodeOfConductPage.SIGNATURE && <React.Fragment>
+            page === DataUserCodeOfConductPage.SIGNATURE && <React.Fragment>
               <FlexColumn>
                 {submitting && <SpinnerOverlay/>}
                 <h1>Accept Data User Code of Conduct</h1>
@@ -169,10 +167,16 @@ export const DataUseAgreement = withUserProfile()(
                   By entering my initials next to each statement below, I acknowledge that:
                 </div>
                 <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
-                  My work, including any external data, files, or software I upload into the Researcher Workbench, may be logged and monitored by the <i>All of Us</i> Research Program to ensure compliance with policies and procedures.
+                  My work, including any external data, files, or software I upload into the
+                   Researcher Workbench, may be logged and monitored by the
+                   <i>All of Us</i> Research Program to ensure compliance with policies and
+                   procedures.
                 </InitialsAgreement>
                 <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
-                  My name, affiliation, profile information, and research description will be made public. My research description will be used by the <i>All of Us</i> Research Program to provide participants with meaningful information about the research being conducted.
+                  My name, affiliation, profile information, and research description will be made
+                   public. My research description will be used by the <i>All of Us</i> Research
+                   Program to provide participants with meaningful information about the research
+                   being conducted.
                 </InitialsAgreement>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I acknowledge that failure to comply with the requirements outlined in this Data
@@ -214,7 +218,7 @@ export const DataUseAgreement = withUserProfile()(
                 <Button
                     type={'link'}
                     style={{marginLeft: 'auto'}}
-                    onClick={() => {this.setState({page: DataUserCodeOfConductPage.CONTENT})}}
+                    onClick={() => this.setState({page: DataUserCodeOfConductPage.CONTENT})}
                 >
                   Back
                 </Button>
@@ -227,7 +231,7 @@ export const DataUseAgreement = withUserProfile()(
                       data-test-id={'submit-ducc-button'}
                       disabled={errors || submitting}
                       onClick={() => {
-                        this.submitDataUseAgreement(initialMonitoring)
+                        this.submitDataUseAgreement(initialMonitoring);
                       }}
                   >
                     Accept
@@ -236,18 +240,18 @@ export const DataUseAgreement = withUserProfile()(
               </FlexRow>
             </React.Fragment>
           }
-        </FlexColumn>
+        </FlexColumn>;
       } else {
         return <div style={dataUseAgreementStyles.dataUseAgreementPage}>
           <DataUseAgreementContentV1/>
           <div style={{height: '1rem'}}/>
           {getDataUseAgreementWidgetV1.call(this,
-              submitting,
-              initialWorkV1,
-              initialNameV1,
-              initialSanctionsV1,
-              errorsV1,
-              this.props.profileState.profile)}
+            submitting,
+            initialWorkV1,
+            initialNameV1,
+            initialSanctionsV1,
+            errorsV1,
+            this.props.profileState.profile)}
         </div>;
       }
     }
@@ -258,6 +262,6 @@ export const DataUseAgreement = withUserProfile()(
 })
 export class DataUserCodeOfConductComponent extends ReactWrapperBase {
   constructor() {
-    super(DataUseAgreement, []);
+    super(DataUserCodeOfConduct, []);
   }
 }

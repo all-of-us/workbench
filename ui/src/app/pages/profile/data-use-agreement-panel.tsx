@@ -1,5 +1,5 @@
 import {Button} from 'app/components/buttons';
-import {FlexColumn, FlexRow} from 'app/components/flex';
+import {FlexColumn} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AouTitle} from 'app/components/text-wrappers';
@@ -13,7 +13,7 @@ import {
 } from './data-use-agreement-styles';
 
 export function getDataUseAgreementWidgetV1(submitting, initialWork, initialName,
-                                            initialSanctions, errors, profile) {
+  initialSanctions, errors, profile) {
   return <FlexColumn style={{
     borderRadius: '1rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.8),
