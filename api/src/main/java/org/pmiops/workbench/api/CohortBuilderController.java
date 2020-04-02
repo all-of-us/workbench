@@ -62,7 +62,6 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.StandardFlag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,7 +69,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
-  private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
@@ -144,7 +142,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
-    validateDomainAndType(domain, type);
+    validateDomain(domain);
+    validateType(type);
     validateTerm(term);
     return ResponseEntity.ok(
         new CriteriaListResponse()
@@ -205,42 +204,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    List<DbCriteria> criteriaList;
-    PageRequest pageRequest =
-        new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
-    List<DbCriteria> exactMatchByCode = cbCriteriaDao.findExactMatchByCode(domain, term);
-    boolean isStandard = exactMatchByCode.isEmpty() || exactMatchByCode.get(0).getStandard();
-
-    if (!isStandard) {
-      Map<Boolean, List<DbCriteria>> groups =
-          cbCriteriaDao
-              .findCriteriaByDomainAndTypeAndCode(
-                  domain, exactMatchByCode.get(0).getType(), isStandard, term, pageRequest)
-              .stream()
-              .collect(Collectors.partitioningBy(c -> c.getCode().equals(term)));
-      criteriaList = groups.get(true);
-      criteriaList.addAll(groups.get(false));
-    } else {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, pageRequest);
-      if (criteriaList.isEmpty() && !term.contains(".")) {
-        criteriaList =
-            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
-                domain, isStandard, modifyTermMatch(term), pageRequest);
-      }
-      if (criteriaList.isEmpty() && !term.contains(".")) {
-        criteriaList =
-            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
-                domain, !isStandard, modifyTermMatch(term), pageRequest);
-      }
-    }
+    validateDomain(domain);
+    validateTerm(term);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
-                criteriaList.stream()
-                    .map(criteriaMapper::dbModelToClient)
-                    .collect(Collectors.toList())));
+                cohortBuilderService.findCriteriaByDomainAndSearchTerm(
+                    cdrVersionId, domain, term, limit)));
   }
 
   @Override
@@ -382,7 +352,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> getCriteriaBy(
       Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
-    validateDomainAndType(domain, type);
+    validateDomain(domain);
+    validateType(type);
     List<DbCriteria> criteriaList;
     if (parentId != null) {
       criteriaList =
@@ -467,12 +438,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         .collect(Collectors.joining());
   }
 
-  private void validateDomainAndType(String domain, String type) {
+  private void validateDomain(String domain) {
     Arrays.stream(DomainType.values())
         .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
         .findFirst()
         .orElseThrow(
             () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
+  }
+
+  private void validateType(String type) {
     Arrays.stream(CriteriaType.values())
         .filter(critType -> critType.toString().equalsIgnoreCase(type))
         .findFirst()
