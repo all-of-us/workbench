@@ -634,21 +634,77 @@ Common.register_command({
   :fn => ->() { run_local_all_migrations() }
 })
 
-def rollback_db(cmd_name, *args)
-  puts "in rollback_db. cmd_name: #{cmd_name} args: #{args}"
+def run_liquibase(cmd_name, *args)
+  common = Common.new
+  common.warning("#{cmd_name} args: #{args}")
+
   ensure_docker_sync
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
-      "--count=[count]",
+      "--command [command]",
+      String,
+      ->(opts, c) { opts.command = c},
+      "Liquibase command, e.g. update, rollback, tag, validate. See "+
+          "https://www.liquibase.org/documentation/command_line.html")
+  op.add_typed_option(
+      "--argument [argument]",
+      String,
+      ->(opts, a) { opts.argument = a},
+      "Liquibase command argument, e.g. count or tag value")
+  op.add_typed_option(
+        "--run-list [run_list]",
+        String,
+        ->(opts, rl) { opts.run_list = rl },
+        "Liquibase runList, a comma-separated list of activities in the liquibase task"
+  )
+  op.add_validator ->(opts) {
+    if opts.command.nil? || opts.command.empty?
+      raise ArgumentError.new("command is required")
+    end
+  }
+  op.parse.validate
+
+  # Currently there's only one activity (main), and leaving out the runList arugment causes
+  # it to run that activity. However, that's not because it's detected as default or primary, but
+  # leaving out the runList is equivalent to specifying all of the activities to run in unspecified
+  # order.
+  # https://github.com/liquibase/liquibase-gradle-plugin#3-configuring-the-plugin
+  if op.opts.run_list.nil? || op.opts.run_list.empty?
+    run_list = "main"
+  else
+    run_list = op.opts.run_list
+  end
+
+  if op.opts.argument.nil? || op.opts.argument.empty?
+    # It's safe to pass the '-PliquibaseCommand=' by itself, but it's not very clean
+    argument = ''
+  else
+    argument = "-PliquibaseCommandValue=#{op.opts.argument}"
+  end
+  common.warning("revised options: #{op.opts}")
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh #{op.opts.command} -PrunList=#{run_list} #{argument} }
+end
+
+Common.register_command({
+    :invocation => "run-liquibase",
+    :description => "Run liquibase",
+    :fn => ->(*args) { run_liquibase('run-liquibase', *args) }
+})
+
+def rollback_db(cmd_name, *args)
+  ensure_docker_sync
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_typed_option(
+      "--count-inclusive=[count]",
       Integer,
       ->(opts, c) { opts.count = c},
-      "Count of changesets to roll back from end.")
+      "Count of changesets to roll back from end (inclusive)")
 
   op.add_typed_option(
-      "--tag [tag]",
+      "--tag-inclusive [tag]",
       String,
       ->(opts, t) { opts.tag = t},
-      "Liquibase changeset tag to roll back to.")
+      "Liquibase changeset tag to roll back through (inclusive).")
   op.add_validator ->(opts) {
     if opts.tag
       if opts.count
@@ -664,11 +720,11 @@ def rollback_db(cmd_name, *args)
 
   common = Common.new
   if op.opts.tag
-    common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh rollback main -PliquibaseCommandValue=#{op.opts.tag}}
+    run_liquibase('run-liquibase', *%W(--command=rollback --argument=#{op.opts.tag}))
   elsif op.opts.count
-    common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh rollbackCount main -PliquibaseCommandValue=#{op.opts.count}}
+    run_liquibase('run-liquibase', *%W(--command=rollbackCount --argument=#{op.opts.count}))
   else
-    common.error('Either --tag or --count is required.')
+    common.error('Either --tag-inclusive or --count-inclusive is required.')
   end
 end
 
