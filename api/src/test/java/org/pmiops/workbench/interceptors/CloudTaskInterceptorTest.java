@@ -65,7 +65,7 @@ public class CloudTaskInterceptorTest {
         .thenReturn(
             CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, ArrayOfLong.class));
     when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER))
-        .thenReturn("rdrQueueTest");
+        .thenReturn("rdrExportQueue");
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }
 
