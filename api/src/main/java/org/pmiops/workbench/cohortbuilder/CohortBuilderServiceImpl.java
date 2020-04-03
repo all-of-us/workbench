@@ -1,5 +1,9 @@
 package org.pmiops.workbench.cohortbuilder;
 
+import static org.pmiops.workbench.model.FilterColumns.ETHNICITY;
+import static org.pmiops.workbench.model.FilterColumns.GENDER;
+import static org.pmiops.workbench.model.FilterColumns.RACE;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -19,9 +24,12 @@ import org.pmiops.workbench.cohortbuilder.mappers.CriteriaAttributeMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapper;
 import org.pmiops.workbench.model.AgeTypeCount;
+import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.DataFilter;
+import org.pmiops.workbench.model.FilterColumns;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -33,7 +41,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
 
   private CdrVersionService cdrVersionService;
-  // dao objects
+  // daos
   private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private CBCriteriaDao cbCriteriaDao;
   private CBDataFilterDao cbDataFilterDao;
@@ -179,6 +187,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public ParticipantDemographics findParticipantDemographics(Long cdrVersionId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
+    return new ParticipantDemographics()
+        .genderList(buildConceptIdNameList(criteriaList, GENDER))
+        .raceList(buildConceptIdNameList(criteriaList, RACE))
+        .ethnicityList(buildConceptIdNameList(criteriaList, ETHNICITY));
+  }
+
+  @Override
   public List<Criteria> findStandardCriteriaByDomainAndConceptId(
       Long cdrVersionId, String domain, Long conceptId) {
     cdrVersionService.setCdrVersion(cdrVersionId);
@@ -214,5 +232,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               return "+" + keywords[i] + "*";
             })
         .collect(Collectors.joining());
+  }
+
+  @NotNull
+  private List<ConceptIdName> buildConceptIdNameList(
+      List<DbCriteria> criteriaList, FilterColumns columnName) {
+    return criteriaList.stream()
+        .filter(c -> c.getType().equals(columnName.toString()))
+        .map(
+            c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
+        .collect(Collectors.toList());
   }
 }

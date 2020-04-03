@@ -105,8 +105,7 @@ public class CohortBuilderControllerTest {
             cdrVersionService,
             elasticSearchService,
             configProvider,
-            cohortBuilderService,
-            criteriaMapper);
+            cohortBuilderService);
   }
 
   @Test

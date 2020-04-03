@@ -3208,7 +3208,7 @@ paths:
       tags:
       - cohortBuilder
       description: Will return a list all values for gender, race and ethnicity.
-      operationId: getParticipantDemographics
+      operationId: findParticipantDemographics
       responses:
         200:
           description: An object which contains a list of all values for gender, race

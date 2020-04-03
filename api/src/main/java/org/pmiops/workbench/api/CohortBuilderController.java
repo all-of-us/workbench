@@ -22,22 +22,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
-import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaMenuOption;
@@ -49,7 +45,6 @@ import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.DomainType;
-import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
@@ -74,7 +69,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private ElasticSearchService elasticSearchService;
   private Provider<WorkbenchConfig> configProvider;
   private CohortBuilderService cohortBuilderService;
-  private CriteriaMapper criteriaMapper;
 
   /**
    * Converter function from backend representation (used with Hibernate) to client representation
@@ -106,8 +100,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       CdrVersionService cdrVersionService,
       ElasticSearchService elasticSearchService,
       Provider<WorkbenchConfig> configProvider,
-      CohortBuilderService cohortBuilderService,
-      CriteriaMapper criteriaMapper) {
+      CohortBuilderService cohortBuilderService) {
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaDao = cbCriteriaDao;
@@ -115,7 +108,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.elasticSearchService = elasticSearchService;
     this.configProvider = configProvider;
     this.cohortBuilderService = cohortBuilderService;
-    this.criteriaMapper = criteriaMapper;
   }
 
   @Override
@@ -323,36 +315,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ParticipantDemographics> getParticipantDemographics(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
-    List<ConceptIdName> genderList = buildConceptIdNameList(criteriaList, FilterColumns.GENDER);
-    List<ConceptIdName> raceList = buildConceptIdNameList(criteriaList, FilterColumns.RACE);
-    List<ConceptIdName> ethnicityList =
-        buildConceptIdNameList(criteriaList, FilterColumns.ETHNICITY);
-    return ResponseEntity.ok(
-        new ParticipantDemographics()
-            .genderList(genderList)
-            .raceList(raceList)
-            .ethnicityList(ethnicityList));
-  }
-
-  @NotNull
-  private List<ConceptIdName> buildConceptIdNameList(
-      List<DbCriteria> criteriaList, FilterColumns columnName) {
-    return criteriaList.stream()
-        .filter(c -> c.getType().equals(columnName.toString()))
-        .map(
-            c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
-        .collect(Collectors.toList());
+  public ResponseEntity<ParticipantDemographics> findParticipantDemographics(Long cdrVersionId) {
+    return ResponseEntity.ok(cohortBuilderService.findParticipantDemographics(cdrVersionId));
   }
 
   /**
    * This method helps determine what request can only be approximated by elasticsearch and must
    * fallback to the BQ implementation.
-   *
-   * @param request
-   * @return
    */
   protected boolean isApproximate(SearchRequest request) {
     List<SearchGroup> allGroups =
