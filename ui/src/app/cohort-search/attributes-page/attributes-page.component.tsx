@@ -200,7 +200,7 @@ export const AttributesPage = withCurrentWorkspace() (
       const {node: {conceptId}} = this.props;
       const{form} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
-      cohortBuilderApi().getCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
+      cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
         resp.items.forEach(attr => {
           if (attr.type === AttrName[AttrName.NUM]) {
             if (!form.num.length) {
