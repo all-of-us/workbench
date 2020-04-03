@@ -4,7 +4,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {PdfViewer} from 'app/components/pdf-viewer';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-V2';
+import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-v2';
 import {getDataUseAgreementWidgetV2} from 'app/pages/profile/data-use-agreement-panel';
 import {
   dataUserCodeOfConductStyles,
