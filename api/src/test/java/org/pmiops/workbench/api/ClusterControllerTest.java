@@ -567,7 +567,8 @@ public class ClusterControllerTest {
   public void getCluster_validateActiveBilling_checkAccessFirst() {
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceService)
-        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
+        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+            WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
     assertThrows(ForbiddenException.class, () -> clusterController.getCluster(WORKSPACE_NS));
     verify(mockWorkspaceService, never()).validateActiveBilling(anyString(), anyString());
@@ -587,7 +588,8 @@ public class ClusterControllerTest {
   public void localize_validateActiveBilling_checkAccessFirst() {
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceService)
-        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
+        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+            WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
 

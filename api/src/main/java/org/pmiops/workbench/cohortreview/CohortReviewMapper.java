@@ -13,35 +13,15 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     uses = {CommonMappers.class})
 public interface CohortReviewMapper {
   @Mapping(target = "etag", source = "version")
-  @Mapping(
-      target = "queryResultSize",
-      ignore =
-          true) // used for pagination. Design is in progress that will remove from this object, and
-  // currently mostly unused
-  @Mapping(
-      target = "page",
-      ignore =
-          true) // used for pagination. Design is in progress that will remove from this object, and
-  // currently mostly unused
-  @Mapping(
-      target = "pageSize",
-      ignore =
-          true) // used for pagination. Design is in progress that will remove from this object, and
-  // currently mostly unused
-  @Mapping(
-      target = "sortOrder",
-      ignore =
-          true) // used for pagination. Design is in progress that will remove from this object, and
-  // currently mostly unused
-  @Mapping(
-      target = "sortColumn",
-      ignore =
-          true) // used for pagination. Design is in progress that will remove from this object, and
-  // currently mostly unused
-  @Mapping(
-      target = "participantCohortStatuses",
-      ignore = true) // this fetches all participants, and can be large, we don't want to fetch by
+  // used for pagination. Effectively deprecated, to remove with RW-4706
+  @Mapping(target = "queryResultSize", ignore = true)
+  @Mapping(target = "page", ignore = true)
+  @Mapping(target = "pageSize", ignore = true)
+  @Mapping(target = "sortOrder", ignore = true)
+  @Mapping(target = "sortColumn", ignore = true)
+  // this fetches all participants, and can be large, we don't want to fetch by
   // default. May be removed from object pending design
+  @Mapping(target = "participantCohortStatuses", ignore = true)
   CohortReview dbModelToClient(DbCohortReview dbCohortReview);
 
   default ReviewStatus reviewStatusFromStorage(Short reviewStatus) {

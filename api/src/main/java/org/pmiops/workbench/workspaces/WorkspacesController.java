@@ -436,7 +436,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Workspace updateWorkspaceImpl(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
     FirecloudWorkspace fcWorkspace =
@@ -680,7 +680,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // This is its own method as opposed to part of the workspace response because this is gated
     // behind write+ access, and adding access based composition to the workspace response
     // would add a lot of unnecessary complexity.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
@@ -1046,9 +1046,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResourceResponse> getCdrSelectors(
       String workspaceNamespace, String workspaceId) {
-    // This also enforces registered auth domain.
     WorkspaceAccessLevel workspaceAccessLevel =
-        workspaceService.enforceWorkspaceAccessLevel(
+        workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     final DbWorkspace workspace =

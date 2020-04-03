@@ -88,32 +88,15 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "permission", source = "accessLevel")
-  @Mapping(
-      target = "cohort",
-      ignore =
-          true) // All workspaceResources have one object and all others are null. That should be
+  // All workspaceResources have one object and all others are null. That should be
   // defined by a setter where used
-  @Mapping(
-      target = "cohortReview",
-      ignore =
-          true) // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
-  @Mapping(
-      target = "conceptSet",
-      ignore =
-          true) // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
-  @Mapping(
-      target = "dataSet",
-      ignore =
-          true) // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
-  @Mapping(
-      target = "notebook",
-      ignore =
-          true) // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
-  @Mapping(target = "modifiedTime", ignore = true) // This should be set when the resource is set
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  // This should be set when the resource is set
+  @Mapping(target = "modifiedTime", ignore = true)
   WorkspaceResource workspaceResourceFromDbWorkspace(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
 

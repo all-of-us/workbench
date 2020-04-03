@@ -476,7 +476,8 @@ public class CohortAnnotationDefinitionControllerTest {
     mockWorkspace.setFirecloudName(NAME);
     mockWorkspace.setWorkspaceId(workspace.getWorkspaceId());
 
-    when(workspaceService.enforceWorkspaceAccessLevel(NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
+    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+            NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.OWNER);
     when(workspaceService.getRequired(NAMESPACE, NAME)).thenReturn(mockWorkspace);
   }
@@ -487,7 +488,8 @@ public class CohortAnnotationDefinitionControllerTest {
     mockWorkspace.setFirecloudName(NAME);
     mockWorkspace.setWorkspaceId(0L);
 
-    when(workspaceService.enforceWorkspaceAccessLevel(NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
+    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+            NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.OWNER);
     when(workspaceService.getRequired(NAMESPACE, NAME)).thenReturn(mockWorkspace);
   }
