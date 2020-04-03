@@ -1846,7 +1846,7 @@ Common.register_command({
   :fn => ->(*args) { deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
 })
 
-def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
+def deploy_app(cmd_name, args, with_cron, with_gsuite_admin, with_queue)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
@@ -1906,6 +1906,7 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     gcloud app deploy
       build/staged-app/app.yaml
   } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
+    (with_queue ? %W{build/staged-app/WEB-INF/appengine-generated/queue.yaml} : []) +
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +
     (op.opts.version ? %W{--version #{op.opts.version}} : []))
@@ -1915,7 +1916,7 @@ def deploy_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
-  deploy_app(cmd_name, args, true, true)
+  deploy_app(cmd_name, args, true, true, true)
 end
 
 Common.register_command({
