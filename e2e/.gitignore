@@ -6,7 +6,7 @@ tsc-out/
 out/
 
 # logs
-screenshots/
+screenshot/
 logs/
 *.log
 npm-debug.log*

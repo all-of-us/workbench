@@ -1,40 +1,25 @@
 import GoogleLoginPage, {selectors} from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 const configs = require('../../resources/workbench-config');
 
-// set timeout globally per suite, not per test.
-jest.setTimeout(2 * 60 * 1000);
 
 describe('Login tests:', () => {
-  let browser;
-  let incognitoContext;
-  let page;
-
-  beforeAll(async () =>  {
-    browser = await PuppeteerLaunch();
-  });
 
   beforeEach(async () => {
-    incognitoContext = await browser.createIncognitoBrowserContext();
-    page = await incognitoContext.newPage();
     await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(60000);
+    await page.setDefaultNavigationTimeout(120000);
   });
 
   afterEach(async () => {
-    await incognitoContext.close();
+    await jestPuppeteer.resetBrowser();
   });
 
-  afterAll(async () => {
-    await browser.close();
-  });
 
   test('Open AoU Workspaces page before login redirects to login page', async () => {
     const url = configs.uiBaseUrl + configs.workspacesUrlPath;
     const loginPage = new GoogleLoginPage(page);
     await page.goto(url, {waitUntil: 'networkidle0'});
-    expect(await loginPage.loginButton).toBeTruthy();
+    expect(await loginPage.loginButton()).toBeTruthy();
   });
 
   test('Entered wrong password', async () => {

@@ -57,7 +57,7 @@ export default class SelectComponent {
   private async isOpen() {
     const selector = this.dropdownXpath() +
        '/*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown-panel ")]';
-    const panel = await this.page.waitForXPath(selector, {visible: true});
+    const panel = await this.page.waitForXPath(selector);
     const classNameString = await (await panel.getProperty('className')).jsonValue();
     const splits = classNameString.toString().split(' ');
     await panel.dispose();
