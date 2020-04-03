@@ -273,7 +273,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       }
       if (!multiOptions.getValue()) {
         promises.push(
-          cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
+          cohortBuilderApi().findParticipantDemographics(+cdrVersionId).then(data => {
             const extract = (arr, _type?) => fp.uniq([
               ...arr.map(i => {
                 filters[_type].push(i.conceptId.toString());
