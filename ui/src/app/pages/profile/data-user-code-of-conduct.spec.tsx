@@ -7,7 +7,6 @@ import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from "../../../testing/react-test-helpers";
-import {DataUserCodeOfConductPage} from "./data-user-code-of-conduct";
 
 const defaultConfig = {
   gsuiteDomain: 'researchallofus.org',

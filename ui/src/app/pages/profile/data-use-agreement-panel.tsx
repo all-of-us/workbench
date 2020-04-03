@@ -12,8 +12,7 @@ import {
   SecondHeader
 } from './data-user-code-of-conduct-styles';
 
-export function getDataUseAgreementWidgetV2(submitting, initialWork, initialName,
-                                            initialSanctions, errors, profile) {
+export function getDataUseAgreementWidgetV2(submitting, initialWork, initialName, initialSanctions, errors, profile) {
   return <FlexColumn style={{
     borderRadius: '1rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.8),
