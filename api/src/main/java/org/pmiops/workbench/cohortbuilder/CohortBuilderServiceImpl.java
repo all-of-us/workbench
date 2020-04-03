@@ -103,6 +103,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<Criteria> findCriteriaBy(
+      Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    List<DbCriteria> criteriaList;
+    if (parentId != null) {
+      criteriaList =
+          cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
+              domain, type, standard, parentId);
+    } else {
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(domain, type);
+    }
+    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+  }
+
+  @Override
   public List<Criteria> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Integer limit) {
     cdrVersionService.setCdrVersion(cdrVersionId);

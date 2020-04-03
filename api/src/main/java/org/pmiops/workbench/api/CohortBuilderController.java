@@ -311,25 +311,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getCriteriaBy(
+  public ResponseEntity<CriteriaListResponse> findCriteriaBy(
       Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
     validateDomain(domain);
     validateType(type);
-    List<DbCriteria> criteriaList;
-    if (parentId != null) {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-              domain, type, standard, parentId);
-    } else {
-      criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(domain, type);
-    }
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
-                criteriaList.stream()
-                    .map(criteriaMapper::dbModelToClient)
-                    .collect(Collectors.toList())));
+                cohortBuilderService.findCriteriaBy(
+                    cdrVersionId, domain, type, standard, parentId)));
   }
 
   @Override
