@@ -94,7 +94,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
-import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
@@ -1048,8 +1047,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceResourceResponse> getCdrSelectors(
       String workspaceNamespace, String workspaceId) {
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel workspaceAccessLevel = workspaceService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    WorkspaceAccessLevel workspaceAccessLevel =
+        workspaceService.enforceWorkspaceAccessLevel(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     final DbWorkspace workspace =
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
@@ -1060,7 +1060,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .map(cohortMapper::dbModelToClient)
             .map(
                 cohort ->
-                    workspaceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
+                    workspaceMapper
+                        .workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .cohort(cohort)
                         .modifiedTime(cohort.getLastModifiedTime().toString()))
             .collect(Collectors.toList()));
@@ -1071,7 +1072,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .map(cohortReviewMapper::dbModelToClient)
             .map(
                 cohortReview ->
-                    workspaceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
+                    workspaceMapper
+                        .workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .modifiedTime(cohortReview.getLastModifiedTime().toString())
                         .cohortReview(cohortReview))
             .collect(Collectors.toList()));
@@ -1082,7 +1084,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .map(conceptSetMapper::dbModelToClient)
             .map(
                 conceptSet ->
-                    workspaceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
+                    workspaceMapper
+                        .workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .modifiedTime(conceptSet.getLastModifiedTime().toString())
                         .conceptSet(conceptSet))
             .collect(Collectors.toList()));
@@ -1093,7 +1096,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .map(dataSetMapper::dbModelToClientLight)
             .map(
                 dataSet ->
-                    workspaceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
+                    workspaceMapper
+                        .workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .dataSet(dataSet)
                         .modifiedTime(
                             Optional.ofNullable(dataSet.getLastModifiedTime())
