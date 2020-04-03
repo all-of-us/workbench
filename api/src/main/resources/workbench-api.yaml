@@ -3644,7 +3644,7 @@ definitions:
         type: boolean
         default: false
         description: Whether to use the new age type options in cohort builder age wizard
-      enableV2DataUserCodeOfConduct:
+      enableV3DataUserCodeOfConduct:
         type: boolean
         default: false
         description: Whether to enable version 2 of the Data User Code of Conduct

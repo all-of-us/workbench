@@ -24,7 +24,7 @@ const styles = {
 };
 
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
-export const DataUseAgreementContentV1 = () => {
+export const DataUseAgreementContentV2 = () => {
   return <div style={styles.dataUseParagraphStyles}>
     <BolderHeader style={{display: 'flex', justifyContent: 'center'}}><AouTitle/></BolderHeader>
     <BoldHeader  style={{display: 'flex', justifyContent: 'center'}}>Demonstration Project Data Use Agreement</BoldHeader>

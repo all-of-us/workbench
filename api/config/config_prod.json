@@ -97,7 +97,7 @@
     "enableMoodleV2Api": false,
     "requireInstitutionalVerification": false,
     "enableCBAgeTypeOptions": false,
-    "enableV2DataUserCodeOfConduct": false
+    "enableV3DataUserCodeOfConduct": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-prod"

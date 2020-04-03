@@ -4,8 +4,8 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {PdfViewer} from 'app/components/pdf-viewer';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {DataUseAgreementContentV1} from 'app/pages/profile/data-use-agreement-content-v1';
-import {getDataUseAgreementWidgetV1} from 'app/pages/profile/data-use-agreement-panel';
+import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-V2';
+import {getDataUseAgreementWidgetV2} from 'app/pages/profile/data-use-agreement-panel';
 import {
   dataUserCodeOfConductStyles,
   DuaTextInput,
@@ -59,9 +59,9 @@ interface Props {
 
 interface State {
   name: string;
-  initialNameV1: string;
-  initialWorkV1: string;
-  initialSanctionsV1: string;
+  initialNameV2: string;
+  initialWorkV2: string;
+  initialSanctionsV2: string;
   initialMonitoring: string;
   initialPublic: string;
   page: DataUserCodeOfConductPage;
@@ -74,9 +74,9 @@ export const DataUserCodeOfConduct = withUserProfile()(
       super(props);
       this.state = {
         name: '',
-        initialNameV1: '',
-        initialWorkV1: '',
-        initialSanctionsV1: '',
+        initialNameV2: '',
+        initialWorkV2: '',
+        initialSanctionsV2: '',
         initialMonitoring: '',
         initialPublic: '',
         page: DataUserCodeOfConductPage.CONTENT,
@@ -86,7 +86,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
 
     submitDataUserCodeOfConduct(initials) {
       this.setState({submitting: true});
-      const dataUseAgreementVersion = serverConfigStore.getValue().enableV2DataUserCodeOfConduct ? 3 : 2;
+      const dataUseAgreementVersion = serverConfigStore.getValue().enableV3DataUserCodeOfConduct ? 3 : 2;
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
         window.history.back();
@@ -95,20 +95,20 @@ export const DataUserCodeOfConduct = withUserProfile()(
 
     render() {
       const {profileState: {profile}} = this.props;
-      const {initialNameV1, initialWorkV1, initialSanctionsV1, initialMonitoring, initialPublic, page, submitting} = this.state;
-      const errorsV1 = validate({initialNameV1, initialWorkV1, initialSanctionsV1}, {
-        initialNameV1: {
+      const {initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic, page, submitting} = this.state;
+      const errorsV2 = validate({initialNameV2, initialWorkV2, initialSanctionsV2}, {
+        initialNameV2: {
           presence: {allowEmpty: false},
           length: {maximum: 6}
         },
-        initialWorkV1: {
+        initialWorkV2: {
           presence: {allowEmpty: false},
-          equality: {attribute: 'initialNameV1'},
+          equality: {attribute: 'initialNameV2'},
           length: {maximum: 6}
         },
-        initialSanctionsV1: {
+        initialSanctionsV2: {
           presence: {allowEmpty: false},
-          equality: {attribute: 'initialNameV1'},
+          equality: {attribute: 'initialNameV2'},
           length: {maximum: 6}
         }
       });
@@ -122,7 +122,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
           equality: {attribute: 'initialMonitoring'}
         }
       });
-      if (serverConfigStore.getValue().enableV2DataUserCodeOfConduct) {
+      if (serverConfigStore.getValue().enableV3DataUserCodeOfConduct) {
         return <FlexColumn style={styles.dataUserCodeOfConductPage}>
           {
             page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
@@ -161,7 +161,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                      value={profile.givenName + ' ' + profile.familyName}
                      data-test-id='ducc-name-input'/>
                    ("Authorized Data User") have personally reviewed this Data User Code of Conduct.
-                   I agree to follow each of the policies and prodedures it describes.
+                   I agree to follow each of the policies and procedures it describes.
                 </div>
                 <div style={styles.smallTopMargin}>
                   By entering my initials next to each statement below, I acknowledge that:
@@ -189,7 +189,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                      violators, and
                   </li>
                   <li>
-                    notification of the National Institute of Health or other federal agencies as
+                    notification of the National Institutes of Health or other federal agencies as
                      to my actions.
                   </li>
                 </ul>
@@ -199,7 +199,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                    Hub, Researcher Workbench, or the <i>All of Us</i> Research Program data is
                    taken very seriously and other sanctions may be sought.
                 </div>
-                <label style={{...styles.bold, ...styles.largeTopMargin}}>Authorized Data user Name</label>
+                <label style={{...styles.bold, ...styles.largeTopMargin}}>Authorized Data User Name</label>
                 <DuaTextInput
                     disabled
                     data-test-id='ducc-username-input'
@@ -243,14 +243,14 @@ export const DataUserCodeOfConduct = withUserProfile()(
         </FlexColumn>;
       } else {
         return <div style={dataUserCodeOfConductStyles.dataUserCodeOfConductPage}>
-          <DataUseAgreementContentV1/>
+          <DataUseAgreementContentV2/>
           <div style={{height: '1rem'}}/>
-          {getDataUseAgreementWidgetV1.call(this,
+          {getDataUseAgreementWidgetV2.call(this,
             submitting,
-            initialWorkV1,
-            initialNameV1,
-            initialSanctionsV1,
-            errorsV1,
+            initialWorkV2,
+            initialNameV2,
+            initialSanctionsV2,
+            errorsV2,
             this.props.profileState.profile)}
         </div>;
       }

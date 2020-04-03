@@ -100,7 +100,7 @@
     "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": true,
-    "enableV2DataUserCodeOfConduct": true
+    "enableV3DataUserCodeOfConduct": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local"
