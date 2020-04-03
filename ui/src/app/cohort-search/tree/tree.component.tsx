@@ -18,7 +18,7 @@ const styles = reactStyles({
     fontSize: '12px',
     fontWeight: 500,
     textAlign: 'left',
-    border: '1px solid #ebafa6',
+    border: `1px solid ${colorWithWhiteness(colors.danger, 0.5)}`,
     borderRadius: '5px',
     marginTop: '0.25rem',
     padding: '8px',

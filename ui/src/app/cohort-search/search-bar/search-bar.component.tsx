@@ -23,8 +23,8 @@ const styles = reactStyles({
   searchBar: {
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
     borderRadius: '5px',
-    height: '40px',
-    padding: '7px 14px',
+    height: '1.67rem',
+    padding: '0.3rem 0.58rem',
   },
   searchInput: {
     background: 'transparent',
@@ -44,7 +44,7 @@ const styles = reactStyles({
     flexDirection: 'column',
     background: colors.white,
     padding: '.25rem 0',
-    border: '1px solid #ccc',
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
     boxShadow: '0 1px 0.125rem hsla(0,0%,45%,.25)',
     maxHeight: '15rem',
     minHeight: '1.25rem',

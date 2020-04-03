@@ -7,7 +7,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -41,7 +41,7 @@ const styles = reactStyles({
     fontSize: '12px',
     fontWeight: 500,
     textAlign: 'left',
-    border: '1px solid #ebafa6',
+    border: `1px solid ${colorWithWhiteness(colors.danger, 0.5)}`,
     borderRadius: '5px',
     marginTop: '0.25rem',
     padding: '8px',
@@ -62,9 +62,9 @@ const styles = reactStyles({
     whiteSpace: 'nowrap'
   },
   searchMatch: {
-    color: '#659F3D',
+    color: colors.select,
     fontWeight: 'bolder',
-    backgroundColor: 'rgba(101,159,61,0.2)',
+    backgroundColor: colorWithWhiteness(colors.select, 0.8),
     padding: '2px 0',
     whiteSpace: 'nowrap'
   },
