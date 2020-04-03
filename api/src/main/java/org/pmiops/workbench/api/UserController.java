@@ -138,6 +138,14 @@ public class UserController implements UserApiDelegate {
     return ResponseEntity.ok(response);
   }
 
+  private BillingAccount freeTierBillingAccount() {
+    return new BillingAccount()
+        .isFreeTier(true)
+        .displayName("Use All of Us free credits")
+        .name(configProvider.get().billing.freeTierBillingAccountName())
+        .isOpen(true);
+  }
+
   @Override
   public ResponseEntity<WorkbenchListBillingAccountsResponse> listBillingAccounts() {
     final List<BillingAccount> billingAccounts = Lists.newArrayList();
@@ -145,12 +153,7 @@ public class UserController implements UserApiDelegate {
     // if we show the free credits account, it goes first
 
     if (freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
-      billingAccounts.add(
-          new BillingAccount()
-              .isFreeTier(true)
-              .displayName("Use All of Us free credits")
-              .name(configProvider.get().billing.freeTierBillingAccountName())
-              .isOpen(true));
+      billingAccounts.add(freeTierBillingAccount());
     }
 
     billingAccounts.addAll(getCloudbillingAccounts());
