@@ -8,15 +8,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.CriteriaAttributeMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapper;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.Criteria;
+import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.DataFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -30,28 +34,34 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private CdrVersionService cdrVersionService;
   // dao objects
+  private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private CBCriteriaDao cbCriteriaDao;
   private CBDataFilterDao cbDataFilterDao;
   private PersonDao personDao;
   // mappers
   private AgeTypeCountMapper ageTypeCountMapper;
+  private CriteriaAttributeMapper criteriaAttributeMapper;
   private CriteriaMapper criteriaMapper;
   private DataFilterMapper dataFilterMapper;
 
   @Autowired
   public CohortBuilderServiceImpl(
       CdrVersionService cdrVersionService,
+      CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
       CBDataFilterDao cbDataFilterDao,
       PersonDao personDao,
       AgeTypeCountMapper ageTypeCountMapper,
+      CriteriaAttributeMapper criteriaAttributeMapper,
       CriteriaMapper criteriaMapper,
       DataFilterMapper dataFilterMapper) {
     this.cdrVersionService = cdrVersionService;
+    this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
     this.cbDataFilterDao = cbDataFilterDao;
     this.personDao = personDao;
     this.ageTypeCountMapper = ageTypeCountMapper;
+    this.criteriaAttributeMapper = criteriaAttributeMapper;
     this.criteriaMapper = criteriaMapper;
     this.dataFilterMapper = dataFilterMapper;
   }
@@ -61,6 +71,17 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cdrVersionService.setCdrVersion(cdrVersionId);
     return personDao.findAgeTypeCounts().stream()
         .map(ageTypeCountMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<CriteriaAttribute> findCriteriaAttributeByConceptId(
+      Long cdrVersionId, Long conceptId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    List<DbCriteriaAttribute> attributeList =
+        cbCriteriaAttributeDao.findCriteriaAttributeByConceptId(conceptId);
+    return attributeList.stream()
+        .map(criteriaAttributeMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
