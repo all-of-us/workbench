@@ -107,7 +107,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     const {item: {searchParameters}, type} = this.wizard;
     this.loading = true;
-    cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), type).then(response => {
+    cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), type).then(response => {
       this.nodes = response.items
         .filter(item => item.parentId !== 0)
         .sort(sortByCountThenName)
@@ -126,7 +126,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     this.loading = true;
     const promises = [
-      cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), CriteriaType.DECEASED.toString()).then(response => {
+      cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), CriteriaType.DECEASED.toString()).then(response => {
         this.deceasedNode = {...response.items[0], parameterId: 'param-dec'};
       })
     ];

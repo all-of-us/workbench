@@ -268,7 +268,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         let encountersOptions = encountersStore.getValue();
         if (!encountersOptions) {
           // get options for visit modifier from api
-          const res = await cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]);
+          const res = await cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]);
           encountersOptions = res.items;
           encountersStore.next(encountersOptions);
         }
