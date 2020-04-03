@@ -227,18 +227,18 @@ export default abstract class BasePage {
    * @param fileName
    */
   async takeScreenshot(fileName: string) {
-    const SCREENSHOT_DIR = 'logs/screenshot';
-    await ensureDir(SCREENSHOT_DIR);
+    const screenshotDir = 'logs/screenshot';
+    await ensureDir(screenshotDir);
     const timestamp = new Date().getTime();
-    const screenshotFile = `${SCREENSHOT_DIR}/${fileName}_${timestamp}.png`;
+    const screenshotFile = `${screenshotDir}/${fileName}_${timestamp}.png`;
     await this.page.screenshot({path: screenshotFile, fullPage: true});
     console.log('Saved screenshot ' + screenshotFile);
   }
 
   async saveToFile(fileName, data, suffix: string = 'html') {
-    const LOG_DIR = 'logs/html';
-    await ensureDir(LOG_DIR);
-    const fname = `${LOG_DIR}/${fileName}-${new Date().getTime()}.${suffix}`;
+    const logDir = 'logs/html';
+    await ensureDir(logDir);
+    const fname = `${logDir}/${fileName}-${new Date().getTime()}.${suffix}`;
     return new Promise((resolve, reject) => {
       writeFile(fname, data, 'utf8', error => {
         if (error) {

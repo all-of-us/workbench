@@ -24,7 +24,7 @@ describe('Workspace creation tests:', () => {
     const dataPage = new DataPage(page);
     await dataPage.waitForLoad();
     // checking new workspace link is found
-    expect(await new Link(page).withXpath(`//a[.='${workspaceName}' and @href]`, {visible: true})).toBeTruthy();
+    expect(await new Link(page).withXpath(`//a[text()='${workspaceName}']`, {visible: true})).toBeTruthy();
   });
 
 

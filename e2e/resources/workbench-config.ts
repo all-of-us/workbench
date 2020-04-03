@@ -1,5 +1,5 @@
 require('dotenv').config();
-const lodash = require('lodash');
+const fp = require('lodash/fp');
 
 const env = process.env.WORKBENCH_ENV || 'dev';
 
@@ -59,6 +59,6 @@ const environment = {
   stable,
 };
 
-const configs = lodash.mergeWith(environment[env], userCredential, urlPath, puppeteer);
+const configs = fp.mergeAll([environment[env], userCredential, urlPath, puppeteer]);
 
 module.exports = configs;

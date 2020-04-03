@@ -37,7 +37,7 @@ export default class GoogleLoginPage extends BasePage {
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return this.page.waitForXPath(selectors.loginButton, {visible: true});
+    return this.page.waitForXPath(selectors.loginButton, {visible: true, timeout: 60000});
   }
 
   /**
@@ -101,7 +101,7 @@ export default class GoogleLoginPage extends BasePage {
   async load(): Promise<void> {
     const url = configs.uiBaseUrl + configs.loginUrlPath;
     try {
-      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded']});
+      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 0});
     } catch (err) {
       console.error('Google login page not found. ' + err);
       await this.takeScreenshot('GoogleLoginPageNotFound');
@@ -118,22 +118,29 @@ export default class GoogleLoginPage extends BasePage {
   async login(email?: string, paswd?: string) {
     const user = email || configs.userEmail;
     const pwd = paswd || configs.userPassword;
-    await this.load(); // load the Google Sign In page
-    const googleLoginButton = await this.loginButton().catch((err) => {
-      console.error('Google login button not found. ' + err);
-      throw err;
-    });
-    await Promise.all([
-      this.page.waitForNavigation(),
-      googleLoginButton.click(),
-    ]);
 
-    if (!user || user.trim().length === 0) {
-      console.warn('Login user email: value is empty!!!')
+    try {
+      await this.load(); // load the Google Sign In page
+      const googleLoginButton = await this.loginButton().catch((err) => {
+        console.error('Google login button not found. ' + err);
+        throw err;
+      });
+      await Promise.all([
+        this.page.waitForNavigation(),
+        googleLoginButton.click(),
+      ]);
+
+      if (!user || user.trim().length === 0) {
+        console.warn('Login user email: value is empty!!!')
+      }
+      await this.enterEmail(user);
+      await this.enterPassword(pwd);
+      await this.submit();
+    } catch (err) {
+      await this.takeScreenshot('FailedLoginPage');
+      await this.saveHtmlToFile(this.page, 'FailedLoginPage');
+      throw err;
     }
-    await this.enterEmail(user);
-    await this.enterPassword(pwd);
-    await this.submit();
 
     try {
       await this.waitUntilTitleMatch('Homepage');

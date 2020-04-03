@@ -25,25 +25,25 @@ describe('User registration tests:', () => {
 
     const createAccountPage = new CreateAccountPage(page);
 
-    // Step 2: Terms of Service.
+    // Step 1: Terms of Service.
     await createAccountPage.acceptTermsOfUseAgreement();
     let nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
-    // Step 3: Enter institution affiliation details
+    // Step 2: Enter institution affiliation details
     await createAccountPage.fillOutInstitution();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.clickWithEval();
 
-    // Step 4: Enter user information
+    // Step 3: Enter user information
     await createAccountPage.fillOutUserInformation();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
-    // Step 5: Enter demographic survey (All Survey Fields are optional)
+    // Step 4: Enter demographic survey (All Survey Fields are optional)
     await createAccountPage.fillOutDemographicSurvey();
 
     // TODO uncomment after disable recaptcha

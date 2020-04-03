@@ -57,7 +57,7 @@ describe('Sidebar Navigation', () => {
     // Select Contact Us
     await homePage.navTo(SideNavLink.CONTACT_US);
 
-    const iframeHandle: any = await page.waitForSelector('iframe[title="Find more information here"]');
+    const iframeHandle: any = await page.waitForSelector('iframe[title="Find more information here"]', {visible: true});
     const newIframe = await iframeHandle.contentFrame();
 
     const askQuestionAboutButton = await Button.forLabel(newIframe, {text: HELP_DESK.ASK_QUESTION});
