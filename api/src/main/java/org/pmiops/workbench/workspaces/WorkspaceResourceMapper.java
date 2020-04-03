@@ -11,14 +11,5 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     componentModel = "spring",
     uses = {CommonMappers.class})
 public interface WorkspaceResourceMapper {
-  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
-  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
-  @Mapping(target = "permission", source = "accessLevel")
-  @Mapping(target = "cohort", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
-  @Mapping(target = "cohortReview", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
-  @Mapping(target = "conceptSet", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
-  @Mapping(target = "dataSet", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
-  @Mapping(target = "notebook", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
-  @Mapping(target = "modifiedTime", ignore = true) // This should be set when the resource is set
-  WorkspaceResource workspaceResourceFromDbWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
+
 }

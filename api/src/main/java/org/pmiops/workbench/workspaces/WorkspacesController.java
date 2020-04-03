@@ -153,7 +153,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceMapper workspaceMapper;
-  private final WorkspaceResourceMapper workspaceResourceMapper;
   private final WorkspaceService workspaceService;
   private final Provider<Zendesk> zendeskProvider;
 
@@ -181,7 +180,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
-      WorkspaceResourceMapper workspaceResourceMapper,
       LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
@@ -205,7 +203,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
-    this.workspaceResourceMapper = workspaceResourceMapper;
     this.logsBasedMetricService = logsBasedMetricService;
   }
 
@@ -1063,7 +1060,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .map(cohortMapper::dbModelToClient)
             .map(
                 cohort ->
-                    workspaceResourceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
+                    workspaceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .cohort(cohort)
                         .modifiedTime(cohort.getLastModifiedTime().toString()))
             .collect(Collectors.toList()));
@@ -1074,7 +1071,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .map(cohortReviewMapper::dbModelToClient)
             .map(
                 cohortReview ->
-                    workspaceResourceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
+                    workspaceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .modifiedTime(cohortReview.getLastModifiedTime().toString())
                         .cohortReview(cohortReview))
             .collect(Collectors.toList()));
@@ -1085,7 +1082,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .map(conceptSetMapper::dbModelToClient)
             .map(
                 conceptSet ->
-                    workspaceResourceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
+                    workspaceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .modifiedTime(conceptSet.getLastModifiedTime().toString())
                         .conceptSet(conceptSet))
             .collect(Collectors.toList()));
@@ -1096,7 +1093,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .map(dataSetMapper::dbModelToClientLight)
             .map(
                 dataSet ->
-                    workspaceResourceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
+                    workspaceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .dataSet(dataSet)
                         .modifiedTime(
                             Optional.ofNullable(dataSet.getLastModifiedTime())

@@ -17,6 +17,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 
@@ -83,6 +84,17 @@ public interface WorkspaceMapper {
   @Mapping(target = "email", source = "user.username")
   @Mapping(target = "role", source = "acl")
   UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry acl);
+
+  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
+  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "permission", source = "accessLevel")
+  @Mapping(target = "cohort", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
+  @Mapping(target = "cohortReview", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
+  @Mapping(target = "conceptSet", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
+  @Mapping(target = "dataSet", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
+  @Mapping(target = "notebook", ignore = true) // All workspaceResources have one object and all others are null. That should be defined by a setter where used
+  @Mapping(target = "modifiedTime", ignore = true) // This should be set when the resource is set
+  WorkspaceResource workspaceResourceFromDbWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
 
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());
