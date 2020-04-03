@@ -155,7 +155,8 @@ public class UserController implements UserApiDelegate {
     List<BillingAccount> billingAccounts =
         Stream.concat(
                 Stream.of(freeTierBillingAccount()),
-                response.getBillingAccounts().stream()
+                Optional.ofNullable(response.getBillingAccounts()).orElse(Collections.emptyList())
+                    .stream()
                     .map(
                         googleBillingAccount ->
                             new BillingAccount()
