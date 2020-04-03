@@ -76,7 +76,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<AgeTypeCount> findAgeTypeCounts(Long cdrVersionId) {
-    this.cdrVersionService.setCdrVersion(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return personDao.findAgeTypeCounts().stream()
         .map(ageTypeCountMapper::dbModelToClient)
         .collect(Collectors.toList());
@@ -96,7 +96,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<Criteria> findCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
-    this.cdrVersionService.setCdrVersion(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersionId);
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
     List<DbCriteria> criteriaList =
@@ -163,7 +163,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<DataFilter> findDataFilters(Long cdrVersionId) {
-    this.cdrVersionService.setCdrVersion(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return StreamSupport.stream(cbDataFilterDao.findAll().spliterator(), false)
         .map(dataFilterMapper::dbModelToClient)
         .collect(Collectors.toList());
