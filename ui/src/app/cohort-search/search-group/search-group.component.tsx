@@ -193,6 +193,7 @@ function initItem(id: string, type: string, tempGroup: number) {
 }
 
 interface Props {
+  dataFilters: Array<string>;
   group: any;
   index: number;
   role: keyof SearchRequest;
@@ -263,6 +264,14 @@ export const SearchGroup = withCurrentWorkspace()(
       this.getGroupCount();
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      const {dataFilters} = this.props;
+      if (prevProps.dataFilters !== dataFilters) {
+        this.setState({initializing: true});
+        this.getGroupCount();
+      }
+    }
+
     componentWillUnmount(): void {
       this.aborter.abort();
       clearTimeout(this.deleteTimeout);
@@ -271,12 +280,12 @@ export const SearchGroup = withCurrentWorkspace()(
     getGroupCount() {
       this.abortPendingCalls();
       this.setState({error: false, loading: true});
-      const {group, role, workspace: {cdrVersionId}} = this.props;
+      const {dataFilters, group, role, workspace: {cdrVersionId}} = this.props;
       const mappedGroup = mapGroup(group);
       const request = {
         includes: [],
         excludes: [],
-        dataFilters: [],
+        dataFilters,
         [role]: [mappedGroup]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request, {signal: this.aborter.signal})
@@ -516,7 +525,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     render() {
-      const {group: {id, items, mention, name, status, temporal, time, timeValue}, index, role} = this.props;
+      const {dataFilters, group: {id, items, mention, name, status, temporal, time, timeValue}, index, role} = this.props;
       const {count, error, inputError, inputTouched, loading, overlayStyle, renaming} = this.state;
       const groupName = !!name ? name : `Group ${index + 1}`;
       const showGroupCount = !loading && !error && this.hasActiveItems && (!temporal || !this.temporalError) && count !== undefined;
@@ -549,7 +558,8 @@ export const SearchGroup = withCurrentWorkspace()(
           </div>}
           {/* Main search item list/temporal group 0 items */}
           {this.items.map((item, i) => <div key={i} data-test-id='item-list' style={styles.searchItem}>
-            <SearchGroupItem role={role}
+            <SearchGroupItem dataFilters={dataFilters}
+              role={role}
               groupId={id}
               item={item}
               index={i}
@@ -588,7 +598,7 @@ export const SearchGroup = withCurrentWorkspace()(
             </div>
             {/* Temporal group 1 items */}
             {this.temporalItems.map((item, i) => <div key={i} style={styles.searchItem} data-test-id='temporal-item-list'>
-              <SearchGroupItem
+              <SearchGroupItem dataFilters={dataFilters}
                 role={role}
                 groupId={id}
                 item={item}

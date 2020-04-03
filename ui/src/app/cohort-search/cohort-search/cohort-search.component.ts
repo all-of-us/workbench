@@ -33,6 +33,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   updatingCohort = false;
   updateGroupListsCount = 0;
   cohortChanged = false;
+  dataFilters = [];
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -59,6 +60,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
     this.subscription.add(searchRequestStore.subscribe(sr => {
       this.criteria = sr;
+      this.dataFilters = sr.dataFilters;
       this.overview = sr.includes.length || sr.excludes.length;
       this.cohortChanged = !!this.cohort && this.cohort.criteria !== JSON.stringify(mapRequest(this.criteria));
       this.updateGroupListsCount++;

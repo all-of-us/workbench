@@ -110,6 +110,7 @@ const css = `
 `;
 
 interface Props {
+  dataFilters: Array<string>;
   groups: Array<any>;
   role: keyof SearchRequest;
   updated: number;
@@ -224,7 +225,7 @@ export class SearchGroupList extends React.Component<Props, State> {
   }
 
   render() {
-    const {groups, role, updated, updateRequest} = this.props;
+    const {dataFilters, groups, role, updated, updateRequest} = this.props;
     const {index} = this.state;
     return <React.Fragment>
       <style>{css}</style>
@@ -234,7 +235,12 @@ export class SearchGroupList extends React.Component<Props, State> {
         </h2>
       </div>
       {groups.map((group, g) => <div key={g}>
-        <SearchGroup group={group} index={g + index} role={role} updated={updated} updateRequest={updateRequest}/>
+        <SearchGroup dataFilters={dataFilters}
+          group={group}
+          index={g + index}
+          role={role}
+          updated={updated}
+          updateRequest={updateRequest}/>
         <div style={styles.circleWrapper}>
           <div style={styles.circle}>AND</div>
         </div>
@@ -264,12 +270,13 @@ export class SearchGroupList extends React.Component<Props, State> {
   template: '<div #root></div>'
 })
 export class SearchGroupListComponent extends ReactWrapperBase {
-  @Input('role') role: Props['role'];
+  @Input('dataFilters') dataFilters: Props['dataFilters'];
   @Input('groups') groups: Props['groups'];
+  @Input('role') role: Props['role'];
   @Input('updated') updated: Props['updated'];
   @Input('updateRequest') updateRequest: Props['updateRequest'];
 
   constructor() {
-    super(SearchGroupList, ['groups', 'role', 'updated', 'updateRequest']);
+    super(SearchGroupList, ['dataFilters', 'groups', 'role', 'updated', 'updateRequest']);
   }
 }

@@ -273,11 +273,13 @@ export const ListOverview = withCurrentWorkspace()(
     handleDataFilterChange(filterName: string, checked: boolean) {
       const {searchRequest} = this.props;
       if (checked) {
-        searchRequest.dataFilters.push(filterName);
+        searchRequest.dataFilters = [...searchRequest.dataFilters, filterName];
       } else {
         searchRequest.dataFilters = searchRequest.dataFilters.filter(df => df !== filterName);
       }
+      this.setState({initializing: true});
       searchRequestStore.next(searchRequest);
+      this.getTotalCount();
     }
 
     callApi() {

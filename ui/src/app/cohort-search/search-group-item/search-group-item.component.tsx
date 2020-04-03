@@ -126,6 +126,7 @@ interface ItemProp extends Item {
 }
 
 interface Props {
+  dataFilters: Array<string>;
   groupId: string;
   item: ItemProp;
   index: number;
@@ -175,14 +176,14 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      const {item: {searchParameters}} = this.props;
-      if (prevProps.item.searchParameters !== searchParameters) {
+      const {dataFilters, item: {searchParameters}} = this.props;
+      if (prevProps.item.searchParameters !== searchParameters || prevProps.dataFilters !== dataFilters) {
         this.setState({loading: true}, () => this.getItemCount());
       }
     }
 
     async getItemCount() {
-      const {item, role, updateGroup} = this.props;
+      const {dataFilters, item, role, updateGroup} = this.props;
       try {
         updateGroup();
         const {cdrVersionId} = currentWorkspaceStore.getValue();
@@ -190,7 +191,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         const request = {
           includes: [],
           excludes: [],
-          dataFilters: [],
+          dataFilters,
           [role]: [{items: [mappedItem], temporal: false}]
         };
         await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.updateSearchRequest('count', count, false));
