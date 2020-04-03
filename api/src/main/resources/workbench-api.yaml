@@ -2999,7 +2999,7 @@ paths:
         of the following: type, subtype, parentId and/or allChildren
 
 '
-      operationId: getCriteriaBy
+      operationId: findCriteriaBy
       parameters:
       - in: path
         name: domain

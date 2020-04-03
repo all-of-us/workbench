@@ -110,7 +110,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaBy() {
+  public void findCriteriaBy() {
     DbCriteria icd9CriteriaParent =
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
@@ -135,7 +135,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(icd9CriteriaParent),
         controller
-            .getCriteriaBy(
+            .findCriteriaBy(
                 1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
             .getBody()
             .getItems()
@@ -143,7 +143,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(icd9Criteria),
         controller
-            .getCriteriaBy(
+            .findCriteriaBy(
                 1L,
                 DomainType.CONDITION.toString(),
                 CriteriaType.ICD9CM.toString(),
@@ -155,9 +155,9 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaByExceptions() {
+  public void findCriteriaByExceptions() {
     try {
-      controller.getCriteriaBy(1L, null, null, false, null);
+      controller.findCriteriaBy(1L, null, null, false, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -166,7 +166,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.getCriteriaBy(1L, "blah", null, false, null);
+      controller.findCriteriaBy(1L, "blah", null, false, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -175,7 +175,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.getCriteriaBy(1L, DomainType.CONDITION.toString(), "blah", false, null);
+      controller.findCriteriaBy(1L, DomainType.CONDITION.toString(), "blah", false, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -185,7 +185,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaByDemo() {
+  public void findCriteriaByDemo() {
     DbCriteria demoCriteria =
         DbCriteria.builder()
             .addDomainId(DomainType.PERSON.toString())
@@ -198,7 +198,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(demoCriteria),
         controller
-            .getCriteriaBy(
+            .findCriteriaBy(
                 1L, DomainType.PERSON.toString(), CriteriaType.AGE.toString(), false, null)
             .getBody()
             .getItems()
