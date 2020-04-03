@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
-import org.pmiops.workbench.model.AgreementType;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
@@ -15,6 +14,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
@@ -442,19 +442,19 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.get(organizationType);
   }
 
-  // Agreement Type
-  private static final BiMap<AgreementType, Short> CLIENT_TO_STORAGE_AGREEMENT_TYPE =
-      ImmutableBiMap.<AgreementType, Short>builder()
-          .put(AgreementType.MASTER, (short) 0)
-          .put(AgreementType.RESTRICTED, (short) 1)
+  // Institution Data Use agreement Type
+  private static final BiMap<DuaType, Short> CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE =
+      ImmutableBiMap.<DuaType, Short>builder()
+          .put(DuaType.MASTER, (short) 0)
+          .put(DuaType.RESTRICTED, (short) 1)
           .build();
 
-  public static AgreementType agreementTypeFromStorage(Short agreementType) {
-    return CLIENT_TO_STORAGE_AGREEMENT_TYPE.inverse().get(agreementType);
+  public static DuaType institutionDUATypeFromStorage(Short institutionDuaType) {
+    return CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE.inverse().get(institutionDuaType);
   }
 
-  public static Short agreementTypeToStorage(AgreementType agreementType) {
-    return CLIENT_TO_STORAGE_AGREEMENT_TYPE.get(agreementType);
+  public static Short institutionDUATypeToStorage(DuaType institutionDuaType) {
+    return CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE.get(institutionDuaType);
   }
   // PrePackagedConceptSet
   private static final BiMap<PrePackagedConceptSetEnum, Short>

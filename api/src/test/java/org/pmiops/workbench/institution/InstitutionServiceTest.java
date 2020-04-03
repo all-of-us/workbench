@@ -18,7 +18,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.AgreementType;
+import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -42,10 +42,7 @@ public class InstitutionServiceTest {
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final Institution testInst =
-      new Institution()
-          .shortName("test")
-          .displayName("this is a test")
-          .agreementTypeEnum(AgreementType.MASTER);
+      new Institution().shortName("test").displayName("this is a test");
 
   // the mapper converts nulls to empty sets
   private final Institution roundTrippedTestInst =
@@ -53,8 +50,7 @@ public class InstitutionServiceTest {
           .shortName(testInst.getShortName())
           .displayName(testInst.getDisplayName())
           .emailDomains(Collections.emptyList())
-          .emailAddresses(Collections.emptyList())
-          .agreementTypeEnum(AgreementType.MASTER);
+          .emailAddresses(Collections.emptyList());
 
   @Before
   public void setUp() {
@@ -71,8 +67,7 @@ public class InstitutionServiceTest {
             .shortName("otherInst")
             .displayName("The Institution of testing")
             .emailDomains(Collections.emptyList())
-            .emailAddresses(Collections.emptyList())
-            .agreementTypeEnum(AgreementType.MASTER);
+            .emailAddresses(Collections.emptyList());
     assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
 
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
@@ -112,8 +107,7 @@ public class InstitutionServiceTest {
             .shortName("otherInst")
             .displayName("The Institution of testing")
             .emailDomains(Collections.emptyList())
-            .emailAddresses(Collections.emptyList())
-            .agreementTypeEnum(AgreementType.MASTER);
+            .emailAddresses(Collections.emptyList());
     service.createInstitution(otherInst);
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, otherInst);
 
@@ -131,8 +125,7 @@ public class InstitutionServiceTest {
             .shortName("otherInst")
             .displayName("The Institution of testing")
             .emailAddresses(Collections.emptyList())
-            .emailDomains(Collections.emptyList())
-            .agreementTypeEnum(AgreementType.MASTER);
+            .emailDomains(Collections.emptyList());
     service.createInstitution(otherInst);
     assertThat(service.getInstitution("otherInst")).hasValue(otherInst);
   }
@@ -268,7 +261,7 @@ public class InstitutionServiceTest {
                     .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
                     .emailAddresses(
                         Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")))
-            .agreementTypeEnum(AgreementType.RESTRICTED);
+            .duaTypeEnum(DuaType.RESTRICTED);
 
     final DbUser user = createUser("external-researcher@sanger.uk");
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isTrue();
@@ -285,7 +278,7 @@ public class InstitutionServiceTest {
                     .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
                     .emailAddresses(
                         Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")))
-            .agreementTypeEnum(AgreementType.MASTER);
+            .duaTypeEnum(DuaType.MASTER);
 
     final DbUser user = createUser("external-researcher@broad.org");
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isTrue();
@@ -294,10 +287,8 @@ public class InstitutionServiceTest {
   @Test
   public void test_emailValidation_null() {
     final Institution inst =
-        service
-            .createInstitution(
-                new Institution().shortName("Broad").displayName("The Broad Institute"))
-            .agreementTypeEnum(AgreementType.MASTER);
+        service.createInstitution(
+            new Institution().shortName("Broad").displayName("The Broad Institute"));
 
     final DbUser user = userDao.save(new DbUser());
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
@@ -311,7 +302,7 @@ public class InstitutionServiceTest {
                 new Institution().shortName("Broad").displayName("The Broad Institute"))
             .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
             .emailAddresses(Lists.newArrayList("email@domain.org"))
-            .agreementTypeEnum(AgreementType.MASTER);
+            .duaTypeEnum(DuaType.MASTER);
 
     final DbUser user = createUser("external-researcher@sanger.uk");
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
@@ -326,6 +317,20 @@ public class InstitutionServiceTest {
                 .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org")));
 
     final DbUser user = createUser("user@hacker@broad.org");
+    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
+  }
+
+  public void test_emailValidation_restricted_mismatch() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org"))
+                .emailAddresses(Lists.newArrayList("testing@broad,org"))
+                .duaTypeEnum(DuaType.RESTRICTED));
+
+    final DbUser user = createUser("hack@broad.org");
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
   }
 

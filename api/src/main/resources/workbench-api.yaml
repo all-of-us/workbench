@@ -5585,9 +5585,9 @@ definitions:
         type: string
         description: 'The detailed Organization Type of this institution, as text,
           if its enumerated type is OTHER'
-      agreementTypeEnum:
-        "$ref": "#/definitions/AgreementType"
-        description: 'Type of Agreement Institution has signed, Master or restricted to few employees'
+      duaTypeEnum:
+        "$ref": "#/definitions/DuaType"
+        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
       emailAddresses:
         type: array
         description: A list of email addresses which can be validated as members of
@@ -5620,8 +5620,9 @@ definitions:
         type: string
         description: A more descriptive name for the Institution, such as 'Vanderbilt
           University Medical Center'
-      agreementTypeEnum:
-        "$ref": "#/definitions/AgreementType"
+      duaTypeEnum:
+        "$ref": "#/definitions/DuaType"
+        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
@@ -5669,9 +5670,9 @@ definitions:
     - HEALTH_CENTER_NON_PROFIT
     - OTHER
 
-  AgreementType:
+  DuaType:
     type: string
-    description: 'Type of Agreement Institution has signed, Applicable to all employees or restricted to  just few'
+    description: 'Type of Data Use Agreement Institution has signed, Applicable to all researchers or restricted to  just few'
     enum:
       - MASTER
       - RESTRICTED
