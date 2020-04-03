@@ -12,5 +12,15 @@ public interface CohortBuilderService {
   List<Criteria> findCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit);
 
+  List<Criteria> findCriteriaByDomainAndSearchTerm(
+      Long cdrVersionId, String domain, String term, Integer limit);
+
   List<DataFilter> findDataFilters(Long cdrVersionId);
+
+  List<Criteria> findDrugBrandOrIngredientByValue(Long cdrVersionId, String value, Integer limit);
+
+  List<Criteria> findDrugIngredientByConceptId(Long cdrVersionId, Long conceptId);
+
+  List<Criteria> findStandardCriteriaByDomainAndConceptId(
+      Long cdrVersionId, String domain, Long conceptId);
 }

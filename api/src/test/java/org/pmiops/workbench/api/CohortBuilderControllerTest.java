@@ -485,7 +485,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getStandardCriteriaByDomainAndConceptId() {
+  public void findStandardCriteriaByDomainAndConceptId() {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute(
@@ -503,7 +503,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .getStandardCriteriaByDomainAndConceptId(1L, DomainType.CONDITION.toString(), 12345L)
+            .findStandardCriteriaByDomainAndConceptId(1L, DomainType.CONDITION.toString(), 12345L)
             .getBody()
             .getItems()
             .get(0));
@@ -541,15 +541,23 @@ public class CohortBuilderControllerTest {
 
     assertEquals(
         createResponseCriteria(drugATCCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "drugN", null).getBody().getItems().get(0));
+        controller.findDrugBrandOrIngredientByValue(1L, "drugN", null).getBody().getItems().get(0));
 
     assertEquals(
         createResponseCriteria(drugBrandCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "brandN", null).getBody().getItems().get(0));
+        controller
+            .findDrugBrandOrIngredientByValue(1L, "brandN", null)
+            .getBody()
+            .getItems()
+            .get(0));
 
     assertEquals(
         createResponseCriteria(drugBrandCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "LP6789", null).getBody().getItems().get(0));
+        controller
+            .findDrugBrandOrIngredientByValue(1L, "LP6789", null)
+            .getBody()
+            .getItems()
+            .get(0));
   }
 
   @Test

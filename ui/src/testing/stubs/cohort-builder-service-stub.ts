@@ -57,11 +57,11 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
-  getDrugBrandOrIngredientByValue(): Promise<CriteriaListResponse> {
+  findDrugBrandOrIngredientByValue(): Promise<CriteriaListResponse> {
     return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
-  getDrugIngredientByConceptId(): Promise<CriteriaListResponse> {
+  findDrugIngredientByConceptId(): Promise<CriteriaListResponse> {
     return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
