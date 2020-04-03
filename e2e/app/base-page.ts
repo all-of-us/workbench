@@ -1,5 +1,6 @@
 import {ElementHandle, Page, Response} from 'puppeteer';
 import { ensureDir, writeFile } from 'fs-extra';
+import BaseElement from './aou-elements/base-element';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -47,9 +48,9 @@ export default abstract class BasePage {
 
   /**
    * Click on element then wait for page navigation.
-   * @param {ElementHandle} clickElement
+   * @param {ElementHandle | BaseElement} clickElement
    */
-  async clickAndWait(clickElement: ElementHandle) {
+  async clickAndWait(clickElement: ElementHandle | BaseElement) {
     return Promise.all([
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 90000}),
       clickElement.click(),
