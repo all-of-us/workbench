@@ -238,6 +238,8 @@ public class WorkbenchConfig {
     public boolean requireInstitutionalVerification;
     // Flag to indicate whether to use the new age type options in cohort builder age wizard
     public boolean enableCBAgeTypeOptions;
+    // Flag to indicate whether to use the V2 Data User Code of Conduct
+    public boolean enableV3DataUserCodeOfConduct;
   }
 
   public static class ActionAuditConfig {

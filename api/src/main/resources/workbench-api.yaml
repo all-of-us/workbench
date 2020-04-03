@@ -3634,20 +3634,20 @@ definitions:
       requireInvitationKey:
         type: boolean
         default: false
-        description: Whether the current environment requires an invitation key for
-          signup.
+        description: Whether the current environment requires an invitation key for signup.
       requireInstitutionalVerification:
         type: boolean
         default: false
         description: 'Feature flag for verifying the institutional affiliation of
-          new users by validating their contact emails.
-
-'
+          new users by validating their contact emails.'
       enableCBAgeTypeOptions:
         type: boolean
         default: false
-        description: Whether to use the new age type options in cohort builder age
-          wizard
+        description: Whether to use the new age type options in cohort builder age wizard
+      enableV3DataUserCodeOfConduct:
+        type: boolean
+        default: false
+        description: Whether to enable version 2 of the Data User Code of Conduct
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:
