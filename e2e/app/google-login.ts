@@ -169,7 +169,6 @@ export default class GoogleLoginPage extends BasePage {
   static async logIn(page: Page): Promise<HomePage> {
     await page.setUserAgent(configs.puppeteerUserAgent);
     await page.setDefaultNavigationTimeout(120000);
-    await page.setViewport({ width: 1920, height: 1080 }); // should match '--window-size=1920,1080' in jest-puppeteer.config.js
 
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
