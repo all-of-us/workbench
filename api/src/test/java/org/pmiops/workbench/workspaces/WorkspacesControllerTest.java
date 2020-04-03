@@ -75,10 +75,12 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
@@ -86,6 +88,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -267,9 +270,12 @@ public class WorkspacesControllerTest {
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
+    DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     FreeTierBillingService.class,
     ReviewQueryBuilder.class,
@@ -277,6 +283,7 @@ public class WorkspacesControllerTest {
     ConceptSetsController.class,
     ConceptSetMapperImpl.class,
     WorkspaceMapperImpl.class,
+    WorkspaceResourceMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({

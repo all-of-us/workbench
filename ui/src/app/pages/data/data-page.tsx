@@ -110,7 +110,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       this.setState({
         isLoading: true
       });
-      const results = await workspacesApi().getDataPageItems(namespace, id);
+      const results = await workspacesApi().getCdrSelectors(namespace, id);
 
       results.map(result => result.modifiedTime ? result.modifiedTime = new Date(Number(result.modifiedTime)).toDateString() : null);
       this.setState({

@@ -340,7 +340,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getDataPageItems(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceResourceResponse> {
+  getCdrSelectors(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceResourceResponse> {
     return new Promise<WorkspaceResourceResponse>(resolve => {
       const workspaceResources = convertToResources(
         cohortReviewStubs,

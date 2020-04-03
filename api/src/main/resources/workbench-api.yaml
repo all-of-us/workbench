@@ -804,18 +804,19 @@ paths:
           description: Workspace deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/get-data-page-items":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cdr-selectors":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - workspaces
-      description: Gets all items shown on the data page of the workspcae
-      operationId: getDataPageItems
+      description: Gets all items within a workspace that describe user selected
+        subsets of the CDR (e.g., concept sets, cohorts, datasets, etc)
+      operationId: getCdrSelectors
       responses:
         200:
-          description: Returns all data page objects in a workspace.
+          description: Returns all objects that describe a section of the CDR in a workspace.
           schema:
             "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage":

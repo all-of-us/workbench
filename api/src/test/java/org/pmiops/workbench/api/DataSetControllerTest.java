@@ -136,6 +136,8 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.workspaces.WorkspaceResourceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceResourceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -269,6 +271,8 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceMapper workspaceMapper;
 
+  @Autowired WorkspaceResourceMapper workspaceResourceMapper;
+
   @Autowired LogsBasedMetricService logsBasedMetricService;
 
   @Autowired Provider<Zendesk> mockZendeskProvider;
@@ -288,6 +292,7 @@ public class DataSetControllerTest {
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
+    WorkspaceResourceMapperImpl.class,
     CommonMappers.class,
     LogsBasedMetricServiceFakeImpl.class,
     UserServiceTestConfiguration.class,
@@ -412,6 +417,7 @@ public class DataSetControllerTest {
             workbenchConfigProvider,
             workspaceAuditor,
             workspaceMapper,
+            workspaceResourceMapper,
             logsBasedMetricService);
     CohortsController cohortsController =
         new CohortsController(

@@ -153,6 +153,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceMapper workspaceMapper;
+  private final WorkspaceResourceMapper workspaceResourceMapper;
   private final WorkspaceService workspaceService;
   private final Provider<Zendesk> zendeskProvider;
 
@@ -180,6 +181,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
+      WorkspaceResourceMapper workspaceResourceMapper,
       LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
@@ -203,6 +205,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
+    this.workspaceResourceMapper = workspaceResourceMapper;
     this.logsBasedMetricService = logsBasedMetricService;
   }
 
@@ -1044,74 +1047,63 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
 
-  private WorkspaceResource createWorkspaceResourceFromWorkspace(DbWorkspace workspace) {
-    return new WorkspaceResource()
-        .workspaceFirecloudName(workspace.getFirecloudName())
-        .workspaceId(workspace.getWorkspaceId())
-        .workspaceNamespace(workspace.getWorkspaceNamespace())
-        .workspaceBillingStatus(workspace.getBillingStatus());
-  }
-
   @Override
-  public ResponseEntity<WorkspaceResourceResponse> getDataPageItems(
+  public ResponseEntity<WorkspaceResourceResponse> getCdrSelectors(
       String workspaceNamespace, String workspaceId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    WorkspaceAccessLevel workspaceAccessLevel = workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbWorkspace workspace =
+    final DbWorkspace workspace =
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
-    Set<DbCohort> cohorts = workspace.getCohorts();
-    WorkspaceResourceResponse workspaceResources = new WorkspaceResourceResponse();
-    workspaceResources.addAll(
+    final Set<DbCohort> cohorts = workspace.getCohorts();
+    WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
+    workspaceResourceResponse.addAll(
         cohorts.stream()
             .map(cohortMapper::dbModelToClient)
             .map(
                 cohort ->
-                    createWorkspaceResourceFromWorkspace(workspace)
+                    workspaceResourceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .cohort(cohort)
                         .modifiedTime(cohort.getLastModifiedTime().toString()))
             .collect(Collectors.toList()));
-    // TODO: Convert cohorts to resources
     List<DbCohortReview> reviews =
         cohortReviewService.getRequiredWithCohortReviews(workspaceNamespace, workspaceId);
-    workspaceResources.addAll(
+    workspaceResourceResponse.addAll(
         reviews.stream()
             .map(cohortReviewMapper::dbModelToClient)
             .map(
                 cohortReview ->
-                    createWorkspaceResourceFromWorkspace(workspace)
+                    workspaceResourceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .modifiedTime(cohortReview.getLastModifiedTime().toString())
                         .cohortReview(cohortReview))
             .collect(Collectors.toList()));
-    // TODO convert cohort reviews to resources
     List<DbConceptSet> conceptSets =
         conceptSetService.findByWorkspaceId(workspace.getWorkspaceId());
-    workspaceResources.addAll(
+    workspaceResourceResponse.addAll(
         conceptSets.stream()
             .map(conceptSetMapper::dbModelToClient)
             .map(
                 conceptSet ->
-                    createWorkspaceResourceFromWorkspace(workspace)
+                    workspaceResourceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .modifiedTime(conceptSet.getLastModifiedTime().toString())
                         .conceptSet(conceptSet))
             .collect(Collectors.toList()));
-    // TODO: Convert concept sets to resources
     List<DbDataset> dataSets =
         dataSetDao.findByWorkspaceIdAndInvalid(workspace.getWorkspaceId(), false);
-    workspaceResources.addAll(
+    workspaceResourceResponse.addAll(
         dataSets.stream()
-            .map(dataSetMapper::dbModelToClient)
+            .map(dataSetMapper::dbModelToClientLight)
             .map(
                 dataSet ->
-                    createWorkspaceResourceFromWorkspace(workspace)
+                    workspaceResourceMapper.workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
                         .dataSet(dataSet)
                         .modifiedTime(
                             Optional.ofNullable(dataSet.getLastModifiedTime())
                                 .map(Object::toString)
                                 .orElse(null)))
             .collect(Collectors.toList()));
-    return ResponseEntity.ok(workspaceResources);
+    return ResponseEntity.ok(workspaceResourceResponse);
   }
 
   private <T> T recordOperationTime(Supplier<T> operation, String operationName) {
