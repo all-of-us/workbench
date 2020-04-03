@@ -23,7 +23,7 @@ public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
   public static final String QUEUE_NAME_REQUEST_HEADER = "X-AppEngine-QueueName";
   private static final String CLOUD_TASK_TAG = "cloudTask";
   public static final Set<String> VALID_QUEUE_NAME_SET =
-      new HashSet<>(Arrays.asList("rdrQueueTest"));
+      new HashSet<>(Arrays.asList("rdrExportQueue"));
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
