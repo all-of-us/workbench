@@ -254,7 +254,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     } else {
       this.selectedIds = [...this.selectedIds, param.parameterId];
       if (param.group) {
-        this.groupSelections = [...this.groupSelections, param.parameterId];
+        this.groupSelections = [...this.groupSelections, param.id];
       }
     }
     this.selections = [...this.selections, param];
