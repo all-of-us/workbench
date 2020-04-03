@@ -194,8 +194,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             cdrVersionService,
             elasticSearchService,
             configProvider,
-            cohortBuilderService,
-            criteriaMapper);
+            cohortBuilderService);
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
