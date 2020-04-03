@@ -11,7 +11,7 @@ apply plugin: 'org.liquibase.gradle'
 
 def db_host = System.getenv("DB_HOST") ?: "db"
 def db_port = System.getenv("DB_PORT") ?: "3306"
-def liquibase_username = "root"
+def liquibase_username = "liquibase"
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
 
 liquibase {
@@ -22,6 +22,5 @@ liquibase {
             username liquibase_username
             password "${liquibase_password}"
         }
-//        runList = project.ext.runList
     }
 }
