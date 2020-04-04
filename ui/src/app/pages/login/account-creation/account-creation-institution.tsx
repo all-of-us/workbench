@@ -15,8 +15,8 @@ import colors from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {
-  AgreementType,
   CheckEmailResponse,
+  DuaType,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -205,7 +205,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           institution.shortName === verifiedInstitutionalAffiliation.institutionShortName, institutions);
 
       // If Instution has signed Restricted agreement and the email id is not in allowed email ids list
-      if (selectedInstitutionObj.agreementTypeEnum === AgreementType.RESTRICTED) {
+      if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
         return <div data-test-id='email-error-message' style={{color: colors.danger}}>
           The institution has authorized access only to select members.<br/>
           Please <a href='https://www.researchallofus.org/apply/' target='_blank'>
