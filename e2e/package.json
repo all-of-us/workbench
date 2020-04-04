@@ -9,7 +9,7 @@
     "test": "cross-env WORKBENCH_ENV=dev jest --detectOpenHandles",
     "test:debug": "cross-env WORKBENCH_ENV=dev HEADLESS=false jest --detectOpenHandles",
     "test-local": "cross-env WORKBENCH_ENV=local jest",
-    "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev CI=true jest --ci --runInBand --forceExit",
+    "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev CI=true jest --ci --maxWorkers=2 --forceExit --reporters=default --reporters=jest-junit",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn run lint --fix",
     "tsc-build": "tsc --skipLibCheck --project tsconfig.json",
@@ -25,6 +25,10 @@
   "engines": {
     "node": ">= 12.0.0"
   },
+  "jest-junit": {
+    "outputDirectory": "./logs",
+    "outputName": "test-results.xml"
+  },
   "dependencies": {},
   "devDependencies": {
     "@types/expect-puppeteer": "^4.4.0",
@@ -39,7 +43,7 @@
     "faker": "^4.1.0",
     "fs-extra": "^9.0.0",
     "jest": "^25.1.0",
-    "jest-cli": "^25.1.0",
+    "jest-junit": "^10.0.0",
     "jest-puppeteer": "^4.4.0",
     "lodash": "^4.17.15",
     "puppeteer": "^2.1.1",
