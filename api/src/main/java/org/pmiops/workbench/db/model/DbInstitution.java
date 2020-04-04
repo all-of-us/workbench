@@ -13,7 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.model.DuaType ;
+import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.OrganizationType;
 
 @Entity
