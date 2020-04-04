@@ -211,7 +211,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           Please <a href='https://www.researchallofus.org/apply/' target='_blank'>
           click here</a> to request to be added to the institution</div>;
       }
-      // If institution has MASTER agreement and the domain is not in the allowed list
+      // If institution has MASTER or NULL agreement and the domain is not in the allowed list
       return <div data-test-id='email-error-message' style={{color: colors.danger}}>
           Your email does not match your institution</div>;
     }

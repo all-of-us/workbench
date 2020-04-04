@@ -164,7 +164,7 @@ it('should validate email affiliation when inst and email domain are specified',
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
-  // Choose 'Broad' and enter an email address.
+  // Choose 'VUMC' and enter an email address.
   getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
   getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@asdf.com'}});
 
@@ -215,7 +215,7 @@ it('should trigger email check when email is filled in before choosing instituti
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
-  getEmailInput(wrapper).simulate('change', {target: {value: 'institution@broadinstitute.org'}});
+  getEmailInput(wrapper).simulate('change', {target: {value: 'contactEmail@broadinstitute.org'}});
   getEmailInput(wrapper).simulate('blur');
   // This shouldn't strictly be needed here, since we expect the API request not to be sent due to
   // no institution being chosen. But for consistency w/ other tests, it's included.
