@@ -3,56 +3,19 @@ import SelectComponent from '../../app/aou-elements/select-component';
 import Textbox from '../../app/aou-elements/textbox';
 import CreateAccountPage, {FIELD_LABEL, INSTITUTION_ROLE_VALUE, INSTITUTION_VALUE} from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
 
 const configs = require('../../resources/workbench-config');
 
-// set timeout globally per suite, not per test.
-jest.setTimeout(2 * 60 * 1000);
 
-describe.skip('User registration tests:', () => {
-
-  let browser;
-  let page;
-
-  beforeAll(async () => {
-    browser = await PuppeteerLaunch();
-  });
+describe('User registration tests:', () => {
 
   beforeEach(async () => {
-    page = await browser.newPage();
-    await page.setDefaultNavigationTimeout(60000);
+    await page.setUserAgent(configs.puppeteerUserAgent);
+    await page.setDefaultNavigationTimeout(120000);
   });
 
   afterEach(async () => {
-    await page.close();
-  });
-
-  afterAll(async () => {
-    await browser.close();
-  });
-
-
-  test('Entered invalid invitation key', async () => {
-    const loginPage = new GoogleLoginPage(page);
-    await loginPage.load();
-
-    const createAccountButton = await loginPage.createAccountButton();
-    await createAccountButton.click();
-
-    const createAccountPage = new CreateAccountPage(page);
-    const headerDisplayed = await createAccountPage.waitForTextExists('Enter your Invitation Key:');
-    expect(headerDisplayed).toBeTruthy();
-    const keyIsNotValidError = 'Invitation Key is not Valid.';
-    const errDisplayed = await createAccountPage.findText(keyIsNotValidError);
-    expect(errDisplayed).toBeFalsy();
-
-    const badInvitationKey = process.env.INVITATION_KEY + '1';
-    await createAccountPage.fillOutInvitationKey(badInvitationKey);
-    const found = await createAccountPage.waitForTextExists(keyIsNotValidError);
-    expect(await found.jsonValue()).toBeTruthy();
-    // Page should be unchanged. User can re-enter invitation key
-    expect(await createAccountPage.getInvitationKeyInput()).toBeTruthy();
+    await jestPuppeteer.resetBrowser();
   });
 
 
@@ -64,11 +27,8 @@ describe.skip('User registration tests:', () => {
     const createAccountButton = await loginPage.createAccountButton();
     await createAccountButton.click();
 
-    // Step 1: Enter invitation key.
     const createAccountPage = new CreateAccountPage(page);
-    await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
-
-    // Step 2: Checking Accepting Terms of Service.
+    // Step 1: Checking Accepting Terms of Service.
     const pdfPage =  await createAccountPage.getPdfPage();
     // expecting pdf document
     expect(await pdfPage.jsonValue()).toBe(true);
@@ -116,11 +76,8 @@ describe.skip('User registration tests:', () => {
     const createAccountButton = await loginPage.createAccountButton();
     await createAccountButton.click();
 
-    // Step 1: Enter invitation key.
     const createAccountPage = new CreateAccountPage(page);
-    await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
-
-    // Step 2: Accepting Terms of Service.
+    // Step 1: Accepting Terms of Service.
     await createAccountPage.scrollToLastPdfPage();
 
     // check checkboxes
@@ -134,13 +91,13 @@ describe.skip('User registration tests:', () => {
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
     const institutionSelect = new SelectComponent(page, 'Select your institution');
-    await institutionSelect.select(INSTITUTION_VALUE.VANDERBILT);
+    await institutionSelect.select(INSTITUTION_VALUE.BROAD);
 
     const emailAddress = await Textbox.forLabel(page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddress.type(configs.contactEmail);
+    await emailAddress.type(configs.broadInstitutionEmail);
 
     const roleSelect = new SelectComponent(page, 'describes your role');
-    await roleSelect.select(INSTITUTION_ROLE_VALUE.RESEARCH_ASSISTANT);
+    await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
 
     await nextButton.waitUntilEnabled();
     await nextButton.focus();

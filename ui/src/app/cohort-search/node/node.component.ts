@@ -79,11 +79,11 @@ export class NodeComponent implements OnInit, OnDestroy {
     const type = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : this.node.type;
     try {
       if (!this.wizard.fullTree) {
-        cohortBuilderApi().getCriteriaBy(cdrId, domainId, type, isStandard, id)
+        cohortBuilderApi().findCriteriaBy(cdrId, domainId, type, isStandard, id)
           .then(resp => {
             if (resp.items.length === 0 && domainId === DomainType.DRUG) {
               cohortBuilderApi()
-                .getCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
+                .findCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
                 .then(rxResp => {
                   this.empty = rxResp.items.length === 0;
                   this.children = rxResp.items;
@@ -102,7 +102,7 @@ export class NodeComponent implements OnInit, OnDestroy {
             }
           });
       } else {
-        cohortBuilderApi().getCriteriaBy(cdrId, domainId, type)
+        cohortBuilderApi().findCriteriaBy(cdrId, domainId, type)
           .then(resp => {
             this.empty = resp.items.length === 0;
             this.loading = false;

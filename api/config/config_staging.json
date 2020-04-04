@@ -92,21 +92,22 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableRdrExport": false,
-    "enableBillingLockout": true,
+    "enableRdrExport": true,
+    "enableBillingLockout": false,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": false,
     "requireInstitutionalVerification": true,
-    "enableCBAgeTypeOptions": false
+    "enableCBAgeTypeOptions": false,
+    "enableV3DataUserCodeOfConduct": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-staging.appspot.com",
-    "queueName": "rdrQueue",
+    "queueName": "rdrExportQueue",
     "exportObjectsPerTask": 10
   },
   "captcha": {

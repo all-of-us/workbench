@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
+import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,12 +34,11 @@ public class TestMockFactory {
   public static final String BUCKET_NAME = "workspace-bucket";
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
-    List<DisseminateResearchEnum> disseminateResearchEnumsList =
-        new ArrayList<DisseminateResearchEnum>();
+    List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
 
-    List<ResearchOutcomeEnum> ResearchOutcomeEnumsList = new ArrayList<ResearchOutcomeEnum>();
+    List<ResearchOutcomeEnum> ResearchOutcomeEnumsList = new ArrayList<>();
     ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
@@ -149,11 +149,15 @@ public class TestMockFactory {
     doReturn(projects).when(cloudbilling).projects();
 
     Cloudbilling.BillingAccounts billingAccounts = mock(Cloudbilling.BillingAccounts.class);
-
     Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
+    Cloudbilling.BillingAccounts.List listRequest = mock(Cloudbilling.BillingAccounts.List.class);
+
     try {
       doReturn(new BillingAccount().setOpen(true)).when(getRequest).execute();
       doReturn(getRequest).when(billingAccounts).get(anyString());
+
+      doReturn(new ListBillingAccountsResponse()).when(listRequest).execute();
+      doReturn(listRequest).when(billingAccounts).list();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
