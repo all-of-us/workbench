@@ -19,7 +19,7 @@ export const defaultInstitutions: Array<Institution> = [{
   displayName: 'Broad Institute',
   organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
   emailDomains: [],
-  emailAddresses: ['institution@broadinstitute.org', 'broad_institution@broadinstitute.org'],
+  emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org'],
   duaTypeEnum: DuaType.RESTRICTED
 }, {
   shortName: 'Verily',
