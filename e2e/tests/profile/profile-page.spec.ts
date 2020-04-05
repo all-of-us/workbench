@@ -4,7 +4,7 @@ import ProfilePage from '../../app/profile-page';
 import {signIn} from '../app';
 
 
-describe.skip('Profile', () => {
+describe('Profile', () => {
 
   beforeEach(async () => {
     await signIn(page);

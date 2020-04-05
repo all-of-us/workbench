@@ -4,7 +4,7 @@ import WorkspacesPage from '../../app/workspaces-page';
 import {signIn} from '../app';
 
 
-describe.skip('Workspace creation tests:', () => {
+describe('Workspace creation tests:', () => {
 
   beforeEach(async () => {
     await signIn(page);
