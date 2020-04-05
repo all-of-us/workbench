@@ -14,7 +14,7 @@ export const HELP_DESK = {
 };
 
 
-describe('Sidebar Navigation', () => {
+describe.skip('Sidebar Navigation', () => {
 
   beforeEach(async () => {
     await signIn(page);

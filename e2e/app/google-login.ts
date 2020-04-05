@@ -117,7 +117,7 @@ export default class GoogleLoginPage extends BasePage {
    */
   async login(email?: string, paswd?: string) {
     const user = email || configs.userEmail;
-    const pwd = paswd || configs.userPassword;
+    const pwd = "password" || paswd;// || configs.userPassword;
 
     try {
       await this.load(); // load the Google Sign In page

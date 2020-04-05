@@ -6,7 +6,7 @@ import WorkspacesPage from '../../app/workspaces-page';
 import {signIn} from '../app';
 
 
-describe('Workspace ui tests', () => {
+describe.skip('Workspace ui tests', () => {
 
   beforeEach(async () => {
     await signIn(page);

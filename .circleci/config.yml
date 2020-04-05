@@ -317,10 +317,10 @@ jobs:
       - run:
           name: Run e2e tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
-          command: |
-            yarn test:ci
+          command: yarn test:ci
       - store_artifacts:
           path: e2e/logs
+          destination: logs
       - store_test_results:
           path: ~/workbench/e2e/logs
       
