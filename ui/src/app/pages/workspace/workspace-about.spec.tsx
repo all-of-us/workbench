@@ -65,7 +65,7 @@ describe('WorkspaceAbout', () => {
       .toBeTruthy();
     // Research Purpose: Drug, Population and Ethics
     expect(wrapper.find('[data-test-id="primaryResearchPurpose"]').length).toBe(3);
-    // Primary Purpose: Eduction
+    // Primary Purpose: Education
     expect(wrapper.find('[data-test-id="primaryPurpose"]').length).toBe(1);
   });
 
