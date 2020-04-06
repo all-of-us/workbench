@@ -419,6 +419,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </TooltipTrigger>
       </div>;
 
+    const areaOfResearchCharactersRemaining = 2000 - areaOfResearch.length;
+
     const errors = this.validate();
 
     return <div id='account-creation'
@@ -565,7 +567,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               backgroundColor: colorWithWhiteness(colors.primary, 0.85), fontSize: 12,
               color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px',
               border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
-              {2000 - areaOfResearch.length} characters remaining
+              {
+                areaOfResearchCharactersRemaining >= 0 && <div>{areaOfResearchCharactersRemaining} characters remaining</div>
+              }
+              {
+                areaOfResearchCharactersRemaining < 0 && <div>{-areaOfResearchCharactersRemaining} characters over</div>
+              }
             </FlexRow>
           </Section>
           {/* TODO(RW-4361): remove after we switch to verified institutional affiliation */}
