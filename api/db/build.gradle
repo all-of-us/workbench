@@ -14,13 +14,23 @@ def db_port = System.getenv("DB_PORT") ?: "3306"
 def liquibase_username = "liquibase"
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
 
-liquibase {
-    activities {
-        main {
-            changeLogFile "changelog/db.changelog-master.xml"
-            url "jdbc:mysql://${db_host}:${db_port}/workbench"
-            username liquibase_username
-            password "${liquibase_password}"
-        }
-    }
+
+task('liquibase') << {
+  ant.input(message: 'Are you sure you want to do this?', validargs: 'y,n', addproperty: 'sure')
+
+  if(ant.sure == 'n') {
+    throw new GradleException('User cancelled task.')
+  }
+
+  liquibase {
+      activities {
+          main {
+              changeLogFile "changelog/db.changelog-master.xml"
+              url "jdbc:mysql://${db_host}:${db_port}/workbench"
+              username liquibase_username
+              password "${liquibase_password}"
+          }
+      }
+  }
+
 }
