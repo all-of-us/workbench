@@ -217,7 +217,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 "
               + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' and match(synonyms) against('+[drug_rank1]' in boolean mode) order by c.est_count desc",
       nativeQuery = true)
-  List<DbCriteria> findDrugIngredientByConceptId(@Param("conceptId") String conceptId);
+  List<DbCriteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
 
   @Query(
       value =

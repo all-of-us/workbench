@@ -45,7 +45,7 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<number>(resolve => resolve(1));
   }
 
-  getCriteriaAttributeByConceptId(): Promise<CriteriaAttributeListResponse> {
+  findCriteriaAttributeByConceptId(): Promise<CriteriaAttributeListResponse> {
     return new Promise<CriteriaAttributeListResponse>(resolve => resolve({items: []}));
   }
 
@@ -53,15 +53,15 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
-  getCriteriaBy(): Promise<CriteriaListResponse> {
+  findCriteriaBy(): Promise<CriteriaListResponse> {
     return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
-  getDrugBrandOrIngredientByValue(): Promise<CriteriaListResponse> {
+  findDrugBrandOrIngredientByValue(): Promise<CriteriaListResponse> {
     return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
-  getDrugIngredientByConceptId(): Promise<CriteriaListResponse> {
+  findDrugIngredientByConceptId(): Promise<CriteriaListResponse> {
     return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
@@ -69,7 +69,7 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<Criteria>(resolve => resolve(criteriaStub));
   }
 
-  getParticipantDemographics(): Promise<ParticipantDemographics> {
+  findParticipantDemographics(): Promise<ParticipantDemographics> {
     return new Promise<ParticipantDemographics>(resolve => resolve({genderList: [], ethnicityList: [], raceList: []}));
   }
 

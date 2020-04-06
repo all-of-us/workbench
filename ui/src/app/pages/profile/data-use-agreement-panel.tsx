@@ -1,41 +1,18 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
-import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {
+  DuaTextInput,
   IndentedListItem,
-  IndentedUnorderedList,
+  IndentedUnorderedList, InitialsAgreement,
   SecondHeader
-} from './data-use-agreement-styles';
+} from './data-user-code-of-conduct-styles';
 
-const DuaTextInput = (props) => {
-  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-  return <TextInput {...fp.omit(['data-test-id'], props)}
-                    style={{
-                      padding: '0 1ex',
-                      width: '12rem',
-                      fontSize: 10,
-                      borderRadius: 6,
-                      ...props.style
-                    }}/>;
-};
-
-const InitialsAgreement = (props) => {
-  return <div style={{display: 'flex', marginTop: '0.5rem'}}>
-    <DuaTextInput onChange={props.onChange} value={props.value}
-                  placeholder='INITIALS' data-test-id='dua-initials-input'
-                  style={{width: '4ex', textAlign: 'center', padding: 0}}/>
-    <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
-  </div>;
-};
-
-export function getDataUseAgreementWidget(submitting, initialWork,
-  initialName, initialSanctions, errors, profile) {
+export function getDataUseAgreementWidgetV2(submitting, initialWork, initialName, initialSanctions, errors, profile) {
   return <FlexColumn style={{
     borderRadius: '1rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.8),
@@ -53,16 +30,16 @@ export function getDataUseAgreementWidget(submitting, initialWork,
       and procedures it describes.
     </div>
     <div>By entering my initials next to each statement below, I agree to these terms:</div>
-    <InitialsAgreement onChange={(v) => this.setState({initialWork: v})} value={initialWork}>
+    <InitialsAgreement onChange={(v) => this.setState({initialWorkV2: v})} value={initialWork}>
       My work will be logged, monitored, and audited by the <i>All of Us</i> Research Program to ensure
       compliance with policies and procedures, as well as the demonstration project charges.
     </InitialsAgreement>
-    <InitialsAgreement onChange={(v) => this.setState({initialName: v})} value={initialName}>
+    <InitialsAgreement onChange={(v) => this.setState({initialNameV2: v})} value={initialName}>
       My name, affiliation, profile information, and research description will be made public.
       My research description will be used by the <AouTitle/> to provide
       participants with meaningful information about the research being conducted.
     </InitialsAgreement>
-    <InitialsAgreement onChange={(v) => this.setState({initialSanctions: v})}
+    <InitialsAgreement onChange={(v) => this.setState({initialSanctionsV2: v})}
                        value={initialSanctions}>
       Access granted by the program in accordance with this agreement is exclusively
       for participation in <i>All of Us</i> demonstration projects. At the conclusion of my
@@ -97,7 +74,7 @@ export function getDataUseAgreementWidget(submitting, initialWork,
       <Button
         style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
         disabled={errors || submitting} data-test-id='submit-dua-button'
-        onClick={() => this.submitDataUseAgreement(this.state.initialWork)}>Submit</Button>
+        onClick={() => this.submitDataUserCodeOfConduct(this.state.initialWorkV2)}>Submit</Button>
     </TooltipTrigger>
   </FlexColumn>;
 }

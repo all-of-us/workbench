@@ -34,6 +34,7 @@ public class ConfigController implements ConfigApiDelegate {
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
             .requireInvitationKey(config.access.requireInvitationKey)
             .requireInstitutionalVerification(config.featureFlags.requireInstitutionalVerification)
-            .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions));
+            .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions)
+            .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct));
   }
 }

@@ -24,12 +24,13 @@ public class CBCriteriaAttributeDaoTest {
   public void onSetup() {
     attribute =
         cbCriteriaAttributeDao.save(
-            new DbCriteriaAttribute()
-                .conceptId(1L)
-                .conceptName("test")
-                .estCount("10")
-                .type("type")
-                .valueAsConceptId(12345678L));
+            DbCriteriaAttribute.builder()
+                .addConceptId(1L)
+                .addConceptName("test")
+                .addEstCount("10")
+                .addType("type")
+                .addValueAsConceptId(12345678L)
+                .build());
   }
 
   @Test

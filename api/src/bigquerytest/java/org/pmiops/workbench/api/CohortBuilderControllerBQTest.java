@@ -35,6 +35,7 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapperImpl;
+import org.pmiops.workbench.cohortbuilder.mappers.CriteriaAttributeMapperImpl;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
 import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapperImpl;
@@ -94,6 +95,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
     CdrVersionService.class,
+    CriteriaAttributeMapperImpl.class,
     CriteriaMapperImpl.class,
     AgeTypeCountMapperImpl.class,
     DataFilterMapperImpl.class
@@ -189,12 +191,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             bigQueryService,
             cohortQueryBuilder,
             cbCriteriaDao,
-            cbCriteriaAttributeDao,
             cdrVersionService,
             elasticSearchService,
             configProvider,
-            cohortBuilderService,
-            criteriaMapper);
+            cohortBuilderService);
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);

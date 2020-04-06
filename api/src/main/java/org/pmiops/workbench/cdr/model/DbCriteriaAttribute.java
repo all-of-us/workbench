@@ -31,11 +31,6 @@ public class DbCriteriaAttribute {
     this.id = id;
   }
 
-  public DbCriteriaAttribute id(long id) {
-    this.id = id;
-    return this;
-  }
-
   @Column(name = "concept_id")
   public long getConceptId() {
     return conceptId;
@@ -43,11 +38,6 @@ public class DbCriteriaAttribute {
 
   public void setConceptId(long conceptId) {
     this.conceptId = conceptId;
-  }
-
-  public DbCriteriaAttribute conceptId(long conceptId) {
-    this.conceptId = conceptId;
-    return this;
   }
 
   @Column(name = "value_as_concept_id")
@@ -59,11 +49,6 @@ public class DbCriteriaAttribute {
     this.valueAsConceptId = valueAsConceptId;
   }
 
-  public DbCriteriaAttribute valueAsConceptId(long valueAsConceptId) {
-    this.valueAsConceptId = valueAsConceptId;
-    return this;
-  }
-
   @Column(name = "concept_name")
   public String getConceptName() {
     return conceptName;
@@ -71,11 +56,6 @@ public class DbCriteriaAttribute {
 
   public void setConceptName(String conceptName) {
     this.conceptName = conceptName;
-  }
-
-  public DbCriteriaAttribute conceptName(String conceptName) {
-    this.conceptName = conceptName;
-    return this;
   }
 
   @Column(name = "type")
@@ -87,11 +67,6 @@ public class DbCriteriaAttribute {
     this.type = type;
   }
 
-  public DbCriteriaAttribute type(String type) {
-    this.type = type;
-    return this;
-  }
-
   @Column(name = "est_count")
   public String getEstCount() {
     return estCount;
@@ -99,11 +74,6 @@ public class DbCriteriaAttribute {
 
   public void setEstCount(String estCount) {
     this.estCount = estCount;
-  }
-
-  public DbCriteriaAttribute estCount(String estCount) {
-    this.estCount = estCount;
-    return this;
   }
 
   @Override
@@ -126,5 +96,61 @@ public class DbCriteriaAttribute {
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this);
+  }
+
+  public static DbCriteriaAttribute.Builder builder() {
+    return new DbCriteriaAttribute.Builder();
+  }
+
+  public static class Builder {
+    private long id;
+    private long conceptId;
+    private long valueAsConceptId;
+    private String conceptName;
+    private String type;
+    private String estCount;
+
+    private Builder() {}
+
+    public DbCriteriaAttribute.Builder addId(long id) {
+      this.id = id;
+      return this;
+    }
+
+    public DbCriteriaAttribute.Builder addConceptId(long conceptId) {
+      this.conceptId = conceptId;
+      return this;
+    }
+
+    public DbCriteriaAttribute.Builder addValueAsConceptId(long valueAsConceptId) {
+      this.valueAsConceptId = valueAsConceptId;
+      return this;
+    }
+
+    public DbCriteriaAttribute.Builder addConceptName(String conceptName) {
+      this.conceptName = conceptName;
+      return this;
+    }
+
+    public DbCriteriaAttribute.Builder addType(String type) {
+      this.type = type;
+      return this;
+    }
+
+    public DbCriteriaAttribute.Builder addEstCount(String estCount) {
+      this.estCount = estCount;
+      return this;
+    }
+
+    public DbCriteriaAttribute build() {
+      DbCriteriaAttribute dbCriteriaAttribute = new DbCriteriaAttribute();
+      dbCriteriaAttribute.setId(this.id);
+      dbCriteriaAttribute.setConceptId(this.conceptId);
+      dbCriteriaAttribute.setValueAsConceptId(this.valueAsConceptId);
+      dbCriteriaAttribute.setConceptName(this.conceptName);
+      dbCriteriaAttribute.setType(this.type);
+      dbCriteriaAttribute.setEstCount(this.estCount);
+      return dbCriteriaAttribute;
+    }
   }
 }

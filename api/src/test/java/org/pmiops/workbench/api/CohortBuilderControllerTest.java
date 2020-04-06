@@ -23,6 +23,8 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapperImpl;
+import org.pmiops.workbench.cohortbuilder.mappers.CriteriaAttributeMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.CriteriaAttributeMapperImpl;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
 import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
 import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapper;
@@ -65,12 +67,18 @@ public class CohortBuilderControllerTest {
   @Autowired private PersonDao personDao;
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private AgeTypeCountMapper ageTypeCountMapper;
+  @Autowired private CriteriaAttributeMapper criteriaAttributeMapper;
   @Autowired private CriteriaMapper criteriaMapper;
   @Autowired private DataFilterMapper dataFilterMapper;
   @Mock private Provider<WorkbenchConfig> configProvider;
 
   @TestConfiguration
-  @Import({AgeTypeCountMapperImpl.class, CriteriaMapperImpl.class, DataFilterMapperImpl.class})
+  @Import({
+    AgeTypeCountMapperImpl.class,
+    CriteriaAttributeMapperImpl.class,
+    CriteriaMapperImpl.class,
+    DataFilterMapperImpl.class
+  })
   static class Configuration {}
 
   @Before
@@ -81,10 +89,12 @@ public class CohortBuilderControllerTest {
     cohortBuilderService =
         new CohortBuilderServiceImpl(
             cdrVersionService,
+            cbCriteriaAttributeDao,
             cbCriteriaDao,
             cbDataFilterDao,
             personDao,
             ageTypeCountMapper,
+            criteriaAttributeMapper,
             criteriaMapper,
             dataFilterMapper);
     controller =
@@ -92,16 +102,14 @@ public class CohortBuilderControllerTest {
             bigQueryService,
             cohortQueryBuilder,
             cbCriteriaDao,
-            cbCriteriaAttributeDao,
             cdrVersionService,
             elasticSearchService,
             configProvider,
-            cohortBuilderService,
-            criteriaMapper);
+            cohortBuilderService);
   }
 
   @Test
-  public void getCriteriaBy() {
+  public void findCriteriaBy() {
     DbCriteria icd9CriteriaParent =
         DbCriteria.builder()
             .addDomainId(DomainType.CONDITION.toString())
@@ -126,7 +134,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(icd9CriteriaParent),
         controller
-            .getCriteriaBy(
+            .findCriteriaBy(
                 1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
             .getBody()
             .getItems()
@@ -134,7 +142,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(icd9Criteria),
         controller
-            .getCriteriaBy(
+            .findCriteriaBy(
                 1L,
                 DomainType.CONDITION.toString(),
                 CriteriaType.ICD9CM.toString(),
@@ -146,9 +154,9 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaByExceptions() {
+  public void findCriteriaByExceptions() {
     try {
-      controller.getCriteriaBy(1L, null, null, false, null);
+      controller.findCriteriaBy(1L, null, null, false, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -157,7 +165,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.getCriteriaBy(1L, "blah", null, false, null);
+      controller.findCriteriaBy(1L, "blah", null, false, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -166,7 +174,7 @@ public class CohortBuilderControllerTest {
     }
 
     try {
-      controller.getCriteriaBy(1L, DomainType.CONDITION.toString(), "blah", false, null);
+      controller.findCriteriaBy(1L, DomainType.CONDITION.toString(), "blah", false, null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
@@ -176,7 +184,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaByDemo() {
+  public void findCriteriaByDemo() {
     DbCriteria demoCriteria =
         DbCriteria.builder()
             .addDomainId(DomainType.PERSON.toString())
@@ -189,7 +197,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(demoCriteria),
         controller
-            .getCriteriaBy(
+            .findCriteriaBy(
                 1L, DomainType.PERSON.toString(), CriteriaType.AGE.toString(), false, null)
             .getBody()
             .getItems()
@@ -485,7 +493,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getStandardCriteriaByDomainAndConceptId() {
+  public void findStandardCriteriaByDomainAndConceptId() {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute(
@@ -503,7 +511,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
         createResponseCriteria(criteria),
         controller
-            .getStandardCriteriaByDomainAndConceptId(1L, DomainType.CONDITION.toString(), 12345L)
+            .findStandardCriteriaByDomainAndConceptId(1L, DomainType.CONDITION.toString(), 12345L)
             .getBody()
             .getItems()
             .get(0));
@@ -541,39 +549,49 @@ public class CohortBuilderControllerTest {
 
     assertEquals(
         createResponseCriteria(drugATCCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "drugN", null).getBody().getItems().get(0));
+        controller.findDrugBrandOrIngredientByValue(1L, "drugN", null).getBody().getItems().get(0));
 
     assertEquals(
         createResponseCriteria(drugBrandCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "brandN", null).getBody().getItems().get(0));
+        controller
+            .findDrugBrandOrIngredientByValue(1L, "brandN", null)
+            .getBody()
+            .getItems()
+            .get(0));
 
     assertEquals(
         createResponseCriteria(drugBrandCriteria),
-        controller.getDrugBrandOrIngredientByValue(1L, "LP6789", null).getBody().getItems().get(0));
+        controller
+            .findDrugBrandOrIngredientByValue(1L, "LP6789", null)
+            .getBody()
+            .getItems()
+            .get(0));
   }
 
   @Test
-  public void getCriteriaAttributeByConceptId() {
+  public void findCriteriaAttributeByConceptId() {
     DbCriteriaAttribute criteriaAttributeMin =
         cbCriteriaAttributeDao.save(
-            new DbCriteriaAttribute()
-                .conceptId(1L)
-                .conceptName("MIN")
-                .estCount("10")
-                .type("NUM")
-                .valueAsConceptId(0L));
+            DbCriteriaAttribute.builder()
+                .addConceptId(1L)
+                .addConceptName("MIN")
+                .addEstCount("10")
+                .addType("NUM")
+                .addValueAsConceptId(0L)
+                .build());
     DbCriteriaAttribute criteriaAttributeMax =
         cbCriteriaAttributeDao.save(
-            new DbCriteriaAttribute()
-                .conceptId(1L)
-                .conceptName("MAX")
-                .estCount("100")
-                .type("NUM")
-                .valueAsConceptId(0L));
+            DbCriteriaAttribute.builder()
+                .addConceptId(1L)
+                .addConceptName("MAX")
+                .addEstCount("100")
+                .addType("NUM")
+                .addValueAsConceptId(0L)
+                .build());
 
     List<CriteriaAttribute> attrs =
         controller
-            .getCriteriaAttributeByConceptId(1L, criteriaAttributeMin.getConceptId())
+            .findCriteriaAttributeByConceptId(1L, criteriaAttributeMin.getConceptId())
             .getBody()
             .getItems();
     assertTrue(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMin)));
@@ -626,33 +644,34 @@ public class CohortBuilderControllerTest {
     assertTrue(controller.isApproximate(searchRequest));
   }
 
-  private Criteria createResponseCriteria(DbCriteria cbCriteria) {
+  private Criteria createResponseCriteria(DbCriteria dbCriteria) {
     return new Criteria()
-        .code(cbCriteria.getCode())
-        .conceptId(cbCriteria.getConceptId() == null ? null : new Long(cbCriteria.getConceptId()))
-        .count(new Long(cbCriteria.getCount()))
-        .domainId(cbCriteria.getDomainId())
-        .group(cbCriteria.getGroup())
-        .hasAttributes(cbCriteria.getAttribute())
-        .id(cbCriteria.getId())
-        .name(cbCriteria.getName())
-        .parentId(cbCriteria.getParentId())
-        .selectable(cbCriteria.getSelectable())
-        .subtype(cbCriteria.getSubtype())
-        .type(cbCriteria.getType())
-        .path(cbCriteria.getPath())
-        .hasAncestorData(cbCriteria.getAncestorData())
-        .hasHierarchy(cbCriteria.getHierarchy())
-        .isStandard(cbCriteria.getStandard())
-        .value(cbCriteria.getValue());
+        .code(dbCriteria.getCode())
+        .conceptId(dbCriteria.getConceptId() == null ? null : new Long(dbCriteria.getConceptId()))
+        .count(new Long(dbCriteria.getCount()))
+        .domainId(dbCriteria.getDomainId())
+        .group(dbCriteria.getGroup())
+        .hasAttributes(dbCriteria.getAttribute())
+        .id(dbCriteria.getId())
+        .name(dbCriteria.getName())
+        .parentId(dbCriteria.getParentId())
+        .selectable(dbCriteria.getSelectable())
+        .subtype(dbCriteria.getSubtype())
+        .type(dbCriteria.getType())
+        .path(dbCriteria.getPath())
+        .hasAncestorData(dbCriteria.getAncestorData())
+        .hasHierarchy(dbCriteria.getHierarchy())
+        .isStandard(dbCriteria.getStandard())
+        .value(dbCriteria.getValue());
   }
 
-  private CriteriaAttribute createResponseCriteriaAttribute(DbCriteriaAttribute criteriaAttribute) {
+  private CriteriaAttribute createResponseCriteriaAttribute(
+      DbCriteriaAttribute dbCriteriaAttribute) {
     return new CriteriaAttribute()
-        .id(criteriaAttribute.getId())
-        .valueAsConceptId(criteriaAttribute.getValueAsConceptId())
-        .conceptName(criteriaAttribute.getConceptName())
-        .type(criteriaAttribute.getType())
-        .estCount(criteriaAttribute.getEstCount());
+        .id(dbCriteriaAttribute.getId())
+        .valueAsConceptId(dbCriteriaAttribute.getValueAsConceptId())
+        .conceptName(dbCriteriaAttribute.getConceptName())
+        .type(dbCriteriaAttribute.getType())
+        .estCount(dbCriteriaAttribute.getEstCount());
   }
 }

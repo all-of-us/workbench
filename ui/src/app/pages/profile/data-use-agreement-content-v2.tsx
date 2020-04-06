@@ -7,7 +7,7 @@ import {
   IndentedOrderedList,
   IndentedUnorderedList,
   SecondHeader
-} from './data-use-agreement-styles';
+} from './data-user-code-of-conduct-styles';
 
 const AOU_DEFINITION_URL = 'https://allofus.nih.gov/about/about-all-us-research-program';
 const CORE_VALUES_URL = 'https://allofus.nih.gov/about/core-values';
@@ -24,7 +24,7 @@ const styles = {
 };
 
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
-export const DataUseAgreementContent = () => {
+export const DataUseAgreementContentV2 = () => {
   return <div style={styles.dataUseParagraphStyles}>
     <BolderHeader style={{display: 'flex', justifyContent: 'center'}}><AouTitle/></BolderHeader>
     <BoldHeader  style={{display: 'flex', justifyContent: 'center'}}>Demonstration Project Data Use Agreement</BoldHeader>

@@ -55,7 +55,7 @@ export class CohortReview extends React.Component<{}, State> {
     });
     cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
     if (!visitsFilterOptions.getValue()) {
-      cohortBuilderApi().getCriteriaBy(
+      cohortBuilderApi().findCriteriaBy(
         +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]
       ).then(response => {
         visitsFilterOptions.next([

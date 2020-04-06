@@ -228,6 +228,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     await createButton.focus(); // bring into viewport
     await Promise.all([
       createButton.click(),
+      this.waitForNavigation(),
       this.waitUntilNoSpinner(),
     ]);
   }

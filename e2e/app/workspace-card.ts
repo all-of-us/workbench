@@ -25,7 +25,7 @@ export default class WorkspaceCard extends BaseElement {
   // **********************
 
   static async getAllCards(page: Page): Promise<WorkspaceCard[]> {
-    await page.waitForXPath(WorkspaceCard.cardRootXpath, {visible: true});
+    await page.waitForXPath(WorkspaceCard.cardRootXpath, {visible: true, timeout: 60000});
     const cards = await page.$x(this.cardRootXpath);
     // transform to WorkspaceCard object
     const resourceCards = cards.map(card => new WorkspaceCard(page).asCardElement(card));
