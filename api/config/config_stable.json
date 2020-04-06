@@ -100,7 +100,8 @@
     "enableMoodleV2Api": false,
     "requireInstitutionalVerification": false,
     "enableCBAgeTypeOptions": false,
-    "enableV3DataUserCodeOfConduct": false
+    "enableV3DataUserCodeOfConduct": false,
+    "enableEventDateModifier": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable"

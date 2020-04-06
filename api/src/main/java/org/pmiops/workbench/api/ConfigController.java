@@ -35,6 +35,7 @@ public class ConfigController implements ConfigApiDelegate {
             .requireInvitationKey(config.access.requireInvitationKey)
             .requireInstitutionalVerification(config.featureFlags.requireInstitutionalVerification)
             .enableCBAgeTypeOptions(config.featureFlags.enableCBAgeTypeOptions)
-            .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct));
+            .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)
+            .enableEventDateModifier(config.featureFlags.enableEventDateModifier));
   }
 }
