@@ -12,6 +12,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CdrVersion;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortReview;
+import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
@@ -99,6 +103,67 @@ public interface WorkspaceMapper {
   @Mapping(target = "modifiedTime", ignore = true)
   WorkspaceResource workspaceResourceFromDbWorkspace(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
+
+  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
+  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "permission", source = "accessLevel")
+  @Mapping(target = "cohort", source = "cohort")
+  // All workspaceResources have one object and all others are null. That should be
+  // defined by a setter where used
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  // This should be set when the resource is set
+  @Mapping(target = "modifiedTime", source = "cohort.lastModifiedTime")
+  WorkspaceResource workspaceResourceFromDbWorkspaceAndCohort(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, Cohort cohort);
+
+  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
+  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "permission", source = "accessLevel")
+  @Mapping(target = "cohortReview", source = "cohortReview")
+  // All workspaceResources have one object and all others are null. That should be
+  // defined by a setter where used
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  // This should be set when the resource is set
+  @Mapping(target = "modifiedTime", source = "cohortReview.lastModifiedTime")
+  WorkspaceResource workspaceResourceFromDbWorkspaceAndCohortReview(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview);
+
+  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
+  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "permission", source = "accessLevel")
+  @Mapping(target = "conceptSet", source = "conceptSet")
+  // All workspaceResources have one object and all others are null. That should be
+  // defined by a setter where used
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  // This should be set when the resource is set
+  @Mapping(target = "modifiedTime", source = "conceptSet.lastModifiedTime")
+  WorkspaceResource workspaceResourceFromDbWorkspaceAndConceptSet(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, ConceptSet conceptSet);
+
+  @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
+  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
+  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
+  @Mapping(target = "permission", source = "accessLevel")
+  @Mapping(target = "dataSet", source = "dataSet")
+  // All workspaceResources have one object and all others are null. That should be
+  // defined by a setter where used
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  // This should be set when the resource is set
+  @Mapping(target = "modifiedTime", source = "dataSet.lastModifiedTime")
+  WorkspaceResource workspaceResourceFromDbWorkspaceAndDataSet(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DataSet dataSet);
 
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());

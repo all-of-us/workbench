@@ -1056,52 +1056,43 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
     workspaceResourceResponse.addAll(
         cohorts.stream()
-            .map(cohortMapper::dbModelToClient)
             .map(
                 cohort ->
-                    workspaceMapper
-                        .workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
-                        .cohort(cohort)
-                        .modifiedTime(cohort.getLastModifiedTime().toString()))
+                    workspaceMapper.workspaceResourceFromDbWorkspaceAndCohort(
+                        workspace, workspaceAccessLevel, cohortMapper.dbModelToClient(cohort)))
             .collect(Collectors.toList()));
     List<DbCohortReview> reviews =
         cohortReviewService.getRequiredWithCohortReviews(workspaceNamespace, workspaceId);
     workspaceResourceResponse.addAll(
         reviews.stream()
-            .map(cohortReviewMapper::dbModelToClient)
             .map(
                 cohortReview ->
-                    workspaceMapper
-                        .workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
-                        .modifiedTime(cohortReview.getLastModifiedTime().toString())
-                        .cohortReview(cohortReview))
+                    workspaceMapper.workspaceResourceFromDbWorkspaceAndCohortReview(
+                        workspace,
+                        workspaceAccessLevel,
+                        cohortReviewMapper.dbModelToClient(cohortReview)))
             .collect(Collectors.toList()));
     List<DbConceptSet> conceptSets =
         conceptSetService.findByWorkspaceId(workspace.getWorkspaceId());
     workspaceResourceResponse.addAll(
         conceptSets.stream()
-            .map(conceptSetMapper::dbModelToClient)
             .map(
                 conceptSet ->
-                    workspaceMapper
-                        .workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
-                        .modifiedTime(conceptSet.getLastModifiedTime().toString())
-                        .conceptSet(conceptSet))
+                    workspaceMapper.workspaceResourceFromDbWorkspaceAndConceptSet(
+                        workspace,
+                        workspaceAccessLevel,
+                        conceptSetMapper.dbModelToClient(conceptSet)))
             .collect(Collectors.toList()));
     List<DbDataset> dataSets =
         dataSetDao.findByWorkspaceIdAndInvalid(workspace.getWorkspaceId(), false);
     workspaceResourceResponse.addAll(
         dataSets.stream()
-            .map(dataSetMapper::dbModelToClientLight)
             .map(
                 dataSet ->
-                    workspaceMapper
-                        .workspaceResourceFromDbWorkspace(workspace, workspaceAccessLevel)
-                        .dataSet(dataSet)
-                        .modifiedTime(
-                            Optional.ofNullable(dataSet.getLastModifiedTime())
-                                .map(Object::toString)
-                                .orElse(null)))
+                    workspaceMapper.workspaceResourceFromDbWorkspaceAndDataSet(
+                        workspace,
+                        workspaceAccessLevel,
+                        dataSetMapper.dbModelToClientLight(dataSet)))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
