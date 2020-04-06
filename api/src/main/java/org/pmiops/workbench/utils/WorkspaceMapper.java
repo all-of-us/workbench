@@ -1,6 +1,6 @@
 package org.pmiops.workbench.utils;
 
-import static org.mapstruct.NullValuePropertyMappingStrategy.*;
+import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
@@ -35,6 +35,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
 
+  @Mapping(target = "googleBucketName", ignore = true)
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   @Mapping(target = "id", source = "firecloudName")
@@ -77,6 +78,30 @@ public interface WorkspaceMapper {
       target = "researchOutcomeEnumSet",
       source = "researchOutcomeList",
       nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
+  @Mapping(target = "workspaceId", ignore = true)
+  @Mapping(target = "version", ignore = true)
+  @Mapping(target = "name", ignore = true)
+  @Mapping(target = "workspaceNamespace", ignore = true)
+  @Mapping(target = "firecloudName", ignore = true)
+  @Mapping(target = "dataAccessLevel", ignore = true)
+  @Mapping(target = "dataAccessLevelEnum", ignore = true)
+  @Mapping(target = "cdrVersion", ignore = true)
+  @Mapping(target = "creator", ignore = true)
+  @Mapping(target = "creationTime", ignore = true)
+  @Mapping(target = "lastModifiedTime", ignore = true)
+  @Mapping(target = "lastAccessedTime", ignore = true)
+  @Mapping(target = "published", ignore = true)
+  @Mapping(target = "disseminateResearchSet", ignore = true)
+  @Mapping(target = "researchOutcomeSet", ignore = true)
+  @Mapping(target = "cohorts", ignore = true)
+  @Mapping(target = "conceptSets", ignore = true)
+  @Mapping(target = "dataSets", ignore = true)
+  @Mapping(target = "firecloudUuid", ignore = true)
+  @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
+  @Mapping(target = "billingMigrationStatusEnum", ignore = true)
+  @Mapping(target = "billingStatus", ignore = true)
+  @Mapping(target = "billingAccountName", ignore = true)
+  @Mapping(target = "billingAccountType", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
