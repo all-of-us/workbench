@@ -303,6 +303,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         presence: {
           allowEmpty: false,
           message: '^Research description cannot be blank'
+        },
+        length: {
+          maximum: 2000,
+          message: '^Research description must be 2000 characters or fewer'
         }
       },
       'address.streetAddress1': {
@@ -418,6 +422,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <InfoIcon style={{'height': '16px', 'paddingLeft': '2px'}}/>
         </TooltipTrigger>
       </div>;
+
+    const areaOfResearchCharactersRemaining = 2000 - areaOfResearch.length;
 
     const errors = this.validate();
 
@@ -565,7 +571,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               backgroundColor: colorWithWhiteness(colors.primary, 0.85), fontSize: 12,
               color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px',
               border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
-              {2000 - areaOfResearch.length} characters remaining
+              {
+                areaOfResearchCharactersRemaining >= 0 && <div>{areaOfResearchCharactersRemaining} characters remaining</div>
+              }
+              {
+                areaOfResearchCharactersRemaining < 0 && <div>{-areaOfResearchCharactersRemaining} characters over</div>
+              }
             </FlexRow>
           </Section>
           {/* TODO(RW-4361): remove after we switch to verified institutional affiliation */}
