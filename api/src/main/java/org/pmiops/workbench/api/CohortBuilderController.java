@@ -113,6 +113,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     validateDomain(domain);
     validateType(type);
     validateTerm(term);
@@ -120,30 +121,32 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         new CriteriaListResponse()
             .items(
                 cohortBuilderService.findCriteriaAutoComplete(
-                    cdrVersionId, domain, term, type, standard, limit)));
+                    domain, term, type, standard, limit)));
   }
 
   @Override
   public ResponseEntity<CriteriaListResponse> findDrugBrandOrIngredientByValue(
       Long cdrVersionId, String value, Integer limit) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(
         new CriteriaListResponse()
-            .items(
-                cohortBuilderService.findDrugBrandOrIngredientByValue(cdrVersionId, value, limit)));
+            .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
   }
 
   @Override
   public ResponseEntity<CriteriaListResponse> findDrugIngredientByConceptId(
       Long cdrVersionId, Long conceptId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(
         new CriteriaListResponse()
-            .items(cohortBuilderService.findDrugIngredientByConceptId(cdrVersionId, conceptId)));
+            .items(cohortBuilderService.findDrugIngredientByConceptId(conceptId)));
   }
 
   @Override
   public ResponseEntity<AgeTypeCountListResponse> findAgeTypeCounts(Long cdrVersionId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(
-        new AgeTypeCountListResponse().items(cohortBuilderService.findAgeTypeCounts(cdrVersionId)));
+        new AgeTypeCountListResponse().items(cohortBuilderService.findAgeTypeCounts()));
   }
 
   /**
@@ -175,13 +178,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Integer limit) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     validateDomain(domain);
     validateTerm(term);
     return ResponseEntity.ok(
         new CriteriaListResponse()
-            .items(
-                cohortBuilderService.findCriteriaByDomainAndSearchTerm(
-                    cdrVersionId, domain, term, limit)));
+            .items(cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, limit)));
   }
 
   @Override
@@ -227,19 +229,20 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<DataFiltersResponse> findDataFilters(Long cdrVersionId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(
-        new DataFiltersResponse().items(cohortBuilderService.findDataFilters(cdrVersionId)));
+        new DataFiltersResponse().items(cohortBuilderService.findDataFilters()));
   }
 
   @Override
   public ResponseEntity<CriteriaListResponse> findStandardCriteriaByDomainAndConceptId(
       Long cdrVersionId, String domain, Long conceptId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     validateDomain(domain);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(
-                cohortBuilderService.findStandardCriteriaByDomainAndConceptId(
-                    cdrVersionId, domain, conceptId)));
+                cohortBuilderService.findStandardCriteriaByDomainAndConceptId(domain, conceptId)));
   }
 
   @Override
@@ -297,26 +300,27 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaAttributeListResponse> findCriteriaAttributeByConceptId(
       Long cdrVersionId, Long conceptId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     return ResponseEntity.ok(
         new CriteriaAttributeListResponse()
-            .items(cohortBuilderService.findCriteriaAttributeByConceptId(cdrVersionId, conceptId)));
+            .items(cohortBuilderService.findCriteriaAttributeByConceptId(conceptId)));
   }
 
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaBy(
       Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
     validateDomain(domain);
     validateType(type);
     return ResponseEntity.ok(
         new CriteriaListResponse()
-            .items(
-                cohortBuilderService.findCriteriaBy(
-                    cdrVersionId, domain, type, standard, parentId)));
+            .items(cohortBuilderService.findCriteriaBy(domain, type, standard, parentId)));
   }
 
   @Override
   public ResponseEntity<ParticipantDemographics> findParticipantDemographics(Long cdrVersionId) {
-    return ResponseEntity.ok(cohortBuilderService.findParticipantDemographics(cdrVersionId));
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    return ResponseEntity.ok(cohortBuilderService.findParticipantDemographics());
   }
 
   /**

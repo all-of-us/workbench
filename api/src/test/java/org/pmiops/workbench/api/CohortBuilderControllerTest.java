@@ -21,14 +21,8 @@ import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
-import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapperImpl;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaAttributeMapper;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaAttributeMapperImpl;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapperImpl;
-import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapper;
-import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapperImpl;
+import org.pmiops.workbench.cohortbuilder.mappers.CohortBuilderMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -66,19 +60,11 @@ public class CohortBuilderControllerTest {
   @Autowired private CBDataFilterDao cbDataFilterDao;
   @Autowired private PersonDao personDao;
   @Autowired private JdbcTemplate jdbcTemplate;
-  @Autowired private AgeTypeCountMapper ageTypeCountMapper;
-  @Autowired private CriteriaAttributeMapper criteriaAttributeMapper;
-  @Autowired private CriteriaMapper criteriaMapper;
-  @Autowired private DataFilterMapper dataFilterMapper;
+  @Autowired private CohortBuilderMapper cohortBuilderMapper;
   @Mock private Provider<WorkbenchConfig> configProvider;
 
   @TestConfiguration
-  @Import({
-    AgeTypeCountMapperImpl.class,
-    CriteriaAttributeMapperImpl.class,
-    CriteriaMapperImpl.class,
-    DataFilterMapperImpl.class
-  })
+  @Import({CohortBuilderMapperImpl.class})
   static class Configuration {}
 
   @Before
@@ -88,15 +74,7 @@ public class CohortBuilderControllerTest {
 
     cohortBuilderService =
         new CohortBuilderServiceImpl(
-            cdrVersionService,
-            cbCriteriaAttributeDao,
-            cbCriteriaDao,
-            cbDataFilterDao,
-            personDao,
-            ageTypeCountMapper,
-            criteriaAttributeMapper,
-            criteriaMapper,
-            dataFilterMapper);
+            cbCriteriaAttributeDao, cbCriteriaDao, cbDataFilterDao, personDao, cohortBuilderMapper);
     controller =
         new CohortBuilderController(
             bigQueryService,

@@ -12,17 +12,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
-import org.pmiops.workbench.cohortbuilder.mappers.AgeTypeCountMapper;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaAttributeMapper;
-import org.pmiops.workbench.cohortbuilder.mappers.CriteriaMapper;
-import org.pmiops.workbench.cohortbuilder.mappers.DataFilterMapper;
+import org.pmiops.workbench.cohortbuilder.mappers.CohortBuilderMapper;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
@@ -40,63 +36,45 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
 
-  private CdrVersionService cdrVersionService;
-  // daos
   private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private CBCriteriaDao cbCriteriaDao;
   private CBDataFilterDao cbDataFilterDao;
   private PersonDao personDao;
-  // mappers
-  private AgeTypeCountMapper ageTypeCountMapper;
-  private CriteriaAttributeMapper criteriaAttributeMapper;
-  private CriteriaMapper criteriaMapper;
-  private DataFilterMapper dataFilterMapper;
+  private CohortBuilderMapper cohortBuilderMapper;
 
   @Autowired
   public CohortBuilderServiceImpl(
-      CdrVersionService cdrVersionService,
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
       CBDataFilterDao cbDataFilterDao,
       PersonDao personDao,
-      AgeTypeCountMapper ageTypeCountMapper,
-      CriteriaAttributeMapper criteriaAttributeMapper,
-      CriteriaMapper criteriaMapper,
-      DataFilterMapper dataFilterMapper) {
-    this.cdrVersionService = cdrVersionService;
+      CohortBuilderMapper cohortBuilderMapper) {
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
     this.cbDataFilterDao = cbDataFilterDao;
     this.personDao = personDao;
-    this.ageTypeCountMapper = ageTypeCountMapper;
-    this.criteriaAttributeMapper = criteriaAttributeMapper;
-    this.criteriaMapper = criteriaMapper;
-    this.dataFilterMapper = dataFilterMapper;
+    this.cohortBuilderMapper = cohortBuilderMapper;
   }
 
   @Override
-  public List<AgeTypeCount> findAgeTypeCounts(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public List<AgeTypeCount> findAgeTypeCounts() {
     return personDao.findAgeTypeCounts().stream()
-        .map(ageTypeCountMapper::dbModelToClient)
+        .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
   @Override
-  public List<CriteriaAttribute> findCriteriaAttributeByConceptId(
-      Long cdrVersionId, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public List<CriteriaAttribute> findCriteriaAttributeByConceptId(Long conceptId) {
     List<DbCriteriaAttribute> attributeList =
         cbCriteriaAttributeDao.findCriteriaAttributeByConceptId(conceptId);
     return attributeList.stream()
-        .map(criteriaAttributeMapper::dbModelToClient)
+        .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
   @Override
   public List<Criteria> findCriteriaAutoComplete(
-      Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String domain, String term, String type, Boolean standard, Integer limit) {
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
     List<DbCriteria> criteriaList =
@@ -107,13 +85,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
               domain, type, standard, term, pageRequest);
     }
-    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override
   public List<Criteria> findCriteriaBy(
-      Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String domain, String type, Boolean standard, Long parentId) {
     List<DbCriteria> criteriaList;
     if (parentId != null) {
       criteriaList =
@@ -122,13 +101,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     } else {
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(domain, type);
     }
-    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override
   public List<Criteria> findCriteriaByDomainAndSearchTerm(
-      Long cdrVersionId, String domain, String term, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String domain, String term, Integer limit) {
     List<DbCriteria> criteriaList;
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
@@ -158,37 +138,38 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                 domain, !isStandard, modifyTermMatch(term), pageRequest);
       }
     }
-    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
-  }
-
-  @Override
-  public List<DataFilter> findDataFilters(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    return StreamSupport.stream(cbDataFilterDao.findAll().spliterator(), false)
-        .map(dataFilterMapper::dbModelToClient)
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
   @Override
-  public List<Criteria> findDrugBrandOrIngredientByValue(
-      Long cdrVersionId, String value, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public List<DataFilter> findDataFilters() {
+    return StreamSupport.stream(cbDataFilterDao.findAll().spliterator(), false)
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit) {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findDrugBrandOrIngredientByValue(
             value, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
-    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override
-  public List<Criteria> findDrugIngredientByConceptId(Long cdrVersionId, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public List<Criteria> findDrugIngredientByConceptId(Long conceptId) {
     List<DbCriteria> criteriaList = cbCriteriaDao.findDrugIngredientByConceptId(conceptId);
-    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override
-  public ParticipantDemographics findParticipantDemographics(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public ParticipantDemographics findParticipantDemographics() {
     List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
     return new ParticipantDemographics()
         .genderList(buildConceptIdNameList(criteriaList, GENDER))
@@ -197,9 +178,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<Criteria> findStandardCriteriaByDomainAndConceptId(
-      Long cdrVersionId, String domain, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public List<Criteria> findStandardCriteriaByDomainAndConceptId(String domain, Long conceptId) {
     // These look ups can be done as one dao call but to make this code testable with the mysql
     // fulltext search match function and H2 in memory database, it's split into 2 separate calls
     // Each call is sub second, so having 2 calls and being testable is better than having one call
@@ -213,7 +192,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       criteriaList =
           cbCriteriaDao.findStandardCriteriaByDomainAndConceptId(domain, true, conceptIds);
     }
-    return criteriaList.stream().map(criteriaMapper::dbModelToClient).collect(Collectors.toList());
+    return criteriaList.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   private String modifyTermMatch(String term) {
