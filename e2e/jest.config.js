@@ -2,6 +2,10 @@ module.exports = {
   "verbose": true,
   "preset": "jest-puppeteer",
   "testTimeout": 300000,
+  "reporters": [
+    "default",
+    "jest-junit"
+  ],
   "transform": {
     "\\.(ts|tsx)$": "ts-jest"
   },

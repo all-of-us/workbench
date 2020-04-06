@@ -298,15 +298,15 @@ jobs:
           command: git submodule update --init --recursive
       - restore_cache:
           keys:
-          - e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
-          - e2e-test-cache-
+          - v1-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          - v1-e2e-test-cache-
       - run: 
           working_directory: ~/workbench/e2e
-          command: yarn cache clean && yarn install --verbose --frozen-lockfile
+          command: yarn cache clean && yarn install --frozen-lockfile
       - save_cache:
           paths:
             - ~/.cache/yarn
-          key: e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v1-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
           name: Update environment variables
           command: |
@@ -317,9 +317,12 @@ jobs:
       - run:
           name: Run e2e tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
-          command: yarn --silent test:ci
+          command: yarn test:ci
       - store_artifacts:
           path: e2e/logs
+          destination: logs
+      - store_test_results:
+          path: ~/workbench/e2e/logs
       
   ui-deploy-to-test:
     <<: *defaults
@@ -434,6 +437,7 @@ workflows:
           requires:
             - api-deploy-to-test
             - ui-deploy-to-test
+
   deploy-staging:
     jobs:
       - api-local-test:
