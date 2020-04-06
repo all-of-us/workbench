@@ -57,10 +57,7 @@ export default class GoogleLoginPage extends BasePage {
     const isLink = await page.evaluate((e1, e2) => e1 === e2, elemt1, link);
     if (isLink) {
       // click " Use another Account " link
-      await Promise.all([
-        this.page.waitForNavigation(),
-        link.click(),
-      ]);
+      await this.clickAndWait(link);
     }
 
     const emailInput = await this.email();
@@ -68,10 +65,7 @@ export default class GoogleLoginPage extends BasePage {
     await emailInput.type(userEmail);
 
     const nextButton = await this.page.waitForXPath(selectors.NextButton);
-    await Promise.all([
-      this.page.waitForNavigation(),
-      nextButton.click(),
-    ]);
+    await this.clickAndWait(nextButton);
   }
 
   /**
@@ -89,10 +83,7 @@ export default class GoogleLoginPage extends BasePage {
    */
   async submit() : Promise<void> {
     const button = await this.page.waitForXPath(selectors.NextButton, {visible: true});
-    await Promise.all([
-      this.page.waitForNavigation(),
-      button.click(),
-    ]);
+    await this.clickAndWait(button);
   }
 
   /**
@@ -125,10 +116,7 @@ export default class GoogleLoginPage extends BasePage {
         console.error('Google login button not found. ' + err);
         throw err;
       });
-      await Promise.all([
-        this.page.waitForNavigation(),
-        googleLoginButton.click(),
-      ]);
+      await this.clickAndWait(googleLoginButton);
 
       if (!user || user.trim().length === 0) {
         console.warn('Login user email: value is empty!!!')

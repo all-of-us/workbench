@@ -77,16 +77,16 @@ describe('User registration tests:', () => {
     await createAccountButton.click();
 
     const createAccountPage = new CreateAccountPage(page);
-    // Step 1: Accepting Terms of Service.
+    // Step 1 of 3: Accepting Terms of Service.
     await createAccountPage.scrollToLastPdfPage();
 
     // check checkboxes
     await (await createAccountPage.getPrivacyStatementCheckbox()).check();
     await (await createAccountPage.getTermsOfUseCheckbox()).check();
     const agreementPageButton = await createAccountPage.getNextButton();
-    await agreementPageButton.click();
+    await agreementPageButton.clickWithEval();
 
-    // Step 1 of 3: Enter Institution information
+    // Step 2 of 3: Enter Institution information
     const nextButton = await createAccountPage.getNextButton();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
@@ -104,7 +104,7 @@ describe('User registration tests:', () => {
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
     await nextButton.clickWithEval();
 
-    // Step 2 of 3: Enter user information.
+    // Step 3 of 3: Enter user information.
     expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
 
     // verify username domain

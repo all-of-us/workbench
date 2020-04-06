@@ -109,9 +109,7 @@ export default abstract class AuthenticatedPage extends BasePage {
     if (targetPage === SideNavLink.CONTACT_US) {
       await link.click();
     } else {
-      const navPromise = this.waitForNavigation();
-      await link.click();
-      await navPromise;
+      await this.clickAndWait(link);
     }
 
   }
