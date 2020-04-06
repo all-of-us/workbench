@@ -303,6 +303,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         presence: {
           allowEmpty: false,
           message: '^Research description cannot be blank'
+        },
+        length: {
+          maximum: 2000,
+          message: '^Research description must be 2000 characters or fewer'
         }
       },
       'address.streetAddress1': {
