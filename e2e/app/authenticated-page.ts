@@ -1,4 +1,9 @@
 import {Page} from 'puppeteer';
+import Checkbox from './aou-elements/checkbox';
+import RadioButton from './aou-elements/radiobutton';
+import TextOptions from './aou-elements/text-options';
+import Textarea from './aou-elements/textarea';
+import Textbox from './aou-elements/textbox';
 import {clrIconXpath} from './aou-elements/xpath-defaults';
 import {findIcon} from './aou-elements/xpath-finder';
 import BasePage from './base-page';
@@ -184,6 +189,53 @@ export default abstract class AuthenticatedPage extends BasePage {
       return true;
     } catch(err) {
       return false;
+    }
+  }
+
+
+  /**
+   *
+   * @param fields Array
+   */
+  async performUiActions(fields: ({ id: { textOption?: TextOptions; affiliated?: string; type?: string }; value?: string; selected?: boolean })[]) {
+    for (const field of fields) {
+      await this.performUiAction(field.id, field.value, field.selected);
+    }
+  }
+
+  /**
+   * UI actions helper function.
+   *
+   * @param { textOption?: TextOptions; affiliated?: string; type?: string } identifier
+   * @param { string } value
+   * @param { boolean } selected
+   */
+  async performUiAction(identifier: { textOption?: TextOptions; affiliated?: string; type?: string }, value?: string, selected?: boolean) {
+    switch (identifier.type.toLowerCase()) {
+      case 'radiobutton':
+        const radioELement = await RadioButton.forLabel(this.page, identifier.textOption);
+        await radioELement.toggle(selected);
+        break;
+      case 'checkbox':
+        const checkboxElement = await Checkbox.forLabel(this.page, identifier.textOption);
+        await checkboxElement.toggle(selected);
+        if (value) {
+          // For UI fields which is displayed with a checkbox and a textbox or textarea together
+          await this.performUiAction({ textOption: identifier.textOption, type: identifier.affiliated }, value);
+        }
+        break;
+      case 'textbox':
+        const textboxElement = await Textbox.forLabel(this.page, identifier.textOption);
+        await textboxElement.type(value);
+        await textboxElement.tabKey();
+        break;
+      case 'textarea':
+        const textareaElement = await Textarea.forLabel(this.page, identifier.textOption);
+        await textareaElement.type(value);
+        await textareaElement.tabKey();
+        break;
+      default:
+        throw new Error(`${identifier} is not recognized.`)
     }
   }
 

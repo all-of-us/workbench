@@ -158,24 +158,28 @@ export default class BaseElement {
   }
 
   async click(options?: ClickOptions): Promise<void> {
-    await this.element.asElement().click(options);
+    return this.element.asElement().click(options);
   }
 
   async type(text: string, options?: { delay: number }): Promise<void> {
     await this.focus();
-    await this.element.asElement().type(text, options);
+    return this.element.asElement().type(text, options);
   }
 
   async pressKeyboard(key: string, options?: { text?: string, delay?: number }): Promise<void> {
-    await this.element.asElement().press(key, options);
+    return this.element.asElement().press(key, options);
+  }
+
+  async tabKey() {
+    this.pressKeyboard('Tab', { delay: 100 });
   }
 
   /**
    * Calling focus() and hover() together.
    */
-  async focus(): Promise<void> {
+  async focus(): Promise<void[]> {
     const handle = this.element.asElement();
-    await Promise.all([
+    return Promise.all([
       handle.focus(),
       handle.hover()
     ]);
@@ -188,7 +192,7 @@ export default class BaseElement {
    */
   async getTextContent(): Promise<string> {
     const handle = await this.element.asElement();
-    return await handle.evaluate(
+    return handle.evaluate(
        (element: HTMLElement) => (element.textContent ? element.textContent.trim() : ''), this.element,
     );
   }
@@ -198,7 +202,7 @@ export default class BaseElement {
    * Alternative: await page.evaluate(elem => elem.value, element);
    */
   async getValue(): Promise<unknown> {
-    return await this.getProperty('value');
+    return this.getProperty('value');
   }
 
   async getComputedStyle(styleName: string): Promise<unknown> {
@@ -240,7 +244,7 @@ export default class BaseElement {
 
   // try this method when click() is not working
   async clickWithEval() {
-    await this.page.evaluate(elem =>
+    return this.page.evaluate(elem =>
        elem.click()
        , this.element
     );

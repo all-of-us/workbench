@@ -52,4 +52,11 @@ export default class RadioButton extends BaseElement {
     }
   }
 
+  async toggle(onOff: boolean): Promise<void> {
+    if (onOff) {
+      return this.select();
+    }
+    return this.unSelect();
+  }
+
 }

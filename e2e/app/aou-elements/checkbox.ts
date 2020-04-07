@@ -57,4 +57,11 @@ export default class Checkbox extends BaseElement {
     }
   }
 
+  async toggle(onOff: boolean): Promise<void> {
+    if (onOff) {
+      return this.check();
+    }
+    return this.unCheck();
+  }
+
 }
