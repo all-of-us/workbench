@@ -30,14 +30,19 @@ export function toDisplay(resourceType: ResourceType): string {
   }
 }
 
-export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
-  | DataSet[], workspaceNamespace: string, workspaceId: string,
-  accessLevel: WorkspaceAccessLevel,
-  resourceType: ResourceType): WorkspaceResource[] {
+export interface ConvertToResourcesArgs {
+  list:  FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[] | DataSet[];
+  workspaceNamespace: string;
+  workspaceId: string;
+  accessLevel: WorkspaceAccessLevel;
+  resourceType: ResourceType;
+}
+
+export function convertToResources(args: ConvertToResourcesArgs): WorkspaceResource[] {
   const resourceList = [];
-  for (const resource of list) {
-    resourceList.push(convertToResource(resource, workspaceNamespace, workspaceId,
-      accessLevel, resourceType));
+  for (const resource of args.list) {
+    resourceList.push(convertToResource(resource, args.workspaceNamespace, args.workspaceId,
+      args.accessLevel, args.resourceType));
   }
   return resourceList;
 }

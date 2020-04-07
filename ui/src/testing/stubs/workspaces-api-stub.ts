@@ -342,18 +342,19 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   getCdrSelectors(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceResourceResponse> {
     return new Promise<WorkspaceResourceResponse>(resolve => {
+      const convertToResourcesBaseArgs = {
+        workspaceNamespace: workspaceNamespace,
+        workspaceId: workspaceId,
+        accessLevel: WorkspaceAccessLevel.OWNER,
+      };
       const workspaceResources = convertToResources(
-        cohortReviewStubs,
-        workspaceNamespace,
-        workspaceId,
-        WorkspaceAccessLevel.OWNER,
-        ResourceType.COHORTREVIEW)
+        {...convertToResourcesBaseArgs, list: cohortReviewStubs, resourceType: ResourceType.COHORTREVIEW})
         .concat(convertToResources(
-          exampleCohortStubs, workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER, ResourceType.COHORT))
+          {...convertToResourcesBaseArgs, list: exampleCohortStubs, resourceType: ResourceType.COHORT}))
         .concat(convertToResources(
-          DataSetApiStub.stubDataSets(), workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER, ResourceType.DATASET))
+          {...convertToResourcesBaseArgs, list: DataSetApiStub.stubDataSets(), resourceType: ResourceType.DATASET}))
         .concat(convertToResources(
-          ConceptSetsApiStub.stubConceptSets(), workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER, ResourceType.CONCEPTSET));
+          {...convertToResourcesBaseArgs, list: ConceptSetsApiStub.stubConceptSets(), resourceType: ResourceType.CONCEPTSET}));
       resolve(workspaceResources);
     });
   }

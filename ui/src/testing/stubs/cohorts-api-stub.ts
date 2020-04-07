@@ -1,4 +1,4 @@
-import {convertToResources} from 'app/utils/resourceActions';
+import {convertToResources, ConvertToResourcesArgs} from 'app/utils/resourceActions';
 import {
   Cohort,
   CohortAnnotationsResponse,
@@ -86,8 +86,14 @@ export class CohortsApiStub extends CohortsApi {
 
     this.cohorts = exampleCohortStubs;
     this.workspaces = [stubWorkspace];
-    this.resourceList = convertToResources(this.cohorts, stubWorkspace.namespace,
-      stubWorkspace.id, WorkspaceAccessLevel.OWNER, ResourceType.COHORT);
+    const convertToResourceArgs: ConvertToResourcesArgs = {
+      list: this.cohorts,
+      workspaceNamespace: stubWorkspace.namespace,
+      workspaceId: stubWorkspace.id,
+      accessLevel: WorkspaceAccessLevel.OWNER,
+      resourceType: ResourceType.COHORT
+    }
+    this.resourceList = convertToResources(convertToResourceArgs);
   }
 
   updateCohort(ns: string, wsid: string, cid: number, newCohort: Cohort): Promise<Cohort> {
