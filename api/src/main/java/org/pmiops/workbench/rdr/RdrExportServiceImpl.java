@@ -294,6 +294,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setScientificApproaches(dbWorkspace.getScientificApproach());
     rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
+    rdrWorkspace.setReviewRequested(dbWorkspace.getReviewRequested());
 
     rdrWorkspace.setWorkspaceDemographic(
         toRdrWorkspaceDemographics(dbWorkspace.getSpecificPopulationsEnum()));
