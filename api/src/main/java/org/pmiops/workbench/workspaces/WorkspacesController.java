@@ -39,23 +39,12 @@ import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdrselector.CdrSelectorService;
-import org.pmiops.workbench.cohortreview.CohortReviewMapper;
-import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.cohorts.CohortMapper;
-import org.pmiops.workbench.conceptset.ConceptSetMapper;
-import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -1036,7 +1025,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final DbWorkspace dbWorkspace =
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
-    workspaceResourceResponse.addAll(cdrSelectorService.getCdrSelectorsInWorkspace(dbWorkspace, workspaceAccessLevel));
+    workspaceResourceResponse.addAll(
+        cdrSelectorService.getCdrSelectorsInWorkspace(dbWorkspace, workspaceAccessLevel));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 

@@ -32,7 +32,13 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 @Mapper(
     componentModel = "spring",
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
-    uses = {CommonMappers.class, CohortMapper.class, CohortReviewMapper.class, ConceptSetMapper.class, DataSetMapper.class})
+    uses = {
+      CommonMappers.class,
+      CohortMapper.class,
+      CohortReviewMapper.class,
+      ConceptSetMapper.class,
+      DataSetMapper.class
+    })
 public interface WorkspaceMapper {
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")

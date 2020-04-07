@@ -92,7 +92,7 @@ export class CohortsApiStub extends CohortsApi {
       workspaceId: stubWorkspace.id,
       accessLevel: WorkspaceAccessLevel.OWNER,
       resourceType: ResourceType.COHORT
-    }
+    };
     this.resourceList = convertToResources(convertToResourceArgs);
   }
 
