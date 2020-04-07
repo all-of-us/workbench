@@ -48,6 +48,7 @@ public class RdrExportServiceImplTest {
   @MockBean private RdrExportDao rdrExportDao;
   @MockBean private UserDao mockUserDao;
   @MockBean private WorkspaceDao mockWorkspaceDao;
+  @MockBean private WorkspaceService mockWorkspaceService;
 
   private static final Instant NOW = Instant.now();
   private static final Timestamp NOW_TIMESTAMP = Timestamp.from(NOW);
@@ -55,6 +56,7 @@ public class RdrExportServiceImplTest {
 
   private DbUser dbUserWithEmail;
   private DbUser dbUserWithoutEmail;
+  private DbWorkspace mockWorkspace;
 
   @TestConfiguration
   @Import({RdrExportServiceImpl.class})
@@ -94,7 +96,7 @@ public class RdrExportServiceImplTest {
     when(mockUserDao.findUserByUserId(2L)).thenReturn(dbUserWithoutEmail);
 
     when(rdrExportDao.findByEntityTypeAndEntityId(anyShort(), anyLong())).thenReturn(null);
-    DbWorkspace mockWorkspace =
+    mockWorkspace =
         buildDbWorkspace(1, "workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE);
     when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(1)).thenReturn(mockWorkspace);
   }
@@ -111,6 +113,9 @@ public class RdrExportServiceImplTest {
     workspace.setWorkspaceActiveStatusEnum(activeStatus);
     workspace.setFirecloudName(name);
     workspace.setFirecloudUuid(Long.toString(dbId));
+    workspace.setScientificApproach("Scientific Approach");
+    workspace.setReasonForAllOfUs("Reason for AllOf Us");
+    workspace.setEthics(false);
     workspace.setReviewRequested(true);
     return workspace;
   }
@@ -146,6 +151,9 @@ public class RdrExportServiceImplTest {
     List<Long> workspaceID = new ArrayList<>();
     workspaceID.add(1l);
     rdrExportService.exportWorkspaces(workspaceID);
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(
+            mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
     verify(rdrExportDao, times(1)).save(anyList());
   }
 }
