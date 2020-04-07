@@ -291,6 +291,7 @@ jobs:
         environment:
           NODE_ENV: development
     working_directory: ~/workbench
+    parallelism: 3
     steps:
       - checkout
       - run:
@@ -317,7 +318,7 @@ jobs:
       - run:
           name: Run e2e tests (Puppeteer and Jest)
           working_directory: ~/workbench/e2e
-          command: yarn test:ci
+          command: yarn test:ci $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname)
       - store_artifacts:
           path: e2e/logs
           destination: logs
@@ -422,6 +423,7 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
+      - puppeteer-e2e-test
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
@@ -431,12 +433,7 @@ workflows:
           <<: *filter_master
           requires:
             - ui-build-test
-      # After merge PR to master branch, run Puppeteer tests after ui and api deployed to "test" env successfully.
-      - puppeteer-e2e-test:
-          <<: *filter_master
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
+
 
   deploy-staging:
     jobs:
