@@ -37,7 +37,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 ################################################
 # INSERT DATA
 ################################################
-echo "ds_linking - inserting conditions data"
+echo "ds_linking - inserting condition data"
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
