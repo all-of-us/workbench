@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
@@ -134,10 +135,15 @@ public class InstitutionServiceImpl implements InstitutionService {
       return false;
     }
 
-    if (institution.getEmailAddresses().contains(contactEmail)) {
-      return true;
+    // If the Institution has DUA Agreement that is restricted just to few researchers
+    // Confirm if the email address is in the allowed email list
+    if (institution.getDuaTypeEnum() != null
+        && institution.getDuaTypeEnum().equals(DuaType.RESTRICTED)) {
+      return institution.getEmailAddresses().contains(contactEmail);
     }
 
+    // If Agreement Type is NULL assume DUA Agreement is MASTER
+    // If Institution agreement type is master confirm if the contact email has valid/allowed domain
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
     return institution.getEmailDomains().contains(contactEmailDomain);
   }

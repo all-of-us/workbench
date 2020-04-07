@@ -141,6 +141,8 @@
     <include file="changelog/db.changelog-131-user-verified-institutional-affiliation.xml"/>
     <include file="changelog/db.changelog-132-non-null-contact-email.xml"/>
     <include file="changelog/db.changelog-133-institution-user-instructions.xml"/>
+    <include file="changelog/db.changelog-134-institution-data-user-agreement.xml"/>
+
     <!--
      Note: to update the DB locally, do the following:
      - Migrate schema changes: `./project.rb run-local-all-migrations`

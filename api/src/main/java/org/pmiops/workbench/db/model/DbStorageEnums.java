@@ -14,6 +14,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
@@ -441,6 +442,20 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.get(organizationType);
   }
 
+  // Institution Data Use agreement Type
+  private static final BiMap<DuaType, Short> CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE =
+      ImmutableBiMap.<DuaType, Short>builder()
+          .put(DuaType.MASTER, (short) 0)
+          .put(DuaType.RESTRICTED, (short) 1)
+          .build();
+
+  public static DuaType institutionDUATypeFromStorage(Short institutionDuaType) {
+    return CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE.inverse().get(institutionDuaType);
+  }
+
+  public static Short institutionDUATypeToStorage(DuaType institutionDuaType) {
+    return CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE.get(institutionDuaType);
+  }
   // PrePackagedConceptSet
   private static final BiMap<PrePackagedConceptSetEnum, Short>
       CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =
