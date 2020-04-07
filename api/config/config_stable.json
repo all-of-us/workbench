@@ -95,7 +95,7 @@
     "enableRdrExport": true,
     "enableBillingLockout": true,
     "enableSumoLogicEventHandling": true,
-    "useKeylessDelegatedCredentials": false,
+    "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": false,
     "requireInstitutionalVerification": false,
