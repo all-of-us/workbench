@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -128,7 +129,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.institutionService = institutionService;
   }
 
-  private int getCurrentDuccVersion() {
+  @VisibleForTesting
+  @Override
+  public int getCurrentDuccVersion() {
     return configProvider.get().featureFlags.enableV3DataUserCodeOfConduct ? 3 : 2;
   }
 

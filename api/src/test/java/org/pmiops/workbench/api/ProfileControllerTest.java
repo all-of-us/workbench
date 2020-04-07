@@ -37,6 +37,8 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -122,7 +124,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
-  private static final int DUA_VERSION = 2;
 
   private static final double FREE_TIER_USAGE = 100D;
   private static final double FREE_TIER_LIMIT = 300D;
@@ -139,6 +140,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Autowired private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private ProfileService profileService;
   @Autowired private ProfileController profileController;
@@ -150,6 +152,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static FakeClock fakeClock = new FakeClock(NOW);
 
   private static DbUser dbUser;
+
+  private int DUA_VERSION;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
@@ -168,6 +172,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     VerifiedInstitutionalAffiliationMapperImpl.class,
     CaptchaVerificationService.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
+    UserServiceImpl.class,
     UserServiceTestConfiguration.class,
   })
   static class Configuration {
@@ -236,6 +241,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+
+    DUA_VERSION = userService.getCurrentDuccVersion();
 
     try {
       doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
