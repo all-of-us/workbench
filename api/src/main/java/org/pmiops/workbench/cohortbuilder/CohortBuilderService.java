@@ -9,27 +9,24 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 
 public interface CohortBuilderService {
 
-  List<AgeTypeCount> findAgeTypeCounts(Long cdrVersionId);
+  List<AgeTypeCount> findAgeTypeCounts();
 
-  List<CriteriaAttribute> findCriteriaAttributeByConceptId(Long cdrVersionId, Long conceptId);
+  List<CriteriaAttribute> findCriteriaAttributeByConceptId(Long conceptId);
 
   List<Criteria> findCriteriaAutoComplete(
-      Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit);
+      String domain, String term, String type, Boolean standard, Integer limit);
 
-  List<Criteria> findCriteriaBy(
-      Long cdrVersionId, String domain, String type, Boolean standard, Long parentId);
+  List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 
-  List<Criteria> findCriteriaByDomainAndSearchTerm(
-      Long cdrVersionId, String domain, String term, Integer limit);
+  List<Criteria> findCriteriaByDomainAndSearchTerm(String domain, String term, Integer limit);
 
-  List<DataFilter> findDataFilters(Long cdrVersionId);
+  List<DataFilter> findDataFilters();
 
-  List<Criteria> findDrugBrandOrIngredientByValue(Long cdrVersionId, String value, Integer limit);
+  List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
 
-  List<Criteria> findDrugIngredientByConceptId(Long cdrVersionId, Long conceptId);
+  List<Criteria> findDrugIngredientByConceptId(Long conceptId);
 
-  ParticipantDemographics findParticipantDemographics(Long cdrVersionId);
+  ParticipantDemographics findParticipantDemographics();
 
-  List<Criteria> findStandardCriteriaByDomainAndConceptId(
-      Long cdrVersionId, String domain, Long conceptId);
+  List<Criteria> findStandardCriteriaByDomainAndConceptId(String domain, Long conceptId);
 }
