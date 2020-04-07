@@ -167,7 +167,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         this.getItemCount();
       }
       if (!!modifiers && modifiers.some(mod => mod.name === ModifierType.ENCOUNTERS) && !encounters) {
-        cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]).then(res => {
+        cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]).then(res => {
           encountersStore.next(res.items);
           this.setState({encounters: res.items});
         });

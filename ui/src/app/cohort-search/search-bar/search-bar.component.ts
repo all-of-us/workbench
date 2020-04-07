@@ -78,7 +78,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
     const {domainId, isStandard, type} = this.node;
     const apiCall = domainId === DomainType.DRUG
-      ? cohortBuilderApi().getDrugBrandOrIngredientByValue(cdrId, this.searchTerm.value)
+      ? cohortBuilderApi().findDrugBrandOrIngredientByValue(cdrId, this.searchTerm.value)
       : cohortBuilderApi().findCriteriaAutoComplete(
         cdrId, domainId, this.searchTerm.value, type, isStandard
       );
@@ -108,7 +108,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.searchTerm.setValue(option.name, {emitEvent: false});
       if (option.type === CriteriaType[CriteriaType.BRAND]) {
         const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-        cohortBuilderApi().getDrugIngredientByConceptId(cdrId, option.conceptId)
+        cohortBuilderApi().findDrugIngredientByConceptId(cdrId, option.conceptId)
           .then(resp => {
             if (resp.items.length) {
               const ingredients = resp.items.map(it => it.name);

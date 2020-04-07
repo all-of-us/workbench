@@ -141,6 +141,8 @@ definitions:
         type: string
       focusOnUnderrepresentedPopulations:
         type: boolean
+      reviewRequested:
+        type: boolean
       workspaceDemographic:
         $ref: '#/definitions/RdrWorkspaceDemographic'
 

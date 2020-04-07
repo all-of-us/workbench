@@ -99,14 +99,15 @@
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
-    "enableCBAgeTypeOptions": true
+    "enableCBAgeTypeOptions": true,
+    "enableV3DataUserCodeOfConduct": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local"
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
-    "queueName": "rdrQueueTest",
+    "queueName": "rdrExportQueue",
     "exportObjectsPerTask": 10
   },
   "captcha": {

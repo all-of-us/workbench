@@ -22,8 +22,9 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
   public static final String QUEUE_NAME_REQUEST_HEADER = "X-AppEngine-QueueName";
   private static final String CLOUD_TASK_TAG = "cloudTask";
+  // Keep queue name consistent with the name as in OfflineRdrExportController
   public static final Set<String> VALID_QUEUE_NAME_SET =
-      new HashSet<>(Arrays.asList("rdrQueueTest"));
+      new HashSet<>(Arrays.asList("rdrExportQueue"));
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
