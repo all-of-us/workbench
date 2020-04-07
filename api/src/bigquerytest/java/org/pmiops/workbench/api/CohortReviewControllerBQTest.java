@@ -89,6 +89,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Import({
     WorkspaceServiceImpl.class,
     CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
     BigQueryTestService.class,
