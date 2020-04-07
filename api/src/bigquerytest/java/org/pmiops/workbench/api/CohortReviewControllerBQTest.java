@@ -28,6 +28,7 @@ import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -87,6 +88,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
+    CohortMapperImpl.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
     BigQueryTestService.class,
