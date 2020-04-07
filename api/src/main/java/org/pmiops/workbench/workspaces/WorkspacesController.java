@@ -38,6 +38,7 @@ import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cdrselector.CdrSelectorService;
 import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohorts.CohortMapper;
@@ -132,16 +133,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
+  private final CdrSelectorService cdrSelectorService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
-  private final CohortMapper cohortMapper;
-  private final CohortReviewMapper cohortReviewMapper;
-  private final CohortReviewService cohortReviewService;
-  private final ConceptSetMapper conceptSetMapper;
-  private final ConceptSetService conceptSetService;
-  private final DataSetDao dataSetDao;
-  private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final LogsBasedMetricService logsBasedMetricService;
@@ -159,14 +154,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
+      CdrSelectorService cdrSelectorService,
       CdrVersionDao cdrVersionDao,
-      CohortMapper cohortMapper,
-      CohortReviewMapper cohortReviewMapper,
-      CohortReviewService cohortReviewService,
-      ConceptSetMapper conceptSetMapper,
-      ConceptSetService conceptSetService,
-      DataSetDao dataSetDao,
-      DataSetMapper dataSetMapper,
       UserDao userDao,
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
@@ -182,14 +171,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
+    this.cdrSelectorService = cdrSelectorService;
     this.cdrVersionDao = cdrVersionDao;
-    this.cohortMapper = cohortMapper;
-    this.cohortReviewMapper = cohortReviewMapper;
-    this.cohortReviewService = cohortReviewService;
-    this.conceptSetMapper = conceptSetMapper;
-    this.conceptSetService = conceptSetService;
-    this.dataSetDao = dataSetDao;
-    this.dataSetMapper = dataSetMapper;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -1050,50 +1033,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    final DbWorkspace workspace =
+    final DbWorkspace dbWorkspace =
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
-    final Set<DbCohort> cohorts = workspace.getCohorts();
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
-    workspaceResourceResponse.addAll(
-        cohorts.stream()
-            .map(
-                cohort ->
-                    workspaceMapper.workspaceResourceFromDbWorkspaceAndCohort(
-                        workspace, workspaceAccessLevel, cohortMapper.dbModelToClient(cohort)))
-            .collect(Collectors.toList()));
-    List<DbCohortReview> reviews =
-        cohortReviewService.getRequiredWithCohortReviews(workspaceNamespace, workspaceId);
-    workspaceResourceResponse.addAll(
-        reviews.stream()
-            .map(
-                cohortReview ->
-                    workspaceMapper.workspaceResourceFromDbWorkspaceAndCohortReview(
-                        workspace,
-                        workspaceAccessLevel,
-                        cohortReviewMapper.dbModelToClient(cohortReview)))
-            .collect(Collectors.toList()));
-    List<DbConceptSet> conceptSets =
-        conceptSetService.findByWorkspaceId(workspace.getWorkspaceId());
-    workspaceResourceResponse.addAll(
-        conceptSets.stream()
-            .map(
-                conceptSet ->
-                    workspaceMapper.workspaceResourceFromDbWorkspaceAndConceptSet(
-                        workspace,
-                        workspaceAccessLevel,
-                        conceptSetMapper.dbModelToClient(conceptSet)))
-            .collect(Collectors.toList()));
-    List<DbDataset> dataSets =
-        dataSetDao.findByWorkspaceIdAndInvalid(workspace.getWorkspaceId(), false);
-    workspaceResourceResponse.addAll(
-        dataSets.stream()
-            .map(
-                dataSet ->
-                    workspaceMapper.workspaceResourceFromDbWorkspaceAndDataSet(
-                        workspace,
-                        workspaceAccessLevel,
-                        dataSetMapper.dbModelToClientLight(dataSet)))
-            .collect(Collectors.toList()));
+    workspaceResourceResponse.addAll(cdrSelectorService.getCdrSelectorsInWorkspace(dbWorkspace, workspaceAccessLevel));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 
