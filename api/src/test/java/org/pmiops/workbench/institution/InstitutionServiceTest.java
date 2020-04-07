@@ -320,6 +320,7 @@ public class InstitutionServiceTest {
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
   }
 
+  @Test
   public void test_emailValidation_restricted_mismatch() {
     final Institution inst =
         service.createInstitution(
@@ -331,6 +332,34 @@ public class InstitutionServiceTest {
                 .duaTypeEnum(DuaType.RESTRICTED));
 
     final DbUser user = createUser("hack@broad.org");
+    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
+  }
+
+  @Test
+  public void test_emailValidation_nullDuaType() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org"))
+                .emailAddresses(Lists.newArrayList("testing@broad,org")));
+
+    final DbUser user = createUser("hack@broad.org");
+    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isTrue();
+  }
+
+  @Test
+  public void test_emailValidation_nullDuaType_incorrectEmailDomain() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org"))
+                .emailAddresses(Lists.newArrayList("testing@broad,org")));
+
+    final DbUser user = createUser("hack@broadinstitute.org");
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
   }
 
