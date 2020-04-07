@@ -9,7 +9,7 @@
     "test": "cross-env WORKBENCH_ENV=dev jest --detectOpenHandles",
     "test:debug": "cross-env WORKBENCH_ENV=dev HEADLESS=false jest --detectOpenHandles",
     "test-local": "cross-env WORKBENCH_ENV=local jest",
-    "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev CI=true jest --ci --runInBand --forceExit --reporters=default --reporters=jest-junit",
+    "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev CI=true jest --ci --runInBand --forceExit --testResultsProcessor=\"jest-junit\"",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn run lint --fix",
     "tsc-build": "tsc --skipLibCheck --project tsconfig.json",
