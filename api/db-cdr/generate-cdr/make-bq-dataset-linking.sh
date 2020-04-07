@@ -181,7 +181,9 @@ VALUES
     ('RACE_CONCEPT_ID', 'person.RACE_CONCEPT_ID', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
     ('RACE', 'p_race_concept.concept_name as RACE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_race_concept on person.race_concept_id = p_race_concept.CONCEPT_ID', 'Person'),
     ('ETHNICITY_CONCEPT_ID', 'person.ETHNICITY_CONCEPT_ID', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
-    ('ETHNICITY', 'p_ethnicity_concept.concept_name as ETHNICITY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_ethnicity_concept on person.ethnicity_concept_id = p_ethnicity_concept.CONCEPT_ID', 'Person')"
+    ('ETHNICITY', 'p_ethnicity_concept.concept_name as ETHNICITY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_ethnicity_concept on person.ethnicity_concept_id = p_ethnicity_concept.CONCEPT_ID', 'Person'),
+    ('SEX_AT_BIRTH_CONCEPT_ID', 'person.SEX_AT_BIRTH_CONCEPT_ID', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    ('SEX_AT_BIRTH', 'p_sex_at_birth_concept.concept_name as SEX_AT_BIRTH', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_sex_at_birth_concept on person.sex_at_birth_concept_id = p_sex_at_birth_concept.CONCEPT_ID', 'Person')"
 
 echo "ds_linking - inserting procedure data"
 
