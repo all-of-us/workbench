@@ -15,7 +15,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
-function initItem(id: string, type: string, fullTree: boolean) {
+function initItem(id: string, type: string) {
   return {
     id,
     type,
@@ -23,8 +23,7 @@ function initItem(id: string, type: string, fullTree: boolean) {
     modifiers: [],
     temporalGroup: 0,
     isRequesting: false,
-    status: 'active',
-    fullTree
+    status: 'active'
   };
 }
 
@@ -216,12 +215,11 @@ export class SearchGroupList extends React.Component<Props, State> {
       (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
     triggerEvent(category, 'Click', `${category} - ${label}`);
-    const fullTree = criteria.fullTree || false;
     let context: any;
     const itemId = generateId('items');
     const groupId = null;
-    const item = initItem(itemId, domain, fullTree);
-    context = {item, domain, type, standard, role, groupId, itemId, fullTree};
+    const item = initItem(itemId, domain);
+    context = {item, domain, type, standard, role, groupId, itemId};
     wizardStore.next(context);
   }
 

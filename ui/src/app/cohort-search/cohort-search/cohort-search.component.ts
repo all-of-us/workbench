@@ -2,7 +2,7 @@ import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/co
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {Observable} from 'rxjs/Observable';
 
-import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
+import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {SearchRequest} from 'generated/fetch';
@@ -49,7 +49,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
             this.cohort = cohort;
             currentCohortStore.next(cohort);
             if (cohort.criteria) {
-              initExisting.next(true);
               searchRequestStore.next(parseCohortDefinition(cohort.criteria));
             }
           });

@@ -1,15 +1,5 @@
-import {Component, OnDestroy, OnInit } from '@angular/core';
-import {
-  attributesStore,
-  autocompleteStore,
-  groupSelectionsStore,
-  scrollStore,
-  searchRequestStore,
-  selectionsStore,
-  subtreePathStore,
-  subtreeSelectedStore,
-  wizardStore
-} from 'app/cohort-search/search-state.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
@@ -30,11 +20,10 @@ export class ModalComponent implements OnInit, OnDestroy {
   readonly domainType = DomainType;
   readonly criteriaType = CriteriaType;
   subscription: Subscription;
-  selections = {};
-  selectionIds: Array<string>;
-  selectionList: Array<any>;
+  selectedIds: Array<string>;
+  selections: Array<any>;
+  groupSelections: Array<number> = [];
   open = false;
-  noSelection = true;
   title = '';
   mode = 'list';
   backMode: string;
@@ -46,8 +35,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   attributesNode: any;
   hierarchyNode: any;
   publicUiUrl = environment.publicUiUrl;
-
-  constructor() {}
+  treeSearchTerms = '';
+  autocompleteSelection: any;
 
   ngOnInit() {
     this.subscription = wizardStore
@@ -55,10 +44,10 @@ export class ModalComponent implements OnInit, OnDestroy {
       .subscribe(wizard => {
         // reset to default each time the modal is opened
         this.wizard = wizard;
-        this.selectionList = wizard.item.searchParameters;
-        this.noSelection = this.selectionList.length === 0;
         if (!this.open) {
           this.title = wizard.domain === DomainType.PERSON ? typeToTitle(wizard.type) : domainToTitle(wizard.domain);
+          this.selections = wizard.item.searchParameters;
+          this.selectedIds = this.selections.map(s => s.parameterId);
           if (this.initTree) {
             this.hierarchyNode = {
               domainId: wizard.domain,
@@ -75,21 +64,9 @@ export class ModalComponent implements OnInit, OnDestroy {
           this.open = true;
         }
       });
-
-    this.subscription.add(selectionsStore.subscribe(list => this.selectionIds = list));
-    this.subscription.add(subtreeSelectedStore.subscribe(
-      sel => this.loadingSubtree = sel !== undefined));
-    this.subscription.add(scrollStore.filter(id => !!id).subscribe(id => this.setScroll(id)));
-    this.subscription.add(attributesStore
-      .filter(crit => !!crit)
-      .subscribe(criterion => {
-        this.backMode = this.mode;
-        this.attributesNode = criterion;
-        this.mode = 'attributes';
-      }));
   }
 
-  setScroll(id: string) {
+  setScroll = (id: string) => {
     const nodeId = `node${id}`;
     const node = document.getElementById(nodeId);
     if (node) {
@@ -104,26 +81,27 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   close() {
     wizardStore.next(undefined);
-    autocompleteStore.next('');
-    selectionsStore.next([]);
-    subtreePathStore.next([]);
-    attributesStore.next( undefined);
-    groupSelectionsStore.next([]);
     this.attributesNode = undefined;
+    this.autocompleteSelection = undefined;
     this.hierarchyNode = undefined;
     this.loadingSubtree = false;
+    this.selectedIds = [];
+    this.selections = [];
+    this.treeSearchTerms = '';
     this.open = false;
   }
 
   back = () => {
     switch (this.mode) {
       case 'tree':
+        this.autocompleteSelection = undefined;
         this.backMode = 'list';
+        this.hierarchyNode = undefined;
         this.mode = 'list';
         break;
       default:
-        this.mode = this.backMode;
         this.attributesNode = undefined;
+        this.mode = this.backMode;
         break;
     }
   }
@@ -134,6 +112,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
     }
     const searchRequest = searchRequestStore.getValue();
+    item.searchParameters = this.selections;
     if (groupId) {
       const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
       if (groupIndex > -1) {
@@ -232,9 +211,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   showHierarchy = (criterion: any) => {
-    autocompleteStore.next(criterion.name);
-    subtreePathStore.next(criterion.path.split('.'));
-    subtreeSelectedStore.next(criterion.id);
+    this.loadingSubtree = true;
+    this.treeSearchTerms = criterion.name;
+    this.autocompleteSelection = criterion;
     this.hierarchyNode = {
       domainId: criterion.domainId,
       type: criterion.type,
@@ -251,6 +230,41 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   get disableFlag() {
-    return this.noSelection || this.modifiersDisabled;
+    return this.selections.length === 0 || this.modifiersDisabled;
+  }
+
+  setTreeSearchTerms = (input: string) => {
+    this.treeSearchTerms = input;
+  }
+
+  setAutocompleteSelection = (selection: any) => {
+    this.loadingSubtree = true;
+    this.autocompleteSelection = selection;
+  }
+
+  setAttributes = (criterion: any) => {
+    this.backMode = this.mode;
+    this.attributesNode = criterion;
+    this.mode = 'attributes';
+  }
+
+  addSelection = (param: any) => {
+    if (this.selectedIds.includes(param.parameterId)) {
+      this.selections = this.selections.filter(p => p.parameterId !== param.parameterId);
+    } else {
+      this.selectedIds = [...this.selectedIds, param.parameterId];
+      if (param.group) {
+        this.groupSelections = [...this.groupSelections, param.id];
+      }
+    }
+    this.selections = [...this.selections, param];
+  }
+
+  removeSelection = (param: any) => {
+    this.selectedIds = this.selectedIds.filter(id => id !== param.parameterId);
+    this.selections = this.selections.filter(sel => sel.parameterId !== param.parameterId);
+    if (param.group) {
+      this.groupSelections = this.groupSelections.filter(id => id !== param.id);
+    }
   }
 }

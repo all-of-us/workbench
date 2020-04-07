@@ -1,5 +1,7 @@
 import {Component, Input} from '@angular/core';
-import {attributesStore, groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import * as React from 'react';
+import {Key} from 'ts-key-enum';
+
 import {domainToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -12,8 +14,6 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType} from 'generated/fetch';
-import * as React from 'react';
-import {Key} from 'ts-key-enum';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -142,7 +142,9 @@ const styles = reactStyles({
 
 interface Props {
   hierarchy: Function;
-  selections: Array<string>;
+  select: Function;
+  selectedIds: Array<string>;
+  setAttributes: Function;
   wizard: any;
   workspace: WorkspaceData;
 }
@@ -215,23 +217,8 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     selectItem = (row: any) => {
-      const {wizard} = this.props;
-      let {selections} = this.props;
-      const parameterId = this.getParamId(row);
-      if (!selections.includes(parameterId)) {
-        if (row.group) {
-          const groups = [...groupSelectionsStore.getValue(), row.id];
-          groupSelectionsStore.next(groups);
-        }
-        wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
-        selections = [parameterId, ...selections];
-        selectionsStore.next(selections);
-        wizardStore.next(wizard);
-      }
-    }
-
-    launchAttributes = (row: any) => {
-      attributesStore.next(row);
+      const param = {parameterId: this.getParamId(row), ...row, attributes: []};
+      this.props.select(param);
     }
 
     showHierarchy = (row: any) => {
@@ -268,9 +255,9 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     isSelected = (row: any) => {
-      const {selections} = this.props;
+      const {selectedIds} = this.props;
       const paramId = this.getParamId(row);
-      return selections.includes(paramId);
+      return selectedIds.includes(paramId);
     }
 
     getParamId(row: any) {
@@ -293,7 +280,7 @@ export const ListSearch = withCurrentWorkspace()(
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
-      const selected = !attributes && !brand && this.isSelected(row);
+      const selected = !attributes && !brand && this.props.selectedIds.includes(this.getParamId(row));
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
@@ -303,7 +290,7 @@ export const ListSearch = withCurrentWorkspace()(
         <td style={{...columnStyle, textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
           {row.selectable && <div style={{...styles.selectDiv}}>
             {attributes &&
-              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.launchAttributes(row)}/>
+              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.props.setAttributes(row)}/>
             }
             {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
             {unselected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='16' onClick={() => this.selectItem(row)}/>}
@@ -421,9 +408,11 @@ export const ListSearch = withCurrentWorkspace()(
 })
 export class ListSearchComponent extends ReactWrapperBase {
   @Input('hierarchy') hierarchy: Props['hierarchy'];
-  @Input('selections') selections: Props['selections'];
+  @Input('select') select: Props['select'];
+  @Input('selectedIds') selectedIds: Props['selectedIds'];
+  @Input('setAttributes') setAttributes: Props['setAttributes'];
   @Input('wizard') wizard: Props['wizard'];
   constructor() {
-    super(ListSearch, ['hierarchy', 'selections', 'wizard']);
+    super(ListSearch, ['hierarchy', 'select', 'selectedIds', 'setAttributes', 'wizard']);
   }
 }
