@@ -1,6 +1,7 @@
 queue:
 - name: rdrExportQueue
   rate: 1/m
+  target: api
   bucket_size: 500
   retry_parameters:
     task_retry_limit: 1
