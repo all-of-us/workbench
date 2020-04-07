@@ -160,7 +160,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     RACE_CONCEPT_ID         INT64,
     RACE                    STRING,
     ETHNICITY_CONCEPT_ID    INT64,
-    ETHNICITY               STRING
+    ETHNICITY               STRING,
+    SEX_AT_BIRTH_CONCEPT_ID INT64,
+    SEX_AT_BIRTH            STRING
 )"
 
 echo "CREATE TABLE - ds_procedure_occurrence"
