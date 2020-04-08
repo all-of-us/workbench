@@ -346,7 +346,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      verifyInsitutionAffilation(request.getProfile());
+      verifyInstitutionalAffiliation(request.getProfile());
     }
 
     final Profile profile = request.getProfile();
@@ -515,7 +515,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void verifyInsitutionAffilation(Profile profile) {
+  private void verifyInstitutionalAffiliation(Profile profile) {
     String userName = profile.getUsername();
     String contactEmail = profile.getContactEmail();
     DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation =
