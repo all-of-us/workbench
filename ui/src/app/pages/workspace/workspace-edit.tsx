@@ -1139,7 +1139,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   You must select a billing account</div>}
                 {errors.primaryPurpose && <div> You must choose at least one primary research
                   purpose (Question 1)</div>}
-                {errors.otherPrimaryPurpose && <div> Other primary purpose should be of atleast 500 characters</div>}
+                {errors.otherPrimaryPurpose && <div> Other primary purpose should be of at most 500 characters</div>}
                 {errors.anticipatedFindings && <div> Answer for <i>What are the anticipated findings
                   from the study? (Question # 2.1)</i> cannot be empty</div>}
                 {errors.scientificApproach && <div> Answer for <i>What are the scientific
@@ -1147,13 +1147,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.intendedStudy && <div> Answer for<i>What are the specific scientific question(s) you intend to study
                   (Question # 2.3)</i> cannot be empty</div>}
                 {errors.specificPopulation && <div> You must specify a population of study</div>}
-                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be atleast 80 characters</div>}
+                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
                 {errors.researchOutcoming && <div> You must specify the outcome of the research</div>}
                 {errors.disseminate && <div> You must specific how you plan to disseminate your research findings</div>}
                 {errors.otherDisseminateResearchFindings && <div>
-                  Disseminate Research Findings Other text should be of atleast 100 characters</div>}
+                  Disseminate Research Findings Other text should be of at most 100 characters</div>}
                 {errors.otherSpecificPopulation && <div>
-                  Specific Population Other text should be of atleast 100 characters</div>}
+                  Specific Population Other text should be of at most 100 characters</div>}
               </ul>
             } disabled={!errors}>
               <Button type='primary'
