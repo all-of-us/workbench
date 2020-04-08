@@ -60,7 +60,7 @@ export function clickableXpath(label: string) {
  * @param shapeValue:
  */
 export function clrIconXpath(opts: TextOptions, shapeValue: string) {
-  if (opts === undefined) {
+  if (Object.keys(opts).length == 0) {
     return `//clr-icon[@shape='${shapeValue}'][*[@role='img']]`; // anywhere on page
   }
   // next to a label

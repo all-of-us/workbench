@@ -1,6 +1,7 @@
 import CreateAccountPage from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
 
+const configs = require('../../resources/workbench-config');
 
 describe('User registration tests:', () => {
 
@@ -14,7 +15,7 @@ describe('User registration tests:', () => {
   });
 
 
-  test.skip('Can register new user', async () => {
+  test('Can register new user', async () => {
     // Load the landing page for login.
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
