@@ -28,12 +28,11 @@ export default class Button extends BaseElement {
    * Wait until button is clickable (enabled).
    */
   async waitUntilEnabled(): Promise<unknown> {
-    const result = await this.page.waitForFunction((e) => {
+    const retrievedValue = await this.page.waitForFunction((e) => {
       const style = window.getComputedStyle(e);
       return style.getPropertyValue('cursor') === 'pointer';
     }, {}, this.element);
-    const jval = await result.jsonValue();
-    return jval;
+    return await retrievedValue.jsonValue();
   }
 
 }
