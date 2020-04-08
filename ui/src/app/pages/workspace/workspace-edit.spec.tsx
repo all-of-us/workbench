@@ -357,7 +357,7 @@ describe('WorkspaceEdit', () => {
     const inValidInput = fp.repeat(81, 'b');
     wrapper.find('[data-test-id="search-input"]').first().simulate('change', {target: {value: inValidInput}});
     diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
-    expect(diseaseNameError[0]).toBe('Disease of focus must be true');
+    expect(fp.first(diseaseNameError)).toBe('Disease of focus must be true');
   });
 
   it ('should show error message if Other text for disseminate research is more than 100 characters', async() => {
@@ -372,7 +372,7 @@ describe('WorkspaceEdit', () => {
     const inValidInput = fp.repeat(101, 'b');
     wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: inValidInput}});
     otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
-    expect(otherDisseminateResearchFindingsError.get(0)).toBe('Other disseminate research findings must be true');
+    expect(fp.first(otherDisseminateResearchFindingsError)).toBe('Other disseminate research findings must be true');
   });
 
   it ('should show error message if Other text for Special Population is more than 100 characters', async() => {
@@ -392,6 +392,6 @@ describe('WorkspaceEdit', () => {
     wrapper.find('[data-test-id="other-specialPopulation-text"]').first().simulate('change', {target: {value: inValidInput}});
 
     otherSpecificPopulationError = getSaveButtonDisableMsg(wrapper, 'otherSpecificPopulation');
-    expect(otherSpecificPopulationError[0]).toBe('Other specific population must be true');
+    expect(fp.first(otherSpecificPopulationError)).toBe('Other specific population must be true');
   });
 });

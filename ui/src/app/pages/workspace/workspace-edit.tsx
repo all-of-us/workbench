@@ -602,9 +602,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get isOtherDisseminateResearchValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
-      return this.isDisseminateResearchValid &&
-          (!fp.includes(DisseminateResearchEnum.OTHER, researchPurpose.disseminateResearchFindingList) ||
-              (researchPurpose.otherDisseminateResearchFindings && researchPurpose.otherDisseminateResearchFindings.length <= 100));
+      return !fp.includes(DisseminateResearchEnum.OTHER, researchPurpose.disseminateResearchFindingList) ||
+              (researchPurpose.otherDisseminateResearchFindings && researchPurpose.otherDisseminateResearchFindings.length <= 100);
     }
 
 
