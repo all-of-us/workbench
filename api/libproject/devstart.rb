@@ -635,10 +635,12 @@ Common.register_command({
 })
 
 def run_liquibase(cmd_name, *args)
-  common = Common.new
-  common.warning("#{cmd_name} args: #{args}")
+  # ensure_docker_sync
+  ensure_docker(cmd_name, args)
 
-  ensure_docker_sync
+  common = Common.new
+  common.status("run_liquibase cmd_name: #{cmd_name} args: #{args}")
+
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
       "--command [command]",
@@ -655,7 +657,12 @@ def run_liquibase(cmd_name, *args)
         "--run-list [run_list]",
         String,
         ->(opts, rl) { opts.run_list = rl },
-        "Liquibase runList, a comma-separated list of activities in the liquibase task"
+        "Liquibase runList, a comma-separated list of activities in the liquibase task")
+  op.add_typed_option(
+        '--project [project]',
+        String,
+        ->(opts, p) { opts.project = p },
+        'AoU environment GCP project. Used to pick MySQL instance.'
   )
   op.add_validator ->(opts) {
     if opts.command.nil? || opts.command.empty?
@@ -681,8 +688,19 @@ def run_liquibase(cmd_name, *args)
   else
     argument = "-PliquibaseCommandValue=#{op.opts.argument}"
   end
-  common.warning("revised options: #{op.opts}")
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh #{op.opts.command} -PrunList=#{run_list} #{argument} }
+  op.opts.project = TEST_PROJECT
+
+  context = GcloudContextV2.new(op)
+  context.validate
+  common.run_inline('docker-compose --help')
+
+  with_cloud_proxy_and_db(context) do |gcc|
+    common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}")
+    common.run_inline('docker-compose --help')
+    common.run_inline(
+        %W{docker-compose run db-scripts ./run-migrations.sh #{op.opts.command}
+        -PrunList=#{run_list} #{argument}})
+  end
 end
 
 Common.register_command({
@@ -719,6 +737,13 @@ def rollback_db(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
+
+  # todo: get SQL for transaction. use sql proxy
+  common.warning('Have you rolled back the application to the tag associated with this database rollback? [y/N]')
+  answer = gets
+  unless answer.downcase == 'y'
+    raise RuntimeError.new('User cancelled rollback operation.')
+  end
   if op.opts.tag
     run_liquibase('run-liquibase', *%W(--command=rollback --argument=#{op.opts.tag}))
   elsif op.opts.count

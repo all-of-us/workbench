@@ -20,5 +20,4 @@ echo "Creating database if it does not exist..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
 echo "Run Liquibase..."
-# ../gradlew rollbackCount -PrunList=rollbackCount main
-(cd "$(dirname "${BASH_SOURCE}")" && ../gradlew $liquibaseCommand $runList $liquibaseArgs)
+(cd "$(dirname "${BASH_SOURCE}")" && ../gradlew liquibase $liquibaseCommand $runList $liquibaseArgs)
