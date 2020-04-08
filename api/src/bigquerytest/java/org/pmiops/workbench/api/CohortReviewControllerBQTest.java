@@ -30,7 +30,9 @@ import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -93,6 +95,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
     BigQueryTestService.class,
     ReviewQueryBuilder.class,
     CohortCloningService.class,
