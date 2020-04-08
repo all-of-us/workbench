@@ -99,21 +99,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "role", source = "acl")
   UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry acl);
 
-  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
-  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
-  @Mapping(target = "permission", source = "accessLevel")
-  // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
-  @Mapping(target = "cohort", ignore = true)
-  @Mapping(target = "cohortReview", ignore = true)
-  @Mapping(target = "conceptSet", ignore = true)
-  @Mapping(target = "dataSet", ignore = true)
-  @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
-  @Mapping(target = "modifiedTime", ignore = true)
-  WorkspaceResource workspaceResourceFromDbWorkspace(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
-
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
@@ -127,7 +112,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "dbCohort.lastModifiedTime")
-  WorkspaceResource workspaceResourceFromDbWorkspaceAndDbCohort(
+  WorkspaceResource dbWorkspaceAndDbCohortToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohort dbCohort);
 
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
@@ -143,7 +128,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "dbCohortReview.lastModifiedTime")
-  WorkspaceResource workspaceResourceFromDbWorkspaceAndCohortReview(
+  WorkspaceResource dbWorkspaceAndDbCohortReviewToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohortReview dbCohortReview);
 
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
@@ -159,7 +144,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "dbConceptSet.lastModifiedTime")
-  WorkspaceResource workspaceResourceFromDbWorkspaceAndConceptSet(
+  WorkspaceResource dbWorkspaceAndDbConceptSetToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbConceptSet dbConceptSet);
 
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
@@ -175,7 +160,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "dbDataset.lastModifiedTime")
-  WorkspaceResource workspaceResourceFromDbWorkspaceAndDataSet(
+  WorkspaceResource dbWorkspaceAndDbDatasetToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset);
 
   default String cdrVersionId(CdrVersion cdrVersion) {

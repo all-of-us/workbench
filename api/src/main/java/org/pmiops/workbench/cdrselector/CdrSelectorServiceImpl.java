@@ -40,15 +40,17 @@ public class CdrSelectorServiceImpl implements CdrSelectorService {
   @Override
   public List<WorkspaceResource> getCdrSelectorsInWorkspace(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel workspaceAccessLevel) {
-    List<WorkspaceResource> workspaceResources = new ArrayList<WorkspaceResource>();
+    List<WorkspaceResource> workspaceResources = new ArrayList<>();
+
     final Set<DbCohort> cohorts = dbWorkspace.getCohorts();
     workspaceResources.addAll(
         cohorts.stream()
             .map(
                 cohort ->
-                    workspaceMapper.workspaceResourceFromDbWorkspaceAndDbCohort(
+                    workspaceMapper.dbWorkspaceAndDbCohortToWorkspaceResource(
                         dbWorkspace, workspaceAccessLevel, cohort))
             .collect(Collectors.toList()));
+
     List<DbCohortReview> reviews =
         cohortReviewService.getRequiredWithCohortReviews(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
@@ -56,27 +58,30 @@ public class CdrSelectorServiceImpl implements CdrSelectorService {
         reviews.stream()
             .map(
                 cohortReview ->
-                    workspaceMapper.workspaceResourceFromDbWorkspaceAndCohortReview(
+                    workspaceMapper.dbWorkspaceAndDbCohortReviewToWorkspaceResource(
                         dbWorkspace, workspaceAccessLevel, cohortReview))
             .collect(Collectors.toList()));
+
     List<DbConceptSet> conceptSets =
         conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId());
     workspaceResources.addAll(
         conceptSets.stream()
             .map(
                 dbConceptSet ->
-                    workspaceMapper.workspaceResourceFromDbWorkspaceAndConceptSet(
+                    workspaceMapper.dbWorkspaceAndDbConceptSetToWorkspaceResource(
                         dbWorkspace, workspaceAccessLevel, dbConceptSet))
             .collect(Collectors.toList()));
+
     List<DbDataset> datasets =
         dataSetDao.findByWorkspaceIdAndInvalid(dbWorkspace.getWorkspaceId(), false);
     workspaceResources.addAll(
         datasets.stream()
             .map(
                 dbDataset ->
-                    workspaceMapper.workspaceResourceFromDbWorkspaceAndDataSet(
+                    workspaceMapper.dbWorkspaceAndDbDatasetToWorkspaceResource(
                         dbWorkspace, workspaceAccessLevel, dbDataset))
             .collect(Collectors.toList()));
+
     return workspaceResources;
   }
 }
