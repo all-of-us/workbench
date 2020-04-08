@@ -384,21 +384,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // set via the newer Verified Institutional Affiliation flow
     boolean requireInstitutionalVerification =
         configProvider.get().featureFlags.requireInstitutionalVerification;
-    if (requireInstitutionalVerification
-        && !institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
-      final String msg =
-          Optional.ofNullable(dbVerifiedAffiliation)
-              .map(
-                  affiliation ->
-                      String.format(
-                          "Cannot create user %s: contact email %s is not a valid member of institution '%s'",
-                          userName, contactEmail, affiliation.getInstitution().getShortName()))
-              .orElse(
-                  String.format(
-                      "Cannot create user %s: contact email %s does not have a valid institutional affiliation",
-                      userName, contactEmail));
-      throw new BadRequestException(msg);
-    }
 
     try {
       dbUser = userDao.save(dbUser);

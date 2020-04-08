@@ -30,6 +30,7 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
@@ -344,6 +345,10 @@ public class ProfileController implements ProfileApiDelegate {
       verifyInvitationKey(request.getInvitationKey());
     }
 
+    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
+      verifyInsitutionAffilation(request.getProfile());
+    }
+
     final Profile profile = request.getProfile();
 
     // We don't include this check in validateAndCleanProfile since some existing user profiles
@@ -507,6 +512,28 @@ public class ProfileController implements ProfileApiDelegate {
       }
     } catch (org.pmiops.workbench.captcha.ApiException e) {
       throw new ServerErrorException("Exception while verifying Captcha");
+    }
+  }
+
+  private void verifyInsitutionAffilation(Profile profile) {
+    String userName = profile.getUsername();
+    String contactEmail = profile.getContactEmail();
+    DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation =
+        verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+            profile.getVerifiedInstitutionalAffiliation(), institutionService);
+    if (!institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
+      final String msg =
+          Optional.ofNullable(dbVerifiedAffiliation)
+              .map(
+                  affiliation ->
+                      String.format(
+                          "Cannot create user %s: contact email %s is not a valid member of institution '%s'",
+                          userName, contactEmail, affiliation.getInstitution().getShortName()))
+              .orElse(
+                  String.format(
+                      "Cannot create user %s: contact email %s does not have a valid institutional affiliation",
+                      userName, contactEmail));
+      throw new BadRequestException(msg);
     }
   }
 
