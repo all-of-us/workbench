@@ -635,11 +635,21 @@ Common.register_command({
 })
 
 def run_liquibase(cmd_name, *args)
-  # ensure_docker_sync
-  ensure_docker(cmd_name, args)
+  command_to_sql = {
+      'changelogSync' => 'changelogSyncSQL',
+      'markNextChangesetRan' => 'markNextChangesetRanSQL',
+      'rollback' => 'rollbackSQL',
+      'rollbackCount' => 'rollbackCountSQL',
+      'rollbackToDate' => 'rollbackToDateSQL',
+      'update' => 'updateSQL',
+      'updateCount' => 'updateCountSql',
+      'updateToTag' => 'updateToTagSQL'
+  }
 
   common = Common.new
-  common.status("run_liquibase cmd_name: #{cmd_name} args: #{args}")
+  ensure_docker(cmd_name, args)
+
+  # common.status("run_liquibase cmd_name: #{cmd_name} args: #{args}")
 
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
@@ -688,18 +698,45 @@ def run_liquibase(cmd_name, *args)
   else
     argument = "-PliquibaseCommandValue=#{op.opts.argument}"
   end
-  op.opts.project = TEST_PROJECT
+
+  if op.opts.project.nil? || op.opts.project.empty?
+    op.opts.project = TEST_PROJECT
+  end
 
   context = GcloudContextV2.new(op)
   context.validate
-  common.run_inline('docker-compose --help')
 
   with_cloud_proxy_and_db(context) do |gcc|
-    common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}")
-    common.run_inline('docker-compose --help')
-    common.run_inline(
-        %W{docker-compose run db-scripts ./run-migrations.sh #{op.opts.command}
-        -PrunList=#{run_list} #{argument}})
+    # common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}, dir: #{Dir.pwd}")
+    command = op.opts.command
+
+    # common.run_inline(%W{./gradlew -b ./db/build.gradle liquibase #{op.opts.command} -PrunList=#{run_list} #{argument}})
+    Dir.chdir('db') # 'cd' isn't available to run inline apparently
+    verification_command = command_to_sql[command]
+    common.status("command: #{command}, verification_command: #{verification_command}")
+    unless verification_command.nil? || verification_command.empty?
+      verificion_full_cmd = %W{../gradlew #{verification_command} -PrunList=#{run_list}}
+      unless argument.nil? || argument.empty?
+        verificion_full_cmd << " #{argument}"
+      end
+      # common.status("full cmd: #{verificion_full_cmd}")
+
+      common.run_inline(verificion_full_cmd)
+
+      common.status("Running the #{command} with provided arguments will run the SQL statements above. Continue? [y/N]")
+      answer = STDIN.gets.chomp
+      unless answer.downcase == 'y'
+        raise RuntimeError.new("User cancelled Liquibase #{command} operation.")
+      end
+    end
+
+    full_cmd = %W{../gradlew #{command} -PrunList=#{run_list}}
+    unless argument.nil? || argument.empty?
+      full_cmd << " #{argument}"
+    end
+
+    common.status(full_cmd)
+    common.run_inline(full_cmd)
   end
 end
 
@@ -739,8 +776,8 @@ def rollback_db(cmd_name, *args)
   common = Common.new
 
   # todo: get SQL for transaction. use sql proxy
-  common.warning('Have you rolled back the application to the tag associated with this database rollback? [y/N]')
-  answer = gets
+  common.status('Have you rolled back the application to the tag associated with this database rollback? [y/N]')
+  answer = STDIN.gets.chomp
   unless answer.downcase == 'y'
     raise RuntimeError.new('User cancelled rollback operation.')
   end
