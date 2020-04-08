@@ -274,6 +274,8 @@ export const ListOverview = withCurrentWorkspace()(
       const {searchRequest} = this.props;
       if (checked) {
         searchRequest.dataFilters = [...searchRequest.dataFilters, filterName];
+        // sort to keep consistent order when multiple filters are selected
+        searchRequest.dataFilters.sort();
       } else {
         searchRequest.dataFilters = searchRequest.dataFilters.filter(df => df !== filterName);
       }

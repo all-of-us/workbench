@@ -239,7 +239,7 @@ function genSuffix(): string {
 
 export function parseCohortDefinition(json: string) {
   const data = JSON.parse(json);
-  const sr = {dataFilters: data.datafilters || []};
+  const sr = {dataFilters: data.dataFilters || []};
   for (const role of ['includes', 'excludes']) {
     sr[role] = data[role].map(grp => {
       grp.items = grp.items.map(item => {
