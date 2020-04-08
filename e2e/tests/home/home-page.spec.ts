@@ -1,4 +1,4 @@
-import NewClrIconLink from '../../app/aou-elements/clr-icon-link';
+import ClrIconLink from '../../app/aou-elements/clr-icon-link';
 import Link from '../../app/aou-elements/link';
 import BaseElement from '../../app/aou-elements/base-element';
 import HomePage, {FIELD_LABEL as editPageFieldLabel} from '../../app/home-page';
@@ -76,7 +76,7 @@ describe('Home page ui tests', () => {
   });
 
   test('Check Create New Workspace link on Home page', async () => {
-    const anyLink = await NewClrIconLink.forLabel(page, {normalizeSpace: editPageFieldLabel.CREATE_NEW_WORKSPACE}, 'plus-circle');
+    const anyLink = await ClrIconLink.forLabel(page, {normalizeSpace: editPageFieldLabel.CREATE_NEW_WORKSPACE}, 'plus-circle');
     expect(anyLink).toBeTruthy();
     const classname = await anyLink.getProperty('className');
     expect(classname).toBe('is-solid');
