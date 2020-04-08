@@ -2,11 +2,11 @@ import TextOptions from './text-options';
 
 function textXpathHelper(opts: TextOptions) {
   if (opts.text) {
-    return `text()="${opts.text}" or @aria-label="${opts.text}" or @placeholder="${opts.text}"`;
+    return `text()='${opts.text}' or @aria-label='${opts.text}' or @placeholder='${opts.text}'`;
   } else if (opts.textContains) {
-    return `contains(text(),"${opts.textContains}") or contains(@aria-label,"${opts.textContains}") or contains(@placeholder,"${opts.textContains}")`;
+    return `contains(text(),'${opts.textContains}') or contains(@aria-label,'${opts.textContains}') or contains(@placeholder,'${opts.textContains}')`;
   } else if (opts.normalizeSpace) {
-    return `contains(normalize-space(), "${opts.normalizeSpace}")`;
+    return `contains(normalize-space(), '${opts.normalizeSpace}')`;
   }
 }
 
@@ -59,10 +59,11 @@ export function clickableXpath(label: string) {
  * @param label:
  * @param shapeValue:
  */
-export function clrIconXpath(label: string, shapeValue: string) {
-  if (label === '') {
+export function clrIconXpath(opts: TextOptions, shapeValue: string) {
+  if (opts === undefined) {
     return `//clr-icon[@shape='${shapeValue}'][*[@role='img']]`; // anywhere on page
   }
   // next to a label
-  return `//*[normalize-space()='${label}']/ancestor::node()[1]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
+  let nodeLevel = opts.ancestorNodeLevel || 1;
+  return `//*[${textXpathHelper(opts)}]/ancestor::node()[${nodeLevel}]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
 }

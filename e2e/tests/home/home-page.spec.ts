@@ -76,7 +76,7 @@ describe('Home page ui tests', () => {
   });
 
   test('Check Create New Workspace link on Home page', async () => {
-    const anyLink = await NewClrIconLink.forLabel(page, editPageFieldLabel.CREATE_NEW_WORKSPACE, 'plus-circle');
+    const anyLink = await NewClrIconLink.forLabel(page, {normalizeSpace: editPageFieldLabel.CREATE_NEW_WORKSPACE}, 'plus-circle');
     expect(anyLink).toBeTruthy();
     const classname = await anyLink.getProperty('className');
     expect(classname).toBe('is-solid');

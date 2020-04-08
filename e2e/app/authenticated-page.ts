@@ -84,7 +84,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async navTo(targetPage: SideNavLink) {
     await this.openSideNav();
-    const angleIconXpath = clrIconXpath('', 'angle');
+    const angleIconXpath = clrIconXpath({}, 'angle');
     await this.page.waitForXPath(angleIconXpath, {timeout: 2000});
     const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${targetPage}")]`;
     // try to find target sidenav link. Get the first element from ElementHandle array
@@ -132,7 +132,7 @@ export default abstract class AuthenticatedPage extends BasePage {
     const is = await this.isSideNavDropdownOpen();
     if (!is) {
       // click bars icon to open dropdown
-      const icon = await findIcon(this.page, '', 'bars');
+      const icon = await findIcon(this.page, {}, 'bars');
       await icon.click();
     }
   }
@@ -179,7 +179,7 @@ export default abstract class AuthenticatedPage extends BasePage {
 
   private async isSideNavDropdownOpen(): Promise<boolean> {
     try {
-      await findIcon(this.page, 'Home', 'home', {visible: true, timeout: 1000});
+      await findIcon(this.page, {text: 'Home'}, 'home', {visible: true, timeout: 1000});
       return true;
     } catch(err) {
       return false;

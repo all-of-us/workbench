@@ -107,8 +107,8 @@ export async function findRadiobutton(page: Page, textOptions: TextOptions, wait
  * @param page
  * @param label
  */
-export async function findIcon(page: Page, label: string, shape: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-  const selector = xpathDefaults.clrIconXpath(label, shape);
+export async function findIcon(page: Page, textOptions: TextOptions, shape: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+  const selector = xpathDefaults.clrIconXpath(textOptions, shape);
   if (waitOptions === undefined) {
     waitOptions = {visible: true};
   }

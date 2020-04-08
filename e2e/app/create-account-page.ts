@@ -115,7 +115,7 @@ export default class CreateAccountPage extends BasePage {
       await textbox.type(field.value);
       await textbox.pressKeyboard('Tab', { delay: 100 });
       if (field.label === 'New Username') {
-        await ClrIconLink.forLabel(this.page, 'New Username', 'success-standard');
+        await ClrIconLink.forLabel(this.page, {text: field.label}, 'success-standard');
         newUserName = field.value; // store new username for return
       }
     }
@@ -154,7 +154,7 @@ export default class CreateAccountPage extends BasePage {
     const emailAddress = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
     await emailAddress.type(configs.broadInstitutionEmail);
     await emailAddress.pressKeyboard('Tab', { delay: 100 }); // tab out for validation starts
-    await ClrIconLink.forLabel(this.page, FIELD_LABEL.INSTITUTION_EMAIL, 'success-standard');
+    await ClrIconLink.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
     const roleSelect = new SelectComponent(this.page, 'describes your role');
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
