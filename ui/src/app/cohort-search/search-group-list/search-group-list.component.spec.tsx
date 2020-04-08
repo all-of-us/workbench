@@ -17,7 +17,7 @@ describe('SearchGroupList', () => {
     });
   });
   it('should render', () => {
-    const wrapper = shallow(<SearchGroupList role='includes' groups={[]} updateRequest={() => {}} updated={0} />);
+    const wrapper = shallow(<SearchGroupList role='includes' groups={[]} updateRequest={() => {}} updated={0} dataFilters={[]} />);
     expect(wrapper.exists()).toBeTruthy();
   });
 });
