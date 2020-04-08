@@ -1,4 +1,4 @@
-# Api Rollback Safety
+# Api and Database Rollback Safety
 
 In App Engine, it is very easy to rollback just the API. This can be difficult to do in
 conjunction with some database changes. One example of such changes is dropping tables.
