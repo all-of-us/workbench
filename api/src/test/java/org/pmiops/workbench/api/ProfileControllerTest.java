@@ -369,7 +369,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList("bob@example.com"))
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
             .emailDomains(Collections.singletonList("example.com"))
             .duaTypeEnum(DuaType.RESTRICTED);
     institutionService.createInstitution(broad);
