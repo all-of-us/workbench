@@ -717,7 +717,7 @@ def run_liquibase(cmd_name, *args)
     unless verification_command.nil? || verification_command.empty?
       verificion_full_cmd = %W{../gradlew #{verification_command} -PrunList=#{run_list}}
       unless argument.nil? || argument.empty?
-        verificion_full_cmd << " #{argument}"
+        verificion_full_cmd << argument
       end
       # common.status("full cmd: #{verificion_full_cmd}")
 
@@ -732,7 +732,7 @@ def run_liquibase(cmd_name, *args)
 
     full_cmd = %W{../gradlew #{command} -PrunList=#{run_list}}
     unless argument.nil? || argument.empty?
-      full_cmd << " #{argument}"
+      full_cmd << argument
     end
 
     common.status(full_cmd)
