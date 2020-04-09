@@ -172,7 +172,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     CommonMappers.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
     CaptchaVerificationService.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class,
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
   })
@@ -289,6 +288,147 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Test(expected = BadRequestException.class)
   public void testInvitationKeyVerification_invitationKeyMismatch() {
     profileController.invitationKeyVerification(invitationVerificationRequest);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCreateAccount_MismatchEmailAddress() {
+    createUser();
+    config.featureFlags.requireInstitutionalVerification = true;
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
+            .emailDomains(Collections.singletonList("example.com"))
+            .duaTypeEnum(DuaType.RESTRICTED);
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionalRoleEnum(InstitutionalRole.STUDENT);
+    createAccountRequest
+        .getProfile()
+        .verifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation)
+        .contactEmail("notBob@example.com");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCreateAccount_MismatchEmailDomain() {
+    createUser();
+    config.featureFlags.requireInstitutionalVerification = true;
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
+            .emailDomains(Collections.singletonList("example.com"))
+            .duaTypeEnum(DuaType.MASTER);
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionalRoleEnum(InstitutionalRole.STUDENT);
+    createAccountRequest
+        .getProfile()
+        .verifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation)
+        .contactEmail("bob@broad.com");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCreateAccount_MismatchEmailDomainNullDUA() {
+    createUser();
+    config.featureFlags.requireInstitutionalVerification = true;
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
+            .emailDomains(Collections.singletonList("example.com"));
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionalRoleEnum(InstitutionalRole.STUDENT);
+    createAccountRequest
+        .getProfile()
+        .verifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation)
+        .contactEmail("bob@broadInstitute.com");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test
+  public void testCreateAccount_Success_RESTRICTEDDUA() {
+    createUser();
+    config.featureFlags.requireInstitutionalVerification = true;
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
+            .emailDomains(Collections.singletonList("example.com"))
+            .duaTypeEnum(DuaType.RESTRICTED);
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionalRoleEnum(InstitutionalRole.STUDENT);
+    createAccountRequest
+        .getProfile()
+        .verifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation)
+        .contactEmail(CONTACT_EMAIL);
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test
+  public void testCreateAccount_Success_MasterDUA() {
+    createUser();
+    config.featureFlags.requireInstitutionalVerification = true;
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailAddresses(Collections.singletonList("institution@example.com"))
+            .emailDomains(Collections.singletonList("example.com"))
+            .duaTypeEnum(DuaType.MASTER);
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionalRoleEnum(InstitutionalRole.STUDENT);
+    createAccountRequest
+        .getProfile()
+        .verifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation)
+        .contactEmail("bob@example.com");
+    profileController.createAccount(createAccountRequest);
+  }
+
+  @Test
+  public void testCreateAccount_Success_NULLDUA() {
+    createUser();
+    config.featureFlags.requireInstitutionalVerification = true;
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailDomains(Collections.singletonList("example.com"));
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("Broad")
+            .institutionalRoleEnum(InstitutionalRole.STUDENT);
+    createAccountRequest
+        .getProfile()
+        .verifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation)
+        .contactEmail("bob@example.com");
+    profileController.createAccount(createAccountRequest);
   }
 
   @Test
