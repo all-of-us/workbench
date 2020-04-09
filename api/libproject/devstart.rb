@@ -733,7 +733,6 @@ def run_liquibase(cmd_name, *args)
         raise RuntimeError.new("User cancelled Liquibase #{command} operation.")
       end
     end
-    common.status(ENV.to_hash)
     full_cmd = liquibase_gradlew_command(command, argument, run_list)
     common.run_inline(full_cmd)
   end
@@ -2112,9 +2111,8 @@ end
 
 def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   common = Common.new
-  common.status("ENV: #{ENV.to_hash}")
   if gcc.project == 'local'
-    common.status('No proxy needed for local environment/project')
+    common.status('No proxy needed for local environment')
     yield gcc
   else
     common.status("Creating cloud proxy for environment #{gcc.project}")
