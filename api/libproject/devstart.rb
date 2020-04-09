@@ -634,6 +634,16 @@ Common.register_command({
   :fn => ->() { run_local_all_migrations() }
 })
 
+def liquibase_gradlew_command(verification_command, argument, run_list)
+  verificion_full_cmd = %W{../gradlew #{verification_command} -PrunList=#{run_list}}
+  unless argument.nil? || argument.empty?
+    verificion_full_cmd << argument
+  end
+  verificion_full_cmd
+end
+
+# Run a liqibase command against the specified project. Where possible, show SQL
+# statements and ask user for verification.
 def run_liquibase(cmd_name, *args)
   command_to_sql = {
       'changelogSync' => 'changelogSyncSQL',
@@ -648,8 +658,6 @@ def run_liquibase(cmd_name, *args)
 
   common = Common.new
   ensure_docker(cmd_name, args)
-
-  # common.status("run_liquibase cmd_name: #{cmd_name} args: #{args}")
 
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
@@ -706,20 +714,15 @@ def run_liquibase(cmd_name, *args)
   context = GcloudContextV2.new(op)
   context.validate
 
-  with_cloud_proxy_and_db(context) do |gcc|
-    # common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}, dir: #{Dir.pwd}")
+  with_cloud_proxy_and_db(context, nil, 'sa-key.json') do |gcc|
+    common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}, dir: #{Dir.pwd}")
     command = op.opts.command
 
-    # common.run_inline(%W{./gradlew -b ./db/build.gradle liquibase #{op.opts.command} -PrunList=#{run_list} #{argument}})
     Dir.chdir('db') # 'cd' isn't available to run inline apparently
     verification_command = command_to_sql[command]
     common.status("command: #{command}, verification_command: #{verification_command}")
     unless verification_command.nil? || verification_command.empty?
-      verificion_full_cmd = %W{../gradlew #{verification_command} -PrunList=#{run_list}}
-      unless argument.nil? || argument.empty?
-        verificion_full_cmd << argument
-      end
-      # common.status("full cmd: #{verificion_full_cmd}")
+      verificion_full_cmd = liquibase_gradlew_command(verification_command, argument, run_list)
 
       common.run_inline(verificion_full_cmd)
 
@@ -730,12 +733,7 @@ def run_liquibase(cmd_name, *args)
       end
     end
 
-    full_cmd = %W{../gradlew #{command} -PrunList=#{run_list}}
-    unless argument.nil? || argument.empty?
-      full_cmd << argument
-    end
-
-    common.status(full_cmd)
+    full_cmd = liquibase_gradlew_command(command, argument, run_list)
     common.run_inline(full_cmd)
   end
 end
@@ -2153,9 +2151,11 @@ def load_config(project, dry_run = false)
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
+  common = Common.new
   ENV.update(read_db_vars(gcc))
   ENV.update(must_get_env_value(gcc.project, :gae_vars))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
+  common.status(ENV)
   CloudSqlProxyContext.new(gcc.project, service_account, key_file).run do
     yield(gcc)
   end
