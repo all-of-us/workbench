@@ -2101,11 +2101,9 @@ def load_config(project, dry_run = false)
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
-  common = Common.new
   ENV.update(read_db_vars(gcc))
   ENV.update(must_get_env_value(gcc.project, :gae_vars))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
-  common.status(ENV)
   CloudSqlProxyContext.new(gcc.project, service_account, key_file).run do
     yield(gcc)
   end
