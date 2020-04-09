@@ -744,56 +744,6 @@ Common.register_command({
     :fn => ->(*args) { run_liquibase('run-liquibase', *args) }
 })
 
-def rollback_db(cmd_name, *args)
-  ensure_docker_sync
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_typed_option(
-      "--count-inclusive=[count]",
-      Integer,
-      ->(opts, c) { opts.count = c},
-      "Count of changesets to roll back from end (inclusive)")
-
-  op.add_typed_option(
-      "--tag-inclusive [tag]",
-      String,
-      ->(opts, t) { opts.tag = t},
-      "Liquibase changeset tag to roll back through (inclusive).")
-  op.add_validator ->(opts) {
-    if opts.tag
-      if opts.count
-        raise ArgumentError.new("Tag option is not valid with count")
-      end
-    else
-      unless opts.count
-        raise ArgumentError.new("Either Count or Tag is required")
-      end
-    end
-  }
-  op.parse.validate
-
-  common = Common.new
-
-  # todo: get SQL for transaction. use sql proxy
-  common.status('Have you rolled back the application to the tag associated with this database rollback? [y/N]')
-  answer = STDIN.gets.chomp
-  unless answer.downcase == 'y'
-    raise RuntimeError.new('User cancelled rollback operation.')
-  end
-  if op.opts.tag
-    run_liquibase('run-liquibase', *%W(--command=rollback --argument=#{op.opts.tag}))
-  elsif op.opts.count
-    run_liquibase('run-liquibase', *%W(--command=rollbackCount --argument=#{op.opts.count}))
-  else
-    common.error('Either --tag-inclusive or --count-inclusive is required.')
-  end
-end
-
-Common.register_command({
-  :invocation => "rollback-db",
-  :description => "Rollback the database using Liquibase",
-  :fn => ->(*args) { rollback_db('rollback-db', *args) }
-})
-
 def run_local_data_migrations()
   ensure_docker_sync()
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
