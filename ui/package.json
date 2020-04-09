@@ -155,7 +155,6 @@
     "karma-jasmine-html-reporter": "^1.4.0",
     "karma-webdriver-launcher": "^1.0.5",
     "lolex": "^3.0.0",
-    "protractor": "~5.4.1",
     "react-test-renderer": "^16.6.3",
     "set-value": "^2.0.1",
     "ts-node": "~3.0.4",
