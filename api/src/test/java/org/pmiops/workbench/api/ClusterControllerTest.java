@@ -31,8 +31,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.actionaudit.auditors.ClusterAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -112,6 +116,10 @@ public class ClusterControllerTest {
   @TestConfiguration
   @Import({
     ClusterController.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
     CommonMappers.class,
     PublicInstitutionDetailsMapperImpl.class,

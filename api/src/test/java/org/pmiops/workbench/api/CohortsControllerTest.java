@@ -30,6 +30,7 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdrselector.CdrSelectorServiceImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -184,6 +185,7 @@ public class CohortsControllerTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
+    CdrSelectorServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,

@@ -25,7 +25,12 @@ import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -67,10 +72,17 @@ public class WorkspaceAuditorTest {
 
   @TestConfiguration
   @Import({
+    ActionAuditTestConfig.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    ConceptSetMapperImpl.class,
+    CommonMappers.class,
+    DataSetMapperImpl.class,
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class,
-    CommonMappers.class,
-    ActionAuditTestConfig.class
+  })
+  @MockBean({
+    UserDao.class
   })
   static class Config {
     @Bean

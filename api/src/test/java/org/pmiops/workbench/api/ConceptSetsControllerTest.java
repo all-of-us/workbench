@@ -26,6 +26,7 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdrselector.CdrSelectorServiceImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -221,22 +222,23 @@ public class ConceptSetsControllerTest {
 
   @TestConfiguration
   @Import({
-    WorkspaceServiceImpl.class,
+    CdrSelectorServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
+    CommonMappers.class,
     ConceptSetMapperImpl.class,
     ConceptSetsController.class,
     ConceptService.class,
     ConceptSetService.class,
     DataSetMapperImpl.class,
-    WorkspacesController.class,
-    WorkspaceMapperImpl.class,
-    CommonMappers.class,
     LogsBasedMetricServiceFakeImpl.class,
     UserServiceTestConfiguration.class,
+    WorkspacesController.class,
+    WorkspaceMapperImpl.class,
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
     BillingProjectBufferService.class,

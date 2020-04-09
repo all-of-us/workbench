@@ -21,9 +21,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
@@ -53,7 +57,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceServiceTest {
 
   @TestConfiguration
-  @Import({WorkspaceMapperImpl.class, CommonMappers.class})
+  @Import({
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    ConceptSetMapperImpl.class,
+    CommonMappers.class,
+    DataSetMapperImpl.class,
+    WorkspaceMapperImpl.class,
+  })
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
