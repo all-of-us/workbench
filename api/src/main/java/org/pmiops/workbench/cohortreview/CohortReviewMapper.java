@@ -12,7 +12,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     componentModel = "spring",
     uses = {CommonMappers.class})
 public interface CohortReviewMapper {
-  @Mapping(target = "etag", source = "version")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   // used for pagination. Effectively deprecated, to remove with RW-4706
   @Mapping(target = "queryResultSize", ignore = true)
   @Mapping(target = "page", ignore = true)

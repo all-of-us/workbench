@@ -66,6 +66,7 @@ import org.pmiops.workbench.api.CohortAnnotationDefinitionController;
 import org.pmiops.workbench.api.CohortReviewController;
 import org.pmiops.workbench.api.CohortsController;
 import org.pmiops.workbench.api.ConceptSetsController;
+import org.pmiops.workbench.api.DataSetController;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -139,14 +140,18 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -161,6 +166,8 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
+import org.pmiops.workbench.model.WorkspaceResource;
+import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
@@ -277,6 +284,7 @@ public class WorkspacesControllerTest {
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
+    DataSetController.class,
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     FreeTierBillingService.class,
@@ -353,6 +361,7 @@ public class WorkspacesControllerTest {
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired DataSetController dataSetController;
   @Autowired DataSetDao dataSetDao;
   @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
@@ -3152,5 +3161,89 @@ public class WorkspacesControllerTest {
         () ->
             workspacesController.copyNotebook(
                 workspace.getNamespace(), workspace.getId(), "z", copyNotebookRequest));
+  }
+
+  private void compareCohortReviewFields(CohortReview cohortReview, CohortReview cohortReview2) {
+    assertThat(cohortReview.getCdrVersionId()).isEqualTo(cohortReview2.getCdrVersionId());
+    assertThat(cohortReview.getCohortDefinition()).isEqualTo(cohortReview2.getCohortDefinition());
+    assertThat(cohortReview.getCohortId()).isEqualTo(cohortReview2.getCohortId());
+    assertThat(cohortReview.getCohortName()).isEqualTo(cohortReview2.getCohortName());
+    assertThat(cohortReview.getCohortReviewId()).isEqualTo(cohortReview2.getCohortReviewId());
+    assertThat(cohortReview.getCreationTime()).isEqualTo(cohortReview2.getCreationTime());
+    assertThat(cohortReview.getDescription()).isEqualTo(cohortReview2.getDescription());
+    assertThat(cohortReview.getMatchedParticipantCount()).isEqualTo(cohortReview2.getMatchedParticipantCount());
+  }
+
+  private void compareDatasetMetadata(DataSet dataSet, DataSet dataSet2) {
+    assertThat(dataSet.getDescription()).isEqualTo(dataSet2.getDescription());
+    assertThat(dataSet.getEtag()).isEqualTo(dataSet2.getEtag());
+    assertThat(dataSet.getId()).isEqualTo(dataSet2.getId());
+    assertThat(dataSet.getIncludesAllParticipants()).isEqualTo(dataSet2.getIncludesAllParticipants());
+    assertThat(dataSet.getLastModifiedTime()).isEqualTo(dataSet2.getLastModifiedTime());
+    assertThat(dataSet.getName()).isEqualTo(dataSet2.getName());
+    assertThat(dataSet.getPrePackagedConceptSet()).isEqualTo(dataSet2.getPrePackagedConceptSet());
+  }
+
+  @Test
+  public void getCdrSelectors() {
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    Cohort cohort =
+        cohortsController
+            .createCohort(
+                workspace.getNamespace(), workspace.getId(), createDefaultCohort("cohort"))
+            .getBody();
+    stubBigQueryCohortCalls();
+    CohortReview cohortReview =
+        cohortReviewController
+            .createCohortReview(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohort.getId(),
+                cdrVersion.getCdrVersionId(),
+                new CreateReviewRequest().size(1))
+            .getBody();
+    ConceptSet conceptSet =
+        conceptSetsController
+            .createConceptSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                new CreateConceptSetRequest()
+                    .conceptSet(
+                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+                    .addAddedIdsItem(CONCEPT_1.getConceptId()))
+            .getBody();
+    DataSet dataSet =
+        dataSetController
+            .createDataSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                new DataSetRequest()
+                    .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
+                    .addConceptSetIdsItem(conceptSet.getId())
+                    .addCohortIdsItem(cohort.getId())
+                    .name("dataset")
+                    .domainValuePairs(
+                        ImmutableList.of(
+                            new DomainValuePair().value("VALUE").domain(Domain.CONDITION))))
+            .getBody();
+
+
+    WorkspaceResourceResponse workspaceResourceResponse = workspacesController.getCdrSelectors(workspace.getNamespace(), workspace.getId()).getBody();
+    assertThat(workspaceResourceResponse.size()).isEqualTo(4);
+    List<WorkspaceResource> cohorts = workspaceResourceResponse.stream().filter(workspaceResource -> workspaceResource.getCohort() != null).collect(Collectors.toList());
+    List<WorkspaceResource> cohortReviews = workspaceResourceResponse.stream().filter(workspaceResource -> workspaceResource.getCohortReview() != null).collect(Collectors.toList());
+    List<WorkspaceResource> conceptSets = workspaceResourceResponse.stream().filter(workspaceResource -> workspaceResource.getConceptSet() != null).collect(Collectors.toList());
+    List<WorkspaceResource> dataSets = workspaceResourceResponse.stream().filter(workspaceResource -> workspaceResource.getDataSet() != null).collect(Collectors.toList());
+    assertThat(cohorts.size()).isEqualTo(1);
+    assertThat(cohorts.get(0).getCohort()).isEqualTo(cohort);
+    assertThat(cohortReviews.size()).isEqualTo(1);
+    compareCohortReviewFields(cohortReviews.get(0).getCohortReview(), cohortReview);
+    assertThat(conceptSets.size()).isEqualTo(1);
+    //Ignore arrays in subtables.
+    assertThat(conceptSets.get(0).getConceptSet()).isEqualTo(conceptSet.concepts(null));
+    assertThat(dataSets.size()).isEqualTo(1);
+    compareDatasetMetadata(dataSets.get(0).getDataSet(), dataSet);
   }
 }

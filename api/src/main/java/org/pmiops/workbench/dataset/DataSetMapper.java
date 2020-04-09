@@ -29,7 +29,7 @@ public interface DataSetMapper {
   @Mapping(
       target = "domainValuePairs",
       ignore = true) // This is stored in a subtable, we may not want to fetch all the time
-  @Mapping(target = "etag", source = "version")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   DataSet dbModelToClientLight(DbDataset dbDataset);
 
   default PrePackagedConceptSetEnum prePackagedConceptSetFromStorage(Short prePackagedConceptSet) {
