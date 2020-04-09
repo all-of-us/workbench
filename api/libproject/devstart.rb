@@ -734,7 +734,6 @@ def run_liquibase(cmd_name, *args)
       end
     end
     common.status(ENV.to_hash)
-    common.run_inline(%W{../gradlew printVars})
     full_cmd = liquibase_gradlew_command(command, argument, run_list)
     common.run_inline(full_cmd)
   end
