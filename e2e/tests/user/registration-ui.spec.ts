@@ -1,7 +1,5 @@
 import BaseElement from '../../app/aou-elements/base-element';
-import SelectComponent from '../../app/aou-elements/select-component';
-import Textbox from '../../app/aou-elements/textbox';
-import CreateAccountPage, {FIELD_LABEL, INSTITUTION_ROLE_VALUE, INSTITUTION_VALUE} from '../../app/create-account-page';
+import CreateAccountPage from '../../app/create-account-page';
 import GoogleLoginPage from '../../app/google-login';
 
 const configs = require('../../resources/workbench-config');
@@ -90,17 +88,9 @@ describe('User registration tests:', () => {
     const nextButton = await createAccountPage.getNextButton();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
-    const institutionSelect = new SelectComponent(page, 'Select your institution');
-    await institutionSelect.select(INSTITUTION_VALUE.BROAD);
+    await createAccountPage.fillOutInstitution();
 
-    const emailAddress = await Textbox.forLabel(page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddress.type(configs.broadInstitutionEmail);
-
-    const roleSelect = new SelectComponent(page, 'describes your role');
-    await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
-
-    await nextButton.waitUntilEnabled();
-    await nextButton.focus();
+    expect(await nextButton.waitUntilEnabled()).toBe(true);
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
     await nextButton.clickWithEval();
 

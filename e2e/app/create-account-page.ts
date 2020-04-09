@@ -115,7 +115,7 @@ export default class CreateAccountPage extends BasePage {
       await textbox.type(field.value);
       await textbox.pressKeyboard('Tab', { delay: 100 });
       if (field.label === 'New Username') {
-        await ClrIconLink.forLabel(this.page, 'New Username', 'success-standard');
+        await ClrIconLink.forLabel(this.page, {text: field.label}, 'success-standard');
         newUserName = field.value; // store new username for return
       }
     }
@@ -151,10 +151,9 @@ export default class CreateAccountPage extends BasePage {
   async fillOutInstitution() {
     const institutionSelect = new SelectComponent(this.page, 'Select your institution');
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
-    const emailAddress = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddress.type(configs.broadInstitutionEmail);
-    await emailAddress.pressKeyboard('Tab', { delay: 100 }); // tab out for validation starts
-    await ClrIconLink.forLabel(this.page, FIELD_LABEL.INSTITUTION_EMAIL, 'success-standard');
+    const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
+    await emailAddressTextbox.type(configs.broadInstitutionEmail);
+    await emailAddressTextbox.pressKeyboard('Tab', { delay: 100 }); // tab out to start email validation
     const roleSelect = new SelectComponent(this.page, 'describes your role');
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
