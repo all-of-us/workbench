@@ -30,7 +30,6 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,10 +76,7 @@ public class WorkspaceMapperTest {
     DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
   })
-  @MockBean({
-    UserDao.class,
-    WorkspaceDao.class
-  })
+  @MockBean({UserDao.class, WorkspaceDao.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {

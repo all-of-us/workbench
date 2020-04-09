@@ -81,9 +81,7 @@ public class WorkspaceAuditorTest {
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class,
   })
-  @MockBean({
-    UserDao.class
-  })
+  @MockBean({UserDao.class})
   static class Config {
     @Bean
     WorkbenchConfig workbenchConfig() {
