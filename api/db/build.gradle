@@ -24,3 +24,13 @@ liquibase {
         runList = project.ext.runList
     }
 }
+
+// print Liquibase environment arguments
+task printVars {
+  group='foo'
+  doLast {
+    println "db_host: #{db_host}"
+    println db_port
+    println liquibase_password
+  }
+}

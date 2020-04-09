@@ -201,7 +201,7 @@ def dev_up()
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
       common.run_inline %W{
-        docker-compose run db-scripts ./run-migrations.sh update main
+        docker-compose run db-scripts ./run-migrations.sh main
       }
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
@@ -276,7 +276,7 @@ def run_local_migrations()
   # Runs migrations against the local database.
   common = Common.new
   Dir.chdir('db') do
-    common.run_inline %W{./run-migrations.sh update main}
+    common.run_inline %W{./run-migrations.sh main}
   end
   Dir.chdir('db-cdr/generate-cdr') do
     common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
@@ -622,7 +622,7 @@ Common.register_command({
 def run_local_all_migrations()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh update main}
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
   init_new_cdr_db %W{--cdr-db-name cdr}
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
@@ -680,7 +680,7 @@ def run_liquibase(cmd_name, *args)
         '--project [project]',
         String,
         ->(opts, p) { opts.project = p },
-        'AoU environment GCP project. Used to pick MySQL instance.'
+        'AoU environment GCP project full name. Used to pick MySQL instance & creadentials.'
   )
   op.add_validator ->(opts) {
     if opts.command.nil? || opts.command.empty?
@@ -715,6 +715,7 @@ def run_liquibase(cmd_name, *args)
   context.validate
 
   with_optional_cloud_proxy_and_db(context, nil, 'sa-key.json') do |gcc|
+    common.status('inside with_optional_cloud_proxy_and_db')
     common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}, dir: #{Dir.pwd}")
     command = op.opts.command
 
@@ -732,7 +733,8 @@ def run_liquibase(cmd_name, *args)
         raise RuntimeError.new("User cancelled Liquibase #{command} operation.")
       end
     end
-
+    common.status(ENV.to_hash)
+    common.run_inline(%W{../gradlew printVars})
     full_cmd = liquibase_gradlew_command(command, argument, run_list)
     common.run_inline(full_cmd)
   end
@@ -758,7 +760,7 @@ Common.register_command({
 def run_local_rw_migrations()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh update main}
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 end
 
 Common.register_command({
@@ -2111,6 +2113,7 @@ end
 
 def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   common = Common.new
+  common.status("ENV: #{ENV.to_hash}")
   if gcc.project == 'local'
     common.status('No proxy needed for local environment/project')
     yield gcc
