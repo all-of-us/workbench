@@ -1,7 +1,7 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {mount} from 'enzyme';
+import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import {DisseminateResearchEnum, ResearchOutcomeEnum,
   SpecificPopulationEnum,UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -18,9 +18,15 @@ jest.mock('app/utils/navigation', () => ({
   navigate: jest.fn()
 }));
 
+type AnyWrapper = (ShallowWrapper|ReactWrapper);
+
 jest.mock('app/utils/workbench-gapi-client', () => ({
   getBillingAccountInfo: () => new Promise(resolve => resolve({billingAccountName: 'billing-account'}))
 }));
+
+function getSaveButtonDisableMsg(wrapper: AnyWrapper, attributeName: string) {
+  return wrapper.find('[data-test-id="workspace-save-btn"]').first().prop('disabled')[attributeName];
+}
 
 describe('WorkspaceEdit', () => {
   let workspacesApi: WorkspacesApiStub;
@@ -308,5 +314,84 @@ describe('WorkspaceEdit', () => {
 
     expect(wrapper.find('[data-test-id="characterLimit"]').get(0).props.children)
       .toContain('You have reached the character limit for this question');
+  });
+
+  it ('should show error message if Other primary purpose is more than 500 characters', async() => {
+    const wrapper = component();
+    let otherPrimaryPurposeError = getSaveButtonDisableMsg(wrapper, 'otherPrimaryPurpose');
+    expect(otherPrimaryPurposeError).toBeUndefined();
+    wrapper.find('[data-test-id="otherPurpose-checkbox"]').at(1).simulate('change', { target: { checked: true } });
+
+    otherPrimaryPurposeError = getSaveButtonDisableMsg(wrapper, 'otherPrimaryPurpose');
+    expect(otherPrimaryPurposeError[0]).toBe('Other primary purpose must be true');
+
+    // Other Primary Purpose
+    const validInput = fp.repeat(500, 'a');
+    wrapper.find('[data-test-id="otherPrimaryPurposeText"]').first().simulate('change', {target: {value: validInput}});
+    otherPrimaryPurposeError = getSaveButtonDisableMsg(wrapper, 'otherPrimaryPurpose');
+    expect(otherPrimaryPurposeError).toBeUndefined();
+
+    const inValidInput = fp.repeat(501, 'b');
+    wrapper.find('[data-test-id="otherPrimaryPurposeText"]').first().simulate('change', {target: {value: inValidInput}});
+    otherPrimaryPurposeError = getSaveButtonDisableMsg(wrapper, 'otherPrimaryPurpose');
+    expect(otherPrimaryPurposeError[0]).toBe('Other primary purpose must be true');
+  });
+
+  it ('should show error message if Disease of focus is more than 80 characters', async() => {
+    const wrapper = component();
+    let diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
+    expect(diseaseNameError).toBeUndefined();
+
+    wrapper.find('[data-test-id="researchPurpose-checkbox"]').at(1).simulate('change', { target: { checked: true } })
+    wrapper.find('[data-test-id="diseaseFocusedResearch-checkbox"]').at(1).simulate('change', { target: { checked: true } });
+
+    diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
+    expect(diseaseNameError[0]).toBe('Disease of focus must be true');
+
+    const validInput = fp.repeat(8, 'a');
+    wrapper.find('[data-test-id="search-input"]').first().simulate('change', {target: {value: validInput}});
+
+    diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
+    expect(diseaseNameError).toBeUndefined();
+    //
+    const inValidInput = fp.repeat(81, 'b');
+    wrapper.find('[data-test-id="search-input"]').first().simulate('change', {target: {value: inValidInput}});
+    diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
+    expect(fp.first(diseaseNameError)).toBe('Disease of focus must be true');
+  });
+
+  it ('should show error message if Other text for disseminate research is more than 100 characters', async() => {
+    const wrapper = component();
+    wrapper.find('[data-test-id="OTHER-checkbox"]').at(1).simulate('change', { target: { checked: true } });
+    let otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
+    const validInput = fp.repeat(8, 'a');
+    wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: validInput}});
+
+    otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
+    expect(otherDisseminateResearchFindingsError).toBeUndefined();
+    const inValidInput = fp.repeat(101, 'b');
+    wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: inValidInput}});
+    otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
+    expect(fp.first(otherDisseminateResearchFindingsError)).toBe('Other disseminate research findings must be true');
+  });
+
+  it ('should show error message if Other text for Special Population is more than 100 characters', async() => {
+    const wrapper = component();
+    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
+      .first().prop('checked')).toEqual(true);
+    wrapper.find('[data-test-id="other-specialPopulation-checkbox"]').at(1).
+    simulate('change', { target: { checked: true } });
+
+    const validInput = fp.repeat(100, 'a');
+    wrapper.find('[data-test-id="other-specialPopulation-text"]').first().simulate('change', {target: {value: validInput}});
+
+    let otherSpecificPopulationError = getSaveButtonDisableMsg(wrapper, 'otherSpecificPopulation');
+    expect(otherSpecificPopulationError).toBeUndefined();
+
+    const inValidInput = fp.repeat(101, 'a');
+    wrapper.find('[data-test-id="other-specialPopulation-text"]').first().simulate('change', {target: {value: inValidInput}});
+
+    otherSpecificPopulationError = getSaveButtonDisableMsg(wrapper, 'otherSpecificPopulation');
+    expect(fp.first(otherSpecificPopulationError)).toBe('Other specific population must be true');
   });
 });

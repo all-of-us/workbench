@@ -391,6 +391,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     makeDiseaseInput(): React.ReactNode {
       return (
         <SearchInput
+          data-test-id='diseaseOfFocus-input'
           enabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}
           placeholder='Name of Disease'
           value={this.state.workspace.researchPurpose.diseaseOfFocus}
@@ -446,6 +447,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         children = <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
                   onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
                   disabled={!this.state.workspace.researchPurpose.otherPurpose}
+                  data-test-id='otherPrimaryPurposeText'
                   style={{marginTop: '0.5rem'}}/>;
       }
 
@@ -484,12 +486,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              placeholder='Specify the name of the forum (journal, scientific
                              conference, blog etc.) through which you will disseminate your
                              findings, if available.'
+                             data-test-id='otherDisseminateResearch-text'
                              disabled={!this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)}
                              style={{marginTop: '0.5rem', width: '16rem'}}/>;
       }
 
       return <div key={index} style={styles.categoryRow}>
         <CheckBox style={styles.checkboxStyle}
+                  data-test-id={index + '-checkbox'}
                   checked={this.disseminateCheckboxSelected(rp.shortName)}
                   onChange={e => this.updateAttribute('disseminateResearchFindingList', rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
@@ -560,6 +564,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
     }
 
+    get isOtherPrimaryPurposeValid() {
+      const rp = this.state.workspace.researchPurpose;
+      return !rp.otherPurpose ||
+          (rp.otherPurposeDetails && rp.otherPurposeDetails.length <= 500);
+    }
+
     get isSpecificPopulationValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
       return (
@@ -571,10 +581,17 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       );
     }
 
+    get isOtherSpecificPopulationValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      return this.isSpecificPopulationValid && (
+          !fp.includes(SpecificPopulationEnum.OTHER, researchPurpose.populationDetails) ||
+          (researchPurpose.otherPopulationDetails && researchPurpose.otherPopulationDetails.length <= 100));
+    }
+
     get isDiseaseOfFocusValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
       return !researchPurpose.diseaseFocusedResearch ||
-        researchPurpose.diseaseOfFocus;
+        researchPurpose.diseaseOfFocus && researchPurpose.diseaseOfFocus.length <= 80;
     }
 
     get isDisseminateResearchValid() {
@@ -582,6 +599,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return researchPurpose.disseminateResearchFindingList &&
           researchPurpose.disseminateResearchFindingList.length !== 0;
     }
+
+    get isOtherDisseminateResearchValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      return !fp.includes(DisseminateResearchEnum.OTHER, researchPurpose.disseminateResearchFindingList) ||
+              (researchPurpose.otherDisseminateResearchFindings && researchPurpose.otherDisseminateResearchFindings.length <= 100);
+    }
+
+
 
     get isResearchOutcome() {
       const researchPurpose = this.state.workspace.researchPurpose;
@@ -791,10 +816,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         intendedStudy,
         scientificApproach,
         'primaryPurpose': this.primaryPurposeIsSelected,
+        'otherPrimaryPurpose': this.isOtherPrimaryPurposeValid,
         'specificPopulation': this.isSpecificPopulationValid,
+        'otherSpecificPopulation': this.isOtherSpecificPopulationValid,
         'diseaseOfFocus': this.isDiseaseOfFocusValid,
         'researchOutcoming': this.isResearchOutcome,
-        'disseminate': this.isDisseminateResearchValid
+        'disseminate': this.isDisseminateResearchValid,
+        'otherDisseminateResearchFindings': this.isOtherDisseminateResearchValid
       }, {
         name: {
           length: { minimum: 1, maximum: 80 }
@@ -804,10 +832,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
         scientificApproach: { length: { minimum: 1, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
+        otherPrimaryPurpose: {truthiness: true},
         specificPopulation: { truthiness: true },
         diseaseOfFocus: { truthiness: true },
         researchOutcoming: {truthiness: true},
-        disseminate: {truthiness: true}
+        disseminate: {truthiness: true},
+        otherDisseminateResearchFindings: {truthiness: true},
+        otherSpecificPopulation: {truthiness: true}
 
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
@@ -951,11 +982,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           <FlexRow>
             <FlexColumn style={styles.flexColumnBy2}>
               {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
-                (rp, i) => this.makeDisseminateForm(rp, i))}
+                (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
             </FlexColumn>
             <FlexColumn style={styles.flexColumnBy2}>
               {disseminateFindings.slice(sliceByHalfLength(disseminateFindings)).map(
-                (rp, i) => this.makeDisseminateForm(rp, i))}
+                (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
             </FlexColumn>
           </FlexRow>
         </WorkspaceEditSection>
@@ -999,6 +1030,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 <CheckBox
                     wrapperStyle={styles.checkboxRow}
                     style={styles.checkboxStyle}
+                    data-test-id='other-specialPopulation-checkbox'
                     label='Other'
                     labelStyle={styles.text}
                     checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
@@ -1009,6 +1041,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                            value={this.state.workspace.researchPurpose.otherPopulationDetails}
                            disabled={!fp.includes(SpecificPopulationEnum.OTHER,
                              this.state.workspace.researchPurpose.populationDetails)}
+                           data-test-id='other-specialPopulation-text'
                            onChange={v => this.setState(fp.set(
                              ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
               </FlexColumn>
@@ -1102,19 +1135,25 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <TooltipTrigger content={
               errors && <ul>
                 {errors.name && <div>{errors.name}</div>}
-                {errors.billingAccountName && <div>You must select a billing account</div>}
-                {errors.primaryPurpose && <div>You must choose at least one primary research
+                {errors.billingAccountName && <div>
+                  You must select a billing account</div>}
+                {errors.primaryPurpose && <div> You must choose at least one primary research
                   purpose (Question 1)</div>}
-                {errors.anticipatedFindings && <div>Answer for <i>What are the anticipated findings
+                {errors.otherPrimaryPurpose && <div> Other primary purpose should be of at most 500 characters</div>}
+                {errors.anticipatedFindings && <div> Answer for <i>What are the anticipated findings
                   from the study? (Question # 2.1)</i> cannot be empty</div>}
-                {errors.scientificApproach && <div>Answer for <i>What are the scientific
+                {errors.scientificApproach && <div> Answer for <i>What are the scientific
                   approaches you plan to use for your study (Question # 2.2)</i> cannot be empty</div>}
-                {errors.intendedStudy && <div>Answer for<i>What are the specific
-                  scientific question(s) you intend to study (Question # 2.3)</i> cannot be empty</div>}
-                {errors.specificPopulation && <div>You must specify a population of study</div>}
-                {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
-                {errors.researchOutcoming && <div>You must specify the outcome of the research</div>}
-                {errors.disseminate && <div>You must specific how you plan to disseminate your research findings</div>}
+                {errors.intendedStudy && <div> Answer for<i>What are the specific scientific question(s) you intend to study
+                  (Question # 2.3)</i> cannot be empty</div>}
+                {errors.specificPopulation && <div> You must specify a population of study</div>}
+                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
+                {errors.researchOutcoming && <div> You must specify the outcome of the research</div>}
+                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings</div>}
+                {errors.otherDisseminateResearchFindings && <div>
+                  Disseminate Research Findings Other text should be of at most 100 characters</div>}
+                {errors.otherSpecificPopulation && <div>
+                  Specific Population Other text should be of at most 100 characters</div>}
               </ul>
             } disabled={!errors}>
               <Button type='primary'
