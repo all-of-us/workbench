@@ -2971,7 +2971,7 @@ paths:
       description: 'Returns a collection of criteria per concept id
 
 '
-      operationId: getStandardCriteriaByDomainAndConceptId
+      operationId: findStandardCriteriaByDomainAndConceptId
       parameters:
       - in: path
         name: domain
@@ -2999,7 +2999,7 @@ paths:
         of the following: type, subtype, parentId and/or allChildren
 
 '
-      operationId: getCriteriaBy
+      operationId: findCriteriaBy
       parameters:
       - in: path
         name: domain
@@ -3035,7 +3035,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns matches on criteria table by code or name
-      operationId: getCriteriaAutoComplete
+      operationId: findCriteriaAutoComplete
       parameters:
       - in: path
         name: domain
@@ -3075,7 +3075,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns criteria tree matching value
-      operationId: getDrugBrandOrIngredientByValue
+      operationId: findDrugBrandOrIngredientByValue
       parameters:
       - in: query
         name: value
@@ -3099,7 +3099,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns criteria tree with the specified name
-      operationId: getDrugIngredientByConceptId
+      operationId: findDrugIngredientByConceptId
       parameters:
       - in: path
         name: conceptId
@@ -3119,7 +3119,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns criteria tree with the specified name
-      operationId: getCriteriaAttributeByConceptId
+      operationId: findCriteriaAttributeByConceptId
       parameters:
       - in: path
         name: conceptId
@@ -3208,7 +3208,7 @@ paths:
       tags:
       - cohortBuilder
       description: Will return a list all values for gender, race and ethnicity.
-      operationId: getParticipantDemographics
+      operationId: findParticipantDemographics
       responses:
         200:
           description: An object which contains a list of all values for gender, race
@@ -3634,20 +3634,20 @@ definitions:
       requireInvitationKey:
         type: boolean
         default: false
-        description: Whether the current environment requires an invitation key for
-          signup.
+        description: Whether the current environment requires an invitation key for signup.
       requireInstitutionalVerification:
         type: boolean
         default: false
         description: 'Feature flag for verifying the institutional affiliation of
-          new users by validating their contact emails.
-
-'
+          new users by validating their contact emails.'
       enableCBAgeTypeOptions:
         type: boolean
         default: false
-        description: Whether to use the new age type options in cohort builder age
-          wizard
+        description: Whether to use the new age type options in cohort builder age wizard
+      enableV3DataUserCodeOfConduct:
+        type: boolean
+        default: false
+        description: Whether to enable version 2 of the Data User Code of Conduct
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:
@@ -5563,9 +5563,7 @@ definitions:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
       who wish to use the system, including the email patterns which we use to validate
-      users.
-
-'
+      users.'
     required:
     - shortName
     - displayName
@@ -5582,15 +5580,14 @@ definitions:
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
-          enumerated OrganizationTypes, or OrganizationType.OTHER if it is not
-
-'
+          enumerated OrganizationTypes, or OrganizationType.OTHER if it is not'
       organizationTypeOtherText:
         type: string
         description: 'The detailed Organization Type of this institution, as text,
-          if its enumerated type is OTHER
-
-'
+          if its enumerated type is OTHER'
+      duaTypeEnum:
+        "$ref": "#/definitions/DuaType"
+        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
       emailAddresses:
         type: array
         description: A list of email addresses which can be validated as members of
@@ -5623,6 +5620,9 @@ definitions:
         type: string
         description: A more descriptive name for the Institution, such as 'Vanderbilt
           University Medical Center'
+      duaTypeEnum:
+        "$ref": "#/definitions/DuaType"
+        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
@@ -5669,6 +5669,14 @@ definitions:
     - EDUCATIONAL_INSTITUTION
     - HEALTH_CENTER_NON_PROFIT
     - OTHER
+
+  DuaType:
+    type: string
+    description: 'Type of Data Use Agreement Institution has signed, Applicable to all researchers or restricted to  just few'
+    enum:
+      - MASTER
+      - RESTRICTED
+
   InstitutionalRole:
     type: string
     description: 'The union of the roles researchers can have at Institutions of all

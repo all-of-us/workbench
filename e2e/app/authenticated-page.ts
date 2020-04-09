@@ -2,6 +2,7 @@ import {Page} from 'puppeteer';
 import {clrIconXpath} from './aou-elements/xpath-defaults';
 import {findIcon} from './aou-elements/xpath-finder';
 import BasePage from './base-page';
+import {performance} from 'perf_hooks';
 
 const configs = require('../resources/workbench-config');
 
@@ -108,9 +109,7 @@ export default abstract class AuthenticatedPage extends BasePage {
     if (targetPage === SideNavLink.CONTACT_US) {
       await link.click();
     } else {
-      const navPromise = this.waitForNavigation();
-      await link.click();
-      await navPromise;
+      await this.clickAndWait(link);
     }
 
   }
@@ -169,9 +168,7 @@ export default abstract class AuthenticatedPage extends BasePage {
       const diff = Math.floor(((finishTime - startTime) / 1000) % 60);
       if (diff > 60) {
         // if timeout exceeds 60 seconds without error thrown, it tells me page loading is slower.
-        console.info(`WARNING: waitUntilNoSpinner took ${diff} seconds.`);
-      } else {
-        console.info(`waitUntilNoSpinner took ${diff} seconds.`);
+        console.warn(`WARNING: waitUntilNoSpinner took ${diff} seconds.`);
       }
     }
     // final 1 second wait for page render to finish

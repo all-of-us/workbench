@@ -48,10 +48,7 @@ export class GenderChart extends React.Component<Props, State> {
       xAxis: {
         categories,
         tickLength: 0,
-        tickPixelInterval: 50,
-        title: {
-          text: 'Gender Identity'
-        }
+        tickPixelInterval: 50
       },
       yAxis: {
         min: 0,

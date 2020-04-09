@@ -91,4 +91,6 @@ public interface UserService {
   void syncTwoFactorAuthStatus();
 
   DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
+
+  int getCurrentDuccVersion();
 }

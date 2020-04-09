@@ -37,6 +37,8 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -60,6 +62,7 @@ import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
@@ -122,7 +125,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
-  private static final int DUA_VERSION = 2;
 
   private static final double FREE_TIER_USAGE = 100D;
   private static final double FREE_TIER_LIMIT = 300D;
@@ -139,6 +141,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Autowired private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private ProfileService profileService;
   @Autowired private ProfileController profileController;
@@ -150,6 +153,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static FakeClock fakeClock = new FakeClock(NOW);
 
   private static DbUser dbUser;
+
+  private int DUA_VERSION;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
@@ -168,6 +173,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     VerifiedInstitutionalAffiliationMapperImpl.class,
     CaptchaVerificationService.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
+    UserServiceImpl.class,
     UserServiceTestConfiguration.class,
   })
   static class Configuration {
@@ -236,6 +242,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+
+    DUA_VERSION = userService.getCurrentDuccVersion();
 
     try {
       doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
@@ -520,7 +528,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
+            .duaTypeEnum(DuaType.RESTRICTED);
     institutionService.createInstitution(broad);
 
     // "Broad" is the only institution
@@ -545,7 +554,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.emptyList());
+            .emailAddresses(Collections.emptyList())
+            .duaTypeEnum(DuaType.RESTRICTED);
     institutionService.createInstitution(broad);
 
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -922,7 +932,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL));
+            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
+            .duaTypeEnum(DuaType.RESTRICTED);
     institutionService.createInstitution(broad);
 
     return new VerifiedInstitutionalAffiliation()

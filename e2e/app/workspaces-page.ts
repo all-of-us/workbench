@@ -53,10 +53,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
     const link = await this.getCreateNewWorkspaceButton();
-    await Promise.all([
-      this.page.waitForNavigation( { waitUntil: ['domcontentloaded','networkidle0']} ),
-      link.click()
-    ]);
+    await this.clickAndWait(link);
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
     return workspaceEdit;

@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
-import {mapRequest} from 'app/cohort-search/utils';
+import {ageTypeToText, genderOrSexTypeToText, mapRequest} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {ClrIcon} from 'app/components/icons';
@@ -14,6 +14,7 @@ import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
@@ -71,12 +72,18 @@ const styles = reactStyles({
     background: colors.white,
     marginBottom: 0,
     marginTop: 0,
+    padding: '0 0.4rem'
   },
   cardHeader: {
     color: colors.primary,
-    fontSize: '13px',
+    fontSize: '12px',
+    fontWeight: 600,
     borderBottom: 'none',
-    padding: '0.5rem 0.75rem',
+    padding: '0.5rem 0',
+  },
+  chartSpinner: {
+    marginLeft: 'calc(50% - 50px)',
+    marginTop: 'calc(50% - 75px)',
   },
   error: {
     background: colors.warning,
@@ -96,6 +103,27 @@ const styles = reactStyles({
     marginBottom: '0.25rem',
     padding: '3px 5px'
   },
+  menuButton: {
+    border: `1px solid ${colorWithWhiteness(colors.black, .8)}`,
+    borderRadius: '0.125rem',
+    color: colors.primary,
+    cursor: 'pointer',
+    fontSize: '11px',
+    fontWeight: 100,
+    height: '1.25rem',
+    lineHeight: '0.75rem',
+    marginRight: '0.25rem',
+    padding: '0.25rem',
+    textAlign: 'left',
+    verticalAlign: 'middle',
+    width: '35%',
+  },
+  refreshButton: {
+    background: 'none',
+    border: `1px solid ${colors.accent}`,
+    color: colors.accent,
+    cursor: 'pointer'
+  }
 });
 
 interface Props {
@@ -107,16 +135,23 @@ interface Props {
 }
 
 interface State {
+  ageType: AgeType;
   apiCallCheck: number;
   apiError: boolean;
   chartData: any;
+  currentGraphOptions: {
+    ageType: AgeType,
+    genderOrSexType: GenderOrSexType
+  };
   deleting: boolean;
   description: string;
   existingCohorts: Array<string>;
+  genderOrSexType: GenderOrSexType;
   initializing: boolean;
   loading: boolean;
   name: string;
   nameTouched: boolean;
+  refreshing: boolean;
   saveError: boolean;
   saveModalOpen: boolean;
   saving: boolean;
@@ -126,20 +161,27 @@ interface State {
 
 export const ListOverview = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
-    dropdown: any;
+    private aborter = new AbortController();
+    private ageMenu: any;
+    private genderOrSexMenu: any;
+    private saveMenu: any;
     constructor(props: Props) {
       super(props);
       this.state = {
+        ageType: AgeType.AGE,
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
+        currentGraphOptions: {ageType: AgeType.AGE, genderOrSexType: GenderOrSexType.GENDER},
         deleting: false,
         description: undefined,
         existingCohorts: [],
+        genderOrSexType: GenderOrSexType.GENDER,
         initializing: true,
-        loading: true,
+        loading: false,
         name: undefined,
         nameTouched: false,
+        refreshing: false,
         saveError: false,
         saveModalOpen: false,
         saving: false,
@@ -154,37 +196,65 @@ export const ListOverview = withCurrentWorkspace()(
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if (!this.state.initializing && this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
-        this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
     }
 
+    componentWillUnmount(): void {
+      this.aborter.abort();
+    }
+
     getTotalCount() {
-      try {
-        const {searchRequest} = this.props;
-        const localCheck = this.state.apiCallCheck + 1;
-        this.setState({apiCallCheck: localCheck});
-        const {cdrVersionId} = currentWorkspaceStore.getValue();
-        const request = mapRequest(searchRequest);
-        if (request.includes.length > 0) {
-          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER],
-            AgeType[AgeType.AGE], request).then(response => {
-              if (localCheck === this.state.apiCallCheck) {
-                this.setState({
-                  chartData: response.items,
-                  total: response.items.reduce((sum, data) => sum + data.count, 0),
-                  loading: false,
-                  initializing: false
-                });
-              }
-            });
-        } else {
-          this.setState({chartData: [], total: 0, loading: false, initializing: false});
+      const {searchRequest} = this.props;
+      if (searchRequest.includes.length > 0) {
+        const {loading, refreshing} = this.state;
+        if (loading || refreshing) {
+          this.aborter.abort();
+          this.aborter = new AbortController();
         }
-      } catch (error) {
-        console.error(error);
-        this.setState({apiError: true, loading: false});
+        this.setState({loading: true, apiError: false});
+        this.callApi()
+          .then(response => {
+            this.setState({
+              chartData: response.items,
+              initializing: false,
+              loading: false,
+              total: response.items.reduce((sum, data) => sum + data.count, 0),
+            });
+          })
+          .catch(error => {
+            if (!isAbortError(error)) {
+              console.error(error);
+              this.setState({apiError: true, loading: false});
+            }
+          });
+      } else {
+        this.setState({chartData: [], total: 0, initializing: false});
       }
+    }
+
+    refreshGraphs() {
+      this.setState({refreshing: true});
+      this.callApi()
+        .then(response => {
+          const {ageType, genderOrSexType} = this.state;
+          this.setState({chartData: response.items, currentGraphOptions: {ageType, genderOrSexType}});
+        })
+        .catch(error => {
+          if (!isAbortError(error)) {
+            console.error(error);
+          }
+        })
+        .finally(() => this.setState({refreshing: false}));
+    }
+
+    callApi() {
+      const {searchRequest} = this.props;
+      const {ageType, genderOrSexType} = this.state;
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const request = mapRequest(searchRequest);
+      return cohortBuilderApi()
+        .getDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
     }
 
     get hasActiveItems() {
@@ -229,14 +299,16 @@ export const ListOverview = withCurrentWorkspace()(
       this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const cid = cohort.id;
-      cohortsApi().updateCohort(ns, wsid, cid, cohort).then(() => {
-        this.setState({saving: false});
-        updating(true);
-        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'actions']);
-      }, (error) => {
-        console.error(error);
-        this.setState({saving: false, saveError: true});
-      });
+      cohortsApi().updateCohort(ns, wsid, cid, cohort)
+        .then(() => {
+          this.setState({saving: false});
+          updating(true);
+          navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'actions']);
+        })
+        .catch(error => {
+          console.error(error);
+          this.setState({saving: false, saveError: true});
+        });
     }
 
     submit() {
@@ -246,25 +318,27 @@ export const ListOverview = withCurrentWorkspace()(
       const {name, description} = this.state;
       const {updating} = this.props;
       const cohort = {name, description, criteria: this.criteria, type: COHORT_TYPE};
-      cohortsApi().createCohort(ns, wsid, cohort).then((c) => {
-        updating(true);
-        navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
-      }, (error) => {
-        console.error(error);
-        this.setState({saving: false, saveError: true});
-      });
+      cohortsApi().createCohort(ns, wsid, cohort)
+        .then((c) => {
+          updating(true);
+          navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
+        })
+        .catch(error => {
+          console.error(error);
+          this.setState({saving: false, saveError: true});
+        });
     }
 
     delete = () => {
       triggerEvent('Click icon', 'Click', 'Icon - Delete - Cohort Builder');
       const {ns, wsid} = urlParamsStore.getValue();
       const {cohort, updating} = this.props;
-      cohortsApi().deleteCohort(ns, wsid, cohort.id).then(() => {
-        updating();
-        navigate(['workspaces', ns, wsid, 'data']);
-      }, (error) => {
-        console.log(error);
-      });
+      cohortsApi().deleteCohort(ns, wsid, cohort.id)
+        .then(() => {
+          updating();
+          navigate(['workspaces', ns, wsid, 'data']);
+        })
+        .catch(error => console.error(error));
     }
 
     cancelDelete = () => {
@@ -301,33 +375,61 @@ export const ListOverview = withCurrentWorkspace()(
     openSaveModal() {
       this.setState({saveModalOpen: true});
       const {ns, wsid} = urlParamsStore.getValue();
-      cohortsApi().getCohortsInWorkspace(ns, wsid).then(response => {
-        this.setState({existingCohorts: response.items.map(cohort => cohort.name)});
-      }, (error) => console.error(error));
+      cohortsApi().getCohortsInWorkspace(ns, wsid)
+        .then(response => this.setState({existingCohorts: response.items.map(cohort => cohort.name)}))
+        .catch(error => console.error(error));
+    }
+
+    get ageItems() {
+      return [
+        {label: ageTypeToText(AgeType.AGE), command: () => this.setState({ageType: AgeType.AGE})},
+        {label: ageTypeToText(AgeType.AGEATCONSENT), command: () => this.setState({ageType: AgeType.AGEATCONSENT})},
+        {label: ageTypeToText(AgeType.AGEATCDR), command: () => this.setState({ageType: AgeType.AGEATCDR})},
+      ];
+    }
+
+    get genderOrSexItems() {
+      return [{
+        label: genderOrSexTypeToText(GenderOrSexType.GENDER),
+        command: () => this.setState({genderOrSexType: GenderOrSexType.GENDER})
+      }, {
+        label: genderOrSexTypeToText(GenderOrSexType.SEXATBIRTH),
+        command: () => this.setState({genderOrSexType: GenderOrSexType.SEXATBIRTH})
+      }];
+    }
+
+    get saveItems() {
+      return [
+        {label: 'Save', command: () => this.saveCohort(), disabled: !this.props.cohortChanged},
+        {label: 'Save as', command: () => this.openSaveModal()},
+      ];
     }
 
     render() {
       const {cohort} = this.props;
-      const {apiError, chartData, deleting, description, existingCohorts, loading, name, nameTouched, saveModalOpen, saveError,
-        saving, stackChart, total} = this.state;
-      const disableIcon = loading || !cohort ;
+      const {ageType, apiError, chartData, currentGraphOptions, deleting, description, existingCohorts, genderOrSexType, loading,
+        name, nameTouched, refreshing, saveModalOpen, saveError, saving, stackChart, total} = this.state;
+      const disableIcon = loading || !cohort;
       const disableSave = loading || saving || this.definitionErrors || !total;
+      const disableRefresh = ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
       const invalid = nameTouched && (!name || !name.trim());
       const nameConflict = !!name && existingCohorts.includes(name.trim());
       const saveDisabled = invalid || !name || nameConflict || saving;
       const showTotal = total !== undefined && total !== null;
-      const items = [
-        {label: 'Save', command: () => this.saveCohort(), disabled: !this.props.cohortChanged},
-        {label: 'Save as', command: () => this.openSaveModal()},
-      ];
       return <React.Fragment>
         <div>
           <div style={styles.overviewHeader}>
             <div style={{width: '100%'}}>
               {!!cohort.id ? <React.Fragment>
-                <Menu appendTo={document.body} model={items} popup={true} ref={el => this.dropdown = el} />
-                <Button type='primary' style={styles.saveButton} onClick={(event) => this.dropdown.toggle(event)} disabled={disableSave}>
-                  Save Cohort <ClrIcon shape='caret down' />
+                <Menu appendTo={document.body}
+                  model={this.saveItems}
+                  popup={true}
+                  ref={el => this.saveMenu = el}/>
+                <Button type='primary'
+                  style={styles.saveButton}
+                  onClick={(event) => this.saveMenu.toggle(event)}
+                  disabled={disableSave}>
+                  Save Cohort <ClrIcon shape='caret down'/>
                 </Button>
               </React.Fragment>
               : <Button type='primary'
@@ -373,32 +475,52 @@ export const ListOverview = withCurrentWorkspace()(
           {!!total && !this.definitionErrors && !loading && !!chartData &&
             <div style={styles.cardContainer}>
               <div style={styles.card}>
-                <div style={styles.cardHeader}>
-                  Results by Gender Identity
+                <div style={styles.cardHeader}>Results by</div>
+                <div style={refreshing ? styles.disabled : {}}>
+                  <Menu appendTo={document.body}
+                    model={this.genderOrSexItems}
+                    popup={true} ref={el => this.genderOrSexMenu = el}/>
+                  <button style={styles.menuButton} onClick={(event) => this.genderOrSexMenu.toggle(event)}>
+                    {genderOrSexTypeToText(genderOrSexType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
+                  </button>
+                  <Menu appendTo={document.body}
+                    model={this.ageItems} popup={true}
+                    ref={el => this.ageMenu = el}/>
+                  <button style={styles.menuButton} onClick={(event) => this.ageMenu.toggle(event)}>
+                    {ageTypeToText(ageType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
+                  </button>
+                  <button style={disableRefresh ? {...styles.refreshButton, ...styles.disabled} : styles.refreshButton}
+                    onClick={() => this.refreshGraphs()}>
+                    REFRESH
+                  </button>
                 </div>
-                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
-                  'Graphs',
-                  'Hover',
-                  'Graphs - Gender - Cohort Builder'
-                )}>
-                  {!!chartData.length && <GenderChart data={chartData} />}
-                </div>
-              </div>
-              <div style={styles.card}>
-                <div style={styles.cardHeader}>
-                  Results By Gender Identity, Age Range, and Race
-                  <ClrIcon shape='sort-by'
-                    className={stackChart ? 'is-info' : ''}
-                    onClick={() => this.toggleChartMode()} />
-                </div>
-                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
-                  'Graphs',
-                  'Hover',
-                  'Graphs - Gender Age Race - Cohort Builder'
-                )}>
-                  {!!chartData.length &&
-                    <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
-                </div>
+                {refreshing ?
+                  <div style={{height: '15rem'}}>
+                    <Spinner style={styles.chartSpinner} size={75}/>
+                  </div> :
+                  <React.Fragment>
+                    <div style={styles.cardHeader}>
+                      {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}
+                    </div>
+                    <div style={{padding: '0.5rem 0.75rem'}}
+                      onMouseEnter={() => triggerEvent('Graphs', 'Hover', 'Graphs - Gender - Cohort Builder')}>
+                      {!!chartData.length && <GenderChart data={chartData} />}
+                    </div>
+                    <div style={styles.cardHeader}>
+                      {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}, {ageTypeToText(currentGraphOptions.ageType)}, and Race
+                      <ClrIcon shape='sort-by'
+                        className={stackChart ? 'is-info' : ''}
+                        onClick={() => this.toggleChartMode()} />
+                    </div>
+                    <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                      'Graphs',
+                      'Hover',
+                      'Graphs - Gender Age Race - Cohort Builder'
+                    )}>
+                      {!!chartData.length && <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
+                    </div>
+                  </React.Fragment>
+                }
               </div>
             </div>
           }
@@ -411,16 +533,29 @@ export const ListOverview = withCurrentWorkspace()(
               Data cannot be saved. Please try again.
             </div>}
             {invalid && <div style={styles.invalid}>Cohort name is required</div>}
-            {nameConflict && <div style={styles.invalid}>A cohort with this name already exists. Please choose a different name.</div>}
-            <TextInput style={{marginBottom: '0.5rem'}} value={name} placeholder='COHORT NAME'
-              onChange={(v) => this.setState({name: v, nameTouched: true})} disabled={saving} />
-            <TextArea value={description} placeholder='DESCRIPTION' disabled={saving}
+            {nameConflict && <div style={styles.invalid}>
+              A cohort with this name already exists. Please choose a different name.
+            </div>}
+            <TextInput style={{marginBottom: '0.5rem'}}
+              value={name}
+              placeholder='COHORT NAME'
+              onChange={(v) => this.setState({name: v, nameTouched: true})}
+              disabled={saving}/>
+            <TextArea value={description}
+              placeholder='DESCRIPTION'
+              disabled={saving}
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
-            <Button style={{color: colors.primary}} type='link' onClick={() => this.cancelSave()}
-              disabled={saving}>Cancel</Button>
-            <Button type='primary' disabled={saveDisabled} onClick={() => this.submit()}>
+            <Button style={{color: colors.primary}}
+              type='link'
+              onClick={() => this.cancelSave()}
+              disabled={saving}>
+              Cancel
+            </Button>
+            <Button type='primary'
+              disabled={saveDisabled}
+              onClick={() => this.submit()}>
               {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
                Save
             </Button>

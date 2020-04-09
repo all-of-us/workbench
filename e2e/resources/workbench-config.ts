@@ -1,5 +1,5 @@
 require('dotenv').config();
-const _ = require('lodash');
+const fp = require('lodash/fp');
 
 const env = process.env.WORKBENCH_ENV || 'dev';
 
@@ -8,6 +8,7 @@ const userCredential = {
   userEmail: process.env.USER_NAME,
   userPassword: process.env.PASSWORD,
   userInvitationkey: process.env.INVITATION_KEY,
+  broadInstitutionEmail: 'aou-dev-registration@broadinstitute.org',
 };
 
 const urlPath = {
@@ -19,7 +20,7 @@ const urlPath = {
 };
 
 const puppeteer = {
-  puppeteerUserAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
+  puppeteerUserAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
 };
 
 // localhost development server
@@ -58,6 +59,6 @@ const environment = {
   stable,
 };
 
-const configs = _.merge(environment[env], userCredential, urlPath, puppeteer);
+const configs = fp.mergeAll([environment[env], userCredential, urlPath, puppeteer]);
 
 module.exports = configs;

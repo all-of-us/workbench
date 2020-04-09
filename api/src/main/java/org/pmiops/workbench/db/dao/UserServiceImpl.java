@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -75,7 +76,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
-  private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -127,6 +127,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.complianceService = complianceService;
     this.directoryService = directoryService;
     this.institutionService = institutionService;
+  }
+
+  @VisibleForTesting
+  @Override
+  public int getCurrentDuccVersion() {
+    return configProvider.get().featureFlags.enableV3DataUserCodeOfConduct ? 3 : 2;
   }
 
   /**
@@ -415,7 +421,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser submitDataUseAgreement(
       DbUser dbUser, Integer dataUseAgreementSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
-    if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
+    if (dataUseAgreementSignedVersion != getCurrentDuccVersion()) {
       throw new BadRequestException("Data Use Agreement Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());

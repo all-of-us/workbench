@@ -1,5 +1,7 @@
 ## All-of-Us Test Automation with Puppeteer in Chrome
-#####`e2e` end-to-end integration tests
+#####`e2e` end-to-end integration tests.
+##### Puppeteer run on the latest [maintenance LTS](https://github.com/nodejs/Release#release-schedule) version of Node.
+
 
 ####Set up
 ##### Clone github project
