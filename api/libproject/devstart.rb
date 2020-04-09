@@ -708,13 +708,13 @@ def run_liquibase(cmd_name, *args)
   end
 
   if op.opts.project.nil? || op.opts.project.empty?
-    op.opts.project = TEST_PROJECT
+    op.opts.project = 'local'
   end
 
   context = GcloudContextV2.new(op)
   context.validate
 
-  with_cloud_proxy_and_db(context, nil, 'sa-key.json') do |gcc|
+  with_optional_cloud_proxy_and_db(context, nil, 'sa-key.json') do |gcc|
     common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}, dir: #{Dir.pwd}")
     command = op.opts.command
 
@@ -740,7 +740,7 @@ end
 
 Common.register_command({
     :invocation => "run-liquibase",
-    :description => "Run liquibase",
+    :description => "Run liquibase command with optional argument",
     :fn => ->(*args) { run_liquibase('run-liquibase', *args) }
 })
 
@@ -2108,6 +2108,19 @@ def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   common.status(ENV)
   CloudSqlProxyContext.new(gcc.project, service_account, key_file).run do
     yield(gcc)
+  end
+end
+
+def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
+  common = Common.new
+  if gcc.project == 'local'
+    common.status('No proxy needed for local environment/project')
+    yield gcc
+  else
+    common.status("Creating cloud proxy for environment #{gcc.project}")
+    with_cloud_proxy_and_db(gcc, service_account, key_file) do |gcc|
+      yield gcc
+    end
   end
 end
 
