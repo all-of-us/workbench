@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Clock;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -11,12 +12,15 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -95,27 +99,32 @@ public class DeleteWorkspaces {
   @Primary
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
-  WorkspacesApi workspaceApi(FireCloudService fireCloudService) throws IOException {
+  WorkspacesApi workspaceApi(WorkbenchConfig config) {
     if (currentImpersonatedUser == null) {
       return null;
     }
-
-    ApiClient apiClient =
-        fireCloudService.getApiClientWithImpersonation(currentImpersonatedUser.getUsername());
-    return new WorkspacesApi(apiClient);
+    return new WorkspacesApi(buildFirecloudServiceAccountApiClient(config));
   }
 
   @Bean
   @Primary
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  ProfileApi profileApi(FireCloudService fireCloudService) throws IOException {
+  ProfileApi profileApi(WorkbenchConfig config) {
     if (currentImpersonatedUser == null) {
       return null;
     }
+    return new ProfileApi(buildFirecloudServiceAccountApiClient(config));
+  }
 
-    ApiClient apiClient =
-        fireCloudService.getApiClientWithImpersonation(currentImpersonatedUser.getUsername());
-    return new ProfileApi(apiClient);
+  private static ApiClient buildFirecloudServiceAccountApiClient(WorkbenchConfig workbenchConfig) {
+    ApiClient apiClient = FireCloudConfig.buildApiClient(workbenchConfig);
+    try {
+      apiClient.setAccessToken(
+          ServiceAccounts.getScopedServiceAccessToken(FireCloudConfig.BILLING_SCOPES));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+    return apiClient;
   }
 
   @Bean
@@ -126,6 +135,8 @@ public class DeleteWorkspaces {
       CommandLine opts = new DefaultParser().parse(options, args);
       boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
 
+      AtomicInteger successes = new AtomicInteger();
+      AtomicInteger fails = new AtomicInteger();
       try (BufferedReader reader =
           new BufferedReader(
               new FileReader(opts.getOptionValue(deleteListFilename.getLongOpt())))) {
@@ -154,12 +165,13 @@ public class DeleteWorkspaces {
                     return;
                   }
 
-                  currentImpersonatedUser = dbWorkspace.getCreator();
                   try {
+                    currentImpersonatedUser = dbWorkspace.getCreator();
                     if (!dryRun) {
                       workspaceService.deleteWorkspace(dbWorkspace);
                     }
 
+                    successes.getAndIncrement();
                     dryLog(
                         dryRun,
                         "Deleted workspace ("
@@ -168,6 +180,7 @@ public class DeleteWorkspaces {
                             + dbWorkspace.getFirecloudName()
                             + ")");
                   } catch (Exception e) {
+                    fails.getAndIncrement();
                     log.log(
                         Level.WARNING,
                         "Could not delete workspace (" + namespace + ", " + fcName + ")",
@@ -175,6 +188,10 @@ public class DeleteWorkspaces {
                   }
                 });
       }
+      dryLog(
+          dryRun,
+          String.format(
+              "Deleted %d workspaces, failed to delete %d", successes.get(), fails.get()));
     };
   }
 
