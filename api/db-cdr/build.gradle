@@ -51,5 +51,6 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
         }
+        runList = project.ext.runList
     }
 }

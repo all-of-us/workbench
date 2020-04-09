@@ -2,7 +2,7 @@ version: "3"
 services:
   scripts:
     build:
-      context: ./src/dev/server # find Dockerfile here
+      context: ./src/dev/server
     user: ${UID}
     working_dir: /w/api
     volumes:
