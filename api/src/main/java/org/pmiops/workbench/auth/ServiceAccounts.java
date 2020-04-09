@@ -43,7 +43,9 @@ public class ServiceAccounts {
       throws IOException {
 
     GoogleCredentials credentials;
-    if (SystemProperty.environment.value().equals(SystemProperty.Environment.Value.Development)) {
+    if (SystemProperty.environment.value() == null
+        || SystemProperty.Environment.Value.Development.equals(
+            SystemProperty.environment.value())) {
       // When running in a local dev environment, we simply get the application default credentials.
       //
       // TODO(gjuggler): it may be possible to remove this branch point altogether, and use the
