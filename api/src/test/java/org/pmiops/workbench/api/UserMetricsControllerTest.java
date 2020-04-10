@@ -306,9 +306,6 @@ public class UserMetricsControllerTest {
     final Cohort cohort1 = foundResource.getCohort();
     final Cohort cohort2 = cohortMapper.dbModelToClient(dbUserRecentResource2.getCohort());
 
-    // Clear out fields that aren't included in the DB Cohort class so
-    // direct equals comparison can be used.
-    cohort1.setEtag(null);
     assertEquals(cohort1, cohort2);
 
     assertEquals(foundResource.getWorkspaceId(), (Long) dbUserRecentResource2.getWorkspaceId());
