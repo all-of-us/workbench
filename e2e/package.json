@@ -27,7 +27,9 @@
   },
   "jest-junit": {
     "outputDirectory": "./logs",
-    "outputName": "test-results.xml"
+    "outputName": "test-results.xml",
+    "classNameTemplate": "{filename}",
+    "suiteNameTemplate": "{filename}"
   },
   "dependencies": {},
   "devDependencies": {
