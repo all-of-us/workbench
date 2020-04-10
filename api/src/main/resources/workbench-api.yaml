@@ -3178,7 +3178,7 @@ paths:
       consumes:
       - application/json
       description: Searches for demographic info about subjects.
-      operationId: getDemoChartInfo
+      operationId: findDemoChartInfo
       parameters:
       - in: path
         name: genderOrSex

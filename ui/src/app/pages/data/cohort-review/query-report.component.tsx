@@ -219,7 +219,7 @@ export const QueryReport = withCurrentWorkspace()(
         this.setState({cdrName});
       });
       const request = (JSON.parse(review.cohortDefinition)) as SearchRequest;
-      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
+      cohortBuilderApi().findDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
         .then(response => {
           this.groupChartData(response.items);
           this.setState({data: response.items, loading: false});

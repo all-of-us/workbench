@@ -110,8 +110,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CloudStorageService cloudStorageService;
 
-  @Autowired private CohortQueryBuilder cohortQueryBuilder;
-
   @Autowired private CohortBuilderService cohortBuilderService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -176,13 +174,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     controller =
         new CohortBuilderController(
-            bigQueryService,
-            cohortQueryBuilder,
-            cbCriteriaDao,
-            cdrVersionService,
-            elasticSearchService,
-            configProvider,
-            cohortBuilderService);
+            cdrVersionService, elasticSearchService, configProvider, cohortBuilderService);
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
@@ -1974,7 +1966,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getDemoChartInfo() {
+  public void findDemoChartInfo() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
@@ -1982,7 +1974,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     DemoChartInfoListResponse response =
         controller
-            .getDemoChartInfo(
+            .findDemoChartInfo(
                 cdrVersion.getCdrVersionId(),
                 GenderOrSexType.GENDER.toString(),
                 AgeType.AGE.toString(),
@@ -1998,7 +1990,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getDemoChartInfoGenderAgeAtConsentWithEHRData() {
+  public void findDemoChartInfoGenderAgeAtConsentWithEHRData() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
@@ -2007,7 +1999,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     DemoChartInfoListResponse response =
         controller
-            .getDemoChartInfo(
+            .findDemoChartInfo(
                 cdrVersion.getCdrVersionId(),
                 GenderOrSexType.GENDER.toString(),
                 AgeType.AGE_AT_CONSENT.toString(),
@@ -2023,7 +2015,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getDemoChartInfoSexAtBirthAgeAtCdr() {
+  public void findDemoChartInfoSexAtBirthAgeAtCdr() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
@@ -2031,7 +2023,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     DemoChartInfoListResponse response =
         controller
-            .getDemoChartInfo(
+            .findDemoChartInfo(
                 cdrVersion.getCdrVersionId(),
                 GenderOrSexType.SEX_AT_BIRTH.toString(),
                 AgeType.AGE_AT_CDR.toString(),
