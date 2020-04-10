@@ -85,7 +85,12 @@ export const styles = reactStyles({
     flex: '1 1 0',
     marginLeft: '1rem'
   },
-  freeCreditBalance: {
+  freeCreditsBalanceClickable: {
+    display: 'inline-block',
+    color: colors.accent,
+    padding: '0.5rem 0.5rem 0.5rem 0.75rem'
+  },
+  freeCreditsBalanceOverlay: {
     height: '44px',
     width: '189.45px',
     color: '#262262',
@@ -925,21 +930,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                           }
                         }}
               />
-              <FlexColumn>
-                {freeTierCreditsBalance > 0.0 && <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>
-                  <div style={{
-                    display: 'inline-block',
-                    color: colors.accent,
-                    padding: '0.5rem 0.5rem 0.5rem 0.75rem'}}>
-                    View FREE credits balance
-                  </div>
-                </Clickable>}
-                <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true}>
-                  <div style={styles.freeCreditBalance}>
-                      FREE CREDIT BALANCE {renderUSD(freeTierCreditsBalance)}
-                  </div>
-                </OverlayPanel>
-              </FlexColumn>
+              <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true}>
+                <div style={styles.freeCreditsBalanceOverlay}>
+                  FREE CREDIT BALANCE {renderUSD(freeTierCreditsBalance)}
+                </div>
+              </OverlayPanel>
+              {freeTierCreditsBalance > 0.0 && <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>
+                <div style={styles.freeCreditsBalanceClickable}>
+                  View FREE credits balance
+                </div>
+              </Clickable>}
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
