@@ -1,11 +1,11 @@
-import ClrIconLink from '../../app/aou-elements/clr-icon-link';
-import Link from '../../app/aou-elements/link';
-import BaseElement from '../../app/aou-elements/base-element';
-import HomePage, {FIELD_LABEL as editPageFieldLabel} from '../../app/home-page';
-import WorkspaceCard from '../../app/workspace-card';
-import WorkspaceEditPage from '../../app/workspace-edit-page';
-import WorkspacesPage from '../../app/workspaces-page';
-import {signIn} from '../app';
+import ClrIconLink from 'app/aou-elements/clr-icon-link';
+import Link from 'app/aou-elements/link';
+import BaseElement from 'app/aou-elements/base-element';
+import HomePage, {FIELD_LABEL as editPageFieldLabel} from 'app/home-page';
+import WorkspaceCard from 'app/workspace-card';
+import WorkspaceEditPage from 'app/workspace-edit-page';
+import WorkspacesPage from 'app/workspaces-page';
+import {signIn} from 'tests/app';
 
 
 describe('Home page ui tests', () => {

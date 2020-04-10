@@ -32,5 +32,8 @@ module.exports = {
     "jsx",
     "json",
     "node"
+  ],
+  "modulePaths": [
+    "<rootDir>"
   ]
 };

@@ -8,7 +8,7 @@ import Textarea from './aou-elements/textarea';
 import Textbox from './aou-elements/textbox';
 import BasePage from './base-page';
 
-const configs = require('../resources/workbench-config');
+const configs = require('resources/workbench-config');
 const faker = require('faker/locale/en_US');
 
 export const PAGE = {

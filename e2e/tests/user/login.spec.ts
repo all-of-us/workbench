@@ -1,4 +1,4 @@
-import GoogleLoginPage, {selectors} from '../../app/google-login';
+import GoogleLoginPage, {selectors} from 'app/google-login';
 
 const configs = require('../../resources/workbench-config');
 

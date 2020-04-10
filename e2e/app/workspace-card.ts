@@ -24,6 +24,11 @@ export default class WorkspaceCard extends BaseElement {
   // static functions
   // **********************
 
+  /**
+   * Find all visible Workspace Cards. Assume at least one Card exists.
+   * @param {Page} page
+   * @throws TimeoutError if fails to find Card.
+    */
   static async getAllCards(page: Page): Promise<WorkspaceCard[]> {
     await page.waitForXPath(WorkspaceCard.cardRootXpath, {visible: true, timeout: 60000});
     const cards = await page.$x(this.cardRootXpath);

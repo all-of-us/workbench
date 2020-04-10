@@ -4,7 +4,7 @@ import {findIcon} from './aou-elements/xpath-finder';
 import BasePage from './base-page';
 import {performance} from 'perf_hooks';
 
-const configs = require('../resources/workbench-config');
+const configs = require('resources/workbench-config');
 
 const selectors = {
   signedInIndicator: 'body#body div',

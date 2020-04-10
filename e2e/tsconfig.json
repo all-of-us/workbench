@@ -20,7 +20,7 @@
     "outDir": "./tsc-out",
     "allowJs": true,
     "checkJs": true,
-    "baseUrl": "./",
+    "baseUrl": ".",
     "typeRoots": [
       "./node_modules/@types"
     ],
