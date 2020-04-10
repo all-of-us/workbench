@@ -1,6 +1,7 @@
 import {Page} from 'puppeteer';
+import {pageUrl} from '../resources/enums';
 import {findButton} from './aou-elements/xpath-finder';
-import AuthenticatedPage, {PageUrl} from './authenticated-page';
+import AuthenticatedPage from './authenticated-page';
 import WorkspaceEditPage from './workspace-edit-page';
 
 const faker = require('faker/locale/en_US');
@@ -33,7 +34,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * Load 'Your Workspaces' page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.WORKSPACES);
+    await this.loadPageUrl(pageUrl.WORKSPACES);
     return this;
   }
 
@@ -69,7 +70,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await editPage.waitForTextExists('Use All of Us free credits');
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
-    await (await editPage.getWorkspaceNameTextbox()).pressKeyboard('Tab', { delay: 100 });
+    await (await editPage.getWorkspaceNameTextbox()).tabKey();
 
     // select Synthetic Data Set 2
     await editPage.selectDataSet('2');

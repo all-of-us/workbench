@@ -1,7 +1,8 @@
 import {ElementHandle, Page} from 'puppeteer';
+import {pageUrl} from '../resources/enums';
 import Link from './aou-elements/link';
 import {findIcon} from './aou-elements/xpath-finder';
-import AuthenticatedPage, {PageUrl} from './authenticated-page';
+import AuthenticatedPage from './authenticated-page';
 
 export const PAGE = {
   TITLE: 'Homepage',
@@ -39,7 +40,7 @@ export default class HomePage extends AuthenticatedPage {
    * Load Home page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.HOME);
+    await this.loadPageUrl(pageUrl.HOME);
     return this;
   }
 

@@ -261,8 +261,8 @@ export default abstract class BasePage {
    * @param {Puppeteer.Page} page
    * @param {string} fileName
    */
-  async saveHtmlToFile(page, fileName: string) {
-    const html = await page.content();
+  async saveHtmlToFile(fileName: string) {
+    const html = await this.page.content();
     await this.saveToFile(fileName, html);
   }
 

@@ -47,7 +47,7 @@ describe('Home page ui tests', () => {
       expect(await card.getEllipsisIcon()).toBeTruthy();
 
       // Assumption: test user is workspace Owner.
-      // Check ellipsis popup has right option values
+      // Check Workspace Actions ellipsis dropdown displayes the right set of options
       const links = await card.getPopupLinkTextsArray();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }

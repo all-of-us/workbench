@@ -1,9 +1,9 @@
 import BaseElement from 'app/aou-elements/base-element';
-import {SideNavLink} from 'app/authenticated-page';
 import HomePage from 'app/home-page';
 import WorkspaceCard from 'app/workspace-card';
 import WorkspacesPage from 'app/workspaces-page';
 import {signIn} from 'tests/app';
+import {sideNavLink} from 'resources/enums';
 
 
 describe('Workspace ui tests', () => {
@@ -47,7 +47,7 @@ describe('Workspace ui tests', () => {
   test('Check Workspace card on Your Workspaces page', async () => {
     const home = new HomePage(page);
     await home.load();
-    await home.navTo(SideNavLink.YOUR_WORKSPACES);
+    await home.navTo(sideNavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
     await WorkspaceCard.getAllCards(page);
@@ -55,7 +55,6 @@ describe('Workspace ui tests', () => {
     const workspaceName = await card.getWorkspaceName();
     expect(workspaceName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
-    expect(await card.getEllipsisIcon()).toBeTruthy();
     const links = await card.getPopupLinkTextsArray();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });

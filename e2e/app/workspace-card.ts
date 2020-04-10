@@ -1,14 +1,7 @@
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
+import {workspaceAccessLevel, workspaceAction} from 'resources/enums';
 import BaseElement from './aou-elements/base-element';
-const _ = require('lodash');
-
-
-export const LINK_LABEL = {
-  DUPLICATE: 'Duplicate',
-  DELETE: 'Delete',
-  EDIT: 'Edit',
-  SHARE: 'Share',
-};
+const fp = require('lodash/fp');
 
 
 /**
@@ -28,7 +21,7 @@ export default class WorkspaceCard extends BaseElement {
    * Find all visible Workspace Cards. Assume at least one Card exists.
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
-    */
+   */
   static async getAllCards(page: Page): Promise<WorkspaceCard[]> {
     await page.waitForXPath(WorkspaceCard.cardRootXpath, {visible: true, timeout: 60000});
     const cards = await page.$x(this.cardRootXpath);
@@ -42,7 +35,7 @@ export default class WorkspaceCard extends BaseElement {
     if (cards.length === 0) {
       throw new Error('FAILED to find any Workspace card on page.');
     }
-    const anyCard = _.shuffle(cards)[0];
+    const anyCard = fp.shuffle(cards)[0];
     return anyCard;
   }
 
@@ -94,7 +87,7 @@ export default class WorkspaceCard extends BaseElement {
    */
   async duplicate() {
     await this.clickEllipsis();
-    const selector = this.linkSelector(LINK_LABEL.DUPLICATE);
+    const selector = this.linkSelector(workspaceAction.DUPLICATE);
     const link = await this.page.waitForXPath(selector, {visible: true});
     await link.click();
     await link.dispose();
@@ -105,7 +98,7 @@ export default class WorkspaceCard extends BaseElement {
    */
   async edit() {
     await this.clickEllipsis();
-    const selector = this.linkSelector(LINK_LABEL.EDIT);
+    const selector = this.linkSelector(workspaceAction.EDIT);
     const link = await this.page.waitForXPath(selector, {visible: true});
     await link.click();
     await link.dispose();
@@ -116,7 +109,7 @@ export default class WorkspaceCard extends BaseElement {
    */
   async share() {
     await this.clickEllipsis();
-    const selector = this.linkSelector(LINK_LABEL.SHARE);
+    const selector = this.linkSelector(workspaceAction.SHARE);
     const link = await this.page.waitForXPath(selector, {visible: true});
     await link.click();
     await link.dispose();
@@ -127,7 +120,7 @@ export default class WorkspaceCard extends BaseElement {
    */
   async delete() {
     await this.clickEllipsis();
-    const selector = this.linkSelector(LINK_LABEL.DELETE);
+    const selector = this.linkSelector(workspaceAction.DELETE);
     const link = await this.page.waitForXPath(selector, {visible: true});
     await link.click();
     await link.dispose();
@@ -149,9 +142,9 @@ export default class WorkspaceCard extends BaseElement {
    * Find workspace access level.
    * @param workspaceName
    */
-  async getWorkspaceAccessLevel(workspaceName: string) : Promise<JSHandle<string>> {
-    const element = await this.page.waitForXPath(this.accessLevel(workspaceName), {visible: true});
-    return await element.getProperty('innerText');
+  async getWorkspaceAccessLevel() : Promise<unknown> {
+    const element = await this.page.waitForXPath(this.accessLevelSelector(), {visible: true});
+    return (await element.getProperty('innerText')).jsonValue();
   }
 
   /**
@@ -159,7 +152,30 @@ export default class WorkspaceCard extends BaseElement {
    * @param {string} workspaceName
    */
   async getWorkspaceNameLink(workspaceName: string) : Promise<ElementHandle> {
-    return await this.page.waitForXPath(this.workspaceLink(workspaceName));
+    return await this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName));
+  }
+
+  async getWorkspaceMatchAccessLevel(level: workspaceAccessLevel = workspaceAccessLevel.OWNER): Promise<WorkspaceCard[]> {
+    const matchWorkspaceArray: WorkspaceCard[] = [];
+    const allWorkspaceCards = await WorkspaceCard.getAllCards(page);
+    for (const card of allWorkspaceCards) {
+      const accessLevel = await card.getWorkspaceAccessLevel();
+      if (accessLevel === level) {
+        matchWorkspaceArray.push(card);
+      }
+    }
+    return matchWorkspaceArray;
+  }
+
+  /**
+   * Click Workspace Name in Workspace Card.
+   */
+  async clickWorkspaceName() {
+    const elemt = await this.page.waitForXPath('//*[@data-test-id="workspace-card-name"]', {visible: true});
+    await Promise.all([
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
+      elemt.click()
+    ]);
   }
 
   private async clickEllipsis(): Promise<void> {
@@ -177,11 +193,11 @@ export default class WorkspaceCard extends BaseElement {
     return  `${WorkspaceCard.popupRootXpath}//*[@role='button' and text()='${linkText}']`;
   }
 
-  private accessLevel(workspaceName: string) {
-    return `//*[.//*[@data-test-id='workspace-card-name' and normalize-space(text())='${workspaceName}']]/*[@data-test-id='workspace-access-level']`;
+  private accessLevelSelector() {
+    return `.//*[@data-test-id='workspace-access-level']`;
   }
 
-  private workspaceLink(workspaceName: string) {
+  private workspaceNameLinkSelector(workspaceName: string) {
     return `//*[@role='button'][./*[@data-test-id='workspace-card-name' and normalize-space(text())='${workspaceName}']]`
   }
 

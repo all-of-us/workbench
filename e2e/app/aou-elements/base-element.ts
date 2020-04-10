@@ -158,16 +158,31 @@ export default class BaseElement {
   }
 
   async click(options?: ClickOptions): Promise<void> {
-    await this.element.asElement().click(options);
+    return this.element.asElement().click(options);
   }
 
   async type(text: string, options?: { delay: number }): Promise<void> {
     await this.focus();
-    await this.element.asElement().type(text, options);
+    return this.element.asElement().type(text, options);
   }
 
   async pressKeyboard(key: string, options?: { text?: string, delay?: number }): Promise<void> {
-    await this.element.asElement().press(key, options);
+    return this.element.asElement().press(key, options);
+  }
+
+  /**
+   * Press keyboard "tab".
+   */
+  async tabKey(): Promise<void> {
+    return this.pressKeyboard('Tab', { delay: 100 });
+  }
+
+  /**
+   * Clear value in textbox or textarea.
+   */
+  async clear(): Promise<void> {
+    await this.element.click({clickCount: 3});
+    await this.element.press('Backspace');
   }
 
   /**
@@ -188,7 +203,7 @@ export default class BaseElement {
    */
   async getTextContent(): Promise<string> {
     const handle = await this.element.asElement();
-    return await handle.evaluate(
+    return handle.evaluate(
        (element: HTMLElement) => (element.textContent ? element.textContent.trim() : ''), this.element,
     );
   }
@@ -198,7 +213,7 @@ export default class BaseElement {
    * Alternative: await page.evaluate(elem => elem.value, element);
    */
   async getValue(): Promise<unknown> {
-    return await this.getProperty('value');
+    return this.getProperty('value');
   }
 
   async getComputedStyle(styleName: string): Promise<unknown> {
@@ -207,12 +222,11 @@ export default class BaseElement {
       const style = window.getComputedStyle(e);
       return style;
     }, this.element);
-
     return (await attrStyle.getProperty(styleName)).jsonValue()
   }
 
   /**
-   * Determine if cursor is disabled (= not-allowed) by checking style attribute 'cursor'.
+   * Determine if cursor is disabled (== " not-allowed ") by checking style 'cursor' value.
    */
   async isCursorNotAllowed(): Promise<boolean> {
     const cursor = await this.getComputedStyle('cursor');
@@ -240,10 +254,7 @@ export default class BaseElement {
 
   // try this method when click() is not working
   async clickWithEval() {
-    await this.page.evaluate(elem =>
-       elem.click()
-       , this.element
-    );
+    await this.page.evaluate( elem => elem.click(), this.element );
   }
 
 }
