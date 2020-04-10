@@ -1,6 +1,6 @@
 import GoogleLoginPage, {selectors} from 'app/google-login';
 
-const configs = require('../../resources/workbench-config');
+const configs = require('resources/workbench-config');
 
 
 describe('Login tests:', () => {
