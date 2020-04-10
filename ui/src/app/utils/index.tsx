@@ -510,3 +510,14 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
     </span>);
 }
 
+// render a float value as US currency, rounded to cents: 255.372793 -> $255.37
+// negative values are rendered as $0
+export function renderUSD(value: number) {
+  value = value || 0.0;
+  if (value < 0.0) {
+    return <div style={{fontWeight: 600}}>$0</div>;
+  } else {
+    return <div style={{fontWeight: 600}}>${(value).toFixed(2)}</div>;
+  }
+}
+
