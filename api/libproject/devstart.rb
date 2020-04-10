@@ -634,15 +634,41 @@ Common.register_command({
   :fn => ->() { run_local_all_migrations() }
 })
 
-def liquibase_gradlew_command(verification_command, argument, run_list)
-  verificion_full_cmd = %W{../gradlew #{verification_command} -PrunList=#{run_list}}
-  unless argument.nil? || argument.empty?
-    verificion_full_cmd << argument
+def liquibase_gradlew_command(command, argument = '', run_list = '')
+  full_cmd_array = %W{../gradlew #{command}}
+
+  # Currently there's only one activity (main), and leaving out the runList argument causes
+  # it to run that activity. Leaving out the runList is equivalent to specifying all of the
+  # activities to run in unspecified order, but we set it in gradle.properties and pull it in as
+  # an external property anyway.
+
+  unless run_list.to_s.empty?
+    full_cmd_array << "-PrunList=#{run_list}"
   end
-  verificion_full_cmd
+
+  unless argument.to_s.empty?
+    full_cmd_array << "-PliquibaseCommandValue=#{argument}"
+  end
+
+  full_cmd_array
 end
 
-# Run a liqibase command against the specified project. Where possible, show SQL
+YES_RESPONSES = ['uh huh', 'roger', 'affirmative', 'you know it', 'most definitely', 'you betcha',
+'most assuredly', 'indubitably', 'yep','by all means', 'positively', 'aye', 'definitely', 'Make it so.',
+'You had me at hello, world.']
+
+# Get user confirmation
+def get_user_confirmation(message)
+  yes_response = YES_RESPONSES.sample
+  Common.new.status("#{message} [#{yes_response}/N]")
+
+  answer = STDIN.gets.chomp
+  unless answer.downcase == yes_response
+    raise RuntimeError.new("Operation cancelled by user.")
+  end
+end
+
+# Run a Liquibase command against the specified project. Where possible, show SQL
 # statements and ask user for verification.
 def run_liquibase(cmd_name, *args)
   command_to_sql = {
@@ -652,7 +678,7 @@ def run_liquibase(cmd_name, *args)
       'rollbackCount' => 'rollbackCountSQL',
       'rollbackToDate' => 'rollbackToDateSQL',
       'update' => 'updateSQL',
-      'updateCount' => 'updateCountSql',
+      'updateCount' => 'updateCountSql', # Stet. Official command name doesn't match Liquibase plugin task
       'updateToTag' => 'updateToTagSQL'
   }
 
@@ -680,34 +706,16 @@ def run_liquibase(cmd_name, *args)
         '--project [project]',
         String,
         ->(opts, p) { opts.project = p },
-        'AoU environment GCP project full name. Used to pick MySQL instance & creadentials.'
+        'AoU environment GCP project full name. Used to pick MySQL instance & credentials.'
   )
   op.add_validator ->(opts) {
-    if opts.command.nil? || opts.command.empty?
+    if opts.command.to_s.empty?
       raise ArgumentError.new("command is required")
     end
   }
   op.parse.validate
 
-  # Currently there's only one activity (main), and leaving out the runList arugment causes
-  # it to run that activity. However, that's not because it's detected as default or primary, but
-  # leaving out the runList is equivalent to specifying all of the activities to run in unspecified
-  # order.
-  # https://github.com/liquibase/liquibase-gradle-plugin#3-configuring-the-plugin
-  if op.opts.run_list.nil? || op.opts.run_list.empty?
-    run_list = "main"
-  else
-    run_list = op.opts.run_list
-  end
-
-  if op.opts.argument.nil? || op.opts.argument.empty?
-    # It's safe to pass the '-PliquibaseCommand=' by itself, but it's not very clean
-    argument = ''
-  else
-    argument = "-PliquibaseCommandValue=#{op.opts.argument}"
-  end
-
-  if op.opts.project.nil? || op.opts.project.empty?
+  if op.opts.project.to_s.empty?
     op.opts.project = 'local'
   end
 
@@ -719,21 +727,17 @@ def run_liquibase(cmd_name, *args)
     common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}, dir: #{Dir.pwd}")
     command = op.opts.command
 
-    Dir.chdir('db') # 'cd' isn't available to run inline apparently
+    Dir.chdir('db') # 'cd' can't be run inline in this context
+
     verification_command = command_to_sql[command]
-    common.status("command: #{command}, verification_command: #{verification_command}")
-    unless verification_command.nil? || verification_command.empty?
-      verificion_full_cmd = liquibase_gradlew_command(verification_command, argument, run_list)
 
-      common.run_inline(verificion_full_cmd)
-
-      common.status("Running the #{command} with provided arguments will run the SQL statements above. Continue? [y/N]")
-      answer = STDIN.gets.chomp
-      unless answer.downcase == 'y'
-        raise RuntimeError.new("User cancelled Liquibase #{command} operation.")
-      end
+    unless verification_command.to_s.empty?
+      verification_full_cmd = liquibase_gradlew_command(verification_command, op.opts.argument, op.opts.run_list)
+      common.run_inline(verification_full_cmd)
+      get_user_confirmation("Execute SQL commands above?")
     end
-    full_cmd = liquibase_gradlew_command(command, argument, run_list)
+
+    full_cmd = liquibase_gradlew_command(command, op.opts.argument, op.opts.run_list)
     common.run_inline(full_cmd)
   end
 end
