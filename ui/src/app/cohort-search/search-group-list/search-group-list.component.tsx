@@ -94,11 +94,15 @@ const css = `
     padding: 0 1rem;
   }
   body .p-menuitem.menuitem-header > .p-menuitem-link {
+    cursor: default;
     font-size: 12px;
     font-weight: 600;
     height: auto;
     line-height: 0.75rem;
     padding-left: 0.5rem;
+  }
+  body .p-menuitem.menuitem-header > .p-menuitem-link:hover {
+    background: ${colors.white};
   }
   body .p-tieredmenu .p-menu-separator {
     margin: 0.25rem 0;
@@ -119,6 +123,7 @@ interface Props {
 interface State {
   criteriaMenuOptions: any;
   index: number;
+  loadingMenuOptions: boolean;
 }
 
 export class SearchGroupList extends React.Component<Props, State> {
@@ -129,6 +134,7 @@ export class SearchGroupList extends React.Component<Props, State> {
     this.state = {
       criteriaMenuOptions: {programTypes: [], domainTypes: []},
       index: 0,
+      loadingMenuOptions: false
     };
   }
 
@@ -152,6 +158,7 @@ export class SearchGroupList extends React.Component<Props, State> {
   }
 
   getMenuOptions() {
+    this.setState({loadingMenuOptions: true});
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
     cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
@@ -183,6 +190,7 @@ export class SearchGroupList extends React.Component<Props, State> {
       criteriaMenuOptions[cdrVersionId].programTypes.sort((a, b) => a.order - b.order);
       criteriaMenuOptions[cdrVersionId].domainTypes.sort((a, b) => a.order - b.order);
       criteriaMenuOptionsStore.next(criteriaMenuOptions);
+      this.setState({loadingMenuOptions: false});
     });
   }
 
@@ -194,14 +202,16 @@ export class SearchGroupList extends React.Component<Props, State> {
   }
 
   get criteriaMenuItems() {
-    const {criteriaMenuOptions: {domainTypes, programTypes}} = this.state;
-    return [
-      {label: 'Program Data', className: 'menuitem-header'},
-      ...programTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
-      {separator: true},
-      {label: 'Domains', className: 'menuitem-header'},
-      ...domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
-    ];
+    const {criteriaMenuOptions: {domainTypes, programTypes}, loadingMenuOptions} = this.state;
+    return loadingMenuOptions
+      ? [{icon: 'pi pi-spin pi-spinner'}]
+      : [
+        {label: 'Program Data', className: 'menuitem-header'},
+        ...programTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
+        {separator: true},
+        {label: 'Domains', className: 'menuitem-header'},
+        ...domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
+      ];
   }
 
   launchWizard(criteria: any) {
