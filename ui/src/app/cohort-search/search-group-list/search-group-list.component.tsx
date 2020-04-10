@@ -13,7 +13,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
+import {DomainType, SearchRequest} from 'generated/fetch';
 
 function initItem(id: string, type: string) {
   return {
@@ -166,7 +166,6 @@ export class SearchGroupList extends React.Component<Props, State> {
             order: PROGRAM_TYPES.indexOf(DomainType[domain])};
           if (domain === DomainType[DomainType.PERSON]) {
             option['children'] = types
-            .filter(subopt => subopt.type !== CriteriaType[CriteriaType.DECEASED])
             .map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
           }
           acc.programTypes.push(option);
