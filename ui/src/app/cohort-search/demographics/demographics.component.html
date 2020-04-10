@@ -5,7 +5,7 @@
       <div class="age-label">
         Age Range
       </div>
-      <div class="control-wrapper slider-wrapper" [class.disabled]="deceased.value">
+      <div class="control-wrapper slider-wrapper">
         <input type="number"
           id="min-age"
           [min]="minAge" [max]="maxAge"
@@ -34,19 +34,12 @@
           class="number-display"
           (blur)="checkMax()">
       </div>
-      <div *ngIf="enableCBAgeTypeOptions" style="margin-left: 1rem" [class.disabled]="deceased.value">
+      <div *ngIf="enableCBAgeTypeOptions" style="margin-left: 1rem">
         <div *ngFor="let ageType of ageTypes; let i = index;" class="radio-inline">
           <input type="radio" [id]="'age_' + i" [value]="ageType.type" formControlName="ageType">
           <label [for]="'age_' + i">{{ageType.label}}</label>
         </div>
       </div>
-
-      <clr-checkbox formControlName="deceased" [clrDisabled]="!ageNode || !deceasedNode">
-        Is Deceased
-        <span *ngIf="enableCBAgeTypeOptions && deceasedNode" class="badge badge-info">
-          {{deceasedNode.count | number}}
-        </span>
-      </clr-checkbox>
     </ng-container>
     <div *ngIf="loading" class="spinner" style="left: 45%"></div>
   </div>
