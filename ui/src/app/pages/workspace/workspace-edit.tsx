@@ -930,7 +930,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                           }
                         }}
               />
-              <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true}>
+              <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
                 <div style={styles.freeCreditsBalanceOverlay}>
                   FREE CREDIT BALANCE {renderUSD(freeTierCreditsBalance)}
                 </div>
