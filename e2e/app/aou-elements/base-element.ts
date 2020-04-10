@@ -178,14 +178,17 @@ export default class BaseElement {
   /**
    * Calling focus() and hover() together.
    */
-  async focus(): Promise<void[]> {
+  async focus(): Promise<void> {
     const handle = this.element.asElement();
-    return Promise.all([
+    await Promise.all([
       handle.focus(),
       handle.hover()
     ]);
   }
 
+  /**
+   * Clear value in textbox or textarea.
+   */
   async clear(): Promise<void> {
     await this.element.click({clickCount: 3});
     await this.element.press('Backspace');

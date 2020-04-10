@@ -1,14 +1,14 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import {defaultFieldValues} from '../resources/data/user-registration-fields';
-import Button from './aou-elements/button';
-import Checkbox from './aou-elements/checkbox';
-import ClrIconLink from './aou-elements/clr-icon-link';
-import SelectComponent from './aou-elements/select-component';
-import Textarea from './aou-elements/textarea';
-import Textbox from './aou-elements/textbox';
-import BasePage from './base-page';
+import {defaultFieldValues} from 'resources/data/user-registration-fields';
+import Button from 'app/aou-elements/button';
+import Checkbox from 'app/aou-elements/checkbox';
+import ClrIconLink from 'app/aou-elements/clr-icon-link';
+import SelectComponent from 'app/aou-elements/select-component';
+import Textarea from 'app/aou-elements/textarea';
+import Textbox from 'app/aou-elements/textbox';
+import BasePage from 'app/base-page';
 
-const configs = require('../resources/workbench-config');
+const configs = require('resources/workbench-config');
 const faker = require('faker/locale/en_US');
 
 export const PAGE = {

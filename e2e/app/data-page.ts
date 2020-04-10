@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
 import Ellipsis from 'app/aou-elements/ellipsis-dropdown';
 import AuthenticatedPage from 'app/authenticated-page';
-import {workspaceAction} from '../util/enums';
+import {workspaceAction} from 'util/enums';
 
 export const TAB_SELECTOR = {
   cohortsTab: '//*[@role="button"][(text()="Cohorts")]',

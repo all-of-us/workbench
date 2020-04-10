@@ -1,5 +1,6 @@
 import CreateAccountPage from 'app/create-account-page';
 import GoogleLoginPage from 'app/google-login';
+
 const configs = require('resources/workbench-config');
 
 

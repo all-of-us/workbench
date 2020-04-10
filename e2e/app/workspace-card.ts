@@ -1,5 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
-import BaseElement from './aou-elements/base-element';
+import BaseElement from 'app/aou-elements/base-element';
 import {workspaceAccessLevel} from 'util/enums';
 const fp = require('lodash/fp');
 

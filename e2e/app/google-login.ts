@@ -1,9 +1,9 @@
 import { ElementHandle, Page } from 'puppeteer';
-import {findButton} from './aou-elements/xpath-finder';
-import BasePage from './base-page';
-import HomePage from './home-page';
+import {findButton} from 'app/aou-elements/xpath-finder';
+import BasePage from 'app/base-page';
+import HomePage from 'app/home-page';
 
-const configs = require('../resources/workbench-config');
+const configs = require('resources/workbench-config');
 
 export const selectors = {
   loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In with Google")]',

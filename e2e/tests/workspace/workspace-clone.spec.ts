@@ -92,7 +92,7 @@ describe('Clone workspace', () => {
       await dataPage.waitForLoad();
     // save Data page URL for comparison after sign out then sign in back
       const workspaceDataUrl = await page.url();
-      expect(workspaceDataUrl).toContain(cloneWorkspaceName.replace(/-/g, ""));
+      expect(workspaceDataUrl).toContain(cloneWorkspaceName.replace(/-/g, ''));
 
       await jestPuppeteer.resetBrowser();
       const newPage = await browser.newPage();

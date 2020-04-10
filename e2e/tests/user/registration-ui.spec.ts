@@ -2,7 +2,7 @@ import BaseElement from 'app/aou-elements/base-element';
 import CreateAccountPage from 'app/create-account-page';
 import GoogleLoginPage from 'app/google-login';
 
-const configs = require('../../resources/workbench-config');
+const configs = require('resources/workbench-config');
 
 
 describe('User registration tests:', () => {

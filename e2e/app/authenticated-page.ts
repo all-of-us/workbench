@@ -1,14 +1,14 @@
 import {performance} from 'perf_hooks';
 import {Page} from 'puppeteer';
-import Checkbox from './aou-elements/checkbox';
-import RadioButton from './aou-elements/radiobutton';
-import TextOptions from './aou-elements/text-options';
-import Textarea from './aou-elements/textarea';
-import Textbox from './aou-elements/textbox';
-import {clrIconXpath} from './aou-elements/xpath-defaults';
-import {findIcon} from './aou-elements/xpath-finder';
-import BasePage from './base-page';
-import {pageUrl, sideNavLink} from '../util/enums';
+import Checkbox from 'app/aou-elements/checkbox';
+import RadioButton from 'app/aou-elements/radiobutton';
+import TextOptions from 'app/aou-elements/text-options';
+import Textarea from 'app/aou-elements/textarea';
+import Textbox from 'app/aou-elements/textbox';
+import {clrIconXpath} from 'app/aou-elements/xpath-defaults';
+import {findIcon} from 'app/aou-elements/xpath-finder';
+import BasePage from 'app/base-page';
+import {pageUrl, sideNavLink} from 'util/enums';
 
 const selectors = {
   signedInIndicator: 'body#body div',

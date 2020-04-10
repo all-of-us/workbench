@@ -1,11 +1,11 @@
 import {Page} from 'puppeteer';
-import Button from './aou-elements/button';
-import Checkbox from './aou-elements/checkbox';
-import Select from './aou-elements/select';
-import SelectComponent from './aou-elements/select-component';
-import Textbox from './aou-elements/textbox';
-import WebComponent from './aou-elements/web-component';
-import AuthenticatedPage from './authenticated-page';
+import Button from 'app/aou-elements/button';
+import Checkbox from 'app/aou-elements/checkbox';
+import Select from 'app/aou-elements/select';
+import SelectComponent from 'app/aou-elements/select-component';
+import Textbox from 'app/aou-elements/textbox';
+import WebComponent from 'app/aou-elements/web-component';
+import AuthenticatedPage from 'app/authenticated-page';
 
 const faker = require('faker/locale/en_US');
 
