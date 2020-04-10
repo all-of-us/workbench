@@ -3648,6 +3648,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable version 2 of the Data User Code of Conduct
+      enableEventDateModifier:
+        type: boolean
+        default: false
+        description: Whether to show the Event Date modifier in cohort builder
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:
