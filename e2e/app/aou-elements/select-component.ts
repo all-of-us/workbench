@@ -9,16 +9,40 @@ export default class SelectComponent {
     this.nodeLevel = nodeLevel || 1;
   }
 
-  async select(textValue: string): Promise<string> {
-    await this.open(2); // with 2 retries
-    const selector = this.dropdownXpath() + `//li[contains(normalize-space(text()), "${textValue}")]`;
-    const selectValue = await this.page.waitForXPath(selector, { visible: true });
-    const selectElement = new BaseElement(this.page, selectValue);
-    const textContent = await selectElement.getTextContent();
-    await selectValue.click();
-    // need to make sure dropdown is disappeared, so it cannot interfere with clicking on elements below.
-    await this.waitUntilDropdownClosed();
-    return textContent;
+  /**
+   * Select option in a Select element.
+   * @param textValue
+   * @param {number} retries Default retry count is 2.
+   */
+  async select(textValue: string, retries: number = 2): Promise<string> {
+
+    const doSelect = async () => {
+      await this.open(2);
+      const selector = this.dropdownXpath() + `//li[contains(normalize-space(text()), "${textValue}")]`;
+      const selectValue = await this.page.waitForXPath(selector, {visible: true});
+      const selectElement = new BaseElement(this.page, selectValue);
+      const textContent = await selectElement.getTextContent();
+      await selectValue.click();
+      // need to make sure dropdown is disappeared, so it cannot interfere with clicking on elements below.
+      await this.waitUntilDropdownClosed();
+      return textContent;
+    };
+
+    const clickAndCheck = async () => {
+      retries --;
+      const selectedValue = await doSelect();
+      // compare with displayed text in Select textbox
+      const displayedValue = await this.getSelectedValue();
+      if (selectedValue === displayedValue) {
+        return; // success
+      }
+      if (retries === 0) {
+        return;
+      }
+      return await this.page.waitFor(2000).then(clickAndCheck); // two seconds pause and retry
+    };
+
+    return clickAndCheck();
   }
 
   async getSelectedValue(): Promise<unknown> {
@@ -31,17 +55,17 @@ export default class SelectComponent {
   // open Select dropdown with retries
   private async open(retries: number): Promise<void> {
     const click = async () => {
+      retries --;
       const is = await this.isOpen();
       if (!is) {
         await this.toggleOpenClose();
       } else {
         return;
       }
-      if (retries < 0) {
+      if (retries === 0) {
         return;
       }
-      retries --;
-      await this.page.waitFor(1000).then(click); // one second pause before try again
+      return await this.page.waitFor(1000).then(click); // one second pause before try again
     };
     return click();
   }

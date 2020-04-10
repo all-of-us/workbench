@@ -1,7 +1,7 @@
-import {SideNavLink} from '../../app/authenticated-page';
-import HomePage from '../../app/home-page';
-import ProfilePage from '../../app/profile-page';
-import {signIn} from '../app';
+import HomePage from 'app/home-page';
+import ProfilePage from 'app/profile-page';
+import {sideNavLink} from 'util/enums';
+import {signIn} from 'tests/app';
 
 
 describe('Profile', () => {
@@ -18,7 +18,7 @@ describe('Profile', () => {
   test('Click First and Last name fields on Profile page', async () => {
     const homePage = new HomePage(page);
     await homePage.waitForLoad();
-    await homePage.navTo(SideNavLink.PROFILE);
+    await homePage.navTo(sideNavLink.PROFILE);
     const profilePage = new ProfilePage(page);
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();

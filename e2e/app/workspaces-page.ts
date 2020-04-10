@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
-import {findButton} from './aou-elements/xpath-finder';
-import {PageUrl} from './authenticated-page';
-import WorkspaceEditPage from './workspace-edit-page';
+import Button from 'app/aou-elements/button';
+import WorkspaceEditPage from 'app/workspace-edit-page';
+import {pageUrl} from 'util/enums';
 
 const faker = require('faker/locale/en_US');
 
@@ -9,14 +9,14 @@ export const PAGE = {
   TITLE: 'View Workspace',
 };
 
-export const FIELD_LABEL = {
+export const labelAlias = {
   CREATE_A_NEW_WORKSPACE: 'Create a New Workspace',
 };
 
-export const FIELD_FINDER = {
-  CREATE_A_NEW_WORKSPACE_BUTTON: {
+export const fields = {
+  createNewWorkspaceButton: {
     textOption: {
-      normalizeSpace: FIELD_LABEL.CREATE_A_NEW_WORKSPACE
+      normalizeSpace: labelAlias.CREATE_A_NEW_WORKSPACE
     }
   }
 };
@@ -42,12 +42,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     * Load 'Your Workspaces' page and ensure page load is completed.
     */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.WORKSPACES);
+    await this.loadPageUrl(pageUrl.WORKSPACES);
     return this;
-  }
-
-  async getCreateNewWorkspaceButton() {
-    return findButton(this.page, {normalizeSpace: FIELD_LABEL.CREATE_A_NEW_WORKSPACE}, {visible: true});
   }
 
    // tests helpers: combined a number of steps in one function
@@ -61,8 +57,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     * 4: return
     */
   async clickCreateNewWorkspace(): Promise<WorkspacesPage> {
-    const link = await this.getCreateNewWorkspaceButton();
-    await this.clickAndWait(link);
+    const createNewWorkspaceButton  = await Button.forLabel(page, fields.createNewWorkspaceButton.textOption );
+    await this.clickAndWait(createNewWorkspaceButton);
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
     return this;
@@ -72,13 +68,12 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     * Create a simple and basic new workspace end-to-end.
     */
   async createWorkspace(workspaceName: string, billingAccount: string) {
-
     await this.clickCreateNewWorkspace();
       // wait for Billing Account default selected value
     await this.waitForTextExists('Use All of Us free credits');
 
     await (await this.getWorkspaceNameTextbox()).type(workspaceName);
-    await (await this.getWorkspaceNameTextbox()).pressKeyboard('Tab', {delay: 100});
+    await (await this.getWorkspaceNameTextbox()).tabKey();
 
       // select Synthetic Data Set 2
     await this.selectDataSet('2');

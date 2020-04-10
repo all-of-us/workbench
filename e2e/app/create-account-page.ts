@@ -113,7 +113,7 @@ export default class CreateAccountPage extends BasePage {
     for (const field of fields) {
       const textbox = await Textbox.forLabel(this.page, {text: field.label});
       await textbox.type(field.value);
-      await textbox.pressKeyboard('Tab', { delay: 100 });
+      await textbox.tabKey();
       if (field.label === 'New Username') {
         await ClrIconLink.forLabel(this.page, {text: field.label}, 'success-standard');
         newUserName = field.value; // store new username for return
@@ -153,7 +153,7 @@ export default class CreateAccountPage extends BasePage {
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
     const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
     await emailAddressTextbox.type(configs.broadInstitutionEmail);
-    await emailAddressTextbox.pressKeyboard('Tab', { delay: 100 }); // tab out to start email validation
+    await emailAddressTextbox.tabKey(); // tab out to start email validation
     const roleSelect = new SelectComponent(this.page, 'describes your role');
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }

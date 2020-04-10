@@ -14,6 +14,7 @@ export default class BaseElement {
   protected css: string;
   protected xpath: string;
   protected element: ElementHandle;
+  protected selector; // xpath or css selector
 
   constructor(aPage: Page, aElement?: ElementHandle) {
     this.page = aPage;
@@ -183,6 +184,11 @@ export default class BaseElement {
       handle.focus(),
       handle.hover()
     ]);
+  }
+
+  async clear(): Promise<void> {
+    await this.element.click({clickCount: 3});
+    await this.element.press('Backspace');
   }
 
   /**

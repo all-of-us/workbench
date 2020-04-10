@@ -52,7 +52,7 @@ export default abstract class BasePage {
    */
   async clickAndWait(clickElement: ElementHandle | BaseElement) {
     return Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 90000}),
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 120000}),
       clickElement.click(),
     ]);
   }
@@ -261,8 +261,8 @@ export default abstract class BasePage {
    * @param {Puppeteer.Page} page
    * @param {string} fileName
    */
-  async saveHtmlToFile(page, fileName: string) {
-    const html = await page.content();
+  async saveHtmlToFile(fileName: string) {
+    const html = await this.page.content();
     await this.saveToFile(fileName, html);
   }
 

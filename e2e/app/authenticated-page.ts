@@ -1,3 +1,4 @@
+import {performance} from 'perf_hooks';
 import {Page} from 'puppeteer';
 import Checkbox from './aou-elements/checkbox';
 import RadioButton from './aou-elements/radiobutton';
@@ -7,41 +8,12 @@ import Textbox from './aou-elements/textbox';
 import {clrIconXpath} from './aou-elements/xpath-defaults';
 import {findIcon} from './aou-elements/xpath-finder';
 import BasePage from './base-page';
-import {performance} from 'perf_hooks';
-
-const configs = require('../resources/workbench-config');
+import {pageUrl, sideNavLink} from '../util/enums';
 
 const selectors = {
   signedInIndicator: 'body#body div',
   logo: 'img[src="/assets/images/all-of-us-logo.svg"]'
 };
-
-export enum PageUrl {
-  HOME = configs.uiBaseUrl,
-  WORKSPACES = configs.uiBaseUrl + configs.workspacesUrlPath,
-  ADMIN = configs.uiBaseUrl + configs.adminUrlPath,
-}
-
-export enum SideNavLink {
-  HOME = 'Home',
-  ADMIN = 'Admin',
-  USER_ADMIN = 'User Admin',
-  PROFILE = 'Profile',
-  SIGN_OUT = 'Sign Out',
-  CONTACT_US = 'Contact Us',
-  USER_SUPPORT = 'User Support',
-  YOUR_WORKSPACES = 'Your Workspaces',
-  FEATURED_WORKSPACES = 'Featured Workspaces',
-}
-
-export enum SideNavLinkIcon {
-  HOME = 'home',
-  ADMIN = 'user',
-  CONTACT_US = 'envelope',
-  USER_SUPPORT = 'help',
-  YOUR_WORKSPACES = 'applications',
-  FEATURED_WORKSPACES = 'star',
-}
 
 
 /**
@@ -70,7 +42,11 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    await this.isLoaded();
+    if (!await this.isLoaded()) {
+      await this.saveHtmlToFile('PageIsNotLoaded');
+      await this.takeScreenshot('PageIsNotLoaded');
+      throw new Error('Page isLoaded() failed.');
+    }
     await this.waitUntilNoSpinner();
     return this;
   }
@@ -78,7 +54,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   /**
    * Load AoU page URL.
    */
-  async loadPageUrl(url: PageUrl): Promise<void> {
+  async loadPageUrl(url: pageUrl): Promise<void> {
     await this.gotoUrl(url.toString());
     await this.waitForLoad();
   }
@@ -87,7 +63,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Go to application page.
    * @param targetPage
    */
-  async navTo(targetPage: SideNavLink) {
+  async navTo(targetPage: sideNavLink) {
     await this.openSideNav();
     const angleIconXpath = clrIconXpath({}, 'angle');
     await this.page.waitForXPath(angleIconXpath, {timeout: 2000});
@@ -97,12 +73,12 @@ export default abstract class AuthenticatedPage extends BasePage {
     if (!applink) {
       // if sidnav link is not found, check to see if it's a link under User or Admin submenu.
       const [username, admin] = await this.page.$x(angleIconXpath);
-      if (targetPage === SideNavLink.PROFILE || targetPage === SideNavLink.SIGN_OUT) {
+      if (targetPage === sideNavLink.PROFILE || targetPage === sideNavLink.SIGN_OUT) {
         // Open User submenu if needed
         if (!applink) {
           await username.click();
         }
-      } else if (targetPage === SideNavLink.USER_ADMIN) {
+      } else if (targetPage === sideNavLink.USER_ADMIN) {
         // Open Admin submenu if needed
         if (!applink) {
           await admin.click();
@@ -111,7 +87,7 @@ export default abstract class AuthenticatedPage extends BasePage {
     }
     // find target sidenav link again. If not found, throws exception
     const link = await this.page.waitForXPath(appLinkXpath, {timeout: 2000});
-    if (targetPage === SideNavLink.CONTACT_US) {
+    if (targetPage === sideNavLink.CONTACT_US) {
       await link.click();
     } else {
       await this.clickAndWait(link);
@@ -192,12 +168,12 @@ export default abstract class AuthenticatedPage extends BasePage {
     }
   }
 
-
   /**
    *
    * @param fields Array
    */
-  async performUiActions(fields: ({ id: { textOption?: TextOptions; affiliated?: string; type?: string }; value?: string; selected?: boolean })[]) {
+  async performUiActions(
+     fields: ({ id: { textOption?: TextOptions; affiliated?: string; type?: string }; value?: string; selected?: boolean })[]) {
     for (const field of fields) {
       await this.performUiAction(field.id, field.value, field.selected);
     }
@@ -207,35 +183,37 @@ export default abstract class AuthenticatedPage extends BasePage {
    * UI actions helper function.
    *
    * @param { textOption?: TextOptions; affiliated?: string; type?: string } identifier
-   * @param { string } value
-   * @param { boolean } selected
+   * @param { string } value Set textbox or textarea value if associated UI element is a Checkbox.
+   * @param { boolean } Set to True for select Checkbox or Radiobutton. False to unselect.
    */
-  async performUiAction(identifier: { textOption?: TextOptions; affiliated?: string; type?: string }, value?: string, selected?: boolean) {
+  async performUiAction(identifier: { textOption?: TextOptions; affiliated?: string; type?: string },
+                        value?: string,
+                        selected?: boolean) {
     switch (identifier.type.toLowerCase()) {
-      case 'radiobutton':
-        const radioELement = await RadioButton.forLabel(this.page, identifier.textOption);
-        await radioELement.toggle(selected);
-        break;
-      case 'checkbox':
-        const checkboxElement = await Checkbox.forLabel(this.page, identifier.textOption);
-        await checkboxElement.toggle(selected);
-        if (value) {
-          // For UI fields which is displayed with a checkbox and a textbox or textarea together
-          await this.performUiAction({ textOption: identifier.textOption, type: identifier.affiliated }, value);
-        }
-        break;
-      case 'textbox':
-        const textboxElement = await Textbox.forLabel(this.page, identifier.textOption);
-        await textboxElement.type(value);
-        await textboxElement.tabKey();
-        break;
-      case 'textarea':
-        const textareaElement = await Textarea.forLabel(this.page, identifier.textOption);
-        await textareaElement.type(value);
-        await textareaElement.tabKey();
-        break;
-      default:
-        throw new Error(`${identifier} is not recognized.`)
+    case 'radiobutton':
+      const radioELement = await RadioButton.forLabel(this.page, identifier.textOption);
+      await radioELement.toggle(selected);
+      break;
+    case 'checkbox':
+      const checkboxElement = await Checkbox.forLabel(this.page, identifier.textOption);
+      await checkboxElement.toggle(selected);
+      if (value) {
+          // For Checkbox and its required Textarea or Textbox. Set value in Textbox or Textarea if Checkbox is checked.
+        await this.performUiAction({ textOption: identifier.textOption, type: identifier.affiliated }, value);
+      }
+      break;
+    case 'textbox':
+      const textboxElement = await Textbox.forLabel(this.page, identifier.textOption);
+      await textboxElement.type(value);
+      await textboxElement.tabKey();
+      break;
+    case 'textarea':
+      const textareaElement = await Textarea.forLabel(this.page, identifier.textOption);
+      await textareaElement.type(value);
+      await textareaElement.tabKey();
+      break;
+    default:
+      throw new Error(`${identifier} is not recognized.`)
     }
   }
 

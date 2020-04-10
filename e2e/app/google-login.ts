@@ -54,7 +54,7 @@ export default class GoogleLoginPage extends BasePage {
 
     // compare to the Use another account link
     const [link] = await this.page.$x(useAnotherAccountXpath);
-    const isLink = await page.evaluate((e1, e2) => e1 === e2, elemt1, link);
+    const isLink = await this.page.evaluate((e1, e2) => e1 === e2, elemt1, link);
     if (isLink) {
       // click " Use another Account " link
       await this.clickAndWait(link);
@@ -126,7 +126,7 @@ export default class GoogleLoginPage extends BasePage {
       await this.submit();
     } catch (err) {
       await this.takeScreenshot('FailedLoginPage');
-      await this.saveHtmlToFile(this.page, 'FailedLoginPage');
+      await this.saveHtmlToFile('FailedLoginPage');
       throw err;
     }
 

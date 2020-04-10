@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
-import Textbox from './aou-elements/textbox';
-import AuthenticatedPage from './authenticated-page';
+import Textbox from 'app/aou-elements/textbox';
+import AuthenticatedPage from 'app/authenticated-page';
 
 
 export const PAGE = {

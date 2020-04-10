@@ -1,11 +1,11 @@
-import NewClrIconLink from '../../app/aou-elements/clr-icon-link';
-import Link from '../../app/aou-elements/link';
-import BaseElement from '../../app/aou-elements/base-element';
-import HomePage, {FIELD_LABEL as editPageFieldLabel} from '../../app/home-page';
-import WorkspaceCard from '../../app/workspace-card';
-import WorkspaceEditPage from '../../app/workspace-edit-page';
-import WorkspacesPage from '../../app/workspaces-page';
-import {signIn} from '../app';
+import ClrIconLink from 'app/aou-elements/clr-icon-link';
+import Link from 'app/aou-elements/link';
+import BaseElement from 'app/aou-elements/base-element';
+import HomePage, {FIELD_LABEL as editPageFieldLabel} from 'app/home-page';
+import WorkspaceCard from 'app/workspace-card';
+import WorkspaceEditPage from 'app/workspace-edit-page';
+import WorkspacesPage from 'app/workspaces-page';
+import {signIn} from 'tests/app';
 
 
 describe('Home page ui tests', () => {
@@ -43,11 +43,8 @@ describe('Home page ui tests', () => {
       const cardName = await card.getWorkspaceName();
       expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
-      // check ellipsis icon existed
-      expect(await card.getEllipsisIcon()).toBeTruthy();
-
       // Assumption: test user is workspace Owner.
-      // Check ellipsis popup has right option values
+      // Check Workspace Actions ellipsis popup has right option values
       const links = await card.getPopupLinkTextsArray();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }
@@ -76,7 +73,7 @@ describe('Home page ui tests', () => {
   });
 
   test('Check Create New Workspace link on Home page', async () => {
-    const anyLink = await NewClrIconLink.forLabel(page, editPageFieldLabel.CREATE_A_NEW_WORKSPACE, 'plus-circle');
+    const anyLink = await ClrIconLink.forLabel(page, {normalizeSpace: editPageFieldLabel.CREATE_A_NEW_WORKSPACE}, 'plus-circle');
     expect(anyLink).toBeTruthy();
     const classname = await anyLink.getProperty('className');
     expect(classname).toBe('is-solid');
