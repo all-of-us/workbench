@@ -1,9 +1,9 @@
-import BaseElement from '../../app/aou-elements/base-element';
-import {SideNavLink} from '../../app/authenticated-page';
-import HomePage from '../../app/home-page';
-import WorkspaceCard from '../../app/workspace-card';
-import WorkspacesPage from '../../app/workspaces-page';
-import {signIn} from '../app';
+import BaseElement from 'app/aou-elements/base-element';
+import {SideNavLink} from 'app/authenticated-page';
+import HomePage from 'app/home-page';
+import WorkspaceCard from 'app/workspace-card';
+import WorkspacesPage from 'app/workspaces-page';
+import {signIn} from 'tests/app';
 
 
 describe('Workspace ui tests', () => {

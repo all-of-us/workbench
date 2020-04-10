@@ -1,10 +1,10 @@
-import Button from '../../app/aou-elements/button';
-import {SideNavLink} from '../../app/authenticated-page';
-import HomePage from '../../app/home-page';
-import ProfilePage from '../../app/profile-page';
-import WorkspacesPage from '../../app/workspaces-page';
-import {waitForExists} from '../../driver/xpath-util';
-import {signIn} from '../app';
+import Button from 'app/aou-elements/button';
+import {SideNavLink} from 'app/authenticated-page';
+import HomePage from 'app/home-page';
+import ProfilePage from 'app/profile-page';
+import WorkspacesPage from 'app/workspaces-page';
+import {waitForExists} from 'driver/xpath-util';
+import {signIn} from 'tests/app';
 
 export const HELP_DESK = {
   ASK_QUESTION: 'Ask a question about the Researcher Workbench',

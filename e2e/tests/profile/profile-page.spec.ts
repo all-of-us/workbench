@@ -1,7 +1,7 @@
-import {SideNavLink} from '../../app/authenticated-page';
-import HomePage from '../../app/home-page';
-import ProfilePage from '../../app/profile-page';
-import {signIn} from '../app';
+import {SideNavLink} from 'app/authenticated-page';
+import HomePage from 'app/home-page';
+import ProfilePage from 'app/profile-page';
+import {signIn} from 'tests/app';
 
 
 describe('Profile', () => {

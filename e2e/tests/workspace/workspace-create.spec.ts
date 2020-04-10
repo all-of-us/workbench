@@ -1,7 +1,7 @@
-import Link from '../../app/aou-elements/link';
-import DataPage from '../../app/data-page';
-import WorkspacesPage from '../../app/workspaces-page';
-import {signIn} from '../app';
+import Link from 'app/aou-elements/link';
+import DataPage from 'app/data-page';
+import WorkspacesPage from 'app/workspaces-page';
+import {signIn} from 'tests/app';
 
 
 describe('Workspace creation tests:', () => {
