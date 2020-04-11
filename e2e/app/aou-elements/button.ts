@@ -26,24 +26,25 @@ export default class Button extends BaseElement {
 
   /**
    * Wait until button is clickable (enabled).
+   * @param {string} selector (Optional) Button Xpath selector.
+   * @throws Timeout exception if button is not enabled after waiting.
    */
-  async waitUntilEnabled(selector?: string): Promise<unknown> {
+  async waitUntilEnabled(selector?: string): Promise<void> {
     // works with either a xpath selector or a Element
     if (selector === undefined) {
-      const retrievedValue = await this.page.waitForFunction((e) => {
+      await this.page.waitForFunction((e) => {
         const style = window.getComputedStyle(e);
         return style.getPropertyValue('cursor') === 'pointer';
-      }, { polling: 'mutation' }, this.element);
-      return retrievedValue.jsonValue();
+      }, {}, this.element);
+      return;
     }
 
-    const booleanValue = await this.page.waitForFunction(xpathSelector => {
+    await this.page.waitForFunction(xpathSelector => {
       const elemt = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       const style = window.getComputedStyle(elemt as Element);
       const propValue = style.getPropertyValue('cursor');
       return propValue === 'pointer';
-    }, { polling: 'mutation' }, selector);
-    return booleanValue.jsonValue();
+    }, {}, selector);
   }
 
 }

@@ -59,13 +59,13 @@ export default class Checkbox extends BaseElement {
 
   /**
    * Toggle checkbox state.
-   * @param {boolean} onOrOff
+   * @param {boolean} checked
    */
-  async toggle(onOrOff?: boolean): Promise<void> {
-    if (onOrOff === undefined) {
+  async toggle(checked?: boolean): Promise<void> {
+    if (checked === undefined) {
       await this.clickWithEval();
     }
-    if (onOrOff) {
+    if (checked) {
       return this.check();
     }
     return this.unCheck();

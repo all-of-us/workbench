@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import {pageUrl} from '../resources/enums';
+import {PAGE_URL} from '../resources/enums';
 import {findButton} from './aou-elements/xpath-finder';
 import AuthenticatedPage from './authenticated-page';
 import WorkspaceEditPage from './workspace-edit-page';
@@ -34,7 +34,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * Load 'Your Workspaces' page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(pageUrl.WORKSPACES);
+    await this.loadPageUrl(PAGE_URL.WORKSPACES);
     return this;
   }
 

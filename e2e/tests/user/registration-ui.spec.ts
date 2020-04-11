@@ -90,7 +90,7 @@ describe('User registration tests:', () => {
 
     await createAccountPage.fillOutInstitution();
 
-    expect(await nextButton.waitUntilEnabled()).toBe(true);
+    await nextButton.waitUntilEnabled();
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
     await nextButton.clickWithEval();
 

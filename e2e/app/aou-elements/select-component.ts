@@ -11,17 +11,17 @@ export default class SelectComponent {
 
   /**
    * Select an option in a Select element.
-   * @param textValue
-   * @param {number} retries Default retry count is 2.
+   * @param {string} textValue Partial or full string to click in Select.
+   * @param {number} tryCount Default try count is 2.
    */
-  async select(textValue: string, retries: number = 2): Promise<string | null> {
+  async select(textValue: string, tryCount: number = 2): Promise<void> {
 
     const clickText = async () => {
       await this.open(2);
       const selector = this.dropdownXpath() + `//li[contains(normalize-space(text()), "${textValue}")]`;
       const selectValue = await this.page.waitForXPath(selector, {visible: true});
-      const selectElement = new BaseElement(this.page, selectValue);
-      const textContent = await selectElement.getTextContent();
+      const baseElement = new BaseElement(this.page, selectValue);
+      const textContent = await baseElement.getTextContent(); // get full text
       await selectValue.click();
       // need to make sure dropdown is disappeared, so it cannot interfere with clicking on elements below.
       await this.waitUntilDropdownClosed();
@@ -29,22 +29,25 @@ export default class SelectComponent {
     };
 
     const clickAndCheck = async () => {
-      retries --;
-      const selectedValue = await clickText();
+      tryCount--;
+      const shouldSelectedValue = await clickText();
       // compare to displayed text in Select textbox
       const displayedValue = await this.getSelectedValue();
-      if (selectedValue === displayedValue) {
-        return selectedValue; // success
+      if (shouldSelectedValue === displayedValue) {
+        return shouldSelectedValue; // success
       }
-      if (retries === 0) {
+      if (tryCount <= 0) {
         return null;
       }
       return await this.page.waitFor(2000).then(clickAndCheck); // two seconds pause and retry
     };
 
-    return clickAndCheck();
+    await clickAndCheck();
   }
 
+  /**
+   * Returns selected value in Select.
+   */
   async getSelectedValue(): Promise<unknown> {
     const selector = this.dropdownXpath() + '/label';
     const displayedValue = await this.page.waitForXPath(selector, { visible: true });
@@ -54,18 +57,18 @@ export default class SelectComponent {
 
   /**
    * Open Select dropdown.
-   * @param {number} retries Retry count. Default is 1.
+   * @param {number} tryCount Default is 1.
    */
-  private async open(retries: number = 1): Promise<void> {
+  private async open(tryCount: number = 1): Promise<void> {
     const click = async () => {
-      retries --;
+      tryCount--;
       const is = await this.isOpen();
       if (!is) {
         await this.toggleOpenClose();
       } else {
         return;
       }
-      if (retries === 0) {
+      if (tryCount <= 0) {
         return;
       }
       await this.page.waitFor(1000).then(click); // one second pause before try again

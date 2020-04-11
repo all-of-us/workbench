@@ -1,27 +1,25 @@
-// @ts-nocheck
+export const config = require('resources/workbench-config');
 
-export enum workspaceAccessLevel {
+export enum WORKSPACE_ACCESS_LEVEL {
    OWNER = 'OWNER',
    READER = 'READER',
    WRITER = 'WRITER',
 }
 
-export enum workspaceAction {
+export enum WORKSPACE_ACTION {
    DUPLICATE  = 'Duplicate',
    DELETE = 'Delete',
    EDIT = 'Edit',
    SHARE = 'Share',
 }
 
-const configs = require('../resources/workbench-config');
-
-export enum pageUrl {
-   HOME = configs.uiBaseUrl,
-   WORKSPACES = configs.uiBaseUrl + configs.workspacesUrlPath,
-   ADMIN = configs.uiBaseUrl + configs.adminUrlPath,
+export enum PAGE_URL {
+   HOME = config.uiBaseUrl,
+   WORKSPACES = config.uiBaseUrl + config.workspacesUrlPath,
+   ADMIN = config.uiBaseUrl + config.adminUrlPath,
 }
 
-export enum sideNavLink {
+export enum NAV_LINK {
    HOME = 'Home',
    ADMIN = 'Admin',
    USER_ADMIN = 'User Admin',
@@ -33,7 +31,7 @@ export enum sideNavLink {
    FEATURED_WORKSPACES = 'Featured Workspaces',
 }
 
-export enum sideNavLinkIcon {
+export enum NAV_LINK_ICON {
    HOME = 'home',
    ADMIN = 'user',
    CONTACT_US = 'envelope',

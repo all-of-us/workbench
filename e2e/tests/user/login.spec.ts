@@ -2,7 +2,6 @@ import GoogleLoginPage, {selectors} from 'app/google-login';
 
 const configs = require('resources/workbench-config');
 
-
 describe('Login tests:', () => {
 
   beforeEach(async () => {
