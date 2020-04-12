@@ -804,16 +804,22 @@ paths:
           description: Workspace deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cdr-selectors":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/workspaceResources":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-    get:
+    post:
+      parameters:
+        - in: body
+          name: resourcesToFetch
+          description: Types of workspace resources to fetch. Currently only supports
+            Cohorts, Cohort Reviews, Concept Sets, and Datasets
+          schema:
+            "$ref": "#/definitions/WorkspaceResourcesRequest"
       tags:
       - workspaces
-      description: Gets all items within a workspace that describe user selected
-        subsets of the CDR (e.g., concept sets, cohorts, datasets, etc)
-      operationId: getCdrSelectors
+      description: Gets a user defined selection of objects contained within a workspace
+      operationId: getWorkspaceResources
       responses:
         200:
           description: Returns all objects that describe a section of the CDR in a workspace.
@@ -5407,6 +5413,10 @@ definitions:
 
 '
         type: string
+  WorkspaceResourcesRequest:
+    type: array
+    items:
+      "$ref": "#/definitions/ResourceType"
   WorkspaceResourceResponse:
     type: array
     items:

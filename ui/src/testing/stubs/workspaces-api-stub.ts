@@ -16,6 +16,7 @@ import {
   WorkspaceBillingUsageResponse,
   WorkspaceListResponse,
   WorkspaceResourceResponse,
+  WorkspaceResourcesRequest,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
   WorkspacesApi,
@@ -340,7 +341,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getCdrSelectors(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceResourceResponse> {
+  getWorkspaceResources(workspaceNamespace: string, workspaceId: string, resourceTypes: WorkspaceResourcesRequest): Promise<WorkspaceResourceResponse> {
     return new Promise<WorkspaceResourceResponse>(resolve => {
       const convertToResourcesBaseArgs = {
         workspaceNamespace: workspaceNamespace,

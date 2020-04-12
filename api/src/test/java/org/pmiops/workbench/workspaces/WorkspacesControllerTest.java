@@ -75,7 +75,7 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
-import org.pmiops.workbench.cdrselector.CdrSelectorServiceImpl;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -157,6 +157,7 @@ import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
@@ -168,6 +169,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
+import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
@@ -270,7 +272,7 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
-    CdrSelectorServiceImpl.class,
+    WorkspaceResourcesServiceImpl.class,
     CdrVersionService.class,
     NotebooksServiceImpl.class,
     WorkspacesController.class,
@@ -3187,7 +3189,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void getCdrSelectors() {
+  public void getWorkspaceResources() {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
@@ -3231,8 +3233,11 @@ public class WorkspacesControllerTest {
                             new DomainValuePair().value("VALUE").domain(Domain.CONDITION))))
             .getBody();
 
+    WorkspaceResourcesRequest workspaceResourcesRequest = new WorkspaceResourcesRequest();
+    workspaceResourcesRequest.addAll(ImmutableList.of(ResourceType.COHORT, ResourceType.COHORT_REVIEW, ResourceType.CONCEPT_SET, ResourceType.DATASET));
+
     WorkspaceResourceResponse workspaceResourceResponse =
-        workspacesController.getCdrSelectors(workspace.getNamespace(), workspace.getId()).getBody();
+        workspacesController.getWorkspaceResources(workspace.getNamespace(), workspace.getId(), workspaceResourcesRequest).getBody();
     assertThat(workspaceResourceResponse.size()).isEqualTo(4);
     List<WorkspaceResource> cohorts =
         workspaceResourceResponse.stream()

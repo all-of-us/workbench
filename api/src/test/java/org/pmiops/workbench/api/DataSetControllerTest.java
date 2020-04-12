@@ -56,8 +56,8 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdrselector.CdrSelectorService;
-import org.pmiops.workbench.cdrselector.CdrSelectorServiceImpl;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
@@ -201,7 +201,8 @@ public class DataSetControllerTest {
 
   @Autowired CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 
-  @Autowired CdrSelectorService cdrSelectorService;
+  @Autowired
+  WorkspaceResourcesService workspaceResourcesService;
 
   @Autowired CdrVersionDao cdrVersionDao;
 
@@ -280,7 +281,7 @@ public class DataSetControllerTest {
 
   @TestConfiguration
   @Import({
-    CdrSelectorServiceImpl.class,
+    WorkspaceResourcesServiceImpl.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
@@ -397,7 +398,7 @@ public class DataSetControllerTest {
         new WorkspacesController(
             billingProjectBufferService,
             workspaceService,
-            cdrSelectorService,
+            workspaceResourcesService,
             cdrVersionDao,
             userDao,
             userProvider,

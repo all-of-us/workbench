@@ -16,7 +16,7 @@ import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {BillingStatus, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
+import {BillingStatus, ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 
 const styles = {
   cardButtonArea: {
@@ -110,7 +110,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       this.setState({
         isLoading: true
       });
-      const results = await workspacesApi().getCdrSelectors(namespace, id);
+      const results = await workspacesApi().getWorkspaceResources(namespace, id,
+        [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET]);
 
       results.map(result => result.modifiedTime ? result.modifiedTime = new Date(Number(result.modifiedTime)).toDateString() : null);
       this.setState({

@@ -38,7 +38,7 @@ import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
-import org.pmiops.workbench.cdrselector.CdrSelectorService;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -85,6 +85,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
+import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
@@ -122,7 +123,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
-  private final CdrSelectorService cdrSelectorService;
+  private final WorkspaceResourcesService workspaceResourcesService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
@@ -143,7 +144,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
-      CdrSelectorService cdrSelectorService,
+      WorkspaceResourcesService workspaceResourcesService,
       CdrVersionDao cdrVersionDao,
       UserDao userDao,
       Provider<DbUser> userProvider,
@@ -160,7 +161,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
-    this.cdrSelectorService = cdrSelectorService;
+    this.workspaceResourcesService = workspaceResourcesService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -1016,8 +1017,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WorkspaceResourceResponse> getCdrSelectors(
-      String workspaceNamespace, String workspaceId) {
+  public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResources(
+      String workspaceNamespace, String workspaceId, WorkspaceResourcesRequest resourceTypes) {
     WorkspaceAccessLevel workspaceAccessLevel =
         workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -1026,7 +1027,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
     workspaceResourceResponse.addAll(
-        cdrSelectorService.getCdrSelectorsInWorkspace(dbWorkspace, workspaceAccessLevel));
+        workspaceResourcesService.getWorkspaceResources(dbWorkspace, workspaceAccessLevel, resourceTypes));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 
