@@ -42,7 +42,9 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
 
   @Override
   public List<WorkspaceResource> getWorkspaceResources(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel workspaceAccessLevel, List<ResourceType> resourceTypes) {
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel workspaceAccessLevel,
+      List<ResourceType> resourceTypes) {
     if (resourceTypes.size() == 0) {
       throw new BadRequestException("Must provide at least one resource type");
     }
@@ -93,8 +95,12 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
                           dbWorkspace, workspaceAccessLevel, dbDataset))
               .collect(Collectors.toList()));
     }
-    if (resourceTypes.contains(ResourceType.COHORT_SEARCH_GROUP) || resourceTypes.contains(ResourceType.COHORT_SEARCH_ITEM) || resourceTypes.contains((ResourceType.NOTEBOOK)) || resourceTypes.contains((ResourceType.WORKSPACE))) {
-      throw new ServerErrorException("Only supported resource types are Cohorts, Cohort Reviews, Concept Sets, and Datasets");
+    if (resourceTypes.contains(ResourceType.COHORT_SEARCH_GROUP)
+        || resourceTypes.contains(ResourceType.COHORT_SEARCH_ITEM)
+        || resourceTypes.contains((ResourceType.NOTEBOOK))
+        || resourceTypes.contains((ResourceType.WORKSPACE))) {
+      throw new ServerErrorException(
+          "Only supported resource types are Cohorts, Cohort Reviews, Concept Sets, and Datasets");
     }
     return workspaceResources;
   }

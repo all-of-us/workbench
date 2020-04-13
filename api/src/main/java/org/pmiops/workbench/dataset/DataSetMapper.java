@@ -18,18 +18,14 @@ public interface DataSetMapper {
   // This is a lightweight version of a client mapper that doesn't make any extra db calls for extra
   // data
   @Mapping(target = "id", source = "dataSetId")
-  @Mapping(
-      target = "conceptSets",
-      ignore =
-          true) // This is stored as a list of ids. Look those up in the controller for entities
-  @Mapping(
-      target = "cohorts",
-      ignore =
-          true) // This is stored as a list of ids. Look those up in the controller for entities
-  @Mapping(
-      target = "domainValuePairs",
-      ignore = true) // This is stored in a subtable, we may not want to fetch all the time
+  // This is stored as a list of ids. Look those up in the controller for entities
+  @Mapping(target = "conceptSets", ignore = true)
+  // This is stored as a list of ids. Look those up in the controller for entities
+  @Mapping(target = "cohorts", ignore = true)
+  // This is stored in a subtable, we may not want to fetch all the time
+  @Mapping(target = "domainValuePairs", ignore = true)
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  // TODO (RW-4756): Define a DatasetLight type.
   DataSet dbModelToClientLight(DbDataset dbDataset);
 
   default PrePackagedConceptSetEnum prePackagedConceptSetFromStorage(Short prePackagedConceptSet) {

@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -476,9 +477,10 @@ public class CohortAnnotationDefinitionControllerTest {
     mockWorkspace.setFirecloudName(NAME);
     mockWorkspace.setWorkspaceId(workspace.getWorkspaceId());
 
-    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-            NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(WorkspaceAccessLevel.OWNER);
+    doReturn(WorkspaceAccessLevel.OWNER)
+        .when(workspaceService)
+        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+            NAMESPACE, NAME, WorkspaceAccessLevel.WRITER);
     when(workspaceService.getRequired(NAMESPACE, NAME)).thenReturn(mockWorkspace);
   }
 

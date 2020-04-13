@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -3165,27 +3166,38 @@ public class WorkspacesControllerTest {
                 workspace.getNamespace(), workspace.getId(), "z", copyNotebookRequest));
   }
 
-  private void compareCohortReviewFields(CohortReview cohortReview, CohortReview cohortReview2) {
-    assertThat(cohortReview.getCdrVersionId()).isEqualTo(cohortReview2.getCdrVersionId());
-    assertThat(cohortReview.getCohortDefinition()).isEqualTo(cohortReview2.getCohortDefinition());
-    assertThat(cohortReview.getCohortId()).isEqualTo(cohortReview2.getCohortId());
-    assertThat(cohortReview.getCohortName()).isEqualTo(cohortReview2.getCohortName());
-    assertThat(cohortReview.getCohortReviewId()).isEqualTo(cohortReview2.getCohortReviewId());
-    assertThat(cohortReview.getCreationTime()).isEqualTo(cohortReview2.getCreationTime());
-    assertThat(cohortReview.getDescription()).isEqualTo(cohortReview2.getDescription());
-    assertThat(cohortReview.getMatchedParticipantCount())
-        .isEqualTo(cohortReview2.getMatchedParticipantCount());
+  // Does not compare: etag, lastModifiedTime, page, pageSize, participantCohortStatuses,
+  // queryResultSize, reviewedCount, reviewSize, reviewStatus, sortColumn, sortOrder
+  private void compareCohortReviewFields(
+      CohortReview observedCohortReview, CohortReview expectedCohortReview) {
+    assertThat(observedCohortReview.getCdrVersionId())
+        .isEqualTo(expectedCohortReview.getCdrVersionId());
+    assertThat(observedCohortReview.getCohortDefinition())
+        .isEqualTo(expectedCohortReview.getCohortDefinition());
+    assertThat(observedCohortReview.getCohortId()).isEqualTo(expectedCohortReview.getCohortId());
+    assertThat(observedCohortReview.getCohortName())
+        .isEqualTo(expectedCohortReview.getCohortName());
+    assertThat(observedCohortReview.getCohortReviewId())
+        .isEqualTo(expectedCohortReview.getCohortReviewId());
+    assertThat(observedCohortReview.getCreationTime())
+        .isEqualTo(expectedCohortReview.getCreationTime());
+    assertThat(observedCohortReview.getDescription())
+        .isEqualTo(expectedCohortReview.getDescription());
+    assertThat(observedCohortReview.getMatchedParticipantCount())
+        .isEqualTo(expectedCohortReview.getMatchedParticipantCount());
   }
 
-  private void compareDatasetMetadata(DataSet dataSet, DataSet dataSet2) {
-    assertThat(dataSet.getDescription()).isEqualTo(dataSet2.getDescription());
-    assertThat(dataSet.getEtag()).isEqualTo(dataSet2.getEtag());
-    assertThat(dataSet.getId()).isEqualTo(dataSet2.getId());
-    assertThat(dataSet.getIncludesAllParticipants())
-        .isEqualTo(dataSet2.getIncludesAllParticipants());
-    assertThat(dataSet.getLastModifiedTime()).isEqualTo(dataSet2.getLastModifiedTime());
-    assertThat(dataSet.getName()).isEqualTo(dataSet2.getName());
-    assertThat(dataSet.getPrePackagedConceptSet()).isEqualTo(dataSet2.getPrePackagedConceptSet());
+  private void compareDatasetMetadata(DataSet observedDataSet, DataSet expectedDataSet) {
+    assertThat(observedDataSet.getDescription()).isEqualTo(expectedDataSet.getDescription());
+    assertThat(observedDataSet.getEtag()).isEqualTo(expectedDataSet.getEtag());
+    assertThat(observedDataSet.getId()).isEqualTo(expectedDataSet.getId());
+    assertThat(observedDataSet.getIncludesAllParticipants())
+        .isEqualTo(expectedDataSet.getIncludesAllParticipants());
+    assertThat(observedDataSet.getLastModifiedTime())
+        .isEqualTo(expectedDataSet.getLastModifiedTime());
+    assertThat(observedDataSet.getName()).isEqualTo(expectedDataSet.getName());
+    assertThat(observedDataSet.getPrePackagedConceptSet())
+        .isEqualTo(expectedDataSet.getPrePackagedConceptSet());
   }
 
   @Test
@@ -3234,35 +3246,47 @@ public class WorkspacesControllerTest {
             .getBody();
 
     WorkspaceResourcesRequest workspaceResourcesRequest = new WorkspaceResourcesRequest();
-    workspaceResourcesRequest.addAll(ImmutableList.of(ResourceType.COHORT, ResourceType.COHORT_REVIEW, ResourceType.CONCEPT_SET, ResourceType.DATASET));
+    workspaceResourcesRequest.addAll(
+        ImmutableList.of(
+            ResourceType.COHORT,
+            ResourceType.COHORT_REVIEW,
+            ResourceType.CONCEPT_SET,
+            ResourceType.DATASET));
 
     WorkspaceResourceResponse workspaceResourceResponse =
-        workspacesController.getWorkspaceResources(workspace.getNamespace(), workspace.getId(), workspaceResourcesRequest).getBody();
+        workspacesController
+            .getWorkspaceResources(
+                workspace.getNamespace(), workspace.getId(), workspaceResourcesRequest)
+            .getBody();
     assertThat(workspaceResourceResponse.size()).isEqualTo(4);
-    List<WorkspaceResource> cohorts =
+    List<Cohort> cohorts =
         workspaceResourceResponse.stream()
-            .filter(workspaceResource -> workspaceResource.getCohort() != null)
+            .map(WorkspaceResource::getCohort)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    List<WorkspaceResource> cohortReviews =
+    List<CohortReview> cohortReviews =
         workspaceResourceResponse.stream()
-            .filter(workspaceResource -> workspaceResource.getCohortReview() != null)
+            .map(WorkspaceResource::getCohortReview)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    List<WorkspaceResource> conceptSets =
+    List<ConceptSet> conceptSets =
         workspaceResourceResponse.stream()
-            .filter(workspaceResource -> workspaceResource.getConceptSet() != null)
+            .map(WorkspaceResource::getConceptSet)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    List<WorkspaceResource> dataSets =
+    List<DataSet> dataSets =
         workspaceResourceResponse.stream()
-            .filter(workspaceResource -> workspaceResource.getDataSet() != null)
+            .map(WorkspaceResource::getDataSet)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    assertThat(cohorts.size()).isEqualTo(1);
-    assertThat(cohorts.get(0).getCohort()).isEqualTo(cohort);
-    assertThat(cohortReviews.size()).isEqualTo(1);
-    compareCohortReviewFields(cohortReviews.get(0).getCohortReview(), cohortReview);
-    assertThat(conceptSets.size()).isEqualTo(1);
+    assertThat(cohorts).hasSize(1);
+    assertThat(cohorts.get(0)).isEqualTo(cohort);
+    assertThat(cohortReviews).hasSize(1);
+    compareCohortReviewFields(cohortReviews.get(0), cohortReview);
+    assertThat(conceptSets).hasSize(1);
     // Ignore arrays in subtables.
-    assertThat(conceptSets.get(0).getConceptSet()).isEqualTo(conceptSet.concepts(null));
-    assertThat(dataSets.size()).isEqualTo(1);
-    compareDatasetMetadata(dataSets.get(0).getDataSet(), dataSet);
+    assertThat(conceptSets.get(0)).isEqualTo(conceptSet.concepts(null));
+    assertThat(dataSets).hasSize(1);
+    compareDatasetMetadata(dataSets.get(0), dataSet);
   }
 }

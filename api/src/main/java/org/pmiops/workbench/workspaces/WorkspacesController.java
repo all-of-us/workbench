@@ -1027,7 +1027,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
     workspaceResourceResponse.addAll(
-        workspaceResourcesService.getWorkspaceResources(dbWorkspace, workspaceAccessLevel, resourceTypes));
+        workspaceResourcesService.getWorkspaceResources(
+            dbWorkspace, workspaceAccessLevel, resourceTypes));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 

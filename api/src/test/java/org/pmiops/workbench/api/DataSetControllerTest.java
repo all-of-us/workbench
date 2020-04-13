@@ -196,86 +196,45 @@ public class DataSetControllerTest {
   private Workspace workspace;
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
-
   @Autowired BigQueryService bigQueryService;
-
   @Autowired CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-
-  @Autowired
-  WorkspaceResourcesService workspaceResourcesService;
-
+  @Autowired WorkspaceResourcesService workspaceResourcesService;
   @Autowired CdrVersionDao cdrVersionDao;
-
   @Autowired CdrVersionService cdrVersionService;
-
   @Autowired CloudStorageService cloudStorageService;
-
   @Autowired Provider<Cloudbilling> cloudBillingProvider;
-
   @Autowired CohortDao cohortDao;
-
   @Autowired CohortFactory cohortFactory;
-
   @Autowired CohortMapper cohortMapper;
-
   @Autowired CohortMaterializationService cohortMaterializationService;
-
   @Autowired CohortReviewDao cohortReviewDao;
-
   @Autowired CohortReviewMapper cohortReviewMapper;
-
   @Autowired CohortReviewService cohortReviewService;
-
   @Autowired ConceptBigQueryService conceptBigQueryService;
-
   @Autowired ConceptDao conceptDao;
-
   @Autowired ConceptService conceptService;
-
   @Autowired ConceptSetService conceptSetService;
-
   @Autowired ConceptSetDao conceptSetDao;
-
   @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
-
   @Autowired DataSetDao dataSetDao;
-
   @Mock DataSetMapper dataSetMapper;
-
   @Autowired ConceptSetMapper conceptSetMapper;
-
   @Autowired DataSetService dataSetService;
-
   @Autowired FireCloudService fireCloudService;
-
   @Autowired FreeTierBillingService freeTierBillingService;
-
   @Autowired CohortQueryBuilder cohortQueryBuilder;
-
   @Autowired TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
-
   @Autowired UserDao userDao;
-
   @Mock Provider<DbUser> userProvider;
-
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
-
   @Autowired NotebooksService notebooksService;
-
   @Autowired UserRecentResourceService userRecentResourceService;
-
   @Autowired UserService userService;
-
   @Autowired WorkspaceDao workspaceDao;
-
   @Autowired WorkspaceService workspaceService;
-
   @Autowired WorkspaceAuditor workspaceAuditor;
-
   @Autowired WorkspaceMapper workspaceMapper;
-
   @Autowired LogsBasedMetricService logsBasedMetricService;
-
   @Autowired Provider<Zendesk> mockZendeskProvider;
   @MockBean MonitoringService mockMonitoringService;
 
@@ -361,7 +320,6 @@ public class DataSetControllerTest {
   }
 
   private DataSetController dataSetController;
-
   private BasicFormatterImpl sqlFormatter = new BasicFormatterImpl();
 
   @Before

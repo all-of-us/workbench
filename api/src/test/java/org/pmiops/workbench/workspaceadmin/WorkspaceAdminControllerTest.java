@@ -76,8 +76,8 @@ public class WorkspaceAdminControllerTest {
   @Import({
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
-    ConceptSetMapperImpl.class,
     CommonMappers.class,
+    ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     WorkspaceAdminController.class,
     WorkspaceMapperImpl.class,

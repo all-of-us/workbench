@@ -5,12 +5,11 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 
 @Mapper(
     componentModel = "spring",
-    uses = {CommonMappers.class})
+    uses = {CommonMappers.class, DbStorageEnums.class})
 public interface CohortReviewMapper {
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   // used for pagination. Effectively deprecated, to remove with RW-4706
@@ -23,8 +22,4 @@ public interface CohortReviewMapper {
   // default. May be removed from object pending design
   @Mapping(target = "participantCohortStatuses", ignore = true)
   CohortReview dbModelToClient(DbCohortReview dbCohortReview);
-
-  default ReviewStatus reviewStatusFromStorage(Short reviewStatus) {
-    return DbStorageEnums.reviewStatusFromStorage(reviewStatus);
-  }
 }

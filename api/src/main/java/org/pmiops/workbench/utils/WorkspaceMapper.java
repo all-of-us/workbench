@@ -104,8 +104,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "permission", source = "accessLevel")
   @Mapping(target = "cohort", source = "dbCohort")
-  // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
+  // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
@@ -120,8 +119,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "permission", source = "accessLevel")
   @Mapping(target = "cohortReview", source = "dbCohortReview")
-  // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
+  // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
@@ -136,8 +134,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "permission", source = "accessLevel")
   @Mapping(target = "conceptSet", source = "dbConceptSet")
-  // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
+  // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
@@ -152,8 +149,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "permission", source = "accessLevel")
   @Mapping(target = "dataSet", source = "dbDataset")
-  // All workspaceResources have one object and all others are null. That should be
-  // defined by a setter where used
+  // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
