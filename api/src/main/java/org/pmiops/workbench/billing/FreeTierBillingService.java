@@ -90,16 +90,6 @@ public class FreeTierBillingService {
                 Collectors.groupingBy(
                     e -> e.getKey().getCreator(), Collectors.summingDouble(Entry::getValue)));
 
-    // to help with debugging RW-4678
-    userCosts.forEach(
-        (dbUser, cost) ->
-            logger.info(
-                String.format(
-                    "User %s (%s) has total cost %f",
-                    dbUser.getUsername(),
-                    Optional.ofNullable(dbUser.getContactEmail()).orElse("NULL"),
-                    cost)));
-
     // check cost and time thresholds for the relevant users
 
     // collect previously-expired and currently-expired users by cost and time
@@ -116,16 +106,6 @@ public class FreeTierBillingService {
             .collect(Collectors.toSet());
 
     final Set<DbUser> newlyExpiredUsers = Sets.difference(expiredUsers, previouslyExpiredUsers);
-
-    // to help with debugging RW-4678
-    newlyExpiredUsers.forEach(
-        dbUser ->
-            logger.info(
-                String.format(
-                    "Alerting for newly expired user: %s (%s)",
-                    dbUser.getUsername(),
-                    Optional.ofNullable(dbUser.getContactEmail()).orElse("NULL"))));
-
     for (final DbUser user : newlyExpiredUsers) {
       try {
         mailService.alertUserFreeTierExpiration(user);
@@ -205,31 +185,11 @@ public class FreeTierBillingService {
     final double currentFraction = currentCost / limit;
     final double previousFraction = previousCost / limit;
 
-    // to help with debugging RW-4678
-    logger.info(
-        String.format(
-            "Checking thresholds for user %s (%s): current %f (%f pct), previous %f (%f pct)",
-            user.getUsername(),
-            Optional.ofNullable(user.getContactEmail()).orElse("NULL"),
-            currentCost,
-            currentFraction,
-            previousCost,
-            previousFraction));
-
     for (final double threshold : thresholdsInDescOrder) {
       if (currentFraction > threshold) {
         // only alert if we have not done so previously
         if (previousFraction <= threshold) {
           try {
-
-            // to help with debugging RW-4678
-            logger.info(
-                String.format(
-                    "Alerting for user %s (%s): has passed %f pct threshold",
-                    user.getUsername(),
-                    Optional.ofNullable(user.getContactEmail()).orElse("NULL"),
-                    threshold));
-
             mailService.alertUserFreeTierDollarThreshold(
                 user, threshold, currentCost, remainingBalance);
           } catch (final MessagingException e) {
