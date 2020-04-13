@@ -112,7 +112,8 @@
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
     "queueName": "rdrExportQueue",
-    "exportObjectsPerTask": 10
+    "exportObjectsPerTask": 10,
+    "excludeFromPublicDirectory": false
   },
   "captcha": {
     "enableCaptcha": true,

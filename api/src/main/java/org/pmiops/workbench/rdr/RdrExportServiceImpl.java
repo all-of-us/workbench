@@ -284,11 +284,8 @@ public class RdrExportServiceImpl implements RdrExportService {
             dbWorkspace.getWorkspaceActiveStatusEnum().toString()));
     // For PROD: Confirm workspace details before showing the data on research directory.
     // As of now Workbench will always exclude workspace details from Public Directory
-    if (workbenchConfigProvider.get().server.shortName.equalsIgnoreCase(PROD_SHORTNAME)) {
-      rdrWorkspace.setExcludeFromPublicDirectory(true);
-    } else {
-      rdrWorkspace.setExcludeFromPublicDirectory(false);
-    }
+    rdrWorkspace.setExcludeFromPublicDirectory(
+        workbenchConfigProvider.get().rdrExport.excludeFromPublicDirectory);
     rdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
     rdrWorkspace.setDiseaseFocusedResearchName(dbWorkspace.getDiseaseOfFocus());
     rdrWorkspace.setOtherPurpose(dbWorkspace.getOtherPurpose());

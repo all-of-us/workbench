@@ -109,7 +109,8 @@
   "rdrExport": {
     "host": "all-of-us-rdr-staging.appspot.com",
     "queueName": "rdrExportQueue",
-    "exportObjectsPerTask": 10
+    "exportObjectsPerTask": 10,
+    "excludeFromPublicDirectory": false
   },
   "captcha": {
     "enableCaptcha": true,

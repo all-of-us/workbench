@@ -255,6 +255,8 @@ public class WorkbenchConfig {
     public String queueName;
     // Number of ids per task
     public Integer exportObjectsPerTask;
+    // Should workspace details be excluded for researcher directory
+    public boolean excludeFromPublicDirectory;
   }
 
   public static class CaptchaConfig {
