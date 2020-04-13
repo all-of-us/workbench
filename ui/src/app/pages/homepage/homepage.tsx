@@ -249,19 +249,19 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         src: '/assets/images/QT-thumbnail.svg',
         onClick: () => this.setState({quickTour: true})
       }, {
-        src: '/assets/images/cohorts-thumbnail.png',
+        src: '/assets/images/intro-workbench.png',
         onClick: () => this.openVideo('nqnOvOpnRLE')
       }, {
-        src: '/assets/images/notebooks-thumbnail.png',
+        src: '/assets/images/cohort-builder.png',
         onClick: () => this.openVideo('fFN__3yskfk')
       }, {
-        src: '/assets/images/cohorts-thumbnail.png',
+        src: '/assets/images/dataset-builder.png',
         onClick: () => this.openVideo('rUM86TNyAi4')
       }, {
-        src: '/assets/images/notebooks-thumbnail.png',
+        src: '/assets/images/notebook-code-snippets.png',
         onClick: () => this.openVideo('6T9t9AzyAK8')
       }, {
-        src: '/assets/images/notebooks-thumbnail.png',
+        src: '/assets/images/user-support.png',
         onClick: () => this.openVideo('dJ7zJAzq6Ck')
       }
     ];
