@@ -4,9 +4,9 @@ import {
   ConceptSet,
   DataSet,
   FileDetail,
-  RecentResource,
   ResourceType,
-  WorkspaceAccessLevel
+  WorkspaceAccessLevel,
+  WorkspaceResource
 } from 'generated/fetch';
 
 export function toDisplay(resourceType: ResourceType): string {
@@ -30,14 +30,19 @@ export function toDisplay(resourceType: ResourceType): string {
   }
 }
 
-export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
-  | DataSet[], workspaceNamespace: string, workspaceId: string,
-  accessLevel: WorkspaceAccessLevel,
-  resourceType: ResourceType): RecentResource[] {
+export interface ConvertToResourcesArgs {
+  list:  FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[] | DataSet[];
+  workspaceNamespace: string;
+  workspaceId: string;
+  accessLevel: WorkspaceAccessLevel;
+  resourceType: ResourceType;
+}
+
+export function convertToResources(args: ConvertToResourcesArgs): WorkspaceResource[] {
   const resourceList = [];
-  for (const resource of list) {
-    resourceList.push(convertToResource(resource, workspaceNamespace, workspaceId,
-      accessLevel, resourceType));
+  for (const resource of args.list) {
+    resourceList.push(convertToResource(resource, args.workspaceNamespace, args.workspaceId,
+      args.accessLevel, args.resourceType));
   }
   return resourceList;
 }
@@ -45,14 +50,14 @@ export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[
 export function convertToResource(resource: FileDetail | Cohort | CohortReview | ConceptSet
   | DataSet, workspaceNamespace: string, workspaceId: string,
   accessLevel: WorkspaceAccessLevel,
-  resourceType: ResourceType): RecentResource {
+  resourceType: ResourceType): WorkspaceResource {
   let modifiedTime: string;
   if (!resource.lastModifiedTime) {
     modifiedTime = new Date().toDateString();
   } else {
     modifiedTime = new Date(resource.lastModifiedTime).toString();
   }
-  const newResource: RecentResource = {
+  const newResource: WorkspaceResource = {
     workspaceNamespace: workspaceNamespace,
     workspaceFirecloudName: workspaceId,
     permission: WorkspaceAccessLevel[accessLevel],

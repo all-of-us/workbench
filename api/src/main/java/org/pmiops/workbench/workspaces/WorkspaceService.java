@@ -82,7 +82,7 @@ public interface WorkspaceService {
 
   WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
 
-  WorkspaceAccessLevel enforceWorkspaceAccessLevel(
+  WorkspaceAccessLevel enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess);
 
   DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(

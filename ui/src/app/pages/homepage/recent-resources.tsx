@@ -11,7 +11,7 @@ import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {ResourceCard} from 'app/components/resource-card';
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
-import {BillingStatus, RecentResource} from 'generated/fetch';
+import {BillingStatus, WorkspaceResource} from 'generated/fetch';
 
 export const RecentResources = (fp.flow as any)(
   withContentRect('client'),
@@ -22,7 +22,7 @@ export const RecentResources = (fp.flow as any)(
 }, {
   loading: boolean,
   offset: number,
-  resources: RecentResource[],
+  resources: WorkspaceResource[],
   existingCohortName: string[],
   existingConceptName: string[],
   existingNotebookName: string[]
@@ -66,7 +66,7 @@ export const RecentResources = (fp.flow as any)(
     return [];
   }
 
-  createResourceCard(resource: RecentResource) {
+  createResourceCard(resource: WorkspaceResource) {
     if (resource.notebook) {
       return <NotebookResourceCard resource={resource}
                                    existingNameList={this.getExistingNameList(resource)}

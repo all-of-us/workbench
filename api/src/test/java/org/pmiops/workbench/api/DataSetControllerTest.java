@@ -56,10 +56,18 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortReviewMapper;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
+import org.pmiops.workbench.cohorts.CohortMapper;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
@@ -188,83 +196,55 @@ public class DataSetControllerTest {
   private Workspace workspace;
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
-
   @Autowired BigQueryService bigQueryService;
-
   @Autowired CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-
+  @Autowired WorkspaceResourcesService workspaceResourcesService;
   @Autowired CdrVersionDao cdrVersionDao;
-
   @Autowired CdrVersionService cdrVersionService;
-
   @Autowired CloudStorageService cloudStorageService;
-
   @Autowired Provider<Cloudbilling> cloudBillingProvider;
-
   @Autowired CohortDao cohortDao;
-
   @Autowired CohortFactory cohortFactory;
-
+  @Autowired CohortMapper cohortMapper;
   @Autowired CohortMaterializationService cohortMaterializationService;
-
   @Autowired CohortReviewDao cohortReviewDao;
-
+  @Autowired CohortReviewMapper cohortReviewMapper;
+  @Autowired CohortReviewService cohortReviewService;
   @Autowired ConceptBigQueryService conceptBigQueryService;
-
   @Autowired ConceptDao conceptDao;
-
   @Autowired ConceptService conceptService;
-
   @Autowired ConceptSetService conceptSetService;
-
   @Autowired ConceptSetDao conceptSetDao;
-
   @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
-
   @Autowired DataSetDao dataSetDao;
-
   @Mock DataSetMapper dataSetMapper;
-
   @Autowired ConceptSetMapper conceptSetMapper;
-
   @Autowired DataSetService dataSetService;
-
   @Autowired FireCloudService fireCloudService;
-
   @Autowired FreeTierBillingService freeTierBillingService;
-
   @Autowired CohortQueryBuilder cohortQueryBuilder;
-
   @Autowired TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
-
   @Autowired UserDao userDao;
-
   @Mock Provider<DbUser> userProvider;
-
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
-
   @Autowired NotebooksService notebooksService;
-
   @Autowired UserRecentResourceService userRecentResourceService;
-
   @Autowired UserService userService;
-
   @Autowired WorkspaceDao workspaceDao;
-
   @Autowired WorkspaceService workspaceService;
-
   @Autowired WorkspaceAuditor workspaceAuditor;
-
   @Autowired WorkspaceMapper workspaceMapper;
-
   @Autowired LogsBasedMetricService logsBasedMetricService;
-
   @Autowired Provider<Zendesk> mockZendeskProvider;
   @MockBean MonitoringService mockMonitoringService;
 
   @TestConfiguration
   @Import({
+    WorkspaceResourcesServiceImpl.class,
     CohortFactoryImpl.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    CohortReviewServiceImpl.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
@@ -340,7 +320,6 @@ public class DataSetControllerTest {
   }
 
   private DataSetController dataSetController;
-
   private BasicFormatterImpl sqlFormatter = new BasicFormatterImpl();
 
   @Before
@@ -377,6 +356,7 @@ public class DataSetControllerTest {
         new WorkspacesController(
             billingProjectBufferService,
             workspaceService,
+            workspaceResourcesService,
             cdrVersionDao,
             userDao,
             userProvider,

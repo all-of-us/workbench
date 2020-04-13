@@ -36,6 +36,7 @@ import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -80,6 +81,8 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.WorkspaceResourceResponse;
+import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
@@ -115,6 +118,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
+  private final WorkspaceResourcesService workspaceResourcesService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
@@ -135,6 +139,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
+      WorkspaceResourcesService workspaceResourcesService,
       CdrVersionDao cdrVersionDao,
       UserDao userDao,
       Provider<DbUser> userProvider,
@@ -151,6 +156,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
+    this.workspaceResourcesService = workspaceResourcesService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -398,7 +404,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Workspace updateWorkspaceImpl(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
     FirecloudWorkspace fcWorkspace =
@@ -618,7 +624,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // This is its own method as opposed to part of the workspace response because this is gated
     // behind write+ access, and adding access based composition to the workspace response
     // would add a lot of unnecessary complexity.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
@@ -979,6 +985,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceMapper.toApiRecentWorkspace(dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResources(
+      String workspaceNamespace,
+      String workspaceId,
+      WorkspaceResourcesRequest workspaceResourcesRequest) {
+    WorkspaceAccessLevel workspaceAccessLevel =
+        workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    final DbWorkspace dbWorkspace =
+        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+    WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
+    workspaceResourceResponse.addAll(
+        workspaceResourcesService.getWorkspaceResources(
+            dbWorkspace, workspaceAccessLevel, workspaceResourcesRequest.getTypesToFetch()));
+    return ResponseEntity.ok(workspaceResourceResponse);
   }
 
   private <T> T recordOperationTime(Supplier<T> operation, String operationName) {

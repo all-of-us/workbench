@@ -7,17 +7,17 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {formatRecentResourceDisplayDate} from 'app/utils';
+import {formatWorkspaceResourceDisplayDate} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {CopyRequest, RecentResource, ResourceType} from 'generated/fetch';
+import {CopyRequest, ResourceType, WorkspaceResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
-  resource: RecentResource;
+  resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: Function;
   disableDuplicate: boolean;
@@ -206,7 +206,7 @@ export const NotebookResourceCard = fp.flow(
         onNavigate={() => AnalyticsTracker.Notebooks.Preview()}
         displayName={this.displayName}
         description={''}
-        displayDate={formatRecentResourceDisplayDate(this.props.resource.modifiedTime)}
+        displayDate={formatWorkspaceResourceDisplayDate(this.props.resource.modifiedTime)}
         footerText={toDisplay(this.resourceType)}
         footerColor={colors.resourceCardHighlights.notebook}
       />

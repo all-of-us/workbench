@@ -293,13 +293,13 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String fromConceptSetId,
       CopyRequest copyRequest) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
     DbWorkspace toWorkspace =
         workspaceService.get(
             copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName());
     DbWorkspace fromWorkspace = workspaceService.get(fromWorkspaceNamespace, fromWorkspaceId);
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         toWorkspace.getWorkspaceNamespace(),
         toWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);
