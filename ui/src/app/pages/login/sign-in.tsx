@@ -295,7 +295,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
         })}/>;
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
-          pdfPath='/assets/documents/terms of service (draft).pdf'
+          pdfPath='/assets/documents/terms-of-service-v2.pdf'
           onComplete={() => this.setState({
             termsOfServiceVersion: 1,
             currentStep: this.getNextStep(currentStep)
