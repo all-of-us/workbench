@@ -21,6 +21,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -33,10 +34,12 @@ import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -50,6 +53,8 @@ public class RdrExportServiceImplTest {
   @MockBean private WorkspaceDao mockWorkspaceDao;
   @MockBean private WorkspaceService mockWorkspaceService;
 
+  private static WorkbenchConfig providedWorkbenchConfig;
+
   private static final Instant NOW = Instant.now();
   private static final Timestamp NOW_TIMESTAMP = Timestamp.from(NOW);
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -58,18 +63,26 @@ public class RdrExportServiceImplTest {
   private DbUser dbUserWithoutEmail;
   private DbWorkspace mockWorkspace;
 
+  @MockBean({VerifiedInstitutionalAffiliationDao.class})
   @TestConfiguration
   @Import({RdrExportServiceImpl.class})
-  @MockBean({WorkspaceDao.class, WorkspaceService.class, VerifiedInstitutionalAffiliationDao.class})
   static class Configuration {
     @Bean
     public Clock clock() {
       return CLOCK;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig getWorkbenchConfig() {
+      return providedWorkbenchConfig;
+    }
   }
 
   @Before
   public void setUp() {
+    providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+    providedWorkbenchConfig.server.shortName = "Prod";
     rdrExportService = spy(rdrExportService);
     when(mockRdrApi.getApiClient()).thenReturn(mockApiClient);
     when(mockApiClient.setDebugging(true)).thenReturn(null);
@@ -150,6 +163,23 @@ public class RdrExportServiceImplTest {
 
     List<Long> workspaceID = new ArrayList<>();
     workspaceID.add(1l);
+
+    rdrExportService.exportWorkspaces(workspaceID);
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(
+            mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
+    verify(rdrExportDao, times(1)).save(anyList());
+  }
+
+  @Test
+  public void exportWorkspace__excludeAsFalse() throws ApiException {
+    doNothing().when(mockRdrApi).exportWorkspaces(anyList());
+
+    List<Long> workspaceID = new ArrayList<>();
+    workspaceID.add(1l);
+
+    providedWorkbenchConfig.server.shortName = "Stable";
+
     rdrExportService.exportWorkspaces(workspaceID);
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(

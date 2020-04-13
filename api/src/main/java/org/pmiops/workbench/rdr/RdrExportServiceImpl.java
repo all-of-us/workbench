@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -54,6 +55,8 @@ public class RdrExportServiceImpl implements RdrExportService {
   private UserDao userDao;
   private WorkspaceService workspaceService;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final String PROD_SHORTNAME = "Prod";
 
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
@@ -66,12 +69,14 @@ public class RdrExportServiceImpl implements RdrExportService {
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       UserDao userDao,
-      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clock = clock;
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = rdrApiProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
   }
@@ -277,7 +282,13 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setStatus(
         org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum.fromValue(
             dbWorkspace.getWorkspaceActiveStatusEnum().toString()));
-    rdrWorkspace.setExcludeFromPublicDirectory(false);
+    // For PROD: Confirm workspace details before showing the data on research directory.
+    // As of now Workbench will always exclude workspace details from Public Directory
+    if (workbenchConfigProvider.get().server.shortName.equalsIgnoreCase(PROD_SHORTNAME)) {
+      rdrWorkspace.setExcludeFromPublicDirectory(true);
+    } else {
+      rdrWorkspace.setExcludeFromPublicDirectory(false);
+    }
     rdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
     rdrWorkspace.setDiseaseFocusedResearchName(dbWorkspace.getDiseaseOfFocus());
     rdrWorkspace.setOtherPurpose(dbWorkspace.getOtherPurpose());
