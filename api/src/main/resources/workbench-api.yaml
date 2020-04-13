@@ -46,9 +46,12 @@ securityDefinitions:
 
       The aou_auth entry under security (below) serves to establish the fact
       that all endpoints are protected: this annotation ensures that client
-      libraries know to send bearer tokens when calling
-    authorizationUrl: ''
-    tokenUrl: ''
+      libraries know to send bearer tokens when calling.
+
+      For OpenAPI 3 conversion, we need to populate these URLs even if we don't
+      use them.
+    authorizationUrl: 'https://because-i-said-so.pmi-ops.org'
+    tokenUrl: 'https://jrr-token.pmi-ops.org'
     type: oauth2
     flow: accessCode
 schemes:
