@@ -14,6 +14,7 @@ import {
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
@@ -231,6 +232,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                       data-test-id={'submit-ducc-button'}
                       disabled={errors || submitting}
                       onClick={() => {
+                        AnalyticsTracker.Registration.AcceptDUCC();
                         this.submitDataUserCodeOfConduct(initialMonitoring);
                       }}
                   >

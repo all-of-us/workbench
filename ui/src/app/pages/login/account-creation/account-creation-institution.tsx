@@ -13,6 +13,7 @@ import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from '
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {
   CheckEmailResponse,
@@ -344,7 +345,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             }
             <div style={{marginTop: '.5rem'}}>
               <a href={'https://www.researchallofus.org/institutional-agreements'} target='_blank'
-                 style={{color: colors.accent}}>
+                 style={{color: colors.accent}}
+                 onClick={() => {
+                   AnalyticsTracker.Registration.InstitutionNotListed();
+                 }}>
               Don't see your institution listed?
               </a>
             </div>
@@ -419,7 +423,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </div>} disabled={!errors}>
               <Button data-test-id='submit-button'
                       disabled={loadingInstitutions || errors != null}
-                      onClick={() => this.props.onComplete(this.state.profile)}>
+                      onClick={() => {
+                        AnalyticsTracker.Registration.InstitutionPage();
+                        this.props.onComplete(this.state.profile);
+                      }}>
                 Next
               </Button>
             </TooltipTrigger>

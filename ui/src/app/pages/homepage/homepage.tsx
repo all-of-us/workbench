@@ -232,6 +232,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   openVideo(videoLink: string): void {
+    AnalyticsTracker.Registration.TutorialVideo();
     this.setState({videoOpen: true, videoLink: videoLink});
   }
 

@@ -4,6 +4,8 @@ import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {ErrorResponse, Profile} from 'generated/fetch';
@@ -35,6 +37,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
 
     try {
+      AnalyticsTracker.Registration.DemographicSurvey();
       const newProfile = await profileApi().createAccount({
         profile: profile,
         captchaVerificationToken: captchaToken,
