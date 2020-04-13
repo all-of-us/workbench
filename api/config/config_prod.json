@@ -110,7 +110,7 @@
     "host": "all-of-us-rdr-prod.appspot.com",
     "queueName": "rdrExportQueue",
     "exportObjectsPerTask": 10,
-    "excludeFromPublicDirectory": true
+    "excludeWorkspaceFromPublicDirectory": true
   },
   "captcha": {
     "enableCaptcha": true,

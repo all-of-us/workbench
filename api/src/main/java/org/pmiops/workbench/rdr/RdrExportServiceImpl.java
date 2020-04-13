@@ -56,7 +56,6 @@ public class RdrExportServiceImpl implements RdrExportService {
   private WorkspaceService workspaceService;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final String PROD_SHORTNAME = "Prod";
 
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
@@ -285,7 +284,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     // For PROD: Confirm workspace details before showing the data on research directory.
     // As of now Workbench will always exclude workspace details from Public Directory
     rdrWorkspace.setExcludeFromPublicDirectory(
-        workbenchConfigProvider.get().rdrExport.excludeFromPublicDirectory);
+        workbenchConfigProvider.get().rdrExport.excludeWorkspaceFromPublicDirectory);
     rdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
     rdrWorkspace.setDiseaseFocusedResearchName(dbWorkspace.getDiseaseOfFocus());
     rdrWorkspace.setOtherPurpose(dbWorkspace.getOtherPurpose());

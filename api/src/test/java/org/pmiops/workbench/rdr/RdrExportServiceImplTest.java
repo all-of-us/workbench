@@ -82,7 +82,7 @@ public class RdrExportServiceImplTest {
   @Before
   public void setUp() {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
-    providedWorkbenchConfig.rdrExport.excludeFromPublicDirectory = false;
+    providedWorkbenchConfig.rdrExport.excludeWorkspaceFromPublicDirectory = false;
     rdrExportService = spy(rdrExportService);
     when(mockRdrApi.getApiClient()).thenReturn(mockApiClient);
     when(mockApiClient.setDebugging(true)).thenReturn(null);
@@ -178,7 +178,7 @@ public class RdrExportServiceImplTest {
     List<Long> workspaceID = new ArrayList<>();
     workspaceID.add(1l);
 
-    providedWorkbenchConfig.rdrExport.excludeFromPublicDirectory = true;
+    providedWorkbenchConfig.rdrExport.excludeWorkspaceFromPublicDirectory = true;
 
     rdrExportService.exportWorkspaces(workspaceID);
     verify(mockWorkspaceService)
