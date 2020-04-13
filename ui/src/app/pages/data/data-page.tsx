@@ -79,6 +79,8 @@ const cohortImg = '/assets/images/cohort-diagram.svg';
 
 const dataSetImg = '/assets/images/dataset-diagram.svg';
 
+const resourcesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
+
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: WorkspaceResource[], isLoading: boolean,
@@ -111,7 +113,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         isLoading: true
       });
       const results = await workspacesApi().getWorkspaceResources(namespace, id,
-        [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET]);
+        resourcesToFetch);
 
       // TODO (RW-4682): Fix this nonsense
       results.map(result => result.modifiedTime ? result.modifiedTime = new Date(Number(result.modifiedTime)).toDateString() : null);

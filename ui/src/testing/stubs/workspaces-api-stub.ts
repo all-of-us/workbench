@@ -341,7 +341,9 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getWorkspaceResources(workspaceNamespace: string, workspaceId: string, resourceTypes: WorkspaceResourcesRequest): Promise<WorkspaceResourceResponse> {
+  getWorkspaceResources(workspaceNamespace: string,
+    workspaceId: string,
+    resourceTypes: WorkspaceResourcesRequest): Promise<WorkspaceResourceResponse> {
     return new Promise<WorkspaceResourceResponse>(resolve => {
       const convertToResourcesBaseArgs = {
         workspaceNamespace: workspaceNamespace,

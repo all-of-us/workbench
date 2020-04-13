@@ -1018,7 +1018,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResources(
-      String workspaceNamespace, String workspaceId, WorkspaceResourcesRequest resourceTypes) {
+      String workspaceNamespace, String workspaceId, WorkspaceResourcesRequest workspaceResourcesRequest) {
     WorkspaceAccessLevel workspaceAccessLevel =
         workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -1028,7 +1028,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
     workspaceResourceResponse.addAll(
         workspaceResourcesService.getWorkspaceResources(
-            dbWorkspace, workspaceAccessLevel, resourceTypes));
+            dbWorkspace, workspaceAccessLevel, workspaceResourcesRequest.getTypesToFetch()));
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 

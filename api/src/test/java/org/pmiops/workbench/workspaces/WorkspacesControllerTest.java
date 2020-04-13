@@ -3246,7 +3246,7 @@ public class WorkspacesControllerTest {
             .getBody();
 
     WorkspaceResourcesRequest workspaceResourcesRequest = new WorkspaceResourcesRequest();
-    workspaceResourcesRequest.addAll(
+    workspaceResourcesRequest.setTypesToFetch(
         ImmutableList.of(
             ResourceType.COHORT,
             ResourceType.COHORT_REVIEW,

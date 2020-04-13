@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.ImmutableList;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.DataSetDao;
@@ -45,6 +47,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
       DbWorkspace dbWorkspace,
       WorkspaceAccessLevel workspaceAccessLevel,
       List<ResourceType> resourceTypes) {
+    List<ResourceType> supportedTypes = ImmutableList.of(ResourceType.COHORT, ResourceType.COHORT_REVIEW, ResourceType.CONCEPT_SET, ResourceType.DATASET);
     if (resourceTypes.size() == 0) {
       throw new BadRequestException("Must provide at least one resource type");
     }
@@ -95,10 +98,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
                           dbWorkspace, workspaceAccessLevel, dbDataset))
               .collect(Collectors.toList()));
     }
-    if (resourceTypes.contains(ResourceType.COHORT_SEARCH_GROUP)
-        || resourceTypes.contains(ResourceType.COHORT_SEARCH_ITEM)
-        || resourceTypes.contains((ResourceType.NOTEBOOK))
-        || resourceTypes.contains((ResourceType.WORKSPACE))) {
+    if (resourceTypes.stream().filter(resourceType -> !supportedTypes.contains(resourceType)).collect(Collectors.toList()).size() > 0) {
       throw new ServerErrorException(
           "Only supported resource types are Cohorts, Cohort Reviews, Concept Sets, and Datasets");
     }
