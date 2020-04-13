@@ -113,6 +113,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       const results = await workspacesApi().getWorkspaceResources(namespace, id,
         [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET]);
 
+      // TODO (RW-4682): Fix this nonsense
       results.map(result => result.modifiedTime ? result.modifiedTime = new Date(Number(result.modifiedTime)).toDateString() : null);
       this.setState({
         existingCohortName: results.filter(resource => resource.cohort !== null && resource.cohort !== undefined)
