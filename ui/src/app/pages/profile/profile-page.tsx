@@ -75,6 +75,20 @@ const styles = reactStyles({
   },
   verticalLine: {
     marginTop: '0.3rem', marginInlineStart: '0rem', width: '64%'
+  },
+  researchPurposeInfo: {
+    fontWeight: 100,
+    width: '80%',
+    marginTop: '0.5rem',
+    marginBottom: '0.3rem'
+  },
+  freeCreditsBox: {
+    borderRadius: '0.4rem',
+    height: '3rem',
+    marginTop: '0.7rem',
+    marginBottom: '1.4rem',
+    color: colors.primary,
+    backgroundColor: colorWithWhiteness(colors.disabled, 0.7)
   }
 });
 
@@ -129,7 +143,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       institutions: [],
       saveProfileErrorResponse: null,
       showDemographicSurveyModal: false,
-      showOtherRole: false,
+      showOtherRole: this.initializeShowOtherRole(),
       updating: false
     };
   }
@@ -143,6 +157,10 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     } catch (e) {
       reportError(e);
     }
+  }
+
+  initializeShowOtherRole() {
+    return this.props.profileState.profile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER;
   }
 
   navigateToTraining(): void {
@@ -202,11 +220,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   }
 
   updateVerifiedInstitutionRole(newRole) {
-    if (newRole === InstitutionalRole.OTHER) {
-      this.setState({showOtherRole: true});
-    } else {
-      this.setState({showOtherRole: false});
-    }
+    this.setState({showOtherRole: newRole === InstitutionalRole.OTHER});
     this.setState(fp.set(['currentProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], newRole));
 
   }
@@ -381,7 +395,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             {makeProfileInput({
               title: <FlexColumn>
                 <div>Your research background, experience and research interests</div>
-                <div style={{fontWeight: 100, width: '80%', marginTop: '0.5rem', marginBottom: '0.3rem'}}>
+                <div style={styles.researchPurposeInfo}>
                   This information will be posted publicly on the AoU Research Hub Website to inform the AoU Research Participants.</div>
               </FlexColumn>,
               valueKey: 'areaOfResearch',
@@ -446,8 +460,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
         <div style={styles.title}>Free credits balance
         </div>
         <hr style={{...styles.verticalLine, width: '15.7rem'}}/>
-          {profile && <FlexRow style={{borderRadius: '0.4rem', height: '3rem', marginTop: '0.7rem', marginBottom: '1.4rem',
-            color: colors.primary, backgroundColor: colorWithWhiteness(colors.disabled, 0.7)}}>
+          {profile && <FlexRow style={styles.freeCreditsBox}>
             <FlexColumn style={{marginLeft: '0.8rem'}}>
               <div style={{marginTop: '0.4rem'}}><i>All of Us</i> FREE credits used:</div>
               <div>Remaining <i>All of Us</i> FREE credits:</div>

@@ -48,6 +48,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -427,13 +428,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       if (requireInstitutionalVerification) {
         DbVerifiedInstitutionalAffiliation dbExistingVerifiedInstitutionalAffiliation =
             verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).get();
-        if (!dbExistingVerifiedInstitutionalAffiliation
-            .getInstitutionalRoleEnum()
-            .equals(dbVerifiedAffiliation.getInstitutionalRoleEnum())) {
-          dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
-              dbVerifiedAffiliation.getInstitutionalRoleEnum());
-          this.verifiedInstitutionalAffiliationDao.save(dbExistingVerifiedInstitutionalAffiliation);
+        dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
+            dbVerifiedAffiliation.getInstitutionalRoleEnum());
+        if (dbVerifiedAffiliation.getInstitutionalRoleEnum().equals(InstitutionalRole.OTHER)) {
+          dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText(
+              dbVerifiedAffiliation.getInstitutionalRoleOtherText());
+        } else {
+          dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText("");
         }
+        this.verifiedInstitutionalAffiliationDao.save(dbExistingVerifiedInstitutionalAffiliation);
       }
     } catch (ObjectOptimisticLockingFailureException e) {
       log.log(Level.WARNING, "version conflict for user update", e);
