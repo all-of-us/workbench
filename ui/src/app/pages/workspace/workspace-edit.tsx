@@ -91,11 +91,11 @@ export const styles = reactStyles({
     padding: '0.25rem 0 0 1rem'
   },
   freeCreditsBalanceOverlay: {
-    height: '44px',
-    width: '150px',
-    color: '#262262',
+    height: 44,
+    width: 150,
+    color: colors.primary,
     fontFamily: 'Montserrat',
-    fontSize: '12px',
+    fontSize: 12,
     letterSpacing: '0',
     lineHeight: '22px',
   },
