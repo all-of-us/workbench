@@ -2,7 +2,7 @@ module.exports = {
   "verbose": true,
   "preset": "jest-puppeteer",
   "testTimeout": 240000,
-  "testRunner": "jest-circus/runner", // Use jest-circus. jest runs tests with jest-jasmine by default.
+  "testRunner": "jest-circus/runner",
   "testEnvironment": "<rootDir>/puppeteer-custom-environment.ts",
   "setupFilesAfterEnv": [
     "<rootDir>/jest-circus.setup.ts",

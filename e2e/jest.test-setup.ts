@@ -2,18 +2,19 @@ const url = require('url');
 
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
-// Set beforeEach for every test
+// Runs this beforeEach() before test's beforeEach().
 beforeEach(async () => {
   await page.setUserAgent(userAgent);
   await page.setDefaultNavigationTimeout(90000);
 });
 
-// Set afterEach for every test
+// Runs this afterEach() before test's afterEach().
 afterEach(async () => {
   await page.deleteCookie(...await page.cookies());
   await jestPuppeteer.resetBrowser();
 });
 
+// Runs this beforeAll() before test's beforeAll().
 beforeAll(async () => {
   await page.setRequestInterception(true);
   page.on('request', (request) => {
@@ -32,6 +33,7 @@ beforeAll(async () => {
   });
 });
 
+// Runs this afterAll() before test's afterAll().
 afterAll(async () => {
   await page.setRequestInterception(false);
 });

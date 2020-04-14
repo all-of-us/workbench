@@ -155,9 +155,6 @@ export default class GoogleLoginPage extends BasePage {
   }
 
   static async logIn(page: Page): Promise<HomePage> {
-    await page.setUserAgent(config.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(120000);
-
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
     const home = new HomePage(page);
