@@ -30,7 +30,14 @@ export const styles = reactStyles({
     textTransform: 'none',
     borderRadius: '2px',
     justifyContent: 'baseline',
-    width: '156px'
+    width: '6.5rem'
+  },
+  createAccountButton: {
+    fontSize: '10px',
+    margin: '.25rem .5rem .25rem 0',
+    border: `1px solid ${colors.primary}`,
+    height: '48px',
+    width: '6.5rem'
   },
   fismaCommon: {
     fontSize: '10px',
@@ -70,8 +77,7 @@ export const LoginReactComponent: React.FunctionComponent<{
           <SmallHeader>
             Don't have an account?
           </SmallHeader>
-          <Button type='secondary' style={{fontSize: '10px', margin: '.25rem .5rem .25rem 0',
-            border: `1px solid ${colors.primary}`, height: '48px', width: '156px'}}
+          <Button type='secondary' style={styles.createAccountButton}
                   onClick={onCreateAccount}>
             Create Account
           </Button>
