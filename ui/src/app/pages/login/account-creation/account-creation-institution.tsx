@@ -208,7 +208,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
         return <div data-test-id='email-error-message' style={{color: colors.danger}}>
           The institution has authorized access only to select members.<br/>
-          Please <a href='https://www.researchallofus.org/apply/' target='_blank'>
+          Please <a href='https://www.researchallofus.org/institutional-agreements' target='_blank'>
           click here</a> to request to be added to the institution</div>;
       }
       // If institution has MASTER or NULL agreement and the domain is not in the allowed list
@@ -343,7 +343,8 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </ErrorDiv>
             }
             <div style={{marginTop: '.5rem'}}>
-              <a href={'https://www.researchallofus.org/apply/'} target='_blank' style={{color: colors.accent}}>
+              <a href={'https://www.researchallofus.org/institutional-agreements'} target='_blank'
+                 style={{color: colors.accent}}>
               Don't see your institution listed?
               </a>
             </div>
