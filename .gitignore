@@ -61,3 +61,4 @@ common-api/out/*
 **/build
 **/.gradle
 **/*.orig
+**/.vscode

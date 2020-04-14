@@ -31,7 +31,7 @@ import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
-import {WorkspaceListComponent} from './pages/workspace/workspace-list';
+// import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
@@ -39,6 +39,7 @@ import {DisabledGuard} from './guards/disabled-guard.service';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
+import {AppRouter} from './components/app-router'
 
 declare let gtag: Function;
 
@@ -81,15 +82,19 @@ const routes: Routes = [
       }, {
         path: 'workspaces',
         children: [
+          // {
+          //   path: '',
+          //   component: WorkspaceListComponent,
+          //   data: {
+          //     title: 'View Workspaces',
+          //     breadcrumb: BreadcrumbType.Workspaces
+          //   }
+          // },
           {
             path: '',
-            component: WorkspaceListComponent,
-            data: {
-              title: 'View Workspaces',
-              breadcrumb: BreadcrumbType.Workspaces
-            }
-          },
-          {
+            component: AppRouter,
+            data: {}
+          },{
             /* TODO The children under ./views need refactoring to use the data
              * provided by the route rather than double-requesting it.
              */
@@ -304,6 +309,10 @@ const routes: Routes = [
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
+      },{
+        path: '**',
+        component: AppRouter,
+        data: {title: 'Create Workspace'}
       }
     ]
   }
