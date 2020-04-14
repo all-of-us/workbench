@@ -3,6 +3,7 @@ import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigatio
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {withContentRect} from 'react-measure';
 
 import {
   Clickable, StyledAnchorTag,
@@ -14,6 +15,7 @@ import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
+import {Scroll} from 'app/icons/scroll';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
@@ -54,7 +56,8 @@ export const styles = reactStyles({
     marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
   quickTourCardsRow: {
-    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem', marginBottom: '1rem'
+    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem', marginBottom: '1rem', marginLeft: '-1rem', paddingLeft: '1rem',
+    position: 'relative'
   },
   quickTourLabel: {
     fontSize: 22, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
@@ -70,6 +73,8 @@ interface Props {
     profile: Profile,
     reload: Function
   };
+  measureRef: React.Ref<any>;
+  contentRect: {client: {width: number}};
 }
 
 interface State {
@@ -83,6 +88,7 @@ interface State {
   firstVisit: boolean;
   firstVisitTraining: boolean;
   quickTour: boolean;
+  quickTourResourceOffset: number;
   trainingCompleted: boolean;
   twoFactorAuthCompleted: boolean;
   videoOpen: boolean;
@@ -107,6 +113,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       firstVisit: undefined,
       firstVisitTraining: true,
       quickTour: false,
+      quickTourResourceOffset: 0,
       trainingCompleted: undefined,
       twoFactorAuthCompleted: undefined,
       videoOpen: false,
@@ -238,11 +245,13 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
 
   render() {
+    const {contentRect: {client: {width}}, measureRef} = this.props;
     const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
-      dataUserCodeOfConductCompleted
+      dataUserCodeOfConductCompleted, quickTourResourceOffset
     } = this.state;
+    const limit = (width * 0.97) / 276;
 
     const quickTourResources = [
       {
@@ -371,17 +380,29 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
           <FlexColumn style={{marginLeft: '3%'}}>
             <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
-            <FlexRow style={styles.quickTourCardsRow}>
-              {quickTourResources.map((thumbnail, i) => {
-                return <React.Fragment key={i}>
-                  <Clickable onClick={thumbnail.onClick}
-                             data-test-id={'quick-tour-resource-' + i}>
-                    <img style={{width: '11rem', marginRight: '0.5rem'}}
-                         src={thumbnail.src}/>
-                  </Clickable>
-                </React.Fragment>;
-              })}
-            </FlexRow>
+            <div ref={measureRef} style={{display: 'flex', position: 'relative'}}>
+              <FlexRow style={styles.quickTourCardsRow}>
+                {quickTourResources.slice(quickTourResourceOffset, quickTourResourceOffset + limit).map((thumbnail, i) => {
+                  return <React.Fragment key={i}>
+                    <Clickable onClick={thumbnail.onClick}
+                               data-test-id={'quick-tour-resource-' + i}>
+                      <img style={{width: '11rem', marginRight: '0.5rem'}}
+                           src={thumbnail.src}/>
+                    </Clickable>
+                  </React.Fragment>;
+                })}
+                {quickTourResourceOffset > 0 && <Scroll
+                    dir='left'
+                    onClick={() => this.setState({quickTourResourceOffset: quickTourResourceOffset - 1})}
+                    style={{left: 0, marginTop: '2rem', position: 'absolute'}}
+                />}
+                {quickTourResourceOffset + limit < quickTourResources.length && <Scroll
+                    dir='right'
+                    onClick={() => this.setState({quickTourResourceOffset: quickTourResourceOffset + 1})}
+                    style={{marginTop: '2rem', position: 'absolute', right: 0}}
+                />}
+              </FlexRow>
+            </div>
           </FlexColumn>
         </div>
       </FlexColumn>
