@@ -77,12 +77,12 @@ export class AccountCreationTos extends React.Component<
         style={{display: 'inline-flex', padding: '1rem', maxWidth: '1000px', margin: 'auto'}}>
         <div style={{flex: 3}}>
           <div style={{...styles.noticeText, marginBottom: '.5rem', height: '3rem'}}>
-            <div style={{fontWeight: 400}}>
-              By clicking here and moving to the Registration step, you acknowledge that you
-              understand the terms of this agreement and agree to abide by them.
-            </div>
             <div>
               Please read through the entire agreement to continue.
+            </div>
+            <div style={{fontWeight: 400}}>
+                By clicking below, or continuing with the registration process or accessing the
+                Workbench, You agree to these Terms and make the following certifications:
             </div>
           </div>
           <div style={{marginBottom: '.25rem'}}>
@@ -96,7 +96,7 @@ export class AccountCreationTos extends React.Component<
                         styles.disabledCheckboxLabel}
                       wrapperStyle={{marginBottom: '0.5rem'}}
                       label={<span>
-              I have read and understand the <i>All of Us</i> Research Program Privacy Statement.</span>}
+              I have read, understand, and agree to the <i>All of Us</i> Program Privacy Statement.</span>}
             /></div>
           <div>
             <CheckBox data-test-id='terms-of-service-check'
@@ -109,7 +109,7 @@ export class AccountCreationTos extends React.Component<
                         styles.disabledCheckboxLabel}
                       wrapperStyle={{marginBottom: '0.5rem'}}
                       label={<span>
-              I have read and understand the <i>All of Us</i> Research Program Terms of Use described above.</span>}
+              I have read, understand, and agree to the Terms described above.</span>}
             /></div>
         </div>
         <FlexColumn style={{paddingLeft: '3rem', alignItems: 'center', justifyContent: 'center'}}>
