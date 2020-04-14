@@ -12,9 +12,9 @@ export default class SelectComponent {
   /**
    * Select an option in a Select element.
    * @param {string} textValue Partial or full string to click in Select.
-   * @param {number} tryCount Default try count is 2.
+   * @param {number} maxAttempts Default try count is 2.
    */
-  async select(textValue: string, tryCount: number = 2): Promise<void> {
+  async select(textValue: string, maxAttempts: number = 2): Promise<void> {
 
     const clickText = async () => {
       await this.open(2);
@@ -29,14 +29,14 @@ export default class SelectComponent {
     };
 
     const clickAndCheck = async () => {
-      tryCount--;
+      maxAttempts--;
       const shouldSelectedValue = await clickText();
       // compare to displayed text in Select textbox
       const displayedValue = await this.getSelectedValue();
       if (shouldSelectedValue === displayedValue) {
         return shouldSelectedValue; // success
       }
-      if (tryCount <= 0) {
+      if (maxAttempts <= 0) {
         return null;
       }
       return await this.page.waitFor(2000).then(clickAndCheck); // two seconds pause and retry
@@ -57,18 +57,18 @@ export default class SelectComponent {
 
   /**
    * Open Select dropdown.
-   * @param {number} tryCount Default is 1.
+   * @param {number} maxAttempts Default is 1.
    */
-  private async open(tryCount: number = 1): Promise<void> {
+  private async open(maxAttempts: number = 1): Promise<void> {
     const click = async () => {
-      tryCount--;
+      maxAttempts--;
       const is = await this.isOpen();
       if (!is) {
         await this.toggleOpenClose();
       } else {
         return;
       }
-      if (tryCount <= 0) {
+      if (maxAttempts <= 0) {
         return;
       }
       await this.page.waitFor(1000).then(click); // one second pause before try again
