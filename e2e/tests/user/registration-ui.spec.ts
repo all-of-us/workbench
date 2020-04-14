@@ -6,16 +6,6 @@ import {config} from 'resources/workbench-config';
 
 describe('User registration tests:', () => {
 
-  beforeEach(async () => {
-    await page.setUserAgent(config.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(120000);
-  });
-
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
-
   test('Loading Terms of Use and Privacy statement page', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();

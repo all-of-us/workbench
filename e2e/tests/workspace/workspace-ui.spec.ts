@@ -12,11 +12,6 @@ describe('Workspace ui tests', () => {
     await signIn(page);
   });
 
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
-
   test('Workspace cards all have same ui size', async () => {
     const cards = await WorkspaceCard.getAllCards(page);
     let width;

@@ -1,32 +1,38 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "allowUnreachableCode": false,
-    "suppressExcessPropertyErrors": false,
-    "moduleResolution": "node",
+    "target": "ES2017",
     "module": "commonjs",
+    "lib": [
+      "ES2017",
+      "dom"
+    ],
+
     "importHelpers": true,
     "sourceMap": true,
     "declaration": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "ES2017",
+
+    /* Module Resolution Options */
+    "moduleResolution": "node",
     "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+
+    /* Additional Checks */
     "forceConsistentCasingInFileNames": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+    "suppressExcessPropertyErrors": false,
+
     "outDir": "./tsc-out",
-    "allowJs": true,
-    "checkJs": true,
     "baseUrl": ".",
     "typeRoots": [
       "./node_modules/@types"
-    ],
-    "lib": [
-      "ES2017",
-      "dom"
     ]
   },
   "inclue": ["/*"],

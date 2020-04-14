@@ -20,11 +20,6 @@ describe('Sidebar Navigation', () => {
     await signIn(page);
   });
 
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
-
   test('Check app side-nav work', async () => {
     const homePage = new HomePage(page);
     // Select Profile link

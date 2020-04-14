@@ -45,6 +45,7 @@
     "faker": "^4.1.0",
     "fs-extra": "^9.0.0",
     "jest": "^25.1.0",
+    "jest-circus": "^25.3.0",
     "jest-junit": "^10.0.0",
     "jest-puppeteer": "^4.4.0",
     "lodash": "^4.17.15",

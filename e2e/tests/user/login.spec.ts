@@ -4,16 +4,6 @@ import {config} from 'resources/workbench-config';
 
 describe('Login tests:', () => {
 
-  beforeEach(async () => {
-    await page.setUserAgent(config.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(120000);
-  });
-
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
-
   test('Open AoU Workspaces page before login redirects to login page', async () => {
     const url = config.uiBaseUrl + config.workspacesUrlPath;
     const loginPage = new GoogleLoginPage(page);
