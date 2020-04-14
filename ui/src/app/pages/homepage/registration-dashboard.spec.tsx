@@ -26,6 +26,7 @@ describe('RegistrationDashboard', () => {
     });
     props  = {
       eraCommonsLinked: false,
+      eraCommonsLoading: false,
       eraCommonsError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
