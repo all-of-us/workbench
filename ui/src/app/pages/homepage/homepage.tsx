@@ -65,27 +65,36 @@ export const styles = reactStyles({
   },
 });
 
-export const Homepage = withUserProfile()(class extends React.Component<
-  { profileState: { profile: Profile, reload: Function } },
-  { accessTasksLoaded: boolean,
-    accessTasksRemaining: boolean,
-    betaAccessGranted: boolean,
-    dataUserCodeOfConductCompleted: boolean,
-    eraCommonsError: string,
-    eraCommonsLinked: boolean,
-    firstVisit: boolean,
-    firstVisitTraining: boolean,
-    quickTour: boolean,
-    trainingCompleted: boolean,
-    twoFactorAuthCompleted: boolean,
-    videoOpen: boolean,
-    videoLink: string,
-    userHasWorkspaces: boolean | null
-  }> {
+interface Props {
+  profileState: {
+    profile: Profile,
+    reload: Function
+  };
+}
+
+interface State {
+  accessTasksLoaded: boolean;
+  accessTasksRemaining: boolean;
+  betaAccessGranted: boolean;
+  dataUserCodeOfConductCompleted: boolean;
+  eraCommonsError: string;
+  eraCommonsLinked: boolean;
+  eraCommonsLoading: boolean;
+  firstVisit: boolean;
+  firstVisitTraining: boolean;
+  quickTour: boolean;
+  trainingCompleted: boolean;
+  twoFactorAuthCompleted: boolean;
+  videoOpen: boolean;
+  videoLink: string;
+  userHasWorkspaces: boolean | null;
+}
+
+export const Homepage = withUserProfile()(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
 
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       accessTasksLoaded: false,
@@ -94,6 +103,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       dataUserCodeOfConductCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
+      eraCommonsLoading: false,
       firstVisit: undefined,
       firstVisitTraining: true,
       quickTour: false,
@@ -125,8 +135,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
   async validateNihToken() {
     const token = (new URL(window.location.href)).searchParams.get('token');
     if (token) {
+      this.setState({eraCommonsLoading: true});
       try {
-        await profileApi().updateNihToken({ jwt: token });
+        const profileResponse = await profileApi().updateNihToken({ jwt: token });
+        if (profileResponse.eraCommonsLinkedNihUsername !== undefined) {
+          this.setState({eraCommonsLinked: true});
+        }
       } catch (e) {
         this.setState({eraCommonsError: 'Error saving NIH Authentication status.'});
       }
@@ -224,8 +238,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
   render() {
     const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
-      eraCommonsLinked, eraCommonsError, firstVisitTraining, trainingCompleted, quickTour,
-      videoLink, twoFactorAuthCompleted, dataUserCodeOfConductCompleted
+      eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
+      trainingCompleted, quickTour, videoLink, twoFactorAuthCompleted,
+      dataUserCodeOfConductCompleted
     } = this.state;
 
     const quickTourResources = [
@@ -269,13 +284,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
           <FlexColumn style={{justifyContent: 'flex-start'}}>
               {accessTasksLoaded ?
                 (accessTasksRemaining ?
-                    (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
-                                            eraCommonsError={eraCommonsError}
+                    (<RegistrationDashboard eraCommonsError={eraCommonsError}
+                                            eraCommonsLinked={eraCommonsLinked}
+                                            eraCommonsLoading={eraCommonsLoading}
                                             trainingCompleted={trainingCompleted}
                                             firstVisitTraining={firstVisitTraining}
                                             betaAccessGranted={betaAccessGranted}
                                             twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                          dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
+                                            dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
                     ) : (
                         <React.Fragment>
                           <FlexColumn>
