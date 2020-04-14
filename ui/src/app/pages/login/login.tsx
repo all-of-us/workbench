@@ -33,8 +33,8 @@ export const styles = reactStyles({
     width: '6.5rem'
   },
   createAccountButton: {
-    fontSize: '10px',
-    margin: '.25rem .5rem .25rem 0',
+    fontSize: '12px',
+    margin: '.5rem .5rem .25rem 0',
     border: `1px solid ${colors.primary}`,
     height: '48px',
     width: '6.5rem'
@@ -60,8 +60,9 @@ export const LoginReactComponent: React.FunctionComponent<{
     return <React.Fragment>
       <div data-test-id='login' style={{marginTop: '5.5rem',  paddingLeft: '3rem'}}>
         <div>
-          <Header>
-            Already have a Researcher Workbench account?
+          <Header style={{width: '14rem', lineHeight: '30px'}}>
+            Already have a
+            Researcher Workbench account?
           </Header>
           <div>
             <Button type='primary' style={styles.button} onClick={signIn}>
