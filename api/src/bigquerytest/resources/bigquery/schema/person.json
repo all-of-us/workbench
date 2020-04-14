@@ -88,5 +88,20 @@
     "type": "integer",
     "name": "ethnicity_source_concept_id",
     "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "sex_at_birth_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "sex_at_birth_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "sex_at_birth_source_concept_id",
+    "mode": "nullable"
   }
 ]
