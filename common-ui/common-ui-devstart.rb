@@ -126,6 +126,14 @@ class CommonUiDevStart
     Common.new.run_inline %W{docker-compose down --volumes --rmi=local}
   end
 
+  def test_angular()
+    Common.new.run_inline %W{docker-compose run --rm #{@ui_name} yarn test --no-watch --no-progress --browsers=ChromeHeadless}
+  end
+
+  def test_react()
+    Common.new.run_inline %W{docker-compose run --rm #{@ui_name} yarn test-react --detectOpenHandles --forceExit --runInBand}
+  end
+
   def register_commands
     Common.register_command({
                             :invocation => "install-dependencies",
@@ -178,7 +186,17 @@ class CommonUiDevStart
                                 :description => "Runs the specified command in a docker container.",
                                 :fn => ->(*args) { docker_run("docker-run", args) }
                             })
-  end
+    Common.register_command({
+        :invocation => "test-angular",
+        :description => "Runs the Angular test suite.",
+        :fn => Proc.new { |_| test_angular() }
+    })
+    Common.register_command({
+        :invocation => "test-react",
+        :description => "Runs the React test suite.",
+        :fn => Proc.new { |_| test_react() }
+    })
+end
 
 end
 
