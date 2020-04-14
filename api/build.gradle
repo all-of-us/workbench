@@ -15,6 +15,7 @@ buildscript {
     JACKSON_VERSION = '2.9.10'
     JODA_VERSION = '2.10'
     KOTLIN_VERSION = '1.3.50'
+    MAPSTRUCT_VERSION = '1.3.1.Final'
     MOCKITO_KOTLIN_VERSION = '2.2.0'
     OKHTTP_VERSION = '2.7.5'
     OPENCENSUS_VERSION = '0.23.0'
@@ -371,26 +372,21 @@ def swaggerCodegenTasks = ['generateApi', 'generateFireCloudClient', 'generateNo
 
 // The IDEA plugin generates files that assist the IntelliJ IDE in opening Gradle-defined projects.
 // https://docs.gradle.org/current/userguide/idea_plugin.html
-project.tasks.ideaModule.dependsOn 'swaggerCodegenTasks'
+project.tasks.ideaModule.dependsOn(swaggerCodegenTasks)
 
 // Java plugin's Generated Source Set gives us the compileGeneratedJava task.
 // We need to provide it with the swagger-codegen tasks that excrete Java.
-project.tasks.compileGeneratedJava.dependsOn 'swaggerCodegenTasks'
+project.tasks.compileGeneratedJava.dependsOn(swaggerCodegenTasks)
 
-war.dependsOn compileGeneratedJava
-war.dependsOn generate_appengine_web_xml
-war.dependsOn generate_appengine_cron_yaml
+project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
+        'generate_appengine_cron_yaml'])
 
 clean.doFirst {
   delete("${projectDir}/$swaggerTargetFolder")
 }
 
-repositories {   // repositories for Jar's you access in your code
+repositories {
   jcenter()
-}
-
-ext {
-  mapstructVersion = '1.3.1.Final'
 }
 
 dependencies {
@@ -478,9 +474,9 @@ dependencies {
   compile 'com.github.rholder:guava-retrying:2.0.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
 
-  implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-  annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-  testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+  implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
+  annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
+  testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
   // Elasticsearch client
   compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:${ELASTICSEARCH_VERSION}"
