@@ -55,6 +55,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     validateDefinitionExists(cohortId, cohortAnnotationDefinition.getColumnName());
 
     cohortAnnotationDefinition.setCohortId(cohortId);
+    cohortAnnotationDefinition.etag(Etags.fromVersion(0));
     CohortAnnotationDefinition response = save(cohortAnnotationDefinition);
     return ResponseEntity.ok(response);
   }

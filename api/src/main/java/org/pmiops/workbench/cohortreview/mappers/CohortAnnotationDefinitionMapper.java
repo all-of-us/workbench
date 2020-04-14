@@ -23,6 +23,7 @@ public interface CohortAnnotationDefinitionMapper {
 
   @Mapping(target = "version", source = "etag", qualifiedByName = "etagToCdrVersion")
   @Mapping(target = "enumValues", source = "enumValues")
+  @Mapping(target = "annotationTypeEnum", ignore = true)
   DbCohortAnnotationDefinition clientToDbModel(CohortAnnotationDefinition source);
 
   default List<String> toStringListFromEnumValues(
@@ -34,10 +35,11 @@ public interface CohortAnnotationDefinitionMapper {
 
   default SortedSet<DbCohortAnnotationEnumValue> toEnumValuesFromStringList(
       List<String> enumValues) {
-    List<DbCohortAnnotationEnumValue> enumValuesList =
-        IntStream.range(0, enumValues.size())
-            .mapToObj(i -> new DbCohortAnnotationEnumValue().name(enumValues.get(i)).order(i))
-            .collect(Collectors.toList());
-    return new TreeSet<>(enumValuesList);
+    return enumValues == null
+        ? new TreeSet<>()
+        : new TreeSet<>(
+            IntStream.range(0, enumValues.size())
+                .mapToObj(i -> new DbCohortAnnotationEnumValue().name(enumValues.get(i)).order(i))
+                .collect(Collectors.toList()));
   }
 }
