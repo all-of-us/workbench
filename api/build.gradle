@@ -1,5 +1,5 @@
-import io.swagger.codegen.config.CodegenConfigurator
-import io.swagger.codegen.DefaultGenerator
+import io.swagger.codegen.v3.config.CodegenConfigurator
+import io.swagger.codegen.v3.DefaultGenerator
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
@@ -10,6 +10,8 @@ def swaggerTargetFolder = 'src/generated/java'
 def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
 
 task generateApi {
+  group = 'swagger-codegen'
+  description = 'Convert OpenAPI spec to Workbench API Java types and code.'
   inputs.file("$projectDir/$workbenchApiSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -34,6 +36,9 @@ task generateApi {
 def fireCloudApiFile = 'src/main/resources/fireCloud.yaml'
 
 task generateFireCloudClient {
+  group = 'swagger-codegen'
+//  description = 'Convert FireCloud Swagger specs to Java clients and model classes.'
+
   inputs.file("$projectDir/$fireCloudApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -59,6 +64,8 @@ task generateFireCloudClient {
 def notebooksApiFile = 'src/main/resources/notebooks.yaml'
 
 task generateNotebooksClient {
+  group = 'swagger-codegen'
+
   inputs.file("$projectDir/$notebooksApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -83,6 +90,8 @@ task generateNotebooksClient {
 def jiraApiFile = 'src/main/resources/jira.yaml'
 
 task generateJiraClient {
+  group = 'swagger-codegen'
+
   inputs.file("$projectDir/$jiraApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -107,6 +116,8 @@ task generateJiraClient {
 def mandrillApiFile = 'src/main/resources/mandrill_api.yaml'
 
 task generateMandrillClient {
+  group = 'swagger-codegen'
+
   inputs.file("$projectDir/$mandrillApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -131,6 +142,8 @@ task generateMandrillClient {
 def moodleApiFile = 'src/main/resources/moodle.yaml'
 
 task generateMoodleClient {
+  group = 'swagger-codegen'
+
   inputs.file("$projectDir/$moodleApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -155,6 +168,8 @@ task generateMoodleClient {
 def rdrApiFile = 'src/main/resources/rdr.yaml'
 
 task generateRdrClient {
+  group = 'swagger-codegen'
+
   inputs.file("$projectDir/$rdrApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -179,6 +194,8 @@ task generateRdrClient {
 def captchaApiFile = 'src/main/resources/captcha.yaml'
 
 task generateCaptchaClient {
+  group = 'swagger-codegen'
+
   inputs.file("$projectDir/$captchaApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -229,7 +246,7 @@ buildscript {    // Configuration for building
     JODA_VERSION = '2.10'
     OPENCENSUS_VERSION = '0.23.0'
     HIBERNATE_VERSION = '5.2.10.Final'
-    SPRINGFOX_VERSION = '2.6.1'
+    SPRINGFOX_VERSION = '2.9.0'
     KOTLIN_VERSION = '1.3.50'
     MOCKITO_KOTLIN_VERSION = '2.2.0'
   }
@@ -243,13 +260,14 @@ buildscript {    // Configuration for building
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${SPRING_BOOT_VERSION}"
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
-    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
+    classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2"
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
-    classpath 'io.swagger:swagger-codegen:2.2.3'
+    classpath 'io.swagger.codegen.v3:swagger-codegen:3.0.19'
+
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
     classpath "org.jetbrains.kotlin:kotlin-noarg:$KOTLIN_VERSION"
     classpath 'org.owasp:dependency-check-gradle:5.1.0'
@@ -352,6 +370,8 @@ sourceSets {
   }
 }
 
+// TODO: rearrange this to have a dependency lilst for each item rather than
+// the current ABCB pattern
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
@@ -446,7 +466,7 @@ dependencies {
   compile 'com.google.auth:google-auth-library-appengine:0.19.0'
   compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
 
-  compile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
+  compile "com.squareup.okhttp:okhttp:${project.ext.OKHTTP_VERSION}"
   compile "com.squareup.okhttp:logging-interceptor:${OKHTTP_VERSION}"
 
   compile "com.google.code.gson:gson:${GSON_VERSION}"
@@ -466,7 +486,7 @@ dependencies {
   compile 'com.cloudbees.thirdparty:zendesk-java-client:0.12.0'
 
   compile 'javax.inject:javax.inject:1'
-  compile 'io.swagger:swagger-annotations:1.5.16'
+  compile group: 'io.swagger', name: 'swagger-annotations', version: '2.0.0-rc2'
   compile 'org.apache.commons:commons-lang3:3.6'
   compile 'org.apache.commons:commons-text:1.8'
   compile 'com.google.guava:guava:26.0-jre'
@@ -511,7 +531,7 @@ dependencies {
   generatedCompile "io.springfox:springfox-swagger2:${SPRINGFOX_VERSION}"
   generatedCompile "io.springfox:springfox-swagger-ui:${SPRINGFOX_VERSION}"
   generatedCompile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
-  generatedCompile "com.squareup.okhttp:logging-interceptor:${OKHTTP_VERSION}"
+  generatedCompile "com.squareup.okhttp:logging-interceptor:$OKHTTP_VERSION"
   generatedCompile "com.google.code.gson:gson:${GSON_VERSION}"
   generatedCompile "joda-time:joda-time:${JODA_VERSION}"
   generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
