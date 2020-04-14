@@ -37,7 +37,6 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
 
     try {
-      AnalyticsTracker.Registration.DemographicSurvey();
       const newProfile = await profileApi().createAccount({
         profile: profile,
         captchaVerificationToken: captchaToken,
@@ -57,7 +56,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     return <React.Fragment>
       <DemographicSurvey
           profile={this.props.profile}
-          onSubmit={(profile, captchaToken) => this.createAccount(profile, captchaToken)}
+          onSubmit={(profile, captchaToken) => {
+            AnalyticsTracker.Registration.DemographicSurvey();
+            return this.createAccount(profile, captchaToken);
+          }}
           onPreviousClick={(profile) => this.props.onPreviousClick(profile)}
           enableCaptcha={true}
           enablePrevious={true}
