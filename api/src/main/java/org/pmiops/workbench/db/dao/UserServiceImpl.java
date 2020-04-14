@@ -425,11 +425,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       boolean requireInstitutionalVerification =
           configProvider.get().featureFlags.requireInstitutionalVerification;
       if (requireInstitutionalVerification) {
-        DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
+        DbVerifiedInstitutionalAffiliation dbExistingVerifiedInstitutionalAffiliation =
             verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).get();
-        dbVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
-            dbVerifiedAffiliation.getInstitutionalRoleEnum());
-        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedInstitutionalAffiliation);
+        if (!dbExistingVerifiedInstitutionalAffiliation
+            .getInstitutionalRoleEnum()
+            .equals(dbVerifiedAffiliation.getInstitutionalRoleEnum())) {
+          dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
+              dbVerifiedAffiliation.getInstitutionalRoleEnum());
+          this.verifiedInstitutionalAffiliationDao.save(dbExistingVerifiedInstitutionalAffiliation);
+        }
       }
     } catch (ObjectOptimisticLockingFailureException e) {
       log.log(Level.WARNING, "version conflict for user update", e);

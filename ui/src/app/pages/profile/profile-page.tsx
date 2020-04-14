@@ -91,11 +91,12 @@ const validators = {
   givenName: {...required, ...notTooLong(80)},
   familyName: {...required, ...notTooLong(80)},
   areaOfResearch: {...required, ...notTooLong(2000)},
-  streetAddress1: required,
-  zipCode: required,
-  city: required,
-  state: required,
-  country: required
+  streetAddress1: {...required, ...notTooLong(95)},
+  streetAddress2: notTooLong(95),
+  zipCode: {...required, ...notTooLong(10)},
+  city: {...required, ...notTooLong(95)},
+  state: {...required, ...notTooLong(95)},
+  country: {...required, ...notTooLong(95)}
 };
 
 interface ProfilePageProps {
@@ -256,6 +257,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       givenName, familyName, areaOfResearch,
         address: {
         streetAddress1,
+        streetAddress2,
           zipCode,
           city,
             state,
@@ -264,7 +266,9 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     } = currentProfile;
     const errors = validate({
       givenName,
-      familyName, areaOfResearch, streetAddress1,
+      familyName, areaOfResearch,
+      streetAddress1,
+      streetAddress2,
       zipCode,
       city,
       state,
