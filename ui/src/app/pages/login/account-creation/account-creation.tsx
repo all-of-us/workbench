@@ -693,7 +693,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </FlexColumn>
         <FlexColumn>
           <FlexColumn style={styles.asideContainer}>
-            <div style={{marginTop: '1rem'}}></div>
             <WhyWillSomeInformationBePublic />
           </FlexColumn>
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
