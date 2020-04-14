@@ -301,12 +301,12 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
       return <div style={{marginBottom: 40}}>
         <div style={styles.inputLabel}>{title}</div>
-        {isLong ? <TextArea
+        {isLong ? <TextArea  data-test-id={props.id || valueKey}
             style={styles.longInputStyle}
             {...inputProps}
           />  :
             <TooltipTrigger content='This field cannot be edited' disabled={!props.disabled}>
-          <TextInput
+          <TextInput  data-test-id={props.id || valueKey}
             style={styles.inputStyle}
             {...inputProps}
           /></TooltipTrigger>}
@@ -408,27 +408,32 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               })}
               {makeProfileInput({
                 title: 'Street Address 2',
-                valueKey: ['address', 'streetAddress2']
+                valueKey: ['address', 'streetAddress2'],
+                id: 'streetAddress2'
               })}
             </FlexRow>
             <FlexRow>
               {makeProfileInput({
                 title: 'City',
-                valueKey: ['address', 'city']
+                valueKey: ['address', 'city'],
+                id: 'city'
               })}
               {makeProfileInput({
                 title: 'State',
-                valueKey: ['address' , 'state']
+                valueKey: ['address' , 'state'],
+                id: 'state'
               })}
             </FlexRow>
             <FlexRow>
               {makeProfileInput({
                 title: 'Zip Code',
-                valueKey: ['address', 'zipCode']
+                valueKey: ['address', 'zipCode'],
+                id: 'zipCode'
               })}
               {makeProfileInput({
                 title: 'Country',
-                valueKey: ['address', 'country']
+                valueKey: ['address', 'country'],
+                id: 'country'
               })}
             </FlexRow>
           </div>

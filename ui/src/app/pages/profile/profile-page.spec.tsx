@@ -111,17 +111,30 @@ describe('ProfilePageComponent', () => {
 
     const wrapper = component();
 
-    let streetAddress1 = wrapper.find('[id="streetAddress1"]').first();
+    let streetAddress1 = wrapper.find('[data-test-id="streetAddress1"]').first();
+    console.log(streetAddress1.props());
     expect(streetAddress1.prop('value')).toBe('Main street');
 
     streetAddress1.simulate('change', {target: {value: 'Broadway'}});
 
     clickSaveProfileButton(wrapper);
     await waitOneTickAndUpdate(wrapper);
-    streetAddress1 = wrapper.find('[id="streetAddress1"]').first();
+    streetAddress1 = wrapper.find('[data-test-id="streetAddress1"]').first();
 
     expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
     expect(streetAddress1.prop('value')).toBe('Broadway');
 
+  });
+
+  it('should throw error if street Address 1 is empty', async() => {
+
+    const wrapper = component();
+
+    let streetAddress1 = wrapper.find('[data-test-id="streetAddress1"]').first();
+    expect(streetAddress1.prop('value')).toBe('Main street');
+
+    streetAddress1.simulate('change', {target: {value: ''}});
+
+    expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
   });
 });
