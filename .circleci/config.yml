@@ -299,15 +299,15 @@ jobs:
           command: git submodule update --init --recursive
       - restore_cache:
           keys:
-          - v2-12345-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
-          - v2-12345-e2e-test-cache-
+          - v2-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          - v2-e2e-test-cache-
       - run: 
           working_directory: ~/workbench/e2e
           command: yarn cache clean && yarn install --frozen-lockfile
       - save_cache:
           paths:
             - ~/.cache/yarn
-          key: v2-12345-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v2-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
           name: Update environment variables
           command: |
@@ -423,7 +423,6 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
-      - puppeteer-e2e-test
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
@@ -434,11 +433,11 @@ workflows:
           requires:
             - ui-build-test
       # After merge PR to master branch, run Puppeteer tests after ui and api deployed to "test" env successfully.
-      #- puppeteer-e2e-test:
-          #<<: *filter_master
-          #requires:
-            #- api-deploy-to-test
-            #- ui-deploy-to-test
+      - puppeteer-e2e-test:
+          <<: *filter_master
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
 
   deploy-staging:
     jobs:
