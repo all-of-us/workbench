@@ -399,11 +399,6 @@ jobs:
               --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
               --key-file circle-sa-key.json \
               --promote
-  sleep_60:
-    <<: *defaults
-    steps:
-      - run:
-        command: sleep 60 && echo 'sleep 60 seconds after deploy to UI and API to Kubernetes'
 
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
 filter_master: &filter_master
@@ -429,8 +424,6 @@ workflows:
       - api-bigquery-test
       - api-integration-test
       - puppeteer-e2e-test
-          requires:
-            - sleep_60
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
@@ -444,7 +437,6 @@ workflows:
       #- puppeteer-e2e-test:
           #<<: *filter_master
           #requires:
-            #- sleep_60
             #- api-deploy-to-test
             #- ui-deploy-to-test
 
