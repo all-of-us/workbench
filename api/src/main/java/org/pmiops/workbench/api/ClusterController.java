@@ -193,7 +193,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<Cluster> getCluster(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
@@ -207,7 +207,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<Cluster> createCluster(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
@@ -221,7 +221,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCluster(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
     leonardoNotebooksClient.deleteCluster(
@@ -233,7 +233,7 @@ public class ClusterController implements ClusterApiDelegate {
   public ResponseEntity<ClusterLocalizeResponse> localize(
       String workspaceNamespace, ClusterLocalizeRequest body) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         dbWorkspace.getWorkspaceNamespace(),
         dbWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);

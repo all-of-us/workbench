@@ -1,7 +1,8 @@
 import {ElementHandle, Page} from 'puppeteer';
+import {PageUrl} from './page-identifiers';
 import Link from './aou-elements/link';
 import {findIcon} from './aou-elements/xpath-finder';
-import AuthenticatedPage, {PageUrl} from './authenticated-page';
+import AuthenticatedPage from './authenticated-page';
 
 export const PAGE = {
   TITLE: 'Homepage',

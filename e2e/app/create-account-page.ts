@@ -7,8 +7,8 @@ import SelectComponent from './aou-elements/select-component';
 import Textarea from './aou-elements/textarea';
 import Textbox from './aou-elements/textbox';
 import BasePage from './base-page';
+import {config} from 'resources/workbench-config';
 
-const configs = require('resources/workbench-config');
 const faker = require('faker/locale/en_US');
 
 export const PAGE = {
@@ -38,8 +38,8 @@ export const EDUCATION_LEVEL_VALUE = {
 };
 
 export const FIELD_LABEL = {
-  READ_UNDERSTAND_PRIVACY_STATEMENT: 'I have read and understand the All of Us Research Program Privacy Statement',
-  READ_UNDERSTAND_TERMS_OF_USE: 'I have read and understand the All of Us Research Program Terms of Use',
+  READ_UNDERSTAND_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement.',
+  READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms described above.',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
   RESEARCH_BACKGROUND: 'describe your research background, experience, and research interests',
@@ -113,7 +113,7 @@ export default class CreateAccountPage extends BasePage {
     for (const field of fields) {
       const textbox = await Textbox.forLabel(this.page, {text: field.label});
       await textbox.type(field.value);
-      await textbox.pressKeyboard('Tab', { delay: 100 });
+      await textbox.tabKey();
       if (field.label === 'New Username') {
         await ClrIconLink.forLabel(this.page, {text: field.label}, 'success-standard');
         newUserName = field.value; // store new username for return
@@ -152,8 +152,8 @@ export default class CreateAccountPage extends BasePage {
     const institutionSelect = new SelectComponent(this.page, 'Select your institution');
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
     const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddressTextbox.type(configs.broadInstitutionEmail);
-    await emailAddressTextbox.pressKeyboard('Tab', { delay: 100 }); // tab out to start email validation
+    await emailAddressTextbox.type(config.broadInstitutionEmail);
+    await emailAddressTextbox.tabKey(); // tab out to start email validation
     const roleSelect = new SelectComponent(this.page, 'describes your role');
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }

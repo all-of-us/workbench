@@ -6,7 +6,7 @@ import {Button} from 'app/components/buttons';
 import {baseStyles, ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -76,6 +76,7 @@ async function redirectToTraining() {
 interface RegistrationTask {
   key: string;
   completionPropsKey: string;
+  loadingPropsKey?: string;
   title: string;
   description: React.ReactNode;
   buttonText: string;
@@ -105,6 +106,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   }, {
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
+    loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
     description: 'Connect your account to the eRA Commons account. The application instructions will guide you through this.',
     buttonText: 'Connect',
@@ -151,8 +153,9 @@ export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc,
 
 export interface RegistrationDashboardProps {
   betaAccessGranted: boolean;
-  eraCommonsLinked: boolean;
   eraCommonsError: string;
+  eraCommonsLinked: boolean;
+  eraCommonsLoading: boolean;
   trainingCompleted: boolean;
   firstVisitTraining: boolean;
   twoFactorAuthCompleted: boolean;
@@ -194,13 +197,23 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
   isEnabled(i: number): boolean {
     const taskCompletionList = this.taskCompletionList;
-
     if (i === 0) {
       return !taskCompletionList[i];
     } else {
+      // Only return the first uncompleted button.
       return !taskCompletionList[i] &&
-      fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
+        fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
     }
+  }
+
+  get taskLoadingList(): Array<boolean> {
+    return getRegistrationTasks().map((config) => {
+      return this.props[config.loadingPropsKey] as boolean;
+    });
+  }
+
+  isLoading(i: number): boolean {
+    return this.taskLoadingList[i];
   }
 
   showRefreshFlow(isRefreshable: boolean): boolean {
@@ -299,17 +312,19 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                       style={{backgroundColor: colors.success,
                         width: 'max-content',
                         cursor: 'default'}}>
-                <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{card.completedText}
+                {card.completedText}
+                <ClrIcon shape='check' style={{marginLeft: '0.5rem'}}/>
               </Button> :
-            <Button onClick={ () => this.onCardClick(card) }
+            <Button onClick={ () => this.isLoading(i) ? true : this.onCardClick(card) }
                     style={{width: 'max-content',
-                      cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
+                      cursor: this.isEnabled(i) && !this.isLoading(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
               {this.showRefreshFlow(card.isRefreshable) ?
                 <div>
-                  <ClrIcon shape='refresh' style={{marginRight: '0.3rem'}}/>
                   Refresh
+                  <ClrIcon shape='refresh' style={{marginLeft: '0.5rem'}}/>
                 </div> : card.buttonText}
+              {this.isLoading(i) ? <Spinner style={{marginLeft: '0.5rem', width: 20, height: 20}}/> : null}
             </Button>}
           </ResourceCardBase>;
         })}

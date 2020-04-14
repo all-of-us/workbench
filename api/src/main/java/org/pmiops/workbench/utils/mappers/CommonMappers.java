@@ -34,6 +34,17 @@ public class CommonMappers {
     return null;
   }
 
+  public String timestampToString(Timestamp timestamp) {
+    // We are using this method because mapstruct defaults to gregorian conversion. The difference
+    // is:
+    // Gregorian: "2020-03-30T18:31:50.000Z"
+    // toString: "2020-03-30 18:31:50.0"
+    if (timestamp != null) {
+      return timestamp.toString();
+    }
+    return null;
+  }
+
   public Timestamp timestamp(Long timestamp) {
     if (timestamp != null) {
       return new Timestamp(timestamp);

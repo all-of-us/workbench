@@ -34,9 +34,9 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
-import org.pmiops.workbench.model.RecentResourceResponse;
+import org.pmiops.workbench.model.WorkspaceResource;
+import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +60,9 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   // TODO(jaycarlton): migrate these private functions to MapStruct
   // Converts DB model to client Model
-  private final Function<DbUserRecentResource, RecentResource> TO_CLIENT =
+  private final Function<DbUserRecentResource, WorkspaceResource> TO_CLIENT =
       userRecentResource -> {
-        RecentResource resource = new RecentResource();
+        WorkspaceResource resource = new WorkspaceResource();
         resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
         resource.setConceptSet(TO_CLIENT_CONCEPT_SET.apply(userRecentResource.getConceptSet()));
         FileDetail fileDetail = convertStringToFileDetail(userRecentResource.getNotebookName());
@@ -133,7 +133,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<RecentResource> updateRecentResource(
+  public ResponseEntity<WorkspaceResource> updateRecentResource(
       String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
     // this is only ever used for Notebooks because we update/add to the cache for the other
     // resources in the backend
@@ -167,7 +167,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   /** Gets the list of all resources recently access by user in order of access date time */
   @Override
-  public ResponseEntity<RecentResourceResponse> getUserRecentResources() {
+  public ResponseEntity<WorkspaceResourceResponse> getUserRecentResources() {
     long userId = userProvider.get().getUserId();
     List<DbUserRecentResource> userRecentResourceList =
         userRecentResourceService.findAllResourcesByUser(userId);
@@ -230,12 +230,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 .limit(MAX_RECENT_NOTEBOOKS)
                 .collect(Collectors.toList()));
 
-    final ImmutableList<RecentResource> userVisibleRecentResources =
+    final ImmutableList<WorkspaceResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
             .filter(urr -> foundBlobIdsContainsUserRecentResource(foundBlobIds, urr))
             .map(urr -> buildRecentResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
-    final RecentResourceResponse recentResponse = new RecentResourceResponse();
+    final WorkspaceResourceResponse recentResponse = new WorkspaceResourceResponse();
     recentResponse.addAll(userVisibleRecentResources);
 
     return ResponseEntity.ok(recentResponse);
@@ -256,11 +256,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .orElse(true);
   }
 
-  private RecentResource buildRecentResource(
+  private WorkspaceResource buildRecentResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentResource dbUserRecentResource) {
-    RecentResource resource = TO_CLIENT.apply(dbUserRecentResource);
+    WorkspaceResource resource = TO_CLIENT.apply(dbUserRecentResource);
     FirecloudWorkspaceResponse workspaceDetails =
         idToFcWorkspaceResponse.get(dbUserRecentResource.getWorkspaceId());
     if (workbenchConfigProvider.get().featureFlags.enableBillingLockout) {

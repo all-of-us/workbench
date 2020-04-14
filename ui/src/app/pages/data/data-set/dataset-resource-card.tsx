@@ -6,17 +6,17 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {formatRecentResourceDisplayDate} from 'app/utils';
+import {formatWorkspaceResourceDisplayDate} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {RecentResource, ResourceType} from 'generated/fetch';
+import {ResourceType, WorkspaceResource} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
-  resource: RecentResource;
+  resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: Function;
   disableExportToNotebook: boolean;
@@ -169,7 +169,7 @@ export const DatasetResourceCard = fp.flow(
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}
         description={this.props.resource.dataSet.description}
-        displayDate={formatRecentResourceDisplayDate(this.props.resource.modifiedTime)}
+        displayDate={formatWorkspaceResourceDisplayDate(this.props.resource.modifiedTime)}
         footerText={toDisplay(this.resourceType)}
         footerColor={colors.resourceCardHighlights.dataSet}
       />

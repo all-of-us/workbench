@@ -113,7 +113,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
       Long cohortId,
       CohortAnnotationDefinition request) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     DbCohort cohort = findCohort(cohortId);
@@ -149,7 +149,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   public ResponseEntity<EmptyResponse> deleteCohortAnnotationDefinition(
       String workspaceNamespace, String workspaceId, Long cohortId, Long annotationDefinitionId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     DbCohort cohort = findCohort(cohortId);
@@ -167,7 +167,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   public ResponseEntity<CohortAnnotationDefinition> getCohortAnnotationDefinition(
       String workspaceNamespace, String workspaceId, Long cohortId, Long annotationDefinitionId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     DbCohort cohort = findCohort(cohortId);
@@ -185,7 +185,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(
       String workspaceNamespace, String workspaceId, Long cohortId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     DbCohort cohort = findCohort(cohortId);
@@ -211,7 +211,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
       Long annotationDefinitionId,
       CohortAnnotationDefinition cohortAnnotationDefinitionRequest) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     String columnName = cohortAnnotationDefinitionRequest.getColumnName();

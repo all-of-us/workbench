@@ -1,42 +1,15 @@
 import {Page} from 'puppeteer';
+import {PageUrl, NavLink} from 'app/page-identifiers';
 import {clrIconXpath} from './aou-elements/xpath-defaults';
 import {findIcon} from './aou-elements/xpath-finder';
 import BasePage from './base-page';
 import {performance} from 'perf_hooks';
 
-const configs = require('resources/workbench-config');
 
 const selectors = {
   signedInIndicator: 'body#body div',
   logo: 'img[src="/assets/images/all-of-us-logo.svg"]'
 };
-
-export enum PageUrl {
-  HOME = configs.uiBaseUrl,
-  WORKSPACES = configs.uiBaseUrl + configs.workspacesUrlPath,
-  ADMIN = configs.uiBaseUrl + configs.adminUrlPath,
-}
-
-export enum SideNavLink {
-  HOME = 'Home',
-  ADMIN = 'Admin',
-  USER_ADMIN = 'User Admin',
-  PROFILE = 'Profile',
-  SIGN_OUT = 'Sign Out',
-  CONTACT_US = 'Contact Us',
-  USER_SUPPORT = 'User Support',
-  YOUR_WORKSPACES = 'Your Workspaces',
-  FEATURED_WORKSPACES = 'Featured Workspaces',
-}
-
-export enum SideNavLinkIcon {
-  HOME = 'home',
-  ADMIN = 'user',
-  CONTACT_US = 'envelope',
-  USER_SUPPORT = 'help',
-  YOUR_WORKSPACES = 'applications',
-  FEATURED_WORKSPACES = 'star',
-}
 
 
 /**
@@ -65,7 +38,11 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    await this.isLoaded();
+    if (!await this.isLoaded()) {
+      await this.saveHtmlToFile('PageIsNotLoaded');
+      await this.takeScreenshot('PageIsNotLoaded');
+      throw new Error('Page isLoaded() failed.');
+    }
     await this.waitUntilNoSpinner();
     return this;
   }
@@ -82,7 +59,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Go to application page.
    * @param targetPage
    */
-  async navTo(targetPage: SideNavLink) {
+  async navTo(targetPage: NavLink) {
     await this.openSideNav();
     const angleIconXpath = clrIconXpath({}, 'angle');
     await this.page.waitForXPath(angleIconXpath, {timeout: 2000});
@@ -92,12 +69,12 @@ export default abstract class AuthenticatedPage extends BasePage {
     if (!applink) {
       // if sidnav link is not found, check to see if it's a link under User or Admin submenu.
       const [username, admin] = await this.page.$x(angleIconXpath);
-      if (targetPage === SideNavLink.PROFILE || targetPage === SideNavLink.SIGN_OUT) {
+      if (targetPage === NavLink.PROFILE || targetPage === NavLink.SIGN_OUT) {
         // Open User submenu if needed
         if (!applink) {
           await username.click();
         }
-      } else if (targetPage === SideNavLink.USER_ADMIN) {
+      } else if (targetPage === NavLink.USER_ADMIN) {
         // Open Admin submenu if needed
         if (!applink) {
           await admin.click();
@@ -106,7 +83,7 @@ export default abstract class AuthenticatedPage extends BasePage {
     }
     // find target sidenav link again. If not found, throws exception
     const link = await this.page.waitForXPath(appLinkXpath, {timeout: 2000});
-    if (targetPage === SideNavLink.CONTACT_US) {
+    if (targetPage === NavLink.CONTACT_US) {
       await link.click();
     } else {
       await this.clickAndWait(link);

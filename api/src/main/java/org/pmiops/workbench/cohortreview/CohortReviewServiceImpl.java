@@ -95,7 +95,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
-    return workspaceService.enforceWorkspaceAccessLevel(
+    return workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, requiredAccess);
   }
 
