@@ -17,7 +17,6 @@ export const HELP_DESK = {
 describe('Sidebar Navigation', () => {
 
   beforeEach(async () => {
-    console.log('beforeEach in sidenav.spec.ts');
     await signIn(page);
   });
 

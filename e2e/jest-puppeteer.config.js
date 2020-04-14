@@ -3,7 +3,6 @@
  * https://github.com/smooth-code/jest-puppeteer#configure-puppeteer
  */
 
-
 const fp = require('lodash/fp');
 const puppeteer = require('puppeteer');
 const isHeadless = process.env.HEADLESS !== 'false';
