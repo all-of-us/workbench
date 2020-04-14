@@ -27,7 +27,7 @@ export function labelXpath(opts: TextOptions) {
  * @param label
  */
 export function buttonXpath(opts: TextOptions) {
-  const role = '@role="button"';
+  const role = `@role='button'`;
   const txt = textXpathHelper(opts);
   return `(//button[${txt}] | //*[${txt} and ${role}])`;
 }
@@ -36,7 +36,7 @@ export function inputXpath(opts: TextOptions) {
   const numSlashes = opts.inputType === 'checkbox' ? '/' : '//';
   const nodeLevel = `ancestor::node()[${opts.ancestorNodeLevel}]`;
   if (opts.inputType !== undefined) {
-    return `${labelXpath(opts)}/${nodeLevel}${numSlashes}input[@type="${opts.inputType}"]`;
+    return `${labelXpath(opts)}/${nodeLevel}${numSlashes}input[@type='${opts.inputType}']`;
   }
   // return all input nodes
   return `${labelXpath(opts)}/${nodeLevel}//input`;
@@ -64,10 +64,10 @@ export function clickableXpath(label: string) {
  * @param shapeValue:
  */
 export function clrIconXpath(opts: TextOptions, shapeValue: string) {
-  if (Object.keys(opts).length == 0) {
+  if (Object.keys(opts).length === 0) {
     return `//clr-icon[@shape='${shapeValue}'][*[@role='img']]`; // anywhere on page
   }
   // next to a label
-  let nodeLevel = opts.ancestorNodeLevel || 1;
+  const nodeLevel = opts.ancestorNodeLevel || 1;
   return `//*[${textXpathHelper(opts)}]/ancestor::node()[${nodeLevel}]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
 }

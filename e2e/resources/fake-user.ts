@@ -15,3 +15,14 @@ export const fakeUser = {
   state: faker.address.stateAbbr(),
   country: 'U.S.A'
 };
+
+export const makeString = (charLimit?: number) => {
+  let loremStr = faker.lorem.paragraphs();
+  if (charLimit === undefined) {
+    return loremStr;
+  }
+  if (loremStr.length > charLimit) {
+    loremStr = loremStr.slice(0, charLimit);
+  }
+  return loremStr
+};
