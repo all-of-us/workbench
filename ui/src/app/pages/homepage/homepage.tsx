@@ -119,7 +119,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     this.checkWorkspaces();
     this.validateNihToken();
     this.callProfile();
-    console.log('component did mount');
   }
 
   componentDidUpdate(prevProps) {
@@ -135,7 +134,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   async validateNihToken() {
     const token = (new URL(window.location.href)).searchParams.get('token');
-    console.log(token);
     if (token) {
       this.setState({eraCommonsLoading: true});
       try {
