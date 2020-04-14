@@ -93,7 +93,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       const details = await institutionApi().getPublicInstitutionDetails();
       this.setState({
         loadingInstitutions: false,
-        institutions: details.institutions
+        institutions: fp.sortBy( institution => institution.displayName, details.institutions)
       });
     } catch (e) {
       this.setState({
