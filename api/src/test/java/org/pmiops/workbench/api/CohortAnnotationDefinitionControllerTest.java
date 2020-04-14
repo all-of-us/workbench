@@ -428,7 +428,8 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   private void setupWorkspaceServiceMock() {
-    when(workspaceService.enforceWorkspaceAccessLevel(NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
+    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+            NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.OWNER);
   }
 }
