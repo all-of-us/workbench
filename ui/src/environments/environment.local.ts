@@ -25,5 +25,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,
   enableNewConceptTabs: true,
-  enableSignedInFooter: true
+  enableFooter: true
 };
