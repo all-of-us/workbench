@@ -32,20 +32,20 @@
     },
     {
       "name": "Type 2 Diabetes Phenotype",
-      "namespace": "aou-rw-e6084db8",
-      "id": "masterfeaturedworkspacetype2diabetesphenotype",
+      "namespace": "aou-rw-2a58c3bc",
+      "id": "type2diabetesphenotype",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Major Depressive Disorders Phenotype",
-      "namespace": "aou-rw-edae682b",
-      "id": "masterdepressionphenotype",
+      "name": "Depression Phenotype",
+      "namespace": "aou-rw-4ad41400",
+      "id": "depressionphenotype",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
       "name": "Dementia Phenotype",
-      "namespace": "aou-rw-76176da6",
-      "id": "featuredworkspacedementia",
+      "namespace": "aou-rw-2f95138c",
+      "id": "duplicateofdementiaphenotype",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
