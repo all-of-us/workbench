@@ -713,7 +713,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingUpgrade
         || newBillingAccountName.equals(workspace.getBillingAccountName())) {
       return;
     }

@@ -94,6 +94,7 @@
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
     "enableBillingLockout": true,
+    "enableBillingUpgrade": true,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,

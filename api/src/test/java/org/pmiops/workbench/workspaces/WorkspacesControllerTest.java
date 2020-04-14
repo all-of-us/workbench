@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -389,6 +390,7 @@ public class WorkspacesControllerTest {
     workbenchConfig = new WorkbenchConfig();
     workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
     workbenchConfig.featureFlags.enableBillingLockout = true;
+    workbenchConfig.featureFlags.enableBillingUpgrade = true;
 
     workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     workbenchConfig.firecloud.registeredDomainName = "allUsers";
@@ -681,7 +683,34 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspace_doNotUpdateBillingForFreeTier() throws Exception {
+  public void testCreateWorkspace_UpdateBillingAccount() throws IOException {
+    Workspace workspace = createWorkspace();
+    workspace.setBillingAccountName("new-account");
+
+    workspacesController.createWorkspace(workspace);
+
+    verify(endUserCloudbillingProvider.get().projects())
+        .updateBillingInfo(
+            any(),
+            eq(new ProjectBillingInfo().setBillingAccountName(workspace.getBillingAccountName())));
+  }
+
+  @Test
+  public void testCreateWorkspace_UpdateBillingAccount_flagFalse() {
+    workbenchConfig.featureFlags.enableBillingUpgrade = false;
+
+    Workspace workspace = createWorkspace();
+    workspace.setBillingAccountName("new-account");
+
+    workspacesController.createWorkspace(workspace);
+
+    // the billing account was not set
+    verifyZeroInteractions(endUserCloudbillingProvider.get());
+    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
+  }
+
+  @Test
+  public void testCreateWorkspace_doNotUpdateBillingForFreeTier() {
     Workspace workspace = createWorkspace();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
 
@@ -692,7 +721,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspaceAlreadyApproved() throws Exception {
+  public void testCreateWorkspaceAlreadyApproved() {
     Workspace workspace = createWorkspace();
     workspace.getResearchPurpose().setApproved(true);
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -706,7 +735,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspace_createDeleteCycleSameName() throws Exception {
+  public void testCreateWorkspace_createDeleteCycleSameName() {
     Workspace workspace = createWorkspace();
 
     Set<String> uniqueIds = new HashSet<>();
@@ -720,14 +749,14 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testCreateWorkspace_archivedCdrVersionThrows() throws Exception {
+  public void testCreateWorkspace_archivedCdrVersionThrows() {
     Workspace workspace = createWorkspace();
     workspace.setCdrVersionId(archivedCdrVersionId);
     workspacesController.createWorkspace(workspace).getBody();
   }
 
   @Test
-  public void testDeleteWorkspace() throws Exception {
+  public void testDeleteWorkspace() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -742,7 +771,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testApproveWorkspace() throws Exception {
+  public void testApproveWorkspace() {
     Workspace ws = createWorkspace();
     ResearchPurpose researchPurpose = ws.getResearchPurpose();
     researchPurpose.setApproved(null);
@@ -793,7 +822,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() throws Exception {
+  public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -815,7 +844,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspace_freeTierBilling_noCreditsRemaining() throws Exception {
+  public void testUpdateWorkspace_freeTierBilling_noCreditsRemaining() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -836,7 +865,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspace_freeTierBilling_hasCreditsRemaining() throws Exception {
+  public void testUpdateWorkspace_freeTierBilling_hasCreditsRemaining() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -984,7 +1013,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspaceResearchPurpose() throws Exception {
+  public void testUpdateWorkspaceResearchPurpose() {
     Workspace ws = createWorkspace();
     ws.getResearchPurpose().reviewRequested(true);
     ws = workspacesController.createWorkspace(ws).getBody();
@@ -1024,7 +1053,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspaceResearchPurpose_cannotUpdateReviewRequest() throws Exception {
+  public void testUpdateWorkspaceResearchPurpose_cannotUpdateReviewRequest() {
     Workspace ws = createWorkspace();
     ws.getResearchPurpose().setReviewRequested(false);
     ws = workspacesController.createWorkspace(ws).getBody();
@@ -1042,7 +1071,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void testReaderUpdateWorkspaceThrows() throws Exception {
+  public void testReaderUpdateWorkspaceThrows() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -1057,7 +1086,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = ConflictException.class)
-  public void testUpdateWorkspaceStaleThrows() throws Exception {
+  public void testUpdateWorkspaceStaleThrows() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -1078,7 +1107,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspaceInvalidEtagsThrow() throws Exception {
+  public void testUpdateWorkspaceInvalidEtagsThrow() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -1097,7 +1126,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testRejectAfterApproveThrows() throws Exception {
+  public void testRejectAfterApproveThrows() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -1110,7 +1139,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testListForApproval() throws Exception {
+  public void testListForApproval() {
     List<Workspace> forApproval =
         workspacesController.getWorkspacesForReview().getBody().getItems();
     assertThat(forApproval).isEmpty();
@@ -1286,7 +1315,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspace_doNotUpdateBillingForFreeTier() throws Exception {
+  public void testCloneWorkspace_doNotUpdateBillingForFreeTier() {
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
@@ -1348,7 +1377,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceWithCohortsAndConceptSets() throws Exception {
+  public void testCloneWorkspaceWithCohortsAndConceptSets() {
     stubFcGetWorkspaceACL();
     Long participantId = 1L;
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
@@ -1648,7 +1677,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() throws Exception {
+  public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() {
     stubFcGetWorkspaceACL();
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createWorkspace();
@@ -1899,7 +1928,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceDifferentOwner() throws Exception {
+  public void testCloneWorkspaceDifferentOwner() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -1932,7 +1961,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceCdrVersion() throws Exception {
+  public void testCloneWorkspaceCdrVersion() {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
@@ -1963,7 +1992,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testCloneWorkspaceBadCdrVersion() throws Exception {
+  public void testCloneWorkspaceBadCdrVersion() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     Workspace modWorkspace =
@@ -1981,7 +2010,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testCloneWorkspaceArchivedCdrVersionThrows() throws Exception {
+  public void testCloneWorkspaceArchivedCdrVersionThrows() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     Workspace modWorkspace =
@@ -1999,7 +2028,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceIncludeUserRoles() throws Exception {
+  public void testCloneWorkspaceIncludeUserRoles() {
     stubFcGetGroup();
     DbUser cloner = createUser("cloner@gmail.com");
     DbUser reader = createUser("reader@gmail.com");
@@ -2091,7 +2120,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testCloneWorkspaceBadRequest() throws Exception {
+  public void testCloneWorkspaceBadRequest() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
