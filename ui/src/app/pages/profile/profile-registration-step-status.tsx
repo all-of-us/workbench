@@ -73,13 +73,18 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
             <div>
               { isComplete ? (
                 <FlexRow>
-                  <ClrIcon style={{color: colors.success, width: '2rem', height: '2rem'}}
-                           shape='check-circle' className='is-solid' />
-                  <FlexColumn style={{marginLeft: '0.5rem'}}>
+                  <FlexColumn>
                     <div>{ wasBypassed ? 'Bypassed By Admin on:' : completedButtonText + ' on:' }
                     </div>
                     <div>{new Date(completionTimestamp).toDateString()}</div>
+                    <Button disabled={true} data-test-id='completed-button'
+                            style={{backgroundColor: colors.success,
+                              width: 'max-content', marginTop: '1rem',
+                              cursor: 'default'}}>
+                      <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{completedButtonText}
+                    </Button>
                   </FlexColumn>
+
                 </FlexRow>
               ) : (
                 <Button

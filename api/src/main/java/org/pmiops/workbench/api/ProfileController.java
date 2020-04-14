@@ -17,6 +17,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -67,6 +68,7 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.profile.AddressMapper;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,6 +193,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
   private final CaptchaVerificationService captchaVerificationService;
   private final DemographicSurveyMapper demographicSurveyMapper;
+  private final AddressMapper addressMapper;
 
   @Autowired
   ProfileController(
@@ -209,7 +212,8 @@ public class ProfileController implements ProfileApiDelegate {
       InstitutionService institutionService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       CaptchaVerificationService captchaVerificationService,
-      DemographicSurveyMapper demographicSurveyMapper) {
+      DemographicSurveyMapper demographicSurveyMapper,
+      AddressMapper addressMapper) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -226,6 +230,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.demographicSurveyMapper = demographicSurveyMapper;
+    this.addressMapper = addressMapper;
   }
 
   @Override
@@ -273,6 +278,45 @@ public class ProfileController implements ProfileApiDelegate {
         Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
     // We always store the username as all lowercase.
     profile.setUsername(profile.getUsername().toLowerCase());
+  }
+
+  private void validateUpdatedProfile(Profile updatedProfile, Profile prevProfile)
+      throws BadRequestException {
+    validateAndCleanProfile(updatedProfile);
+    if (StringUtils.isEmpty(updatedProfile.getAreaOfResearch())) {
+      throw new BadRequestException("Research background cannot be empty");
+    }
+    Optional.ofNullable(updatedProfile.getAddress())
+        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
+
+    Address updatedProfileAddress = updatedProfile.getAddress();
+    if (StringUtils.isEmpty(updatedProfileAddress.getStreetAddress1())
+        || StringUtils.isEmpty(updatedProfileAddress.getCity())
+        || StringUtils.isEmpty(updatedProfileAddress.getState())
+        || StringUtils.isEmpty(updatedProfileAddress.getCountry())
+        || StringUtils.isEmpty(updatedProfileAddress.getZipCode())) {
+      throw new BadRequestException(
+          "Address cannot have empty street Address 1/city/state/country or Zip Code");
+    }
+    if (updatedProfile.getContactEmail() != null
+        && !updatedProfile.getContactEmail().equals(prevProfile.getContactEmail())) {
+      // See RW-1488.
+      throw new BadRequestException("Changing email is not currently supported");
+    }
+    if (updatedProfile.getUsername() != null
+        && !updatedProfile.getUsername().equals(prevProfile.getUsername())) {
+      // See RW-1488.
+      throw new BadRequestException("Changing username is not supported");
+    }
+    if (updatedProfile.getVerifiedInstitutionalAffiliation() != null
+        && !updatedProfile
+            .getVerifiedInstitutionalAffiliation()
+            .getInstitutionDisplayName()
+            .equals(
+                prevProfile.getVerifiedInstitutionalAffiliation().getInstitutionDisplayName())) {
+      // See RW-1488.
+      throw new BadRequestException("Changing institution is not currently supported");
+    }
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -596,7 +640,6 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
-    validateAndCleanProfile(updatedProfile);
     DbUser user = userProvider.get();
 
     // Save current profile for audit trail. Continue to use the userProvider (instead
@@ -604,22 +647,22 @@ public class ProfileController implements ProfileApiDelegate {
     // That is, in the (rare, hopefully) condition that the old profile gives incorrect information,
     // the update will still work as well as it would have.
     final Profile previousProfile = profileService.getProfile(user);
+    validateUpdatedProfile(updatedProfile, previousProfile);
 
     if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
       userService.setDataUseAgreementNameOutOfDate(
           updatedProfile.getGivenName(), updatedProfile.getFamilyName());
     }
+
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
-    user.setOrganization(updatedProfile.getOrganization());
-    user.setCurrentPosition(updatedProfile.getCurrentPosition());
-    user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
-
+    user.setAddress(addressMapper.addressToDbAddress(updatedProfile.getAddress()));
+    user.getAddress().setUser(user);
     DbDemographicSurvey dbDemographicSurvey =
         demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
             updatedProfile.getDemographicSurvey());
@@ -633,17 +676,14 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     user.setDemographicSurvey(dbDemographicSurvey);
-
     user.setLastModifiedTime(now);
-    if (updatedProfile.getContactEmail() != null
-        && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-      // See RW-1488.
-      throw new BadRequestException("Changing email is not currently supported");
-    }
+
     updateInstitutionalAffiliations(updatedProfile, user);
 
-    // This does not update the name in Google.
-    saveUserWithConflictHandling(user);
+    userService.updateUser(
+        user,
+        verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+            updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService));
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);

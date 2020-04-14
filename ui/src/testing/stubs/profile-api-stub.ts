@@ -32,6 +32,13 @@ export class ProfileStubVariables {
     authorities: [],
     freeTierUsage: 1.23,
     freeTierDollarQuota: 34.56,
+    address: {
+      streetAddress1: 'Main street',
+      city: 'Cambridge',
+      state: 'MA',
+      country: 'USA',
+      zipCode: '02142'
+    },
     verifiedInstitutionalAffiliation: {
       institutionShortName: 'Broad',
       institutionDisplayName: 'The Broad Institute',

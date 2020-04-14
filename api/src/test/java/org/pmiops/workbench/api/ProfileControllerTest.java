@@ -645,6 +645,62 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_nullAddress() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setAddress(null);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_nullCountry() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().country(null);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_nullState() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().state(null);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_nullZipCode() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().zipCode(null);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_emptyReasonForResearch() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setAreaOfResearch("");
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_UpdateUserName() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setUsername("newUserName@fakeDomain.com");
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_UpdateContactEmail() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setContactEmail("newContact@fakeDomain.com");
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
   public void updateFamilyName_badRequest() {
     createUser();
     Profile profile = profileController.getMe().getBody();

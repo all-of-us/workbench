@@ -21,6 +21,15 @@ describe('ProfilePageComponent', () => {
     return wrapper.find('[data-test-id="demographics-survey-button"]')
   }
 
+  function getSaveProfileButton(wrapper: ReactWrapper): ReactWrapper {
+    return wrapper.find('[data-test-id="save_profile"]');
+  }
+  function clickSaveProfileButton(wrapper: ReactWrapper) {
+    const saveProfileButton = getSaveProfileButton(wrapper);
+    saveProfileButton.first().simulate('click');
+    return;
+  }
+
   const profile = ProfileStubVariables.PROFILE_STUB;
 
   let mockUpdateProfile: SpyInstance;
@@ -64,7 +73,7 @@ describe('ProfilePageComponent', () => {
     expect(userProfileStore.getValue().profile.givenName).toEqual(profile.givenName);
 
     wrapper.find(TextInput).first().simulate('change', {target: {value: 'x'}});
-    wrapper.find('[data-test-id="save profile"]').first().simulate('click');
+    clickSaveProfileButton(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(reload).toHaveBeenCalled();
   });
@@ -96,5 +105,23 @@ describe('ProfilePageComponent', () => {
     expect(errorModal.getDOMNode().textContent).toContain('An error occurred while updating your profile');
     // Ensure the error modal contains the server-side error message.
     expect(errorModal.getDOMNode().textContent).toContain('Could not create account: invalid institutional affiliation');
+  });
+
+  it('should display/update address', async() => {
+
+    const wrapper = component();
+
+    let streetAddress1 = wrapper.find('[id="streetAddress1"]').first();
+    expect(streetAddress1.prop('value')).toBe('Main street');
+
+    streetAddress1.simulate('change', {target: {value: 'Broadway'}});
+
+    clickSaveProfileButton(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+    streetAddress1 = wrapper.find('[id="streetAddress1"]').first();
+
+    expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
+    expect(streetAddress1.prop('value')).toBe('Broadway');
+
   });
 });

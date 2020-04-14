@@ -418,6 +418,27 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  public DbUser updateUser(
+      DbUser dbUser, DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
+    try {
+      dbUser = userDao.save(dbUser);
+      boolean requireInstitutionalVerification =
+          configProvider.get().featureFlags.requireInstitutionalVerification;
+      if (requireInstitutionalVerification) {
+        DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
+            verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).get();
+        dbVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
+            dbVerifiedAffiliation.getInstitutionalRoleEnum());
+        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedInstitutionalAffiliation);
+      }
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for user update", e);
+      throw new ConflictException("Failed due to concurrent modification");
+    }
+    return dbUser;
+  }
+
+  @Override
   public DbUser submitDataUseAgreement(
       DbUser dbUser, Integer dataUseAgreementSignedVersion, String initials) {
     // FIXME: this should not be hardcoded

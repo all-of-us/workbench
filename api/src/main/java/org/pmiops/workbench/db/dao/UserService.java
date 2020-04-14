@@ -38,6 +38,8 @@ public interface UserService {
       List<DbInstitutionalAffiliation> dbAffiliations,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 
+  DbUser updateUser(DbUser user, DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
+
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);
 
