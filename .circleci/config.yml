@@ -429,7 +429,6 @@ workflows:
       - api-bigquery-test
       - api-integration-test
       - puppeteer-e2e-test
-        <<: *defaults
           requires:
             - sleep_60
       # Run deployment to "test" on master merges.
