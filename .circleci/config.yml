@@ -402,7 +402,8 @@ jobs:
   sleep_60:
     <<: *defaults
     steps:
-      - run: sleep 60 && echo 'sleep 60 seconds after deploy to UI and API to Kubernetes'
+      - run:
+        command: sleep 60 && echo 'sleep 60 seconds after deploy to UI and API to Kubernetes'
 
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
 filter_master: &filter_master
