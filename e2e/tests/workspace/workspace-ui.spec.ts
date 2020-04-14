@@ -3,7 +3,7 @@ import HomePage from 'app/home-page';
 import WorkspaceCard from 'app/workspace-card';
 import WorkspacesPage from 'app/workspaces-page';
 import {signIn} from 'tests/app';
-import {NAV_LINK} from 'resources/enums';
+import {NavLink} from 'app/page-identifiers';
 
 
 describe('Workspace ui tests', () => {
@@ -47,7 +47,7 @@ describe('Workspace ui tests', () => {
   test('Check Workspace card on Your Workspaces page', async () => {
     const home = new HomePage(page);
     await home.load();
-    await home.navTo(NAV_LINK.YOUR_WORKSPACES);
+    await home.navTo(NavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
     await WorkspaceCard.getAllCards(page);

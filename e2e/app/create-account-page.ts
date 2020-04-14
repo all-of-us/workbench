@@ -7,8 +7,8 @@ import SelectComponent from './aou-elements/select-component';
 import Textarea from './aou-elements/textarea';
 import Textbox from './aou-elements/textbox';
 import BasePage from './base-page';
+import {config} from 'resources/workbench-config';
 
-const configs = require('resources/workbench-config');
 const faker = require('faker/locale/en_US');
 
 export const PAGE = {
@@ -152,7 +152,7 @@ export default class CreateAccountPage extends BasePage {
     const institutionSelect = new SelectComponent(this.page, 'Select your institution');
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
     const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddressTextbox.type(configs.broadInstitutionEmail);
+    await emailAddressTextbox.type(config.broadInstitutionEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
     const roleSelect = new SelectComponent(this.page, 'describes your role');
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);

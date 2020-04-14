@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import {PAGE_URL, NAV_LINK} from 'resources/enums';
+import {PageUrl, NavLink} from 'app/page-identifiers';
 import {clrIconXpath} from './aou-elements/xpath-defaults';
 import {findIcon} from './aou-elements/xpath-finder';
 import BasePage from './base-page';
@@ -50,7 +50,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   /**
    * Load AoU page URL.
    */
-  async loadPageUrl(url: PAGE_URL): Promise<void> {
+  async loadPageUrl(url: PageUrl): Promise<void> {
     await this.gotoUrl(url.toString());
     await this.waitForLoad();
   }
@@ -59,7 +59,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Go to application page.
    * @param targetPage
    */
-  async navTo(targetPage: NAV_LINK) {
+  async navTo(targetPage: NavLink) {
     await this.openSideNav();
     const angleIconXpath = clrIconXpath({}, 'angle');
     await this.page.waitForXPath(angleIconXpath, {timeout: 2000});
@@ -69,12 +69,12 @@ export default abstract class AuthenticatedPage extends BasePage {
     if (!applink) {
       // if sidnav link is not found, check to see if it's a link under User or Admin submenu.
       const [username, admin] = await this.page.$x(angleIconXpath);
-      if (targetPage === NAV_LINK.PROFILE || targetPage === NAV_LINK.SIGN_OUT) {
+      if (targetPage === NavLink.PROFILE || targetPage === NavLink.SIGN_OUT) {
         // Open User submenu if needed
         if (!applink) {
           await username.click();
         }
-      } else if (targetPage === NAV_LINK.USER_ADMIN) {
+      } else if (targetPage === NavLink.USER_ADMIN) {
         // Open Admin submenu if needed
         if (!applink) {
           await admin.click();
@@ -83,7 +83,7 @@ export default abstract class AuthenticatedPage extends BasePage {
     }
     // find target sidenav link again. If not found, throws exception
     const link = await this.page.waitForXPath(appLinkXpath, {timeout: 2000});
-    if (targetPage === NAV_LINK.CONTACT_US) {
+    if (targetPage === NavLink.CONTACT_US) {
       await link.click();
     } else {
       await this.clickAndWait(link);

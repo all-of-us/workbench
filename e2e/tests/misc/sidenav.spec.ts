@@ -4,7 +4,7 @@ import ProfilePage from 'app/profile-page';
 import WorkspacesPage from 'app/workspaces-page';
 import {waitForExists} from 'driver/xpath-util';
 import {signIn} from 'tests/app';
-import {NAV_LINK} from 'resources/enums';
+import {NavLink} from 'app/page-identifiers';
 
 export const HELP_DESK = {
   ASK_QUESTION: 'Ask a question about the Researcher Workbench',
@@ -28,7 +28,7 @@ describe('Sidebar Navigation', () => {
   test('Check app side-nav work', async () => {
     const homePage = new HomePage(page);
     // Select Profile link
-    await homePage.navTo(NAV_LINK.PROFILE);
+    await homePage.navTo(NavLink.PROFILE);
     const profilePage = new ProfilePage(page);
     await profilePage.waitForLoad();
     expect(await profilePage.isLoaded()).toBe(true);
@@ -41,13 +41,13 @@ describe('Sidebar Navigation', () => {
     expect(displayedUsername).toBe(`${fname} ${lname}`);
 
     // Select Your Workspaces link
-    await homePage.navTo(NAV_LINK.YOUR_WORKSPACES);
+    await homePage.navTo(NavLink.YOUR_WORKSPACES);
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
     expect(await workspacesPage.isLoaded()).toBe(true);
 
     // Select Home link
-    await homePage.navTo(NAV_LINK.HOME);
+    await homePage.navTo(NavLink.HOME);
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
   });
@@ -55,7 +55,7 @@ describe('Sidebar Navigation', () => {
   test('User can see the Contact Us form', async () => {
     const homePage = new HomePage(page);
     // Select Contact Us
-    await homePage.navTo(NAV_LINK.CONTACT_US);
+    await homePage.navTo(NavLink.CONTACT_US);
 
     const iframeHandle: any = await page.waitForSelector('iframe[title="Find more information here"]', {visible: true});
     const newIframe = await iframeHandle.contentFrame();
@@ -85,7 +85,7 @@ describe('Sidebar Navigation', () => {
   test('User can Sign Out', async () => {
     const homePage = new HomePage(page);
     // Select Sign Out link
-    await homePage.navTo(NAV_LINK.SIGN_OUT);
+    await homePage.navTo(NavLink.SIGN_OUT);
     await waitForExists(page, '//*[text()="Redirect Notice"]');
     const href = await page.evaluate(() => location.href);
     expect(href).toEqual(expect.stringMatching(/(\/|%2F)login$/));

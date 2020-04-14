@@ -59,6 +59,4 @@ const environment = {
   stable,
 };
 
-const configs = fp.mergeAll([environment[env], userCredential, urlPath, puppeteer]);
-
-module.exports = configs;
+export const config = fp.mergeAll([environment[env], userCredential, urlPath, puppeteer]);

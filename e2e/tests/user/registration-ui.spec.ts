@@ -1,14 +1,13 @@
 import BaseElement from 'app/aou-elements/base-element';
 import CreateAccountPage from 'app/create-account-page';
 import GoogleLoginPage from 'app/google-login';
-
-const configs = require('resources/workbench-config');
+import {config} from 'resources/workbench-config';
 
 
 describe('User registration tests:', () => {
 
   beforeEach(async () => {
-    await page.setUserAgent(configs.puppeteerUserAgent);
+    await page.setUserAgent(config.puppeteerUserAgent);
     await page.setDefaultNavigationTimeout(120000);
   });
 
@@ -98,7 +97,7 @@ describe('User registration tests:', () => {
     expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
 
     // verify username domain
-    expect(await createAccountPage.getUsernameDomain()).toBe(configs.userEmailDomain);
+    expect(await createAccountPage.getUsernameDomain()).toBe(config.userEmailDomain);
 
     // verify all input fields are visible and editable on this page
     const allInputs = await page.$$('input');

@@ -1,11 +1,11 @@
 import GoogleLoginPage, {selectors} from 'app/google-login';
+import {config} from 'resources/workbench-config';
 
-const configs = require('resources/workbench-config');
 
 describe('Login tests:', () => {
 
   beforeEach(async () => {
-    await page.setUserAgent(configs.puppeteerUserAgent);
+    await page.setUserAgent(config.puppeteerUserAgent);
     await page.setDefaultNavigationTimeout(120000);
   });
 
@@ -15,7 +15,7 @@ describe('Login tests:', () => {
 
 
   test('Open AoU Workspaces page before login redirects to login page', async () => {
-    const url = configs.uiBaseUrl + configs.workspacesUrlPath;
+    const url = config.uiBaseUrl + config.workspacesUrlPath;
     const loginPage = new GoogleLoginPage(page);
     await page.goto(url, {waitUntil: 'networkidle0'});
     expect(await loginPage.loginButton()).toBeTruthy();
@@ -31,7 +31,7 @@ describe('Login tests:', () => {
     await googleButton.click();
     await naviPromise;
 
-    await loginPage.enterEmail(configs.userEmail);
+    await loginPage.enterEmail(config.userEmail);
     await loginPage.enterPassword(INCORRECT_PASSWORD);
 
     const button = await page.waitForXPath(selectors.NextButton, {visible: true});

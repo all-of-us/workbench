@@ -1,12 +1,12 @@
 import CreateAccountPage from 'app/create-account-page';
 import GoogleLoginPage from 'app/google-login';
+import {config} from 'resources/workbench-config';
 
-const configs = require('resources/workbench-config');
 
 describe('User registration tests:', () => {
 
   beforeEach(async () => {
-    await page.setUserAgent(configs.puppeteerUserAgent);
+    await page.setUserAgent(config.puppeteerUserAgent);
     await page.setDefaultNavigationTimeout(120000);
   });
 

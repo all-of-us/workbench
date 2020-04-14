@@ -22,7 +22,7 @@ export const makeString = (charLimit?: number) => {
     return loremStr;
   }
   if (loremStr.length > charLimit) {
-    loremStr = loremStr.slice(0, charLimit - 1);
+    loremStr = loremStr.slice(0, charLimit);
   }
   return loremStr
 };

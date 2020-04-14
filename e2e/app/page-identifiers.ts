@@ -1,25 +1,25 @@
-export const config = require('resources/workbench-config');
+import {config} from 'resources/workbench-config';
 
-export enum WORKSPACE_ACCESS_LEVEL {
+export enum WorkspaceAccessLevel {
    OWNER = 'OWNER',
    READER = 'READER',
    WRITER = 'WRITER',
 }
 
-export enum WORKSPACE_ACTION {
+export enum WorkspaceAction {
    DUPLICATE  = 'Duplicate',
    DELETE = 'Delete',
    EDIT = 'Edit',
    SHARE = 'Share',
 }
 
-export enum PAGE_URL {
+export enum PageUrl {
    HOME = config.uiBaseUrl,
    WORKSPACES = config.uiBaseUrl + config.workspacesUrlPath,
    ADMIN = config.uiBaseUrl + config.adminUrlPath,
 }
 
-export enum NAV_LINK {
+export enum NavLink {
    HOME = 'Home',
    ADMIN = 'Admin',
    USER_ADMIN = 'User Admin',
@@ -31,7 +31,7 @@ export enum NAV_LINK {
    FEATURED_WORKSPACES = 'Featured Workspaces',
 }
 
-export enum NAV_LINK_ICON {
+export enum NavLinkIcon {
    HOME = 'home',
    ADMIN = 'user',
    CONTACT_US = 'envelope',

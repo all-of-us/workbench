@@ -2,8 +2,8 @@ import { ElementHandle, Page } from 'puppeteer';
 import {findButton} from './aou-elements/xpath-finder';
 import BasePage from './base-page';
 import HomePage from './home-page';
+import {config} from 'resources/workbench-config';
 
-const configs = require('resources/workbench-config');
 
 export const selectors = {
   loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In with Google")]',
@@ -90,7 +90,7 @@ export default class GoogleLoginPage extends BasePage {
    * Open All-of-Us Google login page.
    */
   async load(): Promise<void> {
-    const url = configs.uiBaseUrl + configs.loginUrlPath;
+    const url = config.uiBaseUrl + config.loginUrlPath;
     try {
       await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 0});
     } catch (err) {
@@ -107,8 +107,8 @@ export default class GoogleLoginPage extends BasePage {
    * @param paswd
    */
   async login(email?: string, paswd?: string) {
-    const user = email || configs.userEmail;
-    const pwd = paswd || configs.userPassword;
+    const user = email || config.userEmail;
+    const pwd = paswd || config.userPassword;
 
     try {
       await this.load(); // load the Google Sign In page
@@ -136,7 +136,7 @@ export default class GoogleLoginPage extends BasePage {
       // Handle "Enter Recovery Email" prompt if found exists
       const recoverEmail = await this.page.$x('//input[@type="email" and @aria-label="Enter recovery email address"]');
       if (recoverEmail.length > 0) {
-        await recoverEmail[0].type(configs.contactEmail);
+        await recoverEmail[0].type(config.contactEmail);
         await Promise.all([
           this.page.waitForNavigation(),
           this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
@@ -155,7 +155,7 @@ export default class GoogleLoginPage extends BasePage {
   }
 
   static async logIn(page: Page): Promise<HomePage> {
-    await page.setUserAgent(configs.puppeteerUserAgent);
+    await page.setUserAgent(config.puppeteerUserAgent);
     await page.setDefaultNavigationTimeout(120000);
 
     const loginPage = new GoogleLoginPage(page);

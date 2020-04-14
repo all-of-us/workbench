@@ -1,5 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {WORKSPACE_ACCESS_LEVEL, WORKSPACE_ACTION} from 'resources/enums';
+import {WorkspaceAccessLevel, WorkspaceAction} from 'app/page-identifiers';
 import BaseElement from './aou-elements/base-element';
 const fp = require('lodash/fp');
 
@@ -87,7 +87,7 @@ export default class WorkspaceCard extends BaseElement {
    */
   async duplicate() {
     await this.clickEllipsis();
-    const selector = this.linkSelector(WORKSPACE_ACTION.DUPLICATE);
+    const selector = this.linkSelector(WorkspaceAction.DUPLICATE);
     const link = await this.page.waitForXPath(selector, {visible: true});
     await link.click();
     await link.dispose();
@@ -98,7 +98,7 @@ export default class WorkspaceCard extends BaseElement {
    */
   async edit() {
     await this.clickEllipsis();
-    const selector = this.linkSelector(WORKSPACE_ACTION.EDIT);
+    const selector = this.linkSelector(WorkspaceAction.EDIT);
     const link = await this.page.waitForXPath(selector, {visible: true});
     await link.click();
     await link.dispose();
@@ -109,7 +109,7 @@ export default class WorkspaceCard extends BaseElement {
    */
   async share() {
     await this.clickEllipsis();
-    const selector = this.linkSelector(WORKSPACE_ACTION.SHARE);
+    const selector = this.linkSelector(WorkspaceAction.SHARE);
     const link = await this.page.waitForXPath(selector, {visible: true});
     await link.click();
     await link.dispose();
@@ -120,7 +120,7 @@ export default class WorkspaceCard extends BaseElement {
    */
   async delete() {
     await this.clickEllipsis();
-    const selector = this.linkSelector(WORKSPACE_ACTION.DELETE);
+    const selector = this.linkSelector(WorkspaceAction.DELETE);
     const link = await this.page.waitForXPath(selector, {visible: true});
     await link.click();
     await link.dispose();
@@ -155,7 +155,7 @@ export default class WorkspaceCard extends BaseElement {
     return await this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName));
   }
 
-  async getWorkspaceMatchAccessLevel(level: WORKSPACE_ACCESS_LEVEL = WORKSPACE_ACCESS_LEVEL.OWNER): Promise<WorkspaceCard[]> {
+  async getWorkspaceMatchAccessLevel(level: WorkspaceAccessLevel = WorkspaceAccessLevel.OWNER): Promise<WorkspaceCard[]> {
     const matchWorkspaceArray: WorkspaceCard[] = [];
     const allWorkspaceCards = await WorkspaceCard.getAllCards(page);
     for (const card of allWorkspaceCards) {
