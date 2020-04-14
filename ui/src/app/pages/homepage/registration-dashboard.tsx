@@ -262,7 +262,6 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
-    const loading = this.isLoading(0);
 
     // Assign relative positioning so the spinner's absolute positioning anchors
     // it within the registration box.
