@@ -37,7 +37,7 @@ def fireCloudApiFile = 'src/main/resources/fireCloud.yaml'
 
 task generateFireCloudClient {
   group = 'swagger-codegen'
-//  description = 'Convert FireCloud Swagger specs to Java clients and model classes.'
+  description = 'Convert FireCloud Swagger specs to Java clients and model classes.'
 
   inputs.file("$projectDir/$fireCloudApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
