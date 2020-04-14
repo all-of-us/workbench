@@ -299,15 +299,15 @@ jobs:
           command: git submodule update --init --recursive
       - restore_cache:
           keys:
-          - v2-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
-          - v2-e2e-test-cache-
+          - v2-12345-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          - v2-12345-e2e-test-cache-
       - run: 
           working_directory: ~/workbench/e2e
           command: yarn cache clean && yarn install --frozen-lockfile
       - save_cache:
           paths:
             - ~/.cache/yarn
-          key: v2-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v2-12345-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
           name: Update environment variables
           command: |
