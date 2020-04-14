@@ -19,10 +19,6 @@ const urlPath = {
   adminUrlPath: '/admin/user',
 };
 
-const puppeteer = {
-  puppeteerUserAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
-};
-
 // localhost development server
 const local = {
   uiBaseUrl: process.env.DEV_LOGIN_URL || 'https://localhost',
@@ -59,4 +55,4 @@ const environment = {
   stable,
 };
 
-export const config = fp.mergeAll([environment[env], userCredential, urlPath, puppeteer]);
+export const config = fp.mergeAll([environment[env], userCredential, urlPath]);

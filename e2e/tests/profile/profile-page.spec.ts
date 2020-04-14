@@ -10,10 +10,6 @@ describe('Profile', () => {
     await signIn(page);
   });
 
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
 
   test('Click First and Last name fields on Profile page', async () => {
     const homePage = new HomePage(page);

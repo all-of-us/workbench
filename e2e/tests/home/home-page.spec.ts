@@ -14,11 +14,6 @@ describe('Home page ui tests', () => {
     await signIn(page);
   });
 
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
-
   test('Check visibility of Workspace cards', async () => {
     const cards = await WorkspaceCard.getAllCards(page);
     let width;
