@@ -15,7 +15,7 @@ export const dataUserCodeOfConductStyles = reactStyles({
     paddingTop: '2rem',
     paddingLeft: '3rem',
     paddingBottom: '2rem',
-    maxWidth: '50rem',
+    maxWidth: '48rem',
     height: '100%',
     color: colors.primary,
   },
