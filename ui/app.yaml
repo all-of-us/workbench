@@ -21,14 +21,16 @@ handlers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
     X-XSS-Protection: 1
     X-Content-Type-Options: "nosniff"
-    # unsafe-inline is unfortunately required as the Incapsula WAF injects a
-    # script onto the page when we're serving in production, for which we'd be
-    # unable to precompute a hash.
+    # unsafe-inline and unsafe-eval are unfortunately required as the Incapsula
+    # WAF injects a script onto the page when we're serving in production, for
+    # which we'd be unable to precompute a hash. This script also apparently
+    # uses an unsafe eval.
     Content-Security-Policy-Report-Only: "
       default-src 'none';
       script-src
         'self'
         'unsafe-inline'
+        'unsafe-eval'
         https://apis.google.com
         https://*.googleapis.com
         https://static.zdassets.com
