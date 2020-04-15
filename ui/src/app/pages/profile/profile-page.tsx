@@ -404,7 +404,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
           {enableComplianceTraining && <ProfileRegistrationStepStatus
-            title='Access Training'
+            title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
             wasBypassed={!!profile.complianceTrainingBypassTime}
             incompleteButtonText='Access Training'
             completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}

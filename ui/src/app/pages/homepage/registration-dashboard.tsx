@@ -81,7 +81,7 @@ interface RegistrationTask {
   key: string;
   completionPropsKey: string;
   loadingPropsKey?: string;
-  title: string;
+  title: React.ReactNode;
   description: React.ReactNode;
   buttonText: string;
   completedText: string;
@@ -122,7 +122,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
-    title: 'Complete Ethics training',
+    title: <span><i>All of Us</i> Responsible Conduct of Research Training</span>,
     description: <div>Complete ethics training courses to understand the privacy safeguards and the
       compliance requirements for using the <i>All of Us</i> Dataset.</div>,
     buttonText: 'Complete training',
