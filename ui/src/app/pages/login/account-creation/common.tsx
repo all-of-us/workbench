@@ -62,7 +62,7 @@ export const commonStyles = reactStyles({
 export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
   return <React.Fragment>
     <div style={commonStyles.asideHeader}>Why will some information be public?</div>
-    <div style={commonStyles.asideText}>The <AouTitle/> The All of Us Research Program seeks to be transparent
+    <div style={commonStyles.asideText}>The <AouTitle/> seeks to be transparent
       with participants about who can access their data and for what purpose. Therefore, we will display
       your name, institution, role, research background/interests, and a link to your professional
       profile (if available) in the the <a href='https://researchallofus.org/'>Research Projects
