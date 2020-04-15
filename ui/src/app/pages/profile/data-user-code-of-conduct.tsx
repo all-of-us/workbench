@@ -232,6 +232,8 @@ export const DataUserCodeOfConduct = withUserProfile()(
                       data-test-id={'submit-ducc-button'}
                       disabled={errors || submitting}
                       onClick={() => {
+                        // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
+                        // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                         AnalyticsTracker.Registration.AcceptDUCC();
                         this.submitDataUserCodeOfConduct(initialMonitoring);
                       }}
