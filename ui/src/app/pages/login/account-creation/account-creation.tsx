@@ -413,10 +413,17 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
     const usernameLabelText =
       <div>New Username
-        <TooltipTrigger side='top' content={<div>Usernames can contain only letters
-          (a-z), numbers (0-9), dashes (-), underscores (_), apostrophes ('), and
-          periods (.) (minimum of 3 characters and maximum of 64
-          characters).<br/>Usernames cannot begin or end with a period (.) and may not
+        <TooltipTrigger side='top' content={<div>Usernames can contain only: <ul style={{marginLeft: '0.1rem'}}>
+          <li>letters (a-z)</li>
+          <li>numbers (0-9)</li>
+          <li>dashes (-)</li>
+          <li>underscores (_)</li>
+          <li>apostrophes (')</li>
+          <li>periods (.)</li>
+          <li>minimum of 3 characters</li>
+          <li>maximum of 64 characters</li>
+        </ul>
+          <br/>Usernames cannot begin or end with a period (.) and may not
           contain more than one period (.) in a row.</div>}
                         style={{marginLeft: '0.5rem'}}>
           <InfoIcon style={{'height': '16px', 'paddingLeft': '2px'}}/>
@@ -435,10 +442,16 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <div style={{...styles.text, fontSize: 16, marginTop: '1rem'}}>
             Please complete Step {requireInstitutionalVerification ? '2 of 3' : '1 of 2'}
           </div>
-          <div style={{...styles.text, fontSize: 12, marginTop: '0.7rem'}}>All fields required unless indicated as optional</div>
+          <div style={{...styles.text, fontSize: 12, marginTop: '0.7rem'}}>
+            All fields required unless indicated as optional</div>
           <Section header={<div>Create an <i>All of Us</i> username</div>}>
             <div>
               <FlexRow>
+                <FlexColumn>
+                  <div style={{...styles.asideText, marginBottom: '0.3rem'}}>
+                    We create a 'username'@{gsuiteDomain} Google account which you will use to
+                    login to the Workbench. This is separate account and not related to any personal
+                    or professional Google accounts you may have.</div>
                   <TextInputWithLabel value={username} inputId='username' inputName='username'
                                       placeholder='New Username' invalid={
                                         this.state.usernameConflictError || this.usernameInvalidError()}
@@ -449,6 +462,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   </div>
                   <i style={{...styles.asideText, marginLeft: 4}}>@{gsuiteDomain}</i>
                 </TextInputWithLabel>
+                </FlexColumn>
 
               </FlexRow>
               {this.state.usernameConflictError &&
@@ -679,10 +693,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </FlexColumn>
         <FlexColumn>
           <FlexColumn style={styles.asideContainer}>
-            <div style={styles.asideHeader}>About your new username</div>
-            <div style={styles.asideText}>We create a 'username'@{gsuiteDomain} Google
-                account which you will use to login to the Workbench.</div>
-            <div style={{marginTop: '1rem'}}></div>
             <WhyWillSomeInformationBePublic />
           </FlexColumn>
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
