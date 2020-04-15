@@ -24,13 +24,6 @@ jobs:
       - checkout
       - run:
           command: git submodule update --init --recursive
-      - run:
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
