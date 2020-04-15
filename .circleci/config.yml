@@ -36,8 +36,9 @@ jobs:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
       - restore_cache:
-          key:
+          keys:
             - v1-12345-gradle-wrapper-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+            - v1-12345-gradle-wrapper-
       - run:
           name: Validate swagger definitions
           working_directory: ~/workbench/api
