@@ -74,7 +74,10 @@ def swaggerTargetFolder = 'src/generated/java'
 def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
 def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
 
+// TODO(jaycarlton): rename this to generateWorkbenchApiServer or some such
 task generateApi {
+  group 'swagger-codegen'
+  description 'Generates the Spring controllers and API model classes in Java.'
   dependsOn 'validateSwagger'
   inputs.file("$projectDir/$workbenchApiSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
@@ -100,6 +103,8 @@ task generateApi {
 def fireCloudApiFile = 'src/main/resources/fireCloud.yaml'
 
 task generateFireCloudClient {
+  group 'swagger-codegen'
+  description 'Generates the FireCloud service client and model class definitions from Swagger file.'
   inputs.file("$projectDir/$fireCloudApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -125,6 +130,8 @@ task generateFireCloudClient {
 def notebooksApiFile = 'src/main/resources/notebooks.yaml'
 
 task generateNotebooksClient {
+  group 'swagger-codegen'
+  description 'Generates the Leonardo Notebooks client Java code.'
   inputs.file("$projectDir/$notebooksApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -149,6 +156,8 @@ task generateNotebooksClient {
 def jiraApiFile = 'src/main/resources/jira.yaml'
 
 task generateJiraClient {
+  group 'swagger-codegen'
+  description 'Generates the Jira client Java code.'
   inputs.file("$projectDir/$jiraApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -173,6 +182,9 @@ task generateJiraClient {
 def mandrillApiFile = 'src/main/resources/mandrill_api.yaml'
 
 task generateMandrillClient {
+  group 'swagger-codegen'
+  description 'Generates the Mandrill client Java code.'
+
   inputs.file("$projectDir/$mandrillApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -197,6 +209,9 @@ task generateMandrillClient {
 def moodleApiFile = 'src/main/resources/moodle.yaml'
 
 task generateMoodleClient {
+  group 'swagger-codegen'
+  description 'Generates the Moodle client Java code.'
+
   inputs.file("$projectDir/$moodleApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -221,6 +236,9 @@ task generateMoodleClient {
 def rdrApiFile = 'src/main/resources/rdr.yaml'
 
 task generateRdrClient {
+  group 'swagger-codegen'
+  description 'Generates the AoU Raw Data Repository API client Java code.'
+
   inputs.file("$projectDir/$rdrApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -245,6 +263,9 @@ task generateRdrClient {
 def captchaApiFile = 'src/main/resources/captcha.yaml'
 
 task generateCaptchaClient {
+  group 'swagger-codegen'
+  description 'Generates the ReCAPTCHA API Java code.'
+
   inputs.file("$projectDir/$captchaApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
