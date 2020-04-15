@@ -154,6 +154,8 @@ export default class CreateAccountPage extends BasePage {
     const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
     await emailAddressTextbox.type(config.broadInstitutionEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
+    // Wait for the validation success checkbox to be present.
+    await ClrIconLink.forLabel(this.page, FIELD_LABEL.INSTITUTION_EMAIL, 'success-standard');
     const roleSelect = new SelectComponent(this.page, 'describes your role');
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
