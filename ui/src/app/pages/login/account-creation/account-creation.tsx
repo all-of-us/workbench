@@ -1,7 +1,7 @@
 import {Button} from 'app/components/buttons';
 import {FormSection} from 'app/components/forms';
 
-import {InfoIcon, ValidationIcon} from 'app/components/icons';
+import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/icons';
 
 import {
   Error as ErrorDiv,
@@ -98,6 +98,7 @@ export interface AccountCreationState {
   showInstitution: boolean;
   showNonAcademicAffiliationRole: boolean;
   showNonAcademicAffiliationOther: boolean;
+  showMostInterestedInKnowingBlurb: boolean;
   institutionName: string;
   institutionRole: string;
   nonAcademicAffiliation: string;
@@ -153,6 +154,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       showInstitution: true,
       showNonAcademicAffiliationRole: false,
       showNonAcademicAffiliationOther: false,
+      showMostInterestedInKnowingBlurb: false,
     };
 
     // TODO(RW-4361): remove after we switch to verified institutional affiliation
@@ -573,6 +575,22 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               <i style={{...styles.publiclyDisplayedText, marginLeft: 2}}>
                 Publicly displayed
               </i></div>
+            <div>
+              <FlexRow style={{color: colors.accent, alignItems: 'center'}}>
+                <div
+                    style={{cursor: 'pointer', fontSize: 14}}
+                    onClick={() => this.setState((previousState) => ({showMostInterestedInKnowingBlurb: !previousState.showMostInterestedInKnowingBlurb}))}
+                >
+                  <i>All of Us</i> participants are most interested in knowing:
+                </div>
+                <ClrIcon shape='angle' style={{transform: this.state.showMostInterestedInKnowingBlurb ? 'rotate(180deg)' : 'rotate(90deg)'}}/>
+              </FlexRow>
+              {this.state.showMostInterestedInKnowingBlurb &&
+                <ul style={styles.asideList}>
+                  {researchPurposeList.map((value, index) => <li key={index} style={styles.asideText}>{value}</li>)}
+                </ul>
+              }
+            </div>
           </React.Fragment>}>
             <TextArea style={{height: '15rem', resize: 'none', width: '26rem', borderRadius: '3px 3px 0 0',
               borderColor: colorWithWhiteness(colors.dark, 0.5)}}
@@ -701,12 +719,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         <FlexColumn>
           <FlexColumn style={styles.asideContainer}>
             <WhyWillSomeInformationBePublic />
-          </FlexColumn>
-          <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
-            <div style={styles.asideHeader}><i>All of Us</i> participants are most interested in knowing:</div>
-            <ul style={styles.asideList}>
-              {researchPurposeList.map((value, index) => <li key={index} style={styles.asideText}>{value}</li>)}
-            </ul>
           </FlexColumn>
         </FlexColumn>
       </FlexRow>
