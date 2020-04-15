@@ -24,7 +24,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -63,7 +62,6 @@ import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
@@ -78,7 +76,6 @@ import org.springframework.context.annotation.Import;
   CdrBigQuerySchemaConfigService.class,
   SearchGroupItemQueryBuilder.class
 })
-@ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   private CohortMaterializationService cohortMaterializationService;
@@ -101,8 +98,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   @Autowired private SurveyModuleDao surveyModuleDao;
 
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
-
-  @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private FieldSetQueryBuilder fieldSetQueryBuilder;
 

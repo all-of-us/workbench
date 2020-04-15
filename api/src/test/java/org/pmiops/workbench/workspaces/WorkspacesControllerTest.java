@@ -78,9 +78,11 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionServiceImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohortreview.mappers.CohortAnnotationDefinitionMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -279,6 +281,8 @@ public class WorkspacesControllerTest {
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     CommonMappers.class,
+    CohortAnnotationDefinitionMapperImpl.class,
+    CohortAnnotationDefinitionServiceImpl.class,
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
