@@ -3,7 +3,6 @@ import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigatio
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {withContentRect} from 'react-measure';
 
 import {
   Clickable, StyledAnchorTag,
@@ -73,8 +72,6 @@ interface Props {
     profile: Profile,
     reload: Function
   };
-  measureRef: React.Ref<any>;
-  contentRect: {client: {width: number}};
 }
 
 interface State {
@@ -99,6 +96,7 @@ interface State {
 export const Homepage = withUserProfile()(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
+  private quickTourResourcesDiv: HTMLDivElement;
 
   constructor(props: Props) {
     super(props);
@@ -245,13 +243,12 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
 
   render() {
-    const {contentRect: {client: {width}}, measureRef} = this.props;
     const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
       dataUserCodeOfConductCompleted, quickTourResourceOffset
     } = this.state;
-    const limit = (width * 0.97) / 276;
+    const limit = this.quickTourResourcesDiv ? Math.floor(this.quickTourResourcesDiv.offsetWidth * 0.97 / 276) : 5;
 
     const quickTourResources = [
       {
@@ -380,7 +377,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
           <FlexColumn style={{marginLeft: '3%'}}>
             <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
-            <div ref={measureRef} style={{display: 'flex', position: 'relative'}}>
+            <div ref={(el) => this.quickTourResourcesDiv = el} style={{display: 'flex', position: 'relative'}}>
               <FlexRow style={styles.quickTourCardsRow}>
                 {quickTourResources.slice(quickTourResourceOffset, quickTourResourceOffset + limit).map((thumbnail, i) => {
                   return <React.Fragment key={i}>
