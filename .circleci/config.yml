@@ -14,6 +14,7 @@ java_defaults: &java_defaults
     # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
     # so we bumped this down further to 2G.
     JAVA_TOOL_OPTIONS: -Xmx2g
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     TERM: dumb
 
 jobs:
@@ -26,7 +27,7 @@ jobs:
       - run:
           #Circle is bad about setting up your remotes for you, you must use origin/
           command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
+            if [ ${CIRCLE_BRANCH} != "" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
               echo No relevant changes on non-master branch, skipping
               circleci step halt
             fi
@@ -34,6 +35,9 @@ jobs:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
+      - restore_cache:
+          key:
+            - v1-12345-gradle-wrapper-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Validate swagger definitions
           working_directory: ~/workbench/api
@@ -57,6 +61,10 @@ jobs:
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+      - save_cache:
+          paths:
+            - ~/workbench/api/.gradle/wrapper
+          key: v1-12345-gradle-wrapper-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
 
   api-local-test:
     docker:
