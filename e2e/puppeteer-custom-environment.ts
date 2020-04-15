@@ -4,7 +4,7 @@ require('jest-circus');
 
 
 // jest-circus retryTimes
-const retryTimes = process.env.RETRY_ATTEMPTS || 0;
+const retryTimes = process.env.RETRY_ATTEMPTS || 1;
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   async setup() {
@@ -21,7 +21,6 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   async handleTestEvent(event, state) {
     if (event.name === 'test_fn_failure') {
       if (state.currentlyRunningTest.invocations > retryTimes) {
-        console.log(`Test "${event.test.name}" failed.`);
         const testName = state.currentlyRunningTest.name.replace(/\s/g, ''); // remove whitespaces
         const screenshotDir = 'logs/screenshot';
         await fs.ensureDir(screenshotDir);
@@ -30,7 +29,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
         const fileName = `${testName}_${timestamp}.png`
         const screenshotFile = `${screenshotDir}/${fileName}`;
         await this.global.page.screenshot({path: screenshotFile, fullPage: true});
-        console.log('Saved screenshot ' + screenshotFile);
+        console.error(`Test "${event.test.name}" failed. Saved screenshot ${screenshotFile}.`);
       }
     }
   }
