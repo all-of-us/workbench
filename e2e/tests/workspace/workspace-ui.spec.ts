@@ -3,8 +3,7 @@ import HomePage from 'app/home-page';
 import WorkspaceCard from 'app/workspace-card';
 import WorkspacesPage from 'app/workspaces-page';
 import {signIn} from 'tests/app';
-import {NavLink} from 'app/page-identifiers';
-
+import Navigation, {NavLink} from 'app/navigation';
 
 describe('Workspace ui tests', () => {
 
@@ -13,6 +12,9 @@ describe('Workspace ui tests', () => {
   });
 
   test('Workspace cards all have same ui size', async () => {
+    // on Home page
+    expect(await new HomePage(page).isLoaded()).toBe(true);
+
     const cards = await WorkspaceCard.getAllCards(page);
     let width;
     let height;
@@ -30,29 +32,45 @@ describe('Workspace ui tests', () => {
     }
   });
 
-  // Click CreateNewWorkspace link on My Workpsaces page => Open Create Workspace page
-  test('Click Create New Workspace link on My Workspaces page', async () => {
-    const workspaces = new WorkspacesPage(page);
-    await workspaces.load();
-    const workspaceEdit = await workspaces.clickCreateNewWorkspace();
-    const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
-    expect(await workspaceNameTextbox.isVisible()).toBe(true);
-  });
-
-  test('Check Workspace card on Your Workspaces page', async () => {
+  test('Check Workspace cards on the Workspaces page', async () => {
     const home = new HomePage(page);
     await home.load();
-    await home.navTo(NavLink.YOUR_WORKSPACES);
+    
+    await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
     await WorkspaceCard.getAllCards(page);
     const card = await WorkspaceCard.getAnyCard(page);
+
+    // check workspace name string is made of english characters
     const workspaceName = await card.getWorkspaceName();
     expect(workspaceName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
-    const links = await card.getPopupLinkTextsArray();
+    const levels = ['WRITER', 'READER', 'OWNER'];
+    const accessLevel = await card.getWorkspaceAccessLevel();
+    expect(levels).toContain(accessLevel);
+
+    const ellipsis = await card.getEllipsis();
+    const links = await ellipsis.getAvaliableActions();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 
+  test('Click CANCEL button bring user back to the Workspaces page', async () => {
+    const workspaces = new WorkspacesPage(page);
+    await workspaces.load();
+
+    // Click Create New Workspace link on the Workspaces page
+    const editPage = await workspaces.clickCreateNewWorkspace();
+
+    await (await editPage.getWorkspaceNameTextbox()).type('I-love-my-new-workspace');
+    await (await editPage.getWorkspaceNameTextbox()).tabKey();
+
+    // No Confirm to Cancel confirmation dialog
+    const cancelButton = await editPage.getCancelButton();
+    await editPage.clickAndWait(cancelButton);
+
+    await workspaces.waitForLoad();
+    expect(await workspaces.isLoaded()).toBe(true);
+  });
 
 });

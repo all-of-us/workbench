@@ -1,7 +1,7 @@
 import ClrIconLink from 'app/aou-elements/clr-icon-link';
 import Link from 'app/aou-elements/link';
 import BaseElement from 'app/aou-elements/base-element';
-import HomePage, {FIELD_LABEL as editPageFieldLabel} from 'app/home-page';
+import HomePage, {LABEL_ALIAS as editPageFieldLabel} from 'app/home-page';
 import WorkspaceCard from 'app/workspace-card';
 import WorkspaceEditPage from 'app/workspace-edit-page';
 import WorkspacesPage from 'app/workspaces-page';
@@ -38,12 +38,11 @@ describe('Home page ui tests', () => {
       const cardName = await card.getWorkspaceName();
       expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
-      // check ellipsis icon existed
-      expect(await card.getEllipsisIcon()).toBeTruthy();
-
+      // check Workspace Action menu for listed actions
+      const ellipsis = await card.getEllipsis();
       // Assumption: test user is workspace Owner.
       // Check Workspace Actions ellipsis dropdown displayes the right set of options
-      const links = await card.getPopupLinkTextsArray();
+      const links = await ellipsis.getAvaliableActions();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }
   });

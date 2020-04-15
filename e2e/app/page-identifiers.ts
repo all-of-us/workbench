@@ -19,23 +19,8 @@ export enum PageUrl {
    ADMIN = config.uiBaseUrl + config.adminUrlPath,
 }
 
-export enum NavLink {
-   HOME = 'Home',
-   ADMIN = 'Admin',
-   USER_ADMIN = 'User Admin',
-   PROFILE = 'Profile',
-   SIGN_OUT = 'Sign Out',
-   CONTACT_US = 'Contact Us',
-   USER_SUPPORT = 'User Support',
-   YOUR_WORKSPACES = 'Your Workspaces',
-   FEATURED_WORKSPACES = 'Featured Workspaces',
-}
-
-export enum NavLinkIcon {
-   HOME = 'home',
-   ADMIN = 'user',
-   CONTACT_US = 'envelope',
-   USER_SUPPORT = 'help',
-   YOUR_WORKSPACES = 'applications',
-   FEATURED_WORKSPACES = 'star',
+export enum PageTab {
+   DATA = 'DATA',
+   ANALYSIS = 'ANALYSIS',
+   ABOUT = 'ABOUT'
 }

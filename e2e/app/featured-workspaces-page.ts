@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import AuthenticatedPage from './authenticated-page';
+import AuthenticatedPage from 'app/authenticated-page';
 
 export const PAGE = {
   TITLE: 'Workspace Library',

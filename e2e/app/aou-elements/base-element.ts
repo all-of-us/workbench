@@ -254,7 +254,7 @@ export default class BaseElement {
 
   // try this method when click() is not working
   async clickWithEval() {
-    await this.page.evaluate( elem => elem.click(), this.element );
+    return this.page.evaluate( elem => elem.click(), this.element );
   }
 
 }
