@@ -6,7 +6,7 @@ import {config} from 'resources/workbench-config';
 
 
 export const selectors = {
-  loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In with Google")]',
+  loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
   emailInput: '//input[@type="email"]',
   NextButton: '//*[text()="Next" or @value="Next"]',
   passwordInput: '//input[@type="password"]',
