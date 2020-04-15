@@ -305,11 +305,13 @@ const routes: Routes = [
         path: 'profile',
         component: ProfilePageComponent,
         data: {title: 'Profile'}
-      }, {
-        path: 'workspaces/build',
-        component: WorkspaceEditComponent,
-        data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
-      },{
+      },
+      // , {
+      //   path: 'workspaces/build',
+      //   component: WorkspaceEditComponent,
+      //   data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
+      // },
+      {
         path: '**',
         component: AppRouter,
         data: {title: 'Create Workspace'}
