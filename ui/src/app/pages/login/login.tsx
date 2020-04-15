@@ -30,7 +30,14 @@ export const styles = reactStyles({
     textTransform: 'none',
     borderRadius: '2px',
     justifyContent: 'baseline',
-    maxWidth: '11.45rem'
+    width: '6.5rem'
+  },
+  createAccountButton: {
+    fontSize: '12px',
+    margin: '.5rem .5rem .25rem 0',
+    border: `1px solid ${colors.primary}`,
+    height: '48px',
+    width: '6.5rem'
   },
   fismaCommon: {
     fontSize: '10px',
@@ -53,15 +60,16 @@ export const LoginReactComponent: React.FunctionComponent<{
     return <React.Fragment>
       <div data-test-id='login' style={{marginTop: '5.5rem',  paddingLeft: '3rem'}}>
         <div>
-          <Header>
-            Already have an account?
+          <Header style={{width: '14rem', lineHeight: '30px'}}>
+            Already have a
+            Researcher Workbench account?
           </Header>
           <div>
             <Button type='primary' style={styles.button} onClick={signIn}>
               <img src={googleIcon}
                      style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
               <div>
-                Sign In with Google
+                Sign In
               </div>
             </Button>
           </div>
@@ -70,8 +78,7 @@ export const LoginReactComponent: React.FunctionComponent<{
           <SmallHeader>
             Don't have an account?
           </SmallHeader>
-          <Button type='secondary' style={{fontSize: '10px', margin: '.25rem .5rem .25rem 0',
-            border: `1px solid ${colors.primary}`, height: '48px'}}
+          <Button type='secondary' style={styles.createAccountButton}
                   onClick={onCreateAccount}>
             Create Account
           </Button>
