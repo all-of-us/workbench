@@ -38,6 +38,7 @@ import {
   WhyWillSomeInformationBePublic,
 } from 'app/pages/login/account-creation/common';
 import {isBlank, reactStyles} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
 
 const styles = reactStyles({
@@ -685,7 +686,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                 this.isUsernameValidationError() ||
                                 Boolean(errors)}
                       style={{'height': '2rem', 'width': '10rem'}}
-                      onClick={() => this.props.onComplete(this.state.profile)}>
+                      onClick={() => {
+                        AnalyticsTracker.Registration.CreateAccountPage();
+                        this.props.onComplete(this.state.profile);
+                      }}>
                 Next
               </Button>
             </TooltipTrigger>
