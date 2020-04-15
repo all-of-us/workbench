@@ -8,7 +8,7 @@ import {TextColumn} from 'app/components/text-column';
 import {AouTitle} from 'app/components/text-wrappers';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DropDownSection, Section, TextInputWithLabel} from 'app/pages/login/account-creation/common';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 
@@ -38,6 +38,10 @@ const styles = reactStyles({
   }
 });
 
+const SelectAllText = () => {
+  return <div style={{color: colors.primary, fontSize: '12px',}}>Select all that apply.</div>;
+}
+
 export interface Props {
   profile: Profile;
   // Required if enablePrevious is true.
@@ -46,6 +50,7 @@ export interface Props {
   onSubmit: (profile: Profile, captchaToken: string) => Promise<Profile>;
   enableCaptcha: boolean;
   enablePrevious: boolean;
+  showStepCount: boolean;
 }
 
 interface State {
@@ -112,13 +117,19 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
     const errors = this.validateDemographicSurvey(demographicSurvey);
 
-    return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '26rem'}}>
+    return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '32rem'}}>
       <TextColumn>
         <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Optional Demographics Survey</div>
-        <div style={{fontSize: 16, marginBottom: '.5rem'}}>
-          Please complete Step {requireInstitutionalVerification ? '3 of 3' : '2 of 2'}
-        </div>
-        <div>
+        {this.props.showStepCount &&
+          <div style={{fontSize: 16, marginBottom: '.5rem'}}>
+            Please complete Step {requireInstitutionalVerification ? '3 of 3' : '2 of 2'}
+          </div>
+        }
+        <div style={{
+          backgroundColor: colorWithWhiteness(colors.accent, .85),
+          padding: '1rem',
+          borderRadius: '5px'
+        }}>
           <label style={{fontWeight: 600}}>Answering these questions is optional.</label> <AouTitle/> will
           use this information to measure our success at reaching diverse researchers.
           We will not share your individual answers.
@@ -126,7 +137,8 @@ export class DemographicSurvey extends React.Component<Props, State> {
       </TextColumn>
 
       {/*Race section*/}
-      <Section header='Race' subHeader='Select all that apply'>
+      <Section header='Race' subHeader='(Optional)' subHeaderStyle={{fontStyle: 'italic'}}>
+        <SelectAllText/>
         <FlexColumn style={styles.checkboxAreaContainer}>
           {AccountCreationOptions.race.map((race) => {
             return this.createOptionCheckbox('race', race);
@@ -136,12 +148,15 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
       {/*Ethnicity section*/}
       <DropDownSection data-test-id='dropdown-ethnicity'
-                       header='Ethnicity' options={AccountCreationOptions.ethnicity}
+                       header='Ethnicity'
+                       subHeader='(Optional)'
+                       options={AccountCreationOptions.ethnicity}
                        value={!!demographicSurvey ? demographicSurvey.ethnicity : null}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
 
       {/*Gender Identity section*/}
-      <Section header='Gender Identity' subHeader='Select all that apply'>
+      <Section header='Gender Identity' subHeader='(Optional)'>
+        <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
             return this.createOptionCheckbox('genderIdentityList', genderIdentity);
@@ -150,7 +165,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
       </Section>
 
       <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
-or another sexual and/or gender minority?'>
+or another sexual and/or gender minority?' subheader='(Optional)'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton data-test-id='radio-lgbtq-yes' id='radio-lgbtq-yes' onChange={
@@ -175,7 +190,8 @@ or another sexual and/or gender minority?'>
       </Section>
 
       {/*Sex at birth section*/}
-      <Section header='Sex at birth' subHeader='Select all that apply'>
+      <Section header='Sex at birth' subHeader='(Optional)'>
+        <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox('sexAtBirth', sexAtBirth);
@@ -184,12 +200,14 @@ or another sexual and/or gender minority?'>
       </Section>
 
       {/*Year of birth section*/}
-      <DropDownSection header='Year of Birth' options={AccountCreationOptions.Years}
+      <DropDownSection header='Year of Birth'
+                       subHeader='(Optional)'
+                       options={AccountCreationOptions.Years}
                        value={!!demographicSurvey ? demographicSurvey.yearOfBirth : null}
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
       {/*Disability section*/}
-      <Section header='Do you have a physical or cognitive disability?'>
+      <Section header='Do you have a physical or cognitive disability?' subHeader='(Optional)'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes' onChange={
@@ -208,10 +226,10 @@ or another sexual and/or gender minority?'>
       </Section>
       {/*Education section*/}
       <DropDownSection header='Highest Level of Education Completed'
+                       subHeader='(Optional)'
                        options={AccountCreationOptions.levelOfEducation}
                        value={!!demographicSurvey ? demographicSurvey.education : null}
-                       onChange={
-                         (e) => this.updateDemographicAttribute('education', e)}/>
+                       onChange={(e) => this.updateDemographicAttribute('education', e)}/>
       {environment.enableCaptcha && this.props.enableCaptcha && <div style={{paddingTop: '1rem'}}>
         <ReCAPTCHA sitekey={environment.captchaSiteKey}
                    ref = {this.captchaRef}

@@ -348,7 +348,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             enables us to provide their researchers with access to the Workbench.
           </div>
           <div style={{...styles.text, fontSize: 12, marginTop: '0.5rem'}}>
-            All fields are required.
+            All fields are required unless indicated as optional
           </div>
           {loadingInstitutions && <SpinnerOverlay />}
           {!loadingInstitutions && <div style={{marginTop: '.5rem'}}>

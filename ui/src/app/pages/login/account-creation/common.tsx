@@ -69,6 +69,10 @@ export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
       <a target='_blank' href='https://www.researchallofus.org/research-projects-directory/'>
         &nbsp;Research Projects Directory</a> on our public website.
     </div>
+    <div style={commonStyles.asideText}>
+      This disclosure will also help us comply with the 21st Century Cures Act. Some of these
+      categories may not be visible on our website currently, but will be added in the future.
+    </div>
   </React.Fragment>;
 };
 
@@ -110,7 +114,14 @@ export const Section = (props) => {
         {props.header}
       </label>
       {props.subHeader &&
-      <label style={{color: colors.primary, fontSize: '12px', marginLeft: '.25rem'}}> {props.subHeader} </label>
+        <label style={{
+          color: colors.primary,
+          fontSize: '12px',
+          marginLeft: '.25rem',
+          ...props.subHeaderStyle
+        }}>
+          {props.subHeader}
+        </label>
       }
     </div>
     <Divider style={{marginTop: '.25rem'}}/>
@@ -125,7 +136,7 @@ export const Section = (props) => {
  * @constructor
  */
 export const DropDownSection = (props) => {
-  return <Section header={props.header}>
+  return <Section header={props.header} subHeader={props.subHeader}>
     <Dropdown placeholder='Select'
               options={props.options}
               style={{width: '50%'}}

@@ -451,8 +451,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 <FlexColumn>
                   <div style={{...styles.asideText, marginBottom: '0.3rem'}}>
                     We create a 'username'@{gsuiteDomain} Google account which you will use to
-                    login to the Workbench. This is separate account and not related to any personal
-                    or professional Google accounts you may have.</div>
+                    login to the Workbench. This is a separate account and not related to any
+                    personal or professional Google accounts you may have.</div>
                   <TextInputWithLabel value={username} inputId='username' inputName='username'
                                       placeholder='New Username' invalid={
                                         this.state.usernameConflictError || this.usernameInvalidError()}
@@ -536,8 +536,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </Section>
           <Section header={<React.Fragment>
             <div>Your institutional mailing address</div>
-            <div style={styles.asideText}>We will use your address if we need to send correspondence about the program;
-              your information will not be shared or displayed publicly.</div>
+            <div style={styles.asideText}>We will use your address if we need to send correspondence about the program.</div>
           </React.Fragment>}>
             <FlexColumn style={{lineHeight: '1rem'}}>
               <FlexRow>
@@ -567,7 +566,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </FlexColumn>
           </Section>
           <Section sectionHeaderStyles={{borderBottom: null}} header={<React.Fragment>
-            <div>Please describe your research background, experience, and research interests</div>
+            <div>Your research background, experience, and research interests</div>
             <div style={styles.asideText}>This information will be posted publicly on the <i>All of Us</i> Research Hub website
               to inform program participants. <span  style={{marginLeft: 2,
                 fontSize: 12}}>(2000 character limit)</span>
@@ -658,10 +657,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </FlexColumn>}
           </React.Fragment>}
           <Section header={<React.Fragment>
-            <div>Please link to your professional profile or bio page below, if available</div>
-            <div style={styles.asideText}>You could provide a link to your faculty bio page from your institution's
-              website, your LinkedIn profile page, or another webpage featuring your work. This will
-              allow <i>All of Us</i> researchers and participants to learn more about your work and publications.</div>
+            <div>Your professional profile or bio page below, if available</div>
+            <div style={styles.asideText}>(Optional)</div>
+            <div style={styles.asideText}>
+              You could provide a link to your faculty bio page from your institution's website,
+              your LinkedIn profile page, or another webpage featuring your work. This will
+              allow <i>All of Us</i> researchers and participants to learn more about your work and
+              publications.
+            </div>
           </React.Fragment>}>
               <TextInputWithLabel dataTestId='professionalUrl' inputName='professionalUrl'
                                   placeholder='Professional Url' value={professionalUrl}

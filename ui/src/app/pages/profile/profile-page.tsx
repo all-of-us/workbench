@@ -474,6 +474,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             }}
             enableCaptcha={false}
             enablePrevious={false}
+            showStepCount={false}
         />
       </Modal>}
       {saveProfileErrorResponse &&
