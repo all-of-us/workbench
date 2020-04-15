@@ -134,11 +134,3 @@ export const WorkspaceList = withUserProfile()
 
 });
 
-// @Component({
-//   template: '<div #root></div>'
-// })
-// export class WorkspaceListComponent extends ReactWrapperBase {
-//   constructor() {
-//     super(WorkspaceList, []);
-//   }
-// }

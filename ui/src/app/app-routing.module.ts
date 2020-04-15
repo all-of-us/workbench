@@ -82,14 +82,6 @@ const routes: Routes = [
       }, {
         path: 'workspaces',
         children: [
-          // {
-          //   path: '',
-          //   component: WorkspaceListComponent,
-          //   data: {
-          //     title: 'View Workspaces',
-          //     breadcrumb: BreadcrumbType.Workspaces
-          //   }
-          // },
           {
             path: '',
             component: AppRouter,
@@ -306,11 +298,6 @@ const routes: Routes = [
         component: ProfilePageComponent,
         data: {title: 'Profile'}
       },
-      // , {
-      //   path: 'workspaces/build',
-      //   component: WorkspaceEditComponent,
-      //   data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
-      // },
       {
         path: '**',
         component: AppRouter,
