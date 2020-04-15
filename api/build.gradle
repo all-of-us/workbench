@@ -5,7 +5,7 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 // Runs before all tasks. Mainly sets up properties and dependencies.
 buildscript {
-  // Project-wide constants
+  // Project-wide constants.
   ext {
     ELASTICSEARCH_VERSION = '6.8.3'
     GAE_VERSION = '1.9.64'
@@ -53,6 +53,8 @@ buildscript {
 
 project.ext['hibernate.version'] = project.ext.HIBERNATE_VERSION
 
+// TODO(jaycarlton): migrate to new plugin DSL (RW0-4772)
+// TODO(jaycarlton): move the plugin apply statements closer to configuration blocks for the plugins
 apply plugin: 'com.diffplug.gradle.spotless'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'eclipse'
@@ -65,10 +67,11 @@ apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'war'
 
+// TODO(jaycarlton): Move swagger-codegen tasks and artifacts to a new Gradle project (RW-4577)
+def swaggerTargetFolder = 'src/generated/java'
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
 def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
-def swaggerTargetFolder = 'src/generated/java'
 def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
 
 task generateApi {
@@ -263,22 +266,22 @@ task generateCaptchaClient {
   }
 }
 
-task generate_appengine_web_xml(type: Exec) {
-  executable "ruby"
-  args "libproject/generate_appengine_web_xml.rb"
-}
+//
+// AppEngine
+//
 
+// Generate AppEngine Cron file
 task generate_appengine_cron_yaml(type: Exec) {
   executable "ruby"
   args = ["libproject/generate_appengine_cron_yaml.rb", System.getenv("WORKBENCH_ENV")]
 }
 
-configurations {
-  generatedCompile
-  all {
-    exclude group: 'com.google.guava', module:'guava-jdk5'
-  }
+// Generate AppEngine Web Configration XML file
+task generate_appengine_web_xml(type: Exec) {
+  executable "ruby"
+  args "libproject/generate_appengine_web_xml.rb"
 }
+
 
 
 // Spotless code linter plugin settings
@@ -390,6 +393,10 @@ configurations {
 
   __tools__Implementation.extendsFrom implementation
   __tools__RuntimeOnly.extendsFrom runtimeOnly
+
+  generatedCompile {
+    exclude group: 'com.google.guava', module:'guava-jdk5'
+  }
 }
 
 // Add dependencies to the classes builtin task from the  Java plugin.
@@ -413,6 +420,7 @@ project.tasks.compileGeneratedJava.dependsOn(swaggerCodegenTasks)
 project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
         'generate_appengine_cron_yaml'])
 
+// Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
   delete("${projectDir}/$swaggerTargetFolder")
 }
@@ -421,9 +429,10 @@ repositories {
   jcenter()
 }
 
+// TODO(jaycarlton): see if there's a way to subdivide this block for readability
+// To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 dependencies {
-  // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
-
+  // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
@@ -517,6 +526,26 @@ dependencies {
   compile 'org.json:json:20160810'
 
   compile 'com.github.fge:json-patch:1.9'
+
+  // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
+  // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
+  // plus any custom templates included in our repo under the swaggerTemplateDir.
+  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
+  generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
+  generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
+  generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
+  generatedCompile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
+  generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
+  generatedCompile "joda-time:joda-time:$project.ext.JODA_VERSION"
+  generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$project.ext.JACKSON_VERSION"
+  // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
+  // template file api.mustache for more details.
+  generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
+  generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
+  generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
+
   __tools__Compile 'commons-cli:commons-cli:1.4'
   __tools__Compile 'com.opencsv:opencsv:4.6'
 
@@ -534,33 +563,16 @@ dependencies {
   testRuntime 'org.junit.vintage:junit-vintage-engine:5.4.0'
   testCompile "org.jetbrains.kotlin:kotlin-test:1.3.21"
 
+  // Use Mockito for testing only.
   testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
-
-  // Dependencies for Swagger codegen. This should include all dependencies required by Swagger's
-  // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
-  // plus any custom templates included in our repo under the swaggerTemplateDir.
-  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:${SPRING_BOOT_VERSION}"
-  generatedCompile "io.springfox:springfox-swagger2:${SPRINGFOX_VERSION}"
-  generatedCompile "io.springfox:springfox-swagger-ui:${SPRINGFOX_VERSION}"
-  generatedCompile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
-  generatedCompile "com.squareup.okhttp:logging-interceptor:${OKHTTP_VERSION}"
-  generatedCompile "com.google.code.gson:gson:${GSON_VERSION}"
-  generatedCompile "joda-time:joda-time:${JODA_VERSION}"
-  generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
-  // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
-  // template file api.mustache for more details.
-  generatedCompile "io.opencensus:opencensus-api:${OPENCENSUS_VERSION}"
-  generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
-  generatedCompile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
-
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${KOTLIN_VERSION}"
 }
 
-compileJava {
+tasks.compileJava {
   dependsOn 'compileGeneratedJava'
   options.compilerArgs << '-Xlint:unchecked'
 }
 
+// TODO(jaycarlton): Move unit and integration testing-related tasks to their own Gradle project.
 task integrationTest(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
   testClassesDirs = sourceSets.__integration__.output.classesDirs
@@ -602,7 +614,7 @@ tasks.withType(Test) {
   }
 }
 
-integrationTest {
+tasks.integrationTest {
   // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
 }
@@ -626,7 +638,7 @@ appengine {  // App Engine tasks configuration
   }
 }
 
-task startCronEmulator(dependsOn: ':appengine-cron-emulator:jar') {
+task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_appengine_cron_yaml']) {
   doFirst {
     ext.process = new ProcessBuilder()
             .redirectOutput(ProcessBuilder.Redirect.to(new File("cron-emulator.log")))
@@ -641,7 +653,7 @@ task startCronEmulator(dependsOn: ':appengine-cron-emulator:jar') {
   }
 }
 
-startCronEmulator.dependsOn generate_appengine_cron_yaml
+// AppEngine plugin tasks
 appengineRun.dependsOn startCronEmulator
 appengineStart.dependsOn startCronEmulator
 
@@ -651,14 +663,14 @@ version = '0.1.0'          // Version in generated output
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-task incrementalHotSwap(type: IncrementalHotSwapTask) {
+task incrementalHotSwap(type: IncrementalHotSwapTask, dependsOn: 'compileJava') {
     inputDir = sourceSets.main.java.outputDir
 }
 
-incrementalHotSwap.dependsOn compileJava
-
 task listProjectAPIs(type: GenerateAPIListingTask)
 
+
+// TODO(jaycarlton) move tools-related stuff to its own Gradle project
 
 //
 // COMMAND-LINE TOOLS
@@ -816,6 +828,11 @@ task backfillBillingProjectOwners(type: JavaExec) {
     args Eval.me(appArgs)
   }
 }
+
+//
+// Kotlin Plugin compiler arguments
+// https://kotlinlang.org/docs/reference/using-gradle.html#compiler-options
+//
 
 compileKotlin {
   kotlinOptions {
