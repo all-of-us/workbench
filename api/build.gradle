@@ -31,25 +31,27 @@ buildscript {
     }
   }
 
+  // Top-level Gradle project dependencies
   dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$project.ext.KOTLIN_VERSION"
+    classpath "org.jetbrains.kotlin:kotlin-noarg:$project.ext.KOTLIN_VERSION"
     classpath "org.springframework.boot:spring-boot-gradle-plugin:$project.ext.SPRING_BOOT_VERSION"
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
+
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
     classpath 'io.swagger:swagger-codegen:2.2.3'
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$project.ext.KOTLIN_VERSION"
-    classpath "org.jetbrains.kotlin:kotlin-noarg:$project.ext.KOTLIN_VERSION"
-    classpath 'org.owasp:dependency-check-gradle:5.1.0'
-    classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
     classpath 'net.ltgt.gradle:gradle-apt-plugin:0.21'
+    classpath 'org.owasp:dependency-check-gradle:5.1.0'
   }
 }
 
-ext['hibernate.version'] = project.ext.HIBERNATE_VERSION
+project.ext['hibernate.version'] = project.ext.HIBERNATE_VERSION
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
