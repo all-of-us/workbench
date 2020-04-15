@@ -5,7 +5,8 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-import {Error as ErrorDiv} from 'app/components/inputs';
+import {ValidationIcon} from 'app/components/icons';
+import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
@@ -170,12 +171,13 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
 
   /**
    * Indicates whether the currently-entered email is a valid member of the indicated institution.
-   * This controls the display of the "validity icon" next to the email input.
+   * This controls the display of the "validity icon" next to the email input. When undefined
+   * is returned, the icon will not display anything.
    *
    * Note: this does *not* check for format correctness of the indicated email. That is checked
    * separately at the form-level via validate.js
    */
-  isEmailValid() {
+  isEmailValid(): boolean|undefined {
     const {
       checkEmailResponse,
       profile: {
@@ -195,28 +197,53 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     this.setState(fp.set(['profile', 'contactEmail'], contactEmail));
   }
 
-  get displayEmailErrorMessage() {
-    const {institutions,
+  /**
+   * Returns a DOM fragment explaining to the user why institutional email verification has
+   * failed. This may be due to (1) restricted DUA which requires users to have an
+   * exact email address match, (2) email domain not matching a master DUA list of domains or
+   * emails, or (3) a server error when making the checkEmail request.
+   */
+  displayEmailErrorMessageIfNeeded(): React.ReactNode {
+    const {institutions, checkEmailError, checkEmailResponse,
     profile: {
-      verifiedInstitutionalAffiliation
+      contactEmail,
+      verifiedInstitutionalAffiliation: {institutionShortName}
     }} = this.state;
-    if (verifiedInstitutionalAffiliation && verifiedInstitutionalAffiliation.institutionShortName) {
-      const selectedInstitutionObj = fp.find((institution) =>
-          institution.shortName === verifiedInstitutionalAffiliation.institutionShortName, institutions);
 
-      // If Instution has signed Restricted agreement and the email id is not in allowed email ids list
-      if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
-        return <div data-test-id='email-error-message' style={{color: colors.danger}}>
-          The institution has authorized access only to select members.<br/>
-          Please <a href='https://www.researchallofus.org/institutional-agreements' target='_blank'>
-          click here</a> to request to be added to the institution</div>;
-      }
-      // If institution has MASTER or NULL agreement and the domain is not in the allowed list
+    // No error if we haven't entered an email or chosen an institution.
+    if (!institutionShortName || isBlank(contactEmail)) {
+      return '';
+    }
+
+    // No error if the institution check was successful.
+    if (checkEmailResponse && checkEmailResponse.isValidMember) {
+      return '';
+    }
+
+    // Show an error message if there was a server error.
+    if (checkEmailError) {
+      return <ErrorDiv data-test-id='check-email-error'>
+        An error occurred checking institution membership of this email. Please try again or
+        contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+      </ErrorDiv>;
+    }
+
+    // Finally, we distinguish between the two types of DUAs in terms of user messaging.
+    const selectedInstitutionObj = fp.find((institution) =>
+        institution.shortName === institutionShortName, institutions);
+    if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
+      // Instution has signed Restricted agreement and the email is not in allowed emails list
+      return <div data-test-id='email-error-message' style={{color: colors.danger}}>
+        The institution has authorized access only to select members.<br/>
+        Please <a href='https://www.researchallofus.org/institutional-agreements' target='_blank'>
+        click here</a> to request to be added to the institution</div>;
+    } else {
+      // Institution has MASTER or NULL agreement and the domain is not in the allowed list
       return <div data-test-id='email-error-message' style={{color: colors.danger}}>
           Your email does not match your institution</div>;
     }
-    return '';
   }
+
   /**
    * Runs client-side validation against the form inputs, and returns an object containing errors
    * strings, if empty. If validation passes, undefined is returned.
@@ -364,15 +391,11 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                 invalid={!this.isEmailValid()}
                                 onBlur={() => this.onEmailBlur()}
                                 onChange={email => this.updateContactEmail(email)}>
+              <div style={{...inputStyles.iconArea}}>
+                <ValidationIcon validSuccess={this.isEmailValid()}/>
+              </div>
             </TextInputWithLabel>
-            {this.state.checkEmailError &&
-              <ErrorDiv data-test-id='check-email-error'>
-                An error occurred checking institution membership of this email. Please try again or
-                contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
-              </ErrorDiv>
-            }
-            {this.state.checkEmailResponse &&
-            !this.state.checkEmailResponse.isValidMember && this.displayEmailErrorMessage}
+            {this.displayEmailErrorMessageIfNeeded()}
             <div style={{marginTop: '.5rem'}}>
               <label style={{...styles.boldText, marginTop: '1rem'}}>
                 Which of the following best describes your role?
