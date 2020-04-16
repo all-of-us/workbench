@@ -6,12 +6,12 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {
-  // Project-wide constants.
+  // External propertiges on the default project. Values declared in ext blocks
+  // outside of the buildscsript block aren't usable here.
   ext {
     ELASTICSEARCH_VERSION = '6.8.3'
     GAE_VERSION = '1.9.64'
     GSON_VERSION = '2.8.5'
-    HIBERNATE_VERSION = '5.2.10.Final'
     JACKSON_DATABIND_VERSION = '2.9.10.1'
     JACKSON_VERSION = '2.9.10'
     JODA_VERSION = '2.10'
@@ -24,6 +24,8 @@ buildscript {
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
     SWAGGER_CODEGEN_VERSION = '2.2.3'
   }
+
+  project.ext['hibernate.version'] = '5.2.10.Final'
 
   repositories {
     // Bintray's repository - a fast Maven Central mirror & more
@@ -53,8 +55,6 @@ buildscript {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:$project.ext.SPRING_BOOT_VERSION"
   }
 }
-
-project.ext['hibernate.version'] = project.ext.HIBERNATE_VERSION
 
 // TODO(jaycarlton): migrate to new plugin DSL (RW-4772)
 apply plugin: 'com.diffplug.gradle.spotless'
@@ -512,7 +512,7 @@ dependencies {
   compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
   compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
 
-  compile "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
+  compile "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
 
   // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
   // Kotlin dep, resulting in massive logspam.
