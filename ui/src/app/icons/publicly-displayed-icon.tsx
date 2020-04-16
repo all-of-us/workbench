@@ -34,7 +34,7 @@ const css = `
    }
  `;
 
-export const PublicDisplayed = (props) => {
+export const PubliclyDisplayed = (props) => {
   return <div>
     <style>
       {css}
