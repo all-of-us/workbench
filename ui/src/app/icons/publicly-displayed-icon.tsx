@@ -41,7 +41,7 @@ export const PubliclyDisplayed = (props) => {
     </style>
     <div className='pointer' style={{...props.style}}>
       <label style={{marginLeft: '0.3rem', color: colors.accent}}>
-        Public displayed
+        Publicly displayed
         <TooltipTrigger content='not sure about content'>
           <InfoIcon style={{marginLeft: '0.5rem', width: '0.7rem'}}/>
         </TooltipTrigger>
