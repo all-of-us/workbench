@@ -1,6 +1,6 @@
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
-import {Button, Link, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -34,10 +34,12 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
+  renderUSD,
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
-  withRouteConfigData
+  withRouteConfigData,
+  withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
@@ -51,6 +53,7 @@ import {
   CdrVersionListResponse,
   DataAccessLevel,
   DisseminateResearchEnum,
+  Profile,
   ResearchOutcomeEnum,
   ResearchPurpose,
   SpecificPopulationEnum,
@@ -59,6 +62,7 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
+import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
@@ -80,6 +84,20 @@ export const styles = reactStyles({
   flexColumnBy2: {
     flex: '1 1 0',
     marginLeft: '1rem'
+  },
+  freeCreditsBalanceClickable: {
+    display: 'inline-block',
+    color: colors.accent,
+    padding: '0.25rem 0 0 1rem'
+  },
+  freeCreditsBalanceOverlay: {
+    height: 44,
+    width: 150,
+    color: colors.primary,
+    fontFamily: 'Montserrat',
+    fontSize: 12,
+    letterSpacing: '0',
+    lineHeight: '22px',
   },
   infoIcon: {
     height: '16px',
@@ -168,6 +186,9 @@ export interface WorkspaceEditProps {
   cdrVersionListResponse: CdrVersionListResponse;
   workspace: WorkspaceData;
   cancel: Function;
+  profileState: {
+    profile: Profile;
+  };
 }
 
 
@@ -190,7 +211,7 @@ export interface WorkspaceEditState {
   populationChecked: boolean;
 }
 
-export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
+export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -210,7 +231,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showStigmatizationDetails: false,
         billingAccounts: [],
         showCreateBillingAccountModal: false,
-        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false,
       };
     }
 
@@ -807,8 +828,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             intendedStudy,
             scientificApproach
           }
-        },
+        }
       } = this.state;
+      const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
+      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
+      // defined below in the OverlayPanel declaration
+      let freeTierBalancePanel: OverlayPanel;
       const errors = validate({
         name,
         billingAccountName,
@@ -891,21 +916,30 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
               Select account
             </div>
-            <Dropdown style={{width: '14rem'}}
-                      value={this.state.workspace.billingAccountName}
-                      options={this.buildBillingAccountOptions()}
-                      onChange={e => {
-                        if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
-                          this.setState({
-                            showCreateBillingAccountModal: true
-                          });
-                        } else {
-                          this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
-                        }
-                      }}
-            />
-          </WorkspaceEditSection>
-        }
+            <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
+              <div style={styles.freeCreditsBalanceOverlay}>
+                FREE CREDIT BALANCE {renderUSD(freeTierCreditsBalance)}
+              </div>
+            </OverlayPanel>
+            <FlexRow>
+              <Dropdown style={{width: '14rem'}}
+                        value={this.state.workspace.billingAccountName}
+                        options={this.buildBillingAccountOptions()}
+                        onChange={e => {
+                          if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                            this.setState({
+                              showCreateBillingAccountModal: true
+                            });
+                          } else {
+                            this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
+                          }
+                        }}
+              />
+              {freeTierCreditsBalance > 0.0 && <div style={styles.freeCreditsBalanceClickable}>
+                <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View FREE credits balance</Clickable>
+              </div>}
+            </FlexRow>
+          </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
               description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
@@ -955,7 +989,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header} indent
-          description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
+          description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
             <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[2]}
@@ -978,7 +1012,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
           {/*disseminate  research Section */}
         <WorkspaceEditSection header={researchPurposeQuestions[5].header}
-                              description={researchPurposeQuestions[5].description} style={{width: '50rem'}} index='3.'>
+                              description={researchPurposeQuestions[5].description} style={{width: '48rem'}} index='3.'>
           <FlexRow>
             <FlexColumn style={styles.flexColumnBy2}>
               {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
@@ -994,7 +1028,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           {/*Research outcome section*/}
           <WorkspaceEditSection header={researchPurposeQuestions[6].header} index='4.'
                                 description={researchPurposeQuestions[6].description}
-                                style={{width: '50rem'}}>
+                                style={{width: '48rem'}}>
             <FlexRow style={{marginLeft: '1rem'}}>
               <FlexColumn style={{flex: '1 1 0'}}>
                 {researchOutcomes.map(
@@ -1006,7 +1040,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           {/*Underrespresented population section*/}
         <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
                               description={researchPurposeQuestions[7].description}
-                              style={{width: '50rem'}}>
+                              style={{width: '48rem'}}>
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}

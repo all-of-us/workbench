@@ -2,16 +2,28 @@ package org.pmiops.workbench.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionService;
+import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionServiceImpl;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
+import org.pmiops.workbench.cohortreview.mappers.CohortAnnotationDefinitionMapper;
+import org.pmiops.workbench.cohortreview.mappers.CohortAnnotationDefinitionMapperImpl;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
@@ -19,11 +31,16 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
+import org.pmiops.workbench.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -36,22 +53,40 @@ public class CohortAnnotationDefinitionControllerTest {
   private static String NAME = "test";
   private static String EXISTING_COLUMN_NAME = "testing";
   private static String NEW_COLUMN_NAME = "new_column";
-  private DbWorkspace workspace;
   private DbCohort cohort;
   private DbCohortAnnotationDefinition dbCohortAnnotationDefinition;
-  @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
-  @Autowired CohortDao cohortDao;
-  @Autowired WorkspaceDao workspaceDao;
-  @Mock WorkspaceService workspaceService;
-  CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
+  @Autowired private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
+  @Autowired private CohortDao cohortDao;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private CohortAnnotationDefinitionMapper cohortAnnotationDefinitionMapper;
+  @Mock private CohortReviewDao cohortReviewDao;
+  @Mock private ParticipantCohortStatusDao participantCohortStatusDao;
+  @Mock private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
+  @Mock private WorkspaceService workspaceService;
+  private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
+
+  @TestConfiguration
+  @Import({CohortAnnotationDefinitionMapperImpl.class, CommonMappers.class})
+  static class Configuration {}
 
   @Before
   public void setUp() {
+    CohortReviewService cohortReviewService =
+        new CohortReviewServiceImpl(
+            cohortReviewDao,
+            cohortDao,
+            participantCohortStatusDao,
+            participantCohortAnnotationDao,
+            cohortAnnotationDefinitionDao,
+            workspaceService);
+    CohortAnnotationDefinitionService cohortAnnotationDefinitionService =
+        new CohortAnnotationDefinitionServiceImpl(
+            cohortAnnotationDefinitionDao, cohortAnnotationDefinitionMapper);
     cohortAnnotationDefinitionController =
         new CohortAnnotationDefinitionController(
-            cohortAnnotationDefinitionDao, cohortDao, workspaceService);
+            cohortAnnotationDefinitionService, cohortReviewService, workspaceService);
 
-    workspace = new DbWorkspace();
+    DbWorkspace workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace(NAMESPACE);
     workspace.setFirecloudName(NAME);
     workspaceDao.save(workspace);
@@ -66,16 +101,17 @@ public class CohortAnnotationDefinitionControllerTest {
             .annotationTypeEnum(AnnotationType.STRING)
             .columnName(EXISTING_COLUMN_NAME)
             .version(0);
+    SortedSet enumValues = new TreeSet();
     cohortAnnotationDefinitionDao.save(dbCohortAnnotationDefinition);
   }
 
   @Test
-  public void createCohortAnnotationDefinition_BadCohortId() throws Exception {
+  public void createCohortAnnotationDefinition_BadCohortId() {
     setupWorkspaceServiceMock();
 
     try {
       cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
-          NAMESPACE, NAME, 0L, new org.pmiops.workbench.model.CohortAnnotationDefinition());
+          NAMESPACE, NAME, 0L, new CohortAnnotationDefinition().columnName("column_name"));
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
       assertEquals("Not Found: No Cohort exists for cohortId: " + 0L, e.getMessage());
@@ -83,32 +119,11 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void createCohortAnnotationDefinition_BadWorkspace() throws Exception {
-    setupBadWorkspaceServiceMock();
-
-    try {
-      cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          new org.pmiops.workbench.model.CohortAnnotationDefinition());
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException e) {
-      assertEquals(
-          "Not Found: No workspace matching workspaceNamespace: "
-              + NAMESPACE
-              + ", workspaceId: "
-              + NAME,
-          e.getMessage());
-    }
-  }
-
-  @Test
-  public void createCohortAnnotationDefinition_NameConflict() throws Exception {
+  public void createCohortAnnotationDefinition_NameConflict() {
     setupWorkspaceServiceMock();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition request =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition()
+    CohortAnnotationDefinition request =
+        new CohortAnnotationDefinition()
             .cohortAnnotationDefinitionId(
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .cohortId(cohort.getCohortId())
@@ -130,23 +145,23 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void createCohortAnnotationDefinition() throws Exception {
+  public void createCohortAnnotationDefinition() {
     setupWorkspaceServiceMock();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition request =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition()
+    CohortAnnotationDefinition request =
+        new CohortAnnotationDefinition()
             .cohortId(cohort.getCohortId())
             .columnName(NEW_COLUMN_NAME)
             .annotationType(AnnotationType.STRING)
             .enumValues(new ArrayList<>())
             .etag(Etags.fromVersion(0));
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition response =
+    CohortAnnotationDefinition response =
         cohortAnnotationDefinitionController
             .createCohortAnnotationDefinition(NAMESPACE, NAME, cohort.getCohortId(), request)
             .getBody();
-    org.pmiops.workbench.model.CohortAnnotationDefinition expectedResponse =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition()
+    CohortAnnotationDefinition expectedResponse =
+        new CohortAnnotationDefinition()
             .cohortAnnotationDefinitionId(response.getCohortAnnotationDefinitionId())
             .cohortId(cohort.getCohortId())
             .columnName(NEW_COLUMN_NAME)
@@ -157,11 +172,38 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void updateCohortAnnotationDefinition_BadCohortId() throws Exception {
+  public void createCohortAnnotationDefinitionEnumValues() {
     setupWorkspaceServiceMock();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition request =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition().columnName("ignore");
+    List<String> enumValues = Arrays.asList("value");
+    CohortAnnotationDefinition request =
+        new CohortAnnotationDefinition()
+            .cohortId(cohort.getCohortId())
+            .columnName(NEW_COLUMN_NAME)
+            .annotationType(AnnotationType.ENUM)
+            .enumValues(enumValues)
+            .etag(Etags.fromVersion(0));
+
+    CohortAnnotationDefinition response =
+        cohortAnnotationDefinitionController
+            .createCohortAnnotationDefinition(NAMESPACE, NAME, cohort.getCohortId(), request)
+            .getBody();
+    CohortAnnotationDefinition expectedResponse =
+        new CohortAnnotationDefinition()
+            .cohortAnnotationDefinitionId(response.getCohortAnnotationDefinitionId())
+            .cohortId(cohort.getCohortId())
+            .columnName(NEW_COLUMN_NAME)
+            .annotationType(AnnotationType.ENUM)
+            .enumValues(enumValues)
+            .etag(Etags.fromVersion(0));
+    assertEquals(expectedResponse, response);
+  }
+
+  @Test
+  public void updateCohortAnnotationDefinition_BadCohortId() {
+    setupWorkspaceServiceMock();
+
+    CohortAnnotationDefinition request = new CohortAnnotationDefinition().columnName("ignore");
 
     try {
       cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
@@ -177,36 +219,10 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void updateCohortAnnotationDefinition_BadWorkspace() throws Exception {
-    setupBadWorkspaceServiceMock();
-
-    org.pmiops.workbench.model.CohortAnnotationDefinition request =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition().columnName("ignore");
-
-    try {
-      cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
-          request);
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException e) {
-      assertEquals(
-          "Not Found: No workspace matching workspaceNamespace: "
-              + NAMESPACE
-              + ", workspaceId: "
-              + NAME,
-          e.getMessage());
-    }
-  }
-
-  @Test
-  public void updateCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
+  public void updateCohortAnnotationDefinition_BadAnnotationDefinitionId() {
     setupWorkspaceServiceMock();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition request =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition().columnName("ignore");
+    CohortAnnotationDefinition request = new CohortAnnotationDefinition().columnName("ignore");
 
     try {
       cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
@@ -220,11 +236,11 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void updateCohortAnnotationDefinition_NameConflict() throws Exception {
+  public void updateCohortAnnotationDefinition_NameConflict() {
     setupWorkspaceServiceMock();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition request =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition()
+    CohortAnnotationDefinition request =
+        new CohortAnnotationDefinition()
             .columnName(EXISTING_COLUMN_NAME)
             .etag(Etags.fromVersion(0));
 
@@ -244,19 +260,19 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void updateCohortAnnotationDefinition() throws Exception {
+  public void updateCohortAnnotationDefinition() {
     setupWorkspaceServiceMock();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition request =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition()
+    CohortAnnotationDefinition request =
+        new CohortAnnotationDefinition()
             .cohortAnnotationDefinitionId(
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .columnName(NEW_COLUMN_NAME)
             .etag(Etags.fromVersion(0))
             .cohortId(cohort.getCohortId());
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition expectedResponse =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition()
+    CohortAnnotationDefinition expectedResponse =
+        new CohortAnnotationDefinition()
             .cohortAnnotationDefinitionId(
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .cohortId(cohort.getCohortId())
@@ -265,7 +281,7 @@ public class CohortAnnotationDefinitionControllerTest {
             .enumValues(new ArrayList<>())
             .etag(Etags.fromVersion(0));
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition responseDefinition =
+    CohortAnnotationDefinition responseDefinition =
         cohortAnnotationDefinitionController
             .updateCohortAnnotationDefinition(
                 NAMESPACE,
@@ -279,7 +295,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void deleteCohortAnnotationDefinition_BadCohortId() throws Exception {
+  public void deleteCohortAnnotationDefinition_BadCohortId() {
     setupWorkspaceServiceMock();
 
     try {
@@ -292,28 +308,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void deleteCohortAnnotationDefinition_BadWorkspace() throws Exception {
-    setupBadWorkspaceServiceMock();
-
-    try {
-      cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException e) {
-      assertEquals(
-          "Not Found: No workspace matching workspaceNamespace: "
-              + NAMESPACE
-              + ", workspaceId: "
-              + NAME,
-          e.getMessage());
-    }
-  }
-
-  @Test
-  public void deleteCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
+  public void deleteCohortAnnotationDefinition_BadAnnotationDefinitionId() {
     setupWorkspaceServiceMock();
 
     try {
@@ -328,7 +323,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void deleteCohortAnnotationDefinition() throws Exception {
+  public void deleteCohortAnnotationDefinition() {
     setupWorkspaceServiceMock();
 
     EmptyResponse response =
@@ -344,7 +339,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void getCohortAnnotationDefinition_NotFoundCohort() throws Exception {
+  public void getCohortAnnotationDefinition_NotFoundCohort() {
     setupWorkspaceServiceMock();
 
     try {
@@ -357,28 +352,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void getCohortAnnotationDefinition_NotFoundWorkspace() throws Exception {
-    setupBadWorkspaceServiceMock();
-
-    try {
-      cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException e) {
-      assertEquals(
-          "Not Found: No workspace matching workspaceNamespace: "
-              + NAMESPACE
-              + ", workspaceId: "
-              + NAME,
-          e.getMessage());
-    }
-  }
-
-  @Test
-  public void getCohortAnnotationDefinition_NotFoundAnnotationDefinition() throws Exception {
+  public void getCohortAnnotationDefinition_NotFoundAnnotationDefinition() {
     setupWorkspaceServiceMock();
 
     try {
@@ -393,10 +367,10 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void getCohortAnnotationDefinition() throws Exception {
+  public void getCohortAnnotationDefinition() {
     setupWorkspaceServiceMock();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition responseDefinition =
+    CohortAnnotationDefinition responseDefinition =
         cohortAnnotationDefinitionController
             .getCohortAnnotationDefinition(
                 NAMESPACE,
@@ -405,8 +379,8 @@ public class CohortAnnotationDefinitionControllerTest {
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .getBody();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition expectedResponse =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition()
+    CohortAnnotationDefinition expectedResponse =
+        new CohortAnnotationDefinition()
             .cohortAnnotationDefinitionId(
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .cohortId(cohort.getCohortId())
@@ -419,7 +393,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void getCohortAnnotationDefinitions_NotFoundCohort() throws Exception {
+  public void getCohortAnnotationDefinitions_NotFoundCohort() {
     setupWorkspaceServiceMock();
 
     try {
@@ -431,34 +405,16 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   @Test
-  public void getCohortAnnotationDefinitions_NotFoundWorkspace() throws Exception {
-    setupBadWorkspaceServiceMock();
-
-    try {
-      cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
-          NAMESPACE, NAME, cohort.getCohortId());
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException e) {
-      assertEquals(
-          "Not Found: No workspace matching workspaceNamespace: "
-              + NAMESPACE
-              + ", workspaceId: "
-              + NAME,
-          e.getMessage());
-    }
-  }
-
-  @Test
-  public void getCohortAnnotationDefinitions() throws Exception {
+  public void getCohortAnnotationDefinitions() {
     setupWorkspaceServiceMock();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse responseDefinition =
+    CohortAnnotationDefinitionListResponse responseDefinition =
         cohortAnnotationDefinitionController
             .getCohortAnnotationDefinitions(NAMESPACE, NAME, cohort.getCohortId())
             .getBody();
 
-    org.pmiops.workbench.model.CohortAnnotationDefinition expectedResponse =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition()
+    CohortAnnotationDefinition expectedResponse =
+        new CohortAnnotationDefinition()
             .cohortAnnotationDefinitionId(
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .cohortId(cohort.getCohortId())
@@ -472,27 +428,8 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   private void setupWorkspaceServiceMock() {
-    DbWorkspace mockWorkspace = new DbWorkspace();
-    mockWorkspace.setWorkspaceNamespace(NAMESPACE);
-    mockWorkspace.setFirecloudName(NAME);
-    mockWorkspace.setWorkspaceId(workspace.getWorkspaceId());
-
-    doReturn(WorkspaceAccessLevel.OWNER)
-        .when(workspaceService)
-        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-            NAMESPACE, NAME, WorkspaceAccessLevel.WRITER);
-    when(workspaceService.getRequired(NAMESPACE, NAME)).thenReturn(mockWorkspace);
-  }
-
-  private void setupBadWorkspaceServiceMock() {
-    DbWorkspace mockWorkspace = new DbWorkspace();
-    mockWorkspace.setWorkspaceNamespace(NAMESPACE);
-    mockWorkspace.setFirecloudName(NAME);
-    mockWorkspace.setWorkspaceId(0L);
-
     when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.OWNER);
-    when(workspaceService.getRequired(NAMESPACE, NAME)).thenReturn(mockWorkspace);
   }
 }

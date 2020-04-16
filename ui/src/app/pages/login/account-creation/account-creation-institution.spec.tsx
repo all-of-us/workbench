@@ -2,7 +2,7 @@ import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {serverConfigStore} from 'app/utils/navigation';
-import {ConfigApi, InstitutionApi, Profile} from 'generated/fetch';
+import {ConfigApi, Institution, InstitutionApi, Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {AccountCreationInstitution, Props} from './account-creation-institution';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
@@ -84,8 +84,13 @@ it('should load institutions list', async() => {
 
   expect(mockGetPublicInstitutionDetails).toHaveBeenCalled();
 
-  const options = getInstitutionDropdown(wrapper).props.options as Array<Object>;
+  const options = getInstitutionDropdown(wrapper).props.options as Array<{value, label}>;
   expect(options.length).toEqual(defaultInstitutions.length);
+  // Drop down list should be sorted in ASC order
+  expect(options[0].label).not.toEqual(defaultInstitutions[0].displayName);
+  expect(options[0].label).toEqual('Broad Institute');
+  console.log(options[0]);
+  console.log(defaultInstitutions[0]);
 });
 
 it('should show user-facing error message on data load error', async() => {

@@ -10,11 +10,6 @@ describe('Workspace creation tests:', () => {
     await signIn(page);
   });
 
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
-
   test('User can create a simple workspace with some default values', async () => {
     const workspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
     const workspacesPage = new WorkspacesPage(page);

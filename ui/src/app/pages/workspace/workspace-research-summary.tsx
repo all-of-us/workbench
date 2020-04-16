@@ -11,13 +11,13 @@ const styles = reactStyles({
   textArea: {
     height: '15rem',
     resize: 'none',
-    width: '50rem',
+    width: '48rem',
     borderRadius: '3px 3px 0 0',
     boderColor: colorWithWhiteness(colors.dark, 0.5)
   },
   textBoxCharRemaining: {
     justifyContent: 'space-between',
-    width: '50rem',
+    width: '48rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.95),
     fontSize: 12,
     colors: colors.primary,

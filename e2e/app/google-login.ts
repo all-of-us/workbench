@@ -6,7 +6,7 @@ import {config} from 'resources/workbench-config';
 
 
 export const selectors = {
-  loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In with Google")]',
+  loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
   emailInput: '//input[@type="email"]',
   NextButton: '//*[text()="Next" or @value="Next"]',
   passwordInput: '//input[@type="password"]',
@@ -155,9 +155,6 @@ export default class GoogleLoginPage extends BasePage {
   }
 
   static async logIn(page: Page): Promise<HomePage> {
-    await page.setUserAgent(config.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(120000);
-
     const loginPage = new GoogleLoginPage(page);
     await loginPage.login();
     const home = new HomePage(page);

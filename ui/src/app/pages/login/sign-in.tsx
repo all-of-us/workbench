@@ -18,6 +18,7 @@ import {
   withServerConfig,
   withWindowSize,
 } from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 
 import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
@@ -285,10 +286,12 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
 
     switch (currentStep) {
       case SignInStep.LANDING:
-        return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
+        return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() => {
+          AnalyticsTracker.Registration.CreateAccount();
           this.setState({
             currentStep: this.getNextStep(currentStep)
-          })}/>;
+          });
+        }}/>;
       case SignInStep.INVITATION_KEY:
         return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
           invitationKey: key,
@@ -296,11 +299,14 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
         })}/>;
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
-          pdfPath='/assets/documents/terms-of-service-v2.pdf'
-          onComplete={() => this.setState({
-            termsOfServiceVersion: 1,
-            currentStep: this.getNextStep(currentStep)
-          })}/>;
+          pdfPath='/assets/documents/terms-of-service.pdf'
+          onComplete={() => {
+            AnalyticsTracker.Registration.TOS();
+            this.setState({
+              termsOfServiceVersion: 1,
+              currentStep: this.getNextStep(currentStep)
+            });
+          }}/>;
       case SignInStep.INSTITUTIONAL_AFFILIATION:
         return <AccountCreationInstitution
           profile={this.state.profile}
@@ -363,6 +369,7 @@ export class SignInComponent extends ReactWrapperBase {
   }
 
   signIn(): void {
+    AnalyticsTracker.Registration.SignIn();
     this.signInService.signIn();
   }
 

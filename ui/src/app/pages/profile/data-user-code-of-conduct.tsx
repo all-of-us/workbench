@@ -14,6 +14,7 @@ import {
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
@@ -231,6 +232,9 @@ export const DataUserCodeOfConduct = withUserProfile()(
                       data-test-id={'submit-ducc-button'}
                       disabled={errors || submitting}
                       onClick={() => {
+                        // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
+                        // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
+                        AnalyticsTracker.Registration.AcceptDUCC();
                         this.submitDataUserCodeOfConduct(initialMonitoring);
                       }}
                   >
