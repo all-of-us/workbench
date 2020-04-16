@@ -6,6 +6,7 @@ import {Button} from 'app/components/buttons';
 import {baseStyles, ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -32,9 +33,32 @@ const styles = reactStyles({
   cardDescription: {
     color: colors.primary, fontSize: '14px', lineHeight: '20px'
   },
+  closeableWarning: {
+    margin: '0px 1rem 1rem 0px', display: 'flex', justifyContent: 'space-between'
+  },
   infoBoxButton: {
     color: colors.white, height: '49px', borderRadius: '5px', marginLeft: '1rem',
     maxWidth: '20rem'
+  },
+  twoFactorAuthModalCancelButton: {
+    marginRight: '1rem',
+  },
+  twoFactorAuthModalHeader: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: 600,
+    lineHeight: '24px',
+    marginBottom: 0
+  },
+  twoFactorAuthModalImage: {
+    border: `1px solid ${colors.light}`,
+    height: '6rem',
+    width: '100%',
+    marginTop: '1rem'
+  },
+  twoFactorAuthModalText: {
+    color: colors.primary,
+    lineHeight: '22px'
   },
   warningIcon: {
     color: colors.warning, height: '20px', width: '20px'
@@ -44,9 +68,6 @@ const styles = reactStyles({
     boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center',
     alignItems: 'center'
   },
-  closeableWarning: {
-    margin: '0px 1rem 1rem 0px', display: 'flex', justifyContent: 'space-between'
-  }
 });
 
 function redirectToGoogleSecurity(): void {
@@ -85,7 +106,6 @@ interface RegistrationTask {
   description: React.ReactNode;
   buttonText: string;
   completedText: string;
-  isRefreshable?: boolean;
   completionTimestamp: (profile: Profile) => number;
   onClick: Function;
   featureFlag?: boolean;
@@ -102,7 +122,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     description: 'Add an extra layer of security to your account by providing your phone number in addition to your password to verify your identity upon login.',
     buttonText: 'Get Started',
     completedText: 'Completed',
-    isRefreshable: true,
     completionTimestamp: (profile: Profile) => {
       return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
     },
@@ -174,6 +193,8 @@ interface State {
   trainingWarningOpen: boolean;
   bypassActionComplete: boolean;
   bypassInProgress: boolean;
+  twoFactorAuthModalOpen: boolean;
+  showAsRefresh: Map<string, boolean>;
 }
 
 export class RegistrationDashboard extends React.Component<RegistrationDashboardProps, State> {
@@ -185,6 +206,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       showRefreshButton: false,
       bypassActionComplete: false,
       bypassInProgress: false,
+      twoFactorAuthModalOpen: false,
+      showAsRefresh: new Map()
     };
   }
 
@@ -223,19 +246,10 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     return this.taskLoadingList[i];
   }
 
-  showRefreshFlow(isRefreshable: boolean): boolean {
-    return isRefreshable && this.state.showRefreshButton;
-  }
-
   onCardClick(card) {
-    if (this.showRefreshFlow(card.isRefreshable)) {
+    if (this.state.showAsRefresh.get(card.key)) {
       window.location.reload();
     } else {
-      if (card.isRefreshable) {
-        this.setState({
-          showRefreshButton: true
-        });
-      }
       card.onClick();
     }
   }
@@ -270,6 +284,12 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
 
+    // Override on click for the two factor auth access task. This is important because we want to affect the DOM
+    // for this specific task.
+    const registrationTasksToRender = getRegistrationTasks().map(registrationTask =>
+      registrationTask.key === 'twoFactorAuth' ? {...registrationTask,
+        onClick: () => this.setState({twoFactorAuthModalOpen: true})} :
+        registrationTask);
     // Assign relative positioning so the spinner's absolute positioning anchors
     // it within the registration box.
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
@@ -302,7 +322,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           You have not been granted beta access. Please contact support@researchallofus.org.
         </div>}
       <FlexRow style={{marginTop: '0.85rem'}}>
-        {getRegistrationTasks().map((card, i) => {
+        {registrationTasksToRender.map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
@@ -326,7 +346,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                     style={{width: 'max-content',
                       cursor: this.isEnabled(i) && !this.isLoading(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
-              {this.showRefreshFlow(card.isRefreshable) ?
+              {this.state.showAsRefresh.get(card.key) ?
                 <div>
                   Refresh
                   <ClrIcon shape='refresh' style={{marginLeft: '0.5rem'}}/>
@@ -358,6 +378,28 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         <Button style={{marginLeft: '0.5rem'}}
                 onClick={() => window.location.reload()}>Get Started</Button>
       </div>}
+      {this.state.twoFactorAuthModalOpen && <Modal width={500}>
+          <ModalTitle style={styles.twoFactorAuthModalHeader}>Redirecting to turn on Google 2-step Verification</ModalTitle>
+          <ModalBody>
+              <div style={styles.twoFactorAuthModalText}>Clicking ‘Proceed’ will direct you to a Google page where you
+                  need to login with your <span style={{fontWeight: 600}}>researchallofus.org</span> account and turn
+                  on 2-Step Verification. Once you complete this step, you will see the screen shown below. At that
+                  point, you can return to this page and click 'Refresh’.</div>
+              <img style={styles.twoFactorAuthModalImage} src='assets/images/2sv-image.png' />
+          </ModalBody>
+          <ModalFooter>
+              <Button onClick = {() => this.setState({twoFactorAuthModalOpen: false})}
+                      type='secondary' style={styles.twoFactorAuthModalCancelButton}>Cancel</Button>
+              <Button onClick = {() => {
+                redirectToGoogleSecurity();
+                this.setState((state) => ({
+                  showAsRefresh: state.showAsRefresh.set('twoFactorAuth', true),
+                  twoFactorAuthModalOpen: false
+                }));
+              }}
+                      type='primary'>Proceed</Button>
+          </ModalFooter>
+      </Modal>}
     </FlexColumn>;
   }
 }
