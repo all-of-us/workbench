@@ -30,6 +30,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
   commonStyles,
@@ -40,7 +41,6 @@ import {
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
-import {PubliclyDisplayed} from "../../../icons/publicly-displayed-icon";
 
 const styles = reactStyles({
   ...commonStyles,
@@ -588,11 +588,15 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               <FlexRow style={{color: colors.accent, alignItems: 'center'}}>
                 <div
                     style={{cursor: 'pointer', fontSize: 14}}
-                    onClick={() => this.setState((previousState) => ({showMostInterestedInKnowingBlurb: !previousState.showMostInterestedInKnowingBlurb}))}
+                    onClick={() => this.setState(
+                      (previousState) => ({showMostInterestedInKnowingBlurb: !previousState.showMostInterestedInKnowingBlurb})
+                    )}
                 >
                   <i>All of Us</i> participants are most interested in knowing:
                 </div>
-                <ClrIcon shape='angle' style={{transform: this.state.showMostInterestedInKnowingBlurb ? 'rotate(180deg)' : 'rotate(90deg)'}}/>
+                <ClrIcon shape='angle' style={{
+                  transform: this.state.showMostInterestedInKnowingBlurb ? 'rotate(180deg)' : 'rotate(90deg)'
+                }}/>
               </FlexRow>
               {this.state.showMostInterestedInKnowingBlurb &&
                 <ul style={styles.asideList}>

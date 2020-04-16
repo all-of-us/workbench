@@ -24,7 +24,8 @@ beforeEach(() => {
     onCancelClick: () => {},
     onSubmit: () => Promise.resolve(createEmptyProfile()),
     enableCaptcha: false,
-    enablePrevious: false
+    enablePrevious: false,
+    showStepCount: false
   };
 });
 

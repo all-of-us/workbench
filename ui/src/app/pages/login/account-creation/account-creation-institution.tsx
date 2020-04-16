@@ -9,6 +9,7 @@ import {ValidationIcon} from 'app/components/icons';
 import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
@@ -24,7 +25,6 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {PubliclyDisplayed} from "../../../icons/publicly-displayed-icon";
 
 const styles = reactStyles({
   ...commonStyles,

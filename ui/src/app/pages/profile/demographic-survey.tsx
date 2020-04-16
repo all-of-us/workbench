@@ -39,8 +39,8 @@ const styles = reactStyles({
 });
 
 const SelectAllText = () => {
-  return <div style={{color: colors.primary, fontSize: '12px',}}>Select all that apply.</div>;
-}
+  return <div style={{color: colors.primary, fontSize: '12px', }}>Select all that apply.</div>;
+};
 
 export interface Props {
   profile: Profile;
