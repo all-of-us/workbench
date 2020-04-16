@@ -270,7 +270,7 @@ or another sexual and/or gender minority?'>
           </Button>
         </TooltipTrigger>
       </FormSection>
-      {loading && <SpinnerOverlay />}
+      {loading && <SpinnerOverlay overrideStylesOverlay={{position: 'fixed'}}/>}
     </div>;
   }
 }
