@@ -53,6 +53,12 @@
       "namespace": "aou-rw-ec93e304",
       "id": "featuredworkspaceischemicheartdisease",
       "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Breast Cancer Phenotype",
+      "namespace": "aou-rw-f75efc9b",
+      "id": "breastcancerphenotype",
+      "category": "PHENOTYPE_LIBRARY"
     }
   ]
 }
