@@ -53,8 +53,7 @@ buildscript {
 
 project.ext['hibernate.version'] = project.ext.HIBERNATE_VERSION
 
-// TODO(jaycarlton): migrate to new plugin DSL (RW0-4772)
-// TODO(jaycarlton): move the plugin apply statements closer to configuration blocks for the plugins
+// TODO(jaycarlton): migrate to new plugin DSL (RW-4772)
 apply plugin: 'com.diffplug.gradle.spotless'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'eclipse'
@@ -67,7 +66,6 @@ apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'war'
 
-// TODO(jaycarlton): Move swagger-codegen tasks and artifacts to a new Gradle project (RW-4577)
 def swaggerTargetFolder = 'src/generated/java'
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
@@ -350,13 +348,11 @@ sourceSets {
   //
   // Custom SourceSets
   //
-  // Sometimes, in order to fight the clean code war, you have to get dirty in a battle.
   // Here we use a naming convention with __ word boundaries at start and end
   // to avoid confusion. For example, the plugin may define a __tools__Compile configuration
-  // or a compile__tools__Java task. This "shields up" approach makes it obvious where there's
+  // or a compile__tools__Java task. This approach makes it movre obvious where there's
   // a dynamically defined symbol name, so usages stick out and it's easier to identify the
-  // constituent parts. Why four underscores where two might do? Groovy is making me miss C++
-  // something fierce.
+  // constituent parts.
   // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
   // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
   //
