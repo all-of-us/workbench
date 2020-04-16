@@ -455,6 +455,7 @@ dependencies {
   annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
   compile "ch.qos.logback:logback-classic:1.2.3"
+  // Force these dependencies to safe versions, Zendesk client depends on this.
   compile "com.beust:jcommander:1.78"
   compile "com.cloudbees.thirdparty:zendesk-java-client:0.12.0"
   compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
@@ -488,8 +489,13 @@ dependencies {
   compile "com.opsgenie.integration:sdk:2+"
   compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
   compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
+
+  // Force these dependencies to safe versions, Zendesk client depends on this.
   compile "com.typesafe.netty:netty-reactive-streams:2.0.4"
+
+  // Force these dependencies to safe versions, Zendesk client depends on this.
   compile "io.netty:netty-codec-http:4.1.44.Final"
+
   compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
   compile "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
@@ -501,10 +507,17 @@ dependencies {
   compile "org.apache.commons:commons-collections4:4.4"
   compile "org.apache.commons:commons-lang3:3.6"
   compile "org.apache.commons:commons-text:1.8"
+
+  // Elasticsearch client
   compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
   compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
+
   compile "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
+
+  // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
+  // Kotlin dep, resulting in massive logspam.
   compile "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
+
   compile "org.json:json:20160810"
 
   compile("org.springframework.boot:spring-boot-starter-actuator:$project.ext.SPRING_BOOT_VERSION") {
@@ -674,7 +687,6 @@ task incrementalHotSwap(type: IncrementalHotSwapTask, dependsOn: 'compileJava') 
 task listProjectAPIs(type: GenerateAPIListingTask)
 
 
-// TODO(jaycarlton) move tools-related stuff to its own Gradle project
 
 //
 // COMMAND-LINE TOOLS
