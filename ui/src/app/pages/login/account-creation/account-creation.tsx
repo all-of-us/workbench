@@ -40,6 +40,7 @@ import {
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
+import {PubliclyDisplayed} from "../../../icons/publicly-displayed-icon";
 
 const styles = reactStyles({
   ...commonStyles,
@@ -480,7 +481,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               }
             </div>
           </Section>
-          <Section header={<div>About you <i style={styles.publiclyDisplayedText}>Publicly displayed</i></div>}>
+          <Section header={
+            <FlexRow style={{alignItems: 'center'}}>
+              <div>About you</div>
+              <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+            </FlexRow>
+          }>
             <FlexColumn>
               <FlexRow style={{paddingBottom: '1rem'}}>
                 <TextInputWithLabel value={givenName}
@@ -568,7 +574,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </FlexColumn>
           </Section>
           <Section sectionHeaderStyles={{borderBottom: null}} header={<React.Fragment>
-            <div>Your research background, experience, and research interests</div>
+            <FlexRow style={{alignItems: 'center'}}>
+              <div>Your research background, experience, and research interests</div>
+              <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+            </FlexRow>
             <div style={styles.asideText}>This information will be posted publicly on the <i>All of Us</i> Research Hub website
               to inform program participants. <span  style={{marginLeft: 2,
                 fontSize: 12}}>(2000 character limit)</span>
@@ -675,7 +684,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </FlexColumn>}
           </React.Fragment>}
           <Section header={<React.Fragment>
-            <div>Your professional profile or bio page below, if available</div>
+            <FlexRow style={{alignItems: 'center'}}>
+              <div>Your professional profile or bio page below, if available</div>
+              <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+            </FlexRow>
             <div style={styles.asideText}>(Optional)</div>
             <div style={styles.asideText}>
               You could provide a link to your faculty bio page from your institution's website,
