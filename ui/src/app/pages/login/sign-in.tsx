@@ -25,6 +25,7 @@ import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 import {FlexColumn} from 'app/components/flex';
 import {Footer, FooterTypeEnum} from 'app/components/footer';
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
+import {environment} from 'environments/environment';
 import * as React from 'react';
 
 // A template function which returns the appropriate style config based on window size and
@@ -341,7 +342,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
                   src={SIGNED_OUT_HEADER_IMAGE}/></div>
         {this.renderSignInStep(this.state.currentStep)}
       </FlexColumn>
-      <Footer type={FooterTypeEnum.Registration} />
+      {environment.enableFooter && <Footer type={FooterTypeEnum.Registration} />}
     </FlexColumn>;
   }
 }
