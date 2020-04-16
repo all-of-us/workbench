@@ -1,5 +1,6 @@
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
 
@@ -34,6 +35,10 @@ const css = `
    }
  `;
 
+const toolTipContent = <span>The <AouTitle/> Research Program seeks to be transparent with
+  participants about who can access their data and for what purpose. Your answer to this question
+  will be displayed in the Research Projects Directory on our public website.</span>;
+
 export const PubliclyDisplayed = (props) => {
   return <div>
     <style>
@@ -42,10 +47,10 @@ export const PubliclyDisplayed = (props) => {
     <div className='pointer' style={{...props.style}}>
       <label style={{marginLeft: '0.3rem', color: colors.accent}}>
         Publicly displayed
-        <TooltipTrigger content='not sure about content'>
+        <TooltipTrigger content={toolTipContent} side='right'>
           <InfoIcon style={{marginLeft: '0.5rem', width: '0.7rem'}}/>
         </TooltipTrigger>
       </label>
     </div>
-  </div>;
+   </div>;
 };
