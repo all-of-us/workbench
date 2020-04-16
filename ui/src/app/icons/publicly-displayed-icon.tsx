@@ -7,7 +7,7 @@ const css = `
   .pointer {
      position: relative;
      height: 29px;
-     width: 6.5rem;
+     width: 7rem;
      background-color: ` + colorWithWhiteness(colors.accent, 0.85) + `;
      line-height:1.2rem;
    }
