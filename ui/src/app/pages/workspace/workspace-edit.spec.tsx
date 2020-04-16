@@ -147,6 +147,9 @@ describe('WorkspaceEdit', () => {
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
     expect(workspacesApi.workspaces[0].researchPurpose.populationDetails.length).toBe(0);
   });
 
@@ -206,6 +209,9 @@ describe('WorkspaceEdit', () => {
     const numBefore = workspacesApi.workspaces.length;
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
     expect(navigate).toHaveBeenCalledTimes(1);
   });
@@ -221,6 +227,8 @@ describe('WorkspaceEdit', () => {
 
     jest.useFakeTimers();
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(navigate).not.toHaveBeenCalled();
 
@@ -249,6 +257,8 @@ describe('WorkspaceEdit', () => {
 
     jest.useFakeTimers();
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     let aclDelayBtn;
     for (let i = 0; i < 10; i++) {
       jest.advanceTimersByTime(20e3);
