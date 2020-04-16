@@ -248,8 +248,12 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
       dataUserCodeOfConductCompleted, quickTourResourceOffset
     } = this.state;
-    const limit = this.quickTourResourcesDiv ? Math.floor(this.quickTourResourcesDiv.offsetWidth * 0.97 / 276) : 5;
+    // This calculates the limit for quickTourResources items that can be seen without scrolling. Takes the width of the parent element
+    // and divides by the width of an individual resource item (276px). The default limit is 4 since the min width of the parent element
+    // should be ~1128px
+    const limit = this.quickTourResourcesDiv ? Math.floor(this.quickTourResourcesDiv.offsetWidth / 276) : 4;
 
+    // The videoId parameters below are the YouTube ids that get inserted into the src url of the iframe
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -259,13 +263,13 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         onClick: () => this.openVideo('nqnOvOpnRLE')
       }, {
         src: '/assets/images/cohort-builder.png',
-        onClick: () => this.openVideo('fFN__3yskfk')
+        onClick: () => this.openVideo('wG3d9cg9R84')
       }, {
         src: '/assets/images/dataset-builder.png',
-        onClick: () => this.openVideo('rUM86TNyAi4')
+        onClick: () => this.openVideo('FRmxmkdCHr0')
       }, {
         src: '/assets/images/notebook-code-snippets.png',
-        onClick: () => this.openVideo('6T9t9AzyAK8')
+        onClick: () => this.openVideo('hSn4i1RW0Qk')
       }, {
         src: '/assets/images/user-support.png',
         onClick: () => this.openVideo('dJ7zJAzq6Ck')
