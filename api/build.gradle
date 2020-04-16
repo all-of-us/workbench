@@ -3,7 +3,8 @@ import io.swagger.codegen.DefaultGenerator
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
-// Runs before all tasks. Mainly sets up properties and dependencies.
+// Runs before all tasks. Sets up properties and dependencies for the build
+// process itself.
 buildscript {
   // Project-wide constants.
   ext {
@@ -32,7 +33,9 @@ buildscript {
     }
   }
 
-  // Top-level Gradle project dependencies
+  // Buildscript-specific dependencies (uses buildscript-scoped repositories). This
+  // closure ensures allows the buildscript dependencies (e.g. for plgins) to be managed
+  // independently from the main project's application code's dependencies
   dependencies {
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
@@ -73,7 +76,7 @@ def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
 def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
 
 // TODO(jaycarlton): rename this to generateWorkbenchApiServer or some such
-task generateApi {
+task generateWorkbenchApi {
   group 'swagger-codegen'
   description 'Generates the Spring controllers and API model classes in Java.'
   dependsOn 'validateSwagger'
@@ -422,7 +425,7 @@ configurations {
 // https://docs.gradle.org/current/userguide/java_plugin.html
 classes.dependsOn 'generatedClasses'
 
-def swaggerCodegenTasks = ['generateApi', 'generateFireCloudClient', 'generateNotebooksClient',
+def swaggerCodegenTasks = ['generateWorkbenchApi', 'generateFireCloudClient', 'generateNotebooksClient',
                            'generateJiraClient', 'generateMandrillClient', 'generateMoodleClient',
                            'generateRdrClient', 'generateCaptchaClient']
 
@@ -449,100 +452,81 @@ repositories {
 // TODO(jaycarlton): see if there's a way to subdivide this block for readability
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 dependencies {
-  // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
-  providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+  annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
-  compile 'com.google.api-client:google-api-client-appengine:1.23.0'
-  compile 'com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0'
-  compile 'com.google.http-client:google-http-client-apache:1.29.2'
-  compile 'org.apache.commons:commons-collections4:4.4'
-  compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0'
-  compile 'mysql:mysql-connector-java:8.0.16'
-  compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
-
-  compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
+  compile "ch.qos.logback:logback-classic:1.2.3"
+  compile "com.beust:jcommander:1.78"
+  compile "com.cloudbees.thirdparty:zendesk-java-client:0.12.0"
+  compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
+  compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
+  compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
+  compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
+  compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
+  compile "com.github.fge:json-patch:1.9"
+  compile "com.github.rholder:guava-retrying:2.0.0"
+  compile "com.google.api-client:google-api-client-appengine:1.23.0"
+  compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3"
+  compile "com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0"
+  compile "com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0"
+  compile "com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0"
   compile "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
+  compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
+  compile "com.google.auth:google-auth-library-appengine:0.19.0"
+  compile "com.google.auth:google-auth-library-oauth2-http:0.19.0"
+  compile "com.google.cloud.sql:mysql-socket-factory:1.0.10"
+  compile "com.google.cloud:google-cloud-bigquery:1.51.0"
+  compile "com.google.cloud:google-cloud-iamcredentials:0.43.0-alpha"
+  compile "com.google.cloud:google-cloud-logging:1.90.0"
+  compile "com.google.cloud:google-cloud-monitoring:1.99.2"
+  compile "com.google.cloud:google-cloud-storage:1.51.0"
+  compile "com.google.cloud:google-cloud-tasks:1.27.0"
+  compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
+  compile "com.google.guava:guava:26.0-jre"
+  compile "com.google.http-client:google-http-client-apache:1.29.2"
+  compile "com.google.oauth-client:google-oauth-client-jetty:1.30.3"
+  compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
+  compile "com.opsgenie.integration:sdk:2+"
+  compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
+  compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
+  compile "com.typesafe.netty:netty-reactive-streams:2.0.4"
+  compile "io.netty:netty-codec-http:4.1.44.Final"
+  compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
+  compile "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
+  compile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
+  compile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+  compile "io.swagger:swagger-annotations:1.5.16"
+  compile "javax.inject:javax.inject:1"
+  compile "joda-time:joda-time:$project.ext.JODA_VERSION"
+  compile "mysql:mysql-connector-java:8.0.16"
+  compile "org.apache.commons:commons-collections4:4.4"
+  compile "org.apache.commons:commons-lang3:3.6"
+  compile "org.apache.commons:commons-text:1.8"
+  compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
+  compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
+  compile "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
+  compile "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
+  compile "org.json:json:20160810"
 
-  compile("org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION") {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
-  compile("org.springframework.boot:spring-boot-starter-data-jpa:$project.ext.SPRING_BOOT_VERSION") {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
   compile("org.springframework.boot:spring-boot-starter-actuator:$project.ext.SPRING_BOOT_VERSION") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
 
-  compile 'ch.qos.logback:logback-classic:1.2.3'
+  compile("org.springframework.boot:spring-boot-starter-data-jpa:$project.ext.SPRING_BOOT_VERSION") {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
 
-  compile 'org.springframework.security:spring-security-web:4.2.13.RELEASE'
-  compile "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
+  compile("org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION") {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
 
-  // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
-  // Kotlin dep, resulting in massive logspam.
-  compile "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
-
-  compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
-  compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
-  compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
-  compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
-  compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
-
-  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3'
-  compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
-  compile 'com.google.cloud:google-cloud-bigquery:1.51.0'
-  compile 'com.google.cloud:google-cloud-iamcredentials:0.43.0-alpha'
-  compile 'com.google.cloud:google-cloud-logging:1.90.0'
-  compile 'com.google.cloud:google-cloud-monitoring:1.99.2'
-  compile 'com.google.cloud:google-cloud-storage:1.51.0'
-  compile 'com.google.cloud:google-cloud-tasks:1.27.0'
-  compile 'com.google.oauth-client:google-oauth-client-jetty:1.30.3'
-  compile 'com.google.auth:google-auth-library-oauth2-http:0.19.0'
-  compile 'com.google.auth:google-auth-library-appengine:0.19.0'
-  compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
-
-  compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
-  compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
-
-  compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-  compile "joda-time:joda-time:$project.ext.JODA_VERSION"
-
-  compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
-  compile "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
-  compile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
-  compile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
-
-  compile "com.opsgenie.integration:sdk:2+"
-
-  // Force these dependencies to safe versions, Zendesk client depends on this.
-  compile 'io.netty:netty-codec-http:4.1.44.Final'
-  compile 'com.typesafe.netty:netty-reactive-streams:2.0.4'
-  compile 'com.beust:jcommander:1.78'
-  compile 'com.cloudbees.thirdparty:zendesk-java-client:0.12.0'
-
-  compile 'javax.inject:javax.inject:1'
-  compile 'io.swagger:swagger-annotations:1.5.16'
-  compile 'org.apache.commons:commons-lang3:3.6'
-  compile 'org.apache.commons:commons-text:1.8'
-  compile 'com.google.guava:guava:26.0-jre'
-  compile 'com.github.rholder:guava-retrying:2.0.0'
-  compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
+  compile "org.springframework.retry:spring-retry:1.1.5.RELEASE"
+  compile "org.springframework.security:spring-security-web:4.2.13.RELEASE"
 
   implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
-  annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
   testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
-
-  // Elasticsearch client
-  compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
-  compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
-
-  // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
-  compile 'org.json:json:20160810'
-
-  compile 'com.github.fge:json-patch:1.9'
 
   // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
   // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
@@ -562,6 +546,9 @@ dependencies {
   generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
+
+  // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
+  providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
   __tools__Compile 'commons-cli:commons-cli:1.4'
   __tools__Compile 'com.opencsv:opencsv:4.6'
@@ -671,8 +658,8 @@ task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_app
 }
 
 // AppEngine plugin tasks
-appengineRun.dependsOn startCronEmulator
-appengineStart.dependsOn startCronEmulator
+project.tasks.appengineRun.dependsOn project.tasks.startCronEmulator
+project.tasks.appengineStart.dependsOn project.tasks.startCronEmulator
 
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
