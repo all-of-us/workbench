@@ -6,7 +6,7 @@ anchors:
       - image: allofustest/workbench:buildimage-0.0.16
     working_directory: ~/workbench
   ensure_branch_has_api_changes: &ensure_branch_has_api_changes
-    name: Ensure Branch is on Origin
+    name: Ensure Branch has Changes to API Code
     #Circle is bad about setting up your remotes for you, you must use origin/
     command: |
       if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
