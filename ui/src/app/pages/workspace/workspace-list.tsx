@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 
 import {
   Profile
@@ -15,7 +14,6 @@ import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   reactStyles,
-  ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';

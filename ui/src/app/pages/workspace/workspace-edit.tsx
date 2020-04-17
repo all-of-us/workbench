@@ -1185,7 +1185,15 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
   });
 
-export const BuildWorkspace = props =>  <WorkspaceEdit routeConfigData = {{mode: WorkspaceEditMode.Create}}  {...props}/>
+export const BuildWorkspace = ({history, ...props}) =>  {
+  const {goBack} = history;
+  return <WorkspaceEdit
+    cancel = {goBack}
+    routeConfigData = {{mode: WorkspaceEditMode.Create}}
+    history = {history}
+    {...props}
+  />;
+};
 
 @Component({
   template: '<div #root></div>'

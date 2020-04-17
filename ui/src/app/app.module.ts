@@ -19,6 +19,7 @@ import {SignInService} from './services/sign-in.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
+import {AppRouterComponent} from './components/app-router';
 import {BugReportComponent} from './components/bug-report';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
@@ -50,7 +51,6 @@ import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
-import {AppRouter} from './components/app-router'
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -170,7 +170,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
     HomepageComponent,
-    AppRouter
+    AppRouterComponent
   ],
   providers: [
     {
