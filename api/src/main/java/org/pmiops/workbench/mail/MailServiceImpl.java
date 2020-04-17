@@ -193,6 +193,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.REGISTRATION_IMG, getRegistrationImage())
         .put(EmailSubstitutionField.BULLET_1, cloudStorageService.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageService.getImageUrl("bullet_2.png"))
+        .put(EmailSubstitutionField.BULLET_3, cloudStorageService.getImageUrl("bullet_3.png"))
         .build();
   }
 
