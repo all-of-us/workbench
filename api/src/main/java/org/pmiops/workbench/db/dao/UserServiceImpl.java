@@ -418,6 +418,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return dbUser;
   }
 
+  /**
+   * Save updated dbUser object if requireInstitutionalVerification is enabled: Get the existing
+   * dbExistingVerifiedInstitutionalAffiliation and update it with Institution role and other text
+   *
+   * @param dbUser
+   * @param dbVerifiedAffiliation
+   * @return
+   */
   @Override
   public DbUser updateUser(
       DbUser dbUser, DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
