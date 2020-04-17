@@ -216,6 +216,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       return '';
     }
 
+    // Institution email Address is either being verified or researcher has just enter it and not change focus
+    if (!checkEmailResponse && !checkEmailError) {
+      return '';
+    }
     // No error if the institution check was successful.
     if (checkEmailResponse && checkEmailResponse.isValidMember) {
       return '';
@@ -396,7 +400,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                                 onBlur={() => this.onEmailBlur()}
                                 onChange={email => this.updateContactEmail(email)}>
               <div style={{...inputStyles.iconArea}}>
-                <ValidationIcon validSuccess={this.isEmailValid()}/>
+                <ValidationIcon data-test-id='email-validation-icon' validSuccess={this.isEmailValid()}/>
               </div>
             </TextInputWithLabel>
             {this.displayEmailErrorMessageIfNeeded()}
