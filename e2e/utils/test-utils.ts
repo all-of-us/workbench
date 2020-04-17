@@ -2,11 +2,11 @@
  * @param fields Array
  */
 import {Page} from 'puppeteer';
-import Checkbox from '../app/aou-elements/checkbox';
-import RadioButton from '../app/aou-elements/radiobutton';
-import TextOptions from '../app/aou-elements/text-options';
-import Textarea from '../app/aou-elements/textarea';
-import Textbox from '../app/aou-elements/textbox';
+import Checkbox from 'app/aou-elements/checkbox';
+import RadioButton from 'app/aou-elements/radiobutton';
+import TextOptions from 'app/aou-elements/text-options';
+import Textarea from 'app/aou-elements/textarea';
+import Textbox from 'app/aou-elements/textbox';
 
 /**
  * Perform array of UI actions defined.
