@@ -194,7 +194,7 @@ interface State {
   bypassActionComplete: boolean;
   bypassInProgress: boolean;
   twoFactorAuthModalOpen: boolean;
-  showAsRefresh: Map<string, boolean>;
+  accessTaskKeyToButtonAsRefresh: Map<string, boolean>;
 }
 
 export class RegistrationDashboard extends React.Component<RegistrationDashboardProps, State> {
@@ -207,7 +207,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       bypassActionComplete: false,
       bypassInProgress: false,
       twoFactorAuthModalOpen: false,
-      showAsRefresh: new Map()
+      accessTaskKeyToButtonAsRefresh: new Map()
     };
   }
 
@@ -247,7 +247,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   }
 
   onCardClick(card) {
-    if (this.state.showAsRefresh.get(card.key)) {
+    if (this.state.accessTaskKeyToButtonAsRefresh.get(card.key)) {
       window.location.reload();
     } else {
       card.onClick();
@@ -346,7 +346,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                     style={{width: 'max-content',
                       cursor: this.isEnabled(i) && !this.isLoading(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
-              {this.state.showAsRefresh.get(card.key) ?
+              {this.state.accessTaskKeyToButtonAsRefresh.get(card.key) ?
                 <div>
                   Refresh
                   <ClrIcon shape='refresh' style={{marginLeft: '0.5rem'}}/>
@@ -393,7 +393,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
               <Button onClick = {() => {
                 redirectToGoogleSecurity();
                 this.setState((state) => ({
-                  showAsRefresh: state.showAsRefresh.set('twoFactorAuth', true),
+                  accessTaskKeyToButtonAsRefresh: state.accessTaskKeyToButtonAsRefresh.set('twoFactorAuth', true),
                   twoFactorAuthModalOpen: false
                 }));
               }}
