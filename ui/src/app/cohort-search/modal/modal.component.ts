@@ -1,11 +1,10 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
 import {CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
-
 
 @Component({
   selector: 'app-list-modal',
@@ -16,7 +15,7 @@ import {Subscription} from 'rxjs/Subscription';
   ]
 })
 export class ModalComponent implements OnInit, OnDestroy {
-
+  @Input() dataFilters: Array<string>;
   readonly domainType = DomainType;
   readonly criteriaType = CriteriaType;
   subscription: Subscription;

@@ -183,6 +183,7 @@ const validatorFuncs = {
 };
 
 interface Props {
+  dataFilters: Array<string>;
   disabled: Function;
   wizard: any;
   workspace: WorkspaceData;
@@ -388,6 +389,7 @@ export const ListModifierPage = withCurrentWorkspace()(
 
     calculate = () => {
       const {
+        dataFilters,
         wizard: {domain, item: {modifiers, searchParameters}, role},
         workspace: {cdrVersionId}
       } = this.props;
@@ -404,7 +406,7 @@ export const ListModifierPage = withCurrentWorkspace()(
               modifiers: modifiers
             }]
           }],
-          dataFilters: []
+          dataFilters
         };
         cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
           this.setState({count: response, loading: false});
@@ -559,10 +561,11 @@ export const ListModifierPage = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class ModifierPageComponent extends ReactWrapperBase {
+  @Input('dataFilters') dataFilters: Props['dataFilters'];
   @Input('disabled') disabled: Props['disabled'];
   @Input('wizard') wizard: Props['wizard'];
 
   constructor() {
-    super(ListModifierPage, ['disabled', 'wizard']);
+    super(ListModifierPage, ['dataFilters', 'disabled', 'wizard']);
   }
 }

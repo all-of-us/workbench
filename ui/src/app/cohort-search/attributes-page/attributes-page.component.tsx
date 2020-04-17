@@ -149,6 +149,7 @@ interface AttributeForm {
 
 interface Props {
   close: Function;
+  dataFilters: Array<string>;
   node: any;
   select: Function;
   workspace: WorkspaceData;
@@ -432,7 +433,7 @@ export const AttributesPage = withCurrentWorkspace() (
           }],
           temporal: false
         }],
-        dataFilters: []
+        dataFilters: this.props.dataFilters
       };
       cohortBuilderApi().countParticipants(cdrVersionId, request).then(response => {
         this.setState({count: response, calculating: false});
@@ -587,10 +588,11 @@ export const AttributesPage = withCurrentWorkspace() (
 })
 export class AttributesPageComponent extends ReactWrapperBase {
   @Input('close') close: Props['close'];
+  @Input('dataFilters') dataFilters: Props['dataFilters'];
   @Input('node') node: Props['node'];
   @Input('select') select: Props['select'];
 
   constructor() {
-    super(AttributesPage, ['close', 'node', 'select']);
+    super(AttributesPage, ['close', 'dataFilters', 'node', 'select']);
   }
 }

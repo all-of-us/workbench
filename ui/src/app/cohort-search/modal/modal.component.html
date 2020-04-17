@@ -59,6 +59,7 @@
           <div class="content left" *ngIf="open">
             <ng-container [ngSwitch]="wizard.domain">
               <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"
+                [dataFilters]="dataFilters"
                 [select]="addSelection"
                 [selectedIds]="selectedIds"
                 [selections]="selections"
@@ -98,6 +99,7 @@
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
                     <crit-list-modifier-page *ngIf="showModifiers"
+                      [dataFilters]="dataFilters"
                       [disabled]="modifiersFlag"
                       [wizard]="wizard"></crit-list-modifier-page>
                   </div>
@@ -105,6 +107,7 @@
                   <div class="panel-left" [class.show]="mode === 'attributes'">
                     <crit-attributes-page *ngIf="attributesNode"
                       [close]="back"
+                      [dataFilters]="dataFilters"
                       [node]="attributesNode"
                       [select]="addSelection"></crit-attributes-page>
                   </div>

@@ -35,6 +35,7 @@ function sortByCountThenName(critA, critB) {
   ]
 })
 export class DemographicsComponent implements OnChanges, OnInit, OnDestroy {
+  @Input() dataFilters: Array<string>;
   @Input() select: Function;
   @Input() selectedIds: Array<string>;
   @Input() selections: Array<any>;
@@ -359,7 +360,7 @@ export class DemographicsComponent implements OnChanges, OnInit, OnDestroy {
           }],
           temporal: false
         }],
-        dataFilters: []
+        dataFilters: this.dataFilters
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
         if (init) {
