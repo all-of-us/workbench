@@ -238,7 +238,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                         this.submitDataUserCodeOfConduct(initialMonitoring);
                       }}
                   >
-                    Accept
+                    Proceed
                   </Button>
                 </TooltipTrigger>
               </FlexRow>
