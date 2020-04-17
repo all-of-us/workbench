@@ -448,13 +448,11 @@ repositories {
   jcenter()
 }
 
-// TODO(jaycarlton): see if there's a way to subdivide this block for readability
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 dependencies {
   annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
   compile "ch.qos.logback:logback-classic:1.2.3"
-  // Force these dependencies to safe versions, Zendesk client depends on this.
   compile "com.beust:jcommander:1.78"
   compile "com.cloudbees.thirdparty:zendesk-java-client:0.12.0"
   compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
@@ -488,13 +486,8 @@ dependencies {
   compile "com.opsgenie.integration:sdk:2+"
   compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
   compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
-
-  // Force these dependencies to safe versions, Zendesk client depends on this.
   compile "com.typesafe.netty:netty-reactive-streams:2.0.4"
-
-  // Force these dependencies to safe versions, Zendesk client depends on this.
   compile "io.netty:netty-codec-http:4.1.44.Final"
-
   compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
   compile "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
