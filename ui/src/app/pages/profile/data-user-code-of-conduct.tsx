@@ -145,7 +145,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                     data-test-id={'ducc-next-button'}
                     onClick={() => this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
                 >
-                  Accept
+                  Proceed
                 </Button>
               </FlexRow>
             </React.Fragment>
@@ -238,7 +238,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                         this.submitDataUserCodeOfConduct(initialMonitoring);
                       }}
                   >
-                    Proceed
+                    Accept
                   </Button>
                 </TooltipTrigger>
               </FlexRow>
