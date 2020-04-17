@@ -574,16 +574,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </FlexColumn>
           </Section>
           <Section sectionHeaderStyles={{borderBottom: null}} header={<React.Fragment>
-            <FlexRow style={{alignItems: 'center'}}>
-              <div>Your research background, experience, and research interests</div>
-              <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+            <FlexRow style={{alignItems: 'flex-start'}}>
+              <div style={{width: '70%'}}>Your research background, experience, and research interests</div>
+              <PubliclyDisplayed style={{marginLeft: '1.2rem'}}/>
             </FlexRow>
             <div style={styles.asideText}>This information will be posted publicly on the <i>All of Us</i> Research Hub website
               to inform program participants. <span  style={{marginLeft: 2,
-                fontSize: 12}}>(2000 character limit)</span>
-              <i style={{...styles.publiclyDisplayedText, marginLeft: 2}}>
-                Publicly displayed
-              </i></div>
+                fontSize: 12}}>(2000 character limit)</span></div>
             <div>
               <FlexRow style={{color: colors.accent, alignItems: 'center'}}>
                 <div
@@ -599,7 +596,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 }}/>
               </FlexRow>
               {this.state.showMostInterestedInKnowingBlurb &&
-                <ul style={styles.asideList}>
+                <ul style={{...styles.asideList, marginLeft: '0.5rem'}}>
                   {researchPurposeList.map((value, index) => <li key={index} style={styles.asideText}>{value}</li>)}
                 </ul>
               }
@@ -688,9 +685,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </FlexColumn>}
           </React.Fragment>}
           <Section header={<React.Fragment>
-            <FlexRow style={{alignItems: 'center'}}>
-              <div>Your professional profile or bio page below, if available</div>
-              <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+            <FlexRow style={{alignItems: 'flex-start'}}>
+              <div style={{width: '60%'}}>Your professional profile or bio page below, if available</div>
+              <PubliclyDisplayed style={{marginLeft: '0.5rem'}}/>
             </FlexRow>
             <div style={styles.asideText}>(Optional)</div>
             <div style={styles.asideText}>
@@ -703,8 +700,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               <TextInputWithLabel dataTestId='professionalUrl' inputName='professionalUrl'
                                   placeholder='Professional Url' value={professionalUrl}
                                   labelText={<div>
-                                    Paste Professional URL here <i style={{...styles.publiclyDisplayedText,
-                                      marginLeft: 2}}>Optional and publicly displayed</i>
+                                    Paste Professional URL here
                                   </div>} containerStyle={{width: '26rem'}}
                                   onChange={value => this.updateProfileObject('professionalUrl', value)}/>
           </Section>

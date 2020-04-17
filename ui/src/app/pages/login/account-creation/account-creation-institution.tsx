@@ -32,6 +32,14 @@ const styles = reactStyles({
     width: '50%',
     minWidth: '600px'
   },
+  institutionalDuaTextBox: {
+    ...commonStyles.text,
+    fontSize: 14,
+    marginTop: '0.7rem',
+    padding: '0.5rem',
+    backgroundColor: colorWithWhiteness(colors.accent, .85),
+    borderRadius: '5px',
+  }
 });
 
 /**
@@ -339,14 +347,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           <div style={{...styles.text, fontSize: 16, marginTop: '1rem'}}>
             Please complete Step 1 of 3
           </div>
-          <div style={{
-            ...styles.text,
-            fontSize: 14,
-            marginTop: '0.7rem',
-            padding: '0.5rem',
-            backgroundColor: colorWithWhiteness(colors.accent, .85),
-            borderRadius: '5px',
-          }}>
+          <div style={styles.institutionalDuaTextBox}>
             For access to the <i>All of Us</i> Research Program data, your institution needs to have signed a Data Use Agreement
             with the program. The institutions listed below have an Institutional Data Use Agreement with the program that
             enables us to provide their researchers with access to the Workbench.
@@ -408,7 +409,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             {this.displayEmailErrorMessageIfNeeded()}
             <div style={{marginTop: '.5rem'}}>
               <FlexRow style={{alignItems: 'center', margin: '.5rem 0'}}>
-                <label style={{...styles.boldText}}>
+                <label style={styles.boldText}>
                   Which of the following best describes your role?
                 </label>
                 <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
