@@ -1,15 +1,15 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {PageUrl} from './page-identifiers';
-import Link from './aou-elements/link';
-import {findIcon} from './aou-elements/xpath-finder';
-import AuthenticatedPage from './authenticated-page';
+import {PageUrl} from 'app/page-identifiers';
+import Link from 'app/aou-elements/link';
+import {findIcon} from 'app/aou-elements/xpath-finder';
+import AuthenticatedPage from 'app/authenticated-page';
 
 export const PAGE = {
   TITLE: 'Homepage',
   HEADER: 'Workspaces',
 };
 
-export const FIELD_LABEL = {
+export const LABEL_ALIAS = {
   SEE_ALL_WORKSPACES: 'See all Workspaces',
   CREATE_NEW_WORKSPACE: 'Workspaces',
 };
@@ -25,7 +25,7 @@ export default class HomePage extends AuthenticatedPage {
     try {
       await this.waitUntilTitleMatch(PAGE.TITLE);
       await this.waitForTextExists(PAGE.HEADER);
-      await Link.forLabel(this.page, FIELD_LABEL.SEE_ALL_WORKSPACES);
+      await Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES);
       return true;
     } catch (e) {
       return false;
@@ -33,7 +33,7 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async getCreateNewWorkspaceLink(): Promise<ElementHandle> {
-    return findIcon(this.page, {text: FIELD_LABEL.CREATE_NEW_WORKSPACE}, 'plus-circle');
+    return findIcon(this.page, {text: LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
   }
 
   /**

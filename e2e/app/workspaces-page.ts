@@ -1,8 +1,7 @@
 import {Page} from 'puppeteer';
-import {PageUrl} from './page-identifiers';
-import {findButton} from './aou-elements/xpath-finder';
-import AuthenticatedPage from './authenticated-page';
-import WorkspaceEditPage from './workspace-edit-page';
+import Button from 'app/aou-elements/button';
+import {PageUrl} from 'app/page-identifiers';
+import WorkspaceEditPage from 'app/workspace-edit-page';
 
 const faker = require('faker/locale/en_US');
 
@@ -10,11 +9,19 @@ export const PAGE = {
   TITLE: 'View Workspace',
 };
 
-export const FIELD_LABEL = {
-  CREATE_NEW_WORKSPACE: 'Create a New Workspace',
+export const LABEL_ALIAS = {
+  CREATE_A_NEW_WORKSPACE: 'Create a New Workspace',
 };
 
-export default class WorkspacesPage extends AuthenticatedPage {
+export const FIELD = {
+  createNewWorkspaceButton: {
+    textOption: {
+      normalizeSpace: LABEL_ALIAS.CREATE_A_NEW_WORKSPACE
+    }
+  }
+};
+
+export default class WorkspacesPage extends WorkspaceEditPage {
 
   constructor(page: Page) {
     super(page);
@@ -23,7 +30,8 @@ export default class WorkspacesPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await this.waitUntilTitleMatch(PAGE.TITLE);
-      await this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true});
+      await this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}); // link
+      await this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}); // Texts above Filter By Select
       return true;
     } catch (e) {
       return false;
@@ -38,10 +46,6 @@ export default class WorkspacesPage extends AuthenticatedPage {
     return this;
   }
 
-  async getCreateNewWorkspaceButton() {
-    return findButton(this.page, {normalizeSpace: FIELD_LABEL.CREATE_NEW_WORKSPACE}, {visible: true});
-  }
-
   // tests helpers: combined a number of steps in one function
 
  /**
@@ -53,7 +57,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
   * 4: return
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    const link = await this.getCreateNewWorkspaceButton();
+    const link = await Button.forLabel(page, FIELD.createNewWorkspaceButton.textOption );
     await this.clickAndWait(link);
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
@@ -63,7 +67,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
   /**
    * Create a simple and basic new workspace end-to-end.
    */
-  async createWorkspace(workspaceName: string, billingAccount: string) {
+  async createWorkspace(workspaceName: string, billingAccount: string, reviewRequest: boolean = false) {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
@@ -78,32 +82,20 @@ export default class WorkspacesPage extends AuthenticatedPage {
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
 
-    // expand Disease purpose section
-    await editPage.expandResearchPurposeGroup(true);
-
-    // Enter value in 'Disease-focused research'
-    await editPage.fillOutDiseaseFocusedResearch();
-
+    // 1. What is the primary purpose of your project?
     // check Educational Purpose checkbox
     const educationPurpose = editPage.question1_educationalPurpose();
     await (await educationPurpose.asCheckBox()).check();
 
-    // check For-Profit Purpose checkbox
-    const forProfitPurpose = editPage.question1_forProfitPurpose();
-    await (await forProfitPurpose.asCheckBox()).check();
-
-    // check Other-Purpose checkbox
-    await editPage.fillOutOtherPurpose();
-
     // 2. Please provide a summary of your research purpose by responding to the questions below.
     const scientificQuestions = editPage.question2_scientificQuestionsIntendToStudy();
-    await (await scientificQuestions.asTextArea()).type(faker.lorem.word());
+    await (await scientificQuestions.asTextArea()).type(faker.lorem.paragraphs());
 
     const scientificApproaches = editPage.question2_scientificApproaches();
-    await (await scientificApproaches.asTextArea()).type(faker.lorem.word());
+    await (await scientificApproaches.asTextArea()).type(faker.lorem.paragraphs());
 
     const anticipatedFindings = editPage.question2_anticipatedFindings();
-    await (await anticipatedFindings.asTextArea()).type(faker.lorem.word());
+    await (await anticipatedFindings.asTextArea()).type(faker.lorem.paragraphs());
 
     // 3. The All of Us Research Program encourages researchers to disseminate ....
     const publicationInJournal = editPage.publicationInJournal();
@@ -116,10 +108,21 @@ export default class WorkspacesPage extends AuthenticatedPage {
     // 5. Population of interest: use default values. Using default value
 
     // 6. Request for Review of Research Purpose Description. Using default value
-    await editPage.requestForReviewRadiobutton(false);
+    await editPage.requestForReviewRadiobutton(reviewRequest);
 
     // click CREATE WORKSPACE button
     await editPage.clickCreateFinishButton();
+  }
+
+  /**
+   * Type in new workspace name.
+   * @return {string} new workspace name
+   */
+  async fillOutWorkspaceName(): Promise<string> {
+    const newWorkspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
+    await (await this.getWorkspaceNameTextbox()).type(newWorkspaceName);
+    await (await this.getWorkspaceNameTextbox()).tabKey();
+    return newWorkspaceName;
   }
 
 }
