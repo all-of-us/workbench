@@ -75,11 +75,10 @@ def swaggerTargetFolder = 'src/generated/java'
 def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
 def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
 
-// TODO(jaycarlton): rename this to generateWorkbenchApiServer or some such
 task generateWorkbenchApi {
   group 'swagger-codegen'
   description 'Generates the Spring controllers and API model classes in Java.'
-  dependsOn 'validateSwagger'
+  dependsOn tasks.validateSwagger
   inputs.file("$projectDir/$workbenchApiSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -591,7 +590,7 @@ tasks.compileJava {
 
 task integrationTest(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
-  description = 'Run integration test suite'
+  description = 'Run integration test suite.'
   testClassesDirs = sourceSets.__integration__.output.classesDirs
   classpath = sourceSets.__integration__.runtimeClasspath
   useJUnit {
@@ -613,6 +612,7 @@ task nightlyIntegrationTest(type: Test) {
 
 task bigQueryTest(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
+  description = 'Runs BigQery test suite.'
   testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs
   classpath = sourceSets.__bigQueryTest__.runtimeClasspath
 }
