@@ -1,30 +1,39 @@
 version: 2
 
-defaults: &defaults
-  docker:
-    - image: allofustest/workbench:buildimage-0.0.16
-  working_directory: ~/workbench
-java_defaults: &java_defaults
-  <<: *defaults
-  environment:
-    # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-    # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-    # https://circleci.com/blog/how-to-handle-java-oom-errors/
-    #
-    # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
-    # so we bumped this down further to 2G.
-    JAVA_TOOL_OPTIONS: -Xmx2g
-    TERM: dumb
-
+anchors:
+  defaults: &defaults
+    docker:
+      - image: allofustest/workbench:buildimage-0.0.16
+    working_directory: ~/workbench
+  ensure_branch_has_api_changes: &ensure_branch_has_api_changes
+    name: Ensure Branch is on Origin
+    #Circle is bad about setting up your remotes for you, you must use origin/
+    command: |
+      if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
+        echo No relevant changes on non-master branch, skipping
+        circleci step halt
+      fi
+  java_defaults: &java_defaults
+    <<: *defaults
+    environment:
+      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+      # https://circleci.com/blog/how-to-handle-java-oom-errors/
+      #
+      # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
+      # so we bumped this down further to 2G.
+      JAVA_TOOL_OPTIONS: -Xmx2g
+      TERM: dumb
+    update_git_submodules: &update_git_submodules
+      name: Update Git Submodules
+      command: git submodule update --init --recursive
 jobs:
   api-build-test:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
-      - run:
+      - run: *update_git_submodules
+      - run: &ensure_branch_has_api_changes
           name: Ensure Branch is on Origin
           #Circle is bad about setting up your remotes for you, you must use origin/
           command: |
@@ -82,14 +91,12 @@ jobs:
       MYSQL_ROOT_PASSWORD: ubuntu
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
-      - run:
+      - run: &activate_service_accont_creds
           name: Activate Service Accont Credentials
           working_directory: ~/workbench
           command: ci/activate_creds.sh api/circle-sa-key.json
@@ -117,9 +124,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       # Note: most of the time spent here appears to be in Gradle / App Engine
       # deployment. We tried more aggressively caching outputs via Circle
       # workspaces, but that seemed to have a negligible effect on speed. It's
@@ -129,10 +134,7 @@ jobs:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
-      - run:
-          name: Activate Service Accont Credentials
-          working_directory: ~/workbench
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - run: *activate_service_accont_creds
       - deploy:
           name: Deploy to App Engine
           working_directory: ~/workbench/api
@@ -148,9 +150,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - run:
           name: Scan dependencies for vulnerabilities
           working_directory: ~/workbench/api
@@ -162,26 +162,13 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
-      - run:
-          name: Ensure Branch is on Origin
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
+      - run: *update_git_submodules
+      - run: *ensure_branch_has_api_changes
       - restore_cache:
           keys:
           - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-integration-cache-
-      - run:
-          name: Activate Service Accont Credentials
-          working_directory: ~/workbench
-          # Used to call gsutil from the circle environment.
-          command: ci/activate_creds.sh api/circle-sa-key.json
+          - api-integration-cache-`
+      - run: *activate_service_accont_creds
       - run:
           name: Run Integration Tests
           working_directory: ~/workbench/api
@@ -196,18 +183,12 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - restore_cache:
           keys:
           - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-integration-cache-
-      - run:
-          name: Activate Service Accont Credentials
-          working_directory: ~/workbench
-          # Used to call gsutil from the circle environment.
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - run: *activate_service_accont_creds
       - run:
           name: Run Nightly Integration tests
           working_directory: ~/workbench/api
@@ -222,17 +203,8 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
-      - run:
-          name: Ensure Branch is on Origin
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
+      - run: *update_git_submodules
+      - run: *ensure_branch_has_api_changes
       - restore_cache:
           keys:
           - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -256,9 +228,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - run:
           name: Download Swagger CLI
           working_directory: ~/workbench
@@ -377,9 +347,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodulesz
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
