@@ -22,7 +22,7 @@ describe('Creating new workspaces', () => {
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
   });
 
-  test('Create workspace - YES request for review', async () => {
+  test.skip('Create workspace - YES request for review', async () => {
     const newWorkspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
@@ -32,7 +32,7 @@ describe('Creating new workspaces', () => {
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
   });
 
-  test('User can create a workspace using all inputs', async () => {
+  test.skip('User can create a workspace using all inputs', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
