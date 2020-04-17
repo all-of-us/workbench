@@ -7,6 +7,7 @@ set -ex
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
 export CDR_DATE=$3 # cdr date
+export DATA_BROWSER_FLAG=$4 # data browser flag
 
 # Check that bq_dataset exists and exit if not
 datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
@@ -35,14 +36,13 @@ bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_search_all_events.j
 # insert person data into cb_search_person
 ################################################
 echo "Inserting person data into cb_search_person"
-if [ "$BQ_PROJECT:$BQ_DATASET" == "all-of-us-ehr-dev:synthetic_cdr20180606" ]
+if [ "$DATA_BROWSER_FLAG" == true ]
 then
   bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
-    (person_id, gender, sex_at_birth, race, ethnicity, dob)
+    (person_id, gender, race, ethnicity, dob)
   SELECT p.person_id,
     case when p.gender_concept_id = 0 then 'Unknown' else g.concept_name end as gender,
-    case when p.gender_concept_id = 0 then 'Unknown' else g.concept_name end as sex_at_birth,
     case when p.race_concept_id = 0 then 'Unknown' else regexp_replace(r.concept_name, r'^.+:\s', '') end as race,
     case when e.concept_name is null then 'Unknown' else regexp_replace(e.concept_name, r'^.+:\s', '') end as ethnicity,
     date(birth_datetime) as dob
@@ -183,7 +183,7 @@ WHERE x.person_id = y.person_id"
 # set has EHR data flag
 ################################################
 echo "set has EHR data flag in cb_search_person"
-if [ "$BQ_PROJECT:$BQ_DATASET" == "all-of-us-ehr-dev:synthetic_cdr20180606" ]
+if [ "$BQ_PROJECT:$BQ_DATASET" == "all-of-us-ehr-dev:synthetic_cdr20180606" ] || [ "$DATA_BROWSER_FLAG" == true ]
 then
   bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
   "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x

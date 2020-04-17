@@ -1104,22 +1104,22 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id,
     0,'PERSON',1,'SEX','Sex',1,0,0,0"
 
-echo "DEMO - Sex at birth children"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (id,parent_id,domain_id,is_standard,type,concept_id,name,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
-SELECT ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id,
-    (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'SEX' and parent_id = 0) as parent_id,
-    'PERSON',1,'SEX',concept_id,
-    CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name,
-    a.cnt,0,1,0,0
-FROM
-    (
-        SELECT sex_at_birth_concept_id, count(distinct person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
-        GROUP BY 1
-    ) a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
+#echo "DEMO - Sex at birth children"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+#    (id,parent_id,domain_id,is_standard,type,concept_id,name,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
+#SELECT ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id,
+#    (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'SEX' and parent_id = 0) as parent_id,
+#    'PERSON',1,'SEX',concept_id,
+#    CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name,
+#    a.cnt,0,1,0,0
+#FROM
+#    (
+#        SELECT sex_at_birth_concept_id, count(distinct person_id) cnt
+#        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+#        GROUP BY 1
+#    ) a
+#LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
 
 echo "DEMO - Race parent"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \

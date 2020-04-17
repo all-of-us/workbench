@@ -830,6 +830,7 @@ Generates big query denormalized tables for review. Used by cohort builder. Must
 
 def make_bq_denormalized_search(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser_flag = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -845,11 +846,16 @@ def make_bq_denormalized_search(cmd_name, *args)
     ->(opts, v) { opts.cdr_date = v},
     "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
   )
+  op.add_option(
+      "--data-browser-flag [data-browser-flag]",
+      ->(opts, v) { opts.data_browser_flag = v},
+      "Is this run for data browser. Default is false"
+    )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser_flag}}
 end
 
 Common.register_command({
