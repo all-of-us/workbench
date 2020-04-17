@@ -22,16 +22,6 @@ describe('Creating new workspaces', () => {
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
   });
 
-  test('Create workspace - YES request for review', async () => {
-    const newWorkspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
-    const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.load();
-
-    // create workspace with "Yes, Review Requested" radiobutton selected
-    await workspacesPage.createWorkspace(newWorkspaceName, 'Use All of Us free credits', true);
-    await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
-  });
-
   test('User can create a workspace using all inputs', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
