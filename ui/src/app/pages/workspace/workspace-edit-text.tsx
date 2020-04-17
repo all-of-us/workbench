@@ -1,4 +1,5 @@
 import {TooltipTrigger} from 'app/components/popups';
+import {AoU, AouTitle} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import {
   DisseminateResearchEnum,
@@ -7,7 +8,6 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-
 
 
 export const toolTipTextDemographic = 'For example, by stratifying results based on race/ethnicity, age, ' +
@@ -38,10 +38,18 @@ export const toolTipTextStigmatization = <div>
 
 
 export const ResearchPurposeDescription =
-    <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
-      of <i>All of Us</i> data to provide a meaningful description of the intended purpose of data
-      use for each workspace they create. Your responses will not be used to make decisions about
-      data access.</div>;
+    <div style={{display: 'inline'}}>The <AouTitle/> requires each data user of the
+      <AoU/> data to provide a meaningful description of the intended purpose of data use for
+      each workspace they create. To provide transparency to <AoU/> Program participants, your
+      answers below will be made available publicly in the <a target='_blank'
+      href='https://www.researchallofus.org/research-projects-directory/'>Research Hub
+      Directory </a> on our public website. <b>Your responses will not be used to make decisions about data access.</b>
+      <hr/>
+      <i>Note that you are required to create separate Workspaces for each project
+        for which you access <AoU/> data, hence the responses below are expected
+        to be specific to the project for which you are creating this particular
+        Workspace.</i>
+    </div>;
 
 export interface ResearchPurposeItem {
   shortName: string;
@@ -152,8 +160,7 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
     header: <div> Please provide a summary of your research purpose by responding to the
       questions below.</div>,
     description: <div>Your responses should cover the major components of a research summary:
-      hypothesis, methods and anticipated findings. <strong> Your response will be displayed
-      publicly to inform the <i>All of Us</i> Research participants.</strong> Therefore, please
+      hypothesis, methods and anticipated findings. Therefore, please
       provide sufficiently detailed responses in plain language (without jargon), using as few
       technical terms as possible. </div>
   }, {
@@ -170,7 +177,7 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
   }, {
     header: 'What are the anticipated findings from the study? How would your findings ' +
     'contribute to the body of scientific knowledge in the field?',
-    description: <div>This response will be displayed publicly.(Free text; 1000 Character limit)
+    description: <div>Free text; 1000 Character limit
     </div>
   }, {
     header: <div>The <i>All of Us </i> Research Program encourages researchers to disseminate their
@@ -178,13 +185,13 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
       resource and to recognize the contributions of participant partners. Please tell us how you
       plan to disseminate your research findings. Choose as many options below as applicable, and
       specify details in the text box, if available. </div>,
-    description: <div>Answers not publicly displayed</div>
+    description: ''
   }, {
     header: <div>The <i>All of Us</i> Research Program would like to understand how (or if)  your
       research outcome may fit into the <i>All of Us</i> Research Program Scientific Framework.
       Please select all of the statements below that describe the outcomes you anticipate from your
       research.</div>,
-    description: <div>Answers not publicly displayed</div>
+    description: ''
   }, {
     header: 'Population of interest',
     description: <div>A primary aim of <i>All of Us</i> is to engage communities that have been
@@ -197,9 +204,7 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
       populations. At the same time, we recognize that research with underrepresented populations
       can unintentionally result in harms, including the exacerbation of stigma. We encourage
       researchers to consider whether their research design, methods, and analyses could
-      potentially cause harm to individuals, groups, and communities. <strong> Reminder: Your
-      answers do not affect your access to the data, but they will be displayed publicly on the
-      Research Hub to inform <i>All of Us</i> research participants. </strong></div>
+      potentially cause harm to individuals, groups, and communities.</div>
   }, {
     header: 'Request for Review of Research Purpose Description',
     description: <div>Any research that focuses on certain population characteristics or
