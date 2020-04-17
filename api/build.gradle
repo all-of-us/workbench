@@ -589,14 +589,17 @@ tasks.compileJava {
   options.compilerArgs << '-Xlint:unchecked'
 }
 
-// TODO(jaycarlton): Move unit and integration testing-related tasks to their own Gradle project.
 task integrationTest(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
+  description = 'Run integration test suite'
   testClassesDirs = sourceSets.__integration__.output.classesDirs
   classpath = sourceSets.__integration__.runtimeClasspath
   useJUnit {
     excludeCategories 'org.pmiops.workbench.NightlyTests'
   }
+  // These tests should always run when requested since they consume and produce side-effects.
+  outputs.upToDateWhen { false }
+
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
@@ -629,11 +632,6 @@ tasks.withType(Test) {
       events "passed", "skipped", "failed"
     }
   }
-}
-
-tasks.integrationTest {
-  // These tests should always run when requested since they consume and produce side-effects.
-  outputs.upToDateWhen { false }
 }
 
 appengine {  // App Engine tasks configuration

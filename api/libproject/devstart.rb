@@ -440,7 +440,7 @@ def run_integration_tests(cmd_name, *args)
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
     get_gsuite_admin_key(TEST_PROJECT)
-    common.run_inline %W{gradle integrationTest} + args
+    common.run_inline %W{gradle __integration__Test} + args
   end
 end
 
