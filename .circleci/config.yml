@@ -10,7 +10,7 @@ anchors:
     #Circle is bad about setting up your remotes for you, you must use origin/
     command: |
       if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-        echo No relevant changes on non-master branch, skipping
+        echo No relevant changes on api directory in non-master branch. Skipping
         circleci step halt
       fi
   java_defaults: &java_defaults
@@ -33,14 +33,7 @@ jobs:
     steps:
       - checkout
       - run: *update_git_submodules
-      - run: &ensure_branch_has_api_changes
-          name: Ensure Branch is on Origin
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
+      - run: *ensure_branch_has_api_changes
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -317,9 +310,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run:
-          name: Update Git Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       # Use the ui-build-test workspace here to avoid redoing the setup.
       - attach_workspace:
           at: .
