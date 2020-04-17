@@ -131,7 +131,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
-    description: 'Connect your account to the eRA Commons account. The application instructions will guide you through this.',
+    description: 'Connect your Workbench account to your eRA Commons account. There is no exchange of personal data in this step.',
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
