@@ -424,7 +424,6 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
-      - puppeteer-e2e-test
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
@@ -435,11 +434,11 @@ workflows:
           requires:
             - ui-build-test
       # After merge PR to master branch, run Puppeteer tests after ui and api deployed to "test" env successfully.
-      #- puppeteer-e2e-test:
-          #<<: *filter_master
-          #requires:
-            #- api-deploy-to-test
-            #- ui-deploy-to-test
+      - puppeteer-e2e-test:
+          <<: *filter_master
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
 
   deploy-staging:
     jobs:
