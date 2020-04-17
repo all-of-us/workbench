@@ -136,7 +136,7 @@ const WorkbenchFooter = withUserProfile()(
               </FlexColumn>
             </FlexRow>
           </FooterSection>
-          <div style={{...styles.workbenchFooterItem, ...styles.footerAside}}>
+          <div style={{...styles.workbenchFooterItem, ...styles.footerAside, marginRight: 0}}>
             The <i>All of Us</i> logo is a service mark of the
             U.S. Department of Health and Human Services.
             The <i>All of Us</i> platform is for research only and does

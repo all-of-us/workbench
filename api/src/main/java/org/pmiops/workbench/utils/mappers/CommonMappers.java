@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -97,6 +98,14 @@ public class CommonMappers {
     } else {
       return WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel());
     }
+  }
+
+  public AnnotationType annotationTypeFromStorage(Short annotationType) {
+    return DbStorageEnums.annotationTypeFromStorage(annotationType);
+  }
+
+  public Short annotationTypeToStorage(AnnotationType annotationType) {
+    return DbStorageEnums.annotationTypeToStorage(annotationType);
   }
 
   public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {

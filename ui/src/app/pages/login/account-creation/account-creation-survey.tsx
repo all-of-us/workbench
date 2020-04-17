@@ -4,6 +4,8 @@ import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {ErrorResponse, Profile} from 'generated/fetch';
@@ -54,7 +56,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     return <React.Fragment>
       <DemographicSurvey
           profile={this.props.profile}
-          onSubmit={(profile, captchaToken) => this.createAccount(profile, captchaToken)}
+          onSubmit={(profile, captchaToken) => {
+            AnalyticsTracker.Registration.DemographicSurvey();
+            return this.createAccount(profile, captchaToken);
+          }}
           onPreviousClick={(profile) => this.props.onPreviousClick(profile)}
           enableCaptcha={true}
           enablePrevious={true}

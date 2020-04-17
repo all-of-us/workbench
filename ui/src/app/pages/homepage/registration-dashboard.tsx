@@ -10,6 +10,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
@@ -49,6 +50,7 @@ const styles = reactStyles({
 });
 
 function redirectToGoogleSecurity(): void {
+  AnalyticsTracker.Registration.TwoFactorAuth();
   let url = 'https://myaccount.google.com/u/2/signinoptions/two-step-verification/enroll';
   const {profile} = userProfileStore.getValue();
   // The profile should always be available at this point, but avoid making an
@@ -62,6 +64,7 @@ function redirectToGoogleSecurity(): void {
 }
 
 function redirectToNiH(): void {
+  AnalyticsTracker.Registration.ERACommons();
   const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
           encodeURIComponent(
             window.location.origin.toString() + '/nih-callback?token={token}');
@@ -69,6 +72,7 @@ function redirectToNiH(): void {
 }
 
 async function redirectToTraining() {
+  AnalyticsTracker.Registration.EthicsTraining();
   await profileApi().updatePageVisits({page: 'moodle'});
   window.open(environment.trainingUrl + '/static/data-researcher.html?saml=on', '_blank');
 }
@@ -77,7 +81,7 @@ interface RegistrationTask {
   key: string;
   completionPropsKey: string;
   loadingPropsKey?: string;
-  title: string;
+  title: React.ReactNode;
   description: React.ReactNode;
   buttonText: string;
   completedText: string;
@@ -118,7 +122,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
-    title: 'Complete Ethics training',
+    title: <span><i>All of Us</i> Responsible Conduct of Research Training</span>,
     description: <div>Complete ethics training courses to understand the privacy safeguards and the
       compliance requirements for using the <i>All of Us</i> Dataset.</div>,
     buttonText: 'Complete training',
@@ -139,7 +143,10 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionTimestamp: (profile: Profile) => {
       return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
     },
-    onClick: () => navigate(['data-code-of-conduct'])
+    onClick: () => {
+      AnalyticsTracker.Registration.EnterDUCC();
+      navigate(['data-code-of-conduct']);
+    }
   }
 ] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
 || registrationTask.featureFlag) : (() => {

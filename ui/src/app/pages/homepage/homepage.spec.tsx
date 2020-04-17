@@ -58,10 +58,14 @@ describe('HomepageComponent', () => {
   });
 
   it('should display quick tour when clicked', () => {
+    // Mock offsetWidth needed for horizontal scroll for quick tour/video list
+    const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, value: 1000 });
     const wrapper = component();
     wrapper.find('[data-test-id="quick-tour-resource-0"]').first().simulate('click');
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeTruthy();
-
+    // set offsetWidth back to original
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth);
   });
 
   it('should not auto-display quick tour it not first visit', () => {

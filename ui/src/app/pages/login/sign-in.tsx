@@ -18,12 +18,14 @@ import {
   withServerConfig,
   withWindowSize,
 } from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 
 import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
 import {Footer, FooterTypeEnum} from 'app/components/footer';
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
+import {environment} from 'environments/environment';
 import * as React from 'react';
 
 // A template function which returns the appropriate style config based on window size and
@@ -284,10 +286,12 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
 
     switch (currentStep) {
       case SignInStep.LANDING:
-        return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
+        return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() => {
+          AnalyticsTracker.Registration.CreateAccount();
           this.setState({
             currentStep: this.getNextStep(currentStep)
-          })}/>;
+          });
+        }}/>;
       case SignInStep.INVITATION_KEY:
         return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
           invitationKey: key,
@@ -296,10 +300,13 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
           pdfPath='/assets/documents/terms-of-service.pdf'
-          onComplete={() => this.setState({
-            termsOfServiceVersion: 1,
-            currentStep: this.getNextStep(currentStep)
-          })}/>;
+          onComplete={() => {
+            AnalyticsTracker.Registration.TOS();
+            this.setState({
+              termsOfServiceVersion: 1,
+              currentStep: this.getNextStep(currentStep)
+            });
+          }}/>;
       case SignInStep.INSTITUTIONAL_AFFILIATION:
         return <AccountCreationInstitution
           profile={this.state.profile}
@@ -335,7 +342,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
                   src={SIGNED_OUT_HEADER_IMAGE}/></div>
         {this.renderSignInStep(this.state.currentStep)}
       </FlexColumn>
-      <Footer type={FooterTypeEnum.Registration} />
+      {environment.enableFooter && <Footer type={FooterTypeEnum.Registration} />}
     </FlexColumn>;
   }
 }
@@ -362,6 +369,7 @@ export class SignInComponent extends ReactWrapperBase {
   }
 
   signIn(): void {
+    AnalyticsTracker.Registration.SignIn();
     this.signInService.signIn();
   }
 

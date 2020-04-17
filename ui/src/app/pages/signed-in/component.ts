@@ -44,7 +44,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   headerImg = '/assets/images/all-of-us-logo.svg';
   displayTag = environment.displayTag;
   shouldShowDisplayTag = environment.shouldShowDisplayTag;
-  enableSignedInFooter = environment.enableSignedInFooter;
+  enableSignedInFooter = environment.enableFooter;
   minimizeChrome = false;
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.

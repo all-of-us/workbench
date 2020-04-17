@@ -989,7 +989,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header} indent
-          description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
+          description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
             <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[2]}
@@ -1012,7 +1012,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
           {/*disseminate  research Section */}
         <WorkspaceEditSection header={researchPurposeQuestions[5].header}
-                              description={researchPurposeQuestions[5].description} style={{width: '50rem'}} index='3.'>
+                              description={researchPurposeQuestions[5].description} style={{width: '48rem'}} index='3.'>
           <FlexRow>
             <FlexColumn style={styles.flexColumnBy2}>
               {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
@@ -1028,7 +1028,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           {/*Research outcome section*/}
           <WorkspaceEditSection header={researchPurposeQuestions[6].header} index='4.'
                                 description={researchPurposeQuestions[6].description}
-                                style={{width: '50rem'}}>
+                                style={{width: '48rem'}}>
             <FlexRow style={{marginLeft: '1rem'}}>
               <FlexColumn style={{flex: '1 1 0'}}>
                 {researchOutcomes.map(
@@ -1040,7 +1040,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           {/*Underrespresented population section*/}
         <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
                               description={researchPurposeQuestions[7].description}
-                              style={{width: '50rem'}}>
+                              style={{width: '48rem'}}>
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}

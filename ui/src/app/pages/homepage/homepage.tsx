@@ -14,6 +14,7 @@ import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
+import {Scroll} from 'app/icons/scroll';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
@@ -54,7 +55,8 @@ export const styles = reactStyles({
     marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
   quickTourCardsRow: {
-    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem', marginBottom: '1rem'
+    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem', marginBottom: '1rem', marginLeft: '-1rem', paddingLeft: '1rem',
+    position: 'relative'
   },
   quickTourLabel: {
     fontSize: 22, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
@@ -83,16 +85,18 @@ interface State {
   firstVisit: boolean;
   firstVisitTraining: boolean;
   quickTour: boolean;
+  quickTourResourceOffset: number;
   trainingCompleted: boolean;
   twoFactorAuthCompleted: boolean;
   videoOpen: boolean;
-  videoLink: string;
+  videoId: string;
   userHasWorkspaces: boolean | null;
 }
 
 export const Homepage = withUserProfile()(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
+  private quickTourResourcesDiv: HTMLDivElement;
 
   constructor(props: Props) {
     super(props);
@@ -107,10 +111,11 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       firstVisit: undefined,
       firstVisitTraining: true,
       quickTour: false,
+      quickTourResourceOffset: 0,
       trainingCompleted: undefined,
       twoFactorAuthCompleted: undefined,
       videoOpen: false,
-      videoLink: '',
+      videoId: '',
       userHasWorkspaces: null,
     };
   }
@@ -231,28 +236,43 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     });
   }
 
-  openVideo(videoLink: string): void {
-    this.setState({videoOpen: true, videoLink: videoLink});
+  openVideo(videoId: string): void {
+    AnalyticsTracker.Registration.TutorialVideo();
+    this.setState({videoOpen: true, videoId: videoId});
   }
 
 
   render() {
     const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
-      trainingCompleted, quickTour, videoLink, twoFactorAuthCompleted,
-      dataUserCodeOfConductCompleted
+      trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
+      dataUserCodeOfConductCompleted, quickTourResourceOffset
     } = this.state;
+    // This calculates the limit for quickTourResources items that can be seen without scrolling. Takes the width of the parent element
+    // and divides by the width of an individual resource item (276px). The default limit is 4 since the min width of the parent element
+    // should be ~1128px
+    const limit = this.quickTourResourcesDiv ? Math.floor(this.quickTourResourcesDiv.offsetWidth / 276) : 4;
 
+    // The videoId parameters below are the YouTube ids that get inserted into the src url of the iframe
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
         onClick: () => this.setState({quickTour: true})
       }, {
-        src: '/assets/images/cohorts-thumbnail.png',
-        onClick: () => this.openVideo('/assets/videos/Workbench Tutorial - Cohorts.mp4')
+        src: '/assets/images/intro-workbench.png',
+        onClick: () => this.openVideo('nqnOvOpnRLE')
       }, {
-        src: '/assets/images/notebooks-thumbnail.png',
-        onClick: () => this.openVideo('/assets/videos/Workbench Tutorial - Notebooks.mp4')
+        src: '/assets/images/cohort-builder.png',
+        onClick: () => this.openVideo('wG3d9cg9R84')
+      }, {
+        src: '/assets/images/dataset-builder.png',
+        onClick: () => this.openVideo('FRmxmkdCHr0')
+      }, {
+        src: '/assets/images/notebook-code-snippets.png',
+        onClick: () => this.openVideo('hSn4i1RW0Qk')
+      }, {
+        src: '/assets/images/user-support.png',
+        onClick: () => this.openVideo('dJ7zJAzq6Ck')
       }
     ];
 
@@ -361,17 +381,29 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
           <FlexColumn style={{marginLeft: '3%'}}>
             <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
-            <FlexRow style={styles.quickTourCardsRow}>
-              {quickTourResources.map((thumbnail, i) => {
-                return <React.Fragment key={i}>
-                  <Clickable onClick={thumbnail.onClick}
-                             data-test-id={'quick-tour-resource-' + i}>
-                    <img style={{width: '11rem', marginRight: '0.5rem'}}
-                         src={thumbnail.src}/>
-                  </Clickable>
-                </React.Fragment>;
-              })}
-            </FlexRow>
+            <div ref={(el) => this.quickTourResourcesDiv = el} style={{display: 'flex', position: 'relative'}}>
+              <FlexRow style={styles.quickTourCardsRow}>
+                {quickTourResources.slice(quickTourResourceOffset, quickTourResourceOffset + limit).map((thumbnail, i) => {
+                  return <React.Fragment key={i}>
+                    <Clickable onClick={thumbnail.onClick}
+                               data-test-id={'quick-tour-resource-' + i}>
+                      <img style={{width: '11rem', marginRight: '0.5rem'}}
+                           src={thumbnail.src}/>
+                    </Clickable>
+                  </React.Fragment>;
+                })}
+                {quickTourResourceOffset > 0 && <Scroll
+                    dir='left'
+                    onClick={() => this.setState({quickTourResourceOffset: quickTourResourceOffset - 1})}
+                    style={{left: 0, marginTop: '2rem', position: 'absolute'}}
+                />}
+                {quickTourResourceOffset + limit < quickTourResources.length && <Scroll
+                    dir='right'
+                    onClick={() => this.setState({quickTourResourceOffset: quickTourResourceOffset + 1})}
+                    style={{marginTop: '2rem', position: 'absolute', right: 0}}
+                />}
+              </FlexRow>
+            </div>
           </FlexColumn>
         </div>
       </FlexColumn>
@@ -388,9 +420,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
             />
           </Clickable>
         </div>
-        <video width='100%' controls autoPlay>
-          <source src={videoLink} type='video/mp4'/>
-        </video>
+        {/* Embed code generated by YouTube */}
+        <iframe width='852' height='480' src={`https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&iv_load_policy=3`}
+                frameBorder='0' allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture' allowFullScreen/>
       </Modal>}
     </React.Fragment>;
   }

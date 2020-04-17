@@ -85,6 +85,24 @@ export const AnalyticsTracker = {
     Edit: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Edit'),
     Run: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Run (Playground Mode)')
   },
+  Registration: {
+    SignIn: () => triggerEvent('Registration', 'Click sign-in', 'Sign in'),
+    CreateAccount: () => triggerEvent('Registration', 'Click create account', 'Create account'),
+    TOS: () => triggerEvent('Registration', 'Click next', 'Accepted TOS'),
+    InstitutionNotListed: () => triggerEvent('Registration', 'Click \'don\'t see institution\' link', 'Institution not listed'),
+    InstitutionPage: () =>
+      triggerEvent('Registration', 'Clicked \'Next\' in step 1/3 in registration process', 'Institution info completed'),
+    CreateAccountPage: () =>
+      triggerEvent('Registration', 'Clicked \'Next\' in step 2/3 in registration process', 'Create Account page completed'),
+    DemographicSurvey: () =>
+      triggerEvent('Registration', 'Clicked \'Next\' in step 3/3 in registration process', 'Demographic survey completed'),
+    TwoFactorAuth: () => triggerEvent('Registration', 'Clicked on \'2FA\' button', '2FA'),
+    EthicsTraining: () => triggerEvent('Registration', 'Clicked on \'Ethics training\' button', 'Training'),
+    ERACommons: () => triggerEvent('Registration', 'Clicked on eRA commons button', 'eRA commons'),
+    EnterDUCC: () => triggerEvent('Registration', 'Clicked in DUCC button', 'Entered DUCC'),
+    AcceptDUCC: () => triggerEvent('Registration', 'Clicked in DUCC button', 'Accepted DUCC'),
+    TutorialVideo: () => triggerEvent('Home Page', 'Clicked on a tutorial video', 'Tutorial videos'),
+  },
   Sidebar: {
     OpenSidebar: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.SIDEBAR, 'Click', suffix),
     Search: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Search', `Help - Search - ${suffix}`),
