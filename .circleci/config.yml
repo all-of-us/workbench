@@ -19,8 +19,6 @@ java_defaults: &java_defaults
 jobs:
   api-build-test:
     <<: *java_defaults
-    # TODO(jaycarlton): I don't see any spport in CircleCI for reusing individual steps, but we can
-    # fake it using a Handlebars template or another simple yaml input file
     steps:
       - checkout
       - run:
@@ -350,7 +348,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Update Git Submodulesz
+          name: Update Git Submodules
           command: git submodule update --init --recursive
       # Use the ui-build-test workspace here to avoid redoing the setup.
       - attach_workspace:
