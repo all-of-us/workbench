@@ -353,7 +353,7 @@ sourceSets {
   //
   // Here we use a naming convention with __ word boundaries at start and end
   // to avoid confusion. For example, the plugin may define a __tools__Compile configuration
-  // or a compile__tools__Java task. This approach makes it movre obvious where there's
+  // or a compile__tools__Java task. This approach makes it more obvious where there's
   // a dynamically defined symbol name, so usages stick out and it's easier to identify the
   // constituent parts.
   // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
