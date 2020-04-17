@@ -1,12 +1,9 @@
 import {Page} from 'puppeteer';
-import {PageUrl, NavLink} from 'app/page-identifiers';
-import {clrIconXpath} from './aou-elements/xpath-defaults';
-import {findIcon} from './aou-elements/xpath-finder';
-import BasePage from './base-page';
+import {PageUrl} from 'app/page-identifiers';
+import BasePage from 'app/base-page';
 import {performance} from 'perf_hooks';
 
-
-const selectors = {
+const SELECTOR = {
   signedInIndicator: 'body#body div',
   logo: 'img[src="/assets/images/all-of-us-logo.svg"]'
 };
@@ -23,8 +20,8 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    await this.page.waitForSelector(selectors.signedInIndicator);
-    await this.page.waitForSelector(selectors.logo, {visible: true});
+    await this.page.waitForSelector(SELECTOR.signedInIndicator);
+    await this.page.waitForSelector(SELECTOR.logo, {visible: true});
     return true;
   }
 
@@ -55,41 +52,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     await this.waitForLoad();
   }
 
-  /**
-   * Go to application page.
-   * @param targetPage
-   */
-  async navTo(targetPage: NavLink) {
-    await this.openSideNav();
-    const angleIconXpath = clrIconXpath({}, 'angle');
-    await this.page.waitForXPath(angleIconXpath, {timeout: 2000});
-    const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${targetPage}")]`;
-    // try to find target sidenav link. Get the first element from ElementHandle array
-    const [applink] = await this.page.$x(appLinkXpath);
-    if (!applink) {
-      // if sidnav link is not found, check to see if it's a link under User or Admin submenu.
-      const [username, admin] = await this.page.$x(angleIconXpath);
-      if (targetPage === NavLink.PROFILE || targetPage === NavLink.SIGN_OUT) {
-        // Open User submenu if needed
-        if (!applink) {
-          await username.click();
-        }
-      } else if (targetPage === NavLink.USER_ADMIN) {
-        // Open Admin submenu if needed
-        if (!applink) {
-          await admin.click();
-        }
-      }
-    }
-    // find target sidenav link again. If not found, throws exception
-    const link = await this.page.waitForXPath(appLinkXpath, {timeout: 2000});
-    if (targetPage === NavLink.CONTACT_US) {
-      await link.click();
-    } else {
-      await this.clickAndWait(link);
-    }
-
-  }
 
   /**
    * Find the actual displayed User name string in sidenav dropdown.
@@ -100,18 +62,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     const p = await username.getProperty('innerText');
     const value = await p.jsonValue();
     return value;
-  }
-
-  /**
-   * Open sidenav dropdown.
-   */
-  async openSideNav() {
-    const is = await this.sideNavIsOpen();
-    if (!is) {
-      // click bars icon to open dropdown
-      const barsIcon = await findIcon(this.page, {}, 'bars');
-      await barsIcon.click();
-    }
   }
 
   /**
@@ -153,16 +103,5 @@ export default abstract class AuthenticatedPage extends BasePage {
       await this.page.waitFor(1000);
     }
   }
-
-  // Determine the open state by looking for a visible Home icon
-  private async sideNavIsOpen(): Promise<boolean> {
-    try {
-      await findIcon(this.page, {text: 'Home'}, 'home', {visible: true, timeout: 1000});
-      return true;
-    } catch(err) {
-      return false;
-    }
-  }
-
 
 }

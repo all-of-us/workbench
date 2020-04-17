@@ -1,7 +1,8 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {WorkspaceAccessLevel, WorkspaceAction} from 'app/page-identifiers';
-import BaseElement from './aou-elements/base-element';
-const fp = require('lodash/fp');
+import {WorkspaceAccessLevel} from 'app/page-identifiers';
+import BaseElement from 'app/aou-elements/base-element';
+import EllipsisMenu from 'app/aou-elements/ellipsis-menu';
+import * as fp from 'lodash/fp';
 
 
 /**
@@ -66,76 +67,12 @@ export default class WorkspaceCard extends BaseElement {
     return name;
   }
 
-  /**
-   * Returns an array of link texts in ellipsis popup. Used for UI verification tests
-   */
-  async getPopupLinkTextsArray(): Promise<unknown> {
-    await this.clickEllipsis();
-    const selector = `${WorkspaceCard.popupRootXpath}//*[@role="button"]/text()`;
-    await this.page.waitForXPath(selector, {visible: true});
-    const elems = await this.page.$x(selector);
-    const textsArray = [];
-    for (const elem of elems) {
-      textsArray.push(await (await elem.getProperty('textContent')).jsonValue());
-      await elem.dispose();
-    }
-    return textsArray;
-  }
-
-  /*
-  * Click 'Duplicate' link in ellipsis popup.
-   */
-  async duplicate() {
-    await this.clickEllipsis();
-    const selector = this.linkSelector(WorkspaceAction.DUPLICATE);
-    const link = await this.page.waitForXPath(selector, {visible: true});
-    await link.click();
-    await link.dispose();
-  }
-
-  /*
-  * Click 'Edit' link in ellipsis popup.
-   */
-  async edit() {
-    await this.clickEllipsis();
-    const selector = this.linkSelector(WorkspaceAction.EDIT);
-    const link = await this.page.waitForXPath(selector, {visible: true});
-    await link.click();
-    await link.dispose();
-  }
-
-  /*
-  * Click 'Share' link in ellipsis popup.
-   */
-  async share() {
-    await this.clickEllipsis();
-    const selector = this.linkSelector(WorkspaceAction.SHARE);
-    const link = await this.page.waitForXPath(selector, {visible: true});
-    await link.click();
-    await link.dispose();
-  }
-
-  /*
-  * Click 'Delete' link in ellipsis popup.
-   */
-  async delete() {
-    await this.clickEllipsis();
-    const selector = this.linkSelector(WorkspaceAction.DELETE);
-    const link = await this.page.waitForXPath(selector, {visible: true});
-    await link.click();
-    await link.dispose();
-  }
-
   asElementHandle(): ElementHandle {
     return this.element.asElement();
   }
 
-  async getEllipsisIcon(): Promise<ElementHandle | null> {
-    const ellipsis = await this.element.$x('.//clr-icon[@shape="ellipsis-vertical"]');
-    if (ellipsis.length === 0) {
-      return null;
-    }
-    return ellipsis[0];
+  async getEllipsis(): Promise<EllipsisMenu> {
+    return new EllipsisMenu(this.page, './/clr-icon[@shape="ellipsis-vertical"]', this.asElementHandle());
   }
 
   /**
@@ -152,7 +89,7 @@ export default class WorkspaceCard extends BaseElement {
    * @param {string} workspaceName
    */
   async getWorkspaceNameLink(workspaceName: string) : Promise<ElementHandle> {
-    return await this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName));
+    return this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName));
   }
 
   async getWorkspaceMatchAccessLevel(level: WorkspaceAccessLevel = WorkspaceAccessLevel.OWNER): Promise<WorkspaceCard[]> {
@@ -178,19 +115,9 @@ export default class WorkspaceCard extends BaseElement {
     ]);
   }
 
-  private async clickEllipsis(): Promise<void> {
-    const ellipsis = await this.getEllipsisIcon();
-    await ellipsis.click();
-    await ellipsis.dispose();
-  }
-
   private asCardElement(elementHandle: ElementHandle): WorkspaceCard {
     this.element = elementHandle;
     return this;
-  }
-
-  private linkSelector(linkText: string) {
-    return  `${WorkspaceCard.popupRootXpath}//*[@role='button' and text()='${linkText}']`;
   }
 
   private accessLevelSelector() {
