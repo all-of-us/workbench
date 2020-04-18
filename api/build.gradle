@@ -853,3 +853,13 @@ compileTestKotlin {
     jvmTarget = "1.8"
   }
 }
+//
+//allprojects {
+//  apply plugin: 'nebula.lint'
+//  gradleLint.rules = ['all-dependency'] // add as many rules here as you'd like
+//}
+
+gradleLint {
+  rules  = ['all-dependency', 'dependency-parentheses']
+  criticalRules = ['unused-dependency'] // <-- this will fail the build in the event of a violation
+}
