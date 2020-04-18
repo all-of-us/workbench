@@ -60,7 +60,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
-  private final Provider<WorkspacesApi> adminServiceAccountWorkspaceApiProvider;
+  private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
   private final Provider<StatusApi> statusApiProvider;
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
@@ -109,7 +109,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
           Provider<WorkspacesApi> endUserWorkspacesApiProvider,
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API)
-          Provider<WorkspacesApi> adminServiceAccountWorkspaceApiProvider,
+          Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider,
       Provider<StatusApi> statusApiProvider,
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
@@ -123,7 +123,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
-    this.adminServiceAccountWorkspaceApiProvider = adminServiceAccountWorkspaceApiProvider;
+    this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
@@ -358,14 +358,14 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public FirecloudWorkspaceACL getWorkspaceAclAsService(String projectName, String workspaceName) {
-    WorkspacesApi workspacesApi = adminServiceAccountWorkspaceApiProvider.get();
+    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
     return retryHandler.run((context) -> workspacesApi.getWorkspaceAcl(projectName, workspaceName));
   }
 
   @Override
   public FirecloudWorkspaceResponse getWorkspaceAsService(String projectName, String workspaceName)
       throws WorkbenchException {
-    WorkspacesApi workspacesApi = adminServiceAccountWorkspaceApiProvider.get();
+    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
     return retryHandler.run(
         (context) ->
             workspacesApi.getWorkspace(

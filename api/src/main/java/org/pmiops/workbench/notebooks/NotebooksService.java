@@ -22,7 +22,8 @@ public interface NotebooksService {
 
   /**
    * Retrieve all notebooks in the given cloud storage bucket. This method is authenticated as the
-   * app engine service account, so authorization should be performed before calling this.
+   * app engine service account, so authorization must be performed before calling this and the
+   * input value should be trusted.
    */
   List<FileDetail> getNotebooksAsService(String bucketName);
 

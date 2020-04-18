@@ -133,7 +133,7 @@ public class WorkspaceAdminControllerTest {
         testMockFactory.createFcListClusterResponse();
     List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clusters = new ArrayList<>();
     clusters.add(listClusterResponse);
-    when(mockLeonardoNotebooksClient.listClustersByProjectAsAdmin(WORKSPACE_NAMESPACE))
+    when(mockLeonardoNotebooksClient.listClustersByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(clusters);
 
     FirecloudWorkspace fcWorkspace =
