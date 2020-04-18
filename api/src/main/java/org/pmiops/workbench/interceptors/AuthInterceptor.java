@@ -171,7 +171,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
             new UserAuthentication(user, OAuth2Userinfo, token, UserType.RESEARCHER));
 
     // TODO: setup this in the context, get rid of log statement
-    log.log(Level.INFO, "{0} logged in", OAuth2Userinfo.getEmail());
+    log.log(Level.FINE, "{0} logged in", OAuth2Userinfo.getEmail());
 
     if (!hasRequiredAuthority(method, user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
