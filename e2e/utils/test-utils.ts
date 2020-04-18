@@ -46,12 +46,12 @@ export async function performAction(
     break;
   case 'textbox':
     const textboxElement = await Textbox.forLabel(page, identifier.textOption);
-    await textboxElement.type(value, {delay: 20});
+    await textboxElement.type(value, {delay: 0});
     await textboxElement.tabKey();
     break;
   case 'textarea':
     const textareaElement = await Textarea.forLabel(page, identifier.textOption);
-    await textareaElement.type(value);
+    await textareaElement.type(value, {delay: 0});
     await textareaElement.tabKey();
     break;
   default:
