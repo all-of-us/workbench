@@ -125,7 +125,9 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
               .clusters(clusters);
 
       FirecloudWorkspace fcWorkspace =
-          fireCloudService.getWorkspace(workspaceNamespace, workspaceFirecloudName).getWorkspace();
+          fireCloudService
+              .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
+              .getWorkspace();
 
       return ResponseEntity.ok(
           new AdminFederatedWorkspaceDetailsResponse()

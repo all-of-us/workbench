@@ -140,7 +140,8 @@ public class WorkspaceAdminControllerTest {
         testMockFactory.createFcWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "test");
     FirecloudWorkspaceResponse fcWorkspaceResponse =
         new FirecloudWorkspaceResponse().workspace(fcWorkspace);
-    when(mockFirecloudService.getWorkspace(WORKSPACE_NAMESPACE, TestMockFactory.BUCKET_NAME))
+    when(mockFirecloudService.getWorkspaceAsService(
+            WORKSPACE_NAMESPACE, TestMockFactory.BUCKET_NAME))
         .thenReturn(fcWorkspaceResponse);
   }
 

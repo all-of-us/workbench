@@ -180,7 +180,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     dbUser = userDao.save(dbUser);
     currentUser = dbUser;
 
-    when(mockFireCloudService.getWorkspaceAcl(anyString(), anyString()))
+    when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceACL()
                 .acl(
@@ -809,7 +809,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(currentUser.getUsername(), accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME))
+    when(mockFireCloudService.getWorkspaceAclAsService(NAMESPACE, NAME))
         .thenReturn(workspaceAccessLevelResponse);
   }
 }
