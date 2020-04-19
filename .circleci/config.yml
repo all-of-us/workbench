@@ -38,15 +38,15 @@ parameters:
 
   workingdir_api:
     type: string
-    default: << pipeline.parameters.workingdir >>/api
+    default: "~/workbench/api"
 
   workingdir_ui:
     type: string
-    default: << pipeline.parameters.workingdir >>/ui
+    default: "~/workbench/ui"
 
   workingdir_e2e:
     type: string
-    default: << pipeline.parameters.workingdir >>/e2e
+    default: "~/workbench/e2e"
 
 
 commands:
