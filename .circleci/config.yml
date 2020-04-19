@@ -55,6 +55,7 @@ executors:
     docker:
       - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage-tag >>
     working_directory: << pipeline.parameters.workingdir >>
+    resource_class: medium+  # https://circleci.com/docs/2.0/configuration-reference/#resource_class
     environment:
       # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
       # processes executed within CircleCI's docker containers will respect. Very helpful resource:
@@ -72,6 +73,7 @@ commands:
       - run:
           name: Git fetch submodules
           command: git submodule update --init --recursive
+      - no_change_filter
 
   restore_api_cache:
     description: "restore api project cache"
@@ -147,7 +149,7 @@ commands:
             - ~/.cache/yarn
           key: << parameters.version >>-123-e2e-tests-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
-  filter_no_change:
+  no_change_filter:
     steps:
       - run:
           name: Git checking for differences
@@ -185,32 +187,21 @@ commands:
               --key-file circle-sa-key.json \
               --promote
 
+  activate_sa:
+    steps:
+      - run:
+          name: Activate CircleCI Service Account credential
+          working_directory: << pipeline.parameters.workingdir >>
+          # Used to call gsutil from the circle environment.
+          command: ci/activate_creds.sh api/circle-sa-key.json
 
 
 jobs:
-  # Install NodeJS into a non-node container.
-  integration-test-install-linux:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - node/install:
-          node-version: "12.16.2" # Action LTS release. https://nodejs.org/en/about/releases/
-          install-yarn: true
-      - run:
-          name: Check Node version 12 is installed
-          command: |
-            if ! node --version | grep -q "12"; then
-              echo "Node version 12 not found."
-              exit 1
-            fi
-
   api-build-test:
     executor: buildimage-docker-executor
     working_directory: << pipeline.parameters.workingdir_api >>
     steps:
       - git_checkout
-      - filter_no_change
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
       - run:
@@ -230,7 +221,6 @@ jobs:
       - save_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
 
-
   api-local-test:
     docker:
       - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage-tag >>
@@ -239,26 +229,13 @@ jobs:
           - MYSQL_ROOT_PASSWORD=ubuntu
           - MYSQL_USER=ubuntu
           - MYSQL_PASSWORD=ubuntu
-    working_directory: << pipeline.parameters.workingdir >>
     environment:
-      # Drop to ~1.5G; the local API server starts two Java processes (the API
-      # server and the cron emulator). The default machine has 4GB, so we want
-      # the Java memory limit to be below half of that: other things on the
-      # machine need memory as well. Using 2G here manifested in 137 errors.
-      # If this limit proves to be too low, an alternative would be to use a
-      # larger resource class:
-      #   https://circleci.com/docs/2.0/configuration-reference/#resource_class
-      JAVA_TOOL_OPTIONS: -Xmx1536m
-      TERM: dumb
       MYSQL_ROOT_PASSWORD: ubuntu
-    resource_class: medium+  # https://circleci.com/docs/2.0/configuration-reference/#resource_class
     steps:
       - git_checkout
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
-      - run:
-          working_directory: << pipeline.parameters.workingdir >>
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - activate_sa
       - run:
           # MySQL sometimes refuses connections by the time we attempt to apply
           # data migrations. Watch the port for 2m for startup.
@@ -283,18 +260,13 @@ jobs:
           command: |
             ./project.rb gradle dependencyCheckAnalyze --info
 
-  # TODO(RW-4645): Upgrade to Circle 2.1 and leverage shared commands to reduce duplication.
   api-integration-test:
-    <executor: buildimage-docker-executor
+    executor: buildimage-docker-executor
     steps:
       - git_checkout
-      - skip_if_no_change_cmd
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
-      - run:
-          working_directory: << pipeline.parameters.workingdir >>
-          # Used to call gsutil from the circle environment.
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - activate_sa
       - run:
           working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb integration
@@ -307,10 +279,7 @@ jobs:
       - git_checkout
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
-      - run:
-          working_directory: << pipeline.parameters.workingdir >>
-          # Used to call gsutil from the circle environment.
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - activate_sa
       - run:
           working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb nightly-integration
@@ -324,10 +293,7 @@ jobs:
       - skip_if_no_change_cmd
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
-      - run:
-          working_directory: << pipeline.parameters.workingdir >>
-          # Used to call gsutil from the circle environment.
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - activate_sa
       - run:
           working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb bigquerytest
@@ -415,10 +381,7 @@ jobs:
       - git_checkout
       - restore_ui_cache:
           version: << pipeline.parameters.ui_cache_key_version >>
-      - run:
-          working_directory: << pipeline.parameters.workingdir >>
-          name: Active CircleCI service account
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - activate_sa
       - deploy:
           name: Deploy to App Engine
           working_directory: << pipeline.parameters.workingdir_ui >>
@@ -442,10 +405,7 @@ jobs:
       # touches several top level folders {common,}api.
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
-      - run:
-          working_directory: << pipeline.parameters.workingdir >>
-          name: Active CircleCI service account
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - activate_sa
       - deploy:
           name: Deploy to App Engine
           working_directory: << pipeline.parameters.workingdir_api >>
