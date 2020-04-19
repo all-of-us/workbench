@@ -50,22 +50,6 @@ parameters:
     default: << pipeline.parameters.workingdir >>/e2e
 
 
-executors:
-  buildimage-docker-executor:
-    docker:
-      - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage-tag >>
-    working_directory: << pipeline.parameters.workingdir >>
-    resource_class: medium+  # https://circleci.com/docs/2.0/configuration-reference/#resource_class
-    environment:
-      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-      # https://circleci.com/blog/how-to-handle-java-oom-errors/
-      #
-      # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
-      # so we bumped this down further to 2G.
-      JAVA_TOOL_OPTIONS: -Xmx2g
-      TERM: dumb
-
 commands:
   git_checkout:
     steps:
@@ -84,8 +68,8 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - << parameters.version >>-123-api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-            - << parameters.version >>-123-api-cache-
+            - << parameters.version >>-123-gradle-cache-{{ checksum "~/workbench/api/build.gradle" }}
+            - << parameters.version >>-123-gradle-cache-
 
   save_api_cache:
     description: "save api project cache"
@@ -96,10 +80,11 @@ commands:
     steps:
       - save_cache:
           paths:
-            - ~/.gradle
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
-          key: << parameters.version >>-123-api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+          key: << parameters.version >>-123-gradle-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
   save_ui_cache:
     description: "save ui project cache"
@@ -111,6 +96,7 @@ commands:
       - save_cache:
           paths:
             - ~/.cache/yarn
+            - ./node_modules
           key: << parameters.version >>-123-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
 
   restore_ui_cache:
@@ -134,8 +120,8 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - << parameters.version >>-123-e2e-tests-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - << parameters.version >>-123-e2e-tests-cache-
+            - << parameters.version >>-123-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - << parameters.version >>-123-e2e-cache-
 
   save_e2e_cache:
     description: "save Puppeteer e2e project cache"
@@ -147,7 +133,7 @@ commands:
       - save_cache:
           paths:
             - ~/.cache/yarn
-          key: << parameters.version >>-123-e2e-tests-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: << parameters.version >>-123-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   no_change_filter:
     steps:
@@ -195,6 +181,22 @@ commands:
           # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
 
+executors:
+  buildimage-docker-executor:
+    docker:
+      - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage-tag >>
+    working_directory: << pipeline.parameters.workingdir >>
+    resource_class: medium+  # https://circleci.com/docs/2.0/configuration-reference/#resource_class
+    environment:
+      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+      # https://circleci.com/blog/how-to-handle-java-oom-errors/
+      #
+      # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
+      # so we bumped this down further to 2G.
+      JAVA_TOOL_OPTIONS: -Xmx2g
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false"
+      TERM: dumb
 
 jobs:
   api-build-test:
@@ -439,6 +441,7 @@ filter_master: &filter_master
   filters:
     branches:
       only: master
+
 filter_releases: &filter_releases
   filters:
     branches:
@@ -448,7 +451,7 @@ filter_releases: &filter_releases
 
 
 workflows:
-  version: 2
+
   build-test-deploy:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
