@@ -196,6 +196,21 @@ executors:
       GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false"
       TERM: dumb
 
+  mysql-docker:
+    resource_class: medium+
+    working_directory: << pipeline.parameters.workingdir >>
+    docker:
+      - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage-tag >>
+      - image: mysql:5.7
+        environment:
+          - MYSQL_ROOT_PASSWORD=ubuntu
+          - MYSQL_USER=ubuntu
+          - MYSQL_PASSWORD=ubuntu
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx2g
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false"
+      TERM: dumb
+
 jobs:
   api-build-test:
     executor: buildimage-docker-executor
@@ -224,13 +239,7 @@ jobs:
           version: << pipeline.parameters.api_cache_key_version >>
 
   api-local-test:
-    executor: buildimage-docker-executor
-    docker:
-      - image: mysql:5.7
-        environment:
-          - MYSQL_ROOT_PASSWORD=ubuntu
-          - MYSQL_USER=ubuntu
-          - MYSQL_PASSWORD=ubuntu
+    executor: mysql-docker
     environment:
       MYSQL_ROOT_PASSWORD: ubuntu
     steps:
