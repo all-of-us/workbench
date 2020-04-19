@@ -1,7 +1,41 @@
 #  https://circleci.com/docs/2.0/configuration-reference/
 version: 2.1
 
-# Pipeline parameters
+# -------------------------
+#   ANCHORS
+#
+default_environment: &default_environment
+  resource_class: medium+  # https://circleci.com/docs/2.0/configuration-reference/#resource_class
+  working_directory: << pipeline.parameters.workingdir >>
+  environment:
+    # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+    # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+    # https://circleci.com/blog/how-to-handle-java-oom-errors/
+    #
+    # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
+    # so we bumped this down further to 2G.
+    JAVA_TOOL_OPTIONS: -Xmx2g
+    # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    TERM: dumb
+
+# See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
+filter_master: &filter_master
+  filters:
+    branches:
+      only: master
+
+filter_releases: &filter_releases
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /^v.*/
+
+
+# -------------------------
+#   PIPELINE PARAMETERS
+#
 parameters:
   cache_key_version:
     type: string
@@ -28,7 +62,10 @@ parameters:
     type: string
     default: "~/workbench/deploy"
 
+# -------------------------
+#        COMMANDS
 # https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands
+#
 commands:
   git_checkout:
     steps:
@@ -37,8 +74,50 @@ commands:
           name: Checkout submodules
           command: git submodule update --init --recursive
 
-  # caching: https://circleci.com/docs/2.0/caching/
+  run_yarn_ui:
+    parameters:
+      version:
+        type: string
+        default: << pipeline.parameters.cache_key_version >>
+    steps:
+      # caching: https://circleci.com/docs/2.0/caching/
+      - restore_cache:
+          keys:
+            - << parameters.version >>-yarn-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+            - << parameters.version >>-yarn-ui-cache-
+      - run:
+          name: "UI dir: Yarn install dependencies"
+          working_directory: << pipeline.parameters.workingdir_ui >>
+          command: yarn install --verbose --frozen-lockfile --non-interactive
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+            - ui/node_modules
+            #- node_modules
+            #- aou-ui-angular/node_modules
+          key: << parameters.version >>-yarn-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+
+  run_yarn_e2e:
+    parameters:
+      version:
+        type: string
+        default: << pipeline.parameters.cache_key_version >>
+    steps:
+      - restore_cache:
+          keys:
+            - << parameters.version >>-yarn-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - << parameters.version >>-yarn-e2e-cache-
+      - run:
+          name: "e2e dir: Yarn install dependencies"
+          working_directory: << pipeline.parameters.workingdir_e2e >>
+          command: yarn install --verbose --frozen-lockfile --non-interactive
+      paths:
+        - ~/.cache/yarn
+        - e2e/node_modules
+        key: << parameters.version >>-yarn-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+
   restore_api_cache:
+    description: "API dir: restore gradle cache"
     parameters:
       version:
         type: string
@@ -50,6 +129,7 @@ commands:
             - << parameters.version >>-gradle-api-cache-
 
   save_api_cache:
+    description: "API dir: restore gradle cache"
     parameters:
       version:
         type: string
@@ -62,53 +142,6 @@ commands:
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: << parameters.version >>-gradle-api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-
-  save_ui_cache:
-    parameters:
-      version:
-        type: string
-        default: << pipeline.parameters.cache_key_version >>
-    steps:
-      - save_cache:
-          paths:
-            - ~/.cache/yarn
-            #- node_modules
-            #- aou-ui-angular/node_modules
-            - ui/node_modules
-          key: << parameters.version >>-yarn-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
-
-  restore_ui_cache:
-    parameters:
-      version:
-        type: string
-        default: << pipeline.parameters.cache_key_version >>
-    steps:
-      - restore_cache:
-          keys:
-            - << parameters.version >>-yarn-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
-            - << parameters.version >>-yarn-ui-cache-
-
-  restore_e2e_cache:
-    parameters:
-      version:
-        type: string
-        default: << pipeline.parameters.cache_key_version >>
-    steps:
-      - restore_cache:
-          keys:
-            - << parameters.version >>-yarn-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - << parameters.version >>-yarn-e2e-cache-
-
-  save_e2e_cache:
-    parameters:
-      version:
-        type: string
-        default: << pipeline.parameters.cache_key_version >>
-    steps:
-      - save_cache:
-          paths:
-            - ~/.cache/yarn
-          key: << parameters.version >>-yarn-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   no_change_filter:
     steps:
@@ -149,27 +182,20 @@ commands:
           # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
 
+
+# -------------------------
+#        EXECUTORS
+#
 executors:
   buildimage-docker:
+    <<: *default_environment
     docker:
       - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage_version >>
-    working_directory: << pipeline.parameters.workingdir >>
-    resource_class: medium+  # https://circleci.com/docs/2.0/configuration-reference/#resource_class
-    environment:
-      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-      # https://circleci.com/blog/how-to-handle-java-oom-errors/
-      #
-      # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
-      # so we bumped this down further to 2G.
-      JAVA_TOOL_OPTIONS: -Xmx2g
-      # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-      TERM: dumb
 
   mysql-docker:
-    executor: buildimage-docker
+    <<: *default_environment
     docker:
+      - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage_version >>
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
@@ -276,11 +302,7 @@ jobs:
           name: Download Swagger CLI
           command: |
             ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
-      - restore_ui_cache
-      - run:
-          working_directory: << pipeline.parameters.workingdir_ui >>
-          command: yarn install --verbose --frozen-lockfile
-      - save_ui_cache
+      - run_yarn_ui
       - run:
           working_directory: << pipeline.parameters.workingdir_ui >>
           command: yarn codegen
@@ -320,11 +342,7 @@ jobs:
     steps:
       - git_checkout
       #- no_change_filter  TODO
-      - restore_e2e_cache
-      - run:
-          working_directory: << pipeline.parameters.workingdir_e2e >>
-          command: yarn cache clean && yarn install --frozen-lockfile
-      - save_e2e_cache
+      - run_yarn_e2e
       - run:
           name: Update environment variables
           command: |
@@ -346,7 +364,7 @@ jobs:
     executor: buildimage-docker
     steps:
       - git_checkout
-      - restore_ui_cache
+      - run_yarn_ui
       - activate_sa
       - deploy:
           name: Deploy UI to AppEngine
@@ -403,18 +421,6 @@ jobs:
             project_name: "all-of-us-rw-perf"
             deploy_arg: "deploy"
 
-# See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
-filter_master: &filter_master
-  filters:
-    branches:
-      only: master
-
-filter_releases: &filter_releases
-  filters:
-    branches:
-      ignore: /.*/
-    tags:
-      only: /^v.*/
 
 workflows:
   build-test-deploy:
