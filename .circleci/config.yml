@@ -405,11 +405,13 @@ jobs:
           name: Await MySQL startup
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
       - run:
+          name: Launch local API
           working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb start-local-api
       - run:
+          name: Launch local UI
           working_directory: << pipeline.parameters.workingdir_ui >>
-          command: yarn dev-up --environment local
+          command: yarn dev-up # --environment local
       - run:
           name: Wait for localhost to be started
           command: |
