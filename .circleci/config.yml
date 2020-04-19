@@ -408,7 +408,7 @@ jobs:
           working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb start-local-api
       - run:
-          working_directory: << pipeline.parameters.workingdir_api >>
+          working_directory: << pipeline.parameters.workingdir_ui >>
           command: yarn dev-up --environment local
       - run:
           name: Wait for localhost to be started
