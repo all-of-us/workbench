@@ -291,6 +291,7 @@ jobs:
           command: |
             ./project.rb gradle dependencyCheckAnalyze --info
 
+
   api-integration-test:
     executor: buildimage-docker
     steps:
@@ -387,6 +388,7 @@ jobs:
       - store_test_results:
           path: << pipeline.parameters.workingdir_e2e >>/logs
       
+
   ui-deploy-to-test:
     executor: buildimage-docker
     steps:
@@ -424,6 +426,12 @@ jobs:
           deploy_arg: "deploy"
           working_dir: << pipeline.parameters.workingdir_deploy >>
 
+  sleep_min:
+    steps:
+      - run:
+          name: Sleep 1 minute waiting for new environment to be started
+          command: sleep 1m
+
 workflows:
   build-test-deploy:
     jobs:
@@ -447,6 +455,7 @@ workflows:
       - puppeteer-e2e-test:
           <<: *filter_master
           requires:
+            - sleep_min
             - api-deploy-to-test
             - ui-deploy-to-test
 
