@@ -58,6 +58,7 @@ commands:
           command: git submodule update --init --recursive
       # - no_change_filter
 
+  # caching https://circleci.com/docs/2.0/caching/
   restore_api_cache:
     description: "restore api project cache"
     parameters:
@@ -95,7 +96,6 @@ commands:
       - save_cache:
           paths:
             - ~/.cache/yarn
-            - ./node_modules
           key: << parameters.version >>-123-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
 
   restore_ui_cache:
@@ -138,14 +138,14 @@ commands:
     steps:
       - run:
           name: Git checking for differences
-          #Circle is bad about setting up your remotes for you, you must use origin/
+          # Circle is bad about setting up your remotes for you, you must use origin/
           command: |
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
               echo No relevant changes on non-master branch, skipping
               circleci step halt
             fi
 
-  # deploy UI and API together in order to track and control the release for a tagged version only.
+  # Deploy UI and API together in order to track and control the release for a tagged version only.
   deploy_ui_api:
     parameters:
       project:
@@ -155,10 +155,7 @@ commands:
       - git_checkout
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
-      - run:
-          working_directory: << pipeline.parameters.workingdir >>
-          name: Activate CircleCI service account
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - activate_sa
       - deploy:
           working_directory: << pipeline.parameters.workingdir >>/deploy
           command: |
@@ -323,9 +320,12 @@ jobs:
           version: << pipeline.parameters.ui_cache_key_version >>
       - run:
           working_directory: << pipeline.parameters.workingdir_ui >>
-          command: yarn install --verbose --frozen-lockfile && yarn codegen
+          command: yarn install --verbose --frozen-lockfile
       - save_ui_cache:
           version: << pipeline.parameters.ui_cache_key_version >>
+      - run:
+          working_directory: << pipeline.parameters.workingdir_ui >>
+          command: yarn codegen
       - run:
           name: Run Angular tests
           working_directory: << pipeline.parameters.workingdir_ui >>
