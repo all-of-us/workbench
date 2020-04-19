@@ -163,9 +163,13 @@ commands:
       project_name:
         type: string
         default: "all-of-us-rw-staging"
+      working_dir:
+        type: string
+        default: << pipeline.parameters.workingdir >>
     steps:
       - deploy:
           name: "Run ./project.rb "
+          working_directory: << parameters.working_dir >>
           command: |
             ./project.rb << parameters.deploy_arg >> \
               --project << parameters.project_name >> \
@@ -368,12 +372,11 @@ jobs:
       - git_checkout
       - run_yarn_ui
       - activate_sa
-      - deploy:
-          name: Deploy UI to AppEngine
-          working_directory: << pipeline.parameters.workingdir_ui >>
-          project_deploy_cmd:
-            project_name: "all-of-us-workbench-test"
-            deploy_arg: "deploy-ui"
+      - project_deploy_cmd:
+          project_name: "all-of-us-workbench-test"
+          deploy_arg: "deploy-ui"
+          working_dir: << pipeline.parameters.workingdir_ui >>
+
 
   api-deploy-to-test:
     executor: buildimage-docker
@@ -386,12 +389,10 @@ jobs:
       # touches several top level folders {common,}api.
       - restore_api_cache
       - activate_sa
-      - deploy:
-          name: Deploy API to AppEngine
-          working_directory: << pipeline.parameters.workingdir_api >>
-          project_deploy_cmd:
-            project_name: "all-of-us-workbench-test"
-            deploy_arg: "deploy"
+      - project_deploy_cmd:
+          project_name: "all-of-us-workbench-test"
+          deploy_arg: "deploy"
+          working_dir: << pipeline.parameters.workingdir_api >>
 
   # In staging and perf, we deploy all at once in order to track and control
   # the release for a tagged version only. In "test", we maintain individual
@@ -403,12 +404,10 @@ jobs:
       - git_checkout
       - restore_api_cache
       - activate_sa
-      - deploy:
-          name: Deploy API and UI to AppEngine
-          working_directory: << pipeline.parameters.workingdir_api >>
-          project_deploy_cmd:
-            project_name: "all-of-us-rw-staging"
-            deploy_arg: "deploy"
+      - project_deploy_cmd:
+          project_name: "all-of-us-rw-staging"
+          deploy_arg: "deploy"
+          working_dir: << pipeline.parameters.workingdir_deploy >>
 
   deploy-to-perf:
     executor: buildimage-docker
@@ -416,12 +415,10 @@ jobs:
       - git_checkout
       - restore_api_cache
       - activate_sa
-      - deploy:
-          name: Deploy API and UI to AppEngine
-          working_directory: << pipeline.parameters.workingdir_api >>
-          project_deploy_cmd:
-            project_name: "all-of-us-rw-perf"
-            deploy_arg: "deploy"
+      - project_deploy_cmd:
+          project_name: "all-of-us-rw-perf"
+          deploy_arg: "deploy"
+          working_dir: << pipeline.parameters.workingdir_deploy >>
 
 
 workflows:
