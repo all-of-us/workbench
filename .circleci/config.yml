@@ -32,7 +32,6 @@ filter_releases: &filter_releases
     tags:
       only: /^v.*/
 
-
 # -------------------------
 #   PIPELINE PARAMETERS
 #
@@ -188,7 +187,6 @@ commands:
           # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
 
-
 # -------------------------
 #        EXECUTORS
 #
@@ -202,12 +200,24 @@ executors:
     <<: *default_environment
     docker:
       - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage_version >>
-      - image: mysql:5.7
+      - image: mysql:5.7 # Same as circleci/mysql:5.7 ? This image is not cached on CircleCI
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
           - MYSQL_USER=ubuntu
           - MYSQL_PASSWORD=ubuntu
 
+  browser-docker:
+    <<: *default_environment
+    working_directory: << pipeline.parameters.workingdir_e2e >>
+    docker:
+      - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage_version >>
+      - image: circleci/node:13.10.1-browsers
+          environment:
+            NODE_ENV: development
+
+# -------------------------
+#        JOBS
+#
 jobs:
   api-build-test:
     executor: buildimage-docker
@@ -255,13 +265,29 @@ jobs:
           command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
       - save_api_cache
 
+  api-deploy-to-test:
+    executor: buildimage-docker
+    steps:
+      - git_checkout
+      # Note: most of the time spent here appears to be in Gradle / App Engine
+      # deployment. We tried more aggressively caching outputs via Circle
+      # workspaces, but that seemed to have a negligible effect on speed. It's
+      # also tricky to pick specific sub directories since the API deploy
+      # touches several top level folders {common,}api.
+      - restore_api_cache
+      - activate_sa
+      - project_deploy_cmd:
+          project_name: "all-of-us-workbench-test"
+          deploy_arg: "deploy"
+          working_dir: << pipeline.parameters.workingdir_api >>
+
   api-deps-check:
     executor: buildimage-docker
-    working_directory: << pipeline.parameters.workingdir_api >>
     steps:
       - git_checkout
       - run:
           name: Scan dependencies for vulnerabilities
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: |
             ./project.rb gradle dependencyCheckAnalyze --info
 
@@ -338,12 +364,7 @@ jobs:
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   puppeteer-e2e-test:
-    executor: buildimage-docker
-    docker:
-      - image: circleci/node:13.10.1-browsers
-        environment:
-          NODE_ENV: development
-    working_directory: << pipeline.parameters.workingdir >>
+    executor: browser-docker
     parallelism: 3
     steps:
       - git_checkout
@@ -377,28 +398,11 @@ jobs:
           deploy_arg: "deploy-ui"
           working_dir: << pipeline.parameters.workingdir_ui >>
 
-
-  api-deploy-to-test:
-    executor: buildimage-docker
-    steps:
-      - git_checkout
-      # Note: most of the time spent here appears to be in Gradle / App Engine
-      # deployment. We tried more aggressively caching outputs via Circle
-      # workspaces, but that seemed to have a negligible effect on speed. It's
-      # also tricky to pick specific sub directories since the API deploy
-      # touches several top level folders {common,}api.
-      - restore_api_cache
-      - activate_sa
-      - project_deploy_cmd:
-          project_name: "all-of-us-workbench-test"
-          deploy_arg: "deploy"
-          working_dir: << pipeline.parameters.workingdir_api >>
-
   # In staging and perf, we deploy all at once in order to track and control
   # the release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
   # a version tag.
-  deploy-to-staging:
+  deploy-staging:
     executor: buildimage-docker
     steps:
       - git_checkout
@@ -409,7 +413,7 @@ jobs:
           deploy_arg: "deploy"
           working_dir: << pipeline.parameters.workingdir_deploy >>
 
-  deploy-to-perf:
+  deploy-perf:
     executor: buildimage-docker
     steps:
       - git_checkout
@@ -419,7 +423,6 @@ jobs:
           project_name: "all-of-us-rw-perf"
           deploy_arg: "deploy"
           working_dir: << pipeline.parameters.workingdir_deploy >>
-
 
 workflows:
   build-test-deploy:
@@ -447,7 +450,7 @@ workflows:
             - api-deploy-to-test
             - ui-deploy-to-test
 
-  deploy-staging:
+  build-test-deploy-to-staging-perf:
     jobs:
       - api-local-test:
           <<: *filter_releases
@@ -462,7 +465,7 @@ workflows:
           <<: *filter_releases
       - api-integration-test:
           <<: *filter_releases
-      - deploy-to-staging:
+      - deploy-staging:
           <<: *filter_releases
           requires:
             - api-local-test
@@ -471,7 +474,7 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-build-test
-      - deploy-to-perf:
+      - deploy-perf:
           <<: *filter_releases
           requires:
             - api-local-test
@@ -480,6 +483,12 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-build-test
+      # Enable in future for running tests on staging env.
+      #- puppeteer-e2e-test:
+      #    <<: *filter_releases
+      #    requires:
+      #      - deploy-staging
+
   nightly-tests:
     triggers:
       - schedule:
