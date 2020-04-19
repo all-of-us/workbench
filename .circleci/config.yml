@@ -148,7 +148,6 @@ commands:
 
   # deploy UI and API together in order to track and control the release for a tagged version only.
   deploy_ui_api:
-    executor: buildimage-docker-executor
     parameters:
       project:
         type: string
@@ -424,6 +423,7 @@ jobs:
   # release jobs for API and UI to allow faster deploys and because we lack
   # a version tag.
   deploy-to-staging:
+    executor: buildimage-docker-executor
     steps:
       - deploy_ui_api:
           project: "all-of-us-rw-staging"
