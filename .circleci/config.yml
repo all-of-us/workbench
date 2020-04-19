@@ -97,7 +97,8 @@ commands:
             - ~/.cache/yarn
             - node_modules
             - aou-ui-angular/node_modules
-          key: << parameters.version >>-123-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+            - workbench/ui/node_modules
+          key: << parameters.version >>-123-ui-yarn-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
 
   restore_ui_cache:
     description: "restore ui project cache"
@@ -108,8 +109,8 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - << parameters.version >>-123-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
-            - << parameters.version >>-123-ui-cache-
+            - << parameters.version >>-123-ui-yarn-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+            - << parameters.version >>-123-ui-yarn-cache-
 
   restore_e2e_cache:
     description: "restore Puppeteer e2e project cache"
