@@ -1,72 +1,245 @@
-version: 2
+version: 2.1
 
-defaults: &defaults
-  docker:
-    - image: allofustest/workbench:buildimage-0.0.16
-  working_directory: ~/workbench
-java_defaults: &java_defaults
-  <<: *defaults
-  environment:
-    # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-    # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-    # https://circleci.com/blog/how-to-handle-java-oom-errors/
-    #
-    # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
-    # so we bumped this down further to 2G.
-    JAVA_TOOL_OPTIONS: -Xmx2g
-    TERM: dumb
+# Explore Orbs https://circleci.com/orbs/registry/?filterBy=all
+orbs:
+  ci-caching: jobcloud/ci-caching@0.12.0
+  build-tools: circleci/build-tools@2.6.3
+  docker: circleci/docker@1.0.1
+  node: circleci/node@2.0.2
+  browser-tools: circleci/browser-tools@0.1.4
+  kubernetes: circleci/kubernetes@0.11.0
+  # buildimage provides gradle installation
+  # gradle: circleci/gradle@2.1.0
 
-jobs:
-  api-build-test:
-    <<: *java_defaults
+# Pipeline parameters
+parameters:
+  ui_cache_key_version:
+    type: string
+    default: "v1"
+
+  api_cache_key_version:
+    type: string
+    default: "v1"
+
+  e2e_cache_key_version:
+    type: string
+    default: "v2"
+
+  buildimage-tag:
+    type: string
+    default: "0.0.16"
+
+  circle_deploy_service_account:
+    type: string
+    default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
+
+  workingdir:
+    type: string
+    default: "~/workbench"
+
+  workingdir_api:
+    type: string
+    default: << pipeline.parameters.workingdir >>/api
+
+  workingdir_ui:
+    type: string
+    default: << pipeline.parameters.workingdir >>/ui
+
+  workingdir_e2e:
+    type: string
+    default: << pipeline.parameters.workingdir >>/e2e
+
+
+executors:
+  buildimage-docker-executor:
+    docker:
+      - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage-tag >>
+    working_directory: << pipeline.parameters.workingdir >>
+    environment:
+      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+      # https://circleci.com/blog/how-to-handle-java-oom-errors/
+      #
+      # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
+      # so we bumped this down further to 2G.
+      JAVA_TOOL_OPTIONS: -Xmx2g
+      TERM: dumb
+
+commands:
+  git_checkout:
     steps:
       - checkout
       - run:
+          name: Git fetch submodules
           command: git submodule update --init --recursive
+
+  restore_api_cache:
+    description: "restore api project cache"
+    parameters:
+      version:
+        type: string
+        default: << pipeline.parameters.api_cache_key_version >>
+    steps:
+      - restore_cache:
+          keys:
+            - << parameters.version >>-123-api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+            - << parameters.version >>-123-api-cache-
+
+  save_api_cache:
+    description: "save api project cache"
+    parameters:
+      version:
+        type: string
+        default: << pipeline.parameters.api_cache_key_version >>
+    steps:
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/.m2
+            - ~/workbench/api/build/exploded-api/WEB-INF/lib/
+          key: << parameters.version >>-123-api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+
+  save_ui_cache:
+    description: "save ui project cache"
+    parameters:
+      version:
+        type: string
+        default: << pipeline.parameters.ui_cache_key_version >>
+    steps:
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+          key: << parameters.version >>-123-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+
+  restore_ui_cache:
+    description: "restore ui project cache"
+    parameters:
+      version:
+        type: string
+        default: << pipeline.parameters.ui_cache_key_version >>
+    steps:
+      - restore_cache:
+          keys:
+            - << parameters.version >>-123-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+            - << parameters.version >>-123-ui-cache-
+
+  restore_e2e_cache:
+    description: "restore Puppeteer e2e project cache"
+    parameters:
+      version:
+        type: string
+        default: << pipeline.parameters.e2e_cache_key_version >>
+    steps:
+      - restore_cache:
+          keys:
+            - << parameters.version >>-123-e2e-tests-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - << parameters.version >>-123-e2e-tests-cache-
+
+  save_e2e_cache:
+    description: "save Puppeteer e2e project cache"
+    parameters:
+      version:
+        type: string
+        default: << pipeline.parameters.e2e_cache_key_version >>
+    steps:
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+          key: << parameters.version >>-123-e2e-tests-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+
+  filter_no_change:
+    steps:
       - run:
+          name: Git checking for differences
           #Circle is bad about setting up your remotes for you, you must use origin/
           command: |
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
               echo No relevant changes on non-master branch, skipping
               circleci step halt
             fi
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
+
+  # deploy UI and API together in order to track and control the release for a tagged version only.
+  deploy_ui_api:
+    executor: buildimage-docker-executor
+    parameters:
+      project:
+        type: string
+        default: "all-of-us-rw-staging"
+    steps:
+      - git_checkout
+      - restore_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
+      - run:
+          working_directory: << pipeline.parameters.workingdir >>
+          name: Activate CircleCI service account
+          command: ci/activate_creds.sh api/circle-sa-key.json
+      - deploy:
+          working_directory: << pipeline.parameters.workingdir >>/deploy
+          command: |
+            ./project.rb deploy \
+              --project << parameters.project >> \
+              --account << pipeline.parameters.circle_deploy_service_account >> \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file circle-sa-key.json \
+              --promote
+
+
+
+jobs:
+  # Install NodeJS into a non-node container.
+  integration-test-install-linux:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - node/install:
+          node-version: "12.16.2" # Action LTS release. https://nodejs.org/en/about/releases/
+          install-yarn: true
+      - run:
+          name: Check Node version 12 is installed
+          command: |
+            if ! node --version | grep -q "12"; then
+              echo "Node version 12 not found."
+              exit 1
+            fi
+
+  api-build-test:
+    executor: buildimage-docker-executor
+    working_directory: << pipeline.parameters.workingdir_api >>
+    steps:
+      - git_checkout
+      - filter_no_change
+      - restore_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
       - run:
           name: Validate swagger definitions
-          working_directory: ~/workbench/api
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
       - run:
           name: Integration tests compile
-          working_directory: ~/workbench/api
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb gradle compileBigquerytestJava compileIntegrationJava
       - run:
           name: Unit tests
-          working_directory: ~/workbench/api
           command: ./project.rb test
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
-          working_directory: ~/workbench/api
           command: ./gradlew spotlessCheck
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-            - ~/workbench/api/build/exploded-api/WEB-INF/lib/
-          key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+      - save_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
+
 
   api-local-test:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.16
+      - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage-tag >>
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
           - MYSQL_USER=ubuntu
           - MYSQL_PASSWORD=ubuntu
-    working_directory: ~/workbench
+    working_directory: << pipeline.parameters.workingdir >>
     environment:
       # Drop to ~1.5G; the local API server starts two Java processes (the API
       # server and the cron emulator). The default machine has 4GB, so we want
@@ -78,17 +251,13 @@ jobs:
       JAVA_TOOL_OPTIONS: -Xmx1536m
       TERM: dumb
       MYSQL_ROOT_PASSWORD: ubuntu
+    resource_class: medium+  # https://circleci.com/docs/2.0/configuration-reference/#resource_class
     steps:
-      - checkout
+      - git_checkout
+      - restore_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
       - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
-      - run:
-          working_directory: ~/workbench
+          working_directory: << pipeline.parameters.workingdir >>
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
           # MySQL sometimes refuses connections by the time we attempt to apply
@@ -96,187 +265,109 @@ jobs:
           name: Await MySQL startup
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
       - run:
-          working_directory: ~/workbench/api
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb run-local-migrations
       - run:
-          working_directory: ~/workbench/api
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-            - ~/workbench/api/build/exploded-api/WEB-INF/lib/
-          key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-
-  api-deploy-to-test:
-    <<: *java_defaults
-    steps:
-      - checkout
-      - run:
-          command: git submodule update --init --recursive
-      # Note: most of the time spent here appears to be in Gradle / App Engine
-      # deployment. We tried more aggressively caching outputs via Circle
-      # workspaces, but that seemed to have a negligible effect on speed. It's
-      # also tricky to pick specific sub directories since the API deploy
-      # touches several top level folders {common,}api.
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
-      - run:
-          working_directory: ~/workbench
-          command: ci/activate_creds.sh api/circle-sa-key.json
-      - deploy:
-          name: Deploy to App Engine
-          working_directory: ~/workbench/api
-          command: |
-            ./project.rb deploy \
-              --project all-of-us-workbench-test \
-              --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-              --version circle-ci-test \
-              --key-file circle-sa-key.json \
-              --promote
+      - save_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
 
   api-deps-check:
-    <<: *java_defaults
+    executor: buildimage-docker-executor
+    working_directory: << pipeline.parameters.workingdir_api >>
     steps:
-      - checkout
-      - run:
-          command: git submodule update --init --recursive
+      - git_checkout
       - run:
           name: Scan dependencies for vulnerabilities
-          working_directory: ~/workbench/api
           command: |
             ./project.rb gradle dependencyCheckAnalyze --info
 
   # TODO(RW-4645): Upgrade to Circle 2.1 and leverage shared commands to reduce duplication.
   api-integration-test:
-    <<: *java_defaults
+    <executor: buildimage-docker-executor
     steps:
-      - checkout
+      - git_checkout
+      - skip_if_no_change_cmd
+      - restore_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
       - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - run:
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
-      - restore_cache:
-          keys:
-          - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-integration-cache-
-      - run:
-          working_directory: ~/workbench
+          working_directory: << pipeline.parameters.workingdir >>
           # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
-          working_directory: ~/workbench/api
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb integration
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-          key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
+      - save_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
 
   api-nightly-integration-test:
-    <<: *java_defaults
+    executor: buildimage-docker-executor
     steps:
-      - checkout
+      - git_checkout
+      - restore_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
       - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-          - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-integration-cache-
-      - run:
-          working_directory: ~/workbench
+          working_directory: << pipeline.parameters.workingdir >>
           # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
-          working_directory: ~/workbench/api
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb nightly-integration
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-          key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
+      - save_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
 
   api-bigquery-test:
-    <<: *java_defaults
+    executor: buildimage-docker-executor
     steps:
-      - checkout
+      - git_checkout
+      - skip_if_no_change_cmd
+      - restore_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
       - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - run:
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
-      - restore_cache:
-          keys:
-          - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-integration-cache-
-      - run:
-          working_directory: ~/workbench
+          working_directory: << pipeline.parameters.workingdir >>
           # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
-          working_directory: ~/workbench/api
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb bigquerytest
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-          key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
+      - save_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
 
   ui-build-test:
-    <<: *defaults
+    executor: buildimage-docker-executor
     steps:
-      - checkout
+      - git_checkout
       - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - run:
-          working_directory: ~/workbench
+          working_directory: << pipeline.parameters.workingdir >>
           name: Download Swagger CLI
           command: |
             ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
-      - restore_cache:
-          keys:
-          - ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
-          - ui-cache-
+      - restore_ui_cache:
+          version: << pipeline.parameters.ui_cache_key_version >>
       - run:
-          working_directory: ~/workbench/ui
+          working_directory: << pipeline.parameters.workingdir_ui >>
           command: yarn install --verbose --frozen-lockfile && yarn codegen
-      - save_cache:
-          paths:
-            - ~/.cache/yarn
-          key: ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+      - save_ui_cache:
+          version: << pipeline.parameters.ui_cache_key_version >>
       - run:
           name: Run Angular tests
-          working_directory: ~/workbench/ui
+          working_directory: << pipeline.parameters.workingdir_ui >>
           command: |
             yarn test --no-watch --no-progress --browsers=ChromeHeadless
       - run:
           name: Run React tests (Jest)
-          working_directory: ~/workbench/ui
+          working_directory: << pipeline.parameters.workingdir_ui >>
           command: |
             yarn test-react --detectOpenHandles --forceExit --runInBand
       - run:
           name: Build with strict compilation
-          working_directory: ~/workbench/ui
+          working_directory: << pipeline.parameters.workingdir_ui >>
           command: ./project.rb build --environment test
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Lint Typescript
-          working_directory: ~/workbench/ui
+          working_directory: << pipeline.parameters.workingdir_ui >>
           command: yarn run lint
       - persist_to_workspace:
           root: .
@@ -285,29 +376,22 @@ jobs:
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   puppeteer-e2e-test:
-    <<: *defaults
+    executor: buildimage-docker-executor
     docker:
       - image: circleci/node:13.10.1-browsers
         environment:
           NODE_ENV: development
-    working_directory: ~/workbench
+    working_directory: << pipeline.parameters.workingdir >>
     parallelism: 3
     steps:
-      - checkout
-      - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-          - v2-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
-          - v2-e2e-test-cache-
+      - git_checkout
+      - restore_e2e_cache:
+          version: << pipeline.parameters.e2e_cache_key_version >>
       - run: 
-          working_directory: ~/workbench/e2e
+          working_directory: << pipeline.parameters.workingdir_e2e >>
           command: yarn cache clean && yarn install --frozen-lockfile
-      - save_cache:
-          paths:
-            - ~/.cache/yarn
-          key: v2-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - save_e2e_cache:
+          version: << pipeline.parameters.e2e_cache_key_version >>
       - run:
           name: Update environment variables
           command: |
@@ -317,35 +401,58 @@ jobs:
             source $BASH_ENV
       - run:
           name: Run e2e tests (Puppeteer and Jest)
-          working_directory: ~/workbench/e2e
+          working_directory: << pipeline.parameters.workingdir_e2e >>
           command: yarn test:ci $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
       - store_artifacts:
           path: e2e/logs
           destination: logs
       - store_test_results:
-          path: ~/workbench/e2e/logs
+          path: << pipeline.parameters.workingdir_e2e >>/logs
       
   ui-deploy-to-test:
-    <<: *defaults
+    executor: buildimage-docker-executor
     steps:
-      - checkout
+      - git_checkout
+      - restore_ui_cache:
+          version: << pipeline.parameters.ui_cache_key_version >>
       - run:
-          command: git submodule update --init --recursive
-      # Use the ui-build-test workspace here to avoid redoing the setup.
-      - attach_workspace:
-          at: .
-      - restore_cache:
-          keys:
-          - ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
-          - ui-cache-
+          working_directory: << pipeline.parameters.workingdir >>
+          name: Active CircleCI service account
+          command: ci/activate_creds.sh api/circle-sa-key.json
       - deploy:
           name: Deploy to App Engine
-          working_directory: ~/workbench/ui
+          working_directory: << pipeline.parameters.workingdir_ui >>
           command: |
-            ../ci/activate_creds.sh circle-sa-key.json
             ./project.rb deploy-ui \
               --project all-of-us-workbench-test \
-              --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+              --account << pipeline.parameters.circle_deploy_service_account >> \
+              --version circle-ci-test \
+              --key-file circle-sa-key.json \
+              --promote
+
+
+  api-deploy-to-test:
+    executor: buildimage-docker-executor
+    steps:
+      - git_checkout
+      # Note: most of the time spent here appears to be in Gradle / App Engine
+      # deployment. We tried more aggressively caching outputs via Circle
+      # workspaces, but that seemed to have a negligible effect on speed. It's
+      # also tricky to pick specific sub directories since the API deploy
+      # touches several top level folders {common,}api.
+      - restore_api_cache:
+          version: << pipeline.parameters.api_cache_key_version >>
+      - run:
+          working_directory: << pipeline.parameters.workingdir >>
+          name: Active CircleCI service account
+          command: ci/activate_creds.sh api/circle-sa-key.json
+      - deploy:
+          name: Deploy to App Engine
+          working_directory: << pipeline.parameters.workingdir_api >>
+          command: |
+            ./project.rb deploy \
+              --project all-of-us-workbench-test \
+              --account << pipeline.parameters.circle_deploy_service_account >> \
               --version circle-ci-test \
               --key-file circle-sa-key.json \
               --promote
@@ -354,51 +461,18 @@ jobs:
   # the release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
   # a version tag.
-  deploy-staging:
-    <<: *defaults
+  deploy-to-staging:
     steps:
-      - checkout
-      - run:
-          command: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
-      - deploy:
-          working_directory: ~/workbench/deploy
-          command: |
-            ../ci/activate_creds.sh circle-sa-key.json
-            ./project.rb deploy \
-              --project all-of-us-rw-staging \
-              --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-              --git-version "${CIRCLE_TAG}" \
-              --app-version "${CIRCLE_TAG}" \
-              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file circle-sa-key.json \
-              --promote
+      - deploy_ui_api:
+          project: "all-of-us-rw-staging"
 
-  deploy-perf:
-    <<: *defaults
+  deploy-to-perf:
+    executor: buildimage-docker-executor
     steps:
-      - checkout
-      - run:
-          command: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
-      - deploy:
-          working_directory: ~/workbench/deploy
-          command: |
-            ../ci/activate_creds.sh circle-sa-key.json
-            ./project.rb deploy \
-              --project all-of-us-rw-perf \
-              --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-              --git-version "${CIRCLE_TAG}" \
-              --app-version "${CIRCLE_TAG}" \
-              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file circle-sa-key.json \
-              --promote
+      - deploy_ui_api:
+          project: "all-of-us-rw-perf"
+
+
 
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
 filter_master: &filter_master
@@ -411,6 +485,7 @@ filter_releases: &filter_releases
       ignore: /.*/
     tags:
       only: /^v.*/
+
 
 workflows:
   version: 2
@@ -454,7 +529,7 @@ workflows:
           <<: *filter_releases
       - api-integration-test:
           <<: *filter_releases
-      - deploy-staging:
+      - deploy-to-staging:
           <<: *filter_releases
           requires:
             - api-local-test
@@ -463,7 +538,7 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-build-test
-      - deploy-perf:
+      - deploy-to-perf:
           <<: *filter_releases
           requires:
             - api-local-test
@@ -484,6 +559,7 @@ workflows:
     jobs:
       - api-nightly-integration-test
       - api-bigquery-test
+
 
 experimental:
   notify:
