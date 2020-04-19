@@ -27,7 +27,6 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void testStatusProd() throws IOException {
-    assertThat(false).isTrue(); // test failure display
     config = loadProdConfig();
     assertThat(service.getApiBasePath()).isEqualTo("https://api.firecloud.org");
     assertThat(service.getFirecloudStatus()).isTrue();
