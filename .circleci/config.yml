@@ -2,7 +2,6 @@ version: 2.1
 
 # Explore Orbs https://circleci.com/orbs/registry/?filterBy=all
 orbs:
-  ci-caching: jobcloud/ci-caching@0.12.0
   build-tools: circleci/build-tools@2.6.3
   docker: circleci/docker@1.0.1
   node: circleci/node@2.0.2
