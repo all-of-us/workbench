@@ -224,8 +224,8 @@ jobs:
           version: << pipeline.parameters.api_cache_key_version >>
 
   api-local-test:
+    executor: buildimage-docker-executor
     docker:
-      - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage-tag >>
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
