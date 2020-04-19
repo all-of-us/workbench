@@ -76,7 +76,7 @@ describe('Sidebar Navigation', () => {
     await askQuestionAboutButton.dispose();
   });
 
-  test('User can Sign Out', async () => {
+  test.skip('User can Sign Out', async () => {
     // Select Sign Out link
     await Navigation.navMenu(page, NavLink.SIGN_OUT);
     await waitForExists(page, '//*[text()="Redirect Notice"]');

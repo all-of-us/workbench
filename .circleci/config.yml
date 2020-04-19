@@ -1,15 +1,5 @@
 version: 2.1
 
-# Explore Orbs https://circleci.com/orbs/registry/?filterBy=all
-orbs:
-  build-tools: circleci/build-tools@2.6.3
-  docker: circleci/docker@1.0.1
-  node: circleci/node@2.0.2
-  browser-tools: circleci/browser-tools@0.1.4
-  kubernetes: circleci/kubernetes@0.11.0
-  # buildimage provides gradle installation
-  # gradle: circleci/gradle@2.1.0
-
 # Pipeline parameters
 parameters:
   ui_cache_key_version:
@@ -48,13 +38,12 @@ parameters:
     type: string
     default: "~/workbench/e2e"
 
-
 commands:
   git_checkout:
     steps:
       - checkout
       - run:
-          name: Git fetch submodules
+          name: Checkout submodules
           command: git submodule update --init --recursive
 
   # caching https://circleci.com/docs/2.0/caching/
@@ -449,7 +438,6 @@ jobs:
           project: "all-of-us-rw-perf"
 
 
-
 # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
 filter_master: &filter_master
   filters:
@@ -463,9 +451,7 @@ filter_releases: &filter_releases
     tags:
       only: /^v.*/
 
-
 workflows:
-
   build-test-deploy:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
@@ -536,7 +522,6 @@ workflows:
     jobs:
       - api-nightly-integration-test
       - api-bigquery-test
-
 
 experimental:
   notify:
