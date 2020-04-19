@@ -280,6 +280,9 @@ jobs:
           project_name: "all-of-us-workbench-test"
           deploy_arg: "deploy"
           working_dir: << pipeline.parameters.workingdir_api >>
+      - run:
+          name: Sleep 1 minute waiting for new environment to be started
+          command: sleep 1m
 
   api-deps-check:
     executor: buildimage-docker
@@ -426,12 +429,6 @@ jobs:
           deploy_arg: "deploy"
           working_dir: << pipeline.parameters.workingdir_deploy >>
 
-  sleep_min:
-    steps:
-      - run:
-          name: Sleep 1 minute waiting for new environment to be started
-          command: sleep 1m
-
 workflows:
   build-test-deploy:
     jobs:
@@ -455,7 +452,6 @@ workflows:
       - puppeteer-e2e-test:
           <<: *filter_master
           requires:
-            - sleep_min
             - api-deploy-to-test
             - ui-deploy-to-test
 
