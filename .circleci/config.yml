@@ -56,7 +56,6 @@ commands:
       - run:
           name: Git fetch submodules
           command: git submodule update --init --recursive
-      # - no_change_filter
 
   # caching https://circleci.com/docs/2.0/caching/
   restore_api_cache:
@@ -96,6 +95,8 @@ commands:
       - save_cache:
           paths:
             - ~/.cache/yarn
+            - node_modules
+            - aou-ui-angular/node_modules
           key: << parameters.version >>-123-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
 
   restore_ui_cache:
@@ -213,6 +214,7 @@ jobs:
     executor: buildimage-docker-executor
     steps:
       - git_checkout
+      - no_change_filter
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
       - run:
@@ -272,6 +274,7 @@ jobs:
     executor: buildimage-docker-executor
     steps:
       - git_checkout
+      - no_change_filter
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
       - activate_sa
@@ -298,6 +301,7 @@ jobs:
     executor: buildimage-docker-executor
     steps:
       - git_checkout
+      - no_change_filter
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
       - activate_sa
