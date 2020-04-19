@@ -111,10 +111,11 @@ commands:
           name: "e2e dir: Yarn install dependencies"
           working_directory: << pipeline.parameters.workingdir_e2e >>
           command: yarn install --verbose --frozen-lockfile --non-interactive
-      paths:
-        - ~/.cache/yarn
-        - e2e/node_modules
-        key: << parameters.version >>-yarn-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+            - e2e/node_modules
+          key: << parameters.version >>-yarn-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   restore_api_cache:
     description: "API dir: restore gradle cache"
