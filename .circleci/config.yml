@@ -212,7 +212,7 @@ executors:
     docker:
       - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage_version >>
       - image: circleci/node:13.10.1-browsers
-          environment:
+        environment:
             NODE_ENV: development
 
 # -------------------------
