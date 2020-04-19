@@ -165,6 +165,7 @@ commands:
         default: "all-of-us-rw-staging"
     steps:
       - run:
+          name: "run ./project.rb "
           command: |
             ./project.rb << parameters.deploy_arg >> \
               --project << parameters.project_name >> \
@@ -370,9 +371,10 @@ jobs:
       - deploy:
           name: Deploy UI to AppEngine
           working_directory: << pipeline.parameters.workingdir_ui >>
-          project_deploy_cmd:
-            project_name: "all-of-us-workbench-test"
-            deploy_arg: "deploy-ui"
+          -run:
+            project_deploy_cmd:
+              project_name: "all-of-us-workbench-test"
+              deploy_arg: "deploy-ui"
 
   api-deploy-to-test:
     executor: buildimage-docker
@@ -388,9 +390,10 @@ jobs:
       - deploy:
           name: Deploy API to AppEngine
           working_directory: << pipeline.parameters.workingdir_api >>
-          project_deploy_cmd:
-            project_name: "all-of-us-workbench-test"
-            deploy_arg: "deploy"
+          -run:
+            project_deploy_cmd:
+              project_name: "all-of-us-workbench-test"
+              deploy_arg: "deploy"
 
   # In staging and perf, we deploy all at once in order to track and control
   # the release for a tagged version only. In "test", we maintain individual
@@ -405,9 +408,10 @@ jobs:
       - deploy:
           name: Deploy API and UI to AppEngine
           working_directory: << pipeline.parameters.workingdir_api >>
-          project_deploy_cmd:
-            project_name: "all-of-us-rw-staging"
-            deploy_arg: "deploy"
+          - run:
+            project_deploy_cmd:
+              project_name: "all-of-us-rw-staging"
+              deploy_arg: "deploy"
 
   deploy-to-perf:
     executor: buildimage-docker
@@ -418,9 +422,10 @@ jobs:
       - deploy:
           name: Deploy API and UI to AppEngine
           working_directory: << pipeline.parameters.workingdir_api >>
-          project_deploy_cmd:
-            project_name: "all-of-us-rw-perf"
-            deploy_arg: "deploy"
+          -run:
+            project_deploy_cmd:
+              project_name: "all-of-us-rw-perf"
+              deploy_arg: "deploy"
 
 
 workflows:
