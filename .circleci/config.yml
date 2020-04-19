@@ -56,7 +56,7 @@ commands:
       - run:
           name: Git fetch submodules
           command: git submodule update --init --recursive
-      - no_change_filter
+      # - no_change_filter
 
   restore_api_cache:
     description: "restore api project cache"
@@ -199,13 +199,13 @@ executors:
 jobs:
   api-build-test:
     executor: buildimage-docker-executor
-    working_directory: << pipeline.parameters.workingdir_api >>
     steps:
       - git_checkout
       - restore_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
       - run:
           name: Validate swagger definitions
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
       - run:
           name: Integration tests compile
@@ -213,10 +213,12 @@ jobs:
           command: ./project.rb gradle compileBigquerytestJava compileIntegrationJava
       - run:
           name: Unit tests
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb test
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
+          working_directory: << pipeline.parameters.workingdir_api >>
           command: ./gradlew spotlessCheck
       - save_api_cache:
           version: << pipeline.parameters.api_cache_key_version >>
