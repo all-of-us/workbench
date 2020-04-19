@@ -392,6 +392,36 @@ jobs:
           path: << pipeline.parameters.workingdir_e2e >>/logs
       
 
+  puppeteer-e2e-local-test:
+    executor: mysql-docker
+    environment:
+      MYSQL_ROOT_PASSWORD: ubuntu
+    steps:
+      - git_checkout
+      - restore_api_cache
+      - run_yarn_e2e
+      - activate_sa
+      - run:
+          name: Await MySQL startup
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - run:
+          working_directory: << pipeline.parameters.workingdir_api >>
+          command: ./project.rb start-local-api
+      - run:
+          working_directory: << pipeline.parameters.workingdir_api >>
+          command: yarn dev-up --environment local
+      - run:
+          name: Wait for localhost to be started
+          command: |
+            sleep 20
+            curl --retry 10 --retry-delay 3 -X POST --header "Content-Type: application/json" http://localhost:8081/v1/status
+      - run:
+          working_directory: << pipeline.parameters.workingdir_e2e >>
+          command: yarn cross-env NODE_ENV=development WORKBENCH_ENV=local CI=true jest --ci --runInBand --forceExit
+      - run:
+          working_directory: << pipeline.parameters.workingdir_api >>
+          command: ./project.rb stop-local-api
+
   ui-deploy-to-test:
     executor: buildimage-docker
     steps:
@@ -439,6 +469,7 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
+      - puppeteer-e2e-local-test
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
