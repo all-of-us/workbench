@@ -397,11 +397,15 @@ jobs:
           name: Launch local UI
           working_directory: << pipeline.parameters.workingdir_ui >>
           command: yarn dev-up
+          background: true  # Start UI server and running in the background
       - run:
           name: Wait for localhost to be started
           command: |
-            sleep 20
-            curl --retry 10 --retry-delay 3 -X POST --header "Content-Type: application/json" http://localhost:8081/v1/status
+            sleep 5m
+            curl --retry-delay 1 \
+              --retry-max-time 300 \
+              --retry-connrefused \
+              -X POST --header "Content-Type: application/json" http://localhost:8081/v1/status
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   puppeteer-e2e-test:
