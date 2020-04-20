@@ -8,35 +8,11 @@
 # ./project.rb generate-cb-criteria-tables --bq-project aou-res-curation-prod --bq-dataset deid_output_20181116
 # ./project.rb generate-cb-criteria-tables --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606
 
+set -ex
 
-set -xeuo pipefail
-IFS=$'\n\t'
-
-# --cdr=cdr_version ... *optional
-USAGE="./generate-cdr/generate-cb-criteria-tables.sh --bq-project <PROJECT> --bq-dataset <DATASET>"
-
-while [ $# -gt 0 ]; do
-  echo "1 is $1"
-  case "$1" in
-    --bq-project) BQ_PROJECT=$2; shift 2;;
-    --bq-dataset) BQ_DATASET=$2; shift 2;;
-    -- ) shift; break ;;
-    * ) break ;;
-  esac
-done
-
-
-if [ -z "${BQ_PROJECT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-if [ -z "${BQ_DATASET}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
+export BQ_PROJECT=$1  # project
+export BQ_DATASET=$2  # dataset
+export DATA_BROWSER_FLAG=$3 # data browser flag
 
 # Check that bq_project exists and exit if not
 datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
@@ -1104,22 +1080,25 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id,
     0,'PERSON',1,'SEX','Sex',1,0,0,0"
 
-#echo "DEMO - Sex at birth children"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-#    (id,parent_id,domain_id,is_standard,type,concept_id,name,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
-#SELECT ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id,
-#    (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'SEX' and parent_id = 0) as parent_id,
-#    'PERSON',1,'SEX',concept_id,
-#    CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name,
-#    a.cnt,0,1,0,0
-#FROM
-#    (
-#        SELECT sex_at_birth_concept_id, count(distinct person_id) cnt
-#        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
-#        GROUP BY 1
-#    ) a
-#LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
+if [ "$DATA_BROWSER_FLAG" == false ]
+then
+echo "DEMO - Sex at birth children"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (id,parent_id,domain_id,is_standard,type,concept_id,name,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
+SELECT ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id,
+    (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'SEX' and parent_id = 0) as parent_id,
+    'PERSON',1,'SEX',concept_id,
+    CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name,
+    a.cnt,0,1,0,0
+FROM
+    (
+        SELECT sex_at_birth_concept_id, count(distinct person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+        GROUP BY 1
+    ) a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
+fi
 
 echo "DEMO - Race parent"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
