@@ -439,16 +439,16 @@ jobs:
   e2e-test-env-local:
     <<: *filter_pr_branch
     executor: browser-docker
-      environment:
-        WORKBENCH_ENV: local
+    environment:
+      WORKBENCH_ENV: local
     parallelism: 2
     steps:
       - run_e2e_tests
 
   e2e-test:
     executor: browser-docker
-      environment:
-        WORKBENCH_ENV: dev
+    environment:
+      WORKBENCH_ENV: dev
     parallelism: 3
     steps:
       - run_e2e_tests
