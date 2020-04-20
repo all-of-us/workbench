@@ -32,7 +32,7 @@ filter_releases: &filter_releases
     tags:
       only: /^v.*/
 
-filter_dev: &filter_dev
+filter_pr_branch: &filter_pr_branch
   filters:
     branches:
       ignore:
@@ -74,6 +74,31 @@ parameters:
 # https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands
 #
 commands:
+
+  run_e2e_tests:
+    steps:
+      - git_checkout
+      #- no_change_filter  TODO
+      - run_yarn_e2e
+      - run:
+          name: Update environment variables
+          command: |
+            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
+            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
+            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Run e2e tests (Puppeteer and Jest)
+          working_directory: << pipeline.parameters.workingdir_e2e >>
+          command: yarn test:ci \
+            $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
+      - store_artifacts:
+          path: e2e/logs
+          destination: logs
+      - store_test_results:
+          path: ~/workbench/e2e/logs
+
+
   git_checkout:
     steps:
       - checkout
@@ -199,6 +224,7 @@ commands:
 #        EXECUTORS
 #
 executors:
+
   buildimage-docker:
     <<: *default_environment
     docker:
@@ -220,8 +246,22 @@ executors:
     docker:
       - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage_version >>
       - image: circleci/node:13.10.1-browsers
-        environment:
-            NODE_ENV: development
+      environment:
+          NODE_ENV: development
+          CI: true
+
+  browser-env-local:
+    executor: browser-docker
+    parallelism: 2
+    environment:
+      WORKBENCH_ENV: local
+
+  browser-env-test:
+    executor: browser-docker
+    parallelism: 3
+    environment:
+      WORKBENCH_ENV: dev
+
 
 # -------------------------
 #        JOBS
@@ -375,6 +415,7 @@ jobs:
             - ui
 
   deploy-local:
+    <<: *filter_pr_branch
     executor: mysql-docker
     environment:
       MYSQL_ROOT_PASSWORD: ubuntu
@@ -405,63 +446,20 @@ jobs:
             curl --retry-delay 1 \
               --retry-max-time 300 \
               --retry-connrefused \
-              http://localhost:8081/v1/status
+              http://127.0.0.1:8081/v1/status
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
-  puppeteer-e2e-test:
-    environment:
-      WORKBENCH_ENV: dev
-    executor: browser-docker
-    parallelism: 3
+  e2e-test-env-local:
+    <<: *filter_pr_branch
+    executor: browser-env-local
     steps:
-      - git_checkout
-      #- no_change_filter  TODO
-      - run_yarn_e2e
-      - run:
-          name: Update environment variables
-          command: |
-            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
-            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
-            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
-            source $BASH_ENV
-      - run:
-          name: Run e2e tests (Puppeteer and Jest)
-          working_directory: << pipeline.parameters.workingdir_e2e >>
-          command: yarn test:ci \
-            $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
-      - store_artifacts:
-          path: e2e/logs
-          destination: logs
-      - store_test_results:
-          path: ~/workbench/e2e/logs
+      - run_e2e_tests
 
-  puppeteer-local-test:
-    executor: browser-docker
-    environment:
-      WORKBENCH_ENV: local
-    parallelism: 3
+  e2e-test:
+    executor: browser-env-test
     steps:
-      - git_checkout
-      #- no_change_filter  TODO
-      - run_yarn_e2e
-      - run:
-          name: Update environment variables
-          command: |
-            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
-            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
-            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
-            source $BASH_ENV
-      - run:
-          name: Run e2e tests (Puppeteer and Jest)
-          working_directory: << pipeline.parameters.workingdir_e2e >>
-          command: |
-            yarn test:ci \
-              $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
-      - store_artifacts:
-          path: e2e/logs
-          destination: logs
-      - store_test_results:
-          path: << pipeline.parameters.workingdir_e2e >>/logs
+      - run_e2e_tests
+
 
 
   ui-deploy-to-test:
@@ -512,13 +510,11 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
+      - e2e-test
       - deploy-local:
-          <<: *filter_dev
-      - puppeteer-local-test:
-          <<: *filter_dev
+      - e2e-test-env-local:
           requires:
             - deploy-local
-
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
