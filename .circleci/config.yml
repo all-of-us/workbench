@@ -241,7 +241,6 @@ executors:
 
   browser-docker:
     <<: *default_environment
-    working_directory: << pipeline.parameters.workingdir_e2e >>
     environment:
       NODE_ENV: development
       CI: true
@@ -425,14 +424,21 @@ jobs:
           command: yarn dev-up --configuration=local
           background: true  # Start local UI server and running in the background
       - run:
-          name: Wait for localhost to be started
+          name: Wait for localhost UI to be started
+          background: true
           command: |
             sleep 3m
             dockerize -wait tcp://127.0.0.1:4200 -timeout 3m
+      - run:
+          name: Wait for localhost API to be started
+          background: true
+          command: |
+            sleep 3m
+            dockerize -wait tcp://127.0.0.1:8081/v1/status -timeout 3m
 
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
-  e2e-test-env-local:
+  e2e-test-local:
     executor: browser-docker
     environment:
       WORKBENCH_ENV: local
@@ -500,7 +506,7 @@ workflows:
       - api-integration-test
       - deploy-local:
           <<: *filter_pr_branch
-      - e2e-test-env-local:
+      - e2e-test-local:
           <<: *filter_pr_branch
           requires:
             - deploy-local
