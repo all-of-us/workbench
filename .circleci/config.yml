@@ -37,7 +37,6 @@ filter_pr_branch: &filter_pr_branch
     branches:
       ignore:
         - master
-        - develop
         - /^v.*/
 
 # -------------------------
@@ -429,8 +428,8 @@ jobs:
           name: Wait for localhost to be started
           command: |
             sleep 3m
-            dockerize -wait tcp://127.0.0.1:8081/v1/status -timeout 3m
-          
+            dockerize -wait tcp://127.0.0.1:4200 -timeout 3m
+
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   e2e-test-env-local:
