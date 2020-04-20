@@ -35,9 +35,10 @@ filter_releases: &filter_releases
 filter_dev: &filter_dev
   filters:
     branches:
-      only:
-        - dev
-      pull_request: true
+      ignore:
+        - master
+        - develop
+        - /^v.*/
 
 # -------------------------
 #   PIPELINE PARAMETERS
