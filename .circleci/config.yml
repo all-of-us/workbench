@@ -381,9 +381,9 @@ jobs:
             - ui
 
   deploy-local:
-    <<: *filter_dev
     executor: buildimage-docker
     steps:
+      <<: *filter_dev
       - attach_workspace:
           at: ./ui
       - run_yarn_ui
@@ -423,10 +423,10 @@ jobs:
           path: ~/workbench/e2e/logs
 
   puppeteer-local-test:
-    <<: *filter_dev
     executor: browser-docker
     parallelism: 3
     steps:
+      <<: *filter_dev
       - git_checkout
       #- no_change_filter  TODO
       - run_yarn_e2e
