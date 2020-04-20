@@ -385,6 +385,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ./ui
+      - run_yarn_ui
       - run:
           name: Launch local UI
           working_directory: << pipeline.parameters.workingdir_ui >>
@@ -509,6 +510,7 @@ workflows:
 
   build-test-deploy:
     jobs:
+      <<: *filter_master
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
       - api-local-test
@@ -516,13 +518,6 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
-      - deploy-local:
-          requires:
-            - ui-build-test
-            - api-local-test
-      - puppeteer-local-test:
-          requires:
-            - deploy-local
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
