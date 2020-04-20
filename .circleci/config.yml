@@ -250,20 +250,6 @@ executors:
       - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage_version >>
       - image: circleci/node:13.10.1-browsers
 
-
-  browser-env-local:
-    executor: browser-docker
-    parallelism: 2
-    environment:
-      WORKBENCH_ENV: local
-
-  browser-env-test:
-    executor: browser-docker
-    parallelism: 3
-    environment:
-      WORKBENCH_ENV: dev
-
-
 # -------------------------
 #        JOBS
 #
@@ -452,12 +438,18 @@ jobs:
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   e2e-test-env-local:
     <<: *filter_pr_branch
-    executor: browser-env-local
+    executor: browser-docker
+      environment:
+        WORKBENCH_ENV: local
+    parallelism: 2
     steps:
       - run_e2e_tests
 
   e2e-test:
-    executor: browser-env-test
+    executor: browser-docker
+      environment:
+        WORKBENCH_ENV: dev
+    parallelism: 3
     steps:
       - run_e2e_tests
 
