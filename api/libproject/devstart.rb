@@ -178,8 +178,24 @@ def format_benchmark(bm)
   "%ds" % [bm.real]
 end
 
-def dev_up()
+def dev_up(cmd_name, args)
   common = Common.new
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.skip_configs = false
+  op.opts.skip_db_changes = false
+
+  op.add_typed_option(
+      "--skip-configs=[skip_configs]",
+      TrueClass,
+      ->(opts, v) { opts.skip_configs = v},
+      "When true, skips loading configs & data.")
+  op.add_typed_option(
+      "--skip-db-changes=[skip_db_changes]",
+      TrueClass,
+      ->(opts, v) { opts.skip_db_changes = v},
+      "When true, skips database init & migrations.")
+  op.parse.validate
 
   account = get_auth_login_account()
   if account.nil?
@@ -198,22 +214,26 @@ def dev_up()
     }
     common.status "Database startup complete (#{format_benchmark(bm)})"
 
-    common.status "Database init & migrations..."
-    bm = Benchmark.measure {
-      common.run_inline %W{
-        docker-compose run db-scripts ./run-migrations.sh main
+    unless op.opts.skip_db_changes
+      common.status "Database init & migrations..."
+      bm = Benchmark.measure {
+        common.run_inline %W{
+          docker-compose run db-scripts ./run-migrations.sh main
+        }
+        init_new_cdr_db %W{--cdr-db-name cdr}
       }
-      init_new_cdr_db %W{--cdr-db-name cdr}
-    }
-    common.status "Database init & migrations complete (#{format_benchmark(bm)})"
+      common.status "Database init & migrations complete (#{format_benchmark(bm)})"
+    end
 
-    common.status "Loading configs & data..."
-    bm = Benchmark.measure {
-      common.run_inline %W{
-        docker-compose run api-scripts ./libproject/load_local_data_and_configs.sh
+    unless op.opts.skip_configs
+      common.status "Loading configs & data..."
+      bm = Benchmark.measure {
+        common.run_inline %W{
+          docker-compose run api-scripts ./libproject/load_local_data_and_configs.sh
+        }
       }
-    }
-    common.status "Loading configs complete (#{format_benchmark(bm)})"
+      common.status "Loading configs complete (#{format_benchmark(bm)})"
+    end
 
   }
   common.status "Total dev-env setup time: #{format_benchmark(overall_bm)}"
@@ -226,7 +246,7 @@ Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment, including db migrations and config " \
      "update. (You can use run-api instead if database and config are up-to-date.)",
-  :fn => ->() { dev_up() }
+  :fn => ->(*args) { dev_up("dev-up", args) }
 })
 
 def start_api_reqs()
@@ -350,9 +370,7 @@ def run_api()
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
     get_gsuite_admin_key(TEST_PROJECT)
-    common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
-    common.status "are here:"
-    common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
+    common.status "Starting API..."
     at_exit { common.run_inline %W{docker-compose down} }
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
   end
