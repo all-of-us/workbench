@@ -431,7 +431,7 @@ jobs:
       - run:
           name: Wait for localhost API to be started
           command: |
-            dockerize -wait tcp://127.0.0.1:8081/v1/status -timeout 1m
+            dockerize -wait tcp://localhost:8081/v1/status -timeout 1m
 
 
   # Run Puppeteer end-to-end UI tests, pointed at the Workbench "localhost" environment.
