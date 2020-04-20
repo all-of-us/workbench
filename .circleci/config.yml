@@ -495,9 +495,9 @@ workflows:
           requires:
             - ui-build-test
             - api-local-test
-            - puppeteer-local-test:
-                requires:
-                  - deploy-local
+      - puppeteer-local-test:
+          requires:
+            - deploy-local
 
   build-test-deploy:
     jobs:
