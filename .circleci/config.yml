@@ -270,9 +270,9 @@ jobs:
           command: ./project.rb run-local-migrations
       - run:
           working_directory: << pipeline.parameters.workingdir_api >>
-          command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
+          command: ./project.rb start-local-api && ./project.rb run-local-api-tests
       - save_api_cache
-      # Persist the specified paths (workbench/api) into the workspace for use in downstream job deploy-local-ui.
+      # Persist workbench/api for use in downstream job deploy-local.
       - persist_to_workspace:
           root: .
           paths:
@@ -374,7 +374,7 @@ jobs:
           name: Lint Typescript
           working_directory: << pipeline.parameters.workingdir_ui >>
           command: yarn run lint
-      # Persist the specified paths (workbench/ui) into the workspace for use in downstream job deploy-local-ui.
+      # Persist workbench/ui for use in downstream job deploy-local.
       - persist_to_workspace: # https://circleci.com/docs/2.0/configuration-reference/#persist_to_workspace
           root: .
           paths:
