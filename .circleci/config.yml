@@ -381,6 +381,7 @@ jobs:
             - ui
 
   deploy-local:
+    <<: *filter_dev
     executor: buildimage-docker
     steps:
       - attach_workspace:
@@ -422,6 +423,7 @@ jobs:
           path: ~/workbench/e2e/logs
 
   puppeteer-local-test:
+    <<: *filter_dev
     executor: browser-docker
     parallelism: 3
     steps:
@@ -486,31 +488,9 @@ jobs:
           working_dir: << pipeline.parameters.workingdir_deploy >>
 
 workflows:
-  test-dev:
-    jobs:
-      - api-local-test:
-          <<: *filter_dev
-      - api-build-test:
-          <<: *filter_dev
-      - ui-build-test:
-          <<: *filter_dev
-      - api-bigquery-test:
-          <<: *filter_dev
-      - api-integration-test:
-          <<: *filter_dev
-      - deploy-local:
-          <<: *filter_dev
-          requires:
-            - ui-build-test
-            - api-local-test
-      - puppeteer-local-test:
-          <<: *filter_dev
-          requires:
-            - deploy-local
 
   build-test-deploy:
     jobs:
-      <<: *filter_master
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
       - api-local-test
@@ -518,6 +498,14 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
+      - deploy-local:
+          requires:
+            - ui-build-test
+            - api-local-test
+      - puppeteer-local-test:
+          requires:
+            - deploy-local
+
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
