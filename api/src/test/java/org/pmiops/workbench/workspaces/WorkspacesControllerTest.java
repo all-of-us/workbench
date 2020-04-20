@@ -215,7 +215,6 @@ public class WorkspacesControllerTest {
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
 
-  // unrelated change
   private static final Concept CLIENT_CONCEPT_1 =
       new Concept()
           .conceptId(123L)
