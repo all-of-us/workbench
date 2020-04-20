@@ -32,6 +32,12 @@ filter_releases: &filter_releases
     tags:
       only: /^v.*/
 
+filter_dev: &filter_dev
+  filters:
+    branches:
+      only: dev
+      pull_request: true
+
 # -------------------------
 #   PIPELINE PARAMETERS
 #
@@ -376,7 +382,7 @@ jobs:
     executor: buildimage-docker
     steps:
       - attach_workspace:
-          at: .
+          at: ./ui
       - run:
           name: Launch local UI
           working_directory: << pipeline.parameters.workingdir_ui >>
@@ -477,6 +483,22 @@ jobs:
           working_dir: << pipeline.parameters.workingdir_deploy >>
 
 workflows:
+  test-dev:
+    <<: *filter_dev
+    jobs:
+      - api-local-test
+      - api-build-test
+      - ui-build-test
+      - api-bigquery-test
+      - api-integration-test
+      - deploy-local:
+          requires:
+            - ui-build-test
+            - api-local-test
+            - puppeteer-local-test:
+                requires:
+                  - deploy-local
+
   build-test-deploy:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
