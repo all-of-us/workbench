@@ -487,15 +487,15 @@ jobs:
 workflows:
   test-dev:
     jobs:
-      - api-local-test
+      - api-local-test:
           <<: *filter_dev
-      - api-build-test
+      - api-build-test:
           <<: *filter_dev
-      - ui-build-test
+      - ui-build-test:
           <<: *filter_dev
-      - api-bigquery-test
+      - api-bigquery-test:
           <<: *filter_dev
-      - api-integration-test
+      - api-integration-test:
           <<: *filter_dev
       - deploy-local:
           <<: *filter_dev
