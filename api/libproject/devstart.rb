@@ -804,7 +804,7 @@ def make_bq_denormalized_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser_flag}  #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser_flag} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -816,6 +816,7 @@ Generates big query denormalized tables for search and review. Used by cohort bu
 
 def make_bq_denormalized_review(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -826,11 +827,16 @@ def make_bq_denormalized_review(cmd_name, *args)
     ->(opts, v) { opts.bq_dataset = v},
     "BQ dataset. Required."
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -843,6 +849,7 @@ Generates big query denormalized tables for review. Used by cohort builder. Must
 def make_bq_denormalized_search(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser_flag = false
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -863,11 +870,16 @@ def make_bq_denormalized_search(cmd_name, *args)
     ->(opts, v) { opts.data_browser_flag = v},
     "Is this run for data browser. Default is false"
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser_flag}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser_flag} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -879,6 +891,7 @@ Generates big query denormalized search. Used by cohort builder. Must be run onc
 
 def make_bq_denormalized_dataset(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -889,11 +902,16 @@ def make_bq_denormalized_dataset(cmd_name, *args)
     ->(opts, v) { opts.bq_dataset = v},
     "BQ dataset. Required."
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -905,6 +923,7 @@ Generates big query denormalized dataset tables. Used by Data Set Builder. Must 
 
 def make_bq_dataset_linking(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -915,11 +934,16 @@ def make_bq_dataset_linking(cmd_name, *args)
     ->(opts, v) { opts.bq_dataset = v},
     "BQ dataset. Required."
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -933,6 +957,7 @@ Must be run once when a new cdr is released",
 def generate_cb_criteria_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser_flag = false
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -948,11 +973,16 @@ def generate_cb_criteria_tables(cmd_name, *args)
     ->(opts, v) { opts.data_browser_flag = v},
     "Is this run for data browser. Default is false"
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser_flag}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser_flag} #{op.opts.dry_run}}
 end
 
 Common.register_command({
