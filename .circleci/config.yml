@@ -272,11 +272,6 @@ jobs:
           working_directory: << pipeline.parameters.workingdir_api >>
           command: ./project.rb start-local-api && ./project.rb run-local-api-tests
       - save_api_cache
-      # Persist workbench/api for use in downstream job deploy-local.
-      - persist_to_workspace:
-          root: .
-          paths:
-            - api
 
   api-deploy-to-test:
     executor: buildimage-docker
@@ -374,22 +369,34 @@ jobs:
           name: Lint Typescript
           working_directory: << pipeline.parameters.workingdir_ui >>
           command: yarn run lint
-      # Persist workbench/ui for use in downstream job deploy-local.
       - persist_to_workspace: # https://circleci.com/docs/2.0/configuration-reference/#persist_to_workspace
           root: .
           paths:
             - ui
 
   deploy-local:
-    executor: buildimage-docker
+    executor: mysql-docker
+    environment:
+      MYSQL_ROOT_PASSWORD: ubuntu
     steps:
-      - attach_workspace:
-          at: ./ui
-      - run_yarn_ui
+      - git_checkout
+      - restore_api_cache
+      - activate_sa
+      - run:
+          # MySQL sometimes refuses connections by the time we attempt to apply
+          # data migrations. Watch the port for 2m for startup.
+          name: Await MySQL startup
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - run:
+          working_directory: << pipeline.parameters.workingdir_api >>
+          command: ./project.rb run-local-migrations
+      - run:
+          working_directory: << pipeline.parameters.workingdir_api >>
+          command: ./project.rb start-local-api
       - run:
           name: Launch local UI
           working_directory: << pipeline.parameters.workingdir_ui >>
-          command: yarn dev-up # --environment local
+          command: yarn dev-up
       - run:
           name: Wait for localhost to be started
           command: |
@@ -398,6 +405,8 @@ jobs:
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   puppeteer-e2e-test:
+    environment:
+      WORKBENCH_ENV: dev
     executor: browser-docker
     parallelism: 3
     steps:
@@ -414,7 +423,8 @@ jobs:
       - run:
           name: Run e2e tests (Puppeteer and Jest)
           working_directory: << pipeline.parameters.workingdir_e2e >>
-          command: yarn test:ci $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
+          command: yarn test:ci \
+            $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
       - store_artifacts:
           path: e2e/logs
           destination: logs
@@ -423,6 +433,8 @@ jobs:
 
   puppeteer-local-test:
     executor: browser-docker
+    environment:
+      WORKBENCH_ENV: local
     parallelism: 3
     steps:
       - git_checkout
@@ -439,7 +451,7 @@ jobs:
           name: Run e2e tests (Puppeteer and Jest)
           working_directory: << pipeline.parameters.workingdir_e2e >>
           command: |
-            yarn cross-env NODE_ENV=development WORKBENCH_ENV=local CI=true jest --ci --runInBand \
+            yarn test:ci \
               $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
       - store_artifacts:
           path: e2e/logs
@@ -498,9 +510,6 @@ workflows:
       - api-integration-test
       - deploy-local:
           <<: *filter_dev
-          requires:
-            - ui-build-test
-            - api-local-test
       - puppeteer-local-test:
           <<: *filter_dev
           requires:
