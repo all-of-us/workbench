@@ -15,7 +15,7 @@ public interface LeonardoNotebooksClient {
   List<ListClusterResponse> listClustersByProject(String googleProject);
 
   /** lists all notebook clusters as the appengine SA, to be used only for admin operations */
-  List<ListClusterResponse> listClustersByProjectAsAdmin(String googleProject);
+  List<ListClusterResponse> listClustersByProjectAsService(String googleProject);
 
   /**
    * Creates a notebooks cluster owned by the current authenticated user.
@@ -32,7 +32,7 @@ public interface LeonardoNotebooksClient {
   void deleteCluster(String googleProject, String clusterName) throws WorkbenchException;
 
   /** Deletes a notebook cluster as the appengine SA, to be used only for admin operations */
-  void deleteClusterAsAdmin(String googleProject, String clusterName) throws WorkbenchException;
+  void deleteClusterAsService(String googleProject, String clusterName) throws WorkbenchException;
 
   /** Gets information about a notebook cluster */
   Cluster getCluster(String googleProject, String clusterName) throws WorkbenchException;

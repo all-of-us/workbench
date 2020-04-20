@@ -104,7 +104,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
               dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
       List<org.pmiops.workbench.notebooks.model.ListClusterResponse> fcClusters =
-          leonardoNotebooksClient.listClustersByProjectAsAdmin(workspaceNamespace);
+          leonardoNotebooksClient.listClustersByProjectAsService(workspaceNamespace);
       List<ListClusterResponse> clusters =
           fcClusters.stream()
               .map(
@@ -125,7 +125,9 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
               .clusters(clusters);
 
       FirecloudWorkspace fcWorkspace =
-          fireCloudService.getWorkspace(workspaceNamespace, workspaceFirecloudName).getWorkspace();
+          fireCloudService
+              .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
+              .getWorkspace();
 
       return ResponseEntity.ok(
           new AdminFederatedWorkspaceDetailsResponse()

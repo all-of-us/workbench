@@ -344,7 +344,7 @@ public class ConceptsControllerTest {
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAcl(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+    when(fireCloudService.getWorkspaceAclAsService(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
         .thenReturn(workspaceAccessLevelResponse);
 
     DbCriteria parentSurvey =

@@ -59,8 +59,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
-  private final Provider<WorkspacesApi> workspacesApiProvider;
-  private final Provider<WorkspacesApi> workspaceAclsApiProvider;
+  private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
+  private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
   private final Provider<StatusApi> statusApiProvider;
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
@@ -107,9 +107,9 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
       @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
-          Provider<WorkspacesApi> workspacesApiProvider,
+          Provider<WorkspacesApi> endUserWorkspacesApiProvider,
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API)
-          Provider<WorkspacesApi> workspaceAclsApiProvider,
+          Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider,
       Provider<StatusApi> statusApiProvider,
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
@@ -122,8 +122,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
-    this.workspacesApiProvider = workspacesApiProvider;
-    this.workspaceAclsApiProvider = workspaceAclsApiProvider;
+    this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
+    this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
@@ -308,7 +308,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public FirecloudWorkspace createWorkspace(String projectName, String workspaceName) {
-    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
         new FirecloudWorkspaceIngest()
             .namespace(projectName)
@@ -324,7 +324,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public FirecloudWorkspace cloneWorkspace(
       String fromProject, String fromName, String toProject, String toName) {
-    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =
         new FirecloudWorkspaceRequestClone()
             .namespace(toProject)
@@ -349,7 +349,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public FirecloudWorkspaceACLUpdateResponseList updateWorkspaceACL(
       String projectName, String workspaceName, List<FirecloudWorkspaceACLUpdate> aclUpdates) {
-    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     // TODO: set authorization domain here
     return retryHandler.run(
         (context) ->
@@ -357,16 +357,25 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspaceACL getWorkspaceAcl(String projectName, String workspaceName) {
-    WorkspacesApi workspaceAclsApi = workspaceAclsApiProvider.get();
+  public FirecloudWorkspaceACL getWorkspaceAclAsService(String projectName, String workspaceName) {
+    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
+    return retryHandler.run((context) -> workspacesApi.getWorkspaceAcl(projectName, workspaceName));
+  }
+
+  @Override
+  public FirecloudWorkspaceResponse getWorkspaceAsService(String projectName, String workspaceName)
+      throws WorkbenchException {
+    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
     return retryHandler.run(
-        (context) -> workspaceAclsApi.getWorkspaceAcl(projectName, workspaceName));
+        (context) ->
+            workspacesApi.getWorkspace(
+                projectName, workspaceName, FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override
   public FirecloudWorkspaceResponse getWorkspace(String projectName, String workspaceName)
       throws WorkbenchException {
-    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return retryHandler.run(
         (context) ->
             workspacesApi.getWorkspace(
@@ -395,12 +404,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public List<FirecloudWorkspaceResponse> getWorkspaces(List<String> fields)
       throws WorkbenchException {
-    return retryHandler.run((context) -> workspacesApiProvider.get().listWorkspaces(fields));
+    return retryHandler.run((context) -> endUserWorkspacesApiProvider.get().listWorkspaces(fields));
   }
 
   @Override
   public void deleteWorkspace(String projectName, String workspaceName) throws WorkbenchException {
-    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     retryHandler.run(
         (context) -> {
           workspacesApi.deleteWorkspace(projectName, workspaceName);

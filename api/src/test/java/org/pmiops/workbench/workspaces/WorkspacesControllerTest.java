@@ -485,7 +485,7 @@ public class WorkspacesControllerTest {
   }
 
   private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
-    when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(acl);
+    when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
   }
 
   private void stubFcGetGroup() {
@@ -2052,9 +2052,9 @@ public class WorkspacesControllerTest {
                         .put("canCompute", true)
                         .put("canShare", true)));
 
-    when(fireCloudService.getWorkspaceAcl("cloned-ns", "cloned"))
+    when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(workspaceAclsFromCloned);
-    when(fireCloudService.getWorkspaceAcl(workspace.getNamespace(), workspace.getName()))
+    when(fireCloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getName()))
         .thenReturn(workspaceAclsFromOriginal);
 
     currentUser = cloner;
@@ -2204,7 +2204,7 @@ public class WorkspacesControllerTest {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
 
-    when(fireCloudService.getWorkspaceAcl(anyString(), anyString()))
+    when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
             createWorkspaceACL(
                 new JSONObject()
@@ -2320,7 +2320,7 @@ public class WorkspacesControllerTest {
                         .put("accessLevel", "READER")
                         .put("canCompute", false)
                         .put("canShare", false)));
-    when(fireCloudService.getWorkspaceAcl(any(), any())).thenReturn(workspaceACLs);
+    when(fireCloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACLs);
 
     CLOCK.increment(1000);
     stubFcUpdateWorkspaceACL();
