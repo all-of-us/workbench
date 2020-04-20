@@ -402,7 +402,6 @@ jobs:
             - ui
 
   deploy-local:
-    <<: *filter_pr_branch
     executor: mysql-docker
     environment:
       MYSQL_ROOT_PASSWORD: ubuntu
@@ -437,7 +436,6 @@ jobs:
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   e2e-test-env-local:
-    <<: *filter_pr_branch
     executor: browser-docker
     environment:
       WORKBENCH_ENV: local
@@ -503,9 +501,10 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
-      - e2e-test
       - deploy-local:
+          <<: *filter_pr_branch
       - e2e-test-env-local:
+          <<: *filter_pr_branch
           requires:
             - deploy-local
       # Run deployment to "test" on master merges.
@@ -518,7 +517,7 @@ workflows:
           requires:
             - ui-build-test
       # After merge PR to master branch, run Puppeteer tests after ui and api deployed to "test" env successfully.
-      - puppeteer-e2e-test:
+      - e2e-test:
           <<: *filter_master
           requires:
             - api-deploy-to-test
