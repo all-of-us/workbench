@@ -429,10 +429,8 @@ jobs:
           name: Wait for localhost to be started
           command: |
             sleep 3m
-            curl --retry-delay 1 \
-              --retry-max-time 300 \
-              --retry-connrefused \
-              http://127.0.0.1:8081/v1/status
+            dockerize -wait tcp://127.0.0.1:8081/v1/status -timeout 3m
+          
 
   # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
   e2e-test-env-local:
