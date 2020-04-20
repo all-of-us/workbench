@@ -97,7 +97,7 @@
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
-    "enableMoodleV2Api": false,
+    "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false,
     "enableV3DataUserCodeOfConduct": false,
