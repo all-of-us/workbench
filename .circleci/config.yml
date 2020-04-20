@@ -243,12 +243,13 @@ executors:
   browser-docker:
     <<: *default_environment
     working_directory: << pipeline.parameters.workingdir_e2e >>
+    environment:
+      NODE_ENV: development
+      CI: true
     docker:
       - image: allofustest/workbench:buildimage-<< pipeline.parameters.buildimage_version >>
       - image: circleci/node:13.10.1-browsers
-    environment:
-        NODE_ENV: development
-        CI: true
+
 
   browser-env-local:
     executor: browser-docker
