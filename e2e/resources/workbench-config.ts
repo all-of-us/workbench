@@ -21,7 +21,7 @@ const urlPath = {
 
 // localhost development server
 const local = {
-  uiBaseUrl: process.env.DEV_LOGIN_URL || 'http://localhost:8081',
+  uiBaseUrl: process.env.DEV_LOGIN_URL || 'http://localhost:4200',
   apiBaseUrl: process.env.DEV_API_URL || 'http://localhost/v1',
   userEmailDomain: '@fake-research-aou.org',
 };

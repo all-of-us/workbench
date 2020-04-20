@@ -425,19 +425,16 @@ jobs:
           background: true  # Start local UI server and running in the background
       - run:
           name: Wait for localhost UI to be started
-          background: true
           command: |
             sleep 3m
             dockerize -wait tcp://127.0.0.1:4200 -timeout 3m
       - run:
           name: Wait for localhost API to be started
-          background: true
           command: |
-            sleep 3m
-            dockerize -wait tcp://127.0.0.1:8081/v1/status -timeout 3m
+            dockerize -wait tcp://127.0.0.1:8081/v1/status -timeout 1m
 
 
-  # Run suite of Puppeteer end-to-end QA tests, pointed at the Workbench "test" environment.
+  # Run Puppeteer end-to-end UI tests, pointed at the Workbench "localhost" environment.
   e2e-test-local:
     executor: browser-docker
     environment:
@@ -446,6 +443,7 @@ jobs:
     steps:
       - run_e2e_tests
 
+  # Run Puppeteer end-to-end UI tests, pointed at the Workbench "test" environment.
   e2e-test:
     executor: browser-docker
     environment:
