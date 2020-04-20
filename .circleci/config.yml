@@ -414,29 +414,29 @@ jobs:
 
   puppeteer-local-test:
     executor: browser-docker
-      parallelism: 3
-      steps:
-        - git_checkout
-        #- no_change_filter  TODO
-        - run_yarn_e2e
-        - run:
-            name: Update environment variables
-            command: |
-              echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
-              echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
-              echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
-              source $BASH_ENV
-        - run:
-            name: Run e2e tests (Puppeteer and Jest)
-            working_directory: << pipeline.parameters.workingdir_e2e >>
-            command: |
-              yarn cross-env NODE_ENV=development WORKBENCH_ENV=local CI=true jest --ci --runInBand \
-                $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
-        - store_artifacts:
-            path: e2e/logs
-            destination: logs
-        - store_test_results:
-            path: << pipeline.parameters.workingdir_e2e >>/logs
+    parallelism: 3
+    steps:
+      - git_checkout
+      #- no_change_filter  TODO
+      - run_yarn_e2e
+      - run:
+          name: Update environment variables
+          command: |
+            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
+            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
+            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Run e2e tests (Puppeteer and Jest)
+          working_directory: << pipeline.parameters.workingdir_e2e >>
+          command: |
+            yarn cross-env NODE_ENV=development WORKBENCH_ENV=local CI=true jest --ci --runInBand \
+              $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
+      - store_artifacts:
+          path: e2e/logs
+          destination: logs
+      - store_test_results:
+          path: << pipeline.parameters.workingdir_e2e >>/logs
 
 
   ui-deploy-to-test:
