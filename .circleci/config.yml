@@ -383,7 +383,6 @@ jobs:
   deploy-local:
     executor: buildimage-docker
     steps:
-      <<: *filter_dev
       - attach_workspace:
           at: ./ui
       - run_yarn_ui
@@ -426,7 +425,6 @@ jobs:
     executor: browser-docker
     parallelism: 3
     steps:
-      <<: *filter_dev
       - git_checkout
       #- no_change_filter  TODO
       - run_yarn_e2e
@@ -499,10 +497,12 @@ workflows:
       - api-bigquery-test
       - api-integration-test
       - deploy-local:
+          <<: *filter_dev
           requires:
             - ui-build-test
             - api-local-test
       - puppeteer-local-test:
+          <<: *filter_dev
           requires:
             - deploy-local
 
