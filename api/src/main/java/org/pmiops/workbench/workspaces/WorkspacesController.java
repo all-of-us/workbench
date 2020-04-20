@@ -1,12 +1,5 @@
 package org.pmiops.workbench.workspaces;
 
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -22,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -109,13 +101,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
-
-  private Retryer<Boolean> retryer =
-      RetryerBuilder.<Boolean>newBuilder()
-          .retryIfExceptionOfType(StorageException.class)
-          .withWaitStrategy(WaitStrategies.exponentialWait())
-          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
-          .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceResourcesService workspaceResourcesService;
@@ -484,6 +469,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
 
+    // First verify the caller has read access to the source workspace.
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
+
     DbUser user = userProvider.get();
 
     String toWorkspaceName;
@@ -494,13 +483,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new TooManyRequestsException();
     }
     toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
-
-    // Retrieving the workspace is done first, which acts as an access check.
-    String fromBucket =
-        fireCloudService
-            .getWorkspace(fromWorkspaceNamespace, fromWorkspaceId)
-            .getWorkspace()
-            .getBucketName();
 
     DbWorkspace fromWorkspace =
         workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
@@ -604,18 +586,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
     maybeFileZendeskReviewRequest(savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
-  }
-
-  // A retry period is needed because the permission to copy files into the cloned workspace is not
-  // granted transactionally
-  private Boolean copyBlob(String bucketName, Blob b) {
-    try {
-      cloudStorageService.copyBlob(b.getBlobId(), BlobId.of(bucketName, b.getName()));
-      return true;
-    } catch (StorageException e) {
-      log.warning("Service Account does not have access to bucket " + bucketName);
-      throw e;
-    }
   }
 
   @Override
