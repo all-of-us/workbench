@@ -486,18 +486,24 @@ jobs:
 
 workflows:
   test-dev:
-    <<: *filter_dev
     jobs:
       - api-local-test
+          <<: *filter_dev
       - api-build-test
+          <<: *filter_dev
       - ui-build-test
+          <<: *filter_dev
       - api-bigquery-test
+          <<: *filter_dev
       - api-integration-test
+          <<: *filter_dev
       - deploy-local:
+          <<: *filter_dev
           requires:
             - ui-build-test
             - api-local-test
       - puppeteer-local-test:
+          <<: *filter_dev
           requires:
             - deploy-local
 
