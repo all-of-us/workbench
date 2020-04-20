@@ -35,7 +35,8 @@ filter_releases: &filter_releases
 filter_dev: &filter_dev
   filters:
     branches:
-      only: dev
+      only:
+        - dev
       pull_request: true
 
 # -------------------------
