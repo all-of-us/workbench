@@ -41,13 +41,13 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     })
 public interface WorkspaceMapper {
 
-  @Mapping(target = "researchPurpose", source = "dbWorkspace")
-  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
-  @Mapping(target = "name", source = "dbWorkspace.name")
-  @Mapping(target = "id", source = "fcWorkspace.name")
-  @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "creator", source = "fcWorkspace.createdBy")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
+  @Mapping(target = "creator", source = "fcWorkspace.createdBy")
+  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
+  @Mapping(target = "id", source = "fcWorkspace.name")
+  @Mapping(target = "name", source = "dbWorkspace.name")
+  @Mapping(target = "researchPurpose", source = "dbWorkspace")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
@@ -72,7 +72,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "researchOutcomeList", source = "researchOutcomeEnumSet")
   @Mapping(target = "disseminateResearchFindingList", source = "disseminateResearchEnumSet")
   @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
-  ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
+  ResearchPurpose dbWorkspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
   RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
@@ -131,6 +131,22 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceNamespace", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
+
+  /**
+   * This method should be a replacement for the various merge and set methtods
+   * for DbWorkspace.
+   * @param workspace
+   * @param firecloudWorkspace
+   * @param dbUser
+   * @param billingAccountName
+   * @param cdrVersionId
+   * @return
+   */
+  @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevelEnum")
+  @Mapping(source = "workspace.researchPurpose.additionalNotes", target = "additionalNotes")
+  @Mapping(source = "workspace.name", target = "name")
+  DbWorkspace toDbWorkspace(Workspace workspace, FirecloudWorkspace firecloudWorkspace,
+      DbUser dbUser, String billingAccountName, String cdrVersionId);
 
   @Mapping(target = "email", source = "user.username")
   @Mapping(target = "role", source = "acl")
