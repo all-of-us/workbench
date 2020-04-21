@@ -110,6 +110,22 @@
               "extractLicenses": true,
               "vendorChunk": false
             },
+            "preprod": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.preprod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false
+            },
             "prod": {
               "fileReplacements": [
                 {
@@ -148,6 +164,9 @@
             },
             "stable": {
               "browserTarget": "aou-workbench-ui:build:stable"
+            },
+            "preprod": {
+              "browserTarget": "aou-workbench-ui:build:preprod"
             },
             "prod": {
               "browserTarget": "aou-workbench-ui:build:prod"
