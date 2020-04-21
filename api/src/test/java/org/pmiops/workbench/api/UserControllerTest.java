@@ -325,7 +325,7 @@ public class UserControllerTest {
 
     final WorkbenchListBillingAccountsResponse response =
         userController.listBillingAccounts().getBody();
-    assertThat(response.getBillingAccounts()).isEqualTo(Lists.newArrayList(freeTierBillingAccount));
+    assertThat(response.getBillingAccounts()).containsExactly(freeTierBillingAccount);
   }
 
   @Test
