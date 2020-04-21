@@ -41,7 +41,7 @@ const styles = reactStyles({
 });
 
 interface Props {
-  title: any;
+  title: string | React.ReactNode;
   wasBypassed: boolean;
   isComplete: boolean;
   incompleteButtonText: string;
