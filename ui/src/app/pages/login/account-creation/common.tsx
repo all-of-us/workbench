@@ -84,7 +84,7 @@ export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
 export function TextInputWithLabel(props) {
   return <div style={{...props.containerStyle}}>
     {props.labelContent}
-    {props.labelText && <label style={{...commonStyles.text, fontWeight: 600}}>{props.labelText}</label>}
+    {props.labelText && <label style={{...commonStyles.text, fontWeight: 600, ...props.labelStyle}}>{props.labelText}</label>}
     <div style={{marginTop: '0.1rem'}}>
       <TextInput data-test-id={props.inputId}
                  id={props.inputId}
