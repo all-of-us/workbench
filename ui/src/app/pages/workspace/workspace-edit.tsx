@@ -950,8 +950,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             }/>
 
         {/*Primary purpose */}
-        <WorkspaceEditSection header={researchPurposeQuestions[0].header}
-            description={researchPurposeQuestions[0].description} index='1.' indent publiclyDisplayed>
+          <WorkspaceEditSection header={researchPurposeQuestions[0].header} publiclyDisplayed={true}
+                                description={researchPurposeQuestions[0].description} index='1.'
+                                indent={true}>
           <FlexRow>
             <FlexColumn>
               <FlexColumn  style={styles.researchPurposeRow}>
@@ -987,7 +988,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
         <WorkspaceEditSection
-          header={researchPurposeQuestions[1].header} indent publiclyDisplayed
+          header={researchPurposeQuestions[1].header} indent={true} publiclyDisplayed={true}
           description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
@@ -1037,9 +1038,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </WorkspaceEditSection>
 
           {/*Underrespresented population section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
+        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent={true}
                               description={researchPurposeQuestions[7].description}
-                              style={{width: '48rem'}} publiclyDisplayed>
+                              style={{width: '48rem'}} publiclyDisplayed={true}>
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
@@ -1098,7 +1099,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
           {/* Request for review section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent>
+        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent={true}>
           <FlexRow style={styles.text}><div>
             Any research that focuses on certain population characteristics or&nbsp;
             <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
