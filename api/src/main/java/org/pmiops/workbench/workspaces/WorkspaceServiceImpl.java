@@ -254,7 +254,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
     FirecloudWorkspaceACL aclResp =
-        fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
+        fireCloudService.getWorkspaceAclAsService(workspaceNamespace, firecloudName);
 
     // Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
     // instead. Run this through a typed Gson conversion process to parse into the desired type.
@@ -713,7 +713,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingUpgrade
         || newBillingAccountName.equals(workspace.getBillingAccountName())) {
       return;
     }

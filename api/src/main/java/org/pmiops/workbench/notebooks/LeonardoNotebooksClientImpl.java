@@ -153,7 +153,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public List<ListClusterResponse> listClustersByProjectAsAdmin(String googleProject) {
+  public List<ListClusterResponse> listClustersByProjectAsService(String googleProject) {
     ClusterApi clusterApi = serviceClusterApiProvider.get();
     return retryHandler.run(
         (context) -> clusterApi.listClustersByProject(googleProject, null, false));
@@ -181,7 +181,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void deleteClusterAsAdmin(String googleProject, String clusterName) {
+  public void deleteClusterAsService(String googleProject, String clusterName) {
     ClusterApi clusterApi = serviceClusterApiProvider.get();
     retryHandler.run(
         (context) -> {
