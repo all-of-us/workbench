@@ -1,7 +1,6 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  extends: ["react-app", "prettier"],
   plugins: [
     'react',
     'sort-keys-fix',
@@ -10,19 +9,20 @@ module.exports = {
     'simple-import-sort',
     'prettier'
   ],
+  extends: [],
   parserOptions: {
     ecmaVersion: 6,
     sourceType: "module",
+    // project: '',
     ecmaFeatures: {
-      jsx: true // Allows for the parsing of JSX
+      jsx: true 
     }
   },
   settings: {
     react: {
-      version: "detect" // Tells eslint-plugin-react to automatically detect the version of React to use
+      version: "detect" 
     }
   },
-  extends: [],
   rules: {
     // "prettier/prettier": "warn",
     // Typescript specific
@@ -31,7 +31,7 @@ module.exports = {
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/no-inferrable-types": ["warn", {ignoreParameters: true}],
     "@typescript-eslint/no-non-null-assertion": "warn",
-    // "prefer-arrow/prefer-arrow-functions": ["warn"],
+    // "prefer-arrow/prefer-arrow-functions": ["warn"], // Lots of "newable" functions in the code base 
     "@typescript-eslint/type-annotation-spacing": "warn",
     "@typescript-eslint/unified-signatures": "warn",
 
@@ -40,12 +40,11 @@ module.exports = {
     "arrow-body-style": "warn",
     "@typescript-eslint/prefer-function-type": "warn",
     "@typescript-eslint/class-name-casing": "warn",
-    "capitalized-comments": "warn",
     "spaced-comment": "warn",
     "@typescript-eslint/consistent-type-definitions": ["warn", "interface"],
     "no-trailing-spaces": "warn",
     "no-undef-init": "warn",
-    "brace-style": ["warn", "stroustrup", { "allowSingleLine": true }],
+    "brace-style": ["warn", "1tbs", { "allowSingleLine": true }],
     "simple-import-sort/sort": "warn",
     "quotes": ["warn", "single"],
     "@typescript-eslint/semi": "warn",
@@ -70,10 +69,14 @@ module.exports = {
     "@typescript-eslint/no-misused-new": "warn",
     "no-shadow": "warn",
     "dot-notation": "warn",
-    // "@typescript-eslint/no-throw-literal": "warn", -- CORRECT
+    "no-throw-literal": "warn",
     "no-fallthrough": "warn",
     "no-unused-expressions": "warn",
+    "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "warn",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn", 
+    "react/jsx-uses-vars": "warn", 
     "no-var": "warn",
     "radix": "warn",
     "eqeqeq": ["warn", "always", {"null": "ignore"}],
@@ -83,6 +86,7 @@ module.exports = {
     "max-len": ["warn", {code: 140, ignorePattern: "^import |^export\\{(.*?)\\}"}], 
     "sort-keys-fix/sort-keys-fix": "warn",
     "prefer-const": ["warn", {"destructuring": "all"}],
+    "@typescript-eslint/no-use-before-define": "warn"
 
 
     // "whitespace": [ // CONFIGURE PRETTIER
