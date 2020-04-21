@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,10 @@ public class ApplicationTest {
    * of spring.datasource.platform. This allows you to switch to database-specific scripts if
    * necessary. For example, you might choose to set it to the vendor name of the database (hsqldb,
    * h2, oracle, mysql, postgresql, and so on).
+   *
+   * <p>Ignoring this test due to observed flakiness and false positives. RW-4806
    */
+  @Ignore
   @Test
   public void contextLoads() {
     List<Object> beans = new ArrayList<>();

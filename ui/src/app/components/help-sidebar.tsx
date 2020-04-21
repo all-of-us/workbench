@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
-import {faEllipsisV, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {faBook, faEllipsisV, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -21,6 +21,7 @@ import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {MenuItem, StyledAnchorTag} from './buttons';
 import {PopupTrigger} from './popups';
 
+const dataDictionaryUrl = 'https://aousupporthelp.zendesk.com/hc/en-us/articles/360033200232-Data-dictionary-for-Registered-Tier-Curated-Data-Repository-CDR-';
 const proIcons = {
   thunderstorm: '/assets/icons/thunderstorm-solid.svg'
 };
@@ -179,6 +180,14 @@ const icons = [{
 //   page: null,
 //   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
 //   tooltip: 'Compute Configuration',
+}, {
+  id: 'dataDictionary',
+  disabled: false,
+  faIcon: faBook,
+  label: 'Data Dictionary Icon',
+  page: null,
+  style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
+  tooltip: 'Data Dictionary',
 }, {
   id: 'annotations',
   disabled: false,
@@ -422,12 +431,20 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
           {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
             <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
               <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
-                   onClick={() => this.onIconClick(icon)}
+                   onClick={() => {
+                     if (icon.id !== 'dataDictionary') {
+                       this.onIconClick(icon);
+                     }
+                   }}
                    onMouseOver={() => this.setState({tooltipId: i})}
                    onMouseOut={() => this.setState({tooltipId: undefined})}>
-                {icon.faIcon === null
-                  ? <img src={proIcons[icon.id]} style={icon.style} />
-                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
+                {icon.id === 'dataDictionary'
+                  ? <a href={dataDictionaryUrl} target='_blank'>
+                      <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
+                    </a>
+                  : icon.faIcon === null
+                    ? <img src={proIcons[icon.id]} style={icon.style} />
+                    : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
                 }
               </div>
             </TooltipTrigger>
