@@ -538,7 +538,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateCohortReview() {
-    when(workspaceService.enforceWorkspaceAccessLevel(
+    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.WRITER);
 
@@ -565,7 +565,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void deleteCohortReview() {
-    when(workspaceService.enforceWorkspaceAccessLevel(
+    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.WRITER);
 

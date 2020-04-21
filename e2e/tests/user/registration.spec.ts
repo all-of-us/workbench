@@ -1,20 +1,10 @@
-import CreateAccountPage from '../../app/create-account-page';
-import GoogleLoginPage from '../../app/google-login';
+import CreateAccountPage from 'app/create-account-page';
+import GoogleLoginPage from 'app/google-login';
 
 
 describe('User registration tests:', () => {
 
-  beforeEach(async () => {
-    await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(120000);
-  });
-
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
-
-  test.skip('Can register new user', async () => {
+  test('Can register new user', async () => {
     // Load the landing page for login.
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();

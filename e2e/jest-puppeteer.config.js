@@ -1,3 +1,8 @@
+/**
+ * This file is required by jest-puppeteer preset.
+ * https://github.com/smooth-code/jest-puppeteer#configure-puppeteer
+ */
+
 const fp = require('lodash/fp');
 const puppeteer = require('puppeteer');
 const isHeadless = process.env.HEADLESS !== 'false';
@@ -35,7 +40,7 @@ const SWITCHES = (process.env.CI === 'true') ? CI_SWITCHES : DEFAULT_SWITCHES;
 module.exports = {
   launch: {
     headless: isHeadless,
-    slowMo: 30, // slow down creation of browser to free up heap memory. https://github.com/puppeteer/puppeteer/issues/4684#issuecomment-511255786
+    slowMo: 10, // slow down creation of browser to free up heap memory. https://github.com/puppeteer/puppeteer/issues/4684#issuecomment-511255786
     defaultViewport: null,
     ignoreDefaultArgs: true,
     args: SWITCHES, // Chrome switches to pass to the browser instance

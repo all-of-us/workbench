@@ -44,7 +44,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -94,7 +93,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final FireCloudService fireCloudService;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final InstitutionService institutionService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -112,8 +110,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       FireCloudService fireCloudService,
       ComplianceService complianceService,
-      DirectoryService directoryService,
-      InstitutionService institutionService) {
+      DirectoryService directoryService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -127,7 +124,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.fireCloudService = fireCloudService;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.institutionService = institutionService;
   }
 
   @VisibleForTesting
@@ -385,21 +381,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // set via the newer Verified Institutional Affiliation flow
     boolean requireInstitutionalVerification =
         configProvider.get().featureFlags.requireInstitutionalVerification;
-    if (requireInstitutionalVerification
-        && !institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
-      final String msg =
-          Optional.ofNullable(dbVerifiedAffiliation)
-              .map(
-                  affiliation ->
-                      String.format(
-                          "Cannot create user %s: contact email %s is not a valid member of institution '%s'",
-                          userName, contactEmail, affiliation.getInstitution().getShortName()))
-              .orElse(
-                  String.format(
-                      "Cannot create user %s: contact email %s does not have a valid institutional affiliation",
-                      userName, contactEmail));
-      throw new BadRequestException(msg);
-    }
 
     try {
       dbUser = userDao.save(dbUser);

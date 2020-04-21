@@ -2,7 +2,7 @@
 
 ## Documentation
 
-Some documentation files live in the [doc/](https://github.com/all-of-us/workbench/blob/master/api/doc/) directory. Check out [code-structure.md](https://github.com/all-of-us/workbench/blob/master/api/doc/code-structure.md) for an overview of the layers of the app. 
+Some documentation files live in the [docs/](https://github.com/all-of-us/workbench/blob/master/api/docs/) directory. Check out [code-structure.md](https://github.com/all-of-us/workbench/blob/master/api/docs/code-structure.md) for an overview of the layers of the app. 
 
 ## Gradle Commands
 To build the Swagger REST API yaml file:

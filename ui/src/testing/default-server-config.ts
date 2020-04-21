@@ -10,7 +10,7 @@ const defaultServerConfig: ConfigResponse = {
   enableEraCommons: true,
   unsafeAllowSelfBypass: false,
   defaultFreeCreditsDollarLimit: 300,
-  enableBillingLockout: true,
+  enableBillingUpgrade: true,
   requireInvitationKey: true,
   requireInstitutionalVerification: true,
   enableCBAgeTypeOptions: true,

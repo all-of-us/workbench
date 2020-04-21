@@ -53,13 +53,14 @@ public class ParticipantCohortAnnotationDaoTest {
     enumAnnotationDefinition.getEnumValues().add(enumValue1);
     enumAnnotationDefinition.getEnumValues().add(enumValue2);
     enumAnnotationDefinition.getEnumValues().add(enumValue3);
-    cohortAnnotationDefinitionDao.save(enumAnnotationDefinition);
+    enumAnnotationDefinition = cohortAnnotationDefinitionDao.save(enumAnnotationDefinition);
 
     DbCohortAnnotationDefinition booleanAnnotationDefinition =
         new DbCohortAnnotationDefinition()
             .cohortId(COHORT_ID)
             .columnName("boolean")
             .annotationTypeEnum(AnnotationType.BOOLEAN);
+    booleanAnnotationDefinition = cohortAnnotationDefinitionDao.save(booleanAnnotationDefinition);
 
     pca =
         new DbParticipantCohortAnnotation()
@@ -76,8 +77,8 @@ public class ParticipantCohortAnnotationDaoTest {
             .participantId(participantId)
             .annotationValueEnum("test");
     pca1.setCohortAnnotationEnumValue(enumValue1);
-    participantCohortAnnotationDao.save(pca);
-    participantCohortAnnotationDao.save(pca1);
+    pca = participantCohortAnnotationDao.save(pca);
+    pca1 = participantCohortAnnotationDao.save(pca1);
   }
 
   @Test

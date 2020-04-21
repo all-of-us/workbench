@@ -20,7 +20,11 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -69,7 +73,15 @@ public class WorkspaceAdminControllerTest {
   private static final String WORKSPACE_NAME = "name";
 
   @TestConfiguration
-  @Import({WorkspaceAdminController.class, WorkspaceMapperImpl.class, CommonMappers.class})
+  @Import({
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    CommonMappers.class,
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
+    WorkspaceAdminController.class,
+    WorkspaceMapperImpl.class,
+  })
   @MockBean({
     CloudStorageService.class,
     NotebooksService.class,
@@ -121,14 +133,15 @@ public class WorkspaceAdminControllerTest {
         testMockFactory.createFcListClusterResponse();
     List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clusters = new ArrayList<>();
     clusters.add(listClusterResponse);
-    when(mockLeonardoNotebooksClient.listClustersByProjectAsAdmin(WORKSPACE_NAMESPACE))
+    when(mockLeonardoNotebooksClient.listClustersByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(clusters);
 
     FirecloudWorkspace fcWorkspace =
         testMockFactory.createFcWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "test");
     FirecloudWorkspaceResponse fcWorkspaceResponse =
         new FirecloudWorkspaceResponse().workspace(fcWorkspace);
-    when(mockFirecloudService.getWorkspace(WORKSPACE_NAMESPACE, TestMockFactory.BUCKET_NAME))
+    when(mockFirecloudService.getWorkspaceAsService(
+            WORKSPACE_NAMESPACE, TestMockFactory.BUCKET_NAME))
         .thenReturn(fcWorkspaceResponse);
   }
 

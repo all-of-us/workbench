@@ -6,8 +6,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  /*Footer minimum width*/
-  min-width: 68.5rem
+  /*minimum supported width is 1300, this allows 20px for the scrollbar*/
+  min-width: 1280px;
 }
 
 .content-container {

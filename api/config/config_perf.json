@@ -97,13 +97,15 @@
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
     "enableBillingLockout": true,
+    "enableBillingUpgrade": true,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
-    "enableMoodleV2Api": false,
+    "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false,
-    "enableV3DataUserCodeOfConduct": false
+    "enableV3DataUserCodeOfConduct": false,
+    "enableEventDateModifier": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf"

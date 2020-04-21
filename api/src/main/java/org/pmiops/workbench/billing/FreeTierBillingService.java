@@ -168,6 +168,20 @@ public class FreeTierBillingService {
     final double limit = getUserFreeTierDollarLimit(user);
     final double remainingBalance = limit - currentCost;
 
+    // this shouldn't happen, but it did (RW-4678)
+    // alert if it happens again
+    if (currentCost < previousCost) {
+      String msg =
+          String.format(
+              "User %s (%s) has %f in total free tier spending in BigQuery, "
+                  + "which is less than the %f previous spending we have recorded in the DB",
+              user.getUsername(),
+              Optional.ofNullable(user.getContactEmail()).orElse("NULL"),
+              currentCost,
+              previousCost);
+      logger.warning(msg);
+    }
+
     final double currentFraction = currentCost / limit;
     final double previousFraction = previousCost / limit;
 

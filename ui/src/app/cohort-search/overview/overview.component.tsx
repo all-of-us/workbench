@@ -254,7 +254,7 @@ export const ListOverview = withCurrentWorkspace()(
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const request = mapRequest(searchRequest);
       return cohortBuilderApi()
-        .getDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
+        .findDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
     }
 
     get hasActiveItems() {

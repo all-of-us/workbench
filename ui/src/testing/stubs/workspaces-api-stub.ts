@@ -6,12 +6,17 @@ import {
   RecentWorkspace,
   RecentWorkspaceResponse,
   ResearchPurposeReviewRequest,
+  ResourceType,
   ShareWorkspaceRequest,
-  SpecificPopulationEnum, UpdateWorkspaceRequest,
+  SpecificPopulationEnum,
+  UpdateWorkspaceRequest,
   UserRole,
   Workspace,
-  WorkspaceAccessLevel, WorkspaceBillingUsageResponse,
+  WorkspaceAccessLevel,
+  WorkspaceBillingUsageResponse,
   WorkspaceListResponse,
+  WorkspaceResourceResponse,
+  WorkspaceResourcesRequest,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
   WorkspacesApi,
@@ -21,8 +26,13 @@ import {
 import * as fp from 'lodash/fp';
 
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
+import {convertToResources} from 'app/utils/resourceActions';
 import {CopyRequest, EmptyResponse} from 'generated';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
+import {cohortReviewStubs} from './cohort-review-service-stub';
+import {exampleCohortStubs} from './cohorts-api-stub';
+import {ConceptSetsApiStub} from './concept-sets-api-stub';
+import {DataSetApiStub} from './data-set-api-stub';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -328,6 +338,27 @@ export class WorkspacesApiStub extends WorkspacesApi {
   getBillingUsage(workspaceNamespace: string, workspaceId: string): Promise<WorkspaceBillingUsageResponse> {
     return new Promise<WorkspaceBillingUsageResponse>(resolve => {
       resolve({cost: 5.5});
+    });
+  }
+
+  getWorkspaceResources(workspaceNamespace: string,
+    workspaceId: string,
+    resourceTypes: WorkspaceResourcesRequest): Promise<WorkspaceResourceResponse> {
+    return new Promise<WorkspaceResourceResponse>(resolve => {
+      const convertToResourcesBaseArgs = {
+        workspaceNamespace: workspaceNamespace,
+        workspaceId: workspaceId,
+        accessLevel: WorkspaceAccessLevel.OWNER,
+      };
+      const workspaceResources = convertToResources(
+        {...convertToResourcesBaseArgs, list: cohortReviewStubs, resourceType: ResourceType.COHORTREVIEW})
+        .concat(convertToResources(
+          {...convertToResourcesBaseArgs, list: exampleCohortStubs, resourceType: ResourceType.COHORT}))
+        .concat(convertToResources(
+          {...convertToResourcesBaseArgs, list: DataSetApiStub.stubDataSets(), resourceType: ResourceType.DATASET}))
+        .concat(convertToResources(
+          {...convertToResourcesBaseArgs, list: ConceptSetsApiStub.stubConceptSets(), resourceType: ResourceType.CONCEPTSET}));
+      resolve(workspaceResources);
     });
   }
 }

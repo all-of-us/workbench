@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import GoogleLoginPage from '../app/google-login';
+import GoogleLoginPage from 'app/google-login';
 
 
 export const signIn = async (page: Page) => {

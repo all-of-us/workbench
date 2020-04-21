@@ -5,15 +5,15 @@ import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-mod
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {formatRecentResourceDisplayDate} from 'app/utils';
+import {formatWorkspaceResourceDisplayDate} from 'app/utils';
 import {navigateByUrl} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
-import {RecentResource, ResourceType} from 'generated/fetch';
+import {ResourceType, WorkspaceResource} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
-  resource: RecentResource;
+  resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: Function;
 }
@@ -173,7 +173,7 @@ export const CohortResourceCard = fp.flow(
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}
         description={this.props.resource.cohort.description}
-        displayDate={formatRecentResourceDisplayDate(this.props.resource.modifiedTime)}
+        displayDate={formatWorkspaceResourceDisplayDate(this.props.resource.modifiedTime)}
         footerText={toDisplay(this.resourceType)}
         footerColor={colors.resourceCardHighlights.cohort}
       />

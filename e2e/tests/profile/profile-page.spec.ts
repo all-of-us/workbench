@@ -1,8 +1,7 @@
-import {SideNavLink} from '../../app/authenticated-page';
-import HomePage from '../../app/home-page';
-import ProfilePage from '../../app/profile-page';
-import {signIn} from '../app';
-
+import HomePage from 'app/home-page';
+import ProfilePage from 'app/profile-page';
+import {signIn} from 'tests/app';
+import navigation, {NavLink} from 'app/navigation';
 
 describe('Profile', () => {
 
@@ -10,15 +9,11 @@ describe('Profile', () => {
     await signIn(page);
   });
 
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
 
   test('Click First and Last name fields on Profile page', async () => {
     const homePage = new HomePage(page);
     await homePage.waitForLoad();
-    await homePage.navTo(SideNavLink.PROFILE);
+    await navigation.navMenu(page, NavLink.PROFILE);
     const profilePage = new ProfilePage(page);
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();

@@ -2,7 +2,7 @@ import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {serverConfigStore} from 'app/utils/navigation';
-import {ConfigApi, InstitutionApi, Profile} from 'generated/fetch';
+import {ConfigApi, Institution, InstitutionApi, Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {AccountCreationInstitution, Props} from './account-creation-institution';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
@@ -84,8 +84,13 @@ it('should load institutions list', async() => {
 
   expect(mockGetPublicInstitutionDetails).toHaveBeenCalled();
 
-  const options = getInstitutionDropdown(wrapper).props.options as Array<Object>;
+  const options = getInstitutionDropdown(wrapper).props.options as Array<{value, label}>;
   expect(options.length).toEqual(defaultInstitutions.length);
+  // Drop down list should be sorted in ASC order
+  expect(options[0].label).not.toEqual(defaultInstitutions[0].displayName);
+  expect(options[0].label).toEqual('Broad Institute');
+  console.log(options[0]);
+  console.log(defaultInstitutions[0]);
 });
 
 it('should show user-facing error message on data load error', async() => {
@@ -184,6 +189,30 @@ it('should validate email affiliation when inst and email domain are specified',
   expect(getEmailErrorMessage(wrapper).getDOMNode().textContent).toBe(
     'Your email does not match your institution'
   );
+
+});
+
+it('should display validation icon only after email verification', async() => {
+  const wrapper = component();
+  await waitOneTickAndUpdate(wrapper);
+
+  // Choose 'VUMC' and enter an email address.
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+  getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@wrongDomain.com'}});
+
+  // Email address is entered, but the input hasn't been blurred. The form should know that a
+  // response is required, but the API request hasn't been sent and returned yet.
+  expect(getInstance(wrapper).validate()['checkEmailResponse'])
+    .toContain('Institutional membership check has not completed');
+
+  // At this point, the validation icon should not be displayed as email has not been verified
+  await waitOneTickAndUpdate(wrapper);
+  expect(wrapper.find('[data-test-id="email-validation-icon"]').children().length).toBe(0);
+  getEmailInput(wrapper).simulate('blur');
+
+  // Email has beeb verified, the validation icon should now be displayed
+  await waitOneTickAndUpdate(wrapper);
+  expect(wrapper.find('[data-test-id="email-validation-icon"]').children().length).toBe(1);
 });
 
 it('should clear email validation when institution is changed', async() => {

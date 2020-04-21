@@ -48,8 +48,8 @@ export class SignInService {
         gapi.auth2.init({
           client_id: this.clientId,
           hosted_domain: config.gsuiteDomain,
-          scope: 'https://www.googleapis.com/auth/plus.login openid profile' +
-            ' https://www.googleapis.com/auth/cloud-billing'
+          scope: 'https://www.googleapis.com/auth/plus.login openid profile'
+          + (config.enableBillingUpgrade ? ' https://www.googleapis.com/auth/cloud-billing' : '')
         }).then(() => {
           this.subscribeToAuth2User();
         });

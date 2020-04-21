@@ -1,23 +1,10 @@
-import BaseElement from '../../app/aou-elements/base-element';
-import SelectComponent from '../../app/aou-elements/select-component';
-import Textbox from '../../app/aou-elements/textbox';
-import CreateAccountPage, {FIELD_LABEL, INSTITUTION_ROLE_VALUE, INSTITUTION_VALUE} from '../../app/create-account-page';
-import GoogleLoginPage from '../../app/google-login';
-
-const configs = require('../../resources/workbench-config');
+import BaseElement from 'app/aou-elements/base-element';
+import CreateAccountPage from 'app/create-account-page';
+import GoogleLoginPage from 'app/google-login';
+import {config} from 'resources/workbench-config';
 
 
 describe('User registration tests:', () => {
-
-  beforeEach(async () => {
-    await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(120000);
-  });
-
-  afterEach(async () => {
-    await jestPuppeteer.resetBrowser();
-  });
-
 
   test('Loading Terms of Use and Privacy statement page', async () => {
     const loginPage = new GoogleLoginPage(page);
@@ -90,17 +77,9 @@ describe('User registration tests:', () => {
     const nextButton = await createAccountPage.getNextButton();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
-    const institutionSelect = new SelectComponent(page, 'Select your institution');
-    await institutionSelect.select(INSTITUTION_VALUE.BROAD);
-
-    const emailAddress = await Textbox.forLabel(page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddress.type(configs.broadInstitutionEmail);
-
-    const roleSelect = new SelectComponent(page, 'describes your role');
-    await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
+    await createAccountPage.fillOutInstitution();
 
     await nextButton.waitUntilEnabled();
-    await nextButton.focus();
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
     await nextButton.clickWithEval();
 
@@ -108,7 +87,7 @@ describe('User registration tests:', () => {
     expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
 
     // verify username domain
-    expect(await createAccountPage.getUsernameDomain()).toBe(configs.userEmailDomain);
+    expect(await createAccountPage.getUsernameDomain()).toBe(config.userEmailDomain);
 
     // verify all input fields are visible and editable on this page
     const allInputs = await page.$$('input');

@@ -24,11 +24,15 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -87,8 +91,12 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
     BigQueryTestService.class,
     ReviewQueryBuilder.class,
     CohortCloningService.class,
@@ -172,7 +180,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     dbUser = userDao.save(dbUser);
     currentUser = dbUser;
 
-    when(mockFireCloudService.getWorkspaceAcl(anyString(), anyString()))
+    when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceACL()
                 .acl(
@@ -801,7 +809,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(currentUser.getUsername(), accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME))
+    when(mockFireCloudService.getWorkspaceAclAsService(NAMESPACE, NAME))
         .thenReturn(workspaceAccessLevelResponse);
   }
 }

@@ -19,6 +19,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.pmiops.workbench.appengine.AppEngineMetadataSpringConfiguration;
+import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -36,9 +38,11 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
+import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
@@ -50,20 +54,29 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 /** A tool that will generate a CSV export of our workspace data */
 @Configuration
 @Import({
+  ActionAuditSpringConfiguration.class,
+  AppEngineMetadataSpringConfiguration.class,
+  LogsBasedMetricServiceImpl.class,
   MonitoringServiceImpl.class,
   MonitoringSpringConfiguration.class,
   NotebooksServiceImpl.class,
   StackdriverStatsExporterService.class,
   UserRecentResourceServiceImpl.class
 })
-@ComponentScan("org.pmiops.workbench.firecloud")
+@ComponentScan(
+    value = "org.pmiops.workbench.firecloud",
+    excludeFilters =
+        // The base CommandlineToolConfig also imports the retry handler, which causes conflicts.
+        @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = FirecloudRetryHandler.class))
 public class ExportWorkspaceData {
 
   private static final Logger log = Logger.getLogger(ExportWorkspaceData.class.getName());

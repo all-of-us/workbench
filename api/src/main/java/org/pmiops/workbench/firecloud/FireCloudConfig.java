@@ -39,7 +39,7 @@ public class FireCloudConfig {
   public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
   public static final String END_USER_WORKSPACE_API = "workspacesApi";
 
-  private static final List<String> BILLING_SCOPES =
+  public static final List<String> BILLING_SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
           "https://www.googleapis.com/auth/userinfo.email",

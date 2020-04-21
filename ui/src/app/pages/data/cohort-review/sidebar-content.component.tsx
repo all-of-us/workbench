@@ -5,7 +5,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {styles as headerStyles} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
-import {CheckBox, DatePicker, NumberInput, Select, TextArea} from 'app/components/inputs';
+import {CheckBox, DatePicker, inputBorderColor, Select, TextArea} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/pages/data/cohort-review/annotation-definition-modals.component';
 import {cohortReviewStore, participantStore, updateParticipant} from 'app/services/review-state.service';
@@ -47,6 +47,14 @@ const styles = {
   },
   inlineBlock: {
     display: 'inline-block'
+  },
+  numberInput: {
+    background: colors.white,
+    border: `1px solid ${inputBorderColor}`,
+    borderRadius: 3,
+    height: '1.5rem',
+    padding: '0 0.5rem',
+    width: '100%',
   }
 };
 
@@ -172,9 +180,11 @@ const AnnotationItem = fp.flow(
       accessLevel === WorkspaceAccessLevel.READER;
     switch (annotationType) {
       case AnnotationType.INTEGER:
-        return <NumberInput
+        return <input
+          style={styles.numberInput}
+          type='number'
           value={value}
-          onChange={v => this.setState({editValue: v})}
+          onChange={v => this.setState({editValue: v.target.value})}
           onBlur={() => {
             this.setState({editValue: undefined});
             this.save(value);

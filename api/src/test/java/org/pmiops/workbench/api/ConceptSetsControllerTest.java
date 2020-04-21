@@ -26,14 +26,19 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
@@ -217,18 +222,23 @@ public class ConceptSetsControllerTest {
 
   @TestConfiguration
   @Import({
-    WorkspaceServiceImpl.class,
+    WorkspaceResourcesServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    CohortReviewServiceImpl.class,
+    CommonMappers.class,
     ConceptSetMapperImpl.class,
     ConceptSetsController.class,
     ConceptService.class,
-    WorkspacesController.class,
     ConceptSetService.class,
-    WorkspaceMapperImpl.class,
-    CommonMappers.class,
+    DataSetMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
     UserServiceTestConfiguration.class,
+    WorkspacesController.class,
+    WorkspaceMapperImpl.class,
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -819,7 +829,8 @@ public class ConceptSetsControllerTest {
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
+    when(fireCloudService.getWorkspaceAclAsService(ns, name))
+        .thenReturn(workspaceAccessLevelResponse);
   }
 
   private void saveConcepts() {

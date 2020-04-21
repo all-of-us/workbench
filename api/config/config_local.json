@@ -94,13 +94,15 @@
     "enableVpcServicePerimeter": true,
     "enableRdrExport": true,
     "enableBillingLockout": true,
+    "enableBillingUpgrade": true,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
     "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": true,
-    "enableV3DataUserCodeOfConduct": true
+    "enableV3DataUserCodeOfConduct": true,
+    "enableEventDateModifier": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local"

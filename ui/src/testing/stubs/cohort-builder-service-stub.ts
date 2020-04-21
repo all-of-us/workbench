@@ -37,7 +37,7 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
   }
 
-  getDemoChartInfo(): Promise<DemoChartInfoListResponse> {
+  findDemoChartInfo(): Promise<DemoChartInfoListResponse> {
     return new Promise<DemoChartInfoListResponse>(resolve => resolve({items: []}));
   }
 

@@ -22,9 +22,9 @@ import org.pmiops.workbench.model.AnnotationType;
 @Table(name = "cohort_annotation_definition")
 public class DbCohortAnnotationDefinition {
 
-  private long cohortAnnotationDefinitionId;
+  private Long cohortAnnotationDefinitionId;
   private int version;
-  private long cohortId;
+  private Long cohortId;
   private String columnName;
   private Short annotationType;
   private SortedSet<DbCohortAnnotationEnumValue> enumValues = new TreeSet<>();
@@ -32,16 +32,16 @@ public class DbCohortAnnotationDefinition {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "cohort_annotation_definition_id")
-  public long getCohortAnnotationDefinitionId() {
+  public Long getCohortAnnotationDefinitionId() {
     return cohortAnnotationDefinitionId;
   }
 
-  public void setCohortAnnotationDefinitionId(long cohortAnnotationDefinitionId) {
+  public void setCohortAnnotationDefinitionId(Long cohortAnnotationDefinitionId) {
     this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
   }
 
   public DbCohortAnnotationDefinition cohortAnnotationDefinitionId(
-      long cohortAnnotationDefinitionId) {
+      Long cohortAnnotationDefinitionId) {
     this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
     return this;
   }
@@ -62,15 +62,15 @@ public class DbCohortAnnotationDefinition {
   }
 
   @Column(name = "cohort_id")
-  public long getCohortId() {
+  public Long getCohortId() {
     return cohortId;
   }
 
-  public void setCohortId(long cohortId) {
+  public void setCohortId(Long cohortId) {
     this.cohortId = cohortId;
   }
 
-  public DbCohortAnnotationDefinition cohortId(long cohortId) {
+  public DbCohortAnnotationDefinition cohortId(Long cohortId) {
     this.cohortId = cohortId;
     return this;
   }

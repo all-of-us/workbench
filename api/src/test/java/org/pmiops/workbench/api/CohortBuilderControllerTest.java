@@ -74,16 +74,16 @@ public class CohortBuilderControllerTest {
 
     cohortBuilderService =
         new CohortBuilderServiceImpl(
-            cbCriteriaAttributeDao, cbCriteriaDao, cbDataFilterDao, personDao, cohortBuilderMapper);
-    controller =
-        new CohortBuilderController(
             bigQueryService,
             cohortQueryBuilder,
+            cbCriteriaAttributeDao,
             cbCriteriaDao,
-            cdrVersionService,
-            elasticSearchService,
-            configProvider,
-            cohortBuilderService);
+            cbDataFilterDao,
+            personDao,
+            cohortBuilderMapper);
+    controller =
+        new CohortBuilderController(
+            cdrVersionService, elasticSearchService, configProvider, cohortBuilderService);
   }
 
   @Test

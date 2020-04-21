@@ -804,6 +804,27 @@ paths:
           description: Workspace deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/resources":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      parameters:
+        - in: body
+          name: resourceTypesToFetch
+          description: Types of workspace resources to fetch. Currently only supports
+            Cohorts, Cohort Reviews, Concept Sets, and Datasets
+          schema:
+            "$ref": "#/definitions/WorkspaceResourcesRequest"
+      tags:
+      - workspaces
+      description: Gets a user defined selection of objects contained within a workspace
+      operationId: getWorkspaceResources
+      responses:
+        200:
+          description: Returns all objects that describe a section of the CDR in a workspace.
+          schema:
+            "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -1732,7 +1753,7 @@ paths:
         200:
           description: A list of resources order by last access time desc order
           schema:
-            "$ref": "#/definitions/RecentResourceResponse"
+            "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/update":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -1759,7 +1780,7 @@ paths:
         200:
           description: Successfully added/updated
           schema:
-            "$ref": "#/definitions/RecentResource"
+            "$ref": "#/definitions/WorkspaceResource"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/delete":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3178,7 +3199,7 @@ paths:
       consumes:
       - application/json
       description: Searches for demographic info about subjects.
-      operationId: getDemoChartInfo
+      operationId: findDemoChartInfo
       parameters:
       - in: path
         name: genderOrSex
@@ -3630,7 +3651,11 @@ definitions:
       enableBillingLockout:
         type: boolean
         default: false
-        description: Feature flag for billing lockout and upgrade
+        description: Feature flag for billing lockout
+      enableBillingUpgrade:
+        type: boolean
+        default: false
+        description: Feature flag for billing upgrade
       requireInvitationKey:
         type: boolean
         default: false
@@ -3648,6 +3673,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable version 2 of the Data User Code of Conduct
+      enableEventDateModifier:
+        type: boolean
+        default: false
+        description: Whether to show the Event Date modifier in cohort builder
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:
@@ -5392,11 +5421,18 @@ definitions:
 
 '
         type: string
-  RecentResourceResponse:
+  WorkspaceResourcesRequest:
+    type: object
+    properties:
+      typesToFetch:
+        type: array
+        items:
+          "$ref": "#/definitions/ResourceType"
+  WorkspaceResourceResponse:
     type: array
     items:
-      "$ref": "#/definitions/RecentResource"
-  RecentResource:
+      "$ref": "#/definitions/WorkspaceResource"
+  WorkspaceResource:
     type: object
     properties:
       workspaceId:

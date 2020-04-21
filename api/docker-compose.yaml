@@ -3,6 +3,7 @@ services:
   scripts:
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/api
     volumes:
@@ -36,6 +37,7 @@ services:
       - elastic
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/api
     volumes:
@@ -56,6 +58,7 @@ services:
       - elastic
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/api
     environment:
@@ -70,6 +73,7 @@ services:
       - db
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/api/db
     volumes:
@@ -84,6 +88,7 @@ services:
       - db
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/api
     volumes:
@@ -98,6 +103,7 @@ services:
       - db
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/api/db-cdr
     volumes:
@@ -114,6 +120,7 @@ services:
       - db
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/db-cdr
     volumes:
@@ -130,6 +137,7 @@ services:
   db-cloudsql-import:
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/db-cdr
     volumes:
@@ -147,6 +155,7 @@ services:
   db-local-mysql-import:
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w/db-cdr
     volumes:
@@ -164,6 +173,7 @@ services:
   cloud-sql-proxy:
     build:
       context: ./src/dev/server
+    image: allofustest/workbench-dev-api:local
     user: ${UID}
     working_dir: /w
     volumes:

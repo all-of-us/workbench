@@ -219,6 +219,9 @@ public class WorkbenchConfig {
     // inactive billing workspaces
     // See RW-3209.
     public boolean enableBillingLockout;
+    // Setting this to true will enable the use of Billing Accounts controlled by the user
+    // See RW-4711.
+    public boolean enableBillingUpgrade;
     // Whether or not AoU should handle inbound SumoLogic high-egress event requests.
     // See RW-2253.
     public boolean enableSumoLogicEventHandling;
@@ -240,6 +243,8 @@ public class WorkbenchConfig {
     public boolean enableCBAgeTypeOptions;
     // Flag to indicate whether to use the V2 Data User Code of Conduct
     public boolean enableV3DataUserCodeOfConduct;
+    // Flag to indicate whether to show the Event Date modifier in cohort builder
+    public boolean enableEventDateModifier;
   }
 
   public static class ActionAuditConfig {
