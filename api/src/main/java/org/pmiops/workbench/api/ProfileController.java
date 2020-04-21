@@ -680,7 +680,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     updateInstitutionalAffiliations(updatedProfile, user);
 
-    userService.updateUser(
+    userService.updateUserWithConflictHandling(
         user,
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
             updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService));

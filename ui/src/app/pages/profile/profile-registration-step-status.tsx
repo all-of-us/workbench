@@ -41,13 +41,14 @@ const styles = reactStyles({
 });
 
 interface Props {
-  title: string;
+  title: any;
   wasBypassed: boolean;
   isComplete: boolean;
   incompleteButtonText: string;
   completedButtonText: string;
   completeStep: Function;
   completionTimestamp: string;
+  childrenStyle?: React.CSSProperties;
 }
 
 const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
@@ -96,7 +97,7 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
                 </Button>
               ) }
             </div>
-            <div style={{marginLeft: '2.5rem'}}>
+            <div style={{marginLeft: '2.5rem', ...props.childrenStyle}}>
               { children }
             </div>
           </FlexColumn>

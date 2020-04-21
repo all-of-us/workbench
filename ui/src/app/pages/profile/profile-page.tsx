@@ -125,7 +125,6 @@ interface ProfilePageState {
   institutions: Array<PublicInstitutionDetails>;
   saveProfileErrorResponse: ErrorResponse;
   showDemographicSurveyModal: boolean;
-  showOtherRole: boolean;
   updating: boolean;
 }
 
@@ -143,7 +142,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       institutions: [],
       saveProfileErrorResponse: null,
       showDemographicSurveyModal: false,
-      showOtherRole: this.initializeShowOtherRole(),
       updating: false
     };
   }
@@ -157,10 +155,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     } catch (e) {
       reportError(e);
     }
-  }
-
-  initializeShowOtherRole() {
-    return this.props.profileState.profile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER;
   }
 
   navigateToTraining(): void {
@@ -219,8 +213,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     }
   }
 
-  updateVerifiedInstitutionRole(newRole) {
-    this.setState({showOtherRole: newRole === InstitutionalRole.OTHER});
+  setVerifiedInstitutionRole(newRole) {
     this.setState(fp.set(['currentProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], newRole));
 
   }
@@ -257,14 +250,9 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     }
   }
 
-  validGivenName() {
-    const {currentProfile} = this.state;
-    return currentProfile && currentProfile.givenName && currentProfile.givenName.length <= 80;
-  }
-
   render() {
     const {profileState: {profile}} = this.props;
-    const {currentProfile, saveProfileErrorResponse, showOtherRole, updating, showDemographicSurveyModal} = this.state;
+    const {currentProfile, saveProfileErrorResponse, updating, showDemographicSurveyModal} = this.state;
     const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
       serverConfigStore.getValue();
     const {
@@ -335,187 +323,190 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
     return <FadeBox style={styles.fadebox}>
       <div style={{width: '95%'}}>
-      {(!profile || updating) && <SpinnerOverlay/>}
-      <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
-      <FlexRow style={{justifyContent: 'spaceBetween'}}>
-        <div>
-
-        <div style={styles.title}>Public displayed Information</div>
-          <hr style={styles.verticalLine}/>
-          <FlexRow style={{marginTop: '1rem'}}>
-            {makeProfileInput({
-              title: 'First Name',
-              valueKey: 'givenName'
-            })}
-            {makeProfileInput({
-              title: 'Last Name',
-              valueKey: 'familyName'
-            })}
-          </FlexRow>
-          <FlexRow style={{height: '6rem'}}>
-            <FlexColumn>
-            {makeProfileInput({
-              title: 'Your Institution',
-              valueKey: 'verifiedInstitutionalAffiliation.institutionDisplayName',
-              disabled: true
-            })}
-            {!profile.verifiedInstitutionalAffiliation && <div style={{color: colors.danger}}>
-              Institution cannot be empty. Please contact admin
-            </div>}
-            </FlexColumn>
-
-            <FlexColumn style={{marginBottom: 40}}>
-              <div style={styles.inputLabel}>Your Role</div>
-              {profile.verifiedInstitutionalAffiliation && <Dropdown style={{width: '12.5rem'}} data-test-id='role-dropdown'
-                          placeholder='Your Role'
-                          options={this.getRoleOptions()}
-                          onChange={(v) => this.updateVerifiedInstitutionRole(v.value)}
-                          value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
-
-              {showOtherRole && <div>{makeProfileInput({
-                title: '',
-                valueKey: ['verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'],
-                style: {marginTop: '1rem'}
-              })}
-              </div>}
-            </FlexColumn>
-
-
-          </FlexRow>
-
-          <FlexRow style={{width: '100%'}}>
-            {makeProfileInput({
-              title: 'Professional URL',
-              valueKey: 'professionalUrl',
-              style: {width: '26rem'}
-            })}
-          </FlexRow>
-          <FlexRow>
-
-            {makeProfileInput({
-              title: <FlexColumn>
-                <div>Your research background, experience and research interests</div>
-                <div style={styles.researchPurposeInfo}>
-                  This information will be posted publicly on the AoU Research Hub Website to inform the AoU Research Participants.</div>
-              </FlexColumn>,
-              valueKey: 'areaOfResearch',
-              isLong: true,
-              style: {width: '26rem'}
-            })}
-          </FlexRow>
-          <div style={{width: '65%', marginTop: '0.5rem'}}>
-            <div style={styles.title}>Private Information</div>
-            <hr style={{...styles.verticalLine, width: '26rem'}}/>
+        {(!profile || updating) && <SpinnerOverlay/>}
+        <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
+        <FlexRow style={{justifyContent: 'spaceBetween'}}>
+          <div>
+            <div style={styles.title}>Public displayed Information</div>
+            <hr style={styles.verticalLine}/>
             <FlexRow style={{marginTop: '1rem'}}>
               {makeProfileInput({
-                title: 'Your Username',
-                valueKey: 'username',
-                disabled: true
+                title: 'First Name',
+                valueKey: 'givenName'
               })}
               {makeProfileInput({
-                title: 'Institutional Email Address',
-                valueKey: 'contactEmail',
-                disabled: true
+                title: 'Last Name',
+                valueKey: 'familyName'
+              })}
+            </FlexRow>
+            <FlexRow style={{height: '6rem'}}>
+              <FlexColumn>
+                {makeProfileInput({
+                  title: 'Your Institution',
+                  valueKey: 'verifiedInstitutionalAffiliation.institutionDisplayName',
+                  disabled: true
+                })}
+                {!profile.verifiedInstitutionalAffiliation && <div style={{color: colors.danger}}>
+                  Institution cannot be empty. Please contact admin
+                </div>}
+              </FlexColumn>
+
+              <FlexColumn style={{marginBottom: 40}}>
+                <div style={styles.inputLabel}>Your Role</div>
+                {profile.verifiedInstitutionalAffiliation &&
+                <Dropdown style={{width: '12.5rem'}} data-test-id='role-dropdown'
+                          placeholder='Your Role'
+                          options={this.getRoleOptions()}
+                          onChange={(v) => this.setVerifiedInstitutionRole(v.value)}
+                          value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
+
+                {currentProfile.verifiedInstitutionalAffiliation &&
+                currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum &&
+                currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum ===
+                InstitutionalRole.OTHER && <div>{makeProfileInput({
+                  title: '',
+                  valueKey: ['verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'],
+                  style: {marginTop: '1rem'}
+                })}
+                </div>}
+              </FlexColumn>
+            </FlexRow>
+
+            <FlexRow style={{width: '100%'}}>
+              {makeProfileInput({
+                title: 'Professional URL',
+                valueKey: 'professionalUrl',
+                style: {width: '26rem'}
               })}
             </FlexRow>
             <FlexRow>
-              {makeProfileInput({
-                title: 'Street Address 1',
-                valueKey: ['address', 'streetAddress1'],
-                id: 'streetAddress1'
-              })}
-              {makeProfileInput({
-                title: 'Street Address 2',
-                valueKey: ['address', 'streetAddress2'],
-                id: 'streetAddress2'
-              })}
-            </FlexRow>
-            <FlexRow>
-              {makeProfileInput({
-                title: 'City',
-                valueKey: ['address', 'city'],
-                id: 'city'
-              })}
-              {makeProfileInput({
-                title: 'State',
-                valueKey: ['address' , 'state'],
-                id: 'state'
-              })}
-            </FlexRow>
-            <FlexRow>
-              {makeProfileInput({
-                title: 'Zip Code',
-                valueKey: ['address', 'zipCode'],
-                id: 'zipCode'
-              })}
-              {makeProfileInput({
-                title: 'Country',
-                valueKey: ['address', 'country'],
-                id: 'country'
-              })}
-            </FlexRow>
-          </div>
-         </div>
-        <div style={{width: '16rem', marginRight: '4rem'}}>
-        <div style={styles.title}>Free credits balance
-        </div>
-        <hr style={{...styles.verticalLine, width: '15.7rem'}}/>
-          {profile && <FlexRow style={styles.freeCreditsBox}>
-            <FlexColumn style={{marginLeft: '0.8rem'}}>
-              <div style={{marginTop: '0.4rem'}}><i>All of Us</i> FREE credits used:</div>
-              <div>Remaining <i>All of Us</i> FREE credits:</div>
-            </FlexColumn>
-            <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-              <div style={{marginTop: '0.4rem'}}>{usdElement(profile.freeTierUsage)}</div>
-              {usdElement(profile.freeTierDollarQuota - profile.freeTierUsage)}
-            </FlexColumn>
-          </FlexRow>}
-          <div style={styles.title}>Requirements for All
-          </div>
-          <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
-          <div>
-            <ProfileRegistrationStepStatus
-                title='Turn On Google 2-Step Verification'
-                wasBypassed={!!profile.twoFactorAuthBypassTime}
-                incompleteButtonText='Set Up'
-                completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-                completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
-                isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
-
-
-          </div>
-          <div>
-
-            {enableEraCommons && <ProfileRegistrationStepStatus
-                title='Connect Your eRA Commons Account'
-                wasBypassed={!!profile.eraCommonsBypassTime}
-                incompleteButtonText='Link'
-                completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
-                completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
-                isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['eraCommons'].onClick} >
-              <div>
-                {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
-                  <div> Username: </div>
-                  <div> { profile.eraCommonsLinkedNihUsername } </div>
-                </React.Fragment>}
-                {profile.eraCommonsLinkExpireTime != null &&
-                //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
-                profile.eraCommonsLinkExpireTime !== 0
-                && <React.Fragment>
-                  <div> Link Expiration: </div>
-                  <div>
-                    { moment.unix(profile.eraCommonsLinkExpireTime)
-                        .format('MMMM Do, YYYY, h:mm:ss A') }
+              {makeProfileInput({
+                title: <FlexColumn>
+                  <div>Your research background, experience and research interests</div>
+                  <div style={styles.researchPurposeInfo}>
+                    This information will be posted publicly on the <i>AoU</i> Research Hub Website
+                    to
+                    inform the <i>AoU</i> Research Participants.
                   </div>
-                </React.Fragment>}
-              </div>
-            </ProfileRegistrationStepStatus>}
+                </FlexColumn>,
+                valueKey: 'areaOfResearch',
+                isLong: true,
+                style: {width: '26rem'}
+              })}
+            </FlexRow>
+            <div style={{width: '65%', marginTop: '0.5rem'}}>
+              <div style={styles.title}>Private Information</div>
+              <hr style={{...styles.verticalLine, width: '26rem'}}/>
+              <FlexRow style={{marginTop: '1rem'}}>
+                {makeProfileInput({
+                  title: 'Username',
+                  valueKey: 'username',
+                  disabled: true
+                })}
+                {makeProfileInput({
+                  title: 'Institutional email address',
+                  valueKey: 'contactEmail',
+                  disabled: true
+                })}
+              </FlexRow>
+              <FlexRow>
+                {makeProfileInput({
+                  title: 'Street address 1',
+                  valueKey: ['address', 'streetAddress1'],
+                  id: 'streetAddress1'
+                })}
+                {makeProfileInput({
+                  title: 'Street address 2',
+                  valueKey: ['address', 'streetAddress2'],
+                  id: 'streetAddress2'
+                })}
+              </FlexRow>
+              <FlexRow>
+                {makeProfileInput({
+                  title: 'City',
+                  valueKey: ['address', 'city'],
+                  id: 'city'
+                })}
+                {makeProfileInput({
+                  title: 'State',
+                  valueKey: ['address', 'state'],
+                  id: 'state'
+                })}
+              </FlexRow>
+              <FlexRow>
+                {makeProfileInput({
+                  title: 'Zip Code',
+                  valueKey: ['address', 'zipCode'],
+                  id: 'zipCode'
+                })}
+                {makeProfileInput({
+                  title: 'Country',
+                  valueKey: ['address', 'country'],
+                  id: 'country'
+                })}
+              </FlexRow>
+            </div>
+          </div>
+          <div style={{width: '16rem', marginRight: '4rem'}}>
+            <div style={styles.title}>Free credits balance
+            </div>
+            <hr style={{...styles.verticalLine, width: '15.7rem'}}/>
+            {profile && <FlexRow style={styles.freeCreditsBox}>
+              <FlexColumn style={{marginLeft: '0.8rem'}}>
+                <div style={{marginTop: '0.4rem'}}><i>All of Us</i> Free credits used:</div>
+                <div>Remaining <i>All of Us</i> Free credits:</div>
+              </FlexColumn>
+              <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                <div style={{marginTop: '0.4rem'}}>{usdElement(profile.freeTierUsage)}</div>
+                {usdElement(profile.freeTierDollarQuota - profile.freeTierUsage)}
+              </FlexColumn>
+            </FlexRow>}
+            <div style={styles.title}>Requirements for All
+            </div>
+            <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
+            <div>
+              <ProfileRegistrationStepStatus
+                  title='Turn on Google 2-Step Verification'
+                  wasBypassed={!!profile.twoFactorAuthBypassTime}
+                  incompleteButtonText='Set Up'
+                  completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
+                  completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
+                  isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
+                  completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}/>
 
-            {enableComplianceTraining && <ProfileRegistrationStepStatus
-                title='All of Us Responsible Conduct of Research Training'
+
+            </div>
+            <div>
+
+              {enableEraCommons && <ProfileRegistrationStepStatus
+                  title='Connect Your eRA Commons Account'
+                  wasBypassed={!!profile.eraCommonsBypassTime}
+                  incompleteButtonText='Link'
+                  completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
+                  completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
+                  isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
+                  completeStep={getRegistrationTasksMap()['eraCommons'].onClick}>
+                <div>
+                  {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
+                    <div> Username:</div>
+                    <div> {profile.eraCommonsLinkedNihUsername} </div>
+                  </React.Fragment>}
+                  {profile.eraCommonsLinkExpireTime != null &&
+                  //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
+                  profile.eraCommonsLinkExpireTime !== 0
+                  && <React.Fragment>
+                    <div> Link Expiration:</div>
+                    <div>
+                      {moment.unix(profile.eraCommonsLinkExpireTime)
+                          .format('MMMM Do, YYYY, h:mm:ss A')}
+                    </div>
+                  </React.Fragment>}
+                </div>
+              </ProfileRegistrationStepStatus>}
+
+              {enableComplianceTraining && <ProfileRegistrationStepStatus
+                  title={<span><i>All of Us</i> Responsible Conduct of Research Training'</span>}
                 wasBypassed={!!profile.complianceTrainingBypassTime}
                 incompleteButtonText='Access Training'
                 completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
@@ -524,60 +515,60 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />}
 
 
-            {enableDataUseAgreement && <ProfileRegistrationStepStatus
-                title='Sign Data User Code Of Conduct'
-                wasBypassed={!!profile.dataUseAgreementBypassTime}
-                incompleteButtonText='Sign'
-                completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
-                completionTimestamp={getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile)}
-                isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick} >
-              {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
-                <div> Agreement Renewal: </div>
-                <div>
-                  { moment.unix(profile.dataUseAgreementCompletionTime / 1000)
-                      .add(1, 'year')
-                      .format('MMMM Do, YYYY') }
-                </div>
-              </React.Fragment>}
-              <a
-                  onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
-                View current agreement
-              </a>
-            </ProfileRegistrationStepStatus>}
-          </div>
-          <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
+              {enableDataUseAgreement && <ProfileRegistrationStepStatus
+                  title='Sign Data User Code Of Conduct'
+                  wasBypassed={!!profile.dataUseAgreementBypassTime}
+                  incompleteButtonText='Sign'
+                  completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
+                  completionTimestamp={getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile)}
+                  isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
+                  completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
+                  childrenStyle={{marginLeft: '0rem'}}>
+                {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
+                  <div> Agreement Renewal:</div>
+                  <div>
+                    {moment.unix(profile.dataUseAgreementCompletionTime / 1000)
+                        .add(1, 'year')
+                        .format('MMMM Do, YYYY')}
+                  </div>
+                </React.Fragment>}
+                <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
+                  View current agreement
+                </a>
+              </ProfileRegistrationStepStatus>}
+            </div>
+            <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
 
-            <div style={styles.title}>Optional Demographics Survey</div>
-            <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
-            <Button
-                type={'link'}
-                onClick={() => {
-                  this.setState({showDemographicSurveyModal: true});
-                }}
-                data-test-id={'demographics-survey-button'}
-            >Update Survey</Button>
+              <div style={styles.title}>Optional Demographics Survey</div>
+              <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
+              <Button
+                  type={'link'}
+                  onClick={() => {
+                    this.setState({showDemographicSurveyModal: true});
+                  }}
+                  data-test-id={'demographics-survey-button'}
+              >Update Survey</Button>
+            </div>
           </div>
-    </div>
-      </FlexRow>
-      <div style={{display: 'flex'}}>
+        </FlexRow>
+        <div style={{display: 'flex'}}>
 
 
           <div style={{display: 'flex', marginBottom: '2rem'}}>
             <Button type='link'
-              onClick={() => this.setState({currentProfile: profile})}
+                    onClick={() => this.setState({currentProfile: profile})}
             >
               Discard Changes
             </Button>
             <TooltipTrigger
-              side='top'
-              content={(!!errors || !profile.verifiedInstitutionalAffiliation) && this.saveProfileErrorMessage}>
+                side='top'
+                content={(!!errors || !profile.verifiedInstitutionalAffiliation) && this.saveProfileErrorMessage}>
               <Button
-                data-test-id='save_profile'
-                type='purplePrimary'
-                style={{marginLeft: 40}}
-                onClick={() => this.saveProfile(currentProfile)}
-                disabled={!!errors || fp.isEqual(profile, currentProfile) || !profile.verifiedInstitutionalAffiliation}
+                  data-test-id='save_profile'
+                  type='purplePrimary'
+                  style={{marginLeft: 40}}
+                  onClick={() => this.saveProfile(currentProfile)}
+                  disabled={!!errors || fp.isEqual(profile, currentProfile) || !profile.verifiedInstitutionalAffiliation}
               >
                 Save Profile
               </Button>
@@ -585,39 +576,42 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           </div>
         </div>
 
-      {showDemographicSurveyModal && <Modal width={850}>
-        <DemographicSurvey
-            profile={currentProfile}
-            onCancelClick={() => {
-              this.setState({showDemographicSurveyModal: false});
-            }}
-            onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
-              const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
-              this.setState({showDemographicSurveyModal: false});
-              return savedProfile;
-            }}
-            enableCaptcha={false}
-            enablePrevious={false}
-        />
-      </Modal>}
-      {saveProfileErrorResponse &&
+        {showDemographicSurveyModal && <Modal width={850}>
+          <DemographicSurvey
+              profile={currentProfile}
+              onCancelClick={() => {
+                this.setState({showDemographicSurveyModal: false});
+              }}
+              onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
+                const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
+                this.setState({showDemographicSurveyModal: false});
+                return savedProfile;
+              }}
+              enableCaptcha={false}
+              enablePrevious={false}
+          />
+        </Modal>}
+        {saveProfileErrorResponse &&
         <Modal data-test-id='update-profile-error'>
           <ModalTitle>Error creating account</ModalTitle>
           <ModalBody>
-            <div>An error occurred while updating your profile. The following message was returned:</div>
+            <div>An error occurred while updating your profile. The following message was
+              returned:
+            </div>
             <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
               "{saveProfileErrorResponse.message}"
             </div>
             <div>
-              Please try again or contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+              Please try again or contact <a
+                href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button onClick = {() => this.setState({saveProfileErrorResponse: null})}
+            <Button onClick={() => this.setState({saveProfileErrorResponse: null})}
                     type='primary'>Close</Button>
           </ModalFooter>
         </Modal>
-      }
+        }
       </div></FadeBox>;
   }
 });

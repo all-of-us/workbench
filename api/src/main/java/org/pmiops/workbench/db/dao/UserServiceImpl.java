@@ -427,7 +427,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * @return
    */
   @Override
-  public DbUser updateUser(
+  public DbUser updateUserWithConflictHandling(
       DbUser dbUser, DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     try {
       dbUser = userDao.save(dbUser);
