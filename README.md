@@ -25,7 +25,7 @@ For local development, also install:
   * [Node.js](https://nodejs.org/en/) >= 8.  Currently known to work up to 12.16.
   * [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
   * [Docker sync](https://docker-sync.io)
-    * `> gem install docker-sync`
+    * `sudo gem install docker-sync`
     * If you'd prefer to install as non-root, you can [follow instructions for user-level install](https://docker-sync.readthedocs.io/en/latest/getting-started/installation.html).
 
 After you've installed `gcloud`, login using your `pmi-ops` account:
