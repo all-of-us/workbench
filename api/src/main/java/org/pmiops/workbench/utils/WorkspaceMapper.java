@@ -1,11 +1,11 @@
 package org.pmiops.workbench.utils;
 
-import static org.mapstruct.NullValuePropertyMappingStrategy.*;
-
+import java.sql.Timestamp;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -25,6 +26,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -88,16 +90,16 @@ public interface WorkspaceMapper {
   @Mapping(
       target = "specificPopulationsEnum",
       source = "populationDetails",
-      nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
   @Mapping(
       target = "disseminateResearchEnumSet",
       source = "disseminateResearchFindingList",
-      nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
   @Mapping(target = "disseminateResearchOther", source = "otherDisseminateResearchFindings")
   @Mapping(
       target = "researchOutcomeEnumSet",
       source = "researchOutcomeList",
-      nullValuePropertyMappingStrategy = SET_TO_DEFAULT)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
 
   // Normally using ignore should be frowned upon. In a merge method
   // like this one, it's unavoidable; otherwise we'd just make a straight-up translation.
@@ -109,7 +111,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "billingStatus", ignore = true)
   @Mapping(target = "cdrVersion", ignore = true)
   @Mapping(target = "cohorts", ignore = true)
-  @Mapping(target = "conceptSets", ignore = true)
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "creator", ignore = true)
   @Mapping(target = "dataAccessLevel", ignore = true)
@@ -129,24 +130,46 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
-  void mergeResearchPurposeIntoWorkspace(
-      @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
+  void mergeResearchPurposeIntoWorkspace(@MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
-  /**
-   * This method should be a replacement for the various merge and set methtods
-   * for DbWorkspace.
-   * @param workspace
-   * @param firecloudWorkspace
-   * @param dbUser
-   * @param billingAccountName
-   * @param cdrVersionId
-   * @return
-   */
+  @Mapping(source = "firecloudWorkspace.name", target = "firecloudName")
+  @Mapping(source = "workspace.researchPurpose.populationDetails",      target = "specificPopulationsEnum",      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
   @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevelEnum")
+  @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
   @Mapping(source = "workspace.researchPurpose.additionalNotes", target = "additionalNotes")
-  @Mapping(source = "workspace.name", target = "name")
-  DbWorkspace toDbWorkspace(Workspace workspace, FirecloudWorkspace firecloudWorkspace,
-      DbUser dbUser, String billingAccountName, String cdrVersionId);
+  @Mapping(source = "workspace.researchPurpose.ancestry", target = "ancestry")
+  @Mapping(source = "workspace.researchPurpose.anticipatedFindings", target = "anticipatedFindings")
+  @Mapping(source = "workspace.researchPurpose.approved", target = "approved")
+  @Mapping(source = "workspace.researchPurpose.billingMigrationStatusEnum", target = "billingMigrationStatusEnum")
+  @Mapping(source = "workspace.researchPurpose.cdrVersion", target = "cdrVersion")
+  @Mapping(source = "workspace.researchPurpose.cohorts", target = "cohorts")
+  @Mapping(source = "workspace.researchPurpose.commercialPurpose", target = "commercialPurpose")
+  @Mapping(source = "workspace.researchPurpose.controlSet", target = "controlSet")
+  @Mapping(source = "workspace.researchPurpose.dataSets", target = "dataSets")
+  @Mapping(source = "workspace.researchPurpose.diseaseFocusedResearch", target = "diseaseFocusedResearch")
+  @Mapping(source = "workspace.researchPurpose.diseaseOfFocus", target = "diseaseOfFocus")
+  @Mapping(source = "workspace.researchPurpose.disseminateResearchFindingList",      target = "disseminateResearchEnumSet",      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+  @Mapping(source = "workspace.researchPurpose.disseminateResearchSet", target = "disseminateResearchSet")
+  @Mapping(source = "workspace.researchPurpose.drugDevelopment", target = "drugDevelopment")
+  @Mapping(source = "workspace.researchPurpose.educational", target = "educational")
+  @Mapping(source = "workspace.researchPurpose.ethics", target = "ethics")
+  @Mapping(source = "firecloudWorkspace.workspaceId", target = "firecloudUuid")
+  @Mapping(source = "workspace.researchPurpose.intendedStudy", target = "intendedStudy")
+  @Mapping(source = "workspace.researchPurpose.methodsDevelopment", target = "methodsDevelopment")
+  @Mapping(source = "workspace.researchPurpose.otherPopulationDetails", target = "otherPopulationDetails")
+  @Mapping(source = "workspace.researchPurpose.otherPurpose", target = "otherPurpose")
+  @Mapping(source = "workspace.researchPurpose.otherPurposeDetails", target = "otherPurposeDetails")
+  @Mapping(source = "workspace.researchPurpose.populationHealth", target = "populationHealth")
+  @Mapping(source = "workspace.researchPurpose.reasonForAllOfUs", target = "reasonForAllOfUs")
+  @Mapping(source = "workspace.researchPurpose.researchOutcomeList",      target = "researchOutcomeEnumSet",      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+  @Mapping(source = "workspace.researchPurpose.researchOutcomeList", target = "researchOutcomeSet")
+  @Mapping(source = "workspace.researchPurpose.reviewRequested", target = "reviewRequested")
+  @Mapping(source = "workspace.researchPurpose.scientificApproach", target = "scientificApproach")
+  @Mapping(source = "workspace.researchPurpose.socialBehavioral", target = "socialBehavioral")
+  @Mapping(source = "workspace.researchPurpose.timeRequested", target = "timeRequested")
+  DbWorkspace toDbWorkspace(Workspace workspace, FirecloudWorkspace firecloudWorkspace, FirecloudWorkspaceId firecloudWorkspaceId,
+      DbUser dbUser, String billingAccountName, String cdrVersionId, WorkspaceActiveStatus workspaceActiveStatus,
+      Timestamp lastAccessedTime);
 
   @Mapping(target = "email", source = "user.username")
   @Mapping(target = "role", source = "acl")

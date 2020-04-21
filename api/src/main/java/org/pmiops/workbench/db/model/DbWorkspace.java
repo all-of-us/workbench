@@ -573,15 +573,6 @@ public class DbWorkspace {
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<DbConceptSet> getConceptSets() {
-    return conceptSets;
-  }
-
-  public void setConceptSets(Set<DbConceptSet> conceptSets) {
-    this.conceptSets = conceptSets;
-  }
-
-  @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
   public Set<DbDataset> getDataSets() {
     return dataSets;
   }
