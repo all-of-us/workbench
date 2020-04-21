@@ -286,7 +286,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     async componentDidMount() {
-      if (serverConfigStore.getValue().enableBillingLockout) {
+      if (serverConfigStore.getValue().enableBillingUpgrade) {
         this.fetchBillingAccounts();
       } else {
         // This is a temporary hack to set the billing account name property to anything
@@ -909,7 +909,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             onChange={v => this.setState({cloneUserRole: v})}/>
         </WorkspaceEditSection>
         }
-        {serverConfigStore.getValue().enableBillingLockout &&
+        {serverConfigStore.getValue().enableBillingUpgrade &&
           (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
                                 description={this.renderBillingDescription()}>
