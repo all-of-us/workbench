@@ -5,6 +5,8 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {ageCountStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
+import {ClrIcon} from 'app/components/icons';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -82,7 +84,7 @@ export class Demographics extends React.Component<Props, State> {
       ageTypeNodes: undefined,
       calculating: false,
       count: undefined,
-      loading: false,
+      loading: true,
       nodes: undefined
     };
   }
@@ -364,7 +366,9 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   get noSexData() {
-    return !this.loading && this.wizard.type === CriteriaType.SEX && this.nodes.length === 0;
+    const {wizard: {type}} = this.props;
+    const {loading, nodes} = this.state;
+    return !loading && type === CriteriaType.SEX && nodes.length === 0;
   }
 
   get showPreview() {
@@ -382,7 +386,104 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   render() {
-    return <div>Demographics</div>;
+    const {selectedIds, wizard} = this.props;
+    const {calculating, count, loading, nodes} = this.state;
+    return loading
+      ? <SpinnerOverlay/>
+      : <React.Fragment>
+      <form className='form-container'>
+        {wizard.type === CriteriaType.AGE && <div>
+          <div className='age-label'>
+            Age Range
+          </div>
+          <div className='control-wrapper slider-wrapper'>
+            <input type='number'
+              id='min-age'
+              min={minAge} max={maxAge}
+              className='number-display'
+              onBlur={() => this.checkMin()}/>
+            <div className='slider'>
+              {this.enableCBAgeTypeOptions && <div id='count-wrapper'>
+                {calculating
+                  ? <span className='spinner spinner-inline'></span>
+                  : <span id='age-count' className='badge badge-info'>
+                      {count.toLocaleString()}
+                    </span>
+                }
+              </div>}
+            {/* nouislider here */}
+            </div>
+            <input type='number'
+              id='max-age'
+              min={minAge} max={maxAge}
+              className='number-display'
+              onBlur={() => this.checkMax()}/>
+          </div>
+          {serverConfigStore.getValue().enableCBAgeTypeOptions && <div style={{marginLeft: '1rem'}}>
+            {this.ageTypes.map((ageType, a) => <div key={a} className='radio-inline'>
+              <input type='radio' id={`age_${a}`} value={ageType.type}/>
+              <label>{ageType.label}</label>
+            </div>)}
+          </div>}
+          {loading && <div className='spinner' style={{left: '45%'}}></div>}
+        </div>}
+
+        <div>
+          {this.noSexData && <div className='alert alert-warning'>
+            <div className='alert-items'>
+              <div className='alert-item static'>
+                <div className='alert-icon-wrapper'>
+                  <ClrIcon className='alert-icon is-solid' shape='exclamation-triangle'/>
+                </div>
+                <span className='alert-text'>
+                  This data does not exist in the dataset you’re currently using.
+                   To use this data, please create a new workspace with the most recent dataset.
+                </span>
+              </div>
+            </div>
+          </div>}
+          <div className='control-wrapper'>
+            <div className='ds-wrapper'>
+              <div className='ds-options'>
+                <div className='select-box'>
+                  <div className='option-list' >
+                    {loading && <span className='spinner spinner-md'></span>}
+                    {nodes.map((opt, o) => <div key={o} className='option' onClick={() => this.selectOption(opt)}>
+                      {selectedIds.includes(opt.parameterId)
+                        ? <ClrIcon shape='check-circle' size='20'  className='selection-icon items-disabled-icon'/>
+                        : <ClrIcon shape='plus-circle'  size='20' className='selection-icon items-selection-icon'/>
+                      }
+                      {opt.name}
+                      {opt.count !== null && <span className='badge badge-info'>
+                        {opt.count.toLocaleString()}
+                      </span>}
+                    </div>)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      {this.showPreview && <div className='count-preview'>
+        {wizard.type === CriteriaType.AGE && <div style={{marginRight: '0.25rem'}}>
+          <button className='btn btn-primary' disabled={calculating || count !== null} onClick={() => this.calculateAge()}>
+            Calculate
+          </button>
+        </div>}
+        {count !== null || wizard.type === CriteriaType.AGE && <div>
+          <div className='result-text'>
+            Results
+          </div>
+          <div>
+            Number Participants:
+            <span className='text-bold'>
+              {count !== null ? count.toLocaleString() : ' -- '}
+            </span>
+          </div>
+        </div>}
+      </div>}
+    </React.Fragment>;
   }
 }
 
