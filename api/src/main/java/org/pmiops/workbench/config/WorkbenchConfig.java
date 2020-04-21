@@ -219,6 +219,9 @@ public class WorkbenchConfig {
     // inactive billing workspaces
     // See RW-3209.
     public boolean enableBillingLockout;
+    // Setting this to true will enable the use of Billing Accounts controlled by the user
+    // See RW-4711.
+    public boolean enableBillingUpgrade;
     // Whether or not AoU should handle inbound SumoLogic high-egress event requests.
     // See RW-2253.
     public boolean enableSumoLogicEventHandling;

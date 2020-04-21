@@ -99,7 +99,11 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
+    return getNotebooksAsService(bucketName);
+  }
 
+  @Override
+  public List<FileDetail> getNotebooksAsService(String bucketName) {
     return cloudStorageService.getBlobListForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
         .filter(blob -> NOTEBOOK_PATTERN.matcher(blob.getName()).matches())

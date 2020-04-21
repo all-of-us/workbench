@@ -3651,7 +3651,11 @@ definitions:
       enableBillingLockout:
         type: boolean
         default: false
-        description: Feature flag for billing lockout and upgrade
+        description: Feature flag for billing lockout
+      enableBillingUpgrade:
+        type: boolean
+        default: false
+        description: Feature flag for billing upgrade
       requireInvitationKey:
         type: boolean
         default: false

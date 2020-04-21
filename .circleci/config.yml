@@ -1,35 +1,38 @@
 version: 2
 
-defaults: &defaults
-  docker:
-    - image: allofustest/workbench:buildimage-0.0.16
-  working_directory: ~/workbench
-java_defaults: &java_defaults
-  <<: *defaults
-  environment:
-    # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-    # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-    # https://circleci.com/blog/how-to-handle-java-oom-errors/
-    #
-    # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
-    # so we bumped this down further to 2G.
-    JAVA_TOOL_OPTIONS: -Xmx2g
-    TERM: dumb
-
+anchors:
+  defaults: &defaults
+    docker:
+      - image: allofustest/workbench:buildimage-0.0.16
+    working_directory: ~/workbench
+  ensure_branch_has_api_changes: &ensure_branch_has_api_changes
+    name: Ensure Branch has Changes to API Code
+    command: |
+      if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
+        echo No relevant changes on api directory in non-master branch. Skipping
+        circleci step halt
+      fi
+  java_defaults: &java_defaults
+    <<: *defaults
+    environment:
+      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+      # https://circleci.com/blog/how-to-handle-java-oom-errors/
+      #
+      # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
+      # so we bumped this down further to 2G.
+      JAVA_TOOL_OPTIONS: -Xmx2g
+      TERM: dumb
+    update_git_submodules: &update_git_submodules
+      name: Update Git Submodules
+      command: git submodule update --init --recursive
 jobs:
   api-build-test:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          command: git submodule update --init --recursive
-      - run:
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
+      - run: *update_git_submodules
+      - run: *ensure_branch_has_api_changes
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -43,7 +46,7 @@ jobs:
           working_directory: ~/workbench/api
           command: ./project.rb gradle compile__bigquerytest__Java compile__integration__Java
       - run:
-          name: Unit tests
+          name: Run Java Unit Tests
           working_directory: ~/workbench/api
           command: ./project.rb test
       - run:
@@ -80,14 +83,13 @@ jobs:
       MYSQL_ROOT_PASSWORD: ubuntu
     steps:
       - checkout
-      - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
-      - run:
+      - run: &activate_service_accont_creds
+          name: Activate Service Accont Credentials
           working_directory: ~/workbench
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
@@ -96,9 +98,11 @@ jobs:
           name: Await MySQL startup
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
       - run:
+          name: Run Local Migrations
           working_directory: ~/workbench/api
           command: ./project.rb run-local-migrations
       - run:
+          name: Local API Tests on Running Server
           working_directory: ~/workbench/api
           command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
       - save_cache:
@@ -112,8 +116,7 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       # Note: most of the time spent here appears to be in Gradle / App Engine
       # deployment. We tried more aggressively caching outputs via Circle
       # workspaces, but that seemed to have a negligible effect on speed. It's
@@ -123,9 +126,7 @@ jobs:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
-      - run:
-          working_directory: ~/workbench
-          command: ci/activate_creds.sh api/circle-sa-key.json
+      - run: *activate_service_accont_creds
       - deploy:
           name: Deploy to App Engine
           working_directory: ~/workbench/api
@@ -141,40 +142,30 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - run:
           name: Scan dependencies for vulnerabilities
           working_directory: ~/workbench/api
           command: |
             ./project.rb gradle dependencyCheckAnalyze --info
 
-  # TODO(RW-4645): Upgrade to Circle 2.1 and leverage shared commands to reduce duplication.
   api-integration-test:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - run:
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
+      - run: *update_git_submodules
+      - run: *ensure_branch_has_api_changes
       - restore_cache:
           keys:
           - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-integration-cache-
+      - run: *activate_service_accont_creds
       - run:
-          working_directory: ~/workbench
-          # Used to call gsutil from the circle environment.
-          command: ci/activate_creds.sh api/circle-sa-key.json
-      - run:
+          name: Run Integration Tests
           working_directory: ~/workbench/api
           command: ./project.rb integration
+      - store_test_results:
+          path: ~/workbench/api/build/test-results/integrationTest/
       - save_cache:
           paths:
             - ~/.gradle
@@ -185,20 +176,18 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - restore_cache:
           keys:
           - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-integration-cache-
+      - run: *activate_service_accont_creds
       - run:
-          working_directory: ~/workbench
-          # Used to call gsutil from the circle environment.
-          command: ci/activate_creds.sh api/circle-sa-key.json
-      - run:
+          name: Run Nightly Integration tests
           working_directory: ~/workbench/api
           command: ./project.rb nightly-integration
+      - store_test_results:
+          path: ~/workbench/api/build/test-results/integrationTest/
       - save_cache:
           paths:
             - ~/.gradle
@@ -209,25 +198,19 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout
-      - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - run:
-          #Circle is bad about setting up your remotes for you, you must use origin/
-          command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
-              echo No relevant changes on non-master branch, skipping
-              circleci step halt
-            fi
+      - run: *update_git_submodules
+      - run: *ensure_branch_has_api_changes
       - restore_cache:
           keys:
           - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-integration-cache-
       - run:
+          name: Activate Service Accont Credentials
           working_directory: ~/workbench
           # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
+          name: Run BigQuery Tests
           working_directory: ~/workbench/api
           command: ./project.rb bigquerytest
       - save_cache:
@@ -240,12 +223,10 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - run: *update_git_submodules
       - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - run:
-          working_directory: ~/workbench
           name: Download Swagger CLI
+          working_directory: ~/workbench
           command: |
             ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
       - restore_cache:
@@ -253,6 +234,7 @@ jobs:
           - ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
           - ui-cache-
       - run:
+          name: Yarn Codegen
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile && yarn codegen
       - save_cache:
@@ -260,17 +242,17 @@ jobs:
             - ~/.cache/yarn
           key: ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
       - run:
-          name: Run Angular tests
+          name: Run Angular Tests
           working_directory: ~/workbench/ui
           command: |
             yarn test --no-watch --no-progress --browsers=ChromeHeadless
       - run:
-          name: Run React tests (Jest)
+          name: Run React Jest Tests
           working_directory: ~/workbench/ui
           command: |
             yarn test-react --detectOpenHandles --forceExit --runInBand
       - run:
-          name: Build with strict compilation
+          name: Build UI with strict compilation
           working_directory: ~/workbench/ui
           command: ./project.rb build --environment test
       - run:
@@ -294,14 +276,13 @@ jobs:
     parallelism: 3
     steps:
       - checkout
-      - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - restore_cache:
           keys:
           - v2-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
           - v2-e2e-test-cache-
-      - run: 
+      - run:
+          name: Initialize Yarn
           working_directory: ~/workbench/e2e
           command: yarn cache clean && yarn install --frozen-lockfile
       - save_cache:
@@ -309,7 +290,7 @@ jobs:
             - ~/.cache/yarn
           key: v2-e2e-test-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
-          name: Update environment variables
+          name: Update Puppeteer Environment Variables
           command: |
             echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
             echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
@@ -329,8 +310,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run:
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       # Use the ui-build-test workspace here to avoid redoing the setup.
       - attach_workspace:
           at: .
@@ -339,7 +319,7 @@ jobs:
           - ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
           - ui-cache-
       - deploy:
-          name: Deploy to App Engine
+          name: Deploy UI App to App Engine
           working_directory: ~/workbench/ui
           command: |
             ../ci/activate_creds.sh circle-sa-key.json
@@ -358,8 +338,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run:
-          command: git submodule update --init --recursive
+      - run: *update_git_submodules
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -388,6 +367,7 @@ jobs:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
       - deploy:
+          name: Deploy to Perf Environment
           working_directory: ~/workbench/deploy
           command: |
             ../ci/activate_creds.sh circle-sa-key.json

@@ -73,10 +73,12 @@ public interface FireCloudService {
   /** Retrieves all billing project memberships for the user from FireCloud. */
   List<FirecloudBillingProjectMembership> getBillingProjectMemberships();
 
-  FirecloudWorkspaceACL getWorkspaceAcl(String projectName, String workspaceName);
+  FirecloudWorkspaceACL getWorkspaceAclAsService(String projectName, String workspaceName);
 
   FirecloudWorkspaceACLUpdateResponseList updateWorkspaceACL(
       String projectName, String workspaceName, List<FirecloudWorkspaceACLUpdate> aclUpdates);
+
+  FirecloudWorkspaceResponse getWorkspaceAsService(String projectName, String workspaceName);
 
   /**
    * Requested field options specified here:

@@ -30,6 +30,7 @@ public class ConfigController implements ConfigApiDelegate {
             .enableEraCommons(config.access.enableEraCommons)
             .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
             .enableBillingLockout(config.featureFlags.enableBillingLockout)
+            .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
             .firecloudURL(config.firecloud.baseUrl)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
             .requireInvitationKey(config.access.requireInvitationKey)

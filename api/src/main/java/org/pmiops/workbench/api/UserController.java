@@ -145,6 +145,11 @@ public class UserController implements UserApiDelegate {
 
   @Override
   public ResponseEntity<WorkbenchListBillingAccountsResponse> listBillingAccounts() {
+    // this check should be redundant: the UI only calls this endpoint when the flag is active
+    if (!configProvider.get().featureFlags.enableBillingUpgrade) {
+      return ResponseEntity.ok(new WorkbenchListBillingAccountsResponse());
+    }
+
     ListBillingAccountsResponse response;
     try {
       response = cloudBillingProvider.get().billingAccounts().list().execute();
