@@ -21,7 +21,6 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -222,7 +221,6 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  @NotNull
   private String getFreeCreditsResolutionText() {
     if (workbenchConfigProvider.get().featureFlags.enableBillingUpgrade) {
       return "you can request additional free credits by contacting support "
