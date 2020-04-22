@@ -27,16 +27,18 @@ import RSelect from 'react-select';
 
 const {useState, useEffect} = React;
 
-const withBusyState = fp.curry((setBusy, wrappedFn) => async(...args) => {
+type setFlagState = (value: boolean) => void;
+type setStringState = (value: boolean) => void;
+
+const withBusyState = fp.curry((setBusy: setFlagState, wrappedFn) => async(...args) => {
   setBusy(true);
-  try {
-    await wrappedFn(...args);
+  try {    await wrappedFn(...args);
   } finally {
     setBusy(false);
   }
 });
 
-const withErrorText = fp.curry((setError, wrappedFn) => async(...args) => {
+const withErrorText = fp.curry((setError: setStringState, wrappedFn) => async(...args) => {
   try {
     await wrappedFn(...args);
   } catch (e) {
@@ -49,7 +51,6 @@ const loadWorkspaces = async({filter, setWorkspaceList}) => {
   const workspacesReceived = (await workspacesApi().getWorkspaces()).items.filter(response => filter(response.accessLevel));
   workspacesReceived.sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
   setWorkspaceList(workspacesReceived.map(w => new WorkspacePermissions(w)));
-  throw new Error('test');
 };
 
 const styles = reactStyles({
@@ -62,9 +63,9 @@ const styles = reactStyles({
 });
 
 export const FnWorkspaceList = ({ profileState: { profile } }) => {
-  const [error, setError] = useState('');
+  const [error, setError] = useState<String>('');
   const [workspaceList, setWorkspaceList] = useState([]);
-  const [loadingWorkspaces, setLoadingWorkspaces] = useState();
+  const [loadingWorkspaces, setLoadingWorkspaces] = useState<Boolean>(true);
   const reloadWorkspaces = fp.flow(
     withBusyState(setLoadingWorkspaces),
     withErrorText(async e => {
