@@ -1054,7 +1054,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
                          onChange={v => this.setState({populationChecked: true})}
-                         checked={this.state.populationChecked}/>
+                         checked={populationChecked}/>
             <label style={styles.text}>Yes, my study will focus on one or more specific
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
@@ -1077,7 +1077,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     labelStyle={styles.text}
                     checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
-                    disabled={!this.state.populationChecked}
+                    disabled={!populationChecked}
                 />
                 <TextInput type='text' autoFocus placeholder='Please specify'
                            value={this.state.workspace.researchPurpose.otherPopulationDetails}
@@ -1099,7 +1099,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                          style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
-                         checked={this.state.populationChecked === false}/>
+                         checked={populationChecked === false}/>
             <label style={styles.text}>No, my study will not center on underrepresented populations.
               I am interested in a diverse sample in general, or I am focused on populations that
               have been well represented in prior research.</label>
@@ -1149,7 +1149,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
-                             checked={this.state.workspace.researchPurpose.reviewRequested}/>
+                             checked={reviewRequested}/>
                 <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
                   a review of my research purpose.</label>
                 </FlexRow>
@@ -1159,7 +1159,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', false);
                              }}
-                             checked={this.state.workspace.researchPurpose.reviewRequested === false}/>
+                             checked={
+                               reviewRequested === false}/>
                 <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
                   have no concerns at this time about potential stigmatization based on my study.</label>
                 </FlexRow>
