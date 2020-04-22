@@ -309,8 +309,8 @@ describe('WorkspaceEdit', () => {
     intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
     const charsRemaining = 1000 - testInput.length;
 
-    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
-      .toContain(charsRemaining);
+    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0))
+        .toBeUndefined();
 
     expect(wrapper.find('[data-test-id="characterLimit"]').get(0).props.children)
       .toContain('You have reached the character limit for this question');
