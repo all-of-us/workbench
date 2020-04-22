@@ -9,12 +9,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 
 @Mapper(
     componentModel = "spring",
-    uses = {CommonMappers.class})
+    uses = {CommonMappers.class, DbStorageEnums.class})
 public interface CohortAnnotationDefinitionMapper {
 
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")

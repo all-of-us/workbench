@@ -7,13 +7,10 @@ import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.stereotype.Service;
@@ -79,14 +76,8 @@ public class CommonMappers {
   //                                  ENUMS                                  //
   /////////////////////////////////////////////////////////////////////////////
 
-  public DataAccessLevel dataAccessLevelFromStorage(Short dataAccessLevel) {
-    return DbStorageEnums.dataAccessLevelFromStorage(dataAccessLevel);
-  }
-
-  public Short dataAccessLevelToStorage(DataAccessLevel dataAccessLevel) {
-    return DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
-  }
-
+  // Note that DbStorageEnums is a valid class for use in a MapStruct mapper directly, so there's
+  // no need to add wrapper methods here.
   public WorkspaceAccessLevel fcAccessLevelToApiAccessLevel(FirecloudWorkspaceAccessEntry acl) {
     return WorkspaceAccessLevel.fromValue(acl.getAccessLevel());
   }
@@ -98,14 +89,6 @@ public class CommonMappers {
     } else {
       return WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel());
     }
-  }
-
-  public AnnotationType annotationTypeFromStorage(Short annotationType) {
-    return DbStorageEnums.annotationTypeFromStorage(annotationType);
-  }
-
-  public Short annotationTypeToStorage(AnnotationType annotationType) {
-    return DbStorageEnums.annotationTypeToStorage(annotationType);
   }
 
   public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {
