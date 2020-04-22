@@ -27,7 +27,7 @@ import RSelect from 'react-select';
 const {useState, useEffect} = React;
 
 type setFlagState = (value: boolean) => void;
-type setStringState = (value: string) => void;
+type setErrorState = (value: Error) => void;
 
 const withBusyState = fp.curry((setBusy: setFlagState, wrappedFn) => async(...args) => {
   setBusy(true);
@@ -38,11 +38,11 @@ const withBusyState = fp.curry((setBusy: setFlagState, wrappedFn) => async(...ar
   }
 });
 
-const withErrorText = fp.curry((setError: setStringState, wrappedFn) => async(...args) => {
+const withErrorText = fp.curry((errorHandler: setErrorState, wrappedFn) => async(...args) => {
   try {
     await wrappedFn(...args);
   } catch (e) {
-    setError(e);
+    errorHandler(e);
   }
 });
 
