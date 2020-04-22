@@ -37,7 +37,7 @@ const styles = reactStyles({
     fontSize: 14,
     marginTop: '0.7rem',
     padding: '0.5rem',
-    backgroundColor: colorWithWhiteness(colors.accent, .85),
+    backgroundColor: colorWithWhiteness(colors.accent, .75),
     borderRadius: '5px',
   }
 });
