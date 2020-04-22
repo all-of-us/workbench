@@ -185,7 +185,7 @@ export const createEmptyProfile = (requireInstitutionalVerification: boolean = f
  * The inner / implementation SignIn component. This class should only be rendered via the
  * SignInReact method, which wraps this with the expected higher-order components.
  */
-export class SignInReactImpl extends React.Component<SignInProps, SignInStqte> {
+export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
 
   constructor(props: SignInProps) {
     super(props);
