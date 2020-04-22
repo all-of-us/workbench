@@ -397,60 +397,6 @@ public class ElasticFiltersTest {
   }
 
   @Test
-  public void testPPISurveyQuery() {
-    QueryBuilder resp =
-        ElasticFilters.fromCohortSearch(
-            cbCriteriaDao,
-            new SearchRequest()
-                .addIncludesItem(
-                    new SearchGroup()
-                        .addItemsItem(
-                            new SearchGroupItem()
-                                .addSearchParametersItem(
-                                    new SearchParameter()
-                                        .domain(DomainType.SURVEY.toString())
-                                        .type(CriteriaType.PPI.toString())
-                                        .subtype(CriteriaSubType.SURVEY.toString())
-                                        .ancestorData(false)
-                                        .standard(false)
-                                        .group(true)
-                                        .conceptId(77L)))));
-    assertThat(resp)
-        .isEqualTo(
-            singleNestedQuery(
-                NO_DATA_FILTERS,
-                QueryBuilders.termsQuery(
-                    "events.source_concept_id", ImmutableList.of("77", "7771", "777"))));
-  }
-
-  @Test
-  public void testPPIQuestionQuery() {
-    QueryBuilder resp =
-        ElasticFilters.fromCohortSearch(
-            cbCriteriaDao,
-            new SearchRequest()
-                .addIncludesItem(
-                    new SearchGroup()
-                        .addItemsItem(
-                            new SearchGroupItem()
-                                .addSearchParametersItem(
-                                    new SearchParameter()
-                                        .domain(DomainType.SURVEY.toString())
-                                        .type(CriteriaType.PPI.toString())
-                                        .subtype(CriteriaSubType.QUESTION.toString())
-                                        .conceptId(777L)
-                                        .ancestorData(false)
-                                        .standard(false)
-                                        .group(true)))));
-    assertThat(resp)
-        .isEqualTo(
-            singleNestedQuery(
-                NO_DATA_FILTERS,
-                QueryBuilders.termsQuery(
-                    "events.source_concept_id", ImmutableList.of("7771", "777"))));
-  }
-
-  @Test
   public void testPPIAnswerQuery() {
     Attribute attr =
         new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).addOperandsItem("1");
