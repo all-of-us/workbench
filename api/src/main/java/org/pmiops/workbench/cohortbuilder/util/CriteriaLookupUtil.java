@@ -7,6 +7,7 @@ import com.google.api.client.util.Sets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,8 +195,10 @@ public final class CriteriaLookupUtil {
                 .collect(Collectors.joining(","));
         // Find the entire hierarchy from parent to leaves. Each parent node is now encoded with
         // concept ids. The following lookups are in 2 separate calls for query efficiency
-        List<Long> longIds =
-            Stream.of(ids.split(",")).map(Long::parseLong).collect(Collectors.toList());
+        List<Long> longIds = new ArrayList<>();
+        if (!ids.isEmpty()) {
+          longIds = Stream.of(ids.split(",")).map(Long::parseLong).collect(Collectors.toList());
+        }
         cbCriteriaDao
             .findCriteriaLeavesAndParentsByPath(longIds, ids)
             .forEach(
