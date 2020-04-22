@@ -10,6 +10,7 @@ import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -37,6 +38,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT,
     uses = {
+      CdrVersionMapper.class,
       CommonMappers.class,
       CohortMapper.class,
       CohortReviewMapper.class,
@@ -134,6 +136,7 @@ public interface WorkspaceMapper {
   @Mapping(
       source = "workspace.dataAccessLevel",
       target = "dataAccessLevel") // will take care of dataAccessLevelEnum as well
+  @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
   @Mapping(source = "workspace.name", target = "name")
   @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
   @Mapping(source = "workspace.researchPurpose.additionalNotes", target = "additionalNotes")
@@ -180,7 +183,6 @@ public interface WorkspaceMapper {
       FirecloudWorkspace firecloudWorkspace,
       DbUser dbUser,
       String billingAccountName,
-      String cdrVersionId,
       WorkspaceActiveStatus workspaceActiveStatus,
       Timestamp lastAccessedTime,
       BillingMigrationStatus billingMigrationStatus);
@@ -248,8 +250,4 @@ public interface WorkspaceMapper {
   @Mapping(target = "modifiedTime", source = "dbDataset.lastModifiedTime")
   WorkspaceResource dbWorkspaceAndDbDatasetToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset);
-
-  default String cdrVersionId(CdrVersion cdrVersion) {
-    return String.valueOf(cdrVersion.getCdrVersionId());
-  }
 }

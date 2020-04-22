@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils.mappers;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
@@ -19,12 +20,12 @@ import org.springframework.stereotype.Service;
 public class CommonMappers {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-
   public CommonMappers(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  public Long timestamp(Timestamp timestamp) {
+  @Nullable
+  public Long longToSqlTimestamp(Timestamp timestamp) {
     if (timestamp != null) {
       return timestamp.getTime();
     }
@@ -32,6 +33,7 @@ public class CommonMappers {
     return null;
   }
 
+  @Nullable
   public String timestampToString(Timestamp timestamp) {
     // We are using this method because mapstruct defaults to gregorian conversion. The difference
     // is:
@@ -43,7 +45,8 @@ public class CommonMappers {
     return null;
   }
 
-  public Timestamp timestamp(Long timestamp) {
+  @Nullable
+  public Timestamp longToSqlTimestamp(Long timestamp) {
     if (timestamp != null) {
       return new Timestamp(timestamp);
     }
@@ -51,10 +54,12 @@ public class CommonMappers {
     return null;
   }
 
+  @Nullable
   public String dbUserToCreatorEmail(DbUser creator) {
     return Optional.ofNullable(creator).map(DbUser::getUsername).orElse(null);
   }
 
+  @Nullable
   public String cdrVersionToId(DbCdrVersion cdrVersion) {
     return Optional.ofNullable(cdrVersion)
         .map(DbCdrVersion::getCdrVersionId)
@@ -72,10 +77,6 @@ public class CommonMappers {
     return Etags.toVersion(etag);
   }
 
-  /////////////////////////////////////////////////////////////////////////////
-  //                                  ENUMS                                  //
-  /////////////////////////////////////////////////////////////////////////////
-
   // Note that DbStorageEnums is a valid class for use in a MapStruct mapper directly, so there's
   // no need to add wrapper methods here.
   public WorkspaceAccessLevel fcAccessLevelToApiAccessLevel(FirecloudWorkspaceAccessEntry acl) {
@@ -91,7 +92,8 @@ public class CommonMappers {
     }
   }
 
-  public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {
+  // Self-mapper that validates a new feature flag
+  public BillingStatus overrideIfBillingLockoutDisabled(BillingStatus billingStatus) {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       return BillingStatus.ACTIVE;
     } else {
