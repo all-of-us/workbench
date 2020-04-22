@@ -452,7 +452,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             <div>
               <FlexRow>
                 <FlexColumn>
-                  <div style={{...styles.asideText}}>
+                  <div style={styles.asideText}>
                     We create a 'username'@{gsuiteDomain} Google account which you will use to
                     login to the Workbench. This is a separate account and not related to any
                     personal or professional Google accounts you may have.</div>
@@ -466,7 +466,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                       labelText={usernameLabelText}
                       onChange={v => this.usernameChanged(v)}
                   >
-                    <div style={{...inputStyles.iconArea}}>
+                    <div style={inputStyles.iconArea}>
                       <ValidationIcon validSuccess={this.isUsernameValid()}/>
                     </div>
                     <i style={{...styles.asideText, marginLeft: 4}}>@{gsuiteDomain}</i>
@@ -611,7 +611,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   }}/>
                 </FlexRow>
                 {this.state.showMostInterestedInKnowingBlurb &&
-                  <ul style={{...styles.asideList, listStylePosition: 'outside', marginLeft: '0.75rem'}}>
+                  <ul style={{...styles.asideList, marginLeft: '0.75rem'}}>
                     {researchPurposeList.map((value, index) => <li key={index} style={styles.asideText}>{value}</li>)}
                   </ul>
                 }

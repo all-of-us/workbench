@@ -26,7 +26,8 @@ export const commonStyles = reactStyles({
     display: 'flex',
     height: '100%',
     flexDirection: 'column',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
+    listStylePosition: 'outside'
   },
   asideText: {
     fontSize: 14,
