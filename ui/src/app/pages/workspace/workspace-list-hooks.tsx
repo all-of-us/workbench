@@ -4,7 +4,6 @@ import {
   Profile
 } from 'generated/fetch';
 
-import { r } from '@angular/core/src/render3';
 import {AlertDanger} from 'app/components/alert';
 import {FadeBox} from 'app/components/containers';
 import {FlexRow} from 'app/components/flex';
@@ -62,8 +61,8 @@ const styles = reactStyles({
   }
 });
 
-export const FnWorkspaceList = ({ profileState: { profile } }) => {
-  const [error, setError] = useState<String>('');
+export const FnWorkspaceList = ({ profileState: { profile } }: {profileState: {profile: Profile}}) => {
+  const [error, setError] = useState<String>();
   const [workspaceList, setWorkspaceList] = useState([]);
   const [loadingWorkspaces, setLoadingWorkspaces] = useState<Boolean>(true);
   const reloadWorkspaces = fp.flow(
