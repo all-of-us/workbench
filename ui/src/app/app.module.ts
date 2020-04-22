@@ -48,7 +48,7 @@ import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
-import {WorkspaceListComponent} from './pages/workspace/workspace-list';
+import {WorkspaceListComponent} from './pages/workspace/workspace-list-hooks';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
 

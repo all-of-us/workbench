@@ -5,6 +5,11 @@
     "node_modules/tslint-microsoft-contrib",
     "node_modules/tslint-eslint-rules/dist/rules"
   ],
+  "linterOptions": {
+    "exclude": [
+      "**/*generated/**"
+    ]
+  },
   "rules": {
     "no-unused-variable": [true, {"ignore-pattern": "^_$"}],
     "no-relative-imports": [

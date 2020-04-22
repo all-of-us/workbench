@@ -14,7 +14,7 @@ import {
   workspaceStubs,
   WorkspaceStubVariables
 } from 'testing/stubs/workspaces-api-stub';
-import {WorkspaceList} from './workspace-list';
+import {WorkspaceList} from './workspace-list-hooks';
 
 // Mock the navigate function but not userProfileStore
 jest.mock('app/utils/navigation', () => ({
