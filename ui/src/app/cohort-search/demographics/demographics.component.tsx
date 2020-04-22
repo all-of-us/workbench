@@ -6,12 +6,100 @@ import {Subscription} from 'rxjs/Subscription';
 import {ageCountStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase} from 'app/utils';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
+
+const styles = reactStyles({
+  ageInput: {
+    marginTop: '0.25rem',
+    padding: '0 0.5rem',
+    border: `1px solid ${colors.black}`,
+    borderRadius: '3px',
+    width: '1rem',
+    fontWeight: 300,
+    fontSize: '0.5rem',
+  },
+  ageLabel: {
+    fontSize: '14px',
+    fontWeight: 600,
+    color: colors.primary
+  },
+  calculateBtn: {
+    background: colors.primary,
+    border: 'none',
+    borderRadius: '0.3rem',
+    color: colors.white,
+    cursor: 'pointer',
+    letterSpacing: '0.02rem',
+    lineHeight: '0.75rem',
+    padding: '0rem 0.75rem',
+    textTransform: 'uppercase',
+  },
+  control: {
+    alignItems: 'center',
+    display: 'flex',
+    marginRight: '1rem',
+  },
+  count: {
+    alignItems: 'center',
+    background: colors.accent,
+    borderRadius: '10px',
+    color: colors.white,
+    display: 'inline-flex',
+    fontSize: '10px',
+    height: '0.625rem',
+    justifyContent: 'center',
+    lineHeight: 'normal',
+    margin: '0 0.25rem',
+    minWidth: '0.675rem',
+    padding: '0 4px',
+    verticalAlign: 'middle'
+  },
+  countPreview: {
+    backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
+    padding: '0.5rem',
+    margin: '0 2.5%',
+    position: 'absolute',
+    width: '95%',
+    bottom: '0.5rem',
+  },
+  option: {
+    color: colors.black,
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: 400,
+    marginBottom: '0.5rem',
+    padding: '0 0.25rem',
+    textTransform: 'capitalize',
+  },
+  resultText: {
+    color: colors.primary,
+    fontSize: '14px',
+    fontWeight: 500,
+  },
+  selectIcon: {
+    color: colors.select,
+    marginRight: '0.25rem'
+  },
+  selected: {
+    cursor: 'not-allowed',
+    opacity: 0.4
+  },
+  slider: {
+    flex: 1,
+    padding: '0 0.5rem',
+    margin: '0 0,5rem',
+  },
+  sliderContainer: {
+    width: '96%',
+    paddingLeft: '1rem',
+  }
+});
 
 const minAge = 18;
 const maxAge = 120;
@@ -83,7 +171,7 @@ export class Demographics extends React.Component<Props, State> {
     this.state = {
       ageTypeNodes: undefined,
       calculating: false,
-      count: undefined,
+      count: null,
       loading: true,
       nodes: undefined
     };
@@ -374,7 +462,7 @@ export class Demographics extends React.Component<Props, State> {
   get showPreview() {
     const {selections, wizard} = this.props;
     return !this.state.loading
-      && (selections && selections.length)
+      && (selections && selections.length > 0)
       && !(wizard.type === CriteriaType.AGE && this.enableCBAgeTypeOptions);
   }
 
@@ -389,34 +477,34 @@ export class Demographics extends React.Component<Props, State> {
     const {selectedIds, wizard} = this.props;
     const {calculating, count, loading, nodes} = this.state;
     return loading
-      ? <SpinnerOverlay/>
+      ? <div style={{textAlign: 'center'}}><Spinner style={{marginTop: '3rem'}}/></div>
       : <React.Fragment>
-      <form className='form-container'>
+      <form style={{padding: '0.5rem 0 0 1rem'}}>
         {wizard.type === CriteriaType.AGE && <div>
-          <div className='age-label'>
+          <div style={styles.ageLabel}>
             Age Range
           </div>
-          <div className='control-wrapper slider-wrapper'>
-            <input type='number'
+          <div style={{...styles.control, ... styles.sliderContainer}}>
+            <input style={styles.ageInput}
+              type='number'
               id='min-age'
               min={minAge} max={maxAge}
-              className='number-display'
               onBlur={() => this.checkMin()}/>
-            <div className='slider'>
+            <div style={styles.slider}>
               {this.enableCBAgeTypeOptions && <div id='count-wrapper'>
                 {calculating
-                  ? <span className='spinner spinner-inline'></span>
-                  : <span id='age-count' className='badge badge-info'>
+                  ? <Spinner size={16}/>
+                  : <span style={styles.count} id='age-count'>
                       {count.toLocaleString()}
                     </span>
                 }
               </div>}
             {/* nouislider here */}
             </div>
-            <input type='number'
+            <input style={styles.ageInput}
+              type='number'
               id='max-age'
               min={minAge} max={maxAge}
-              className='number-display'
               onBlur={() => this.checkMax()}/>
           </div>
           {serverConfigStore.getValue().enableCBAgeTypeOptions && <div style={{marginLeft: '1rem'}}>
@@ -425,61 +513,38 @@ export class Demographics extends React.Component<Props, State> {
               <label>{ageType.label}</label>
             </div>)}
           </div>}
-          {loading && <div className='spinner' style={{left: '45%'}}></div>}
         </div>}
 
-        <div>
-          {this.noSexData && <div className='alert alert-warning'>
-            <div className='alert-items'>
-              <div className='alert-item static'>
-                <div className='alert-icon-wrapper'>
-                  <ClrIcon className='alert-icon is-solid' shape='exclamation-triangle'/>
-                </div>
-                <span className='alert-text'>
-                  This data does not exist in the dataset you’re currently using.
-                   To use this data, please create a new workspace with the most recent dataset.
-                </span>
-              </div>
-            </div>
-          </div>}
-          <div className='control-wrapper'>
-            <div className='ds-wrapper'>
-              <div className='ds-options'>
-                <div className='select-box'>
-                  <div className='option-list' >
-                    {loading && <span className='spinner spinner-md'></span>}
-                    {nodes.map((opt, o) => <div key={o} className='option' onClick={() => this.selectOption(opt)}>
-                      {selectedIds.includes(opt.parameterId)
-                        ? <ClrIcon shape='check-circle' size='20'  className='selection-icon items-disabled-icon'/>
-                        : <ClrIcon shape='plus-circle'  size='20' className='selection-icon items-selection-icon'/>
-                      }
-                      {opt.name}
-                      {opt.count !== null && <span className='badge badge-info'>
-                        {opt.count.toLocaleString()}
-                      </span>}
-                    </div>)}
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div style={styles.control}>
+          <div style={{margin: '0.25rem 0', overflow: 'auto', width: '100%'}}>
+            {nodes.map((opt, o) => <div key={o} style={styles.option} onClick={() => this.selectOption(opt)}>
+              {selectedIds.includes(opt.parameterId)
+                ? <ClrIcon shape='check-circle' size='20' style={{...styles.selectIcon, ...styles.selected}}/>
+                : <ClrIcon shape='plus-circle'  size='20' style={styles.selectIcon}/>
+              }
+              {opt.name}
+              {!!opt.count && <span style={styles.count}>
+                {opt.count.toLocaleString()}
+              </span>}
+            </div>)}
           </div>
         </div>
       </form>
-      {this.showPreview && <div className='count-preview'>
+      {this.showPreview && <div style={styles.countPreview}>
         {wizard.type === CriteriaType.AGE && <div style={{marginRight: '0.25rem'}}>
-          <button className='btn btn-primary' disabled={calculating || count !== null} onClick={() => this.calculateAge()}>
+          <button style={styles.calculateBtn} disabled={calculating || count !== null} onClick={() => this.calculateAge()}>
             Calculate
           </button>
         </div>}
-        {count !== null || wizard.type === CriteriaType.AGE && <div>
-          <div className='result-text'>
+        {(count !== null || wizard.type === CriteriaType.AGE) && <div>
+          <div style={styles.resultText}>
             Results
           </div>
           <div>
             Number Participants:
-            <span className='text-bold'>
-              {count !== null ? count.toLocaleString() : ' -- '}
-            </span>
+            <b style={{color: colors.dark}}>
+              &nbsp;{count !== null ? count.toLocaleString() : ' -- '}
+            </b>
           </div>
         </div>}
       </div>}
