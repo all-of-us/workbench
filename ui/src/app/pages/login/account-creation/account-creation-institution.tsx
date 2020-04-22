@@ -9,10 +9,11 @@ import {ValidationIcon} from 'app/components/icons';
 import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {commonStyles, TextInputWithLabel, WhyWillSomeInformationBePublic} from 'app/pages/login/account-creation/common';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {isAbortError, reportError} from 'app/utils/errors';
@@ -27,14 +28,18 @@ import {Dropdown} from 'primereact/dropdown';
 
 const styles = reactStyles({
   ...commonStyles,
-  publiclyDisplayedText: {
-    fontSize: 12,
-    fontWeight: 400
-  },
   wideInputSize: {
     width: '50%',
     minWidth: '600px'
   },
+  institutionalDuaTextBox: {
+    ...commonStyles.text,
+    fontSize: 14,
+    marginTop: '0.7rem',
+    padding: '0.5rem',
+    backgroundColor: colorWithWhiteness(colors.accent, .75),
+    borderRadius: '5px',
+  }
 });
 
 /**
@@ -335,29 +340,27 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     const errors = this.validate();
 
     return <div id='account-creation-institution'
-                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
+                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '1rem'}}>
       <div style={{fontSize: 28, fontWeight: 400, color: colors.primary}}>Create your account</div>
       <FlexRow>
         <FlexColumn style={{marginTop: '0.5rem', marginRight: '2rem'}}>
           <div style={{...styles.text, fontSize: 16, marginTop: '1rem'}}>
             Please complete Step 1 of 3
           </div>
-          <div style={{...styles.text, fontSize: 14, marginTop: '0.7rem'}}>
+          <div style={styles.institutionalDuaTextBox}>
             For access to the <i>All of Us</i> Research Program data, your institution needs to have signed a Data Use Agreement
             with the program. The institutions listed below have an Institutional Data Use Agreement with the program that
             enables us to provide their researchers with access to the Workbench.
           </div>
           <div style={{...styles.text, fontSize: 12, marginTop: '0.5rem'}}>
-            All fields are required.
+            All fields are required unless indicated as optional
           </div>
           {loadingInstitutions && <SpinnerOverlay />}
           {!loadingInstitutions && <div style={{marginTop: '.5rem'}}>
-            <label style={styles.boldText}>
-              Select your institution
-              <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
-                Publicly displayed
-              </i>
-            </label>
+            <FlexRow style={{alignItems: 'center', margin: '.5rem 0'}}>
+              <label style={styles.boldText}>Select your institution</label>
+              <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+            </FlexRow>
             <div style={{...styles.text, fontSize: 14}}>
               Your institution will be notified that you have registered using your institutional credentials.
             </div>
@@ -405,12 +408,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </TextInputWithLabel>
             {this.displayEmailErrorMessageIfNeeded()}
             <div style={{marginTop: '.5rem'}}>
-              <label style={{...styles.boldText, marginTop: '1rem'}}>
-                Which of the following best describes your role?
-                <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
-                  Publicly displayed
-                </i>
-              </label>
+              <FlexRow style={{alignItems: 'center', margin: '.5rem 0'}}>
+                <label style={styles.boldText}>
+                  Which of the following best describes your role?
+                </label>
+                <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+              </FlexRow>
               <div>
                 <Dropdown data-test-id='role-dropdown'
                           style={styles.wideInputSize}
@@ -422,12 +425,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               </div>
             </div>
             {institutionalRoleEnum === InstitutionalRole.OTHER && <div style={{marginTop: '.5rem'}}>
-              <label style={{...styles.boldText, marginTop: '1rem'}}>
-                Please describe your role
-                <i style={{...styles.publiclyDisplayedText, marginLeft: '0.2rem'}}>
-                  Publicly displayed
-                </i>
-              </label>
+              <FlexRow style={{alignItems: 'center'}}>
+                <label style={{...styles.boldText, margin: '.5rem 0'}}>
+                  Please describe your role
+                </label>
+                <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+              </FlexRow>
               <TextInputWithLabel value={institutionalRoleOtherText}
                                   inputStyle={styles.wideInputSize}
                                   inputId='institutionalRoleOtherText'
