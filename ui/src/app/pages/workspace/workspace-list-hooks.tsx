@@ -27,11 +27,12 @@ import RSelect from 'react-select';
 const {useState, useEffect} = React;
 
 type setFlagState = (value: boolean) => void;
-type setStringState = (value: boolean) => void;
+type setStringState = (value: string) => void;
 
 const withBusyState = fp.curry((setBusy: setFlagState, wrappedFn) => async(...args) => {
   setBusy(true);
-  try {    await wrappedFn(...args);
+  try {
+    await wrappedFn(...args);
   } finally {
     setBusy(false);
   }
@@ -62,9 +63,9 @@ const styles = reactStyles({
 });
 
 export const FnWorkspaceList = ({ profileState: { profile } }: {profileState: {profile: Profile}}) => {
-  const [error, setError] = useState<String>();
+  const [error, setError] = useState<string>();
   const [workspaceList, setWorkspaceList] = useState([]);
-  const [loadingWorkspaces, setLoadingWorkspaces] = useState<Boolean>(true);
+  const [loadingWorkspaces, setLoadingWorkspaces] = useState<boolean>(true);
   const reloadWorkspaces = fp.flow(
     withBusyState(setLoadingWorkspaces),
     withErrorText(async e => {
