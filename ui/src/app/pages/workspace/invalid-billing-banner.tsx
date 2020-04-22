@@ -27,7 +27,7 @@ export const InvalidBillingBanner = fp.flow(
   return <StatusAlertBanner
     onClose={() => props.onClose()}
     title={'This workspace has run out of free credits'}
-    message={'The free credits for the creator of this workspace have run out or expired. ' + userAction}
+    message={'The free credits for the creator of this workspace have run out. ' + userAction}
     footer={
       <div style={{display: 'flex', flexDirection: 'column'}}>
         <Button style={{height: '38px', width: '70%', fontWeight: 400}}
