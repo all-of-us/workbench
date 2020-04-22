@@ -117,7 +117,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
     const errors = this.validateDemographicSurvey(demographicSurvey);
 
-    return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '32rem'}}>
+    return <div style={{marginTop: '1rem', paddingLeft: '1rem', width: '32rem'}}>
       <TextColumn>
         <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Optional Demographics Survey</div>
         {this.props.showStepCount &&
