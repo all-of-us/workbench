@@ -4,6 +4,7 @@ import {
   Profile
 } from 'generated/fetch';
 
+import { r } from '@angular/core/src/render3';
 import {AlertDanger} from 'app/components/alert';
 import {FadeBox} from 'app/components/containers';
 import {FlexRow} from 'app/components/flex';
@@ -20,14 +21,13 @@ import {
 } from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import * as fp from 'lodash';
 import * as React from 'react';
 import RSelect from 'react-select';
-import * as fp from 'lodash';
-import { r } from '@angular/core/src/render3';
 
 const {useState, useEffect} = React;
 
-const withBusyState = fp.curry((setBusy, wrappedFn) => async (...args) => {
+const withBusyState = fp.curry((setBusy, wrappedFn) => async(...args) => {
   setBusy(true);
   try {
     await wrappedFn(...args);
@@ -74,7 +74,7 @@ export const FnWorkspaceList = ({ profileState: { profile } }) => {
   )(loadWorkspaces);
 
   useEffect(() => {
-    reloadWorkspaces({filter: null, setError, setWorkspaceList});
+    reloadWorkspaces({filter: null, setWorkspaceList});
   }, []);
 
   // Maps each "Filter by" dropdown element to a set of access levels to display.
@@ -85,7 +85,7 @@ export const FnWorkspaceList = ({ profileState: { profile } }) => {
     { label: 'All',    value: ['OWNER', 'READER', 'WRITER'] },
   ];
   const defaultFilter = filters.find(f => f.label === 'All');
-console.log(error);
+
   return <React.Fragment>
     <FadeBox style={styles.fadeBox}>
       <div style={{padding: '0 1rem'}}>
@@ -95,11 +95,7 @@ console.log(error);
           <RSelect options={filters}
             defaultValue={defaultFilter}
             onChange={(levels) => {
-              reloadWorkspaces({
-                filter: (level: any) => levels.value.includes(level),
-                setError,
-                setWorkspaceList
-              });
+              reloadWorkspaces({ filter: (level: any) => levels.value.includes(level), setWorkspaceList });
             }}/>
         </FlexRow>
         {error && <AlertDanger>
@@ -117,7 +113,7 @@ console.log(error);
                   workspace={wp.workspace}
                   accessLevel={wp.accessLevel}
                   userEmail={profile.username}
-                  reload={ () => reloadWorkspaces({filter: null, setError, setWorkspaceList}) }
+                  reload={ () => reloadWorkspaces({filter: null, setWorkspaceList}) }
                 />;
               })}
             </div>)}
