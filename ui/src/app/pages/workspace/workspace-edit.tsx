@@ -1192,12 +1192,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   (Question 2.3)</i> cannot be empty</div>}
                 {errors.disseminate && <div> You must specific how you plan to disseminate your research findings (Question 3)</div>}
                 {errors.otherDisseminateResearchFindings && <div>
-                    Disseminate Research Findings Other text should be of at most 100 characters</div>}
+                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</div>}
                 {errors.researchOutcoming && <div> You must specify the outcome of the research (Question 4)</div>}
                 {errors.populationChecked && <div>You must pick an answer Population of interest question (Question 5)</div>}
                 {errors.specificPopulation && <div> You must specify a population of study (Question 5)</div>}
                 {errors.otherSpecificPopulation && <div>
-                    Specific Population Other text should be of at most 100 characters</div>}
+                    Specific Population Other text should not be blank and should be at most 100 characters</div>}
                 {errors.reviewRequested && <div>You must pick an answer for review of stigmatizing research (Question 6)</div>}
               </ul>
             } disabled={!errors}>
