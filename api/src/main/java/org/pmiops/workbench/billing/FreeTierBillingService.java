@@ -151,6 +151,12 @@ public class FreeTierBillingService {
         });
   }
 
+  // are these two cost values approximately equal?
+  // used to determine whether we should log anomalies
+  private boolean withinCostTolerance(double currentCost, double previousCost) {
+    return Math.abs(currentCost - previousCost) < 0.000001;
+  }
+
   /**
    * Has this user passed a cost threshold between this check and the previous run?
    *
@@ -170,7 +176,9 @@ public class FreeTierBillingService {
 
     // this shouldn't happen, but it did (RW-4678)
     // alert if it happens again
-    if (currentCost < previousCost) {
+    if (currentCost < previousCost &&
+            // was logging many false positives
+            !withinCostTolerance(currentCost, previousCost) ) {
       String msg =
           String.format(
               "User %s (%s) has %f in total free tier spending in BigQuery, "
