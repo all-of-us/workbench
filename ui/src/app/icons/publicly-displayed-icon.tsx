@@ -44,8 +44,8 @@ export const PubliclyDisplayed = (props) => {
     <style>
       {css}
     </style>
-    <div className='pointer' style={{fontSize: 12, fontWeight: 400, ...props.style}}>
-      <label style={{marginLeft: '0.3rem', color: colors.accent}}>
+    <div className='pointer' style={props.style}>
+      <label style={{fontSize: 12, fontWeight: 400, marginLeft: '0.3rem', color: colors.accent}}>
         Publicly displayed
         <TooltipTrigger content={toolTipContent} side='right'>
           <InfoIcon style={{marginLeft: '0.5rem', width: '0.7rem'}}/>

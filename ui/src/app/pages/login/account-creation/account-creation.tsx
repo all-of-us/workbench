@@ -588,8 +588,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <Section
             header={<React.Fragment>
               <FlexRow style={{alignItems: 'flex-start'}}>
-                <div style={{width: '70%'}}>Your research background, experience, and research interests</div>
-                <PubliclyDisplayed style={{marginLeft: '1.2rem'}}/>
+                <div style={{maxWidth: '60%'}}>Your research background, experience, and research interests</div>
+                <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
               </FlexRow>
               <div
                 style={{...styles.asideText, marginTop: '.125px'}}>
@@ -705,8 +705,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <Section
             header={<React.Fragment>
               <FlexRow style={{alignItems: 'flex-start'}}>
-                <div style={{width: '60%'}}>Your professional profile or bio page below, if available</div>
-                <PubliclyDisplayed style={{marginLeft: '0.5rem'}}/>
+                <div style={{maxWidth: '60%'}}>Your professional profile or bio page below, if available</div>
+                <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
               </FlexRow>
               <div style={{...styles.asideText, marginTop: '.125rem'}}>(Optional)</div>
               <div style={{...styles.asideText, marginTop: '.5rem', marginBottom: '.5rem'}}>

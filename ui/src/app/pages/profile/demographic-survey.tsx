@@ -126,7 +126,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
           </div>
         }
         <div style={{
-          backgroundColor: colorWithWhiteness(colors.accent, .85),
+          backgroundColor: colorWithWhiteness(colors.accent, .75),
           padding: '1rem',
           borderRadius: '5px'
         }}>

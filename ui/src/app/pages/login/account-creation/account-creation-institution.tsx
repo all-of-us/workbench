@@ -340,7 +340,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     const errors = this.validate();
 
     return <div id='account-creation-institution'
-                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
+                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '1rem'}}>
       <div style={{fontSize: 28, fontWeight: 400, color: colors.primary}}>Create your account</div>
       <FlexRow>
         <FlexColumn style={{marginTop: '0.5rem', marginRight: '2rem'}}>
