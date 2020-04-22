@@ -30,6 +30,15 @@ public interface CdrVersionMapper {
   @Mapping(source = "foo", target = "numParticipants")
   @Mapping(source = "foo", target = "cdrDbName")
   @Mapping(source = "foo", target = "elasticIndexBaseName")
+  //  @Mapping(source = "bar.dataAccessLevelEnum", target = "dataAccessLevelEnum")
+//  @Mapping(source = "bar.archivalStatusEnum", target = "archivalStatusEnum")
+  @Mapping(source = "bar.releaseNumber", target = "releaseNumber")
+  @Mapping(source = "bar.bigqueryProject", target = "bigqueryProject")
+  @Mapping(source = "bar.bigqueryDataset", target = "bigqueryDataset")
+  @Mapping(source = "bar.numParticipants", target = "numParticipants")
+  @Mapping(source = "bar.cdrDbName", target = "cdrDbName")
+  @Mapping(source = "bar.elasticIndexBaseName", target = "elasticIndexBaseName")
+
   DbCdrVersion toDbCdrVersion(CdrVersion cdrVersion,
       boolean isDefault,
       BigQueryConfig bigQueryConfig);

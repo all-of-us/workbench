@@ -185,15 +185,7 @@ public interface WorkspaceMapper {
   @Mapping(source = "dbDataSets", target = "dataSets")
   @Mapping(source = "workspaceActiveStatus", target = "workspaceActiveStatusEnum")
   @Mapping(source = "billingMigrationStatus", target = "billingMigrationStatusEnum")
-  @Mapping(source = "bar.isDefault", target = "isDefault")
-  @Mapping(source = "bar.dataAccessLevelEnum", target = "dataAccessLevelEnum")
-  @Mapping(source = "bar.archivalStatusEnum", target = "archivalStatusEnum")
-  @Mapping(source = "bar.releaseNumber", target = "releaseNumber")
-  @Mapping(source = "bar.bigqueryProject", target = "bigqueryProject")
-  @Mapping(source = "bar.bigqueryDataset", target = "bigqueryDataset")
-  @Mapping(source = "bar.numParticipants", target = "numParticipants")
-  @Mapping(source = "bar.cdrDbName", target = "cdrDbName")
-  @Mapping(source = "bar.elasticIndexBaseName", target = "elasticIndexBaseName")
+  @Mapping(source = "cdrVersion.isDefault", target = "isDefault")
   DbWorkspace toDbWorkspace(
       Workspace workspace,
       FirecloudWorkspace firecloudWorkspace,
