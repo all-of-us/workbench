@@ -80,7 +80,7 @@ describe('WorkspaceEdit', () => {
       .toEqual(false);
 
     expect(wrapper.find('[data-test-id="specific-population-no"]').first().prop('checked'))
-      .toEqual(true);
+      .toEqual(false);
   });
 
   it('displays workspaces duplicate page', async () => {
