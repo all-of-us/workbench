@@ -29,7 +29,7 @@ const {useState, useEffect} = React;
 type setFlagState = (value: boolean) => void;
 type setErrorState = (value: Error) => void;
 
-const withBusyState = fp.curry((setBusy: setFlagState, wrappedFn) => async(...args) => {
+const withBusyState = fp.curry((setBusy: setFlagState, wrappedFn: Function) => async(...args) => {
   setBusy(true);
   try {
     await wrappedFn(...args);
@@ -38,7 +38,7 @@ const withBusyState = fp.curry((setBusy: setFlagState, wrappedFn) => async(...ar
   }
 });
 
-const withErrorText = fp.curry((errorHandler: setErrorState, wrappedFn) => async(...args) => {
+const withErrorText = fp.curry((errorHandler: setErrorState, wrappedFn: Function) => async(...args) => {
   try {
     await wrappedFn(...args);
   } catch (e) {
