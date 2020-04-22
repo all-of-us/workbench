@@ -1,6 +1,7 @@
 package org.pmiops.workbench.utils;
 
 import java.sql.Timestamp;
+import java.util.Set;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -178,6 +179,21 @@ public interface WorkspaceMapper {
   @Mapping(source = "workspace.researchPurpose.scientificApproach", target = "scientificApproach")
   @Mapping(source = "workspace.researchPurpose.socialBehavioral", target = "socialBehavioral")
   @Mapping(source = "workspace.researchPurpose.timeRequested", target = "timeRequested")
+  @Mapping(source = "cdrVersion", target = "cdrVersion")
+  @Mapping(source = "workspace.researchPurpose.otherDisseminateResearchFindings", target = "disseminateResearchOther")
+  @Mapping(source = "dbCohorts", target = "cohorts")
+  @Mapping(source = "dbDataSets", target = "dataSets")
+  @Mapping(source = "workspaceActiveStatus", target = "workspaceActiveStatusEnum")
+  @Mapping(source = "billingMigrationStatus", target = "billingMigrationStatusEnum")
+  @Mapping(source = "bar.isDefault", target = "isDefault")
+  @Mapping(source = "bar.dataAccessLevelEnum", target = "dataAccessLevelEnum")
+  @Mapping(source = "bar.archivalStatusEnum", target = "archivalStatusEnum")
+  @Mapping(source = "bar.releaseNumber", target = "releaseNumber")
+  @Mapping(source = "bar.bigqueryProject", target = "bigqueryProject")
+  @Mapping(source = "bar.bigqueryDataset", target = "bigqueryDataset")
+  @Mapping(source = "bar.numParticipants", target = "numParticipants")
+  @Mapping(source = "bar.cdrDbName", target = "cdrDbName")
+  @Mapping(source = "bar.elasticIndexBaseName", target = "elasticIndexBaseName")
   DbWorkspace toDbWorkspace(
       Workspace workspace,
       FirecloudWorkspace firecloudWorkspace,
@@ -185,7 +201,10 @@ public interface WorkspaceMapper {
       String billingAccountName,
       WorkspaceActiveStatus workspaceActiveStatus,
       Timestamp lastAccessedTime,
-      BillingMigrationStatus billingMigrationStatus);
+      BillingMigrationStatus billingMigrationStatus,
+      CdrVersion cdrVersion,
+      Set<DbCohort> dbCohorts,
+      Set<DbDataSet> dbDataSets);
 
   @Mapping(target = "email", source = "user.username")
   @Mapping(target = "role", source = "acl")
