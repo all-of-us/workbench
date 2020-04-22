@@ -231,7 +231,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showStigmatizationDetails: false,
         billingAccounts: [],
         showCreateBillingAccountModal: false,
-        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false,
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
       };
     }
 
@@ -329,7 +329,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             ethics: false,
             populationDetails: [],
             populationHealth: false,
-            reviewRequested: false,
+            reviewRequested: undefined,
             socialBehavioral: false,
             reasonForAllOfUs: '',
           }
@@ -504,9 +504,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (rp.label === 'Other') {
         children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
                              onChange={v => this.updateOtherDisseminateResearch(v)}
-                             placeholder='Specify the name of the forum (journal, scientific
-                             conference, blog etc.) through which you will disseminate your
-                             findings, if available.'
+                             placeholder={'Specify the name of the forum (journal, scientific conference, blog etc.)' +
+                             ' through which you will disseminate your findings, if available.'}
                              data-test-id='otherDisseminateResearch-text'
                              disabled={!this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)}
                              style={{marginTop: '0.5rem', width: '16rem'}}/>;
@@ -604,9 +603,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get isOtherSpecificPopulationValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
-      return this.isSpecificPopulationValid && (
-          !fp.includes(SpecificPopulationEnum.OTHER, researchPurpose.populationDetails) ||
-          (researchPurpose.otherPopulationDetails && researchPurpose.otherPopulationDetails.length <= 100));
+      // Avoids null pointers. We don't want to show this error message if nothing is selected yet.
+      if (!this.isSpecificPopulationValid) {
+        return true;
+      }
+      return !fp.includes(SpecificPopulationEnum.OTHER, researchPurpose.populationDetails) ||
+          (researchPurpose.otherPopulationDetails && researchPurpose.otherPopulationDetails.length <= 100);
     }
 
     get isDiseaseOfFocusValid() {
@@ -820,13 +822,15 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     render() {
       const {
+        populationChecked,
         workspace: {
           name,
           billingAccountName,
           researchPurpose: {
             anticipatedFindings,
             intendedStudy,
-            scientificApproach
+            scientificApproach,
+            reviewRequested
           }
         }
       } = this.state;
@@ -839,6 +843,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         billingAccountName,
         anticipatedFindings,
         intendedStudy,
+        populationChecked,
+        reviewRequested,
         scientificApproach,
         'primaryPurpose': this.primaryPurposeIsSelected,
         'otherPrimaryPurpose': this.isOtherPrimaryPurposeValid,
@@ -854,7 +860,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         },
         billingAccountName: { presence: true },
         intendedStudy: { length: { minimum: 1, maximum: 1000 } },
+        populationChecked: { presence: true },
         anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
+        reviewRequested: { presence: true },
         scientificApproach: { length: { minimum: 1, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
         otherPrimaryPurpose: {truthiness: true},
@@ -1091,7 +1099,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                          style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
-                         checked={!this.state.populationChecked}/>
+                         checked={this.state.populationChecked === false}/>
             <label style={styles.text}>No, my study will not center on underrepresented populations.
               I am interested in a diverse sample in general, or I am focused on populations that
               have been well represented in prior research.</label>
@@ -1151,7 +1159,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', false);
                              }}
-                             checked={!this.state.workspace.researchPurpose.reviewRequested}/>
+                             checked={this.state.workspace.researchPurpose.reviewRequested === false}/>
                 <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
                   have no concerns at this time about potential stigmatization based on my study.</label>
                 </FlexRow>
@@ -1173,21 +1181,23 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   You must select a billing account</div>}
                 {errors.primaryPurpose && <div> You must choose at least one primary research
                   purpose (Question 1)</div>}
+                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
                 {errors.otherPrimaryPurpose && <div> Other primary purpose should be of at most 500 characters</div>}
                 {errors.anticipatedFindings && <div> Answer for <i>What are the anticipated findings
-                  from the study? (Question # 2.1)</i> cannot be empty</div>}
+                  from the study? (Question 2.1)</i> cannot be empty</div>}
                 {errors.scientificApproach && <div> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question # 2.2)</i> cannot be empty</div>}
+                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</div>}
                 {errors.intendedStudy && <div> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question # 2.3)</i> cannot be empty</div>}
-                {errors.specificPopulation && <div> You must specify a population of study</div>}
-                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
-                {errors.researchOutcoming && <div> You must specify the outcome of the research</div>}
-                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings</div>}
+                  (Question 2.3)</i> cannot be empty</div>}
+                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings (Question 3)</div>}
                 {errors.otherDisseminateResearchFindings && <div>
-                  Disseminate Research Findings Other text should be of at most 100 characters</div>}
+                    Disseminate Research Findings Other text should be of at most 100 characters</div>}
+                {errors.researchOutcoming && <div> You must specify the outcome of the research (Question 4)</div>}
+                {errors.populationChecked && <div>You must pick an answer Population of interest question (Question 5)</div>}
+                {errors.specificPopulation && <div> You must specify a population of study (Question 5)</div>}
                 {errors.otherSpecificPopulation && <div>
-                  Specific Population Other text should be of at most 100 characters</div>}
+                    Specific Population Other text should be of at most 100 characters</div>}
+                {errors.reviewRequested && <div>You must pick an answer for review of stigmatizing research (Question 6)</div>}
               </ul>
             } disabled={!errors}>
               <Button type='primary'
