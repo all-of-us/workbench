@@ -22,21 +22,34 @@ import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
+import * as fp from 'lodash';
+import { r } from '@angular/core/src/render3';
 
 const {useState, useEffect} = React;
 
-const reloadWorkspaces = async({filter, setWorkspaceList, setError, setLoadingWorkspaces}) => {
-  filter = filter ? filter : (() => true);
-  setLoadingWorkspaces(true);
+const withBusyState = fp.curry((setBusy, wrappedFn) => async (...args) => {
+  setBusy(true);
   try {
-    const workspacesReceived = (await workspacesApi().getWorkspaces()).items.filter(response => filter(response.accessLevel));
-    workspacesReceived.sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
-    setWorkspaceList(workspacesReceived.map(w => new WorkspacePermissions(w)));
-    setLoadingWorkspaces(false);
-  } catch (e) {
-    const response = await convertAPIError(e);
-    setError(response.message);
+    await wrappedFn(...args);
+  } finally {
+    setBusy(false);
   }
+});
+
+const withErrorText = fp.curry((setError, wrappedFn) => async(...args) => {
+  try {
+    await wrappedFn(...args);
+  } catch (e) {
+    setError(e);
+  }
+});
+
+const loadWorkspaces = async({filter, setWorkspaceList}) => {
+  filter = filter ? filter : (() => true);
+  const workspacesReceived = (await workspacesApi().getWorkspaces()).items.filter(response => filter(response.accessLevel));
+  workspacesReceived.sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
+  setWorkspaceList(workspacesReceived.map(w => new WorkspacePermissions(w)));
+  throw new Error('test');
 };
 
 const styles = reactStyles({
@@ -52,9 +65,16 @@ export const FnWorkspaceList = ({ profileState: { profile } }) => {
   const [error, setError] = useState('');
   const [workspaceList, setWorkspaceList] = useState([]);
   const [loadingWorkspaces, setLoadingWorkspaces] = useState();
+  const reloadWorkspaces = fp.flow(
+    withBusyState(setLoadingWorkspaces),
+    withErrorText(async e => {
+      const response = await convertAPIError(e);
+      setError(response.message);
+    })
+  )(loadWorkspaces);
 
   useEffect(() => {
-    reloadWorkspaces({filter: null, setLoadingWorkspaces, setError, setWorkspaceList});
+    reloadWorkspaces({filter: null, setError, setWorkspaceList});
   }, []);
 
   // Maps each "Filter by" dropdown element to a set of access levels to display.
@@ -65,7 +85,7 @@ export const FnWorkspaceList = ({ profileState: { profile } }) => {
     { label: 'All',    value: ['OWNER', 'READER', 'WRITER'] },
   ];
   const defaultFilter = filters.find(f => f.label === 'All');
-
+console.log(error);
   return <React.Fragment>
     <FadeBox style={styles.fadeBox}>
       <div style={{padding: '0 1rem'}}>
@@ -77,7 +97,6 @@ export const FnWorkspaceList = ({ profileState: { profile } }) => {
             onChange={(levels) => {
               reloadWorkspaces({
                 filter: (level: any) => levels.value.includes(level),
-                setLoadingWorkspaces,
                 setError,
                 setWorkspaceList
               });
@@ -98,7 +117,7 @@ export const FnWorkspaceList = ({ profileState: { profile } }) => {
                   workspace={wp.workspace}
                   accessLevel={wp.accessLevel}
                   userEmail={profile.username}
-                  reload={ () => reloadWorkspaces({filter: null, setLoadingWorkspaces, setError, setWorkspaceList}) }
+                  reload={ () => reloadWorkspaces({filter: null, setError, setWorkspaceList}) }
                 />;
               })}
             </div>)}
