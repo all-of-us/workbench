@@ -176,9 +176,10 @@ public class FreeTierBillingService {
 
     // this shouldn't happen, but it did (RW-4678)
     // alert if it happens again
-    if (currentCost < previousCost &&
-            // was logging many false positives
-            !withinCostTolerance(currentCost, previousCost) ) {
+    if (currentCost < previousCost
+        &&
+        // was logging many false positives
+        !withinCostTolerance(currentCost, previousCost)) {
       String msg =
           String.format(
               "User %s (%s) has %f in total free tier spending in BigQuery, "
