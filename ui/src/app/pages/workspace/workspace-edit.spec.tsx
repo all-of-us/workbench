@@ -78,9 +78,6 @@ describe('WorkspaceEdit', () => {
     // Ensure the 'drug development' checkbox is not checked when creating.
     expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked'))
       .toEqual(false);
-
-    expect(wrapper.find('[data-test-id="specific-population-no"]').first().prop('checked'))
-      .toEqual(true);
   });
 
   it('displays workspaces duplicate page', async () => {
