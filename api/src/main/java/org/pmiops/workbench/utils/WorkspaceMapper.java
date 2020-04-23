@@ -111,29 +111,29 @@ public interface WorkspaceMapper {
   @Mapping(source = "scientificApproach", target = "scientificApproach")
   @Mapping(source = "socialBehavioral", target = "socialBehavioral")
   @Mapping(source = "timeRequested", target = "timeRequested")
-  @Mapping(target = "billingAccountName", ignore = true)
-  @Mapping(target = "billingAccountType", ignore = true)
-  @Mapping(target = "billingMigrationStatusEnum", ignore = true)
-  @Mapping(target = "billingStatus", ignore = true)
-  @Mapping(target = "cdrVersion", ignore = true)
-  @Mapping(target = "cohorts", ignore = true)
-  @Mapping(target = "creationTime", ignore = true)
-  @Mapping(target = "creator", ignore = true)
-  @Mapping(target = "dataAccessLevel", ignore = true)
-  @Mapping(target = "dataAccessLevelEnum", ignore = true)
-  @Mapping(target = "dataSets", ignore = true)
+  @Mapping(target = "billingAccountName", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "billingAccountType", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "billingMigrationStatusEnum", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "billingStatus", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "cdrVersion", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "cohorts", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "creationTime", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "creator", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "dataAccessLevel", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "dataAccessLevelEnum", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "dataSets", ignore = true) // not updated by Research Purpose
   @Mapping(target = "disseminateResearchEnumSet", ignore = true) // transient
-  @Mapping(target = "firecloudName", ignore = true)
-  @Mapping(target = "firecloudUuid", ignore = true)
-  @Mapping(target = "lastAccessedTime", ignore = true)
-  @Mapping(target = "lastModifiedTime", ignore = true)
-  @Mapping(target = "name", ignore = true)
-  @Mapping(target = "published", ignore = true)
+  @Mapping(target = "firecloudName", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "firecloudUuid", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "lastAccessedTime", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "lastModifiedTime", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "name", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "published", ignore = true) // not updated by Research Purpose
   @Mapping(target = "researchOutcomeEnumSet", ignore = true) // transient
-  @Mapping(target = "version", ignore = true)
-  @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
-  @Mapping(target = "workspaceId", ignore = true)
-  @Mapping(target = "workspaceNamespace", ignore = true)
+  @Mapping(target = "version", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "workspaceActiveStatusEnum", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "workspaceId", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "workspaceNamespace", ignore = true) // not updated by Research Purpose
   void setResearchPurpose(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
@@ -149,42 +149,17 @@ public interface WorkspaceMapper {
   @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
   @Mapping(source = "workspace.name", target = "name")
   @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
-
-//  @Mapping(source = "workspace.researchPurpose.additionalNotes", target = "additionalNotes")
-//  @Mapping(source = "workspace.researchPurpose.ancestry", target = "ancestry")
-//  @Mapping(source = "workspace.researchPurpose.anticipatedFindings", target = "anticipatedFindings")
-//  @Mapping(source = "workspace.researchPurpose.approved", target = "approved", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
-//  @Mapping(source = "workspace.researchPurpose.commercialPurpose", target = "commercialPurpose")
-//  @Mapping(source = "workspace.researchPurpose.controlSet", target = "controlSet")
-//  @Mapping(source = "workspace.researchPurpose.diseaseFocusedResearch",      target = "diseaseFocusedResearch")
-//  @Mapping(source = "workspace.researchPurpose.diseaseOfFocus", target = "diseaseOfFocus")
-//  @Mapping(source = "workspace.researchPurpose.disseminateResearchFindingList",      target = "disseminateResearchSet")
-//  @Mapping(source = "workspace.researchPurpose.drugDevelopment", target = "drugDevelopment")
-//  @Mapping(source = "workspace.researchPurpose.educational", target = "educational")
-//  @Mapping(source = "workspace.researchPurpose.ethics", target = "ethics")
-//  @Mapping(source = "workspace.researchPurpose.intendedStudy", target = "intendedStudy")
-//  @Mapping(source = "workspace.researchPurpose.methodsDevelopment", target = "methodsDevelopment")
-//  @Mapping(source = "workspace.researchPurpose.otherDisseminateResearchFindings", target = "disseminateResearchOther")
-//  @Mapping(source = "workspace.researchPurpose.otherPopulationDetails",      target = "otherPopulationDetails")
-//  @Mapping(source = "workspace.researchPurpose.otherPurpose", target = "otherPurpose")
-//  @Mapping(source = "workspace.researchPurpose.otherPurposeDetails", target = "otherPurposeDetails")
-//  @Mapping(source = "workspace.researchPurpose.populationDetails", target = "specificPopulationsEnum")
-//  @Mapping(source = "workspace.researchPurpose.populationHealth", target = "populationHealth")
-//  @Mapping(source = "workspace.researchPurpose.reasonForAllOfUs", target = "reasonForAllOfUs")
-//  @Mapping(source = "workspace.researchPurpose.researchOutcomeList", target = "researchOutcomeSet")
-//  @Mapping(source = "workspace.researchPurpose.reviewRequested", target = "reviewRequested", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
-//  @Mapping(source = "workspace.researchPurpose.scientificApproach", target = "scientificApproach")
-//  @Mapping(source = "workspace.researchPurpose.socialBehavioral", target = "socialBehavioral")
-//  @Mapping(source = "workspace.researchPurpose.timeRequested", target = "timeRequested")
-
+  @Mapping(source = "workspaceActiveStatus", target = "workspaceActiveStatusEnum") // transient
   @Mapping(target = "additionalNotes", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "ancestry", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "anticipatedFindings", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "approved", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "commercialPurpose", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "controlSet", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "dataAccessLevelEnum", ignore = true) // transient // set via dataAccessLevel
   @Mapping(target = "diseaseFocusedResearch", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "diseaseOfFocus", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "disseminateResearchEnumSet", ignore = true) // transient
   @Mapping(target = "disseminateResearchOther", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "disseminateResearchSet", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "drugDevelopment", ignore = true) // mapped in setResearchPurpose()
@@ -197,17 +172,13 @@ public interface WorkspaceMapper {
   @Mapping(target = "otherPurposeDetails", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "populationHealth", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "reasonForAllOfUs", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "researchOutcomeEnumSet", ignore = true) // transient
   @Mapping(target = "researchOutcomeSet", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "reviewRequested", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "scientificApproach", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "socialBehavioral", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "specificPopulationsEnum", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "timeRequested", ignore = true) // mapped in setResearchPurpose()
-
-  @Mapping(source = "workspaceActiveStatus", target = "workspaceActiveStatusEnum") // transient
-  @Mapping(target = "dataAccessLevelEnum", ignore = true) // transient // set via dataAccessLevel
-  @Mapping(target = "disseminateResearchEnumSet", ignore = true) // transient
-  @Mapping(target = "researchOutcomeEnumSet", ignore = true) // transient
   DbWorkspace toDbWorkspace(
       Workspace workspace,
       FirecloudWorkspace firecloudWorkspace,
