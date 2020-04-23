@@ -30,6 +30,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {OutsideUnorderedList} from 'app/components/lists';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
@@ -41,7 +42,6 @@ import {
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
-import {OutsideUnorderedList} from "../../../components/lists";
 
 const styles = reactStyles({
   ...commonStyles,

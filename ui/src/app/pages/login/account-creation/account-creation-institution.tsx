@@ -7,6 +7,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
 import {ValidationIcon} from 'app/components/icons';
 import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
+import {OutsideUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
@@ -25,7 +26,6 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {OutsideUnorderedList} from 'app/components/lists';
 
 const styles = reactStyles({
   ...commonStyles,

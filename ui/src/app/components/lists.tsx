@@ -11,5 +11,5 @@ export const CustomBulletListItem = ({bullet, children}) => {
 };
 
 export const OutsideUnorderedList = ({style = {}, children}) => {
-  return <ul style={{listStylePosition: 'outside', marginLeft: '1rem', ...style}}>{children}</ul>
-}
+  return <ul style={{listStylePosition: 'outside', marginLeft: '1rem', ...style}}>{children}</ul>;
+};

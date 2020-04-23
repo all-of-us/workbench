@@ -11,6 +11,7 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {CustomBulletList, CustomBulletListItem} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll';
@@ -25,7 +26,6 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   Profile,
 } from 'generated/fetch';
-import {CustomBulletList, CustomBulletListItem} from "../../components/lists";
 
 export const styles = reactStyles({
   bottomBanner: {
