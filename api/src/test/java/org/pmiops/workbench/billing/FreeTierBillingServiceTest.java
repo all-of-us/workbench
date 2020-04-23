@@ -555,14 +555,14 @@ public class FreeTierBillingServiceTest {
     createWorkspace(user1, "another project");
 
     final Map<String, Double> costs =
-        ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0, "another project", 100.0);
+        ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0, "another project", 200.0);
     doReturn(mockBQTableResult(costs)).when(bigQueryService).executeQuery(any());
 
     // we have not yet cached the new workspace costs
     assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user1), 100.01);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    final double expectedTotalCachedFreeTierUsage = 1000.0 + 100.01;
+    final double expectedTotalCachedFreeTierUsage = 1000.0 + 200.0;
     assertWithinBillingTolerance(
         freeTierBillingService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
 
