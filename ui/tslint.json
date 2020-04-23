@@ -7,7 +7,10 @@
   ],
   "linterOptions": {
     "exclude": [
-      "**/*generated/**"
+      "**/src/generated/**/*.ts",
+      "**/src/notebooks-generated/**/*.ts",
+      "**/src/publicGenerated/**/*.ts",
+      "**/node_modules/**/*"
     ]
   },
   "rules": {
