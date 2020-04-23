@@ -29,10 +29,7 @@ export default class EllipsisMenu {
     await this.clickEllipsis();
     const selector = `${this.rootXpath}//*[@role='button' and text()='${action}']`;
     const link = await this.page.waitForXPath(selector, {visible: true});
-    await Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 0}),
-      link.click(),
-    ]);
+    await link.click();
     await link.dispose();
   }
 
