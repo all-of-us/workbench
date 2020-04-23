@@ -29,8 +29,10 @@ import {Dropdown} from 'primereact/dropdown';
 const styles = reactStyles({
   ...commonStyles,
   wideInputSize: {
-    width: '50%',
-    minWidth: '600px'
+    // We have a fixed width here because the text for dropdown options sometimes
+    // expands beyond the width of the dropdown, which leads to display bugs.
+    // For example, https://precisionmedicineinitiative.atlassian.net/browse/RW-4817
+    width: 600
   },
   institutionalDuaTextBox: {
     ...commonStyles.text,
