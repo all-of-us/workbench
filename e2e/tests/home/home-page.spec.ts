@@ -44,14 +44,6 @@ describe('Home page ui tests', () => {
       // Check Workspace Actions ellipsis dropdown displayes the right set of options
       const links = await ellipsis.getAvaliableActions();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
-
-      const newCard = new WorkspaceCard(page);
-      const f = await newCard.findCard(cardName);
-      expect(await f.getWorkspaceName()).toBe(cardName);
-
-      const newCardName = await WorkspaceCard.findCard(page, cardName);
-      expect(await newCardName.getWorkspaceName()).toBe(cardName);
-
     }
   });
 

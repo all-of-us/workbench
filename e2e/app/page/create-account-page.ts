@@ -38,7 +38,7 @@ export const LABEL_ALIAS = {
   READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms described above.',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
-  RESEARCH_BACKGROUND: 'Your research background, experience, and research interests',
+  RESEARCH_BACKGROUND: 'describe your research background, experience, and research interests',
   EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YEAR_OF_BIRTH: 'Year of Birth',
   INSTITUTION_EMAIL: 'Your institutional email address',

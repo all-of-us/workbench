@@ -257,29 +257,4 @@ export default class BaseElement {
     return this.page.evaluate( elem => elem.click(), this.element );
   }
 
-  /**
-   * @param {!<string} key
-   * @param (string|number) value
-   * @return {!Promise}
-   */
-  async setAttribute(key: string, value: string) {
-    return await this.element.evaluate((element, k, v) => {
-      element.setAttribute(k, v);
-    }, key, value);
-  }
-
-  /**
-   * Paste texts instead type one char at a time.
-   * @param text
-   */
-  async paste(text: string) {
-    await this.page.evaluate((elem, textValue) => {
-      // Refer to https://stackoverflow.com/a/46012210/440432
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
-      nativeInputValueSetter.call(elem, textValue);
-      const event = new Event('input', {bubbles: true});
-      elem.dispatchEvent(event);
-    }, this.element, text);
-  }
-
 }

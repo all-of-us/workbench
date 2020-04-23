@@ -61,15 +61,16 @@ export default class SelectMenu {
    */
   private async open(maxAttempts: number = 1): Promise<void> {
     const click = async () => {
-      await this.toggleOpenClose();
-      const opened = await this.isOpen();
-      if (opened) {
+      maxAttempts--;
+      const is = await this.isOpen();
+      if (!is) {
+        await this.toggleOpenClose();
+      } else {
         return;
       }
       if (maxAttempts <= 0) {
         return;
       }
-      maxAttempts--;
       await this.page.waitFor(1000).then(click); // one second pause before try again
     };
     return click();
@@ -86,15 +87,11 @@ export default class SelectMenu {
   private async isOpen() {
     const selector = this.dropdownXpath() +
        '/*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown-panel ")]';
-    try {
-      const panel = await this.page.waitForXPath(selector, {timeout: 2000});
-      const classNameString = await (await panel.getProperty('className')).jsonValue();
-      const splits = classNameString.toString().split(' ');
-      await panel.dispose();
-      return splits.includes('p-input-overlay-visible');
-    } catch (err) {
-      return false;
-    }
+    const panel = await this.page.waitForXPath(selector);
+    const classNameString = await (await panel.getProperty('className')).jsonValue();
+    const splits = classNameString.toString().split(' ');
+    await panel.dispose();
+    return splits.includes('p-input-overlay-visible');
   }
 
   private dropdownXpath(): string {

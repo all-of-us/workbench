@@ -1,9 +1,8 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
 import {PageUrl} from 'app/page-identifiers';
-import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
-import RadioButton from '../element/radiobutton';
 
 const faker = require('faker/locale/en_US');
 
@@ -91,13 +90,13 @@ export default class WorkspacesPage extends WorkspaceEditPage {
 
     // 2. Please provide a summary of your research purpose by responding to the questions below.
     const scientificQuestions = editPage.question2_scientificQuestionsIntendToStudy();
-    await (await scientificQuestions.asTextArea()).paste(faker.lorem.paragraph());
+    await (await scientificQuestions.asTextArea()).type(faker.lorem.paragraph());
 
     const scientificApproaches = editPage.question2_scientificApproaches();
-    await (await scientificApproaches.asTextArea()).paste(faker.lorem.paragraph());
+    await (await scientificApproaches.asTextArea()).type(faker.lorem.paragraph());
 
     const anticipatedFindings = editPage.question2_anticipatedFindings();
-    await (await anticipatedFindings.asTextArea()).paste(faker.lorem.paragraph());
+    await (await anticipatedFindings.asTextArea()).type(faker.lorem.paragraph());
 
     // 3. The All of Us Research Program encourages researchers to disseminate ....
     const publicationInJournal = editPage.publicationInJournal();
@@ -108,9 +107,6 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await increaseWellness.asCheckBox()).check();
 
     // 5. Population of interest: use default values. Using default value
-    const noRadiobutton = await RadioButton.forLabel(
-       this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noUnderrepresentedPopulationRadiobutton.textOption);
-    await noRadiobutton.select();
 
     // 6. Request for Review of Research Purpose Description. Using default value
     await editPage.requestForReviewRadiobutton(reviewRequest);
