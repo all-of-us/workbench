@@ -60,7 +60,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class FreeTierBillingServiceTest {
 
-  private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.001;
+  private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
   @Autowired BigQueryService bigQueryService;
   @Autowired FreeTierBillingService freeTierBillingService;
@@ -241,7 +241,7 @@ public class FreeTierBillingServiceTest {
         .alertUserFreeTierDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
-    // check that we do not alert twice for the 75% threshold
+    // check that we do not alert twice for the 65% threshold
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();

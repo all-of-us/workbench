@@ -47,9 +47,9 @@ public class FreeTierBillingService {
 
   private static final Logger logger = Logger.getLogger(FreeTierBillingService.class.getName());
 
-  // somewhat arbitrary
-  private static final double COST_COMPARISON_TOLERANCE = 0.0001;
-  private static final double COST_FRACTION_TOLERANCE = 0.0001;
+  // somewhat arbitrary - 1 per million
+  private static final double COST_COMPARISON_TOLERANCE = 0.000001;
+  private static final double COST_FRACTION_TOLERANCE = 0.000001;
 
   @Autowired
   public FreeTierBillingService(
