@@ -268,27 +268,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-//    DbWorkspace dbWorkspace = new DbWorkspace();
-//    // A little unintuitive but setting this here reflects the current state of the workspace
-//    // while it was in the billing buffer. Setting this value will inform the update billing
-//    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
-//    // tier
-//    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
-//
+    //    DbWorkspace dbWorkspace = new DbWorkspace();
+    //    // A little unintuitive but setting this here reflects the current state of the workspace
+    //    // while it was in the billing buffer. Setting this value will inform the update billing
+    //    // code to skip an unnecessary GCP API call if the billing account is being kept at the
+    // free
+    //    // tier
+    //    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
+    //
     final DbCdrVersion liveCdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
 
-    DbWorkspace dbWorkspace = workspaceMapper.toDbWorkspace(
-        workspace,
-        firecloudWorkspace, // not created yet
-        dbUser,
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName(),
-        WorkspaceActiveStatus.ACTIVE,
-        now,
-        BillingMigrationStatus.NEW,
-        DEFALT_WORKSPACE_VERSION,
-        liveCdrVersion,
-        Collections.emptySet(),
-        Collections.emptySet());
+    DbWorkspace dbWorkspace =
+        workspaceMapper.toDbWorkspace(
+            workspace,
+            firecloudWorkspace, // not created yet
+            dbUser,
+            workbenchConfigProvider.get().billing.freeTierBillingAccountName(),
+            WorkspaceActiveStatus.ACTIVE,
+            now,
+            BillingMigrationStatus.NEW,
+            DEFALT_WORKSPACE_VERSION,
+            liveCdrVersion,
+            Collections.emptySet(),
+            Collections.emptySet());
 
     if (workspace.getResearchPurpose().getReviewRequested()) {
       // Use a consistent timestamp.

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class CommonMappers {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+
   public CommonMappers(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }

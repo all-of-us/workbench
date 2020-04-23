@@ -24,7 +24,6 @@ import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
@@ -39,7 +38,6 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     componentModel = "spring",
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     uses = {
-      CdrVersionMapper.class,
       CommonMappers.class,
       CohortMapper.class,
       CohortReviewMapper.class,
@@ -85,32 +83,10 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspace", source = "dbWorkspace")
   RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
 
-  @Mapping(source = "additionalNotes", target = "additionalNotes")
-  @Mapping(source = "ancestry", target = "ancestry")
-  @Mapping(source = "anticipatedFindings", target = "anticipatedFindings")
-  @Mapping(source = "approved", target = "approved", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
-  @Mapping(source = "commercialPurpose", target = "commercialPurpose")
-  @Mapping(source = "controlSet", target = "controlSet")
-  @Mapping(source = "diseaseFocusedResearch",      target = "diseaseFocusedResearch")
-  @Mapping(source = "diseaseOfFocus", target = "diseaseOfFocus")
-  @Mapping(source = "disseminateResearchFindingList",      target = "disseminateResearchSet")
-  @Mapping(source = "drugDevelopment", target = "drugDevelopment")
-  @Mapping(source = "educational", target = "educational")
-  @Mapping(source = "ethics", target = "ethics")
-  @Mapping(source = "intendedStudy", target = "intendedStudy")
-  @Mapping(source = "methodsDevelopment", target = "methodsDevelopment")
+  @Mapping(source = "disseminateResearchFindingList", target = "disseminateResearchSet")
   @Mapping(source = "otherDisseminateResearchFindings", target = "disseminateResearchOther")
-  @Mapping(source = "otherPopulationDetails",      target = "otherPopulationDetails")
-  @Mapping(source = "otherPurpose", target = "otherPurpose")
-  @Mapping(source = "otherPurposeDetails", target = "otherPurposeDetails")
   @Mapping(source = "populationDetails", target = "specificPopulationsEnum")
-  @Mapping(source = "populationHealth", target = "populationHealth")
-  @Mapping(source = "reasonForAllOfUs", target = "reasonForAllOfUs")
   @Mapping(source = "researchOutcomeList", target = "researchOutcomeSet")
-  @Mapping(source = "reviewRequested", target = "reviewRequested", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
-  @Mapping(source = "scientificApproach", target = "scientificApproach")
-  @Mapping(source = "socialBehavioral", target = "socialBehavioral")
-  @Mapping(source = "timeRequested", target = "timeRequested")
   @Mapping(target = "billingAccountName", ignore = true) // not updated by Research Purpose
   @Mapping(target = "billingAccountType", ignore = true) // not updated by Research Purpose
   @Mapping(target = "billingMigrationStatusEnum", ignore = true) // not updated by Research Purpose
@@ -134,18 +110,23 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true) // not updated by Research Purpose
   @Mapping(target = "workspaceId", ignore = true) // not updated by Research Purpose
   @Mapping(target = "workspaceNamespace", ignore = true) // not updated by Research Purpose
-  void setResearchPurpose(
-      @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
+  void setResearchPurpose(@MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
   @Mapping(source = "billingMigrationStatus", target = "billingMigrationStatusEnum")
   @Mapping(source = "dbCdrVersion", target = "cdrVersion")
-  @Mapping(source = "dbCohorts", target = "cohorts", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
-  @Mapping(source = "dbDatasets", target = "dataSets", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+  @Mapping(
+      source = "dbCohorts",
+      target = "cohorts",
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+  @Mapping(
+      source = "dbDatasets",
+      target = "dataSets",
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
   @Mapping(source = "dbUser", target = "creator")
   @Mapping(source = "firecloudWorkspace.name", target = "firecloudName")
   @Mapping(source = "firecloudWorkspace.workspaceId", target = "firecloudUuid")
   @Mapping(source = "workspace.creationTime", target = "creationTime")
-  @Mapping(source = "workspace.dataAccessLevel",      target = "dataAccessLevel")
+  @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevel")
   @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
   @Mapping(source = "workspace.name", target = "name")
   @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
@@ -194,10 +175,11 @@ public interface WorkspaceMapper {
 
   /**
    * Helper method to insert the Research Purpose fields into the DbWorkspace after mapping all
-   * other fields. While it's certainly possible to do
-   * <code>@Mapping(source = "workspace.researchPurpose.ethics", target = "ethics")</code>
-   * above, that dplicates teh setResearchPurpose code (and the generated code isn't as nice, as it
-   * extracts the RP and tests it for null many times).
+   * other fields. While it's certainly possible to do <code>
+   * @Mapping(source = "workspace.researchPurpose.ethics", target = "ethics")</code> above, that
+   * dplicates teh setResearchPurpose code (and the generated code isn't as nice, as it extracts the
+   * RP and tests it for null many times).
+   *
    * @param dbWorkspace
    * @param workspace
    */
