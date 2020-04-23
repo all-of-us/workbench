@@ -193,6 +193,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.REGISTRATION_IMG, getRegistrationImage())
         .put(EmailSubstitutionField.BULLET_1, cloudStorageService.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageService.getImageUrl("bullet_2.png"))
+        .put(EmailSubstitutionField.BULLET_3, cloudStorageService.getImageUrl("bullet_3.png"))
         .build();
   }
 
@@ -356,7 +357,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private String getRegistrationImage() {
-    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.jpg");
+    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.png");
   }
 
   // TODO choose desired date format
