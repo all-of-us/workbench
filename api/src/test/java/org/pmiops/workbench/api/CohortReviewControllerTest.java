@@ -75,6 +75,7 @@ import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
+import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
@@ -293,7 +294,7 @@ public class CohortReviewControllerTest {
     String criteria =
         "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
             + "\"parameterId\":\"param1567486C34\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"domain\":\"CONDITION\",\"type\": "
-            + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1567486,\"value\":\"C34\"}],"
+            + "\"ICD10CM\",\"group\":false,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1567486,\"value\":\"C34\"}],"
             + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[]}";
     cohort.setCriteria(criteria);
     cohortDao.save(cohort);
@@ -453,6 +454,33 @@ public class CohortReviewControllerTest {
                   + ", cdrVersionId: "
                   + cdrVersion.getCdrVersionId());
     }
+  }
+
+  @Test
+  public void createCohortReview() {
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
+        .thenReturn(workspace);
+
+    stubBigQueryCohortCalls();
+
+    CohortReview cohortReview =
+        cohortReviewController
+            .createCohortReview(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                cohortWithoutReview.getCohortId(),
+                cdrVersion.getCdrVersionId(),
+                new CreateReviewRequest().size(1))
+            .getBody();
+
+    assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
+    assertThat(cohortReview.getCohortName()).isEqualTo(cohortWithoutReview.getName());
+    assertThat(cohortReview.getDescription()).isEqualTo(cohortWithoutReview.getDescription());
+    assertThat(cohortReview.getReviewSize()).isEqualTo(1);
+    assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
+    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus())
+        .isEqualTo(CohortStatus.NOT_REVIEWED);
   }
 
   @Test
