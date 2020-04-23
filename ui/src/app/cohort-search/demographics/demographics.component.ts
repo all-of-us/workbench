@@ -59,10 +59,8 @@ export class DemographicsComponent implements OnChanges, OnInit, OnDestroy {
     ageMax: new FormControl(120),
     ageRange: new FormControl([this.minAge, this.maxAge]),
     ageType: new FormControl(AttrName.AGE.toString()),
-    deceased: new FormControl(),
   });
   get ageRange() { return this.demoForm.get('ageRange'); }
-  get deceased() { return this.demoForm.get('deceased'); }
 
   ageNode = {
     hasAncestorData: false,
@@ -76,7 +74,6 @@ export class DemographicsComponent implements OnChanges, OnInit, OnDestroy {
     type: CriteriaType.AGE,
     value: ''
   };
-  deceasedNode: any;
 
   nodes = [];
   ageNodes: any;
@@ -86,7 +83,6 @@ export class DemographicsComponent implements OnChanges, OnInit, OnDestroy {
   ngOnInit() {
     if (this.wizard.type === CriteriaType.AGE) {
       this.initAgeControls();
-      this.initDeceased();
       this.initAgeRange();
       this.loadAgeNodesFromApi();
     } else {
@@ -122,30 +118,20 @@ export class DemographicsComponent implements OnChanges, OnInit, OnDestroy {
     });
   }
 
-  async loadAgeNodesFromApi() {
+  loadAgeNodesFromApi() {
     const {cdrVersionId} = currentWorkspaceStore.getValue();
-    this.loading = true;
-    const promises = [
-      cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), CriteriaType.DECEASED.toString()).then(response => {
-        this.deceasedNode = {...response.items[0], parameterId: 'age-param'};
-      })
-    ];
     if (this.enableCBAgeTypeOptions) {
+      this.loading = true;
       const initialValue = {[AttrName.AGE.toString()]: [], 'AGE_AT_CONSENT': [], 'AGE_AT_CDR': []};
-      promises.push(
-        cohortBuilderApi().findAgeTypeCounts(+cdrVersionId).then(response => {
-          this.ageNodes = response.items.reduce((acc, item) => {
-            acc[item.ageType].push(item);
-            return acc;
-          }, initialValue);
-        })
-      );
+      cohortBuilderApi().findAgeTypeCounts(+cdrVersionId).then(response => {
+        this.ageNodes = response.items.reduce((acc, item) => {
+          acc[item.ageType].push(item);
+          return acc;
+        }, initialValue);
+        setTimeout(() => this.centerAgeCount());
+        this.loading = false;
+      });
     }
-    await Promise.all(promises);
-    if (this.enableCBAgeTypeOptions) {
-      setTimeout(() => this.centerAgeCount());
-    }
-    this.loading = false;
   }
 
     /*
@@ -273,20 +259,6 @@ export class DemographicsComponent implements OnChanges, OnInit, OnDestroy {
         this.select(this.selectedNode);
       });
     this.subscription.add(ageDiff);
-  }
-
-  initDeceased() {
-    const existent = this.selections.find(s => s.type === CriteriaType.DECEASED.toString());
-    if (existent !== undefined) {
-      this.deceased.setValue(true);
-      this.count = this.wizard.count;
-    }
-    this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
-      triggerEvent('Cohort Builder Search', 'Click', 'Demo - Age/Deceased - Deceased Box');
-      const selected = includeDeceased ? this.deceasedNode : this.selectedNode;
-      this.select(selected);
-      this.count = includeDeceased ? this.deceasedNode.count : null;
-    }));
   }
 
   centerAgeCount() {
