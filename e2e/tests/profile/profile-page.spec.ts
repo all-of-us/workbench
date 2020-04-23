@@ -1,7 +1,7 @@
-import HomePage from 'app/home-page';
-import ProfilePage from 'app/profile-page';
+import HomePage from 'app/page/home-page';
+import ProfilePage from 'app/page/profile-page';
 import {signIn} from 'tests/app';
-import navigation, {NavLink} from 'app/navigation';
+import navigation, {NavLink} from 'app/component/navigation';
 
 describe('Profile', () => {
 

@@ -1,5 +1,5 @@
-import {makeString} from 'resources/fake-user';
-import {FIELD} from 'app/workspace-edit-page';
+import {makeString} from 'utils/str-utils';
+import {FIELD} from 'app/page/workspace-edit-page';
 
 // Question #1: What is the primary purpose of your project?
 export const defaultAnswersPrimaryPurpose = [

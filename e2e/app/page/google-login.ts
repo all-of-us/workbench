@@ -1,8 +1,9 @@
 import { ElementHandle, Page } from 'puppeteer';
-import {findButton} from 'app/aou-elements/xpath-finder';
-import BasePage from 'app/base-page';
-import HomePage from 'app/home-page';
+import {findButton} from 'app/element/xpath-finder';
+import BasePage from 'app/page/base-page';
+import HomePage from 'app/page/home-page';
 import {config} from 'resources/workbench-config';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 
 export const SELECTOR = {
@@ -96,7 +97,7 @@ export default class GoogleLoginPage extends BasePage {
       await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 0});
     } catch (err) {
       console.error('Google login page not found. ' + err);
-      await this.takeScreenshot('GoogleLoginPageNotFound');
+      await takeScreenshot(this.page, 'GoogleLoginPageNotFound');
       throw err;
     }
   }
@@ -126,8 +127,8 @@ export default class GoogleLoginPage extends BasePage {
       await this.enterPassword(pwd);
       await this.submit();
     } catch (err) {
-      await this.takeScreenshot('FailedLoginPage');
-      await this.saveHtmlToFile('FailedLoginPage');
+      await takeScreenshot(this.page, 'FailedLoginPage');
+      await savePageToFile(this.page, 'FailedLoginPage');
       throw err;
     }
 

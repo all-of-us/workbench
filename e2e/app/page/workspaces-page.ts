@@ -1,7 +1,8 @@
 import {Page} from 'puppeteer';
-import Button from 'app/aou-elements/button';
+import Button from 'app/element/button';
 import {PageUrl} from 'app/page-identifiers';
-import WorkspaceEditPage from 'app/workspace-edit-page';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import {makeWorkspaceName} from 'utils/str-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -119,7 +120,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
    * @return {string} new workspace name
    */
   async fillOutWorkspaceName(): Promise<string> {
-    const newWorkspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
+    const newWorkspaceName = makeWorkspaceName();
     await (await this.getWorkspaceNameTextbox()).type(newWorkspaceName);
     await (await this.getWorkspaceNameTextbox()).tabKey();
     return newWorkspaceName;

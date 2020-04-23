@@ -1,5 +1,5 @@
-import CreateAccountPage from 'app/create-account-page';
-import GoogleLoginPage from 'app/google-login';
+import CreateAccountPage from 'app/page/create-account-page';
+import GoogleLoginPage from 'app/page/google-login';
 
 
 describe('User registration tests:', () => {
@@ -20,18 +20,21 @@ describe('User registration tests:', () => {
     let nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
+    await nextButton.dispose();
 
     // Step 2: Enter institution affiliation details
     await createAccountPage.fillOutInstitution();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.clickWithEval();
+    await nextButton.dispose();
 
     // Step 3: Enter user information
     await createAccountPage.fillOutUserInformation();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
+    await nextButton.dispose();
 
     // Step 4: Enter demographic survey (All Survey Fields are optional)
     await createAccountPage.fillOutDemographicSurvey();

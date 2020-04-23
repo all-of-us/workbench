@@ -1,10 +1,10 @@
-import Button from 'app/aou-elements/button';
-import HomePage from 'app/home-page';
-import ProfilePage from 'app/profile-page';
-import WorkspacesPage from 'app/workspaces-page';
+import Button from 'app/element/button';
+import HomePage from 'app/page/home-page';
+import ProfilePage from 'app/page/profile-page';
+import WorkspacesPage from 'app/page/workspaces-page';
 import {waitForExists} from 'driver/xpath-util';
 import {signIn} from 'tests/app';
-import Navigation, {NavLink} from 'app/navigation';
+import Navigation, {NavLink} from 'app/component/navigation';
 
 export const HELP_DESK = {
   ASK_QUESTION: 'Ask a question about the Researcher Workbench',

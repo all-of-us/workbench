@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
-import EllipsisMenu from 'app/aou-elements/ellipsis-menu';
-import AuthenticatedPage from 'app/authenticated-page';
+import EllipsisMenu from 'app/component/ellipsis-menu';
+import AuthenticatedPage from 'app/page/authenticated-page';
 import {WorkspaceAction, PageTab} from 'app/page-identifiers';
 
 

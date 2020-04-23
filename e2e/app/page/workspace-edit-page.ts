@@ -1,11 +1,11 @@
 import {Page} from 'puppeteer';
-import Button from 'app/aou-elements/button';
-import Checkbox from 'app/aou-elements/checkbox';
-import Select from 'app/aou-elements/select';
-import SelectComponent from 'app/aou-elements/select-component';
-import Textbox from 'app/aou-elements/textbox';
-import WebComponent from 'app/aou-elements/web-component';
-import AuthenticatedPage from 'app/authenticated-page';
+import Button from 'app/element/button';
+import Checkbox from 'app/element/checkbox';
+import Select from 'app/element/select';
+import SelectMenu from 'app/component/select-menu';
+import Textbox from 'app/element/textbox';
+import WebComponent from 'app/element/web-component';
+import AuthenticatedPage from 'app/page/authenticated-page';
 
 const faker = require('faker/locale/en_US');
 
@@ -280,7 +280,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     try {
       await this.waitUntilTitleMatch(PAGE.TITLE);
       await this.getWorkspaceNameTextbox();
-      await new SelectComponent(this.page, LABEL_ALIAS.SELECT_BILLING).getSelectedValue();
+      await new SelectMenu(this.page, LABEL_ALIAS.SELECT_BILLING).getSelectedValue();
       await this.getCreateWorkspaceButton();
       return true;
     } catch (e) {

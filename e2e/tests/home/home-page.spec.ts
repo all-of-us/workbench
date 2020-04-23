@@ -1,10 +1,10 @@
-import ClrIconLink from 'app/aou-elements/clr-icon-link';
-import Link from 'app/aou-elements/link';
-import BaseElement from 'app/aou-elements/base-element';
-import HomePage, {LABEL_ALIAS as HOME_PAGE_LABEL_ALIAS} from 'app/home-page';
-import WorkspaceCard from 'app/workspace-card';
-import WorkspaceEditPage from 'app/workspace-edit-page';
-import WorkspacesPage from 'app/workspaces-page';
+import ClrIconLink from 'app/element/clr-icon-link';
+import Link from 'app/element/link';
+import BaseElement from 'app/element/base-element';
+import HomePage, {LABEL_ALIAS as HOME_PAGE_LABEL_ALIAS} from 'app/page/home-page';
+import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import WorkspacesPage from 'app/page/workspaces-page';
 import {signIn} from 'tests/app';
 
 
@@ -39,11 +39,19 @@ describe('Home page ui tests', () => {
       expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
       // check Workspace Action menu for listed actions
-      const ellipsis = await card.getEllipsis();
+      const ellipsis = card.getEllipsis();
       // Assumption: test user is workspace Owner.
       // Check Workspace Actions ellipsis dropdown displayes the right set of options
       const links = await ellipsis.getAvaliableActions();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
+
+      const newCard = new WorkspaceCard(page);
+      const f = await newCard.findCard(cardName);
+      expect(await f.getWorkspaceName()).toBe(cardName);
+
+      const newCardName = await WorkspaceCard.findCard(page, cardName);
+      expect(await newCardName.getWorkspaceName()).toBe(cardName);
+
     }
   });
 

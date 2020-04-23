@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
-import BaseElement from './base-element';
+import BaseElement from 'app/element/base-element';
 
-export default class SelectComponent {
+export default class SelectMenu {
 
   constructor(private readonly page: Page, private readonly label?: string, private readonly nodeLevel?: number) {
     this.page = page;
@@ -61,16 +61,15 @@ export default class SelectComponent {
    */
   private async open(maxAttempts: number = 1): Promise<void> {
     const click = async () => {
-      maxAttempts--;
-      const is = await this.isOpen();
-      if (!is) {
-        await this.toggleOpenClose();
-      } else {
+      await this.toggleOpenClose();
+      const opened = await this.isOpen();
+      if (opened) {
         return;
       }
       if (maxAttempts <= 0) {
         return;
       }
+      maxAttempts--;
       await this.page.waitFor(1000).then(click); // one second pause before try again
     };
     return click();
@@ -87,11 +86,15 @@ export default class SelectComponent {
   private async isOpen() {
     const selector = this.dropdownXpath() +
        '/*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown-panel ")]';
-    const panel = await this.page.waitForXPath(selector);
-    const classNameString = await (await panel.getProperty('className')).jsonValue();
-    const splits = classNameString.toString().split(' ');
-    await panel.dispose();
-    return splits.includes('p-input-overlay-visible');
+    try {
+      const panel = await this.page.waitForXPath(selector, {timeout: 2000});
+      const classNameString = await (await panel.getProperty('className')).jsonValue();
+      const splits = classNameString.toString().split(' ');
+      await panel.dispose();
+      return splits.includes('p-input-overlay-visible');
+    } catch (err) {
+      return false;
+    }
   }
 
   private dropdownXpath(): string {
