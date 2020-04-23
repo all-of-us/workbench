@@ -61,13 +61,9 @@ describe('Creating new workspaces', () => {
 
     const finishButton = await workspacesPage.getCreateWorkspaceButton();
     await finishButton.waitUntilEnabled();
-
-    await finishButton.focus(); // bring button into viewport
-    await workspacesPage.clickAndWait(finishButton);
-    await workspacesPage.waitUntilNoSpinner();
+    await workspacesPage.clickCreateFinishButton(finishButton);
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
-
   });
 
   // helper function to check visible workspace link on Data page

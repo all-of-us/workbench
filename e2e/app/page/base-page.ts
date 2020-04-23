@@ -51,7 +51,7 @@ export default abstract class BasePage {
    */
   async clickAndWait(clickElement: ElementHandle | BaseElement) {
     return Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 0}),
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
       clickElement.click(),
     ]);
   }

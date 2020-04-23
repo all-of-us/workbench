@@ -1,4 +1,4 @@
-import {Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
 import Select from 'app/element/select';
@@ -425,10 +425,9 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   /**
    * Find and click the CREATE WORKSPACE (FINISH) button
    */
-  async clickCreateFinishButton(): Promise<void> {
-    const createButton = await this.getCreateWorkspaceButton();
-    await createButton.focus(); // bring into viewport
-    await createButton.click();
+  async clickCreateFinishButton(button: ElementHandle | Button): Promise<void> {
+    await button.focus(); // bring into viewport
+    await button.click();
 
     // confirm create in pop-up dialog
     const dialog = new Dialog(this.page);

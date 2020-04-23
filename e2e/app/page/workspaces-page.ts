@@ -31,9 +31,12 @@ export default class WorkspacesPage extends WorkspaceEditPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitUntilTitleMatch(PAGE.TITLE);
-      await this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}); // link
-      await this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}); // Texts above Filter By Select
+      await Promise.all([
+        this.waitUntilTitleMatch(PAGE.TITLE),
+        this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
+        this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}),  // Texts above Filter By Select
+        this.waitUntilNoSpinner(),
+      ]);
       return true;
     } catch (e) {
       return false;
@@ -116,7 +119,9 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await editPage.requestForReviewRadiobutton(reviewRequest);
 
     // click CREATE WORKSPACE button
-    await editPage.clickCreateFinishButton();
+    const createButton = await this.getCreateWorkspaceButton();
+    await createButton.waitUntilEnabled();
+    await editPage.clickCreateFinishButton(createButton);
   }
 
   /**

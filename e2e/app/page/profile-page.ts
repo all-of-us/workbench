@@ -29,7 +29,10 @@ export default class ProfilePage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitForTextExists(PAGE.TITLE);
+      await Promise.all([
+        this.waitForTextExists(PAGE.TITLE),
+        this.waitUntilNoSpinner(),
+      ]);
       return true;
     } catch (e) {
       return false;
