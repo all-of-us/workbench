@@ -7550,3 +7550,17 @@ definitions:
         format: int64
       conceptName:
         type: string
+  WorkspaceUsersClusters:
+    type: object
+    properties:
+      creator:
+        "$ref": "#/definitions/User"
+      collaborators:
+        type: array
+        items:
+          "$ref": "#/definitions/User"
+      workspace:
+        "$ref": "#/definitions/Workspace"
+      clusters:
+        type: array
+        "$ref": "#/definitions/Cluster"
