@@ -60,7 +60,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class FreeTierBillingServiceTest {
 
-  private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.001;
+  private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
   @Autowired BigQueryService bigQueryService;
   @Autowired FreeTierBillingService freeTierBillingService;
@@ -241,7 +241,7 @@ public class FreeTierBillingServiceTest {
         .alertUserFreeTierDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
-    // check that we do not alert twice for the 75% threshold
+    // check that we do not alert twice for the 65% threshold
 
     doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
     freeTierBillingService.checkFreeTierBillingUsage();
@@ -555,14 +555,14 @@ public class FreeTierBillingServiceTest {
     createWorkspace(user1, "another project");
 
     final Map<String, Double> costs =
-        ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0, "another project", 100.0);
+        ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0, "another project", 200.0);
     doReturn(mockBQTableResult(costs)).when(bigQueryService).executeQuery(any());
 
     // we have not yet cached the new workspace costs
     assertWithinBillingTolerance(freeTierBillingService.getCachedFreeTierUsage(user1), 100.01);
 
     freeTierBillingService.checkFreeTierBillingUsage();
-    final double expectedTotalCachedFreeTierUsage = 1000.0 + 100.01;
+    final double expectedTotalCachedFreeTierUsage = 1000.0 + 200.0;
     assertWithinBillingTolerance(
         freeTierBillingService.getCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
 
