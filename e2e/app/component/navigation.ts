@@ -1,6 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {clrIconXpath} from 'app/aou-elements/xpath-defaults';
-import {findIcon} from 'app/aou-elements/xpath-finder';
+import {clrIconXpath} from 'app/element/xpath-defaults';
+import {findIcon} from 'app/element/xpath-finder';
 
 export enum NavLink {
   HOME = 'Home',

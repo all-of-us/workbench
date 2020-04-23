@@ -1,6 +1,6 @@
-import BaseElement from 'app/aou-elements/base-element';
-import CreateAccountPage from 'app/create-account-page';
-import GoogleLoginPage from 'app/google-login';
+import BaseElement from 'app/element/base-element';
+import CreateAccountPage from 'app/page/create-account-page';
+import GoogleLoginPage from 'app/page/google-login';
 import {config} from 'resources/workbench-config';
 
 

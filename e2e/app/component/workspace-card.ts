@@ -1,18 +1,22 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {WorkspaceAccessLevel} from 'app/page-identifiers';
-import BaseElement from 'app/aou-elements/base-element';
-import EllipsisMenu from 'app/aou-elements/ellipsis-menu';
+import EllipsisMenu from 'app/component/ellipsis-menu';
 import * as fp from 'lodash/fp';
 
+const SELECTOR = {
+  cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
+  cardNameId: '@data-test-id="workspace-card-name"',
+  ellipsisXpath: './/clr-icon[@shape="ellipsis-vertical"]',
+  accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
+}
 
 /**
  * WorkspaceCard represents workspace card user found on Home and All Workspaces pages.
  * A Workspace Card is element that contains a child element with attribute: @data-test-id='workspace-card'
  */
-export default class WorkspaceCard extends BaseElement {
+export default class WorkspaceCard {
 
-  static readonly popupRootXpath = '//*[@id="popup-root"]'; // element is not a child of workspace-card
-  static readonly cardRootXpath = '//*[child::*[@data-test-id="workspace-card"]]';
+  private cardElement: ElementHandle;
 
   // **********************
   // static functions
@@ -24,10 +28,10 @@ export default class WorkspaceCard extends BaseElement {
    * @throws TimeoutError if fails to find Card.
    */
   static async getAllCards(page: Page): Promise<WorkspaceCard[]> {
-    await page.waitForXPath(WorkspaceCard.cardRootXpath, {visible: true, timeout: 60000});
-    const cards = await page.$x(this.cardRootXpath);
+    await page.waitForXPath(SELECTOR.cardRootXpath, {visible: true, timeout: 0});
+    const cards = await page.$x(SELECTOR.cardRootXpath);
     // transform to WorkspaceCard object
-    const resourceCards = cards.map(card => new WorkspaceCard(page).asCardElement(card));
+    const resourceCards = cards.map(card => new WorkspaceCard(page).asCard(card));
     return resourceCards;
   }
 
@@ -41,38 +45,50 @@ export default class WorkspaceCard extends BaseElement {
   }
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
-    const selector = `.//*[@data-test-id="workspace-card-name" and text()="${workspaceName}"]`;
+    const selector = `.//*[${SELECTOR.cardNameId} and normalize-space(text())="${workspaceName}"]`;
     const allCards = await this.getAllCards(page);
     for (const card of allCards) {
-      const children = await card.asElementHandle().$x(selector);
+      const handle = card.asElementHandle();
+      const children = await handle.$x(selector);
       if (children.length > 0) {
         return card; // matched workspace name, found the Workspace card.
       }
-      await card.dispose(); // not it, dispose the ElementHandle.
+      await handle.dispose(); // not it, dispose the ElementHandle.
     }
     return null; // not found
   }
 
 
-  constructor(page: Page) {
-    super(page);
+  constructor(private readonly page: Page) {
+
   }
 
-  async getWorkspaceName(): Promise<unknown> {
-    const selector = './/*[@data-test-id="workspace-card-name"]';
-    const workspaceNameElemt = await this.element.$x(selector);
+  async findCard(workspaceName: string): Promise<WorkspaceCard | null> {
+    const selector = `.//*[${SELECTOR.cardNameId} and normalize-space(text())="${workspaceName}"]`;
+    await this.page.waitForXPath(SELECTOR.cardRootXpath, {visible: true, timeout: 0});
+    const elements = await this.page.$x(SELECTOR.cardRootXpath);
+    for (const elem of elements) {
+      if ((await elem.$x(selector)).length > 0) {
+        return this.asCard(elem);
+      }
+    }
+    return null;
+  }
+
+  async getWorkspaceName(): Promise<string> {
+    const workspaceNameElemt = await this.cardElement.$x(`.//*[${SELECTOR.cardNameId}]`);
     const jHandle = await workspaceNameElemt[0].getProperty('innerText');
     const name = await jHandle.jsonValue();
     await jHandle.dispose();
-    return name;
+    return name.toString();
   }
 
   asElementHandle(): ElementHandle {
-    return this.element.asElement();
+    return this.cardElement.asElement();
   }
 
-  async getEllipsis(): Promise<EllipsisMenu> {
-    return new EllipsisMenu(this.page, './/clr-icon[@shape="ellipsis-vertical"]', this.asElementHandle());
+  getEllipsis(): EllipsisMenu {
+    return new EllipsisMenu(this.page, SELECTOR.ellipsisXpath, this.asElementHandle());
   }
 
   /**
@@ -80,7 +96,7 @@ export default class WorkspaceCard extends BaseElement {
    * @param workspaceName
    */
   async getWorkspaceAccessLevel() : Promise<unknown> {
-    const element = await this.page.waitForXPath(this.accessLevelSelector(), {visible: true});
+    const [element] = await this.cardElement.$x(SELECTOR.accessLevelXpath);
     return (await element.getProperty('innerText')).jsonValue();
   }
 
@@ -94,7 +110,7 @@ export default class WorkspaceCard extends BaseElement {
 
   async getWorkspaceMatchAccessLevel(level: WorkspaceAccessLevel = WorkspaceAccessLevel.OWNER): Promise<WorkspaceCard[]> {
     const matchWorkspaceArray: WorkspaceCard[] = [];
-    const allWorkspaceCards = await WorkspaceCard.getAllCards(page);
+    const allWorkspaceCards = await WorkspaceCard.getAllCards(this.page);
     for (const card of allWorkspaceCards) {
       const accessLevel = await card.getWorkspaceAccessLevel();
       if (accessLevel === level) {
@@ -108,24 +124,20 @@ export default class WorkspaceCard extends BaseElement {
    * Click Workspace Name in Workspace Card.
    */
   async clickWorkspaceName() {
-    const elemt = await this.page.waitForXPath('//*[@data-test-id="workspace-card-name"]', {visible: true});
+    const elemt = await this.page.waitForXPath(`.//*[${SELECTOR.cardNameId}]`, {visible: true});
     await Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 0}),
       elemt.click()
     ]);
   }
 
-  private asCardElement(elementHandle: ElementHandle): WorkspaceCard {
-    this.element = elementHandle;
+  private asCard(elementHandle: ElementHandle): WorkspaceCard {
+    this.cardElement = elementHandle;
     return this;
   }
 
-  private accessLevelSelector() {
-    return `.//*[@data-test-id='workspace-access-level']`;
-  }
-
   private workspaceNameLinkSelector(workspaceName: string) {
-    return `//*[@role='button'][./*[@data-test-id='workspace-card-name' and normalize-space(text())='${workspaceName}']]`
+    return `//*[@role='button'][./*[${SELECTOR.cardNameId} and normalize-space(text())="${workspaceName}"]]`
   }
 
 }

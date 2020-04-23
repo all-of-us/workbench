@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
-import BaseElement from './base-element';
+import BaseElement from 'app/element/base-element';
 
-export default class SelectComponent {
+export default class SelectMenu {
 
   constructor(private readonly page: Page, private readonly label?: string, private readonly nodeLevel?: number) {
     this.page = page;

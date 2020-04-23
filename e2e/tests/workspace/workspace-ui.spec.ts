@@ -1,9 +1,9 @@
-import BaseElement from 'app/aou-elements/base-element';
-import HomePage from 'app/home-page';
-import WorkspaceCard from 'app/workspace-card';
-import WorkspacesPage from 'app/workspaces-page';
-import {signIn} from 'tests/app';
-import Navigation, {NavLink} from 'app/navigation';
+import BaseElement from 'app/element/base-element';
+import HomePage from 'app/page/home-page';
+import WorkspaceCard from 'app/component/workspace-card';
+import WorkspacesPage from 'app/page/workspaces-page';
+import {signIn} from 'utils/app-utils';
+import Navigation, {NavLink} from 'app/component/navigation';
 
 describe('Workspace ui tests', () => {
 
@@ -50,7 +50,7 @@ describe('Workspace ui tests', () => {
     const accessLevel = await card.getWorkspaceAccessLevel();
     expect(levels).toContain(accessLevel);
 
-    const ellipsis = await card.getEllipsis();
+    const ellipsis = card.getEllipsis();
     const links = await ellipsis.getAvaliableActions();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
