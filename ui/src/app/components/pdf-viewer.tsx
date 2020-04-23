@@ -5,6 +5,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {withWindowSize} from 'app/utils';
 
 export interface Props {
+  containerStyles?: React.CSSProperties;
   onLastPageRender: () => void;
   pdfPath: string;
   windowSize: {
@@ -74,7 +75,7 @@ export const PdfViewer = withWindowSize()( class extends React.Component<Props, 
   render() {
     const {loading, numPages} = this.state;
 
-    return <div style={{flex: '1 1 0', overflowY: 'auto'}}>
+    return <div style={{flex: '1 1 0', overflowY: 'auto', ...this.props.containerStyles}}>
       {loading && <SpinnerOverlay/>}
       <Document data-test-id='pdf-document'
                 file={this.props.pdfPath}
