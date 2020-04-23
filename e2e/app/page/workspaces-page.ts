@@ -3,7 +3,7 @@ import Button from 'app/element/button';
 import {PageUrl} from 'app/page-identifiers';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
-import RadioButton from '../element/radiobutton';
+import RadioButton from 'app/element/radiobutton';
 
 const faker = require('faker/locale/en_US');
 

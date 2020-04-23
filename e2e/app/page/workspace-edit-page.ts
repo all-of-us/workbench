@@ -6,6 +6,7 @@ import SelectMenu from 'app/component/select-menu';
 import Textbox from 'app/element/textbox';
 import WebComponent from 'app/element/web-component';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import Dialog, {ButtonLabel} from 'app/component/dialog';
 
 const faker = require('faker/locale/en_US');
 
@@ -427,7 +428,15 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   async clickCreateFinishButton(): Promise<void> {
     const createButton = await this.getCreateWorkspaceButton();
     await createButton.focus(); // bring into viewport
-    await this.clickAndWait(createButton);
+    await createButton.click();
+
+    // confirm create in pop-up dialog
+    const dialog = new Dialog(this.page);
+    await Promise.all([
+      dialog.clickButton(ButtonLabel.Confirm),
+      dialog.waitUntilDialogIsClosed(),
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
+    ]);
     await this.waitUntilNoSpinner();
   }
 
