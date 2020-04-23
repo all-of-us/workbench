@@ -17,8 +17,8 @@ export const styles = {
     height: '20px'
   },
 
-  warningIcon: {
-    color: colors.warning,
+  dangerIcon: {
+    color: colors.danger,
     width: '20px',
     height: '20px'
   },
@@ -68,6 +68,6 @@ export const ValidationIcon = props => {
                     style={{...styles.successIcon, ...props.style}}/>;
   } else {
     return <ClrIcon shape='warning-standard' class='is-solid'
-                    style={{...styles.warningIcon, ...props.style}}/>;
+                    style={{...styles.dangerIcon, ...props.style}}/>;
   }
 };
