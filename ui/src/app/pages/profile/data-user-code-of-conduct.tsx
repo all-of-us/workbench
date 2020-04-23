@@ -169,8 +169,8 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 </div>
                 <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
                   My work, including any external data, files, or software I upload into the
-                   Researcher Workbench, will be logged and monitored by the <i>All of Us</i>
-                   Research Program to ensure compliance with policies and procedures.
+                   Researcher Workbench, will be logged and monitored by the <i>All of Us</i> Research
+                   Program to ensure compliance with policies and procedures.
                 </InitialsAgreement>
                 <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
                   My name, affiliation, profile information and research description will be made
