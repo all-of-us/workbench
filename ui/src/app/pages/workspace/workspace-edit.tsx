@@ -208,6 +208,7 @@ export interface WorkspaceEditState {
   showResearchPurpose: boolean;
   billingAccounts: Array<BillingAccount>;
   showCreateBillingAccountModal: boolean;
+  showConfirmationModal: boolean;
   populationChecked: boolean;
 }
 
@@ -231,6 +232,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showStigmatizationDetails: false,
         billingAccounts: [],
         showCreateBillingAccountModal: false,
+        showConfirmationModal: false,
         populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
       };
     }
@@ -832,7 +834,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             scientificApproach,
             reviewRequested
           }
-        }
+        },
+        showConfirmationModal
       } = this.state;
       const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
@@ -1202,7 +1205,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </ul>
             } disabled={!errors}>
               <Button type='primary'
-                      onClick={() => this.onSaveClick()}
+                      onClick={() => this.setState({showConfirmationModal: true})}
                       disabled={errors || this.state.loading}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
@@ -1262,6 +1265,40 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </Button>
           </ModalFooter>
         </Modal>
+        }
+        {showConfirmationModal &&
+          <Modal width={500}>
+            <ModalTitle style={{fontSize: '16px', marginBottom: 0}}>
+              {this.renderButtonText()}
+            </ModalTitle>
+            <ModalBody style={{color: colors.primary, lineHeight: '1rem', marginTop: '0.25rem'}}>
+              <div>Your responses to these questions:</div>
+              <div style={{margin: '0.25rem 0 0.25rem 1rem'}}>
+                <span style={{fontWeight: 600}}>Primary purpose of your project</span> (Question 1)<br/>
+                <span style={{fontWeight: 600}}>Summary of research purpose</span> (Question 2)<br/>
+                <span style={{fontWeight: 600}}>Population of interest</span> (Question 5)<br/>
+              </div>
+              <div style={{marginBottom: '1rem'}}>
+                Will be
+                <a style={{color: colors.accent}}
+                  href='https://www.researchallofus.org/research-projects-directory/'
+                  target='_blank'> displayed publicly </a>
+                 to inform <i>All of Us</i> Research participants. Therefore, please verify that you have provided sufficiently detailed
+                 responses in plain language.
+              </div>
+              <div>You can also make changes to your answers after you create your workspace.</div>
+            </ModalBody>
+            <ModalFooter>
+              <Button type='secondary' style={{marginRight: '1rem'}}
+                onClick={() => this.setState({showConfirmationModal: false})}>
+                Keep Editing
+              </Button>
+              <Button type='primary' onClick={() => this.onSaveClick()}
+                data-test-id='workspace-confirm-save-btn'>
+                Confirm
+              </Button>
+            </ModalFooter>
+          </Modal>
         }
         </div>
       </FadeBox> ;
