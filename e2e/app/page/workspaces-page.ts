@@ -72,7 +72,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   /**
    * Create a simple and basic new workspace end-to-end.
    */
-  async createWorkspace(workspaceName: string, billingAccount: string, reviewRequest: boolean = false) {
+  async createWorkspace(workspaceName: string, billingAccount: string, reviewRequest: boolean = false): Promise<string> {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
@@ -121,7 +121,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     // click CREATE WORKSPACE button
     const createButton = await this.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
-    await editPage.clickCreateFinishButton(createButton);
+    return await editPage.clickCreateFinishButton(createButton);
   }
 
   /**

@@ -425,18 +425,20 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   /**
    * Find and click the CREATE WORKSPACE (FINISH) button
    */
-  async clickCreateFinishButton(button: ElementHandle | Button): Promise<void> {
+  async clickCreateFinishButton(button: ElementHandle | Button): Promise<string> {
     await button.focus(); // bring into viewport
     await button.click();
 
     // confirm create in pop-up dialog
     const dialog = new Dialog(this.page);
+    const dialogText = await dialog.getContent();
     await Promise.all([
       dialog.clickButton(ButtonLabel.Confirm),
       dialog.waitUntilDialogIsClosed(),
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
     ]);
     await this.waitUntilNoSpinner();
+    return dialogText;
   }
 
   async clickShareWithCollaboratorsCheckbox() {
