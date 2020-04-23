@@ -72,7 +72,6 @@ describe('User registration tests:', () => {
     await (await createAccountPage.getTermsOfUseCheckbox()).check();
     const agreementPageButton = await createAccountPage.getNextButton();
     await agreementPageButton.clickWithEval();
-    await agreementPageButton.dispose();
 
     // Step 2 of 3: Enter Institution information
     const nextButton = await createAccountPage.getNextButton();
@@ -83,7 +82,6 @@ describe('User registration tests:', () => {
     await nextButton.waitUntilEnabled();
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
     await nextButton.clickWithEval();
-    await nextButton.dispose();
 
     // Step 3 of 3: Enter user information.
     expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();

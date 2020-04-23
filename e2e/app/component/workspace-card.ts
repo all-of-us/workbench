@@ -45,7 +45,7 @@ export default class WorkspaceCard {
   }
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
-    const selector = `.//*[@data-test-id="workspace-card-name" and normalize-space(text())="${workspaceName}"]`;
+    const selector = `.//*[${SELECTOR.cardNameId} and normalize-space(text())="${workspaceName}"]`;
     const allCards = await this.getAllCards(page);
     for (const card of allCards) {
       const handle = card.asElementHandle();
@@ -64,7 +64,7 @@ export default class WorkspaceCard {
   }
 
   async findCard(workspaceName: string): Promise<WorkspaceCard | null> {
-    const selector = `.//*[@data-test-id="workspace-card-name" and normalize-space(text())="${workspaceName}"]`;
+    const selector = `.//*[${SELECTOR.cardNameId} and normalize-space(text())="${workspaceName}"]`;
     await this.page.waitForXPath(SELECTOR.cardRootXpath, {visible: true, timeout: 0});
     const elements = await this.page.$x(SELECTOR.cardRootXpath);
     for (const elem of elements) {
