@@ -41,6 +41,7 @@ import {
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
+import {OutsideUnorderedList} from "../../../components/lists";
 
 const styles = reactStyles({
   ...commonStyles,
@@ -735,9 +736,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </Button>
             <TooltipTrigger content={errors && <React.Fragment>
               <div>Please review the following: </div>
-              <ul>
+              <OutsideUnorderedList>
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
-              </ul>
+              </OutsideUnorderedList>
             </React.Fragment>} disabled={!errors}>
               <Button disabled={this.state.usernameCheckInProgress ||
                                 this.isUsernameValidationError() ||

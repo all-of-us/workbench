@@ -25,6 +25,7 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {OutsideUnorderedList} from 'app/components/lists';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -447,9 +448,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </Button>
             <TooltipTrigger content={errors && <div data-test-id='validation-errors'>
               <div>Please review the following: </div>
-              <ul>
+              <OutsideUnorderedList>
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
-              </ul>
+              </OutsideUnorderedList>
             </div>} disabled={!errors}>
               <Button data-test-id='submit-button'
                       disabled={loadingInstitutions || errors != null}

@@ -8,7 +8,6 @@ import {
   Clickable, StyledAnchorTag,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {CustomBulletList, CustomBulletListItem} from 'app/components/custom-bullet-list';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
@@ -26,6 +25,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   Profile,
 } from 'generated/fetch';
+import {CustomBulletList, CustomBulletListItem} from "../../components/lists";
 
 export const styles = reactStyles({
   bottomBanner: {
