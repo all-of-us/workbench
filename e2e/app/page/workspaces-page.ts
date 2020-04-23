@@ -1,8 +1,9 @@
 import {Page} from 'puppeteer';
 import Button from 'app/element/button';
 import {PageUrl} from 'app/page-identifiers';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
+import RadioButton from '../element/radiobutton';
 
 const faker = require('faker/locale/en_US');
 
@@ -107,6 +108,9 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await increaseWellness.asCheckBox()).check();
 
     // 5. Population of interest: use default values. Using default value
+    const noRadiobutton = await RadioButton.forLabel(
+       this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noUnderrepresentedPopulationRadiobutton.textOption);
+    await noRadiobutton.select();
 
     // 6. Request for Review of Research Purpose Description. Using default value
     await editPage.requestForReviewRadiobutton(reviewRequest);
