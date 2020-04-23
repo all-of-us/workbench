@@ -2,7 +2,7 @@ import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'tests/app';
+import {signIn} from 'utils/app-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 
 describe('Workspace ui tests', () => {

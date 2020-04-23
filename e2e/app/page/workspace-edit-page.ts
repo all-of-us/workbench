@@ -223,7 +223,7 @@ export const FIELD = {
       type: 'radiobutton',
       textOption: {textContains: LABEL_ALIAS.YES_FOCUS_ON_UNDERREPRESENTED_POPULATION}
     },
-    noOnUnderrepresentedPopulationRadiobutton: {
+    noUnderrepresentedPopulationRadiobutton: {
       type: 'radiobutton',
       textOption: {textContains: LABEL_ALIAS.NO_FOCUS_ON_UNDERREPRESENTED_POPULATION}
     },

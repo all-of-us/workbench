@@ -1,7 +1,7 @@
 import Link from 'app/element/link';
 import DataPage from 'app/page/data-page';
 import WorkspacesPage, {FIELD} from 'app/page/workspaces-page';
-import {signIn} from 'tests/app';
+import {signIn} from 'utils/app-utils';
 import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import {performActions} from 'utils/test-utils';
@@ -21,7 +21,7 @@ describe('Creating new workspaces', () => {
     // create workspace with "No Review Requested" radiobutton selected
     await workspacesPage.createWorkspace(newWorkspaceName, 'Use All of Us free credits',);
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
-  }, 6 * 60 * 1000);
+  });
 
   test('User can create a workspace using all inputs', async () => {
     const workspacesPage = new WorkspacesPage(page);
@@ -68,7 +68,7 @@ describe('Creating new workspaces', () => {
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
 
-  }, 6 * 60 * 1000);
+  });
 
   // helper function to check visible workspace link on Data page
   async function verifyWorkspaceLinkOnDataPage(workspaceName: string) {

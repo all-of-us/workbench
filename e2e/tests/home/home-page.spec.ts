@@ -5,7 +5,7 @@ import HomePage, {LABEL_ALIAS as HOME_PAGE_LABEL_ALIAS} from 'app/page/home-page
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'tests/app';
+import {signIn} from 'utils/app-utils';
 
 
 describe('Home page ui tests', () => {

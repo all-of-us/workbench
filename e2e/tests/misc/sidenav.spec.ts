@@ -3,7 +3,7 @@ import HomePage from 'app/page/home-page';
 import ProfilePage from 'app/page/profile-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {waitForExists} from 'driver/xpath-util';
-import {signIn} from 'tests/app';
+import {signIn} from 'utils/app-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 
 export const HELP_DESK = {

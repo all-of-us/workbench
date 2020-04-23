@@ -48,7 +48,7 @@ export async function performAction(
     break;
   case 'textarea':
     const textareaElement = await Textarea.forLabel(page, identifier.textOption);
-    await textareaElement.type(value, {delay: 0});
+    await textareaElement.paste(value);
     await textareaElement.tabKey();
     break;
   default:
