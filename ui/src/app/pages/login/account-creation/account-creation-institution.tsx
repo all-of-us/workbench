@@ -29,8 +29,7 @@ import {Dropdown} from 'primereact/dropdown';
 const styles = reactStyles({
   ...commonStyles,
   wideInputSize: {
-    width: '50%',
-    minWidth: '600px'
+    width: 600
   },
   institutionalDuaTextBox: {
     ...commonStyles.text,
