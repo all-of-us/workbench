@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils;
 
 import java.sql.Timestamp;
 import java.util.Set;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -37,7 +38,6 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 @Mapper(
     componentModel = "spring",
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT,
     uses = {
       CdrVersionMapper.class,
       CommonMappers.class,
@@ -85,23 +85,32 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspace", source = "dbWorkspace")
   RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
 
-  /**
-   * This method was written I think before we realized we could have multiple input arguments.
-   *
-   * @deprecated
-   * @param workspace
-   * @param researchPurpose
-   */
-  @Deprecated
-  @Mapping(target = "specificPopulationsEnum", source = "populationDetails")
-  @Mapping(target = "disseminateResearchEnumSet", source = "disseminateResearchFindingList")
-  @Mapping(target = "disseminateResearchOther", source = "otherDisseminateResearchFindings")
-  @Mapping(target = "researchOutcomeEnumSet", source = "researchOutcomeList")
-
-  // Normally using ignore should be frowned upon. In a merge method
-  // like this one, it's unavoidable; otherwise we'd just make a straight-up translation.
-  // However,
-  @Mapping(target = "approved", ignore = true)
+  @Mapping(source = "additionalNotes", target = "additionalNotes")
+  @Mapping(source = "ancestry", target = "ancestry")
+  @Mapping(source = "anticipatedFindings", target = "anticipatedFindings")
+  @Mapping(source = "approved", target = "approved", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+  @Mapping(source = "commercialPurpose", target = "commercialPurpose")
+  @Mapping(source = "controlSet", target = "controlSet")
+  @Mapping(source = "diseaseFocusedResearch",      target = "diseaseFocusedResearch")
+  @Mapping(source = "diseaseOfFocus", target = "diseaseOfFocus")
+  @Mapping(source = "disseminateResearchFindingList",      target = "disseminateResearchSet")
+  @Mapping(source = "drugDevelopment", target = "drugDevelopment")
+  @Mapping(source = "educational", target = "educational")
+  @Mapping(source = "ethics", target = "ethics")
+  @Mapping(source = "intendedStudy", target = "intendedStudy")
+  @Mapping(source = "methodsDevelopment", target = "methodsDevelopment")
+  @Mapping(source = "otherDisseminateResearchFindings", target = "disseminateResearchOther")
+  @Mapping(source = "otherPopulationDetails",      target = "otherPopulationDetails")
+  @Mapping(source = "otherPurpose", target = "otherPurpose")
+  @Mapping(source = "otherPurposeDetails", target = "otherPurposeDetails")
+  @Mapping(source = "populationDetails", target = "specificPopulationsEnum")
+  @Mapping(source = "populationHealth", target = "populationHealth")
+  @Mapping(source = "reasonForAllOfUs", target = "reasonForAllOfUs")
+  @Mapping(source = "researchOutcomeList", target = "researchOutcomeSet")
+  @Mapping(source = "reviewRequested", target = "reviewRequested", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+  @Mapping(source = "scientificApproach", target = "scientificApproach")
+  @Mapping(source = "socialBehavioral", target = "socialBehavioral")
+  @Mapping(source = "timeRequested", target = "timeRequested")
   @Mapping(target = "billingAccountName", ignore = true)
   @Mapping(target = "billingAccountType", ignore = true)
   @Mapping(target = "billingMigrationStatusEnum", ignore = true)
@@ -113,80 +122,92 @@ public interface WorkspaceMapper {
   @Mapping(target = "dataAccessLevel", ignore = true)
   @Mapping(target = "dataAccessLevelEnum", ignore = true)
   @Mapping(target = "dataSets", ignore = true)
-  @Mapping(target = "disseminateResearchSet", ignore = true)
+  @Mapping(target = "disseminateResearchEnumSet", ignore = true) // transient
   @Mapping(target = "firecloudName", ignore = true)
   @Mapping(target = "firecloudUuid", ignore = true)
   @Mapping(target = "lastAccessedTime", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "name", ignore = true)
   @Mapping(target = "published", ignore = true)
-  @Mapping(target = "researchOutcomeSet", ignore = true)
-  @Mapping(target = "reviewRequested", ignore = true)
-  @Mapping(target = "timeRequested", ignore = true)
+  @Mapping(target = "researchOutcomeEnumSet", ignore = true) // transient
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
-  void mergeResearchPurposeIntoWorkspace(
+  void setResearchPurpose(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
+  @Mapping(source = "billingMigrationStatus", target = "billingMigrationStatusEnum")
+  @Mapping(source = "dbCdrVersion", target = "cdrVersion")
+  @Mapping(source = "dbCohorts", target = "cohorts", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+  @Mapping(source = "dbDatasets", target = "dataSets", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
   @Mapping(source = "dbUser", target = "creator")
   @Mapping(source = "firecloudWorkspace.name", target = "firecloudName")
   @Mapping(source = "firecloudWorkspace.workspaceId", target = "firecloudUuid")
   @Mapping(source = "workspace.creationTime", target = "creationTime")
-  @Mapping(
-      source = "workspace.dataAccessLevel",
-      target = "dataAccessLevel") // will take care of dataAccessLevelEnum as well
-  @Mapping(target = "dataAccessLevelEnum", ignore = true) // set via dataAccessLevel
+  @Mapping(source = "workspace.dataAccessLevel",      target = "dataAccessLevel")
   @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
   @Mapping(source = "workspace.name", target = "name")
   @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
-  @Mapping(source = "workspace.researchPurpose.additionalNotes", target = "additionalNotes")
-  @Mapping(source = "workspace.researchPurpose.ancestry", target = "ancestry")
-  @Mapping(source = "workspace.researchPurpose.anticipatedFindings", target = "anticipatedFindings")
-  @Mapping(source = "workspace.researchPurpose.approved", target = "approved")
-  @Mapping(source = "workspace.researchPurpose.commercialPurpose", target = "commercialPurpose")
-  @Mapping(source = "workspace.researchPurpose.controlSet", target = "controlSet")
-  @Mapping(
-      source = "workspace.researchPurpose.diseaseFocusedResearch",
-      target = "diseaseFocusedResearch")
-  @Mapping(source = "workspace.researchPurpose.diseaseOfFocus", target = "diseaseOfFocus")
-  @Mapping(
-      source = "workspace.researchPurpose.disseminateResearchFindingList",
-      target = "disseminateResearchEnumSet")
-  @Mapping(
-      source = "workspace.researchPurpose.disseminateResearchFindingList",
-      target = "disseminateResearchSet")
-  @Mapping(source = "workspace.researchPurpose.drugDevelopment", target = "drugDevelopment")
-  @Mapping(source = "workspace.researchPurpose.educational", target = "educational")
-  @Mapping(source = "workspace.researchPurpose.ethics", target = "ethics")
-  @Mapping(source = "workspace.researchPurpose.intendedStudy", target = "intendedStudy")
-  @Mapping(source = "workspace.researchPurpose.methodsDevelopment", target = "methodsDevelopment")
-  @Mapping(
-      source = "workspace.researchPurpose.otherPopulationDetails",
-      target = "otherPopulationDetails")
-  @Mapping(source = "workspace.researchPurpose.otherPurpose", target = "otherPurpose")
-  @Mapping(source = "workspace.researchPurpose.otherPurposeDetails", target = "otherPurposeDetails")
-  @Mapping(
-      source = "workspace.researchPurpose.populationDetails",
-      target = "specificPopulationsEnum")
-  @Mapping(source = "workspace.researchPurpose.populationHealth", target = "populationHealth")
-  @Mapping(source = "workspace.researchPurpose.reasonForAllOfUs", target = "reasonForAllOfUs")
-  @Mapping(
-      source = "workspace.researchPurpose.researchOutcomeList",
-      target = "researchOutcomeEnumSet")
-  @Mapping(source = "workspace.researchPurpose.researchOutcomeList", target = "researchOutcomeSet")
-  @Mapping(source = "workspace.researchPurpose.reviewRequested", target = "reviewRequested")
-  @Mapping(source = "workspace.researchPurpose.scientificApproach", target = "scientificApproach")
-  @Mapping(source = "workspace.researchPurpose.socialBehavioral", target = "socialBehavioral")
-  @Mapping(source = "workspace.researchPurpose.timeRequested", target = "timeRequested")
-  @Mapping(source = "dbCdrVersion", target = "cdrVersion")
-  @Mapping(source = "workspace.researchPurpose.otherDisseminateResearchFindings", target = "disseminateResearchOther")
-  @Mapping(source = "dbCohorts", target = "cohorts")
-  @Mapping(source = "dbDatasets", target = "dataSets")
-  @Mapping(source = "workspaceActiveStatus", target = "workspaceActiveStatusEnum")
-  @Mapping(source = "billingMigrationStatus", target = "billingMigrationStatusEnum")
-//  @Mapping(source = "dbCdrVersion.isDefault", target = "isDefault")
+
+//  @Mapping(source = "workspace.researchPurpose.additionalNotes", target = "additionalNotes")
+//  @Mapping(source = "workspace.researchPurpose.ancestry", target = "ancestry")
+//  @Mapping(source = "workspace.researchPurpose.anticipatedFindings", target = "anticipatedFindings")
+//  @Mapping(source = "workspace.researchPurpose.approved", target = "approved", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+//  @Mapping(source = "workspace.researchPurpose.commercialPurpose", target = "commercialPurpose")
+//  @Mapping(source = "workspace.researchPurpose.controlSet", target = "controlSet")
+//  @Mapping(source = "workspace.researchPurpose.diseaseFocusedResearch",      target = "diseaseFocusedResearch")
+//  @Mapping(source = "workspace.researchPurpose.diseaseOfFocus", target = "diseaseOfFocus")
+//  @Mapping(source = "workspace.researchPurpose.disseminateResearchFindingList",      target = "disseminateResearchSet")
+//  @Mapping(source = "workspace.researchPurpose.drugDevelopment", target = "drugDevelopment")
+//  @Mapping(source = "workspace.researchPurpose.educational", target = "educational")
+//  @Mapping(source = "workspace.researchPurpose.ethics", target = "ethics")
+//  @Mapping(source = "workspace.researchPurpose.intendedStudy", target = "intendedStudy")
+//  @Mapping(source = "workspace.researchPurpose.methodsDevelopment", target = "methodsDevelopment")
+//  @Mapping(source = "workspace.researchPurpose.otherDisseminateResearchFindings", target = "disseminateResearchOther")
+//  @Mapping(source = "workspace.researchPurpose.otherPopulationDetails",      target = "otherPopulationDetails")
+//  @Mapping(source = "workspace.researchPurpose.otherPurpose", target = "otherPurpose")
+//  @Mapping(source = "workspace.researchPurpose.otherPurposeDetails", target = "otherPurposeDetails")
+//  @Mapping(source = "workspace.researchPurpose.populationDetails", target = "specificPopulationsEnum")
+//  @Mapping(source = "workspace.researchPurpose.populationHealth", target = "populationHealth")
+//  @Mapping(source = "workspace.researchPurpose.reasonForAllOfUs", target = "reasonForAllOfUs")
+//  @Mapping(source = "workspace.researchPurpose.researchOutcomeList", target = "researchOutcomeSet")
+//  @Mapping(source = "workspace.researchPurpose.reviewRequested", target = "reviewRequested", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+//  @Mapping(source = "workspace.researchPurpose.scientificApproach", target = "scientificApproach")
+//  @Mapping(source = "workspace.researchPurpose.socialBehavioral", target = "socialBehavioral")
+//  @Mapping(source = "workspace.researchPurpose.timeRequested", target = "timeRequested")
+
+  @Mapping(target = "additionalNotes", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "ancestry", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "anticipatedFindings", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "approved", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "commercialPurpose", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "controlSet", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "diseaseFocusedResearch", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "diseaseOfFocus", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "disseminateResearchOther", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "disseminateResearchSet", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "drugDevelopment", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "educational", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "ethics", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "intendedStudy", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "methodsDevelopment", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "otherPopulationDetails", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "otherPurpose", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "otherPurposeDetails", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "populationHealth", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "reasonForAllOfUs", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "researchOutcomeSet", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "reviewRequested", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "scientificApproach", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "socialBehavioral", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "specificPopulationsEnum", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "timeRequested", ignore = true) // mapped in setResearchPurpose()
+
+  @Mapping(source = "workspaceActiveStatus", target = "workspaceActiveStatusEnum") // transient
+  @Mapping(target = "dataAccessLevelEnum", ignore = true) // transient // set via dataAccessLevel
+  @Mapping(target = "disseminateResearchEnumSet", ignore = true) // transient
+  @Mapping(target = "researchOutcomeEnumSet", ignore = true) // transient
   DbWorkspace toDbWorkspace(
       Workspace workspace,
       FirecloudWorkspace firecloudWorkspace,
@@ -195,13 +216,25 @@ public interface WorkspaceMapper {
       WorkspaceActiveStatus workspaceActiveStatus,
       Timestamp lastAccessedTime,
       BillingMigrationStatus billingMigrationStatus,
+      int version,
       DbCdrVersion dbCdrVersion,
       Set<DbCohort> dbCohorts,
       Set<DbDataset> dbDatasets);
 
-  default DbWorkspace toDbWorkspace() {
-
+  /**
+   * Helper method to insert the Research Purpose fields into the DbWorkspace after mapping all
+   * other fields. While it's certainly possible to do
+   * <code>@Mapping(source = "workspace.researchPurpose.ethics", target = "ethics")</code>
+   * above, that dplicates teh setResearchPurpose code (and the generated code isn't as nice, as it
+   * extracts the RP and tests it for null many times).
+   * @param dbWorkspace
+   * @param workspace
+   */
+  @AfterMapping
+  default void insertResearchPurpose(@MappingTarget DbWorkspace dbWorkspace, Workspace workspace) {
+    setResearchPurpose(dbWorkspace, workspace.getResearchPurpose());
   }
+
   @Mapping(target = "email", source = "user.username")
   @Mapping(target = "role", source = "acl")
   UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry acl);

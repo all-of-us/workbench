@@ -58,7 +58,6 @@ public class WorkspaceAuditorTest {
 
   private Workspace workspace1;
   private Workspace workspace2;
-  private DbUser user1;
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
 

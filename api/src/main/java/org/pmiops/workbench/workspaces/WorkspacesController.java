@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +102,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
+  public static final int DEFALT_WORKSPACE_VERSION = 1;
 
   private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceResourcesService workspaceResourcesService;
@@ -173,7 +175,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private DbCdrVersion setLiveCdrVersionId(DbWorkspace dbWorkspace, String cdrVersionId) {
+  private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
@@ -189,7 +191,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 "CDR version with ID %s is not live, please select a different CDR version",
                 cdrVersionId));
       }
-      dbWorkspace.setCdrVersion(cdrVersion);
       return cdrVersion;
     } catch (NumberFormatException e) {
       throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
@@ -249,47 +250,52 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Workspace createWorkspaceImpl(Workspace workspace) {
     validateWorkspaceApiModel(workspace);
 
-    DbUser user = userProvider.get();
-    String workspaceNamespace;
+    DbUser dbUser = userProvider.get();
+
     DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(dbUser);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
-    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+
+    final String workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
+    final FirecloudWorkspace firecloudWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbWorkspace dbWorkspace = new DbWorkspace();
-    // A little unintuitive but setting this here reflects the current state of the workspace
-    // while it was in the billing buffer. Setting this value will inform the update billing
-    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
-    // tier
-    dbWorkspace.setBillingAccountName(
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
-    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
+    final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+//    DbWorkspace dbWorkspace = new DbWorkspace();
+//    // A little unintuitive but setting this here reflects the current state of the workspace
+//    // while it was in the billing buffer. Setting this value will inform the update billing
+//    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
+//    // tier
+//    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
+//
+    final DbCdrVersion liveCdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
 
-    // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
-    dbWorkspace.setName(workspace.getName());
+    DbWorkspace dbWorkspace = workspaceMapper.toDbWorkspace(
+        workspace,
+        firecloudWorkspace, // not created yet
+        dbUser,
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName(),
+        WorkspaceActiveStatus.ACTIVE,
+        now,
+        BillingMigrationStatus.NEW,
+        DEFALT_WORKSPACE_VERSION,
+        liveCdrVersion,
+        Collections.emptySet(),
+        Collections.emptySet());
 
-    // Ignore incoming fields pertaining to review status; clients can only request a review.
-    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
     if (workspace.getResearchPurpose().getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
-    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
 
-    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
-
+    // The initial billing account fixup could be done in the mapper, but we don't
     try {
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workspace.getBillingAccountName());
@@ -314,7 +320,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     maybeFileZendeskReviewRequest(createdWorkspace);
     return createdWorkspace;
@@ -344,7 +350,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(createdAndLastModifiedTime);
     dbWorkspace.setLastModifiedTime(createdAndLastModifiedTime);
-    dbWorkspace.setVersion(1);
+    dbWorkspace.setVersion(DEFALT_WORKSPACE_VERSION);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 
@@ -418,7 +424,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (researchPurpose != null) {
       // Note: this utility does not set the "review requested" bit or time. This is currently
       // immutable on a workspace, see RW-4132.
-      workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
+      workspaceMapper.setResearchPurpose(dbWorkspace, researchPurpose);
     }
 
     if (workspace.getBillingAccountName() != null) {
@@ -516,7 +522,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
+    workspaceMapper.setResearchPurpose(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -530,7 +536,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
-      DbCdrVersion reqCdrVersion = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
+      final DbCdrVersion reqCdrVersion = getLiveCdrVersionId(reqCdrVersionId);
+      dbWorkspace.setCdrVersion(reqCdrVersion);
       dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
     }
 
