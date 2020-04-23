@@ -137,6 +137,7 @@ public interface WorkspaceMapper {
   @Mapping(
       source = "workspace.dataAccessLevel",
       target = "dataAccessLevel") // will take care of dataAccessLevelEnum as well
+  @Mapping(target = "dataAccessLevelEnum", ignore = true) // set via dataAccessLevel
   @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
   @Mapping(source = "workspace.name", target = "name")
   @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
@@ -179,13 +180,13 @@ public interface WorkspaceMapper {
   @Mapping(source = "workspace.researchPurpose.scientificApproach", target = "scientificApproach")
   @Mapping(source = "workspace.researchPurpose.socialBehavioral", target = "socialBehavioral")
   @Mapping(source = "workspace.researchPurpose.timeRequested", target = "timeRequested")
-  @Mapping(source = "cdrVersion", target = "cdrVersion")
+  @Mapping(source = "dbCdrVersion", target = "cdrVersion")
   @Mapping(source = "workspace.researchPurpose.otherDisseminateResearchFindings", target = "disseminateResearchOther")
   @Mapping(source = "dbCohorts", target = "cohorts")
-  @Mapping(source = "dbDataSets", target = "dataSets")
+  @Mapping(source = "dbDatasets", target = "dataSets")
   @Mapping(source = "workspaceActiveStatus", target = "workspaceActiveStatusEnum")
   @Mapping(source = "billingMigrationStatus", target = "billingMigrationStatusEnum")
-  @Mapping(source = "cdrVersion.isDefault", target = "isDefault")
+//  @Mapping(source = "dbCdrVersion.isDefault", target = "isDefault")
   DbWorkspace toDbWorkspace(
       Workspace workspace,
       FirecloudWorkspace firecloudWorkspace,
@@ -194,10 +195,13 @@ public interface WorkspaceMapper {
       WorkspaceActiveStatus workspaceActiveStatus,
       Timestamp lastAccessedTime,
       BillingMigrationStatus billingMigrationStatus,
-      CdrVersion cdrVersion,
+      DbCdrVersion dbCdrVersion,
       Set<DbCohort> dbCohorts,
-      Set<DbDataSet> dbDataSets);
+      Set<DbDataset> dbDatasets);
 
+  default DbWorkspace toDbWorkspace() {
+
+  }
   @Mapping(target = "email", source = "user.username")
   @Mapping(target = "role", source = "acl")
   UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry acl);

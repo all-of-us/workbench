@@ -20,30 +20,24 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     })
 public interface CdrVersionMapper {
 
-  @Mapping(source = "cdrVersion.dataAccessLevel", target = "dataAccessLevelEnum")
+//  @Mapping(source = "cdrVersion.dataAccessLevel", target = "dataAccessLevelEnum")
 //  @Mapping(source = "isDefault", target = "isDefault")
-//  @Mapping(source = "dataAccessLevel", target = "dataAccessLevelEnum")
-  @Mapping(source = "cdrVersion.archivalStatus", target = "archivalStatusEnum")
-  @Mapping(source = "foo", target = "releaseNumber")
-  @Mapping(source = "bigQueryConfig.projectId", target = "bigqueryProject")
-  @Mapping(source = "bigQueryConfig.dataSetId", target = "bigqueryDataset")
-  @Mapping(source = "foo", target = "numParticipants")
-  @Mapping(source = "foo", target = "cdrDbName")
-  @Mapping(source = "foo", target = "elasticIndexBaseName")
-  //  @Mapping(source = "bar.dataAccessLevelEnum", target = "dataAccessLevelEnum")
-//  @Mapping(source = "bar.archivalStatusEnum", target = "archivalStatusEnum")
-  @Mapping(source = "bar.releaseNumber", target = "releaseNumber")
-  @Mapping(source = "bar.bigqueryProject", target = "bigqueryProject")
-  @Mapping(source = "bar.bigqueryDataset", target = "bigqueryDataset")
-  @Mapping(source = "bar.numParticipants", target = "numParticipants")
-  @Mapping(source = "bar.cdrDbName", target = "cdrDbName")
-  @Mapping(source = "bar.elasticIndexBaseName", target = "elasticIndexBaseName")
-
-  DbCdrVersion toDbCdrVersion(CdrVersion cdrVersion,
-      boolean isDefault,
-      BigQueryConfig bigQueryConfig);
-
-  default String cdrVersionIdToString(CdrVersion cdrVersion) {
-    return String.valueOf(cdrVersion.getCdrVersionId());
-  }
+//  @Mapping(source = "cdrVersion.archivalStatus", target = "archivalStatusEnum")
+//  @Mapping(source = "bigQueryConfig.projectId", target = "bigqueryProject")
+//  @Mapping(source = "bigQueryConfig.dataSetId", target = "bigqueryDataset")
+//  @Mapping(source = "foo", target = "numParticipants")
+//  @Mapping(source = "foo", target = "cdrDbName")
+//  @Mapping(source = "foo", target = "elasticIndexBaseName")
+//  @Mapping(source = "bar.numParticipants", target = "numParticipants")
+//  @Mapping(source = "bar.cdrDbName", target = "cdrDbName")
+//  @Mapping(source = "bar.elasticIndexBaseName", target = "elasticIndexBaseName")
+//
+//  DbCdrVersion toDbCdrVersion(CdrVersion cdrVersion,
+//      boolean isDefault,
+//      BigQueryConfig bigQueryConfig,
+//      Short releaseNumber);
+//
+//  default String cdrVersionIdToString(CdrVersion cdrVersion) {
+//    return String.valueOf(cdrVersion.getCdrVersionId());
+//  }
 }
