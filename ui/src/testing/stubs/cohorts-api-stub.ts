@@ -1,13 +1,13 @@
-import {convertToResources} from 'app/utils/resourceActions';
+import {convertToResources, ConvertToResourcesArgs} from 'app/utils/resourceActions';
 import {
   Cohort,
   CohortAnnotationsResponse,
   CohortsApi,
   EmptyResponse,
-  RecentResource,
   ResourceType,
   Workspace,
-  WorkspaceAccessLevel
+  WorkspaceAccessLevel,
+  WorkspaceResource
 } from 'generated/fetch';
 import {CohortListResponse} from 'generated/fetch/api';
 import {WorkspaceStubVariables} from './workspace-service-stub';
@@ -73,7 +73,7 @@ class CohortStub implements Cohort {
 export class CohortsApiStub extends CohortsApi {
   public workspaces: Workspace[];
   public cohorts: CohortStub[];
-  public resourceList: RecentResource[];
+  public resourceList: WorkspaceResource[];
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
@@ -86,8 +86,14 @@ export class CohortsApiStub extends CohortsApi {
 
     this.cohorts = exampleCohortStubs;
     this.workspaces = [stubWorkspace];
-    this.resourceList = convertToResources(this.cohorts, stubWorkspace.namespace,
-      stubWorkspace.id, WorkspaceAccessLevel.OWNER, ResourceType.COHORT);
+    const convertToResourceArgs: ConvertToResourcesArgs = {
+      list: this.cohorts,
+      workspaceNamespace: stubWorkspace.namespace,
+      workspaceId: stubWorkspace.id,
+      accessLevel: WorkspaceAccessLevel.OWNER,
+      resourceType: ResourceType.COHORT
+    };
+    this.resourceList = convertToResources(convertToResourceArgs);
   }
 
   updateCohort(ns: string, wsid: string, cid: number, newCohort: Cohort): Promise<Cohort> {

@@ -198,7 +198,6 @@ public class MailServiceImpl implements MailService {
 
   private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(
       final String instructions) {
-    final CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.INSTRUCTIONS, instructions)
@@ -222,6 +221,16 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
+  private String getFreeCreditsResolutionText() {
+    if (workbenchConfigProvider.get().featureFlags.enableBillingUpgrade) {
+      return "you can request additional free credits by contacting support "
+          + "or provide a new billing account in the Workbench to continue with your analyses. "
+          + "Instructions for providing a new billing account are provided in the Workbench.";
+    } else {
+      return "you can request for an extension of free credits by contacting support.";
+    }
+  }
+
   private ImmutableMap<EmailSubstitutionField, String> freeTierDollarThresholdSubstitutionMap(
       final DbUser user, double currentUsage, double remainingBalance) {
 
@@ -231,15 +240,18 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
         .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
         .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
+        .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
         .build();
   }
 
   private ImmutableMap<EmailSubstitutionField, String> freeTierExpirationSubstitutionMap(
       DbUser user) {
+
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
         .build();
   }
 

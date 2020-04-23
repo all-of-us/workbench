@@ -11,7 +11,7 @@
                 <button  *ngIf="!attributesNode"
                  type="button"
                  class="btn tab"
-                 [disabled]="!noSelection && conceptType === 'standard'"
+                 [disabled]="selections.length !== 0 && conceptType === 'standard'"
                  [class.active]="mode === 'list' || mode === 'tree'"
                  (click)="mode = backMode">
                   {{title}}
@@ -28,7 +28,7 @@
                   class="btn tab"
                   *ngIf="showModifiers"
                   [class.active]="mode === 'modifiers'"
-                  [disabled]="noSelection"
+                  [disabled]="selections.length === 0"
                   (click)="setMode('modifiers')">
                   Modifiers
                 </button>
@@ -58,7 +58,11 @@
           </div>
           <div class="content left" *ngIf="open">
             <ng-container [ngSwitch]="wizard.domain">
-              <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"></crit-list-demographics>
+              <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"
+                [select]="addSelection"
+                [selectedIds]="selectedIds"
+                [selections]="selections"
+                [wizard]="wizard"></crit-list-demographics>
               <ng-container *ngSwitchDefault>
                 <div *ngIf="loadingSubtree" class="spinner spinner-lg spin-in-overlay">
                   Loading...
@@ -70,15 +74,25 @@
                   [class.show]="['tree', 'list', 'modifiers', 'attributes'].includes(mode)">
                   <!-- Tree View -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
-                    <crit-list-tree *ngIf="hierarchyNode" [node]="hierarchyNode"
-                      [selections]="selectionIds"
-                      [wizard]="wizard"
-                      [back]="back"></crit-list-tree>
+                    <crit-tree *ngIf="hierarchyNode"
+                      [autocompleteSelection]="autocompleteSelection"
+                      [back]="back"
+                      [groupSelections]="groupSelections"
+                      [node]="hierarchyNode"
+                      [scrollToMatch]="setScroll"
+                      [searchTerms]="treeSearchTerms"
+                      [select]="addSelection"
+                      [selectedIds]="selectedIds"
+                      [selectOption]="setAutocompleteSelection"
+                      [setAttributes]="setAttributes"
+                      [setSearchTerms]="setTreeSearchTerms"></crit-tree>
                   </div>
                   <!-- List View -->
                   <div class="panel-left" [class.show]="mode === 'list'">
                     <crit-list-search [hierarchy]="showHierarchy"
-                      [selections]="selectionIds"
+                      [select]="addSelection"
+                      [selectedIds]="selectedIds"
+                      [setAttributes]="setAttributes"
                       [wizard]="wizard"></crit-list-search>
                   </div>
                   <!-- Modifiers Page -->
@@ -90,8 +104,9 @@
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">
                     <crit-attributes-page *ngIf="attributesNode"
+                      [close]="back"
                       [node]="attributesNode"
-                      [close]="back"></crit-attributes-page>
+                      [select]="addSelection"></crit-attributes-page>
                   </div>
                 </div>
               </ng-container>
@@ -118,9 +133,10 @@
               <h5 class="selection-title">Selected Criteria</h5>
               <div class="panel-right selected">
                 <crit-list-selection-info
-                  *ngFor="let parameter of selectionList; let p = index"
-                  [indexes]="[p]"
-                  [parameter]="parameter">
+                  *ngFor="let parameter of selections; let p = index"
+                  [index]="p"
+                  [parameter]="parameter"
+                  [remove]="removeSelection">
                 </crit-list-selection-info>
               </div>
               <div class="footer">
@@ -131,7 +147,7 @@
                 </button>
                 <button  *ngIf="showNext"
                   type="button"
-                  [disabled]="noSelection"
+                  [disabled]="selections.length === 0"
                   (click)="mode = 'modifiers'"
                   class="btn btn-primary">
                   Next

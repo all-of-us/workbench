@@ -24,11 +24,15 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -52,8 +56,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.PageFilterRequest;
@@ -61,7 +63,6 @@ import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantChartDataListResponse;
 import org.pmiops.workbench.model.ParticipantData;
 import org.pmiops.workbench.model.ParticipantDataListResponse;
-import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.VocabularyListResponse;
@@ -87,8 +88,12 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
     BigQueryTestService.class,
     ReviewQueryBuilder.class,
     CohortCloningService.class,
@@ -172,7 +177,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     dbUser = userDao.save(dbUser);
     currentUser = dbUser;
 
-    when(mockFireCloudService.getWorkspaceAcl(anyString(), anyString()))
+    when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceACL()
                 .acl(
@@ -372,66 +377,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     assertEquals(
         expectedReview,
         controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody().getItems().get(0));
-  }
-
-  @Test
-  public void createCohortReview() {
-    DbCohort cohortWithoutReview = new DbCohort();
-    cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
-    String criteria =
-        "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
-            + "\"parameterId\":\"param1567486C34\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"domain\":\"CONDITION\",\"type\": "
-            + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1,\"value\":\"C34\"}],"
-            + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[]}";
-    cohortWithoutReview.setCriteria(criteria);
-    cohortWithoutReview = cohortDao.save(cohortWithoutReview);
-
-    CohortReview cohortReview =
-        controller
-            .createCohortReview(
-                NAMESPACE,
-                NAME,
-                cohortWithoutReview.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                new CreateReviewRequest().size(1))
-            .getBody();
-
-    assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
-    assertThat(cohortReview.getReviewSize()).isEqualTo(1);
-    assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus())
-        .isEqualTo(CohortStatus.NOT_REVIEWED);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getDeceased()).isEqualTo(false);
-  }
-
-  @Test
-  public void createCohortReviewWithEHRData() {
-    DbCohort cohortWithoutReview = new DbCohort();
-    cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
-    String criteria =
-        "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
-            + "\"parameterId\":\"param1567486C34\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"domain\":\"CONDITION\",\"type\": "
-            + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1,\"value\":\"C34\"}],"
-            + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[],\"dataFilters\":[\"HAS_EHR_DATA\"]}";
-    cohortWithoutReview.setCriteria(criteria);
-    cohortWithoutReview = cohortDao.save(cohortWithoutReview);
-
-    CohortReview cohortReview =
-        controller
-            .createCohortReview(
-                NAMESPACE,
-                NAME,
-                cohortWithoutReview.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                new CreateReviewRequest().size(1))
-            .getBody();
-
-    assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
-    assertThat(cohortReview.getReviewSize()).isEqualTo(1);
-    assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus())
-        .isEqualTo(CohortStatus.NOT_REVIEWED);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getDeceased()).isEqualTo(false);
   }
 
   @Test
@@ -801,7 +746,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(currentUser.getUsername(), accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME))
+    when(mockFireCloudService.getWorkspaceAclAsService(NAMESPACE, NAME))
         .thenReturn(workspaceAccessLevelResponse);
   }
 }

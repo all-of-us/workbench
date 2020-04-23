@@ -1,19 +1,15 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import {defaultFieldValues} from '../resources/data/user-registration-fields';
-import Button from './aou-elements/button';
-import Checkbox from './aou-elements/checkbox';
-import ClrIconLink from './aou-elements/clr-icon-link';
-import SelectComponent from './aou-elements/select-component';
-import Textarea from './aou-elements/textarea';
-import Textbox from './aou-elements/textbox';
-import BasePage from './base-page';
+import {defaultFieldValues} from 'resources/data/user-registration-fields';
+import Button from 'app/aou-elements/button';
+import Checkbox from 'app/aou-elements/checkbox';
+import ClrIconLink from 'app/aou-elements/clr-icon-link';
+import SelectComponent from 'app/aou-elements/select-component';
+import Textarea from 'app/aou-elements/textarea';
+import Textbox from 'app/aou-elements/textbox';
+import BasePage from 'app/base-page';
+import {config} from 'resources/workbench-config';
 
-const configs = require('../resources/workbench-config');
 const faker = require('faker/locale/en_US');
-
-export const PAGE = {
-  TITLE: 'Sign In',
-};
 
 export const INSTITUTION_VALUE = {
   VANDERBILT: 'Vanderbilt University Medical Center',
@@ -37,15 +33,15 @@ export const EDUCATION_LEVEL_VALUE = {
   // other option values here
 };
 
-export const FIELD_LABEL = {
-  READ_UNDERSTAND_PRIVACY_STATEMENT: 'I have read and understand the All of Us Research Program Privacy Statement',
-  READ_UNDERSTAND_TERMS_OF_USE: 'I have read and understand the All of Us Research Program Terms of Use',
+export const LABEL_ALIAS = {
+  READ_UNDERSTAND_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement.',
+  READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms described above.',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
   RESEARCH_BACKGROUND: 'describe your research background, experience, and research interests',
   EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YEAR_OF_BIRTH: 'Year of Birth',
-  INSTITUTION_EMAIL: 'institutional email address',
+  INSTITUTION_EMAIL: 'Your institutional email address',
 };
 
 export default class CreateAccountPage extends BasePage {
@@ -55,7 +51,7 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await this.waitForTextExists(PAGE.TITLE);
+    await this.waitForTextExists('Sign In');
     return true;
   }
 
@@ -88,19 +84,19 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_PRIVACY_STATEMENT});
+    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_PRIVACY_STATEMENT});
   }
 
   async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_TERMS_OF_USE});
+    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_TERMS_OF_USE});
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {text: FIELD_LABEL.INSTITUTION_NAME});
+    return await Textbox.forLabel(this.page, {text: LABEL_ALIAS.INSTITUTION_NAME});
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return await Textarea.forLabel(this.page, {normalizeSpace: FIELD_LABEL.RESEARCH_BACKGROUND});
+    return await Textarea.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.RESEARCH_BACKGROUND});
   }
 
   async getUsernameDomain(): Promise<unknown> {
@@ -113,9 +109,9 @@ export default class CreateAccountPage extends BasePage {
     for (const field of fields) {
       const textbox = await Textbox.forLabel(this.page, {text: field.label});
       await textbox.type(field.value);
-      await textbox.pressKeyboard('Tab', { delay: 100 });
+      await textbox.tabKey();
       if (field.label === 'New Username') {
-        await ClrIconLink.forLabel(this.page, 'New Username', 'success-standard');
+        await ClrIconLink.forLabel(this.page, {text: field.label}, 'success-standard');
         newUserName = field.value; // store new username for return
       }
     }
@@ -135,13 +131,13 @@ export default class CreateAccountPage extends BasePage {
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = new SelectComponent(this.page, FIELD_LABEL.EDUCATION_LEVEL, 2);
+    const dropdown = new SelectComponent(this.page, LABEL_ALIAS.EDUCATION_LEVEL, 2);
     await dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = new SelectComponent(this.page, FIELD_LABEL.YEAR_OF_BIRTH, 2);
+    const dropdown = new SelectComponent(this.page, LABEL_ALIAS.YEAR_OF_BIRTH, 2);
     await dropdown.select(year);
   }
 
@@ -151,8 +147,10 @@ export default class CreateAccountPage extends BasePage {
   async fillOutInstitution() {
     const institutionSelect = new SelectComponent(this.page, 'Select your institution');
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
-    const emailAddress = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddress.type(configs.contactEmail);
+    const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
+    await emailAddressTextbox.type(config.broadInstitutionEmail);
+    await emailAddressTextbox.tabKey(); // tab out to start email validation
+    await ClrIconLink.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
     const roleSelect = new SelectComponent(this.page, 'describes your role');
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }

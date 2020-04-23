@@ -16,7 +16,7 @@ import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, ReactWrapperBase, renderUSD, withUserProfile} from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
@@ -171,16 +171,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
         areaOfResearch: 'Current Research'
       }[v] || validate.prettify(v))
     });
-
-    // render a float value as US currency, rounded to cents: 255.372793 -> $255.37
-    const usdElement = (value: number) => {
-      value = value || 0.0;
-      if (value < 0.0) {
-        return <div style={{fontWeight: 600}}>-${(-value).toFixed(2)}</div>;
-      } else {
-        return <div style={{fontWeight: 600}}>${(value).toFixed(2)}</div>;
-      }
-    };
 
     const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
       const errorText = profile && errors && errors[valueKey];
@@ -390,8 +380,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               <div>Remaining <i>All of Us</i> FREE credits:</div>
             </FlexColumn>
             <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-              {usdElement(profile.freeTierUsage)}
-              {usdElement(profile.freeTierDollarQuota - profile.freeTierUsage)}
+              {renderUSD(profile.freeTierUsage)}
+              {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
             </FlexColumn>
           </FlexRow>}
           <div>
@@ -414,7 +404,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
           {enableComplianceTraining && <ProfileRegistrationStepStatus
-            title='Access Training'
+            title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
             wasBypassed={!!profile.complianceTrainingBypassTime}
             incompleteButtonText='Access Training'
             completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
@@ -484,6 +474,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             }}
             enableCaptcha={false}
             enablePrevious={false}
+            showStepCount={false}
         />
       </Modal>}
       {saveProfileErrorResponse &&

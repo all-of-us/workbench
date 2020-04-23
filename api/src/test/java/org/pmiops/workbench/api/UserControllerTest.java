@@ -3,8 +3,12 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -18,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -26,13 +31,16 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.model.BillingAccount;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
+import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.PaginationToken;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -54,6 +62,7 @@ public class UserControllerTest {
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
   private static long incrementedUserId = 1;
+  private static final Cloudbilling testCloudbilling = TestMockFactory.createMockedCloudbilling();
 
   @TestConfiguration
   @Import({
@@ -89,6 +98,11 @@ public class UserControllerTest {
     @Bean
     Random random() {
       return new FakeLongRandom(123);
+    }
+
+    @Bean(END_USER_CLOUD_BILLING)
+    Cloudbilling getCloudBilling() {
+      return testCloudbilling;
     }
   }
 
@@ -236,6 +250,93 @@ public class UserControllerTest {
     List<User> newAscending = Lists.newArrayList(robinsonsAsc.getUsers());
     newAscending.sort(Comparator.comparing(User::getUserName));
     assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
+  }
+
+  @Test
+  public void listBillingAccounts() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = true;
+
+    final com.google.api.services.cloudbilling.model.BillingAccount cloudbillingAccount1 =
+        new com.google.api.services.cloudbilling.model.BillingAccount()
+            .setName("googlebucks")
+            .setDisplayName("Paid using your credit card");
+
+    final com.google.api.services.cloudbilling.model.BillingAccount cloudbillingAccount2 =
+        new com.google.api.services.cloudbilling.model.BillingAccount()
+            .setName("a2")
+            .setDisplayName("Account 2 - Open")
+            .setOpen(true);
+
+    final List<com.google.api.services.cloudbilling.model.BillingAccount> cloudbillingAccounts =
+        Lists.newArrayList(cloudbillingAccount1, cloudbillingAccount2);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
+
+    // the list always starts with the free tier account
+    final BillingAccount freeTierBillingAccount =
+        new BillingAccount()
+            .isFreeTier(true)
+            .displayName("Use All of Us free credits")
+            .name("billingAccounts/free-tier")
+            .isOpen(true);
+
+    final BillingAccount workbenchBillingAccount1 =
+        new BillingAccount()
+            .name("googlebucks")
+            .displayName("Paid using your credit card")
+            .isFreeTier(false)
+            .isOpen(false);
+
+    final BillingAccount workbenchBillingAccount2 =
+        new BillingAccount()
+            .name("a2")
+            .displayName("Account 2 - Open")
+            .isFreeTier(false)
+            .isOpen(true);
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts =
+        Lists.newArrayList(
+            freeTierBillingAccount, workbenchBillingAccount1, workbenchBillingAccount2);
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
+  }
+
+  @Test
+  public void listBillingAccount_nullCloudResponse() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = true;
+
+    // the list always starts with the free tier account
+    final BillingAccount freeTierBillingAccount =
+        new BillingAccount()
+            .isFreeTier(true)
+            .displayName("Use All of Us free credits")
+            .name("billingAccounts/free-tier")
+            .isOpen(true);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).containsExactly(freeTierBillingAccount);
+  }
+
+  @Test
+  public void listBillingAccount_upgradeFlagFalse() {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = false;
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEmpty();
   }
 
   /*

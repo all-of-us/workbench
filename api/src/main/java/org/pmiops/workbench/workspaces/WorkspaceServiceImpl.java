@@ -254,7 +254,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
     FirecloudWorkspaceACL aclResp =
-        fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
+        fireCloudService.getWorkspaceAclAsService(workspaceNamespace, firecloudName);
 
     // Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
     // instead. Run this through a typed Gson conversion process to parse into the desired type.
@@ -519,7 +519,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
+  public WorkspaceAccessLevel enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
     final WorkspaceAccessLevel access;
     try {
@@ -540,7 +540,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
-    enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, workspaceAccessLevel);
+    enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        workspaceNamespace, workspaceId, workspaceAccessLevel);
     DbWorkspace workspace = getRequired(workspaceNamespace, workspaceId);
     // Because we've already checked that the user has access to the workspace in question,
     // we don't need to check their membership in the authorization domain for the CDR version
@@ -623,7 +624,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             .filter(
                 workspace -> {
                   try {
-                    enforceWorkspaceAccessLevel(
+                    enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
                         workspace.getWorkspaceNamespace(),
                         workspace.getFirecloudName(),
                         WorkspaceAccessLevel.READER);
@@ -712,7 +713,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingUpgrade
         || newBillingAccountName.equals(workspace.getBillingAccountName())) {
       return;
     }

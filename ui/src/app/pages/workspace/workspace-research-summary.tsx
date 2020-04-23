@@ -11,13 +11,13 @@ const styles = reactStyles({
   textArea: {
     height: '15rem',
     resize: 'none',
-    width: '50rem',
+    width: '48rem',
     borderRadius: '3px 3px 0 0',
     boderColor: colorWithWhiteness(colors.dark, 0.5)
   },
   textBoxCharRemaining: {
     justifyContent: 'space-between',
-    width: '50rem',
+    width: '48rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.95),
     fontSize: 12,
     colors: colors.primary,
@@ -98,12 +98,11 @@ export class WorkspaceResearchSummary extends React.Component<Props, State > {
         <div data-test-id='characterMessage'
              style={{color: textColor, marginLeft: 'auto'}}>1000
           characters remaining</div>}
-         {researchValue &&
-        <div data-test-id='characterMessage'
+         {researchValue && researchValue.length < 1000 && <div data-test-id='characterMessage'
              style={{color: textColor, marginLeft: 'auto'}}>
           {1000 - researchValue.length} characters remaining</div>}
         {researchValue && researchValue.length === 1000 &&
-        <label data-test-id='characterLimit' style={{color: colors.danger}}>
+        <label data-test-id='characterLimit' style={{color: colors.danger, marginLeft: 'auto'}}>
           You have reached the character limit for this question</label>}
 
       </FlexRow>

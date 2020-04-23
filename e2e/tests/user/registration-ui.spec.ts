@@ -1,60 +1,10 @@
-import BaseElement from '../../app/aou-elements/base-element';
-import SelectComponent from '../../app/aou-elements/select-component';
-import Textbox from '../../app/aou-elements/textbox';
-import CreateAccountPage, {FIELD_LABEL, INSTITUTION_ROLE_VALUE, INSTITUTION_VALUE} from '../../app/create-account-page';
-import GoogleLoginPage from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
-
-const configs = require('../../resources/workbench-config');
-
-// set timeout globally per suite, not per test.
-jest.setTimeout(2 * 60 * 1000);
-
-describe.skip('User registration tests:', () => {
-
-  let browser;
-  let page;
-
-  beforeAll(async () => {
-    browser = await PuppeteerLaunch();
-  });
-
-  beforeEach(async () => {
-    page = await browser.newPage();
-    await page.setDefaultNavigationTimeout(60000);
-  });
-
-  afterEach(async () => {
-    await page.close();
-  });
-
-  afterAll(async () => {
-    await browser.close();
-  });
+import BaseElement from 'app/aou-elements/base-element';
+import CreateAccountPage from 'app/create-account-page';
+import GoogleLoginPage from 'app/google-login';
+import {config} from 'resources/workbench-config';
 
 
-  test('Entered invalid invitation key', async () => {
-    const loginPage = new GoogleLoginPage(page);
-    await loginPage.load();
-
-    const createAccountButton = await loginPage.createAccountButton();
-    await createAccountButton.click();
-
-    const createAccountPage = new CreateAccountPage(page);
-    const headerDisplayed = await createAccountPage.waitForTextExists('Enter your Invitation Key:');
-    expect(headerDisplayed).toBeTruthy();
-    const keyIsNotValidError = 'Invitation Key is not Valid.';
-    const errDisplayed = await createAccountPage.findText(keyIsNotValidError);
-    expect(errDisplayed).toBeFalsy();
-
-    const badInvitationKey = process.env.INVITATION_KEY + '1';
-    await createAccountPage.fillOutInvitationKey(badInvitationKey);
-    const found = await createAccountPage.waitForTextExists(keyIsNotValidError);
-    expect(await found.jsonValue()).toBeTruthy();
-    // Page should be unchanged. User can re-enter invitation key
-    expect(await createAccountPage.getInvitationKeyInput()).toBeTruthy();
-  });
-
+describe('User registration tests:', () => {
 
   test('Loading Terms of Use and Privacy statement page', async () => {
     const loginPage = new GoogleLoginPage(page);
@@ -64,11 +14,8 @@ describe.skip('User registration tests:', () => {
     const createAccountButton = await loginPage.createAccountButton();
     await createAccountButton.click();
 
-    // Step 1: Enter invitation key.
     const createAccountPage = new CreateAccountPage(page);
-    await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
-
-    // Step 2: Checking Accepting Terms of Service.
+    // Step 1: Checking Accepting Terms of Service.
     const pdfPage =  await createAccountPage.getPdfPage();
     // expecting pdf document
     expect(await pdfPage.jsonValue()).toBe(true);
@@ -116,42 +63,31 @@ describe.skip('User registration tests:', () => {
     const createAccountButton = await loginPage.createAccountButton();
     await createAccountButton.click();
 
-    // Step 1: Enter invitation key.
     const createAccountPage = new CreateAccountPage(page);
-    await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
-
-    // Step 2: Accepting Terms of Service.
+    // Step 1 of 3: Accepting Terms of Service.
     await createAccountPage.scrollToLastPdfPage();
 
     // check checkboxes
     await (await createAccountPage.getPrivacyStatementCheckbox()).check();
     await (await createAccountPage.getTermsOfUseCheckbox()).check();
     const agreementPageButton = await createAccountPage.getNextButton();
-    await agreementPageButton.click();
+    await agreementPageButton.clickWithEval();
 
-    // Step 1 of 3: Enter Institution information
+    // Step 2 of 3: Enter Institution information
     const nextButton = await createAccountPage.getNextButton();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
-    const institutionSelect = new SelectComponent(page, 'Select your institution');
-    await institutionSelect.select(INSTITUTION_VALUE.VANDERBILT);
-
-    const emailAddress = await Textbox.forLabel(page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddress.type(configs.contactEmail);
-
-    const roleSelect = new SelectComponent(page, 'describes your role');
-    await roleSelect.select(INSTITUTION_ROLE_VALUE.RESEARCH_ASSISTANT);
+    await createAccountPage.fillOutInstitution();
 
     await nextButton.waitUntilEnabled();
-    await nextButton.focus();
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
     await nextButton.clickWithEval();
 
-    // Step 2 of 3: Enter user information.
+    // Step 3 of 3: Enter user information.
     expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
 
     // verify username domain
-    expect(await createAccountPage.getUsernameDomain()).toBe(configs.userEmailDomain);
+    expect(await createAccountPage.getUsernameDomain()).toBe(config.userEmailDomain);
 
     // verify all input fields are visible and editable on this page
     const allInputs = await page.$$('input');

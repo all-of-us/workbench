@@ -634,6 +634,120 @@ Common.register_command({
   :fn => ->() { run_local_all_migrations() }
 })
 
+def liquibase_gradlew_command(command, argument = '', run_list = '')
+  full_cmd_array = %W{../gradlew #{command}}
+
+  # Currently there's only one activity (main), and leaving out the runList argument causes
+  # it to run that activity. Leaving out the runList is equivalent to specifying all of the
+  # activities to run in unspecified order, but we set it in gradle.properties and pull it in as
+  # an external property anyway.
+
+  unless run_list.to_s.empty?
+    full_cmd_array << "-PrunList=#{run_list}"
+  end
+
+  unless argument.to_s.empty?
+    full_cmd_array << "-PliquibaseCommandValue=#{argument}"
+  end
+
+  full_cmd_array
+end
+
+YES_RESPONSES = ['uh huh', 'roger', 'affirmative', 'you know it', 'most definitely', 'you betcha',
+'most assuredly', 'indubitably', 'yep','by all means', 'positively', 'aye', 'definitely', 'Make it so.',
+'You had me at hello, world.']
+
+# Get user confirmation
+def get_user_confirmation(message)
+  yes_response = YES_RESPONSES.sample
+  Common.new.status("#{message} [#{yes_response}/N]")
+
+  answer = STDIN.gets.chomp
+  unless answer.downcase == yes_response
+    raise RuntimeError.new("Operation cancelled by user.")
+  end
+end
+
+# Run a Liquibase command against the specified project. Where possible, show SQL
+# statements and ask user for verification.
+def run_liquibase(cmd_name, *args)
+  command_to_sql = {
+      'changelogSync' => 'changelogSyncSQL',
+      'markNextChangesetRan' => 'markNextChangesetRanSQL',
+      'rollback' => 'rollbackSQL',
+      'rollbackCount' => 'rollbackCountSQL',
+      'rollbackToDate' => 'rollbackToDateSQL',
+      'update' => 'updateSQL',
+      'updateCount' => 'updateCountSql', # Stet. Official command name doesn't match Liquibase plugin task
+      'updateToTag' => 'updateToTagSQL'
+  }
+
+  common = Common.new
+  ensure_docker(cmd_name, args)
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_typed_option(
+      "--command [command]",
+      String,
+      ->(opts, c) { opts.command = c},
+      "Liquibase command, e.g. update, rollback, tag, validate. See "+
+          "https://www.liquibase.org/documentation/command_line.html")
+  op.add_typed_option(
+      "--argument [argument]",
+      String,
+      ->(opts, a) { opts.argument = a},
+      "Liquibase command argument, e.g. count or tag value")
+  op.add_typed_option(
+        "--run-list [run_list]",
+        String,
+        ->(opts, rl) { opts.run_list = rl },
+        "Liquibase runList, a comma-separated list of activities in the liquibase task")
+  op.add_typed_option(
+        '--project [project]',
+        String,
+        ->(opts, p) { opts.project = p },
+        'AoU environment GCP project full name. Used to pick MySQL instance & credentials.'
+  )
+  op.add_validator ->(opts) {
+    if opts.command.to_s.empty?
+      raise ArgumentError.new("command is required")
+    end
+  }
+  op.parse.validate
+
+  if op.opts.project.to_s.empty?
+    op.opts.project = 'local'
+  end
+
+  context = GcloudContextV2.new(op)
+  context.validate
+
+  with_optional_cloud_proxy_and_db(context, nil, 'sa-key.json') do |gcc|
+    common.status('inside with_optional_cloud_proxy_and_db')
+    common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}, dir: #{Dir.pwd}")
+    command = op.opts.command
+
+    Dir.chdir('db') # 'cd' can't be run inline in this context
+
+    verification_command = command_to_sql[command]
+
+    unless verification_command.to_s.empty?
+      verification_full_cmd = liquibase_gradlew_command(verification_command, op.opts.argument, op.opts.run_list)
+      common.run_inline(verification_full_cmd)
+      get_user_confirmation("Execute SQL commands above?")
+    end
+
+    full_cmd = liquibase_gradlew_command(command, op.opts.argument, op.opts.run_list)
+    common.run_inline(full_cmd)
+  end
+end
+
+Common.register_command({
+    :invocation => "run-liquibase",
+    :description => "Run liquibase command with optional argument",
+    :fn => ->(*args) { run_liquibase('run-liquibase', *args) }
+})
+
 def run_local_data_migrations()
   ensure_docker_sync()
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
@@ -1846,7 +1960,7 @@ Common.register_command({
   :fn => ->(*args) { deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
 })
 
-def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
+def deploy_app(cmd_name, args, with_cron, with_gsuite_admin, with_queue)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
@@ -1906,6 +2020,7 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     gcloud app deploy
       build/staged-app/app.yaml
   } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
+    (with_queue ? %W{build/staged-app/WEB-INF/appengine-generated/queue.yaml} : []) +
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +
     (op.opts.version ? %W{--version #{op.opts.version}} : []))
@@ -1915,7 +2030,7 @@ def deploy_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
-  deploy_app(cmd_name, args, true, true)
+  deploy_app(cmd_name, args, true, true, true)
 end
 
 Common.register_command({
@@ -1995,6 +2110,19 @@ def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
   CloudSqlProxyContext.new(gcc.project, service_account, key_file).run do
     yield(gcc)
+  end
+end
+
+def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
+  common = Common.new
+  if gcc.project == 'local'
+    common.status('No proxy needed for local environment')
+    yield gcc
+  else
+    common.status("Creating cloud proxy for environment #{gcc.project}")
+    with_cloud_proxy_and_db(gcc, service_account, key_file) do |gcc|
+      yield gcc
+    end
   end
 end
 

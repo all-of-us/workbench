@@ -20,6 +20,13 @@ public interface NotebooksService {
 
   List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
 
+  /**
+   * Retrieve all notebooks in the given cloud storage bucket. This method is authenticated as the
+   * app engine service account, so authorization must be performed before calling this and the
+   * input value should be trusted.
+   */
+  List<FileDetail> getNotebooksAsService(String bucketName);
+
   FileDetail copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceName,

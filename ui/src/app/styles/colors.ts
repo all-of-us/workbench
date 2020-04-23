@@ -18,6 +18,7 @@ export default {
   // Text links and Icon links
   accent: '#216FB4',
   disabled: '#9B9B9B',
+  select: '#659F3D',
   resourceCardHighlights: {
     cohort: '#F8C954',
     cohortReview: '#A8385D',

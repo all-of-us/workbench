@@ -92,24 +92,28 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableRdrExport": false,
-    "enableBillingLockout": false,
-    "enableSumoLogicEventHandling": false,
+    "enableRdrExport": true,
+    "enableBillingLockout": true,
+    "enableBillingUpgrade": true,
+    "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
-    "sendFreeTierAlertEmails": false,
-    "enableMoodleV2Api": false,
+    "sendFreeTierAlertEmails": true,
+    "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
-    "enableCBAgeTypeOptions": false
+    "enableCBAgeTypeOptions": false,
+    "enableV3DataUserCodeOfConduct": false,
+    "enableEventDateModifier": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-staging.appspot.com",
-    "queueName": "rdrQueue",
+    "queueName": "rdrExportQueue",
     "exportObjectsPerTask": 10
   },
   "captcha": {
-    "enableCaptcha": false
+    "enableCaptcha": true,
+    "useTestCaptcha": true
   }
 }

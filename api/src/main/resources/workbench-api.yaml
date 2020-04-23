@@ -8,7 +8,7 @@ x-aou-note: |
   This file references parameters, paths, and definitions specified in
   client_api.yaml; the two files get merged together into a merged.yaml file at build time.
 
-  If validation fails, gradle:generateApi fails claiming this file does not exist.
+  If validation fails, gradle:generateWorkbenchApi fails claiming this file does not exist.
 
   For separate validation (with some false positives), do:
   ./project.rb validate-swagger
@@ -804,6 +804,27 @@ paths:
           description: Workspace deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/resources":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      parameters:
+        - in: body
+          name: resourceTypesToFetch
+          description: Types of workspace resources to fetch. Currently only supports
+            Cohorts, Cohort Reviews, Concept Sets, and Datasets
+          schema:
+            "$ref": "#/definitions/WorkspaceResourcesRequest"
+      tags:
+      - workspaces
+      description: Gets a user defined selection of objects contained within a workspace
+      operationId: getWorkspaceResources
+      responses:
+        200:
+          description: Returns all objects that describe a section of the CDR in a workspace.
+          schema:
+            "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -1732,7 +1753,7 @@ paths:
         200:
           description: A list of resources order by last access time desc order
           schema:
-            "$ref": "#/definitions/RecentResourceResponse"
+            "$ref": "#/definitions/WorkspaceResourceResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/update":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -1759,7 +1780,7 @@ paths:
         200:
           description: Successfully added/updated
           schema:
-            "$ref": "#/definitions/RecentResource"
+            "$ref": "#/definitions/WorkspaceResource"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/delete":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2971,7 +2992,7 @@ paths:
       description: 'Returns a collection of criteria per concept id
 
 '
-      operationId: getStandardCriteriaByDomainAndConceptId
+      operationId: findStandardCriteriaByDomainAndConceptId
       parameters:
       - in: path
         name: domain
@@ -2999,7 +3020,7 @@ paths:
         of the following: type, subtype, parentId and/or allChildren
 
 '
-      operationId: getCriteriaBy
+      operationId: findCriteriaBy
       parameters:
       - in: path
         name: domain
@@ -3035,7 +3056,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns matches on criteria table by code or name
-      operationId: getCriteriaAutoComplete
+      operationId: findCriteriaAutoComplete
       parameters:
       - in: path
         name: domain
@@ -3075,7 +3096,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns criteria tree matching value
-      operationId: getDrugBrandOrIngredientByValue
+      operationId: findDrugBrandOrIngredientByValue
       parameters:
       - in: query
         name: value
@@ -3099,7 +3120,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns criteria tree with the specified name
-      operationId: getDrugIngredientByConceptId
+      operationId: findDrugIngredientByConceptId
       parameters:
       - in: path
         name: conceptId
@@ -3119,7 +3140,7 @@ paths:
       tags:
       - cohortBuilder
       description: Returns criteria tree with the specified name
-      operationId: getCriteriaAttributeByConceptId
+      operationId: findCriteriaAttributeByConceptId
       parameters:
       - in: path
         name: conceptId
@@ -3178,7 +3199,7 @@ paths:
       consumes:
       - application/json
       description: Searches for demographic info about subjects.
-      operationId: getDemoChartInfo
+      operationId: findDemoChartInfo
       parameters:
       - in: path
         name: genderOrSex
@@ -3208,7 +3229,7 @@ paths:
       tags:
       - cohortBuilder
       description: Will return a list all values for gender, race and ethnicity.
-      operationId: getParticipantDemographics
+      operationId: findParticipantDemographics
       responses:
         200:
           description: An object which contains a list of all values for gender, race
@@ -3630,24 +3651,32 @@ definitions:
       enableBillingLockout:
         type: boolean
         default: false
-        description: Feature flag for billing lockout and upgrade
+        description: Feature flag for billing lockout
+      enableBillingUpgrade:
+        type: boolean
+        default: false
+        description: Feature flag for billing upgrade
       requireInvitationKey:
         type: boolean
         default: false
-        description: Whether the current environment requires an invitation key for
-          signup.
+        description: Whether the current environment requires an invitation key for signup.
       requireInstitutionalVerification:
         type: boolean
         default: false
         description: 'Feature flag for verifying the institutional affiliation of
-          new users by validating their contact emails.
-
-'
+          new users by validating their contact emails.'
       enableCBAgeTypeOptions:
         type: boolean
         default: false
-        description: Whether to use the new age type options in cohort builder age
-          wizard
+        description: Whether to use the new age type options in cohort builder age wizard
+      enableV3DataUserCodeOfConduct:
+        type: boolean
+        default: false
+        description: Whether to enable version 2 of the Data User Code of Conduct
+      enableEventDateModifier:
+        type: boolean
+        default: false
+        description: Whether to show the Event Date modifier in cohort builder
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:
@@ -5392,11 +5421,18 @@ definitions:
 
 '
         type: string
-  RecentResourceResponse:
+  WorkspaceResourcesRequest:
+    type: object
+    properties:
+      typesToFetch:
+        type: array
+        items:
+          "$ref": "#/definitions/ResourceType"
+  WorkspaceResourceResponse:
     type: array
     items:
-      "$ref": "#/definitions/RecentResource"
-  RecentResource:
+      "$ref": "#/definitions/WorkspaceResource"
+  WorkspaceResource:
     type: object
     properties:
       workspaceId:
@@ -5563,9 +5599,7 @@ definitions:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
       who wish to use the system, including the email patterns which we use to validate
-      users.
-
-'
+      users.'
     required:
     - shortName
     - displayName
@@ -5582,15 +5616,14 @@ definitions:
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
-          enumerated OrganizationTypes, or OrganizationType.OTHER if it is not
-
-'
+          enumerated OrganizationTypes, or OrganizationType.OTHER if it is not'
       organizationTypeOtherText:
         type: string
         description: 'The detailed Organization Type of this institution, as text,
-          if its enumerated type is OTHER
-
-'
+          if its enumerated type is OTHER'
+      duaTypeEnum:
+        "$ref": "#/definitions/DuaType"
+        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
       emailAddresses:
         type: array
         description: A list of email addresses which can be validated as members of
@@ -5623,6 +5656,9 @@ definitions:
         type: string
         description: A more descriptive name for the Institution, such as 'Vanderbilt
           University Medical Center'
+      duaTypeEnum:
+        "$ref": "#/definitions/DuaType"
+        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
@@ -5669,6 +5705,14 @@ definitions:
     - EDUCATIONAL_INSTITUTION
     - HEALTH_CENTER_NON_PROFIT
     - OTHER
+
+  DuaType:
+    type: string
+    description: 'Type of Data Use Agreement Institution has signed, Applicable to all researchers or restricted to  just few'
+    enum:
+      - MASTER
+      - RESTRICTED
+
   InstitutionalRole:
     type: string
     description: 'The union of the roles researchers can have at Institutions of all

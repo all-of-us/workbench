@@ -3,7 +3,7 @@ import {AttrName, CriteriaSubType, DomainType, Operator} from 'generated/fetch';
 import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
-import {ppiQuestions, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {ppiQuestions} from 'app/cohort-search/search-state.service';
 import {
   mapParameter,
   sanitizeNumericalInput,
@@ -148,8 +148,9 @@ interface AttributeForm {
 }
 
 interface Props {
-  node: any;
   close: Function;
+  node: any;
+  select: Function;
   workspace: WorkspaceData;
 }
 
@@ -200,7 +201,7 @@ export const AttributesPage = withCurrentWorkspace() (
       const {node: {conceptId}} = this.props;
       const{form} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
-      cohortBuilderApi().getCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
+      cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
         resp.items.forEach(attr => {
           if (attr.type === AttrName[AttrName.NUM]) {
             if (!form.num.length) {
@@ -441,23 +442,14 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     addParameterToSearchItem() {
+      const {close, select} = this.props;
       const param = this.paramWithAttributes;
       // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
       if (this.isPhysicalMeasurement) {
         this.trackEvent(param.subtype, 'Add');
       }
-      const wizard = wizardStore.getValue();
-      let selections = selectionsStore.getValue();
-      if (!selections.includes(param.parameterId)) {
-        selections = [param.parameterId, ...selections];
-        selectionsStore.next(selections);
-      } else {
-        wizard.item.searchParameters = wizard.item.searchParameters
-          .filter(p => p.parameterId !== param.parameterId);
-      }
-      wizard.item.searchParameters.push(param);
-      wizardStore.next(wizard);
-      this.props.close();
+      select(param);
+      close();
     }
 
     trackEvent(subtype: string, eventType: string) {
@@ -594,10 +586,11 @@ export const AttributesPage = withCurrentWorkspace() (
   template: '<div #root></div>'
 })
 export class AttributesPageComponent extends ReactWrapperBase {
-  @Input('node') node: Props['node'];
   @Input('close') close: Props['close'];
+  @Input('node') node: Props['node'];
+  @Input('select') select: Props['select'];
 
   constructor() {
-    super(AttributesPage, ['node', 'close']);
+    super(AttributesPage, ['close', 'node', 'select']);
   }
 }

@@ -4,7 +4,7 @@ export const environment: Environment = {
   displayTag: 'Staging',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'https://api-dot-all-of-us-rw-staging.appspot.com',
-  captchaSiteKey: '',
+  captchaSiteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
   clientId: '657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com',
   leoApiUrl: 'https://notebooks.firecloud.org',
   publicUiUrl: 'https://aou-db-staging.appspot.com',
@@ -19,9 +19,9 @@ export const environment: Environment = {
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enableCaptcha: false,
+  enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: false,
   enableNewConceptTabs: false,
-  enableSignedInFooter: false
+  enableFooter: false
 };

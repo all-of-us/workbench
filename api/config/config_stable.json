@@ -23,7 +23,10 @@
     "bufferCapacity": 10,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsDollarLimit": 300.0,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-stable-1@all-of-us-rw-stable.iam.gserviceaccount.com"
@@ -89,24 +92,28 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableRdrExport": false,
-    "enableBillingLockout": false,
-    "enableSumoLogicEventHandling": false,
-    "useKeylessDelegatedCredentials": false,
-    "sendFreeTierAlertEmails": false,
-    "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false,
-    "enableCBAgeTypeOptions": false
+    "enableRdrExport": true,
+    "enableBillingLockout": true,
+    "enableBillingUpgrade": false,
+    "enableSumoLogicEventHandling": true,
+    "useKeylessDelegatedCredentials": true,
+    "sendFreeTierAlertEmails": true,
+    "enableMoodleV2Api": true,
+    "requireInstitutionalVerification": true,
+    "enableCBAgeTypeOptions": false,
+    "enableV3DataUserCodeOfConduct": false,
+    "enableEventDateModifier": false
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-stable"
+    "logName": "workbench-action-audit-stable"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-stable.appspot.com",
-    "queueName": "rdrQueue",
-    "exportObjectsPerTask" : 10
+    "queueName": "rdrExportQueue",
+    "exportObjectsPerTask": 10
   },
   "captcha": {
-    "enableCaptcha": false
+    "enableCaptcha": true,
+    "useTestCaptcha": false
   }
 }

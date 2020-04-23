@@ -1,41 +1,12 @@
 import {Page} from 'puppeteer';
-import {clrIconXpath} from './aou-elements/xpath-defaults';
-import {findIcon} from './aou-elements/xpath-finder';
-import BasePage from './base-page';
+import {PageUrl} from 'app/page-identifiers';
+import BasePage from 'app/base-page';
+import {performance} from 'perf_hooks';
 
-const configs = require('../resources/workbench-config');
-
-const selectors = {
+const SELECTOR = {
   signedInIndicator: 'body#body div',
   logo: 'img[src="/assets/images/all-of-us-logo.svg"]'
 };
-
-export enum PageUrl {
-  HOME = configs.uiBaseUrl,
-  WORKSPACES = configs.uiBaseUrl + configs.workspacesUrlPath,
-  ADMIN = configs.uiBaseUrl + configs.adminUrlPath,
-}
-
-export enum SideNavLink {
-  HOME = 'Home',
-  ADMIN = 'Admin',
-  USER_ADMIN = 'User Admin',
-  PROFILE = 'Profile',
-  SIGN_OUT = 'Sign Out',
-  CONTACT_US = 'Contact Us',
-  USER_SUPPORT = 'User Support',
-  YOUR_WORKSPACES = 'Your Workspaces',
-  FEATURED_WORKSPACES = 'Featured Workspaces',
-}
-
-export enum SideNavLinkIcon {
-  HOME = 'home',
-  ADMIN = 'user',
-  CONTACT_US = 'envelope',
-  USER_SUPPORT = 'help',
-  YOUR_WORKSPACES = 'applications',
-  FEATURED_WORKSPACES = 'star',
-}
 
 
 /**
@@ -49,8 +20,8 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    await this.page.waitForSelector(selectors.signedInIndicator);
-    await this.page.waitForSelector(selectors.logo, {visible: true});
+    await this.page.waitForSelector(SELECTOR.signedInIndicator);
+    await this.page.waitForSelector(SELECTOR.logo, {visible: true});
     return true;
   }
 
@@ -64,7 +35,11 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    await this.isLoaded();
+    if (!await this.isLoaded()) {
+      await this.saveHtmlToFile('PageIsNotLoaded');
+      await this.takeScreenshot('PageIsNotLoaded');
+      throw new Error('Page isLoaded() failed.');
+    }
     await this.waitUntilNoSpinner();
     return this;
   }
@@ -77,43 +52,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     await this.waitForLoad();
   }
 
-  /**
-   * Go to application page.
-   * @param targetPage
-   */
-  async navTo(targetPage: SideNavLink) {
-    await this.openSideNav();
-    const angleIconXpath = clrIconXpath('', 'angle');
-    await this.page.waitForXPath(angleIconXpath, {timeout: 2000});
-    const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${targetPage}")]`;
-    // try to find target sidenav link. Get the first element from ElementHandle array
-    const [applink] = await this.page.$x(appLinkXpath);
-    if (!applink) {
-      // if sidnav link is not found, check to see if it's a link under User or Admin submenu.
-      const [username, admin] = await this.page.$x(angleIconXpath);
-      if (targetPage === SideNavLink.PROFILE || targetPage === SideNavLink.SIGN_OUT) {
-        // Open User submenu if needed
-        if (!applink) {
-          await username.click();
-        }
-      } else if (targetPage === SideNavLink.USER_ADMIN) {
-        // Open Admin submenu if needed
-        if (!applink) {
-          await admin.click();
-        }
-      }
-    }
-    // find target sidenav link again. If not found, throws exception
-    const link = await this.page.waitForXPath(appLinkXpath, {timeout: 2000});
-    if (targetPage === SideNavLink.CONTACT_US) {
-      await link.click();
-    } else {
-      const navPromise = this.waitForNavigation();
-      await link.click();
-      await navPromise;
-    }
-
-  }
 
   /**
    * Find the actual displayed User name string in sidenav dropdown.
@@ -124,18 +62,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     const p = await username.getProperty('innerText');
     const value = await p.jsonValue();
     return value;
-  }
-
-  /**
-   * Open sidenav dropdown.
-   */
-  async openSideNav() {
-    const is = await this.isSideNavDropdownOpen();
-    if (!is) {
-      // click bars icon to open dropdown
-      const icon = await findIcon(this.page, '', 'bars');
-      await icon.click();
-    }
   }
 
   /**
@@ -169,9 +95,7 @@ export default abstract class AuthenticatedPage extends BasePage {
       const diff = Math.floor(((finishTime - startTime) / 1000) % 60);
       if (diff > 60) {
         // if timeout exceeds 60 seconds without error thrown, it tells me page loading is slower.
-        console.info(`WARNING: waitUntilNoSpinner took ${diff} seconds.`);
-      } else {
-        console.info(`waitUntilNoSpinner took ${diff} seconds.`);
+        console.warn(`WARNING: waitUntilNoSpinner took ${diff} seconds.`);
       }
     }
     // final 1 second wait for page render to finish
@@ -179,15 +103,5 @@ export default abstract class AuthenticatedPage extends BasePage {
       await this.page.waitFor(1000);
     }
   }
-
-  private async isSideNavDropdownOpen(): Promise<boolean> {
-    try {
-      await findIcon(this.page, 'Home', 'home', {visible: true, timeout: 1000});
-      return true;
-    } catch(err) {
-      return false;
-    }
-  }
-
 
 }

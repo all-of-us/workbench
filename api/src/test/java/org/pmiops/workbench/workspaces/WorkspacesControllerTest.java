@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -50,6 +51,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,6 +68,7 @@ import org.pmiops.workbench.api.CohortAnnotationDefinitionController;
 import org.pmiops.workbench.api.CohortReviewController;
 import org.pmiops.workbench.api.CohortsController;
 import org.pmiops.workbench.api.ConceptSetsController;
+import org.pmiops.workbench.api.DataSetController;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -74,11 +77,16 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionServiceImpl;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohortreview.mappers.CohortAnnotationDefinitionMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
@@ -86,6 +94,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -135,19 +144,24 @@ import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
@@ -157,6 +171,9 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
+import org.pmiops.workbench.model.WorkspaceResource;
+import org.pmiops.workbench.model.WorkspaceResourceResponse;
+import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
@@ -259,17 +276,24 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
+    WorkspaceResourcesServiceImpl.class,
     CdrVersionService.class,
     NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     CommonMappers.class,
+    CohortAnnotationDefinitionMapperImpl.class,
+    CohortAnnotationDefinitionServiceImpl.class,
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
+    DataSetController.class,
+    DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     FreeTierBillingService.class,
     ReviewQueryBuilder.class,
@@ -345,6 +369,7 @@ public class WorkspacesControllerTest {
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired DataSetController dataSetController;
   @Autowired DataSetDao dataSetDao;
   @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
@@ -365,6 +390,7 @@ public class WorkspacesControllerTest {
     workbenchConfig = new WorkbenchConfig();
     workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
     workbenchConfig.featureFlags.enableBillingLockout = true;
+    workbenchConfig.featureFlags.enableBillingUpgrade = true;
 
     workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     workbenchConfig.firecloud.registeredDomainName = "allUsers";
@@ -461,7 +487,7 @@ public class WorkspacesControllerTest {
   }
 
   private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
-    when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(acl);
+    when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
   }
 
   private void stubFcGetGroup() {
@@ -657,7 +683,34 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspace_doNotUpdateBillingForFreeTier() throws Exception {
+  public void testCreateWorkspace_UpdateBillingAccount() throws IOException {
+    Workspace workspace = createWorkspace();
+    workspace.setBillingAccountName("new-account");
+
+    workspacesController.createWorkspace(workspace);
+
+    verify(endUserCloudbillingProvider.get().projects())
+        .updateBillingInfo(
+            any(),
+            eq(new ProjectBillingInfo().setBillingAccountName(workspace.getBillingAccountName())));
+  }
+
+  @Test
+  public void testCreateWorkspace_UpdateBillingAccount_flagFalse() {
+    workbenchConfig.featureFlags.enableBillingUpgrade = false;
+
+    Workspace workspace = createWorkspace();
+    workspace.setBillingAccountName("new-account");
+
+    workspacesController.createWorkspace(workspace);
+
+    // the billing account was not set
+    verifyZeroInteractions(endUserCloudbillingProvider.get());
+    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
+  }
+
+  @Test
+  public void testCreateWorkspace_doNotUpdateBillingForFreeTier() {
     Workspace workspace = createWorkspace();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
 
@@ -668,7 +721,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspaceAlreadyApproved() throws Exception {
+  public void testCreateWorkspaceAlreadyApproved() {
     Workspace workspace = createWorkspace();
     workspace.getResearchPurpose().setApproved(true);
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -682,7 +735,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspace_createDeleteCycleSameName() throws Exception {
+  public void testCreateWorkspace_createDeleteCycleSameName() {
     Workspace workspace = createWorkspace();
 
     Set<String> uniqueIds = new HashSet<>();
@@ -696,14 +749,14 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testCreateWorkspace_archivedCdrVersionThrows() throws Exception {
+  public void testCreateWorkspace_archivedCdrVersionThrows() {
     Workspace workspace = createWorkspace();
     workspace.setCdrVersionId(archivedCdrVersionId);
     workspacesController.createWorkspace(workspace).getBody();
   }
 
   @Test
-  public void testDeleteWorkspace() throws Exception {
+  public void testDeleteWorkspace() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -718,7 +771,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testApproveWorkspace() throws Exception {
+  public void testApproveWorkspace() {
     Workspace ws = createWorkspace();
     ResearchPurpose researchPurpose = ws.getResearchPurpose();
     researchPurpose.setApproved(null);
@@ -769,7 +822,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() throws Exception {
+  public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -791,7 +844,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspace_freeTierBilling_noCreditsRemaining() throws Exception {
+  public void testUpdateWorkspace_freeTierBilling_noCreditsRemaining() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -812,7 +865,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspace_freeTierBilling_hasCreditsRemaining() throws Exception {
+  public void testUpdateWorkspace_freeTierBilling_hasCreditsRemaining() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -960,7 +1013,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspaceResearchPurpose() throws Exception {
+  public void testUpdateWorkspaceResearchPurpose() {
     Workspace ws = createWorkspace();
     ws.getResearchPurpose().reviewRequested(true);
     ws = workspacesController.createWorkspace(ws).getBody();
@@ -1000,7 +1053,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspaceResearchPurpose_cannotUpdateReviewRequest() throws Exception {
+  public void testUpdateWorkspaceResearchPurpose_cannotUpdateReviewRequest() {
     Workspace ws = createWorkspace();
     ws.getResearchPurpose().setReviewRequested(false);
     ws = workspacesController.createWorkspace(ws).getBody();
@@ -1018,7 +1071,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void testReaderUpdateWorkspaceThrows() throws Exception {
+  public void testReaderUpdateWorkspaceThrows() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -1033,7 +1086,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = ConflictException.class)
-  public void testUpdateWorkspaceStaleThrows() throws Exception {
+  public void testUpdateWorkspaceStaleThrows() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -1054,7 +1107,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUpdateWorkspaceInvalidEtagsThrow() throws Exception {
+  public void testUpdateWorkspaceInvalidEtagsThrow() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -1073,7 +1126,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testRejectAfterApproveThrows() throws Exception {
+  public void testRejectAfterApproveThrows() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -1086,7 +1139,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testListForApproval() throws Exception {
+  public void testListForApproval() {
     List<Workspace> forApproval =
         workspacesController.getWorkspacesForReview().getBody().getItems();
     assertThat(forApproval).isEmpty();
@@ -1262,7 +1315,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspace_doNotUpdateBillingForFreeTier() throws Exception {
+  public void testCloneWorkspace_doNotUpdateBillingForFreeTier() {
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
@@ -1324,7 +1377,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceWithCohortsAndConceptSets() throws Exception {
+  public void testCloneWorkspaceWithCohortsAndConceptSets() {
     stubFcGetWorkspaceACL();
     Long participantId = 1L;
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
@@ -1624,7 +1677,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() throws Exception {
+  public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() {
     stubFcGetWorkspaceACL();
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createWorkspace();
@@ -1875,7 +1928,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceDifferentOwner() throws Exception {
+  public void testCloneWorkspaceDifferentOwner() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -1908,7 +1961,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceCdrVersion() throws Exception {
+  public void testCloneWorkspaceCdrVersion() {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
@@ -1939,7 +1992,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testCloneWorkspaceBadCdrVersion() throws Exception {
+  public void testCloneWorkspaceBadCdrVersion() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     Workspace modWorkspace =
@@ -1957,7 +2010,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testCloneWorkspaceArchivedCdrVersionThrows() throws Exception {
+  public void testCloneWorkspaceArchivedCdrVersionThrows() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     Workspace modWorkspace =
@@ -1975,7 +2028,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceIncludeUserRoles() throws Exception {
+  public void testCloneWorkspaceIncludeUserRoles() {
     stubFcGetGroup();
     DbUser cloner = createUser("cloner@gmail.com");
     DbUser reader = createUser("reader@gmail.com");
@@ -2028,9 +2081,9 @@ public class WorkspacesControllerTest {
                         .put("canCompute", true)
                         .put("canShare", true)));
 
-    when(fireCloudService.getWorkspaceAcl("cloned-ns", "cloned"))
+    when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(workspaceAclsFromCloned);
-    when(fireCloudService.getWorkspaceAcl(workspace.getNamespace(), workspace.getName()))
+    when(fireCloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getName()))
         .thenReturn(workspaceAclsFromOriginal);
 
     currentUser = cloner;
@@ -2067,7 +2120,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testCloneWorkspaceBadRequest() throws Exception {
+  public void testCloneWorkspaceBadRequest() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -2180,7 +2233,7 @@ public class WorkspacesControllerTest {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
 
-    when(fireCloudService.getWorkspaceAcl(anyString(), anyString()))
+    when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
             createWorkspaceACL(
                 new JSONObject()
@@ -2296,7 +2349,7 @@ public class WorkspacesControllerTest {
                         .put("accessLevel", "READER")
                         .put("canCompute", false)
                         .put("canShare", false)));
-    when(fireCloudService.getWorkspaceAcl(any(), any())).thenReturn(workspaceACLs);
+    when(fireCloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACLs);
 
     CLOCK.increment(1000);
     stubFcUpdateWorkspaceACL();
@@ -3076,5 +3129,129 @@ public class WorkspacesControllerTest {
         () ->
             workspacesController.copyNotebook(
                 workspace.getNamespace(), workspace.getId(), "z", copyNotebookRequest));
+  }
+
+  // Does not compare: etag, lastModifiedTime, page, pageSize, participantCohortStatuses,
+  // queryResultSize, reviewedCount, reviewSize, reviewStatus, sortColumn, sortOrder
+  private void compareCohortReviewFields(
+      CohortReview observedCohortReview, CohortReview expectedCohortReview) {
+    assertThat(observedCohortReview.getCdrVersionId())
+        .isEqualTo(expectedCohortReview.getCdrVersionId());
+    assertThat(observedCohortReview.getCohortDefinition())
+        .isEqualTo(expectedCohortReview.getCohortDefinition());
+    assertThat(observedCohortReview.getCohortId()).isEqualTo(expectedCohortReview.getCohortId());
+    assertThat(observedCohortReview.getCohortName())
+        .isEqualTo(expectedCohortReview.getCohortName());
+    assertThat(observedCohortReview.getCohortReviewId())
+        .isEqualTo(expectedCohortReview.getCohortReviewId());
+    assertThat(observedCohortReview.getCreationTime())
+        .isEqualTo(expectedCohortReview.getCreationTime());
+    assertThat(observedCohortReview.getDescription())
+        .isEqualTo(expectedCohortReview.getDescription());
+    assertThat(observedCohortReview.getMatchedParticipantCount())
+        .isEqualTo(expectedCohortReview.getMatchedParticipantCount());
+  }
+
+  private void compareDatasetMetadata(DataSet observedDataSet, DataSet expectedDataSet) {
+    assertThat(observedDataSet.getDescription()).isEqualTo(expectedDataSet.getDescription());
+    assertThat(observedDataSet.getEtag()).isEqualTo(expectedDataSet.getEtag());
+    assertThat(observedDataSet.getId()).isEqualTo(expectedDataSet.getId());
+    assertThat(observedDataSet.getIncludesAllParticipants())
+        .isEqualTo(expectedDataSet.getIncludesAllParticipants());
+    assertThat(observedDataSet.getLastModifiedTime())
+        .isEqualTo(expectedDataSet.getLastModifiedTime());
+    assertThat(observedDataSet.getName()).isEqualTo(expectedDataSet.getName());
+    assertThat(observedDataSet.getPrePackagedConceptSet())
+        .isEqualTo(expectedDataSet.getPrePackagedConceptSet());
+  }
+
+  @Test
+  public void getWorkspaceResources() {
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    Cohort cohort =
+        cohortsController
+            .createCohort(
+                workspace.getNamespace(), workspace.getId(), createDefaultCohort("cohort"))
+            .getBody();
+    stubBigQueryCohortCalls();
+    CohortReview cohortReview =
+        cohortReviewController
+            .createCohortReview(
+                workspace.getNamespace(),
+                workspace.getId(),
+                cohort.getId(),
+                cdrVersion.getCdrVersionId(),
+                new CreateReviewRequest().size(1))
+            .getBody();
+    ConceptSet conceptSet =
+        conceptSetsController
+            .createConceptSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                new CreateConceptSetRequest()
+                    .conceptSet(
+                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+                    .addAddedIdsItem(CONCEPT_1.getConceptId()))
+            .getBody();
+    DataSet dataSet =
+        dataSetController
+            .createDataSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                new DataSetRequest()
+                    .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
+                    .addConceptSetIdsItem(conceptSet.getId())
+                    .addCohortIdsItem(cohort.getId())
+                    .name("dataset")
+                    .domainValuePairs(
+                        ImmutableList.of(
+                            new DomainValuePair().value("VALUE").domain(Domain.CONDITION))))
+            .getBody();
+
+    WorkspaceResourcesRequest workspaceResourcesRequest = new WorkspaceResourcesRequest();
+    workspaceResourcesRequest.setTypesToFetch(
+        ImmutableList.of(
+            ResourceType.COHORT,
+            ResourceType.COHORT_REVIEW,
+            ResourceType.CONCEPT_SET,
+            ResourceType.DATASET));
+
+    WorkspaceResourceResponse workspaceResourceResponse =
+        workspacesController
+            .getWorkspaceResources(
+                workspace.getNamespace(), workspace.getId(), workspaceResourcesRequest)
+            .getBody();
+    assertThat(workspaceResourceResponse.size()).isEqualTo(4);
+    List<Cohort> cohorts =
+        workspaceResourceResponse.stream()
+            .map(WorkspaceResource::getCohort)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    List<CohortReview> cohortReviews =
+        workspaceResourceResponse.stream()
+            .map(WorkspaceResource::getCohortReview)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    List<ConceptSet> conceptSets =
+        workspaceResourceResponse.stream()
+            .map(WorkspaceResource::getConceptSet)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    List<DataSet> dataSets =
+        workspaceResourceResponse.stream()
+            .map(WorkspaceResource::getDataSet)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    assertThat(cohorts).hasSize(1);
+    assertThat(cohorts.get(0)).isEqualTo(cohort);
+    assertThat(cohortReviews).hasSize(1);
+    compareCohortReviewFields(cohortReviews.get(0), cohortReview);
+    assertThat(conceptSets).hasSize(1);
+    // Ignore arrays in subtables.
+    assertThat(conceptSets.get(0)).isEqualTo(conceptSet.concepts(null));
+    assertThat(dataSets).hasSize(1);
+    compareDatasetMetadata(dataSets.get(0), dataSet);
   }
 }

@@ -1094,6 +1094,26 @@
           "mode": "nullable",
           "description": "A foreign key to the ethnicity concept that refers to the code used in the source.",
           "foreignKey": "concept"
+        },
+        {
+          "type": "integer",
+          "name": "sex_at_birth_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to the sex at birth concept that refers to the code used in the standard.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "string",
+          "name": "sex_at_birth_source_value",
+          "mode": "nullable",
+          "description": "The source code for the sex at birth of the person as it appears in the source data. The person sex at birth is mapped to a standard sex at birth concept in the Standardized Vocabularies and the original code is, stored here for reference."
+        },
+        {
+          "type": "integer",
+          "name": "sex_at_birth_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to the sex at birth concept that refers to the code used in the source.",
+          "foreignKey": "concept"
         }
       ]
     },
@@ -1310,14 +1330,15 @@
     },
     "survey": {
       "domain": "SURVEY",
-      "columns": [{
-        "type": "integer",
-        "name": "question_concept_id",
-        "mode": "required",
-        "description": "A foreign key that refers to a Survey question concept id.",
-        "foreignKey": "concept",
-        "domainConcept": "standard"
-      },
+      "columns": [
+        {
+          "type": "integer",
+          "name": "question_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to a Survey question concept id.",
+          "foreignKey": "concept",
+          "domainConcept": "standard"
+        },
         {
           "type": "integer",
           "name": "answer_concept_id",
@@ -1329,5 +1350,4 @@
       ]
     }
   }
-
 }

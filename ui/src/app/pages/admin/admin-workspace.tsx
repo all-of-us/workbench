@@ -14,7 +14,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
 import {
   getSelectedPopulations,
-  getSelectedResearchPurposeItems
+  getSelectedPrimaryPurposeItems
 } from 'app/utils/research-purpose';
 import {
   AdminFederatedWorkspaceDetailsResponse,
@@ -281,7 +281,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
             {
               this.workspaceInfoField(
                 'Primary purpose of project',
-                getSelectedResearchPurposeItems(
+                getSelectedPrimaryPurposeItems(
                   workspace.researchPurpose).map(
                     (
                       researchPurposeItem, i) =>

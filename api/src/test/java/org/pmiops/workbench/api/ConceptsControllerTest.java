@@ -25,9 +25,13 @@ import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.concept.ConceptService;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -260,7 +264,15 @@ public class ConceptsControllerTest {
   private static DbUser currentUser;
 
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, WorkspaceMapperImpl.class, CommonMappers.class})
+  @Import({
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
+    WorkspaceServiceImpl.class,
+    WorkspaceMapperImpl.class,
+    CommonMappers.class
+  })
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,
@@ -332,7 +344,7 @@ public class ConceptsControllerTest {
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAcl(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+    when(fireCloudService.getWorkspaceAclAsService(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
         .thenReturn(workspaceAccessLevelResponse);
 
     DbCriteria parentSurvey =

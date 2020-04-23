@@ -6,14 +6,10 @@ import {AttributesPageComponent} from 'app/cohort-search/attributes-page/attribu
 import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
-import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
-import {NodeComponent} from 'app/cohort-search/node/node.component';
-import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
-import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
-import {TreeComponent} from 'app/cohort-search/tree/tree.component';
+import {CriteriaTreeComponent} from 'app/cohort-search/tree/tree.component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType} from 'generated';
@@ -32,16 +28,12 @@ describe('ModalComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         AttributesPageComponent,
+        CriteriaTreeComponent,
         DemographicsComponent,
         ModalComponent,
         ModifierPageComponent,
-        NodeInfoComponent,
-        NodeComponent,
-        OptionInfoComponent,
-        SearchBarComponent,
         ListSearchComponent,
         SelectionInfoComponent,
-        TreeComponent,
         SafeHtmlPipe,
         ValidatorErrorsComponent,
       ],

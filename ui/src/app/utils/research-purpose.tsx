@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
+import {PrimaryPurposeItems, ResearchPurposeItem} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
 import {ResearchPurpose} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -26,8 +27,17 @@ const styles = {
   },
 };
 
-export function getSelectedResearchPurposeItems(researchPurpose: ResearchPurpose) {
-  return ResearchPurposeItems.filter((item) =>
+export function getSelectedResearchPurposeItems(researchPurpose: ResearchPurpose, isResearchPurpose: boolean) {
+  const primaryPurposeItems = isResearchPurpose ? ResearchPurposeItems : PrimaryPurposeItems;
+  return researchPurposeDivs(primaryPurposeItems, researchPurpose);
+}
+
+export function getSelectedPrimaryPurposeItems(researchPurpose: ResearchPurpose) {
+  return researchPurposeDivs(fp.concat(ResearchPurposeItems, PrimaryPurposeItems), researchPurpose);
+}
+
+function researchPurposeDivs(primaryPurposeItems: Array<ResearchPurposeItem>, researchPurpose: ResearchPurpose) {
+  return primaryPurposeItems.filter((item) =>
       researchPurpose[item.shortName]).map((item) => {
         const headerContent = <div style={styles.researchPurposeItemHeader}>{item.shortDescription}</div>;
         let descriptiveContent = <div style={styles.researchPurposeItemDescription}>{item.longDescription}</div>;

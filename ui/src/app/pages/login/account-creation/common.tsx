@@ -26,7 +26,8 @@ export const commonStyles = reactStyles({
     display: 'flex',
     height: '100%',
     flexDirection: 'column',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
+    listStylePosition: 'outside'
   },
   asideText: {
     fontSize: 14,
@@ -62,11 +63,16 @@ export const commonStyles = reactStyles({
 export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
   return <React.Fragment>
     <div style={commonStyles.asideHeader}>Why will some information be public?</div>
-    <div style={commonStyles.asideText}>The <AouTitle/> The All of Us Research Program seeks to be transparent
+    <div style={commonStyles.asideText}>The <AouTitle/> seeks to be transparent
       with participants about who can access their data and for what purpose. Therefore, we will display
       your name, institution, role, research background/interests, and a link to your professional
-      profile (if available) in the the <a href='https://researchallofus.org/'>Research Projects
-        Directory</a> on our public website.
+      profile (if available) in the
+      <a target='_blank' href='https://www.researchallofus.org/research-projects-directory/'>
+        &nbsp;Research Projects Directory</a> on our public website.
+    </div>
+    <div style={commonStyles.asideText}>
+      This disclosure will also help us comply with the 21st Century Cures Act. Some of these
+      categories may not be visible on our website currently, but will be added in the future.
     </div>
   </React.Fragment>;
 };
@@ -79,7 +85,7 @@ export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
 export function TextInputWithLabel(props) {
   return <div style={{...props.containerStyle}}>
     {props.labelContent}
-    {props.labelText && <label style={{...commonStyles.text, fontWeight: 600}}>{props.labelText}</label>}
+    {props.labelText && <label style={{...commonStyles.text, fontWeight: 600, ...props.labelStyle}}>{props.labelText}</label>}
     <div style={{marginTop: '0.1rem'}}>
       <TextInput data-test-id={props.inputId}
                  id={props.inputId}
@@ -109,7 +115,14 @@ export const Section = (props) => {
         {props.header}
       </label>
       {props.subHeader &&
-      <label style={{color: colors.primary, fontSize: '12px', marginLeft: '.25rem'}}> {props.subHeader} </label>
+        <label style={{
+          color: colors.primary,
+          fontSize: '12px',
+          marginLeft: '.25rem',
+          ...props.subHeaderStyle
+        }}>
+          {props.subHeader}
+        </label>
       }
     </div>
     <Divider style={{marginTop: '.25rem'}}/>
@@ -124,7 +137,7 @@ export const Section = (props) => {
  * @constructor
  */
 export const DropDownSection = (props) => {
-  return <Section header={props.header}>
+  return <Section header={props.header} subHeader={props.subHeader}>
     <Dropdown placeholder='Select'
               options={props.options}
               style={{width: '50%'}}

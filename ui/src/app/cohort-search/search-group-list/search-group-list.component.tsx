@@ -13,9 +13,9 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
+import {DomainType, SearchRequest} from 'generated/fetch';
 
-function initItem(id: string, type: string, fullTree: boolean) {
+function initItem(id: string, type: string) {
   return {
     id,
     type,
@@ -23,8 +23,7 @@ function initItem(id: string, type: string, fullTree: boolean) {
     modifiers: [],
     temporalGroup: 0,
     isRequesting: false,
-    status: 'active',
-    fullTree
+    status: 'active'
   };
 }
 
@@ -95,11 +94,15 @@ const css = `
     padding: 0 1rem;
   }
   body .p-menuitem.menuitem-header > .p-menuitem-link {
+    cursor: default;
     font-size: 12px;
     font-weight: 600;
     height: auto;
     line-height: 0.75rem;
     padding-left: 0.5rem;
+  }
+  body .p-menuitem.menuitem-header > .p-menuitem-link:hover {
+    background: ${colors.white};
   }
   body .p-tieredmenu .p-menu-separator {
     margin: 0.25rem 0;
@@ -120,6 +123,7 @@ interface Props {
 interface State {
   criteriaMenuOptions: any;
   index: number;
+  loadingMenuOptions: boolean;
 }
 
 export class SearchGroupList extends React.Component<Props, State> {
@@ -130,6 +134,7 @@ export class SearchGroupList extends React.Component<Props, State> {
     this.state = {
       criteriaMenuOptions: {programTypes: [], domainTypes: []},
       index: 0,
+      loadingMenuOptions: false
     };
   }
 
@@ -153,6 +158,7 @@ export class SearchGroupList extends React.Component<Props, State> {
   }
 
   getMenuOptions() {
+    this.setState({loadingMenuOptions: true});
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
     cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
@@ -167,7 +173,6 @@ export class SearchGroupList extends React.Component<Props, State> {
             order: PROGRAM_TYPES.indexOf(DomainType[domain])};
           if (domain === DomainType[DomainType.PERSON]) {
             option['children'] = types
-            .filter(subopt => subopt.type !== CriteriaType[CriteriaType.DECEASED])
             .map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
           }
           acc.programTypes.push(option);
@@ -185,6 +190,7 @@ export class SearchGroupList extends React.Component<Props, State> {
       criteriaMenuOptions[cdrVersionId].programTypes.sort((a, b) => a.order - b.order);
       criteriaMenuOptions[cdrVersionId].domainTypes.sort((a, b) => a.order - b.order);
       criteriaMenuOptionsStore.next(criteriaMenuOptions);
+      this.setState({loadingMenuOptions: false});
     });
   }
 
@@ -196,14 +202,16 @@ export class SearchGroupList extends React.Component<Props, State> {
   }
 
   get criteriaMenuItems() {
-    const {criteriaMenuOptions: {domainTypes, programTypes}} = this.state;
-    return [
-      {label: 'Program Data', className: 'menuitem-header'},
-      ...programTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
-      {separator: true},
-      {label: 'Domains', className: 'menuitem-header'},
-      ...domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
-    ];
+    const {criteriaMenuOptions: {domainTypes, programTypes}, loadingMenuOptions} = this.state;
+    return loadingMenuOptions
+      ? [{icon: 'pi pi-spin pi-spinner'}]
+      : [
+        {label: 'Program Data', className: 'menuitem-header'},
+        ...programTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
+        {separator: true},
+        {label: 'Domains', className: 'menuitem-header'},
+        ...domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
+      ];
   }
 
   launchWizard(criteria: any) {
@@ -216,12 +224,11 @@ export class SearchGroupList extends React.Component<Props, State> {
       (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
     triggerEvent(category, 'Click', `${category} - ${label}`);
-    const fullTree = criteria.fullTree || false;
     let context: any;
     const itemId = generateId('items');
     const groupId = null;
-    const item = initItem(itemId, domain, fullTree);
-    context = {item, domain, type, standard, role, groupId, itemId, fullTree};
+    const item = initItem(itemId, domain);
+    context = {item, domain, type, standard, role, groupId, itemId};
     wizardStore.next(context);
   }
 

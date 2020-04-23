@@ -3,6 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -48,8 +49,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
    */
   @Query(
       value =
-          "select distinct ca.descendant_id as id,parent_id,domain_id,is_standard,type,subtype,ca.descendant_id as concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,"
-              + "has_ancestor_data,path,synonyms "
+          "select distinct c.concept_id as conceptId, c2.id as parentId from ( "
+              + "select distinct ca.descendant_id as concept_id,path "
               + "from cb_criteria_ancestor ca "
               + "   join (select a.* "
               + "           from cb_criteria a "
@@ -67,14 +68,14 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "            and type = 'RXNORM') c "
               + "    on (ca.ancestor_id = c.concept_id) "
               + "union "
-              + "select a.id,parent_id,domain_id,is_standard,type,subtype,concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,"
-              + " has_ancestor_data,a.path,synonyms "
+              + "select a.concept_id,a.path "
               + "  from cb_criteria a "
-              + "  where domain_id = :domain "
-              + "   and type = :type "
-              + "   and concept_id in (:parentConceptIds) ",
+              + "  where a.domain_id = :domain "
+              + "   and a.type = :type "
+              + "   and a.concept_id in (:parentConceptIds)) c "
+              + "join (select id from cb_criteria where concept_id in (:parentConceptIds)) c2 on c.path like concat('%', c2.id, '%') ",
       nativeQuery = true)
-  List<DbCriteria> findCriteriaAncestors(
+  List<DbCriteriaLookup> findCriteriaAncestors(
       @Param("domain") String domain,
       @Param("type") String type,
       @Param("group") Boolean group,
@@ -96,13 +97,24 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select * from cb_criteria "
-              + "where domain_id = :domain "
-              + "and type = :type "
-              + "and parent_id in (:parentIds)"
-              + "or id in (:parentIds)",
+          "select distinct c.concept_id as conceptId, c2.id as parentId "
+              + "from cb_criteria c "
+              + "join (select id from cb_criteria where id in (:conceptIds)) c2 on c.path like concat('%', c2.id, '%') "
+              + "where match(c.path) against(:path)",
       nativeQuery = true)
-  List<DbCriteria> findCriteriaLeavesAndParentsByDomainAndTypeAndParentIds(
+  List<DbCriteriaLookup> findCriteriaLeavesAndParentsByPath(
+      @Param("conceptIds") List<Long> conceptIds, @Param("path") String path);
+
+  @Query(
+      value =
+          "select distinct c.concept_id as conceptId, c2.id as parentId "
+              + "from cb_criteria c join (select id from cb_criteria where id in (:parentIds)) c2 on c.path like concat('%', c2.id, '%') "
+              + "where c.domain_id = :domain "
+              + "and c.type = :type "
+              + "and c.parent_id in (:parentIds) "
+              + "or c.id in (:parentIds)",
+      nativeQuery = true)
+  List<DbCriteriaLookup> findCriteriaLeavesAndParentsByDomainAndTypeAndParentIds(
       @Param("domain") String domain,
       @Param("type") String type,
       @Param("parentIds") List<Long> parentIds);
@@ -217,7 +229,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 "
               + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' and match(synonyms) against('+[drug_rank1]' in boolean mode) order by c.est_count desc",
       nativeQuery = true)
-  List<DbCriteria> findDrugIngredientByConceptId(@Param("conceptId") String conceptId);
+  List<DbCriteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
 
   @Query(
       value =

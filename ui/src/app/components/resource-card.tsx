@@ -13,7 +13,7 @@ import {toDisplay} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {CopyModal} from 'app/components/copy-modal';
-import {CopyRequest, DataSet, RecentResource, ResourceType} from 'generated/fetch';
+import {CopyRequest, DataSet, ResourceType, WorkspaceResource} from 'generated/fetch';
 
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {RenameModal} from 'app/components/rename-modal';
@@ -75,7 +75,7 @@ const resourceTypeColor = (resourceType: ResourceType) => {
 };
 
 export interface Props {
-  resourceCard: RecentResource;
+  resourceCard: WorkspaceResource;
   onDuplicateResource: Function;
   onUpdate: Function;
   existingNameList?: string[];

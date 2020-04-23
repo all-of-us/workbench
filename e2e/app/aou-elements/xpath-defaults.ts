@@ -1,12 +1,16 @@
 import TextOptions from './text-options';
 
 function textXpathHelper(opts: TextOptions) {
+  let findText;
   if (opts.text) {
-    return `text()="${opts.text}" or @aria-label="${opts.text}" or @placeholder="${opts.text}"`;
+    findText = opts.text;
+    return `text()='${findText}' or @aria-label='${findText}' or @placeholder='${findText}'`;
   } else if (opts.textContains) {
-    return `contains(text(),"${opts.textContains}") or contains(@aria-label,"${opts.textContains}") or contains(@placeholder,"${opts.textContains}")`;
+    findText = opts.textContains;
+    return `contains(text(), '${findText}') or contains(@aria-label, '${findText}') or contains(@placeholder, '${findText}')`;
   } else if (opts.normalizeSpace) {
-    return `contains(normalize-space(), "${opts.normalizeSpace}")`;
+    findText = opts.normalizeSpace;
+    return `contains(normalize-space(), '${findText}')`;
   }
 }
 
@@ -23,7 +27,7 @@ export function labelXpath(opts: TextOptions) {
  * @param label
  */
 export function buttonXpath(opts: TextOptions) {
-  const role = '@role="button"';
+  const role = `@role='button'`;
   const txt = textXpathHelper(opts);
   return `(//button[${txt}] | //*[${txt} and ${role}])`;
 }
@@ -32,7 +36,7 @@ export function inputXpath(opts: TextOptions) {
   const numSlashes = opts.inputType === 'checkbox' ? '/' : '//';
   const nodeLevel = `ancestor::node()[${opts.ancestorNodeLevel}]`;
   if (opts.inputType !== undefined) {
-    return `${labelXpath(opts)}/${nodeLevel}${numSlashes}input[@type="${opts.inputType}"]`;
+    return `${labelXpath(opts)}/${nodeLevel}${numSlashes}input[@type='${opts.inputType}']`;
   }
   // return all input nodes
   return `${labelXpath(opts)}/${nodeLevel}//input`;
@@ -59,10 +63,11 @@ export function clickableXpath(label: string) {
  * @param label:
  * @param shapeValue:
  */
-export function clrIconXpath(label: string, shapeValue: string) {
-  if (label === '') {
+export function clrIconXpath(opts: TextOptions, shapeValue: string) {
+  if (Object.keys(opts).length === 0) {
     return `//clr-icon[@shape='${shapeValue}'][*[@role='img']]`; // anywhere on page
   }
   // next to a label
-  return `//*[normalize-space()='${label}']/ancestor::node()[1]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
+  const nodeLevel = opts.ancestorNodeLevel || 1;
+  return `//*[${textXpathHelper(opts)}]/ancestor::node()[${nodeLevel}]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
 }

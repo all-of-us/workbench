@@ -1,12 +1,10 @@
-import Button from '../../app/aou-elements/button';
-import {SideNavLink} from '../../app/authenticated-page';
-import GoogleLoginPage from '../../app/google-login';
-import ProfilePage from '../../app/profile-page';
-import WorkspacesPage from '../../app/workspaces-page';
-import launchBrowser from '../../driver/puppeteer-launch';
-import {waitForExists} from '../../driver/xpath-util';
-
-const configs = require('../../resources/workbench-config');
+import Button from 'app/aou-elements/button';
+import HomePage from 'app/home-page';
+import ProfilePage from 'app/profile-page';
+import WorkspacesPage from 'app/workspaces-page';
+import {waitForExists} from 'driver/xpath-util';
+import {signIn} from 'tests/app';
+import Navigation, {NavLink} from 'app/navigation';
 
 export const HELP_DESK = {
   ASK_QUESTION: 'Ask a question about the Researcher Workbench',
@@ -15,30 +13,17 @@ export const HELP_DESK = {
   REQUEST_ADDITIONAL_BILLING_CREDITS: 'Request additional billing credits',
 };
 
-// set timeout globally per suite, not per test.
-jest.setTimeout(2 * 60 * 1000);
 
-describe('Navigation', () => {
-  let browser;
-  let page;
+describe('Sidebar Navigation', () => {
 
   beforeEach(async () => {
-    browser = await launchBrowser();
-    page = await browser.newPage();
-    await page.setUserAgent(configs.puppeteerUserAgent);
+    await signIn(page);
   });
 
-  afterEach(async () => {
-    await browser.close();
-  });
-
-
-  test('Check app side-nav work', async () => {
-    const homePage = await GoogleLoginPage.logIn(page);
-    expect(await homePage.isLoaded()).toBe(true);
-
+  test('SideNav menu works', async () => {
+    const homePage = new HomePage(page);
     // Select Profile link
-    await homePage.navTo(SideNavLink.PROFILE);
+    await Navigation.navMenu(page, NavLink.PROFILE);
     const profilePage = new ProfilePage(page);
     await profilePage.waitForLoad();
     expect(await profilePage.isLoaded()).toBe(true);
@@ -46,29 +31,27 @@ describe('Navigation', () => {
     // check user name in dropdown matches names on Profile page
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();
-    await homePage.openSideNav();
+    await Navigation.openNavMenu(page);
     const displayedUsername = await homePage.getUserName();
     expect(displayedUsername).toBe(`${fname} ${lname}`);
 
     // Select Your Workspaces link
-    await homePage.navTo(SideNavLink.YOUR_WORKSPACES);
+    await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
     expect(await workspacesPage.isLoaded()).toBe(true);
 
     // Select Home link
-    await homePage.navTo(SideNavLink.HOME);
+    await Navigation.navMenu(page, NavLink.HOME);
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
   });
 
   test('User can see the Contact Us form', async () => {
-    const homePage = await GoogleLoginPage.logIn(page);
-
     // Select Contact Us
-    await homePage.navTo(SideNavLink.CONTACT_US);
+    await Navigation.navMenu(page, NavLink.CONTACT_US);
 
-    const iframeHandle = await page.waitForSelector('iframe[title="Find more information here"]');
+    const iframeHandle: any = await page.waitForSelector('iframe[title="Find more information here"]', {visible: true});
     const newIframe = await iframeHandle.contentFrame();
 
     const askQuestionAboutButton = await Button.forLabel(newIframe, {text: HELP_DESK.ASK_QUESTION});
@@ -94,9 +77,8 @@ describe('Navigation', () => {
   });
 
   test('User can Sign Out', async () => {
-    const homePage = await GoogleLoginPage.logIn(page);
     // Select Sign Out link
-    await homePage.navTo(SideNavLink.SIGN_OUT);
+    await Navigation.navMenu(page, NavLink.SIGN_OUT);
     await waitForExists(page, '//*[text()="Redirect Notice"]');
     const href = await page.evaluate(() => location.href);
     expect(href).toEqual(expect.stringMatching(/(\/|%2F)login$/));

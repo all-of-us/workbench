@@ -1,8 +1,9 @@
 import {TitleCasePipe} from '@angular/common';
 import {
+  AgeType,
   CriteriaSubType,
   CriteriaType,
-  DomainType,
+  DomainType, GenderOrSexType,
   SearchGroup,
   SearchGroupItem,
   SearchParameter,
@@ -97,10 +98,10 @@ export function domainToTitle(domain: any): string {
 export function typeToTitle(_type: string): string {
   switch (_type) {
     case CriteriaType[CriteriaType.AGE]:
-      _type = 'Age/Deceased';
+      _type = 'Age';
       break;
     case CriteriaType[CriteriaType.DECEASED]:
-      _type = 'Age/Deceased';
+      _type = 'Deceased';
       break;
     case CriteriaType[CriteriaType.ETHNICITY]:
       _type = 'Ethnicity';
@@ -143,6 +144,26 @@ export function subTypeToTitle(subtype: string): string {
       break;
   }
   return subtype;
+}
+
+export function ageTypeToText(ageType: AgeType) {
+  switch (ageType) {
+    case AgeType.AGE:
+      return 'Current Age';
+    case AgeType.AGEATCDR:
+      return 'Age at CDR';
+    case AgeType.AGEATCONSENT:
+      return 'Age  at Consent';
+  }
+}
+
+export function genderOrSexTypeToText(genderOrSexType: GenderOrSexType) {
+  switch (genderOrSexType) {
+    case GenderOrSexType.GENDER:
+      return 'Gender Identity';
+    case GenderOrSexType.SEXATBIRTH:
+      return 'Sex at Birth';
+  }
 }
 
 export function highlightMatches(

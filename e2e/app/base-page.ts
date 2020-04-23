@@ -1,5 +1,6 @@
 import {ElementHandle, Page, Response} from 'puppeteer';
-import { ensureDir } from 'fs-extra';
+import { ensureDir, writeFile } from 'fs-extra';
+import BaseElement from 'app/aou-elements/base-element';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -45,11 +46,14 @@ export default abstract class BasePage {
     return this.page.$eval(`${cssSelector}`, elem => elem.textContent.trim())
   }
 
-  async waitForNavigation() {
+  /**
+   * Click on element then wait for page navigation.
+   * @param {ElementHandle | BaseElement} clickElement
+   */
+  async clickAndWait(clickElement: ElementHandle | BaseElement) {
     return Promise.all([
-      this.page.waitForNavigation({waitUntil: 'load'}),
-      this.page.waitForNavigation({waitUntil: 'domcontentloaded'}),
-      this.page.waitForNavigation({waitUntil: 'networkidle0', timeout: 60000}),
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 0}),
+      clickElement.click(),
     ]);
   }
 
@@ -227,12 +231,39 @@ export default abstract class BasePage {
    * @param fileName
    */
   async takeScreenshot(fileName: string) {
-    const SCREENSHOT_DIR = 'logs/screenshot';
-    await ensureDir(SCREENSHOT_DIR);
+    const screenshotDir = 'logs/screenshot';
+    await ensureDir(screenshotDir);
     const timestamp = new Date().getTime();
-    const screenshotFile = `${SCREENSHOT_DIR}/${fileName}_${timestamp}.png`;
+    const screenshotFile = `${screenshotDir}/${fileName}_${timestamp}.png`;
     await this.page.screenshot({path: screenshotFile, fullPage: true});
-    console.log('screenshot taken: ' + screenshotFile);
+    console.log('Saved screenshot ' + screenshotFile);
+  }
+
+  async saveToFile(fileName, data, suffix: string = 'html') {
+    const logDir = 'logs/html';
+    await ensureDir(logDir);
+    const fname = `${logDir}/${fileName}-${new Date().getTime()}.${suffix}`;
+    return new Promise((resolve, reject) => {
+      writeFile(fname, data, 'utf8', error => {
+        if (error) {
+          console.error(`save file failed. ` + error);
+          reject(false);
+        } else {
+          console.log('Saved file ' + fname);
+          resolve(true);
+        }
+      })
+    });
+  }
+
+  /**
+   * Save Html source to a file. Useful for test failure troubleshooting.
+   * @param {Puppeteer.Page} page
+   * @param {string} fileName
+   */
+  async saveHtmlToFile(fileName: string) {
+    const html = await this.page.content();
+    await this.saveToFile(fileName, html);
   }
 
 }

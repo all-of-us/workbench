@@ -9,6 +9,7 @@ import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -233,7 +234,20 @@ export const ListModifierPage = withCurrentWorkspace()(
             label: 'N or More',
             value: Operator.GREATERTHANOREQUALTO,
           }]
-        }, {
+        }],
+        loading: false,
+        count: null,
+        visitCounts: undefined,
+        error: false,
+      };
+      this.updateInput = fp.debounce(300, () => this.updateMods());
+    }
+
+    async componentDidMount() {
+      const {workspace: {cdrVersionId}} = this.props;
+      const {formState} = this.state;
+      if (serverConfigStore.getValue().enableEventDateModifier) {
+        formState.push({
           name: ModifierType.EVENTDATE,
           label: 'Event Date',
           type: 'date',
@@ -252,23 +266,14 @@ export const ListModifierPage = withCurrentWorkspace()(
             label: 'Is Between',
             value: Operator.BETWEEN,
           }]
-        }],
-        loading: false,
-        count: null,
-        visitCounts: undefined,
-        error: false,
-      };
-      this.updateInput = fp.debounce(300, () => this.updateMods());
-    }
-
-    async componentDidMount() {
-      const {workspace: {cdrVersionId}} = this.props;
-      const {formState} = this.state;
+        });
+      }
       if (this.addEncounters) {
         let encountersOptions = encountersStore.getValue();
         if (!encountersOptions) {
           // get options for visit modifier from api
-          const res = await cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]);
+          const res = await cohortBuilderApi().findCriteriaBy(
+            +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]);
           encountersOptions = res.items;
           encountersStore.next(encountersOptions);
         }
@@ -294,11 +299,10 @@ export const ListModifierPage = withCurrentWorkspace()(
           }
         });
         formState.push(encounters);
-        this.setState({formState, visitCounts});
-        this.getExisting();
-      } else {
-        this.getExisting();
+        this.setState({visitCounts});
       }
+      this.setState({formState});
+      this.getExisting();
     }
 
     getExisting() {

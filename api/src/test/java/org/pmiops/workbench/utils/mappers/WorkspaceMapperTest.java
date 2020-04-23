@@ -11,7 +11,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
+import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -63,8 +68,15 @@ public class WorkspaceMapperTest {
   @Autowired private WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
-  @Import({WorkspaceMapperImpl.class, CommonMappers.class})
-  @MockBean({WorkspaceDao.class})
+  @Import({
+    CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
+    CommonMappers.class,
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
+    WorkspaceMapperImpl.class,
+  })
+  @MockBean({UserDao.class, WorkspaceDao.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {

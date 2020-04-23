@@ -1,37 +1,8 @@
-import CreateAccountPage from '../../app/create-account-page';
-import GoogleLoginPage from '../../app/google-login';
-import PuppeteerLaunch from '../../driver/puppeteer-launch';
-const configs = require('../../resources/workbench-config');
-
-// set timeout globally per suite, not per test.
-jest.setTimeout(2 * 60 * 1000);
-
-describe.skip('User registration tests:', () => {
-
-  let browser;
-  let incognitoContext;
-  let page;
+import CreateAccountPage from 'app/create-account-page';
+import GoogleLoginPage from 'app/google-login';
 
 
-  beforeAll(async () => {
-    browser = await PuppeteerLaunch();
-  });
-
-  beforeEach(async () => {
-    incognitoContext = await browser.createIncognitoBrowserContext();
-    page = await incognitoContext.newPage();
-    await page.setUserAgent(configs.puppeteerUserAgent);
-    await page.setDefaultNavigationTimeout(60000);
-  });
-
-  afterEach(async () => {
-    await incognitoContext.close();
-  });
-
-  afterAll(async () => {
-    await browser.close();
-  });
-
+describe('User registration tests:', () => {
 
   test('Can register new user', async () => {
     // Load the landing page for login.
@@ -44,29 +15,25 @@ describe.skip('User registration tests:', () => {
 
     const createAccountPage = new CreateAccountPage(page);
 
-    // Step 1: Enter invitation key.
-    await createAccountPage.waitForTextExists('Enter your Invitation Key:');
-    await createAccountPage.fillOutInvitationKey(process.env.INVITATION_KEY);
-
-    // Step 2: Terms of Service.
+    // Step 1: Terms of Service.
     await createAccountPage.acceptTermsOfUseAgreement();
     let nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
-    // Step 3: Enter institution affiliation details
+    // Step 2: Enter institution affiliation details
     await createAccountPage.fillOutInstitution();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.clickWithEval();
 
-    // Step 4: Enter user information
+    // Step 3: Enter user information
     await createAccountPage.fillOutUserInformation();
     nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
-    // Step 5: Enter demographic survey (All Survey Fields are optional)
+    // Step 4: Enter demographic survey (All Survey Fields are optional)
     await createAccountPage.fillOutDemographicSurvey();
 
     // TODO uncomment after disable recaptcha

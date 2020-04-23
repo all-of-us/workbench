@@ -25,7 +25,7 @@ fi
 
 ## Dump workbench cdr count data
 echo "Dumping BigQuery cdr dataset to .csv"
-if ./generate-cdr/make-bq-data-dump.sh $WORKBENCH_PROJECT $BUCKET $WORKBENCH_DATASET
+if ./generate-cdr/make-bq-data-dump.sh $WORKBENCH_PROJECT "$BUCKET/$BQ_DATASET" $WORKBENCH_DATASET
 then
     echo "Workbench cdr count data dumped"
 else
@@ -44,7 +44,7 @@ else
 fi
 
 # Make empty sql dump
-if ./generate-cdr/make-mysqldump.sh --db-name $WORKBENCH_DATASET --bucket "$BUCKET/$CDR_VERSION"
+if ./generate-cdr/make-mysqldump.sh --db-name $WORKBENCH_DATASET --bucket "$BUCKET/$BQ_DATASET/$CDR_VERSION"
 then
   echo "Success"
 else
@@ -53,7 +53,7 @@ else
 fi
 
 # Import Sql dump and data in bucket to cloudsql
-if ./generate-cdr/cloudsql-import.sh --project $WORKBENCH_PROJECT --instance workbenchmaindb --bucket "$BUCKET/$CDR_VERSION" \
+if ./generate-cdr/cloudsql-import.sh --project $WORKBENCH_PROJECT --instance workbenchmaindb --bucket "$BUCKET/$BQ_DATASET/$CDR_VERSION" \
     --database $WORKBENCH_DATASET --create-db-sql-file $WORKBENCH_DATASET.sql
 then
   echo "Success"

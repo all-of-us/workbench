@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -43,7 +44,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -75,7 +75,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
-  private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -93,7 +92,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final FireCloudService fireCloudService;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final InstitutionService institutionService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -111,8 +109,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       FireCloudService fireCloudService,
       ComplianceService complianceService,
-      DirectoryService directoryService,
-      InstitutionService institutionService) {
+      DirectoryService directoryService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -126,7 +123,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.fireCloudService = fireCloudService;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.institutionService = institutionService;
+  }
+
+  @VisibleForTesting
+  @Override
+  public int getCurrentDuccVersion() {
+    return configProvider.get().featureFlags.enableV3DataUserCodeOfConduct ? 3 : 2;
   }
 
   /**
@@ -378,21 +380,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // set via the newer Verified Institutional Affiliation flow
     boolean requireInstitutionalVerification =
         configProvider.get().featureFlags.requireInstitutionalVerification;
-    if (requireInstitutionalVerification
-        && !institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
-      final String msg =
-          Optional.ofNullable(dbVerifiedAffiliation)
-              .map(
-                  affiliation ->
-                      String.format(
-                          "Cannot create user %s: contact email %s is not a valid member of institution '%s'",
-                          userName, contactEmail, affiliation.getInstitution().getShortName()))
-              .orElse(
-                  String.format(
-                      "Cannot create user %s: contact email %s does not have a valid institutional affiliation",
-                      userName, contactEmail));
-      throw new BadRequestException(msg);
-    }
 
     try {
       dbUser = userDao.save(dbUser);
@@ -415,7 +402,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser submitDataUseAgreement(
       DbUser dbUser, Integer dataUseAgreementSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
-    if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
+    if (dataUseAgreementSignedVersion != getCurrentDuccVersion()) {
       throw new BadRequestException("Data Use Agreement Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());

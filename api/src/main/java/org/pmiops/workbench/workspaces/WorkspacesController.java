@@ -1,12 +1,5 @@
 package org.pmiops.workbench.workspaces;
 
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -22,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -36,6 +28,7 @@ import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -80,6 +73,8 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.WorkspaceResourceResponse;
+import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
@@ -107,14 +102,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final int NUM_RANDOM_CHARS = 20;
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
 
-  private Retryer<Boolean> retryer =
-      RetryerBuilder.<Boolean>newBuilder()
-          .retryIfExceptionOfType(StorageException.class)
-          .withWaitStrategy(WaitStrategies.exponentialWait())
-          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
-          .build();
-
   private final BillingProjectBufferService billingProjectBufferService;
+  private final WorkspaceResourcesService workspaceResourcesService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
@@ -135,6 +124,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
+      WorkspaceResourcesService workspaceResourcesService,
       CdrVersionDao cdrVersionDao,
       UserDao userDao,
       Provider<DbUser> userProvider,
@@ -151,6 +141,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       LogsBasedMetricService logsBasedMetricService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
+    this.workspaceResourcesService = workspaceResourcesService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -398,7 +389,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Workspace updateWorkspaceImpl(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
     FirecloudWorkspace fcWorkspace =
@@ -478,6 +469,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
 
+    // First verify the caller has read access to the source workspace.
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
+
     DbUser user = userProvider.get();
 
     String toWorkspaceName;
@@ -488,13 +483,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new TooManyRequestsException();
     }
     toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
-
-    // Retrieving the workspace is done first, which acts as an access check.
-    String fromBucket =
-        fireCloudService
-            .getWorkspace(fromWorkspaceNamespace, fromWorkspaceId)
-            .getWorkspace()
-            .getBucketName();
 
     DbWorkspace fromWorkspace =
         workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
@@ -600,25 +588,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
-  // A retry period is needed because the permission to copy files into the cloned workspace is not
-  // granted transactionally
-  private Boolean copyBlob(String bucketName, Blob b) {
-    try {
-      cloudStorageService.copyBlob(b.getBlobId(), BlobId.of(bucketName, b.getName()));
-      return true;
-    } catch (StorageException e) {
-      log.warning("Service Account does not have access to bucket " + bucketName);
-      throw e;
-    }
-  }
-
   @Override
   public ResponseEntity<WorkspaceBillingUsageResponse> getBillingUsage(
       String workspaceNamespace, String workspaceId) {
     // This is its own method as opposed to part of the workspace response because this is gated
     // behind write+ access, and adding access based composition to the workspace response
     // would add a lot of unnecessary complexity.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
@@ -979,6 +955,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceMapper.toApiRecentWorkspace(dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResources(
+      String workspaceNamespace,
+      String workspaceId,
+      WorkspaceResourcesRequest workspaceResourcesRequest) {
+    WorkspaceAccessLevel workspaceAccessLevel =
+        workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    final DbWorkspace dbWorkspace =
+        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+    WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
+    workspaceResourceResponse.addAll(
+        workspaceResourcesService.getWorkspaceResources(
+            dbWorkspace, workspaceAccessLevel, workspaceResourcesRequest.getTypesToFetch()));
+    return ResponseEntity.ok(workspaceResourceResponse);
   }
 
   private <T> T recordOperationTime(Supplier<T> operation, String operationName) {

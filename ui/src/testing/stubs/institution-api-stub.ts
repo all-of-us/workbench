@@ -1,5 +1,6 @@
 import {
   CheckEmailResponse,
+  DuaType,
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
   Institution,
@@ -11,12 +12,15 @@ export const defaultInstitutions: Array<Institution> = [{
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',
   organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
-  emailDomains: ['vumc.org']
+  emailDomains: ['vumc.org'],
+  duaTypeEnum: DuaType.MASTER
 }, {
   shortName: 'Broad',
   displayName: 'Broad Institute',
   organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
-  emailDomains: ['broadinstitute.org']
+  emailDomains: [],
+  emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org'],
+  duaTypeEnum: DuaType.RESTRICTED
 }, {
   shortName: 'Verily',
   displayName: 'Verily LLC',
@@ -73,7 +77,8 @@ export class InstitutionApiStub extends InstitutionApi {
           return {
             shortName: x.shortName,
             displayName: x.displayName,
-            organizationTypeEnum: x.organizationTypeEnum
+            organizationTypeEnum: x.organizationTypeEnum,
+            duaTypeEnum: x.duaTypeEnum
           };
         })
       });

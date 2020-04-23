@@ -15,14 +15,10 @@ import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {ListSearchComponent} from './list-search/list-search.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
-import {NodeInfoComponent} from './node-info/node-info.component';
-import {NodeComponent} from './node/node.component';
-import {OptionInfoComponent} from './option-info/option-info.component';
 import {OverviewComponent} from './overview/overview.component';
-import {SearchBarComponent} from './search-bar/search-bar.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {SelectionInfoComponent} from './selection-info/selection-info.component';
-import {TreeComponent} from './tree/tree.component';
+import {CriteriaTreeComponent} from './tree/tree.component';
 
 import {BreadcrumbType} from 'app/utils/navigation';
 
@@ -59,19 +55,15 @@ const routes: Routes = [{
   declarations: [
     AttributesPageComponent,
     CohortSearchComponent,
+    CriteriaTreeComponent,
     GenderChartComponent,
     DemographicsComponent,
     ModalComponent,
     ModifierPageComponent,
-    NodeComponent,
-    NodeInfoComponent,
-    OptionInfoComponent,
     OverviewComponent,
-    SearchBarComponent,
     SearchGroupListComponent,
     ListSearchComponent,
     SelectionInfoComponent,
-    TreeComponent,
     SafeHtmlPipe,
   ],
   providers: [TitleCasePipe]

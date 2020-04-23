@@ -1,6 +1,6 @@
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
-import {Button, Link, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -34,10 +34,12 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
+  renderUSD,
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
-  withRouteConfigData
+  withRouteConfigData,
+  withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
@@ -51,6 +53,7 @@ import {
   CdrVersionListResponse,
   DataAccessLevel,
   DisseminateResearchEnum,
+  Profile,
   ResearchOutcomeEnum,
   ResearchPurpose,
   SpecificPopulationEnum,
@@ -59,6 +62,7 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
+import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
@@ -80,6 +84,20 @@ export const styles = reactStyles({
   flexColumnBy2: {
     flex: '1 1 0',
     marginLeft: '1rem'
+  },
+  freeCreditsBalanceClickable: {
+    display: 'inline-block',
+    color: colors.accent,
+    padding: '0.25rem 0 0 1rem'
+  },
+  freeCreditsBalanceOverlay: {
+    height: 44,
+    width: 150,
+    color: colors.primary,
+    fontFamily: 'Montserrat',
+    fontSize: 12,
+    letterSpacing: '0',
+    lineHeight: '22px',
   },
   infoIcon: {
     height: '16px',
@@ -168,6 +186,9 @@ export interface WorkspaceEditProps {
   cdrVersionListResponse: CdrVersionListResponse;
   workspace: WorkspaceData;
   cancel: Function;
+  profileState: {
+    profile: Profile;
+  };
 }
 
 
@@ -190,7 +211,7 @@ export interface WorkspaceEditState {
   populationChecked: boolean;
 }
 
-export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
+export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -210,7 +231,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showStigmatizationDetails: false,
         billingAccounts: [],
         showCreateBillingAccountModal: false,
-        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
       };
     }
 
@@ -265,7 +286,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     async componentDidMount() {
-      if (serverConfigStore.getValue().enableBillingLockout) {
+      if (serverConfigStore.getValue().enableBillingUpgrade) {
         this.fetchBillingAccounts();
       } else {
         // This is a temporary hack to set the billing account name property to anything
@@ -308,7 +329,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             ethics: false,
             populationDetails: [],
             populationHealth: false,
-            reviewRequested: false,
+            reviewRequested: undefined,
             socialBehavioral: false,
             reasonForAllOfUs: '',
           }
@@ -391,6 +412,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     makeDiseaseInput(): React.ReactNode {
       return (
         <SearchInput
+          data-test-id='diseaseOfFocus-input'
           enabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}
           placeholder='Name of Disease'
           value={this.state.workspace.researchPurpose.diseaseOfFocus}
@@ -446,6 +468,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         children = <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
                   onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
                   disabled={!this.state.workspace.researchPurpose.otherPurpose}
+                  data-test-id='otherPrimaryPurposeText'
                   style={{marginTop: '0.5rem'}}/>;
       }
 
@@ -481,15 +504,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (rp.label === 'Other') {
         children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
                              onChange={v => this.updateOtherDisseminateResearch(v)}
-                             placeholder='Specify the name of the forum (journal, scientific
-                             conference, blog etc.) through which you will disseminate your
-                             findings, if available.'
+                             placeholder={'Specify the name of the forum (journal, scientific conference, blog etc.)' +
+                             ' through which you will disseminate your findings, if available.'}
+                             data-test-id='otherDisseminateResearch-text'
                              disabled={!this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)}
                              style={{marginTop: '0.5rem', width: '16rem'}}/>;
       }
 
       return <div key={index} style={styles.categoryRow}>
         <CheckBox style={styles.checkboxStyle}
+                  data-test-id={index + '-checkbox'}
                   checked={this.disseminateCheckboxSelected(rp.shortName)}
                   onChange={e => this.updateAttribute('disseminateResearchFindingList', rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
@@ -560,6 +584,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
     }
 
+    get isOtherPrimaryPurposeValid() {
+      const rp = this.state.workspace.researchPurpose;
+      return !rp.otherPurpose ||
+          (rp.otherPurposeDetails && rp.otherPurposeDetails.length <= 500);
+    }
+
     get isSpecificPopulationValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
       return (
@@ -571,10 +601,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       );
     }
 
+    get isOtherSpecificPopulationValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      // Avoids null pointers. We don't want to show this error message if nothing is selected yet.
+      if (!this.isSpecificPopulationValid) {
+        return true;
+      }
+      return !fp.includes(SpecificPopulationEnum.OTHER, researchPurpose.populationDetails) ||
+          (researchPurpose.otherPopulationDetails && researchPurpose.otherPopulationDetails.length <= 100);
+    }
+
     get isDiseaseOfFocusValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
       return !researchPurpose.diseaseFocusedResearch ||
-        researchPurpose.diseaseOfFocus;
+        researchPurpose.diseaseOfFocus && researchPurpose.diseaseOfFocus.length <= 80;
     }
 
     get isDisseminateResearchValid() {
@@ -582,6 +622,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return researchPurpose.disseminateResearchFindingList &&
           researchPurpose.disseminateResearchFindingList.length !== 0;
     }
+
+    get isOtherDisseminateResearchValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      return !fp.includes(DisseminateResearchEnum.OTHER, researchPurpose.disseminateResearchFindingList) ||
+              (researchPurpose.otherDisseminateResearchFindings && researchPurpose.otherDisseminateResearchFindings.length <= 100);
+    }
+
+
 
     get isResearchOutcome() {
       const researchPurpose = this.state.workspace.researchPurpose;
@@ -774,40 +822,56 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     render() {
       const {
+        populationChecked,
         workspace: {
           name,
           billingAccountName,
           researchPurpose: {
             anticipatedFindings,
             intendedStudy,
-            scientificApproach
+            scientificApproach,
+            reviewRequested
           }
-        },
+        }
       } = this.state;
+      const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
+      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
+      // defined below in the OverlayPanel declaration
+      let freeTierBalancePanel: OverlayPanel;
       const errors = validate({
         name,
         billingAccountName,
         anticipatedFindings,
         intendedStudy,
+        populationChecked,
+        reviewRequested,
         scientificApproach,
         'primaryPurpose': this.primaryPurposeIsSelected,
+        'otherPrimaryPurpose': this.isOtherPrimaryPurposeValid,
         'specificPopulation': this.isSpecificPopulationValid,
+        'otherSpecificPopulation': this.isOtherSpecificPopulationValid,
         'diseaseOfFocus': this.isDiseaseOfFocusValid,
         'researchOutcoming': this.isResearchOutcome,
-        'disseminate': this.isDisseminateResearchValid
+        'disseminate': this.isDisseminateResearchValid,
+        'otherDisseminateResearchFindings': this.isOtherDisseminateResearchValid
       }, {
         name: {
           length: { minimum: 1, maximum: 80 }
         },
         billingAccountName: { presence: true },
         intendedStudy: { length: { minimum: 1, maximum: 1000 } },
+        populationChecked: { presence: true },
         anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
+        reviewRequested: { presence: true },
         scientificApproach: { length: { minimum: 1, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
+        otherPrimaryPurpose: {truthiness: true},
         specificPopulation: { truthiness: true },
         diseaseOfFocus: { truthiness: true },
         researchOutcoming: {truthiness: true},
-        disseminate: {truthiness: true}
+        disseminate: {truthiness: true},
+        otherDisseminateResearchFindings: {truthiness: true},
+        otherSpecificPopulation: {truthiness: true}
 
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
@@ -853,28 +917,37 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             onChange={v => this.setState({cloneUserRole: v})}/>
         </WorkspaceEditSection>
         }
-        {serverConfigStore.getValue().enableBillingLockout &&
+        {serverConfigStore.getValue().enableBillingUpgrade &&
           (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
                                 description={this.renderBillingDescription()}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
               Select account
             </div>
-            <Dropdown style={{width: '14rem'}}
-                      value={this.state.workspace.billingAccountName}
-                      options={this.buildBillingAccountOptions()}
-                      onChange={e => {
-                        if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
-                          this.setState({
-                            showCreateBillingAccountModal: true
-                          });
-                        } else {
-                          this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
-                        }
-                      }}
-            />
-          </WorkspaceEditSection>
-        }
+            <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
+              <div style={styles.freeCreditsBalanceOverlay}>
+                FREE CREDIT BALANCE {renderUSD(freeTierCreditsBalance)}
+              </div>
+            </OverlayPanel>
+            <FlexRow>
+              <Dropdown style={{width: '14rem'}}
+                        value={this.state.workspace.billingAccountName}
+                        options={this.buildBillingAccountOptions()}
+                        onChange={e => {
+                          if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                            this.setState({
+                              showCreateBillingAccountModal: true
+                            });
+                          } else {
+                            this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
+                          }
+                        }}
+              />
+              {freeTierCreditsBalance > 0.0 && <div style={styles.freeCreditsBalanceClickable}>
+                <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View FREE credits balance</Clickable>
+              </div>}
+            </FlexRow>
+          </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
               description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
@@ -924,7 +997,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header} indent
-          description={researchPurposeQuestions[1].description} style={{width: '50rem'}} index='2.'>
+          description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
             <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[2]}
@@ -947,15 +1020,15 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
           {/*disseminate  research Section */}
         <WorkspaceEditSection header={researchPurposeQuestions[5].header}
-                              description={researchPurposeQuestions[5].description} style={{width: '50rem'}} index='3.'>
+                              description={researchPurposeQuestions[5].description} style={{width: '48rem'}} index='3.'>
           <FlexRow>
             <FlexColumn style={styles.flexColumnBy2}>
               {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
-                (rp, i) => this.makeDisseminateForm(rp, i))}
+                (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
             </FlexColumn>
             <FlexColumn style={styles.flexColumnBy2}>
               {disseminateFindings.slice(sliceByHalfLength(disseminateFindings)).map(
-                (rp, i) => this.makeDisseminateForm(rp, i))}
+                (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
             </FlexColumn>
           </FlexRow>
         </WorkspaceEditSection>
@@ -963,7 +1036,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           {/*Research outcome section*/}
           <WorkspaceEditSection header={researchPurposeQuestions[6].header} index='4.'
                                 description={researchPurposeQuestions[6].description}
-                                style={{width: '50rem'}}>
+                                style={{width: '48rem'}}>
             <FlexRow style={{marginLeft: '1rem'}}>
               <FlexColumn style={{flex: '1 1 0'}}>
                 {researchOutcomes.map(
@@ -975,13 +1048,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           {/*Underrespresented population section*/}
         <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
                               description={researchPurposeQuestions[7].description}
-                              style={{width: '50rem'}}>
+                              style={{width: '48rem'}}>
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
                          onChange={v => this.setState({populationChecked: true})}
-                         checked={this.state.populationChecked}/>
+                         checked={populationChecked}/>
             <label style={styles.text}>Yes, my study will focus on one or more specific
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
@@ -999,16 +1072,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 <CheckBox
                     wrapperStyle={styles.checkboxRow}
                     style={styles.checkboxStyle}
+                    data-test-id='other-specialPopulation-checkbox'
                     label='Other'
                     labelStyle={styles.text}
                     checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
-                    disabled={!this.state.populationChecked}
+                    disabled={!populationChecked}
                 />
                 <TextInput type='text' autoFocus placeholder='Please specify'
                            value={this.state.workspace.researchPurpose.otherPopulationDetails}
                            disabled={!fp.includes(SpecificPopulationEnum.OTHER,
                              this.state.workspace.researchPurpose.populationDetails)}
+                           data-test-id='other-specialPopulation-text'
                            onChange={v => this.setState(fp.set(
                              ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
               </FlexColumn>
@@ -1024,7 +1099,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                          style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
-                         checked={!this.state.populationChecked}/>
+                         checked={populationChecked === false}/>
             <label style={styles.text}>No, my study will not center on underrepresented populations.
               I am interested in a diverse sample in general, or I am focused on populations that
               have been well represented in prior research.</label>
@@ -1074,7 +1149,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
-                             checked={this.state.workspace.researchPurpose.reviewRequested}/>
+                             checked={reviewRequested}/>
                 <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
                   a review of my research purpose.</label>
                 </FlexRow>
@@ -1084,7 +1159,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', false);
                              }}
-                             checked={!this.state.workspace.researchPurpose.reviewRequested}/>
+                             checked={
+                               reviewRequested === false}/>
                 <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
                   have no concerns at this time about potential stigmatization based on my study.</label>
                 </FlexRow>
@@ -1102,19 +1178,27 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <TooltipTrigger content={
               errors && <ul>
                 {errors.name && <div>{errors.name}</div>}
-                {errors.billingAccountName && <div>You must select a billing account</div>}
-                {errors.primaryPurpose && <div>You must choose at least one primary research
+                {errors.billingAccountName && <div>
+                  You must select a billing account</div>}
+                {errors.primaryPurpose && <div> You must choose at least one primary research
                   purpose (Question 1)</div>}
-                {errors.anticipatedFindings && <div>Answer for <i>What are the anticipated findings
-                  from the study? (Question # 2.1)</i> cannot be empty</div>}
-                {errors.scientificApproach && <div>Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question # 2.2)</i> cannot be empty</div>}
-                {errors.intendedStudy && <div>Answer for<i>What are the specific
-                  scientific question(s) you intend to study (Question # 2.3)</i> cannot be empty</div>}
-                {errors.specificPopulation && <div>You must specify a population of study</div>}
-                {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
-                {errors.researchOutcoming && <div>You must specify the outcome of the research</div>}
-                {errors.disseminate && <div>You must specific how you plan to disseminate your research findings</div>}
+                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
+                {errors.otherPrimaryPurpose && <div> Other primary purpose should be of at most 500 characters</div>}
+                {errors.anticipatedFindings && <div> Answer for <i>What are the anticipated findings
+                  from the study? (Question 2.1)</i> cannot be empty</div>}
+                {errors.scientificApproach && <div> Answer for <i>What are the scientific
+                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</div>}
+                {errors.intendedStudy && <div> Answer for<i>What are the specific scientific question(s) you intend to study
+                  (Question 2.3)</i> cannot be empty</div>}
+                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings (Question 3)</div>}
+                {errors.otherDisseminateResearchFindings && <div>
+                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</div>}
+                {errors.researchOutcoming && <div> You must specify the outcome of the research (Question 4)</div>}
+                {errors.populationChecked && <div>You must pick an answer Population of interest question (Question 5)</div>}
+                {errors.specificPopulation && <div> You must specify a population of study (Question 5)</div>}
+                {errors.otherSpecificPopulation && <div>
+                    Specific Population Other text should not be blank and should be at most 100 characters</div>}
+                {errors.reviewRequested && <div>You must pick an answer for review of stigmatizing research (Question 6)</div>}
               </ul>
             } disabled={!errors}>
               <Button type='primary'
