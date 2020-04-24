@@ -512,6 +512,8 @@ dependencies {
 
   compile "org.json:json:20160810"
 
+  compile "org.springframework:spring-web:5.0.16.RELEASE"
+
   compile("org.springframework.boot:spring-boot-starter-actuator:$project.ext.SPRING_BOOT_VERSION") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
