@@ -539,24 +539,25 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * options.
      */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-      return <div key={item.label}><div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
+      return <div key={item.label}>
+        <div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
         {item.subCategory.map((sub, index) =>
             <FlexRow key={sub.label} style={{...styles.categoryRow, paddingTop: '0rem'}}>
-          <CheckBox
-              manageOwnState={false}
-              wrapperStyle={styles.checkboxRow}
-              data-test-id={sub.shortName + '-checkbox'}
-              style={{...styles.checkboxStyle, marginTop: '0.1rem'}}
-              key={sub.label}
-              checked={this.specificPopulationCheckboxSelected(sub.shortName)}
-              onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
-              disabled={!this.state.populationChecked}/>
-          <FlexColumn>
-            <label style={styles.text}>
-              {sub.label}
-            </label>
-          </FlexColumn>
-        </FlexRow>)}
+              <CheckBox
+                  manageOwnState={false}
+                  wrapperStyle={styles.checkboxRow}
+                  data-test-id={sub.shortName + '-checkbox'}
+                  style={{...styles.checkboxStyle, marginTop: '0.1rem'}}
+                  key={sub.label}
+                  checked={this.specificPopulationCheckboxSelected(sub.shortName)}
+                  onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
+                  disabled={!this.state.populationChecked}/>
+              <FlexColumn>
+                <label style={styles.text}>
+                  {sub.label}
+                </label>
+              </FlexColumn>
+            </FlexRow>)}
       </div>;
     }
 
