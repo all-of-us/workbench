@@ -970,7 +970,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
-        <WorkspaceEditSection header='Research Use Statement Questions' largeHeader
+        <WorkspaceEditSection header='Research Use Statement Questions' largeHeader={true}
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>
