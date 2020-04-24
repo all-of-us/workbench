@@ -632,16 +632,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px',
               border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
               {
-                areaOfResearchCharactersRemaining > 0 && <div data-test-id='charRemaining'>
-                  {areaOfResearchCharactersRemaining} characters remaining</div>
+                areaOfResearchCharactersRemaining >= 0 && <div>{areaOfResearchCharactersRemaining} characters remaining</div>
               }
               {
-                areaOfResearchCharactersRemaining === 0 && <div data-test-id='charRemaining' style={{color: colors.danger}}>
-                  {areaOfResearchCharactersRemaining} characters remaining</div>
-              }
-              {
-                areaOfResearchCharactersRemaining < 0 && <div data-test-id='charOver' style={{color: colors.danger}}>
-                  {-areaOfResearchCharactersRemaining} characters over</div>
+                areaOfResearchCharactersRemaining < 0 && <div>{-areaOfResearchCharactersRemaining} characters over</div>
               }
             </FlexRow>
           </Section>
