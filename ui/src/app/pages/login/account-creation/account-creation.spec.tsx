@@ -14,12 +14,8 @@ const component = () => {
   return mount(<AccountCreation {...props}/>);
 };
 
-function getCharactersRemainingProps(wrapper: ReactWrapper) {
-  return wrapper.find('[data-test-id="charRemaining"]').get(0).props;
-}
-
-function getCharactersOverProps(wrapper: ReactWrapper) {
-  return wrapper.find('[data-test-id="charOver"]').get(0).props;
+function getCharactersLimitProps(wrapper: ReactWrapper) {
+  return wrapper.find('[data-test-id="characterLimit"]').get(0).props;
 }
 
 const defaultConfig = {gsuiteDomain: 'researchallofus.org'};
@@ -185,19 +181,18 @@ it('should display characters over message if research purpose character length 
   const wrapper = component();
 
   const areaOfResearchTextBox = wrapper.find('[id="areaOfResearch"]');
-  expect(getCharactersRemainingProps(wrapper).children)
-    .toEqual([2000, ' characters remaining']);
+  expect(getCharactersLimitProps(wrapper).children).toEqual('2000 characters remaining');
 
   let testInput = fp.repeat(2000, 'a');
   areaOfResearchTextBox.find('textarea#areaOfResearch').simulate('change', {target: {value: testInput}});
-  expect(getCharactersRemainingProps(wrapper).children)
-    .toEqual([0, ' characters remaining']);
-  expect(getCharactersRemainingProps(wrapper).style.color).toBe(colors.danger);
+  expect(getCharactersLimitProps(wrapper).children)
+    .toEqual('0 characters remaining');
+  expect(getCharactersLimitProps(wrapper).style.color).toBe(colors.danger);
 
   testInput = fp.repeat(2010, 'a');
   areaOfResearchTextBox.find('textarea#areaOfResearch').simulate('change', {target: {value: testInput}});
-  expect(getCharactersOverProps(wrapper).children).toEqual([10, ' characters over']);
-  expect(getCharactersOverProps(wrapper).style.color).toBe(colors.danger);
+  expect(getCharactersLimitProps(wrapper).children).toEqual('10 characters over');
+  expect(getCharactersLimitProps(wrapper).style.color).toBe(colors.danger);
   // Characters remaining message should not be displayed
   expect(wrapper.find('[data-test-id="charRemaining"]').get(0)).toBeUndefined();
 });

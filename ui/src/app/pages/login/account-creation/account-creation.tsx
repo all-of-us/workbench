@@ -7,8 +7,7 @@ import {
   ErrorMessage,
   FormValidationErrorMessage,
   RadioButton,
-  styles as inputStyles,
-  TextArea,
+  styles as inputStyles, TextAreaWithLengthValidationMessage,
   TextInput
 } from 'app/components/inputs';
 
@@ -17,7 +16,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   EducationalRole,
   IndustryRole,
@@ -435,8 +434,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </TooltipTrigger>
       </div>;
 
-    const areaOfResearchCharactersRemaining = 2000 - areaOfResearch.length;
-
     const errors = this.validate();
 
     return <div id='account-creation'
@@ -621,30 +618,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             style={{marginTop: '2rem'}}
             sectionHeaderStyles={{borderBottom: null}}
           >
-            <TextArea style={{height: '15rem', resize: 'none', width: '26rem', borderRadius: '3px 3px 0 0',
-              borderColor: colorWithWhiteness(colors.dark, 0.5)}}
-                      id='areaOfResearch'
-                      name='areaOfResearch'
-                      placeholder='Describe Your Current Research'
-                      value={areaOfResearch}
-                      onChange={v => this.updateProfileObject('areaOfResearch', v)}/>
-            <FlexRow style={{justifyContent: 'flex-end', width: '26rem',
-              backgroundColor: colorWithWhiteness(colors.primary, 0.85), fontSize: 12,
-              color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px',
-              border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
-              {
-                areaOfResearchCharactersRemaining > 0 && <div data-test-id='charRemaining'>
-                  {areaOfResearchCharactersRemaining} characters remaining</div>
-              }
-              {
-                areaOfResearchCharactersRemaining === 0 && <div data-test-id='charRemaining' style={{color: colors.danger}}>
-                  {areaOfResearchCharactersRemaining} characters remaining</div>
-              }
-              {
-                areaOfResearchCharactersRemaining < 0 && <div data-test-id='charOver' style={{color: colors.danger}}>
-                  {-areaOfResearchCharactersRemaining} characters over</div>
-              }
-            </FlexRow>
+            <TextAreaWithLengthValidationMessage
+              id={'areaOfResearch'}
+              initialText={areaOfResearch}
+              maxCharacters={2000}
+              onChange={(s: string) => this.updateProfileObject('areaOfResearch', s)}
+              tooLongWarningCharacters={1900}
+            />
           </Section>
           {/* TODO(RW-4361): remove after we switch to verified institutional affiliation */}
           {!requireInstitutionalVerification && <React.Fragment>

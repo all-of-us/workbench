@@ -1021,21 +1021,30 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[2]}
-                          researchValue={this.state.workspace.researchPurpose.intendedStudy}
-                          onChange={v => this.updateResearchPurpose('intendedStudy', v)}
-                          index='2.1' rowId='intendedStudyText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[2]}
+                researchValue={this.state.workspace.researchPurpose.intendedStudy}
+                onChange={v => this.updateResearchPurpose('intendedStudy', v)}
+                index='2.1'
+                id='intendedStudyText'
+            />
 
             {/* TextBox: scientific approaches section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[3]}
-                           researchValue={this.state.workspace.researchPurpose.scientificApproach}
-                            onChange={v => this.updateResearchPurpose('scientificApproach', v)}
-                           index='2.2' rowId='scientificApproachText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[3]}
+                researchValue={this.state.workspace.researchPurpose.scientificApproach}
+                onChange={v => this.updateResearchPurpose('scientificApproach', v)}
+                index='2.2'
+                id='scientificApproachText'
+            />
             {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[4]}
-                           researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
-                           onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
-                           index='2.3' rowId='anticipatedFindingsText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[4]}
+                researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
+                onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
+                index='2.3'
+                id='anticipatedFindingsText'
+            />
           </FlexColumn>
         </WorkspaceEditSection>
 
@@ -1209,12 +1218,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   purpose (Question 1)</li>}
                 {errors.diseaseOfFocus && <li> You must specify a disease of focus and it should be at most 80 characters</li>}
                 {errors.otherPrimaryPurpose && <li> Other primary purpose should be of at most 500 characters</li>}
-                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
-                  from the study? (Question 2.1)</i> cannot be empty</li>}
-                {errors.scientificApproach && <li> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</li>}
                 {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question 2.3)</i> cannot be empty</li>}
+                  (Question 2.1)</i> must be between 0 and 1000 characters</li>}
+                {errors.scientificApproach && <li> Answer for <i>What are the scientific
+                  approaches you plan to use for your study (Question 2.2)</i> must be between 0 and 1000 characters</li>}
+                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
+                  from the study? (Question 2.3)</i> must be between 0 and 1000 characters</li>}
                 {errors.disseminate && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
                 {errors.otherDisseminateResearchFindings && <li>
                     Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}
