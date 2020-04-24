@@ -2,7 +2,17 @@ import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
 import * as React from 'react';
+
+const styles = reactStyles({
+  label: {
+    marginLeft: '0.3rem',
+    color: colors.accent,
+    fontSize: '12px',
+    fontWeight: 400
+  }
+});
 
 const css = `
   .pointer {
@@ -45,7 +55,7 @@ export const PubliclyDisplayed = (props) => {
       {css}
     </style>
     <div className='pointer' style={props.style}>
-      <label style={{fontSize: 12, fontWeight: 400, marginLeft: '0.3rem', color: colors.accent}}>
+      <label style={styles.label}>
         Publicly displayed
         <TooltipTrigger content={toolTipContent} side='right'>
           <InfoIcon style={{marginLeft: '0.5rem', width: '0.7rem'}}/>

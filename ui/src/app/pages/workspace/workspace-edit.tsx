@@ -10,6 +10,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -156,6 +157,11 @@ export const styles = reactStyles({
     borderRadius: '6px',
     marginRight: '20px',
     marginBottom: '5px'
+  },
+  researchPurposeDescription: {
+    marginLeft: '-0.9rem',
+    fontSize: 14,
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85)
   }
 });
 
@@ -430,10 +436,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     renderBillingDescription() {
       return <div>
-        The <i>All of Us</i> Program provides free credits for each registered user. If you use up your free credits,
-        you can request additional credits or use your own <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
-        'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>Google Cloud Platform
-        billing account</StyledAnchorTag>
+        The <i>All of Us</i> Program provides $300 in free credits per user. Please refer to
+        <StyledAnchorTag href={'https://aousupporthelp.zendesk.com/hc/en-us/sections' +
+        '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
+        </StyledAnchorTag> to learn more about the free credit
+        program and how it can be used. Once you have used up your free credits, you can request
+        additional credits by <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
+      'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>
+        &nbsp;contacting support</StyledAnchorTag>.
       </div>;
     }
 
@@ -923,7 +933,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         {serverConfigStore.getValue().enableBillingUpgrade &&
           (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
-                                description={this.renderBillingDescription()}>
+                                description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
               Select account
             </div>
@@ -953,17 +963,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-              description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
+              description={<div style={styles.researchPurposeDescription}>
+                <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>
-              <i>Note that you are required to create separate Workspaces for each project
-                for which you access All of Us data, hence the responses below are expected
-                to be specific to the project for which you are creating this particular
-                Workspace.</i></div>
+              </div></div>
             }/>
 
         {/*Primary purpose */}
-        <WorkspaceEditSection header={researchPurposeQuestions[0].header}
-            description={researchPurposeQuestions[0].description} index='1.' indent>
+          <WorkspaceEditSection header={researchPurposeQuestions[0].header} publiclyDisplayed={true}
+                                description={researchPurposeQuestions[0].description} index='1.'
+                                indent={true}>
           <FlexRow>
             <FlexColumn>
               <FlexColumn  style={styles.researchPurposeRow}>
@@ -999,7 +1008,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
         <WorkspaceEditSection
-          header={researchPurposeQuestions[1].header} indent
+          header={researchPurposeQuestions[1].header} indent={true} publiclyDisplayed={true}
           description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
@@ -1049,9 +1058,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </WorkspaceEditSection>
 
           {/*Underrespresented population section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
+        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent={true}
                               description={researchPurposeQuestions[7].description}
-                              style={{width: '48rem'}}>
+                              style={{width: '48rem'}} publiclyDisplayed={true}>
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
@@ -1110,7 +1119,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
           {/* Request for review section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent>
+        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent={true}>
           <FlexRow style={styles.text}><div>
             Any research that focuses on certain population characteristics or&nbsp;
             <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
@@ -1179,30 +1188,30 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               Cancel
             </Button>
             <TooltipTrigger content={
-              errors && <ul>
-                {errors.name && <div>{errors.name}</div>}
-                {errors.billingAccountName && <div>
-                  You must select a billing account</div>}
-                {errors.primaryPurpose && <div> You must choose at least one primary research
-                  purpose (Question 1)</div>}
-                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
-                {errors.otherPrimaryPurpose && <div> Other primary purpose should be of at most 500 characters</div>}
-                {errors.anticipatedFindings && <div> Answer for <i>What are the anticipated findings
-                  from the study? (Question 2.1)</i> cannot be empty</div>}
-                {errors.scientificApproach && <div> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</div>}
-                {errors.intendedStudy && <div> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question 2.3)</i> cannot be empty</div>}
-                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings (Question 3)</div>}
-                {errors.otherDisseminateResearchFindings && <div>
-                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</div>}
-                {errors.researchOutcoming && <div> You must specify the outcome of the research (Question 4)</div>}
-                {errors.populationChecked && <div>You must pick an answer Population of interest question (Question 5)</div>}
-                {errors.specificPopulation && <div> You must specify a population of study (Question 5)</div>}
-                {errors.otherSpecificPopulation && <div>
-                    Specific Population Other text should not be blank and should be at most 100 characters</div>}
-                {errors.reviewRequested && <div>You must pick an answer for review of stigmatizing research (Question 6)</div>}
-              </ul>
+              errors && <BulletAlignedUnorderedList>
+                {errors.name && <li>{errors.name}</li>}
+                {errors.billingAccountName && <li>
+                  You must select a billing account</li>}
+                {errors.primaryPurpose && <li> You must choose at least one primary research
+                  purpose (Question 1)</li>}
+                {errors.diseaseOfFocus && <li> You must specify a disease of focus and it should be at most 80 characters</li>}
+                {errors.otherPrimaryPurpose && <li> Other primary purpose should be of at most 500 characters</li>}
+                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
+                  from the study? (Question 2.1)</i> cannot be empty</li>}
+                {errors.scientificApproach && <li> Answer for <i>What are the scientific
+                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</li>}
+                {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
+                  (Question 2.3)</i> cannot be empty</li>}
+                {errors.disseminate && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
+                {errors.otherDisseminateResearchFindings && <li>
+                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}
+                {errors.researchOutcoming && <li> You must specify the outcome of the research (Question 4)</li>}
+                {errors.populationChecked && <li>You must pick an answer Population of interest question (Question 5)</li>}
+                {errors.specificPopulation && <li> You must specify a population of study (Question 5)</li>}
+                {errors.otherSpecificPopulation && <li>
+                    Specific Population Other text should not be blank and should be at most 100 characters</li>}
+                {errors.reviewRequested && <li>You must pick an answer for review of stigmatizing research (Question 6)</li>}
+              </BulletAlignedUnorderedList>
             } disabled={!errors}>
               <Button type='primary'
                       onClick={() => this.setState({showConfirmationModal: true})}

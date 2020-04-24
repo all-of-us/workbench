@@ -131,6 +131,8 @@ interface SignInState {
   // Tracks the Terms of Service version that was viewed and acknowledged by the user.
   // This is an optional parameter in the createUser API call.
   termsOfServiceVersion?: number;
+  // Page has been loaded by clicking Previous Button
+  isPreviousStep: boolean;
 }
 
 export const createEmptyProfile = (requireInstitutionalVerification: boolean = false): Profile => {
@@ -196,7 +198,8 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
       // This defines the profile state for a new user flow. This will get passed to each
       // step component as a prop. When each sub-step completes, it will pass the updated Profile
       // data in its onComplete callback.
-      profile: createEmptyProfile(this.props.serverConfig.requireInstitutionalVerification)
+      profile: createEmptyProfile(this.props.serverConfig.requireInstitutionalVerification),
+      isPreviousStep: false
     };
   }
 
@@ -274,13 +277,15 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
     const onComplete = (profile: Profile) => {
       this.setState({
         profile: profile,
-        currentStep: this.getNextStep(currentStep)
+        currentStep: this.getNextStep(currentStep),
+        isPreviousStep: false
       });
     };
     const onPrevious = (profile: Profile) => {
       this.setState({
         profile: profile,
-        currentStep: this.getPreviousStep(currentStep)
+        currentStep: this.getPreviousStep(currentStep),
+        isPreviousStep: true
       });
     };
 
@@ -295,7 +300,8 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
       case SignInStep.INVITATION_KEY:
         return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
           invitationKey: key,
-          currentStep: this.getNextStep(currentStep)
+          currentStep: this.getNextStep(currentStep),
+          isPreviousStep: false
         })}/>;
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
@@ -304,9 +310,10 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
             AnalyticsTracker.Registration.TOS();
             this.setState({
               termsOfServiceVersion: 1,
-              currentStep: this.getNextStep(currentStep)
+              currentStep: this.getNextStep(currentStep),
+              isPreviousStep: false
             });
-          }}/>;
+          }} afterPrev={this.state.isPreviousStep}/>;
       case SignInStep.INSTITUTIONAL_AFFILIATION:
         return <AccountCreationInstitution
           profile={this.state.profile}

@@ -7,6 +7,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
 import {ValidationIcon} from 'app/components/icons';
 import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
@@ -104,6 +105,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
         loadingInstitutions: false,
         institutions: fp.sortBy( institution => institution.displayName, details.institutions)
       });
+      // Check email and populate appropriate icon In case page is loaded :
+      // after clicking PREVIOUS BUTTON from step 3 or
+      // if the fields were populated and researcher moves to TOS and back
+      if (this.props.profile && this.props.profile.contactEmail) {
+        this.checkEmail();
+      }
     } catch (e) {
       this.setState({
         loadingInstitutions: false,
@@ -449,9 +456,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </Button>
             <TooltipTrigger content={errors && <div data-test-id='validation-errors'>
               <div>Please review the following: </div>
-              <ul>
+              <BulletAlignedUnorderedList>
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
-              </ul>
+              </BulletAlignedUnorderedList>
             </div>} disabled={!errors}>
               <Button data-test-id='submit-button'
                       disabled={loadingInstitutions || errors != null}

@@ -37,6 +37,8 @@ export interface AccountCreationTosProps {
   onComplete: () => void;
   // Path to the Terms of Service PDF file to be displayed.
   pdfPath: string;
+  // Coming from Institution page
+  afterPrev: boolean;
 }
 
 interface AccountCreationTosState {
@@ -56,9 +58,9 @@ export class AccountCreationTos extends React.Component<
   constructor(props: AccountCreationTosProps) {
     super(props);
     this.state = {
-      hasReadEntireTos: false,
-      hasAckedPrivacyStatement: false,
-      hasAckedTermsOfService: false,
+      hasReadEntireTos: props.afterPrev,
+      hasAckedPrivacyStatement: props.afterPrev,
+      hasAckedTermsOfService: props.afterPrev,
       loadingPdf: true,
       numPages: 0,
     };
@@ -88,7 +90,7 @@ export class AccountCreationTos extends React.Component<
           </div>
           <div style={{marginBottom: '.25rem'}}>
             <CheckBox data-test-id='privacy-statement-check'
-                      checked={false}
+                      checked={hasAckedPrivacyStatement}
                       disabled={!hasReadEntireTos}
                       onChange={checked => this.setState({hasAckedPrivacyStatement: checked})}
                       style={styles.checkbox}
@@ -101,7 +103,7 @@ export class AccountCreationTos extends React.Component<
             /></div>
           <div>
             <CheckBox data-test-id='terms-of-service-check'
-                      checked={false}
+                      checked={hasAckedTermsOfService}
                       disabled={!hasReadEntireTos}
                       onChange={checked => this.setState({hasAckedTermsOfService: checked})}
                       style={styles.checkbox}

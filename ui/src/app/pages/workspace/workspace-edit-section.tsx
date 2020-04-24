@@ -1,6 +1,7 @@
 import {FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
@@ -34,6 +35,7 @@ export const styles = reactStyles({
 interface Props {
   children?: string | React.ReactNode;
   description?: string | React.ReactNode;
+  descriptionStyle?: React.CSSProperties;
   header: any;
   index?: string;
   indent?: boolean;
@@ -42,6 +44,7 @@ interface Props {
   tooltip?: React.ReactNode;
   subHeader?: string;
   style?: any;
+  publiclyDisplayed?: boolean;
 }
 
 export const WorkspaceEditSection = (props: Props) => {
@@ -55,6 +58,8 @@ export const WorkspaceEditSection = (props: Props) => {
           fontSize: (props.largeHeader ? 20 : 16)}}>
           {props.header}
         </div>
+        {props.publiclyDisplayed &&
+        <PubliclyDisplayed style={{marginLeft: '1.5rem', marginTop: '-0.1rem'}}/>}
       </FlexRow>}
       {!props.index &&
       <div style={{...styles.header,
@@ -75,7 +80,7 @@ export const WorkspaceEditSection = (props: Props) => {
       {props.subHeader}
     </div>
     }
-    <div style={{...styles.text, marginLeft: '0.9rem'}}>
+    <div style={{...styles.text, marginLeft: '0.9rem', ...props.descriptionStyle}}>
       {props.description}
     </div>
     <div style={{marginTop: '0.5rem', marginLeft: (props.indent ? '0.9rem' : '0rem')}}>
