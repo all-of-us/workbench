@@ -1,4 +1,4 @@
-import GoogleLoginPage, {SELECTOR} from 'app/google-login';
+import GoogleLoginPage, {SELECTOR} from 'app/page/google-login';
 import {config} from 'resources/workbench-config';
 
 

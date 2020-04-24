@@ -98,10 +98,10 @@ export function domainToTitle(domain: any): string {
 export function typeToTitle(_type: string): string {
   switch (_type) {
     case CriteriaType[CriteriaType.AGE]:
-      _type = 'Age/Deceased';
+      _type = 'Age';
       break;
     case CriteriaType[CriteriaType.DECEASED]:
-      _type = 'Age/Deceased';
+      _type = 'Deceased';
       break;
     case CriteriaType[CriteriaType.ETHNICITY]:
       _type = 'Ethnicity';

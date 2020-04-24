@@ -1,10 +1,11 @@
-import Link from 'app/aou-elements/link';
-import DataPage from 'app/data-page';
-import WorkspacesPage, {FIELD} from 'app/workspaces-page';
-import {signIn} from 'tests/app';
-import Button from 'app/aou-elements/button';
-import * as testData from 'resources/workspace-data';
+import Link from 'app/element/link';
+import DataPage from 'app/page/data-page';
+import WorkspacesPage, {FIELD} from 'app/page/workspaces-page';
+import {signIn} from 'utils/app-utils';
+import Button from 'app/element/button';
+import * as testData from 'resources/data/workspace-data';
 import {performActions} from 'utils/test-utils';
+import {makeWorkspaceName} from 'utils/str-utils';
 
 describe('Creating new workspaces', () => {
 
@@ -13,7 +14,7 @@ describe('Creating new workspaces', () => {
   });
 
   test('Create workspace - NO request for review', async () => {
-    const newWorkspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
+    const newWorkspaceName = makeWorkspaceName();
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
@@ -66,6 +67,7 @@ describe('Creating new workspaces', () => {
     await workspacesPage.waitUntilNoSpinner();
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
+
   });
 
   // helper function to check visible workspace link on Data page

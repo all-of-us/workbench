@@ -70,6 +70,7 @@ export class AccountCreationTos extends React.Component<
     return <FlexColumn data-test-id='account-creation-tos'
                        style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
       <PdfViewer
+          containerStyles={{backgroundColor: colors.white}}
           onLastPageRender={() => this.setState({hasReadEntireTos: true})}
           pdfPath={this.props.pdfPath}
       />

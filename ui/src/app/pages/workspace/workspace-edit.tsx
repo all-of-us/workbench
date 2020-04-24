@@ -208,6 +208,7 @@ export interface WorkspaceEditState {
   showResearchPurpose: boolean;
   billingAccounts: Array<BillingAccount>;
   showCreateBillingAccountModal: boolean;
+  showConfirmationModal: boolean;
   populationChecked: boolean;
 }
 
@@ -231,7 +232,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         showStigmatizationDetails: false,
         billingAccounts: [],
         showCreateBillingAccountModal: false,
-        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false,
+        showConfirmationModal: false,
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
       };
     }
 
@@ -329,7 +331,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             ethics: false,
             populationDetails: [],
             populationHealth: false,
-            reviewRequested: false,
+            reviewRequested: undefined,
             socialBehavioral: false,
             reasonForAllOfUs: '',
           }
@@ -428,10 +430,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     renderBillingDescription() {
       return <div>
-        The <i>All of Us</i> Program provides free credits for each registered user. If you use up your free credits,
-        you can request additional credits or use your own <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
-        'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>Google Cloud Platform
-        billing account</StyledAnchorTag>
+        The <i>All of Us</i> Program provides $300 in free credits per user. Please refer to
+        <StyledAnchorTag href={'https://aousupporthelp.zendesk.com/hc/en-us/sections' +
+        '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
+        </StyledAnchorTag> to learn more about the free credit
+        program and how it can be used. Once you have used up your free credits, you can request
+        additional credits by <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
+      'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>
+        &nbsp;contacting support</StyledAnchorTag>.
       </div>;
     }
 
@@ -504,9 +510,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (rp.label === 'Other') {
         children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
                              onChange={v => this.updateOtherDisseminateResearch(v)}
-                             placeholder='Specify the name of the forum (journal, scientific
-                             conference, blog etc.) through which you will disseminate your
-                             findings, if available.'
+                             placeholder={'Specify the name of the forum (journal, scientific conference, blog etc.)' +
+                             ' through which you will disseminate your findings, if available.'}
                              data-test-id='otherDisseminateResearch-text'
                              disabled={!this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)}
                              style={{marginTop: '0.5rem', width: '16rem'}}/>;
@@ -604,9 +609,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get isOtherSpecificPopulationValid() {
       const researchPurpose = this.state.workspace.researchPurpose;
-      return this.isSpecificPopulationValid && (
-          !fp.includes(SpecificPopulationEnum.OTHER, researchPurpose.populationDetails) ||
-          (researchPurpose.otherPopulationDetails && researchPurpose.otherPopulationDetails.length <= 100));
+      // Avoids null pointers. We don't want to show this error message if nothing is selected yet.
+      if (!this.isSpecificPopulationValid) {
+        return true;
+      }
+      return !fp.includes(SpecificPopulationEnum.OTHER, researchPurpose.populationDetails) ||
+          (researchPurpose.otherPopulationDetails && researchPurpose.otherPopulationDetails.length <= 100);
     }
 
     get isDiseaseOfFocusValid() {
@@ -820,15 +828,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     render() {
       const {
+        populationChecked,
         workspace: {
           name,
           billingAccountName,
           researchPurpose: {
             anticipatedFindings,
             intendedStudy,
-            scientificApproach
+            scientificApproach,
+            reviewRequested
           }
-        }
+        },
+        showConfirmationModal
       } = this.state;
       const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
@@ -839,6 +850,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         billingAccountName,
         anticipatedFindings,
         intendedStudy,
+        populationChecked,
+        reviewRequested,
         scientificApproach,
         'primaryPurpose': this.primaryPurposeIsSelected,
         'otherPrimaryPurpose': this.isOtherPrimaryPurposeValid,
@@ -854,7 +867,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         },
         billingAccountName: { presence: true },
         intendedStudy: { length: { minimum: 1, maximum: 1000 } },
+        populationChecked: { presence: true },
         anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
+        reviewRequested: { presence: true },
         scientificApproach: { length: { minimum: 1, maximum: 1000 } },
         primaryPurpose: { truthiness: true },
         otherPrimaryPurpose: {truthiness: true},
@@ -912,7 +927,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         {serverConfigStore.getValue().enableBillingUpgrade &&
           (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
-                                description={this.renderBillingDescription()}>
+                                description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
               Select account
             </div>
@@ -1046,7 +1061,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
                          onChange={v => this.setState({populationChecked: true})}
-                         checked={this.state.populationChecked}/>
+                         checked={populationChecked}/>
             <label style={styles.text}>Yes, my study will focus on one or more specific
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
@@ -1069,7 +1084,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     labelStyle={styles.text}
                     checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
-                    disabled={!this.state.populationChecked}
+                    disabled={!populationChecked}
                 />
                 <TextInput type='text' autoFocus placeholder='Please specify'
                            value={this.state.workspace.researchPurpose.otherPopulationDetails}
@@ -1091,7 +1106,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                          style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
-                         checked={!this.state.populationChecked}/>
+                         checked={populationChecked === false}/>
             <label style={styles.text}>No, my study will not center on underrepresented populations.
               I am interested in a diverse sample in general, or I am focused on populations that
               have been well represented in prior research.</label>
@@ -1141,7 +1156,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
-                             checked={this.state.workspace.researchPurpose.reviewRequested}/>
+                             checked={reviewRequested}/>
                 <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
                   a review of my research purpose.</label>
                 </FlexRow>
@@ -1151,7 +1166,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', false);
                              }}
-                             checked={!this.state.workspace.researchPurpose.reviewRequested}/>
+                             checked={
+                               reviewRequested === false}/>
                 <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
                   have no concerns at this time about potential stigmatization based on my study.</label>
                 </FlexRow>
@@ -1173,25 +1189,27 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   You must select a billing account</div>}
                 {errors.primaryPurpose && <div> You must choose at least one primary research
                   purpose (Question 1)</div>}
+                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
                 {errors.otherPrimaryPurpose && <div> Other primary purpose should be of at most 500 characters</div>}
                 {errors.anticipatedFindings && <div> Answer for <i>What are the anticipated findings
-                  from the study? (Question # 2.1)</i> cannot be empty</div>}
+                  from the study? (Question 2.1)</i> cannot be empty</div>}
                 {errors.scientificApproach && <div> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question # 2.2)</i> cannot be empty</div>}
+                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</div>}
                 {errors.intendedStudy && <div> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question # 2.3)</i> cannot be empty</div>}
-                {errors.specificPopulation && <div> You must specify a population of study</div>}
-                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
-                {errors.researchOutcoming && <div> You must specify the outcome of the research</div>}
-                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings</div>}
+                  (Question 2.3)</i> cannot be empty</div>}
+                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings (Question 3)</div>}
                 {errors.otherDisseminateResearchFindings && <div>
-                  Disseminate Research Findings Other text should be of at most 100 characters</div>}
+                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</div>}
+                {errors.researchOutcoming && <div> You must specify the outcome of the research (Question 4)</div>}
+                {errors.populationChecked && <div>You must pick an answer Population of interest question (Question 5)</div>}
+                {errors.specificPopulation && <div> You must specify a population of study (Question 5)</div>}
                 {errors.otherSpecificPopulation && <div>
-                  Specific Population Other text should be of at most 100 characters</div>}
+                    Specific Population Other text should not be blank and should be at most 100 characters</div>}
+                {errors.reviewRequested && <div>You must pick an answer for review of stigmatizing research (Question 6)</div>}
               </ul>
             } disabled={!errors}>
               <Button type='primary'
-                      onClick={() => this.onSaveClick()}
+                      onClick={() => this.setState({showConfirmationModal: true})}
                       disabled={errors || this.state.loading}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
@@ -1251,6 +1269,40 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </Button>
           </ModalFooter>
         </Modal>
+        }
+        {showConfirmationModal &&
+          <Modal width={500}>
+            <ModalTitle style={{fontSize: '16px', marginBottom: 0}}>
+              {this.renderButtonText()}
+            </ModalTitle>
+            <ModalBody style={{color: colors.primary, lineHeight: '1rem', marginTop: '0.25rem'}}>
+              <div>Your responses to these questions:</div>
+              <div style={{margin: '0.25rem 0 0.25rem 1rem'}}>
+                <span style={{fontWeight: 600}}>Primary purpose of your project</span> (Question 1)<br/>
+                <span style={{fontWeight: 600}}>Summary of research purpose</span> (Question 2)<br/>
+                <span style={{fontWeight: 600}}>Population of interest</span> (Question 5)<br/>
+              </div>
+              <div style={{marginBottom: '1rem'}}>
+                Will be
+                <a style={{color: colors.accent}}
+                  href='https://www.researchallofus.org/research-projects-directory/'
+                  target='_blank'> displayed publicly </a>
+                 to inform <i>All of Us</i> Research participants. Therefore, please verify that you have provided sufficiently detailed
+                 responses in plain language.
+              </div>
+              <div>You can also make changes to your answers after you create your workspace.</div>
+            </ModalBody>
+            <ModalFooter>
+              <Button type='secondary' style={{marginRight: '1rem'}}
+                onClick={() => this.setState({showConfirmationModal: false})}>
+                Keep Editing
+              </Button>
+              <Button type='primary' onClick={() => this.onSaveClick()}
+                data-test-id='workspace-confirm-save-btn'>
+                Confirm
+              </Button>
+            </ModalFooter>
+          </Modal>
         }
         </div>
       </FadeBox> ;

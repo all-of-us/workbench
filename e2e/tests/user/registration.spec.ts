@@ -1,5 +1,5 @@
-import CreateAccountPage from 'app/create-account-page';
-import GoogleLoginPage from 'app/google-login';
+import CreateAccountPage from 'app/page/create-account-page';
+import GoogleLoginPage from 'app/page/google-login';
 
 
 describe('User registration tests:', () => {
