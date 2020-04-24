@@ -30,7 +30,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-import {OutsideUnorderedList} from 'app/components/lists';
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
@@ -736,9 +736,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </Button>
             <TooltipTrigger content={errors && <React.Fragment>
               <div>Please review the following: </div>
-              <OutsideUnorderedList>
+              <BulletAlignedUnorderedList>
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
-              </OutsideUnorderedList>
+              </BulletAlignedUnorderedList>
             </React.Fragment>} disabled={!errors}>
               <Button disabled={this.state.usernameCheckInProgress ||
                                 this.isUsernameValidationError() ||

@@ -7,7 +7,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
 import {ValidationIcon} from 'app/components/icons';
 import {Error as ErrorDiv, styles as inputStyles} from 'app/components/inputs';
-import {OutsideUnorderedList} from 'app/components/lists';
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
@@ -448,9 +448,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </Button>
             <TooltipTrigger content={errors && <div data-test-id='validation-errors'>
               <div>Please review the following: </div>
-              <OutsideUnorderedList>
+              <BulletAlignedUnorderedList>
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
-              </OutsideUnorderedList>
+              </BulletAlignedUnorderedList>
             </div>} disabled={!errors}>
               <Button data-test-id='submit-button'
                       disabled={loadingInstitutions || errors != null}

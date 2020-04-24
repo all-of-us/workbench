@@ -10,6 +10,6 @@ export const CustomBulletListItem = ({bullet, children}) => {
   </React.Fragment>;
 };
 
-export const OutsideUnorderedList = ({style = {}, children}) => {
+export const BulletAlignedUnorderedList = ({style = {}, children}) => {
   return <ul style={{listStylePosition: 'outside', marginLeft: '1rem', ...style}}>{children}</ul>;
 };
