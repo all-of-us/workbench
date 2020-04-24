@@ -12,7 +12,7 @@
     "test:ci": "cross-env NODE_ENV=development WORKBENCH_ENV=dev CI=true jest --ci --runInBand --forceExit",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn run lint --fix",
-    "tsc-build": "tsc --skipLibCheck --project tsconfig.json",
+    "tsc-build": "tsc --build --clean && tsc --skipLibCheck --project tsconfig.json",
     "compile": "rimraf tsc-out/ && yarn run tsc-build"
   },
   "keywords": [
@@ -23,7 +23,7 @@
     "ui"
   ],
   "engines": {
-    "node": ">= 12.0.0"
+    "node": ">= 10.0.0"
   },
   "jest-junit": {
     "outputDirectory": "./logs",

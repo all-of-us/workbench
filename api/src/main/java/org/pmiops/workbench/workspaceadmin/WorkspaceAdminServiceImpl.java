@@ -65,12 +65,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, String workspaceName) {
     String bucketName =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspaceAsService(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
 
-    int notebookFilesCount =
-        notebooksService.getNotebooks(workspaceNamespace, workspaceName).size();
+    int notebookFilesCount = notebooksService.getNotebooksAsService(bucketName).size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
     long storageSizeBytes = getStorageSizeBytes(bucketName);
 

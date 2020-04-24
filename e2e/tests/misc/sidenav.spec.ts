@@ -1,10 +1,10 @@
-import Button from 'app/aou-elements/button';
-import HomePage from 'app/home-page';
-import ProfilePage from 'app/profile-page';
-import WorkspacesPage from 'app/workspaces-page';
+import Button from 'app/element/button';
+import HomePage from 'app/page/home-page';
+import ProfilePage from 'app/page/profile-page';
+import WorkspacesPage from 'app/page/workspaces-page';
 import {waitForExists} from 'driver/xpath-util';
-import {signIn} from 'tests/app';
-import {NavLink} from 'app/page-identifiers';
+import {signIn} from 'utils/app-utils';
+import Navigation, {NavLink} from 'app/component/navigation';
 
 export const HELP_DESK = {
   ASK_QUESTION: 'Ask a question about the Researcher Workbench',
@@ -20,10 +20,10 @@ describe('Sidebar Navigation', () => {
     await signIn(page);
   });
 
-  test('Check app side-nav work', async () => {
+  test('SideNav menu works', async () => {
     const homePage = new HomePage(page);
     // Select Profile link
-    await homePage.navTo(NavLink.PROFILE);
+    await Navigation.navMenu(page, NavLink.PROFILE);
     const profilePage = new ProfilePage(page);
     await profilePage.waitForLoad();
     expect(await profilePage.isLoaded()).toBe(true);
@@ -31,26 +31,25 @@ describe('Sidebar Navigation', () => {
     // check user name in dropdown matches names on Profile page
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();
-    await homePage.openSideNav();
+    await Navigation.openNavMenu(page);
     const displayedUsername = await homePage.getUserName();
     expect(displayedUsername).toBe(`${fname} ${lname}`);
 
     // Select Your Workspaces link
-    await homePage.navTo(NavLink.YOUR_WORKSPACES);
+    await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
     expect(await workspacesPage.isLoaded()).toBe(true);
 
     // Select Home link
-    await homePage.navTo(NavLink.HOME);
+    await Navigation.navMenu(page, NavLink.HOME);
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
   });
 
   test('User can see the Contact Us form', async () => {
-    const homePage = new HomePage(page);
     // Select Contact Us
-    await homePage.navTo(NavLink.CONTACT_US);
+    await Navigation.navMenu(page, NavLink.CONTACT_US);
 
     const iframeHandle: any = await page.waitForSelector('iframe[title="Find more information here"]', {visible: true});
     const newIframe = await iframeHandle.contentFrame();
@@ -78,9 +77,8 @@ describe('Sidebar Navigation', () => {
   });
 
   test('User can Sign Out', async () => {
-    const homePage = new HomePage(page);
     // Select Sign Out link
-    await homePage.navTo(NavLink.SIGN_OUT);
+    await Navigation.navMenu(page, NavLink.SIGN_OUT);
     await waitForExists(page, '//*[text()="Redirect Notice"]');
     const href = await page.evaluate(() => location.href);
     expect(href).toEqual(expect.stringMatching(/(\/|%2F)login$/));

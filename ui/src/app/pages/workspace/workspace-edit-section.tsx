@@ -35,6 +35,7 @@ export const styles = reactStyles({
 interface Props {
   children?: string | React.ReactNode;
   description?: string | React.ReactNode;
+  descriptionStyle?: React.CSSProperties;
   header: any;
   index?: string;
   indent?: boolean;
@@ -79,7 +80,7 @@ export const WorkspaceEditSection = (props: Props) => {
       {props.subHeader}
     </div>
     }
-    <div style={{...styles.text, marginLeft: '0.9rem'}}>
+    <div style={{...styles.text, marginLeft: '0.9rem', ...props.descriptionStyle}}>
       {props.description}
     </div>
     <div style={{marginTop: '0.5rem', marginLeft: (props.indent ? '0.9rem' : '0rem')}}>

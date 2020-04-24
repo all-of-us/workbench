@@ -140,17 +140,17 @@ public class ClusterController implements ClusterApiDelegate {
     }
     List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clustersToDelete =
         filterByClustersInList(
-                leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream(),
+                leonardoNotebooksClient.listClustersByProjectAsService(billingProjectId).stream(),
                 clusterNamesToDelete.getClustersToDelete())
             .collect(Collectors.toList());
 
     clustersToDelete.forEach(
         cluster ->
-            leonardoNotebooksClient.deleteClusterAsAdmin(
+            leonardoNotebooksClient.deleteClusterAsService(
                 cluster.getGoogleProject(), cluster.getClusterName()));
     List<ListClusterResponse> clustersInProjectAffected =
         filterByClustersInList(
-                leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream(),
+                leonardoNotebooksClient.listClustersByProjectAsService(billingProjectId).stream(),
                 clusterNamesToDelete.getClustersToDelete())
             .map(
                 leoCluster ->

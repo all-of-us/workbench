@@ -1,13 +1,13 @@
 import {Page} from 'puppeteer';
-import Textbox from './aou-elements/textbox';
-import AuthenticatedPage from './authenticated-page';
+import Textbox from 'app/element/textbox';
+import AuthenticatedPage from 'app/page/authenticated-page';
 
 
 export const PAGE = {
   TITLE: 'Profile',
 };
 
-export const FIELD_LABEL = {
+export const LABEL_ALIAS = {
   FIRST_NAME: 'First Name',
   LAST_NAME: 'Last Name',
   CONTACT_EMAIL: 'Contact Email',
@@ -37,11 +37,11 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async getFirstName(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {text: FIELD_LABEL.FIRST_NAME});
+    return await Textbox.forLabel(this.page, {text: LABEL_ALIAS.FIRST_NAME});
   }
 
   async getLastName(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {text: FIELD_LABEL.LAST_NAME});
+    return await Textbox.forLabel(this.page, {text: LABEL_ALIAS.LAST_NAME});
   }
 
 }

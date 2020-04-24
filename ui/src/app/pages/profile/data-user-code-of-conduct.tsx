@@ -145,7 +145,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                     data-test-id={'ducc-next-button'}
                     onClick={() => this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
                 >
-                  Accept
+                  Proceed
                 </Button>
               </FlexRow>
             </React.Fragment>
@@ -169,12 +169,11 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 </div>
                 <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
                   My work, including any external data, files, or software I upload into the
-                   Researcher Workbench, may be logged and monitored by the
-                   <i>All of Us</i> Research Program to ensure compliance with policies and
-                   procedures.
+                   Researcher Workbench, will be logged and monitored by the <i>All of Us</i> Research
+                   Program to ensure compliance with policies and procedures.
                 </InitialsAgreement>
                 <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
-                  My name, affiliation, profile information, and research description will be made
+                  My name, affiliation, profile information and research description will be made
                    public. My research description will be used by the <i>All of Us</i> Research
                    Program to provide participants with meaningful information about the research
                    being conducted.
@@ -197,8 +196,8 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I understand that failure to comply with these requirements may also carry
                    financial or legal repercussions. Any misuse of the <i>All of Us</i> Research
-                   Hub, Researcher Workbench, or the <i>All of Us</i> Research Program data is
-                   taken very seriously and other sanctions may be sought.
+                   Hub, Researcher Workbench or data resources is taken very seriously, and other
+                  sanctions may be sought.
                 </div>
                 <label style={{...styles.bold, ...styles.largeTopMargin}}>Authorized Data User Name</label>
                 <DuaTextInput

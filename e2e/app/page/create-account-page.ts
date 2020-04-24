@@ -1,19 +1,15 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import {defaultFieldValues} from '../resources/data/user-registration-fields';
-import Button from './aou-elements/button';
-import Checkbox from './aou-elements/checkbox';
-import ClrIconLink from './aou-elements/clr-icon-link';
-import SelectComponent from './aou-elements/select-component';
-import Textarea from './aou-elements/textarea';
-import Textbox from './aou-elements/textbox';
-import BasePage from './base-page';
+import {defaultFieldValues} from 'resources/data/user-registration-data';
+import Button from 'app/element/button';
+import Checkbox from 'app/element/checkbox';
+import ClrIconLink from 'app/element/clr-icon-link';
+import SelectMenu from 'app/component/select-menu';
+import Textarea from 'app/element/textarea';
+import Textbox from 'app/element/textbox';
+import BasePage from 'app/page/base-page';
 import {config} from 'resources/workbench-config';
 
 const faker = require('faker/locale/en_US');
-
-export const PAGE = {
-  TITLE: 'Sign In',
-};
 
 export const INSTITUTION_VALUE = {
   VANDERBILT: 'Vanderbilt University Medical Center',
@@ -37,12 +33,12 @@ export const EDUCATION_LEVEL_VALUE = {
   // other option values here
 };
 
-export const FIELD_LABEL = {
+export const LABEL_ALIAS = {
   READ_UNDERSTAND_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement.',
   READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms described above.',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
-  RESEARCH_BACKGROUND: 'describe your research background, experience, and research interests',
+  RESEARCH_BACKGROUND: 'Your research background, experience, and research interests',
   EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YEAR_OF_BIRTH: 'Year of Birth',
   INSTITUTION_EMAIL: 'Your institutional email address',
@@ -55,7 +51,7 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await this.waitForTextExists(PAGE.TITLE);
+    await this.waitForTextExists('Sign In');
     return true;
   }
 
@@ -88,19 +84,19 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_PRIVACY_STATEMENT});
+    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_PRIVACY_STATEMENT});
   }
 
   async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: FIELD_LABEL.READ_UNDERSTAND_TERMS_OF_USE});
+    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_TERMS_OF_USE});
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {text: FIELD_LABEL.INSTITUTION_NAME});
+    return await Textbox.forLabel(this.page, {text: LABEL_ALIAS.INSTITUTION_NAME});
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return await Textarea.forLabel(this.page, {normalizeSpace: FIELD_LABEL.RESEARCH_BACKGROUND});
+    return await Textarea.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.RESEARCH_BACKGROUND});
   }
 
   async getUsernameDomain(): Promise<unknown> {
@@ -124,24 +120,24 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string) {
-    const dropdown = new SelectComponent(this.page);
+    const dropdown = new SelectMenu(this.page);
     await dropdown.select(selectTextValue);
   }
 
   async getInstitutionValue() {
-    const dropdown = new SelectComponent(this.page);
+    const dropdown = new SelectMenu(this.page);
     return await dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = new SelectComponent(this.page, FIELD_LABEL.EDUCATION_LEVEL, 2);
+    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.EDUCATION_LEVEL, 2);
     await dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = new SelectComponent(this.page, FIELD_LABEL.YEAR_OF_BIRTH, 2);
+    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.YEAR_OF_BIRTH, 2);
     await dropdown.select(year);
   }
 
@@ -149,12 +145,13 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 1: Fill out institution affiliation details
   async fillOutInstitution() {
-    const institutionSelect = new SelectComponent(this.page, 'Select your institution');
+    const institutionSelect = new SelectMenu(this.page, 'Select your institution', 2);
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
-    const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: FIELD_LABEL.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
+    const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
     await emailAddressTextbox.type(config.broadInstitutionEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
-    const roleSelect = new SelectComponent(this.page, 'describes your role');
+    await ClrIconLink.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
+    const roleSelect = new SelectMenu(this.page, 'describes your role', 2);
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
 

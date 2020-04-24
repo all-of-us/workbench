@@ -1,11 +1,11 @@
-import ClrIconLink from 'app/aou-elements/clr-icon-link';
-import Link from 'app/aou-elements/link';
-import BaseElement from 'app/aou-elements/base-element';
-import HomePage, {FIELD_LABEL as editPageFieldLabel} from 'app/home-page';
-import WorkspaceCard from 'app/workspace-card';
-import WorkspaceEditPage from 'app/workspace-edit-page';
-import WorkspacesPage from 'app/workspaces-page';
-import {signIn} from 'tests/app';
+import ClrIconLink from 'app/element/clr-icon-link';
+import Link from 'app/element/link';
+import BaseElement from 'app/element/base-element';
+import HomePage, {LABEL_ALIAS as HOME_PAGE_LABEL_ALIAS} from 'app/page/home-page';
+import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import WorkspacesPage from 'app/page/workspaces-page';
+import {signIn} from 'utils/app-utils';
 
 
 describe('Home page ui tests', () => {
@@ -38,19 +38,18 @@ describe('Home page ui tests', () => {
       const cardName = await card.getWorkspaceName();
       expect(cardName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
-      // check ellipsis icon existed
-      expect(await card.getEllipsisIcon()).toBeTruthy();
-
+      // check Workspace Action menu for listed actions
+      const ellipsis = card.getEllipsis();
       // Assumption: test user is workspace Owner.
       // Check Workspace Actions ellipsis dropdown displayes the right set of options
-      const links = await card.getPopupLinkTextsArray();
+      const links = await ellipsis.getAvaliableActions();
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }
   });
 
    // Click See All Workspaces link => Opens Your Workspaces page
   test('Click on See All Workspace link', async () => {
-    const seeAllWorkspacesLink = await Link.forLabel(page, editPageFieldLabel.SEE_ALL_WORKSPACES);
+    const seeAllWorkspacesLink = await Link.forLabel(page, HOME_PAGE_LABEL_ALIAS.SEE_ALL_WORKSPACES);
     await seeAllWorkspacesLink.click();
     const workspaces = new WorkspacesPage(page);
     await workspaces.waitForLoad();
@@ -65,28 +64,28 @@ describe('Home page ui tests', () => {
 
     const workspaceEdit = new WorkspaceEditPage(page);
     await workspaceEdit.waitForLoad();
-    // expect Workspace name Input textfield exists and NOT disabled
+    // expect Workspace name Input textfield exists
     const workspaceNameTextbox = await workspaceEdit.getWorkspaceNameTextbox();
     expect(await workspaceNameTextbox.isVisible()).toBe(true);
   });
 
   test('Check Create New Workspace link on Home page', async () => {
-    const anyLink = await ClrIconLink.forLabel(page, {normalizeSpace: editPageFieldLabel.CREATE_NEW_WORKSPACE}, 'plus-circle');
-    expect(anyLink).toBeTruthy();
-    const classname = await anyLink.getProperty('className');
+    const plusIcon = await ClrIconLink.forLabel(page, {normalizeSpace: HOME_PAGE_LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
+    expect(plusIcon).toBeTruthy();
+    const classname = await plusIcon.getProperty('className');
     expect(classname).toBe('is-solid');
-    const shape = await anyLink.getAttribute('shape');
+    const shape = await plusIcon.getAttribute('shape');
     expect(shape).toBe('plus-circle');
-    const hasShape = await anyLink.hasAttribute('shape');
+    const hasShape = await plusIcon.hasAttribute('shape');
     expect(hasShape).toBe(true);
-    const disabled = await anyLink.isDisabled();
+    const disabled = await plusIcon.isDisabled();
     expect(disabled).toBe(false);
-    const cursor = await anyLink.getComputedStyle('cursor');
+    const cursor = await plusIcon.getComputedStyle('cursor');
     expect(cursor).toBe('pointer');
-    expect(await anyLink.isVisible()).toBe(true);
+    expect(await plusIcon.isVisible()).toBe(true);
 
-    await anyLink.dispose();
-    expect(await anyLink.isVisible()).toBe(false);
+    await plusIcon.dispose();
+    expect(await plusIcon.isVisible()).toBe(false);
   });
 
 

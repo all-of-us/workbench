@@ -66,7 +66,7 @@ describe('WorkspaceEdit', () => {
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.next(cdrVersionListResponse);
     routeConfigDataStore.next({mode: WorkspaceEditMode.Create});
-    serverConfigStore.next({enableBillingLockout: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
+    serverConfigStore.next({enableBillingUpgrade: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
   });
 
   it('displays workspaces create page', async () => {
@@ -80,7 +80,7 @@ describe('WorkspaceEdit', () => {
       .toEqual(false);
 
     expect(wrapper.find('[data-test-id="specific-population-no"]').first().prop('checked'))
-      .toEqual(true);
+      .toEqual(false);
   });
 
   it('displays workspaces duplicate page', async () => {
@@ -147,6 +147,9 @@ describe('WorkspaceEdit', () => {
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
     expect(workspacesApi.workspaces[0].researchPurpose.populationDetails.length).toBe(0);
   });
 
@@ -206,6 +209,9 @@ describe('WorkspaceEdit', () => {
     const numBefore = workspacesApi.workspaces.length;
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
     expect(navigate).toHaveBeenCalledTimes(1);
   });
@@ -221,6 +227,8 @@ describe('WorkspaceEdit', () => {
 
     jest.useFakeTimers();
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(navigate).not.toHaveBeenCalled();
 
@@ -249,6 +257,8 @@ describe('WorkspaceEdit', () => {
 
     jest.useFakeTimers();
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     let aclDelayBtn;
     for (let i = 0; i < 10; i++) {
       jest.advanceTimersByTime(20e3);
@@ -309,8 +319,8 @@ describe('WorkspaceEdit', () => {
     intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
     const charsRemaining = 1000 - testInput.length;
 
-    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
-      .toContain(charsRemaining);
+    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0))
+        .toBeUndefined();
 
     expect(wrapper.find('[data-test-id="characterLimit"]').get(0).props.children)
       .toContain('You have reached the character limit for this question');

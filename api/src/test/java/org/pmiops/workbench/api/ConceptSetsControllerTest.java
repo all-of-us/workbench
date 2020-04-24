@@ -829,7 +829,8 @@ public class ConceptSetsControllerTest {
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
+    when(fireCloudService.getWorkspaceAclAsService(ns, name))
+        .thenReturn(workspaceAccessLevelResponse);
   }
 
   private void saveConcepts() {

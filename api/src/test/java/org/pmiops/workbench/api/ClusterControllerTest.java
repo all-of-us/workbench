@@ -319,7 +319,7 @@ public class ClusterControllerTest {
   @Test
   public void testDeleteClustersInProject() {
     List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
-    when(mockLeoNotebooksClient.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+    when(mockLeoNotebooksClient.listClustersByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listClusterResponseList);
 
     clusterController.deleteClustersInProject(
@@ -327,7 +327,7 @@ public class ClusterControllerTest {
         new ListClusterDeleteRequest()
             .clustersToDelete(ImmutableList.of(testFcCluster.getClusterName())));
     verify(mockLeoNotebooksClient)
-        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+        .deleteClusterAsService(BILLING_PROJECT_ID, testFcCluster.getClusterName());
     verify(mockClusterAuditor)
         .fireDeleteClustersInProject(
             BILLING_PROJECT_ID,
@@ -341,13 +341,13 @@ public class ClusterControllerTest {
     List<ListClusterResponse> listClusterResponseList =
         ImmutableList.of(testFcClusterListResponse, testFcClusterListResponse2);
     List<String> clustersToDelete = ImmutableList.of(testFcCluster.getClusterName());
-    when(mockLeoNotebooksClient.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+    when(mockLeoNotebooksClient.listClustersByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listClusterResponseList);
 
     clusterController.deleteClustersInProject(
         BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(clustersToDelete));
     verify(mockLeoNotebooksClient, times(clustersToDelete.size()))
-        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+        .deleteClusterAsService(BILLING_PROJECT_ID, testFcCluster.getClusterName());
     verify(mockClusterAuditor, times(1))
         .fireDeleteClustersInProject(BILLING_PROJECT_ID, clustersToDelete);
   }
@@ -358,13 +358,13 @@ public class ClusterControllerTest {
         ImmutableList.of(testFcClusterListResponse, testFcClusterListResponse2);
     List<String> clustersToDelete =
         ImmutableList.of(testFcClusterDifferentProject.getClusterName());
-    when(mockLeoNotebooksClient.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+    when(mockLeoNotebooksClient.listClustersByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listClusterResponseList);
 
     clusterController.deleteClustersInProject(
         BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(clustersToDelete));
     verify(mockLeoNotebooksClient, times(0))
-        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+        .deleteClusterAsService(BILLING_PROJECT_ID, testFcCluster.getClusterName());
     verify(mockClusterAuditor, times(0))
         .fireDeleteClustersInProject(BILLING_PROJECT_ID, clustersToDelete);
   }
@@ -372,13 +372,13 @@ public class ClusterControllerTest {
   @Test
   public void testDeleteClustersInProject_NoClusters() {
     List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
-    when(mockLeoNotebooksClient.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+    when(mockLeoNotebooksClient.listClustersByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listClusterResponseList);
 
     clusterController.deleteClustersInProject(
         BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(ImmutableList.of()));
     verify(mockLeoNotebooksClient, never())
-        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+        .deleteClusterAsService(BILLING_PROJECT_ID, testFcCluster.getClusterName());
     verify(mockClusterAuditor, never())
         .fireDeleteClustersInProject(
             BILLING_PROJECT_ID,
@@ -390,13 +390,13 @@ public class ClusterControllerTest {
   @Test
   public void testDeleteClustersInProject_NullClustersList() {
     List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
-    when(mockLeoNotebooksClient.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+    when(mockLeoNotebooksClient.listClustersByProjectAsService(BILLING_PROJECT_ID))
         .thenReturn(listClusterResponseList);
 
     clusterController.deleteClustersInProject(
         BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(null));
     verify(mockLeoNotebooksClient)
-        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+        .deleteClusterAsService(BILLING_PROJECT_ID, testFcCluster.getClusterName());
     verify(mockClusterAuditor)
         .fireDeleteClustersInProject(
             BILLING_PROJECT_ID,

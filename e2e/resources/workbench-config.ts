@@ -1,5 +1,5 @@
 require('dotenv').config();
-const fp = require('lodash/fp');
+import * as fp from 'lodash/fp';
 
 const env = process.env.WORKBENCH_ENV || 'dev';
 

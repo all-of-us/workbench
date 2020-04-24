@@ -1,14 +1,16 @@
 import { ElementHandle, Page } from 'puppeteer';
-import {findButton} from './aou-elements/xpath-finder';
-import BasePage from './base-page';
-import HomePage from './home-page';
+import {findButton} from 'app/element/xpath-finder';
+import BasePage from 'app/page/base-page';
+import HomePage from 'app/page/home-page';
 import {config} from 'resources/workbench-config';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 
-export const selectors = {
+export const SELECTOR = {
   loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
   emailInput: '//input[@type="email"]',
   NextButton: '//*[text()="Next" or @value="Next"]',
+  submitButton: '//*[@id="passwordNext" or @id="submit"]',
   passwordInput: '//input[@type="password"]',
 };
 
@@ -23,21 +25,21 @@ export default class GoogleLoginPage extends BasePage {
    * Login email input field.
    */
   async email(): Promise<ElementHandle> {
-    return this.page.waitForXPath(selectors.emailInput, {visible: true});
+    return this.page.waitForXPath(SELECTOR.emailInput, {visible: true});
   }
 
   /**
    * Login password input field.
    */
   async password(): Promise<ElementHandle> {
-    return this.page.waitForXPath(selectors.passwordInput, {visible: true});
+    return this.page.waitForXPath(SELECTOR.passwordInput, {visible: true});
   }
 
   /**
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return this.page.waitForXPath(selectors.loginButton, {visible: true, timeout: 60000});
+    return this.page.waitForXPath(SELECTOR.loginButton, {visible: true, timeout: 60000});
   }
 
   /**
@@ -48,7 +50,7 @@ export default class GoogleLoginPage extends BasePage {
     // Handle Google "Use another account" dialog if it exists
     const useAnotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
     const elemt1 = await Promise.race([
-      this.page.waitForXPath(selectors.emailInput, {visible: true, timeout: 60000}),
+      this.page.waitForXPath(SELECTOR.emailInput, {visible: true, timeout: 60000}),
       this.page.waitForXPath(useAnotherAccountXpath, {visible: true, timeout: 60000}),
     ]);
 
@@ -64,7 +66,7 @@ export default class GoogleLoginPage extends BasePage {
     await emailInput.focus();
     await emailInput.type(userEmail);
 
-    const nextButton = await this.page.waitForXPath(selectors.NextButton);
+    const nextButton = await this.page.waitForXPath(SELECTOR.NextButton);
     await this.clickAndWait(nextButton);
   }
 
@@ -82,7 +84,7 @@ export default class GoogleLoginPage extends BasePage {
    * Click Next button to submit login credential.
    */
   async submit() : Promise<void> {
-    const button = await this.page.waitForXPath(selectors.NextButton, {visible: true});
+    const button = await this.page.waitForXPath(SELECTOR.submitButton, {visible: true});
     await this.clickAndWait(button);
   }
 
@@ -95,7 +97,7 @@ export default class GoogleLoginPage extends BasePage {
       await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 0});
     } catch (err) {
       console.error('Google login page not found. ' + err);
-      await this.takeScreenshot('GoogleLoginPageNotFound');
+      await takeScreenshot(this.page, 'GoogleLoginPageNotFound');
       throw err;
     }
   }
@@ -125,8 +127,8 @@ export default class GoogleLoginPage extends BasePage {
       await this.enterPassword(pwd);
       await this.submit();
     } catch (err) {
-      await this.takeScreenshot('FailedLoginPage');
-      await this.saveHtmlToFile('FailedLoginPage');
+      await takeScreenshot(this.page, 'FailedLoginPage');
+      await savePageToFile(this.page, 'FailedLoginPage');
       throw err;
     }
 

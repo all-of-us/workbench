@@ -69,6 +69,8 @@ public class WorkspaceServiceTest {
     @Bean
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
+      workbenchConfig.billing.accountId = "free-tier-account";
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
       workbenchConfig.featureFlags.enableBillingLockout = true;
       return workbenchConfig;
@@ -169,6 +171,7 @@ public class WorkspaceServiceTest {
     doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
     doReturn(workspaceName).when(mockWorkspace).getName();
     doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
+
     FirecloudWorkspaceResponse mockWorkspaceResponse = mock(FirecloudWorkspaceResponse.class);
     doReturn(mockWorkspace).when(mockWorkspaceResponse).getWorkspace();
     doReturn(accessLevel.toString()).when(mockWorkspaceResponse).getAccessLevel();

@@ -9192,6 +9192,19 @@ wd@^1.11.0:
     request "2.88.0"
     vargs "^0.1.0"
 
+wd@^1.12.1:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/wd/-/wd-1.12.1.tgz#067eb3674db00eeb9e506701f9314657c44d5a89"
+  integrity sha512-O99X8OnOgkqfmsPyLIRzG9LmZ+rjmdGFBCyhGpnsSL4MB4xzHoeWmSVcumDiQ5QqPZcwGkszTgeJvjk2VjtiNw==
+  dependencies:
+    archiver "^3.0.0"
+    async "^2.0.0"
+    lodash "^4.0.0"
+    mkdirp "^0.5.1"
+    q "^1.5.1"
+    request "2.88.0"
+    vargs "^0.1.0"
+
 webidl-conversions@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"

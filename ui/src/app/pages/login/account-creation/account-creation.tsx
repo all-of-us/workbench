@@ -1,7 +1,7 @@
 import {Button} from 'app/components/buttons';
 import {FormSection} from 'app/components/forms';
 
-import {InfoIcon, ValidationIcon} from 'app/components/icons';
+import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/icons';
 
 import {
   Error as ErrorDiv,
@@ -30,6 +30,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
   commonStyles,
@@ -98,6 +99,7 @@ export interface AccountCreationState {
   showInstitution: boolean;
   showNonAcademicAffiliationRole: boolean;
   showNonAcademicAffiliationOther: boolean;
+  showMostInterestedInKnowingBlurb: boolean;
   institutionName: string;
   institutionRole: string;
   nonAcademicAffiliation: string;
@@ -153,6 +155,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       showInstitution: true,
       showNonAcademicAffiliationRole: false,
       showNonAcademicAffiliationOther: false,
+      showMostInterestedInKnowingBlurb: false,
     };
 
     // TODO(RW-4361): remove after we switch to verified institutional affiliation
@@ -436,33 +439,38 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     const errors = this.validate();
 
     return <div id='account-creation'
-                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
+                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '1rem'}}>
       <div style={{fontSize: 28, fontWeight: 400, color: colors.primary}}>Create your account</div>
       <FlexRow>
-        <FlexColumn style={{marginTop: '0.5rem', marginRight: '2rem'}}>
+        <FlexColumn style={{marginRight: '2rem'}}>
           <div style={{...styles.text, fontSize: 16, marginTop: '1rem'}}>
             Please complete Step {requireInstitutionalVerification ? '2 of 3' : '1 of 2'}
           </div>
-          <div style={{...styles.text, fontSize: 12, marginTop: '0.7rem'}}>
+          <div style={{...styles.text, fontSize: 12, marginTop: '0.3rem'}}>
             All fields required unless indicated as optional</div>
-          <Section header={<div>Create an <i>All of Us</i> username</div>}>
+          <Section header={<div>Create an <i>All of Us</i> username</div>} style={{marginTop: '1.25rem'}}>
             <div>
               <FlexRow>
                 <FlexColumn>
-                  <div style={{...styles.asideText, marginBottom: '0.3rem'}}>
+                  <div style={styles.asideText}>
                     We create a 'username'@{gsuiteDomain} Google account which you will use to
-                    login to the Workbench. This is separate account and not related to any personal
-                    or professional Google accounts you may have.</div>
-                  <TextInputWithLabel value={username} inputId='username' inputName='username'
-                                      placeholder='New Username' invalid={
-                                        this.state.usernameConflictError || this.usernameInvalidError()}
-                                      containerStyle={{width: '26rem'}} labelText={usernameLabelText}
-                                    onChange={v => this.usernameChanged(v)}>
-                  <div style={{...inputStyles.iconArea}}>
-                    <ValidationIcon validSuccess={this.isUsernameValid()}/>
-                  </div>
-                  <i style={{...styles.asideText, marginLeft: 4}}>@{gsuiteDomain}</i>
-                </TextInputWithLabel>
+                    login to the Workbench. This is a separate account and not related to any
+                    personal or professional Google accounts you may have.</div>
+                  <TextInputWithLabel
+                      value={username}
+                      inputId='username'
+                      inputName='username'
+                      placeholder='New Username'
+                      invalid={this.state.usernameConflictError || this.usernameInvalidError()}
+                      containerStyle={{width: '26rem', marginTop: '1.25rem'}}
+                      labelText={usernameLabelText}
+                      onChange={v => this.usernameChanged(v)}
+                  >
+                    <div style={inputStyles.iconArea}>
+                      <ValidationIcon validSuccess={this.isUsernameValid()}/>
+                    </div>
+                    <i style={{...styles.asideText, marginLeft: 4}}>@{gsuiteDomain}</i>
+                  </TextInputWithLabel>
                 </FlexColumn>
 
               </FlexRow>
@@ -478,9 +486,17 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               }
             </div>
           </Section>
-          <Section header={<div>About you <i style={styles.publiclyDisplayedText}>Publicly displayed</i></div>}>
+          <Section
+            header={
+              <FlexRow style={{alignItems: 'center'}}>
+                <div>About you</div>
+                <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+              </FlexRow>
+            }
+            style={{marginTop: '2rem'}}
+          >
             <FlexColumn>
-              <FlexRow style={{paddingBottom: '1rem'}}>
+              <FlexRow style={{marginTop: '.25rem'}}>
                 <TextInputWithLabel value={givenName}
                                     inputId='givenName'
                                     inputName='givenName'
@@ -506,7 +522,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 </ErrorMessage>}
               </FlexRow>
               {!requireInstitutionalVerification &&
-                <FlexRow style={{alignItems: 'left'}}>
+                <FlexRow style={{alignItems: 'left', marginTop: '1rem'}}>
                   <TextInputWithLabel value={contactEmail}
                                       inputId='contactEmail'
                                       inputName='contactEmail'
@@ -523,7 +539,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 </FlexRow>
               }
               {requireInstitutionalVerification &&
-                <div>
+                <div style={{marginTop: '1rem'}}>
                   <MultiSelectWithLabel placeholder={'Select one or more'}
                                         options={AccountCreationOptions.degree}
                                         value={this.state.profile.degrees}
@@ -534,13 +550,16 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               }
             </FlexColumn>
           </Section>
-          <Section header={<React.Fragment>
-            <div>Your institutional mailing address</div>
-            <div style={styles.asideText}>We will use your address if we need to send correspondence about the program;
-              your information will not be shared or displayed publicly.</div>
-          </React.Fragment>}>
+          <Section
+            header={<React.Fragment>
+                <div>Your institutional mailing address</div>
+                <div style={styles.asideText}>We will use your address if we need to send correspondence about the program.</div>
+              </React.Fragment>
+            }
+            style={{marginTop: '2rem'}}
+          >
             <FlexColumn style={{lineHeight: '1rem'}}>
-              <FlexRow>
+              <FlexRow style={{marginTop: '1rem'}}>
                 <TextInputWithLabel dataTestId='streetAddress' inputName='streetAddress'
                                     placeholder='Street Address' value={streetAddress1} labelText='Street Address 1'
                                     onChange={value => this.updateAddress('streetAddress1', value)}/>
@@ -549,14 +568,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                     containerStyle={styles.multiInputSpacing}
                                     onChange={value => this.updateAddress('streetAddress2', value)}/>
               </FlexRow>
-              <FlexRow style={{marginTop: '0.75rem'}}>
+              <FlexRow style={{marginTop: '1rem'}}>
                 <TextInputWithLabel dataTestId='city' inputName='city' placeholder='City' value={city} labelText='City'
                                     onChange={value => this.updateAddress('city', value)}/>
                 <TextInputWithLabel dataTestId='state' inputName='state' placeholder='State' value={state} labelText='State'
                                     containerStyle={styles.multiInputSpacing}
                                     onChange={value => this.updateAddress('state', value)}/>
               </FlexRow>
-              <FlexRow style={{marginTop: '0.75rem'}}>
+              <FlexRow style={{marginTop: '1rem'}}>
                 <TextInputWithLabel dataTestId='zip' inputName='zip' placeholder='Zip code'
                                     value={zipCode} labelText='Zip code'
                                     onChange={value => this.updateAddress('zipCode', value)}/>
@@ -566,15 +585,41 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
             </FlexColumn>
           </Section>
-          <Section sectionHeaderStyles={{borderBottom: null}} header={<React.Fragment>
-            <div>Please describe your research background, experience, and research interests</div>
-            <div style={styles.asideText}>This information will be posted publicly on the <i>All of Us</i> Research Hub website
-              to inform program participants. <span  style={{marginLeft: 2,
-                fontSize: 12}}>(2000 character limit)</span>
-              <i style={{...styles.publiclyDisplayedText, marginLeft: 2}}>
-                Publicly displayed
-              </i></div>
-          </React.Fragment>}>
+          <Section
+            header={<React.Fragment>
+              <FlexRow style={{alignItems: 'flex-start'}}>
+                <div style={{maxWidth: '60%'}}>Your research background, experience, and research interests</div>
+                <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+              </FlexRow>
+              <div
+                style={{...styles.asideText, marginTop: '.125px'}}>
+                  This information will be posted publicly on the <i>All of Us</i> Research Hub website to inform program participants.
+                  <span style={{marginLeft: 2, fontSize: 12}}>(2000 character limit)</span>
+              </div>
+              <div style={{marginTop: '.5rem'}}>
+                <FlexRow style={{color: colors.accent, alignItems: 'center'}}>
+                  <div
+                      style={{cursor: 'pointer', fontSize: 14}}
+                      onClick={() => this.setState(
+                        (previousState) => ({showMostInterestedInKnowingBlurb: !previousState.showMostInterestedInKnowingBlurb})
+                      )}
+                  >
+                    <i>All of Us</i> participants are most interested in knowing:
+                  </div>
+                  <ClrIcon shape='angle' style={{
+                    transform: this.state.showMostInterestedInKnowingBlurb ? 'rotate(180deg)' : 'rotate(90deg)'
+                  }}/>
+                </FlexRow>
+                {this.state.showMostInterestedInKnowingBlurb &&
+                  <ul style={{...styles.asideList, marginLeft: '0.75rem'}}>
+                    {researchPurposeList.map((value, index) => <li key={index} style={styles.asideText}>{value}</li>)}
+                  </ul>
+                }
+              </div>
+            </React.Fragment>}
+            style={{marginTop: '2rem'}}
+            sectionHeaderStyles={{borderBottom: null}}
+          >
             <TextArea style={{height: '15rem', resize: 'none', width: '26rem', borderRadius: '3px 3px 0 0',
               borderColor: colorWithWhiteness(colors.dark, 0.5)}}
                       id='areaOfResearch'
@@ -657,21 +702,33 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                          style={{marginTop: '1rem', width: '18rem'}}/>}
             </FlexColumn>}
           </React.Fragment>}
-          <Section header={<React.Fragment>
-            <div>Please link to your professional profile or bio page below, if available</div>
-            <div style={styles.asideText}>You could provide a link to your faculty bio page from your institution's
-              website, your LinkedIn profile page, or another webpage featuring your work. This will
-              allow <i>All of Us</i> researchers and participants to learn more about your work and publications.</div>
-          </React.Fragment>}>
-              <TextInputWithLabel dataTestId='professionalUrl' inputName='professionalUrl'
-                                  placeholder='Professional Url' value={professionalUrl}
-                                  labelText={<div>
-                                    Paste Professional URL here <i style={{...styles.publiclyDisplayedText,
-                                      marginLeft: 2}}>Optional and publicly displayed</i>
-                                  </div>} containerStyle={{width: '26rem'}}
-                                  onChange={value => this.updateProfileObject('professionalUrl', value)}/>
+          <Section
+            header={<React.Fragment>
+              <FlexRow style={{alignItems: 'flex-start'}}>
+                <div style={{maxWidth: '60%'}}>Your professional profile or bio page below, if available</div>
+                <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
+              </FlexRow>
+              <div style={{...styles.asideText, marginTop: '.125rem'}}>(Optional)</div>
+              <div style={{...styles.asideText, marginTop: '.5rem', marginBottom: '.5rem'}}>
+                You could provide a link to your faculty bio page from your institution's website,
+                your LinkedIn profile page, or another webpage featuring your work. This will
+                allow <i>All of Us</i> researchers and participants to learn more about your work and
+                publications.
+              </div>
+            </React.Fragment>}
+            style={{marginTop: '2rem'}}
+          >
+            <TextInputWithLabel
+              dataTestId='professionalUrl'
+              inputName='professionalUrl'
+              placeholder='Professional Url'
+              value={professionalUrl}
+              labelText={<div>Paste Professional URL here</div>}
+              containerStyle={{width: '26rem', marginTop: '.25rem'}}
+              onChange={value => this.updateProfileObject('professionalUrl', value)}
+            />
           </Section>
-          <FormSection style={{paddingBottom: '1rem'}}>
+          <FormSection style={{marginTop: '4rem', paddingBottom: '1rem'}}>
             <Button type='secondary' style={{marginRight: '1rem'}}
                     onClick={() => this.props.onPreviousClick(this.state.profile)}>
               Previous
@@ -698,12 +755,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         <FlexColumn>
           <FlexColumn style={styles.asideContainer}>
             <WhyWillSomeInformationBePublic />
-          </FlexColumn>
-          <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
-            <div style={styles.asideHeader}><i>All of Us</i> participants are most interested in knowing:</div>
-            <ul style={styles.asideList}>
-              {researchPurposeList.map((value, index) => <li key={index} style={styles.asideText}>{value}</li>)}
-            </ul>
           </FlexColumn>
         </FlexColumn>
       </FlexRow>

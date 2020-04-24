@@ -23,8 +23,8 @@ const css = `
   .pointer {
      position: relative;
      height: 29px;
-     width: 6.3rem;
-     background-color: ` + colorWithWhiteness(colors.accent, 0.85) + `;
+     width: 7rem;
+     background-color: ` + colorWithWhiteness(colors.accent, 0.75) + `;
      line-height:1.2rem;
    }
 
@@ -45,7 +45,7 @@ const css = `
      width:0rem;
      height:0rem;
      border-top:0.6rem solid transparent;
-     border-right:0.7rem solid ` + colorWithWhiteness(colors.accent, 0.85) + `;
+     border-right:0.7rem solid ` + colorWithWhiteness(colors.accent, 0.75) + `;
      border-bottom:0.6rem solid transparent;
    }
  `;
@@ -59,7 +59,7 @@ export const PubliclyDisplayed = (props) => {
     <style>
       {css}
     </style>
-    <div className='pointer' style={{...props.style}}>
+    <div className='pointer' style={props.style}>
       <label style={styles.label}>
         Publicly displayed
         <TooltipTrigger content={toolTipContent} side='right'>

@@ -126,7 +126,7 @@ public class StackdriverStatsExporterService {
     } catch (ModulesException e) {
       final String newNodeId = getSpoofedNodeId();
       if (workbenchConfigProvider.get().server.shortName.equals("Local")) {
-        logger.log(Level.INFO, String.format("Spoofed nodeID for local process is %s.", newNodeId));
+        logger.log(Level.FINE, String.format("Spoofed nodeID for local process is %s.", newNodeId));
       } else {
         logger.warning(
             String.format(

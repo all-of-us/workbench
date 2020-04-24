@@ -193,12 +193,12 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.REGISTRATION_IMG, getRegistrationImage())
         .put(EmailSubstitutionField.BULLET_1, cloudStorageService.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageService.getImageUrl("bullet_2.png"))
+        .put(EmailSubstitutionField.BULLET_3, cloudStorageService.getImageUrl("bullet_3.png"))
         .build();
   }
 
   private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(
       final String instructions) {
-    final CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.INSTRUCTIONS, instructions)
@@ -222,6 +222,16 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
+  private String getFreeCreditsResolutionText() {
+    if (workbenchConfigProvider.get().featureFlags.enableBillingUpgrade) {
+      return "you can request additional free credits by contacting support "
+          + "or provide a new billing account in the Workbench to continue with your analyses. "
+          + "Instructions for providing a new billing account are provided in the Workbench.";
+    } else {
+      return "you can request for an extension of free credits by contacting support.";
+    }
+  }
+
   private ImmutableMap<EmailSubstitutionField, String> freeTierDollarThresholdSubstitutionMap(
       final DbUser user, double currentUsage, double remainingBalance) {
 
@@ -231,15 +241,18 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
         .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
         .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
+        .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
         .build();
   }
 
   private ImmutableMap<EmailSubstitutionField, String> freeTierExpirationSubstitutionMap(
       DbUser user) {
+
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
         .build();
   }
 
@@ -344,7 +357,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private String getRegistrationImage() {
-    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.jpg");
+    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.png");
   }
 
   // TODO choose desired date format

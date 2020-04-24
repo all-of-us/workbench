@@ -7,15 +7,15 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "Working with All of Us Survey Data v1",
-      "namespace": "aou-rw-bbb5bfea",
-      "id": "featuredworkspaceworkingwithallofussurveydatav1",
+      "name": "How to Work with All of Us Survey Data",
+      "namespace": "aou-rw-4afd24c8",
+      "id": "allofussurveycodebookandfrequencydistributionsv2",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "Working with All of Us Physical Measurements Data v2",
-      "namespace": "aou-rw-53569ac7",
-      "id": "featuredworkspaceworkingwithallofusphysicalmeasurementsdatav2",
+      "name": "How to Work with All of Us Physical Measurements Data",
+      "namespace": "aou-rw-6f2f1945",
+      "id": "duplicateofworkingwithallofusphysicalmeasurementsdatav1",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
@@ -32,26 +32,32 @@
     },
     {
       "name": "Type 2 Diabetes Phenotype",
-      "namespace": "aou-rw-e6084db8",
-      "id": "masterfeaturedworkspacetype2diabetesphenotype",
+      "namespace": "aou-rw-cbbc55ff",
+      "id": "duplicateoftype2diabetesphenotypev2",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Major Depressive Disorders Phenotype",
-      "namespace": "aou-rw-edae682b",
-      "id": "masterdepressionphenotype",
+      "name": "Depression Phenotype",
+      "namespace": "aou-rw-c2194402",
+      "id": "duplicateofdepressionphenotypev2",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
       "name": "Dementia Phenotype",
-      "namespace": "aou-rw-76176da6",
-      "id": "featuredworkspacedementia",
+      "namespace": "aou-rw-57d9e914",
+      "id": "duplicateofdementiaphenotypev2",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
       "name": "Ischemic Heart Disease Phenotype",
-      "namespace": "aou-rw-ec93e304",
-      "id": "featuredworkspaceischemicheartdisease",
+      "namespace": "aou-rw-b4991ce0",
+      "id": "duplicateofischemicheartdiseasephenotypev2",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Breast Cancer Phenotype",
+      "namespace": "aou-rw-e5dfb446",
+      "id": "duplicateofbreastcancerphenotypev2",
       "category": "PHENOTYPE_LIBRARY"
     }
   ]

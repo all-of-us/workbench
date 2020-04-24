@@ -8,7 +8,7 @@ x-aou-note: |
   This file references parameters, paths, and definitions specified in
   client_api.yaml; the two files get merged together into a merged.yaml file at build time.
 
-  If validation fails, gradle:generateApi fails claiming this file does not exist.
+  If validation fails, gradle:generateWorkbenchApi fails claiming this file does not exist.
 
   For separate validation (with some false positives), do:
   ./project.rb validate-swagger
@@ -3651,7 +3651,11 @@ definitions:
       enableBillingLockout:
         type: boolean
         default: false
-        description: Feature flag for billing lockout and upgrade
+        description: Feature flag for billing lockout
+      enableBillingUpgrade:
+        type: boolean
+        default: false
+        description: Feature flag for billing upgrade
       requireInvitationKey:
         type: boolean
         default: false

@@ -63,6 +63,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           onPreviousClick={(profile) => this.props.onPreviousClick(profile)}
           enableCaptcha={true}
           enablePrevious={true}
+          showStepCount={true}
       />
       {this.state.createAccountErrorResponse && <Modal data-test-id='create-account-error'>
         <ModalTitle>Error creating account</ModalTitle>
