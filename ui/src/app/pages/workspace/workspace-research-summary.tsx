@@ -12,24 +12,19 @@ interface Props {
   researchValue: string;
 }
 
-export class WorkspaceResearchSummary extends React.Component<Props> {
-
-  constructor(props: Props) {
-    super(props);
-  }
-
-  render() {
-    const {id, index, onChange, researchPurpose, researchValue} = this.props;
-    return <WorkspaceEditSection data-test-id={id}
-                                 header={researchPurpose.header}
-                                 description={researchPurpose.description} index={index}
-                                 indexStyle={{marginRight: '0.2rem'}}
-                                 indent>
+export const WorkspaceResearchSummary = (props: Props) => {
+    return <WorkspaceEditSection
+        data-test-id={props.id}
+        header={props.researchPurpose.header}
+        description={props.researchPurpose.description}
+        index={props.index}
+        indent
+    >
       <TextAreaWithLengthValidationMessage
-          id={id}
-          initialText={researchValue}
+          id={props.id}
+          initialText={props.researchValue}
           maxCharacters={1000}
-          onChange={(s: string) => onChange(s)}
+          onChange={(s: string) => props.onChange(s)}
           tooLongWarningCharacters={950}
           tooShortWarningCharacters={50}
           tooShortWarning={'The description you entered seems too short. Please consider ' +
@@ -37,5 +32,4 @@ export class WorkspaceResearchSummary extends React.Component<Props> {
             'understand your work.'}
        />
     </WorkspaceEditSection>;
-  }
-}
+};
