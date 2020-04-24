@@ -1218,12 +1218,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   purpose (Question 1)</li>}
                 {errors.diseaseOfFocus && <li> You must specify a disease of focus and it should be at most 80 characters</li>}
                 {errors.otherPrimaryPurpose && <li> Other primary purpose should be of at most 500 characters</li>}
-                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
-                  from the study? (Question 2.1)</i> must be between 0 and 1000 characters</li>}
+                {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
+                  (Question 2.1)</i> must be between 0 and 1000 characters</li>}
                 {errors.scientificApproach && <li> Answer for <i>What are the scientific
                   approaches you plan to use for your study (Question 2.2)</i> must be between 0 and 1000 characters</li>}
-                {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question 2.3)</i> must be between 0 and 1000 characters</li>}
+                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
+                  from the study? (Question 2.3)</i> must be between 0 and 1000 characters</li>}
                 {errors.disseminate && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
                 {errors.otherDisseminateResearchFindings && <li>
                     Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}
