@@ -10,6 +10,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -65,7 +66,6 @@ import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {BulletAlignedUnorderedList} from "app/components/lists";
 
 export const styles = reactStyles({
   categoryRow: {

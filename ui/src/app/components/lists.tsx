@@ -1,5 +1,5 @@
+import {reactStyles} from 'app/utils';
 import * as React from 'react';
-import {reactStyles} from "../utils";
 
 export const CustomBulletList = ({children}) => {
   return <ul style={{position: 'relative', listStyle: 'none', marginLeft: 0}}>{children}</ul>;
