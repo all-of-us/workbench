@@ -37,9 +37,10 @@ const styles = {
   smallHeader: {
     fontSize: 16,
     fontWeight: 600,
+    marginTop: '.5rem'
   },
   textSection: {
-    marginTop: '.75rem'
+    marginTop: '.25rem'
   }
 };
 
