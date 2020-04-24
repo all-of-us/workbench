@@ -146,7 +146,7 @@ export const styles = reactStyles({
     width: '100%',
   },
   text: {
-    fontSize: '13px',
+    fontSize: '14px',
     color: colors.primary,
     fontWeight: 400,
     lineHeight: '24px'
@@ -491,7 +491,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   checked={!!this.state.workspace.researchPurpose[rp.shortName]}
                   onChange={e => this.updatePrimaryPurpose(rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
-          <label style={{...styles.shortDescription, fontSize: isResearchPurpose ? 14 : 16}} htmlFor={rp.uniqueId}>
+          <label style={{...styles.shortDescription, fontSize: 14}} htmlFor={rp.uniqueId}>
             {rp.shortDescription}
           </label>
           <div>
@@ -541,33 +541,43 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * options.
      */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-      return <div key={item.label}><strong>{item.label} *</strong>
-        {item.subCategory.map((sub, index) => <FlexRow key={sub.label}>
+      return <div key={item.label}><div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
+        {item.subCategory.map((sub, index) =>
+            <FlexRow key={sub.label} style={{...styles.categoryRow, paddingTop: '0rem'}}>
           <CheckBox
               manageOwnState={false}
               wrapperStyle={styles.checkboxRow}
               data-test-id={sub.shortName + '-checkbox'}
-              style={styles.checkboxStyle}
-              label={sub.label}
-              labelStyle={styles.text}
+              style={{...styles.checkboxStyle, marginTop: '0.1rem'}}
               key={sub.label}
               checked={this.specificPopulationCheckboxSelected(sub.shortName)}
               onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
-              disabled={!this.state.populationChecked}/></FlexRow>)}
+              disabled={!this.state.populationChecked}/>
+          <FlexColumn>
+            <label style={styles.text}>
+              {sub.label}
+            </label>
+          </FlexColumn>
+        </FlexRow>)}
       </div>;
     }
 
-    makeOutcomingResearchForm(item, I): React.ReactNode {
-      return <CheckBox
-          wrapperStyle={styles.checkboxRow}
-          style={styles.checkboxStyle}
-          label={item.label}
-          labelStyle={styles.text}
-          key={item.label}
-          checked={this.researchOutcomeCheckboxSelected(item.shortName)}
-          onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
-      />;
+    makeOutcomingResearchForm(item, index): React.ReactNode {
+      return <div key={index} style={{...styles.categoryRow, paddingTop: '0rem'}}>
+        <CheckBox
+            style={styles.checkboxStyle}
+            key={item.label}
+            checked={this.researchOutcomeCheckboxSelected(item.shortName)}
+            onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
+        />
+        <FlexColumn style={{marginTop: '-0.2rem'}}>
+          <label style={styles.text}>
+            {item.label}
+          </label>
+        </FlexColumn>
+      </div>;
     }
+
     renderHeader() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create:
@@ -888,12 +898,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        <div style={{width: '95%'}}>
+        <div style={{width: '1120px'}}>
           {this.state.loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
-          <FlexRow>
+          <FlexRow style={{alignItems: 'baseline'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
               value = {this.state.workspace.name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
@@ -917,7 +927,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </div>
             </TooltipTrigger>
             <TooltipTrigger content={toolTipText.cdrSelect}>
-              <InfoIcon style={{...styles.infoIcon}}/>
+              <InfoIcon style={{...styles.infoIcon, marginTop: '0.4rem'}}/>
             </TooltipTrigger>
           </FlexRow>
         </WorkspaceEditSection>
@@ -962,7 +972,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
-        <WorkspaceEditSection header='Research Use Statement Questions'
+        <WorkspaceEditSection header='Research Use Statement Questions' largeHeader
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>
@@ -987,7 +997,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     <button style={{...styles.shortDescription, border: 'none'}}
                             data-test-id='research-purpose-button'
                             onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
-                      Research purpose
+                      <label style={{fontSize: 14, marginLeft: '0.2rem'}}>Research purpose</label>
                       <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
                      </button>
                   </div>
@@ -1086,7 +1096,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     style={styles.checkboxStyle}
                     data-test-id='other-specialPopulation-checkbox'
                     label='Other'
-                    labelStyle={styles.text}
+                    labelStyle={{...styles.text, fontWeight: 'bold'}}
                     checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                     disabled={!populationChecked}

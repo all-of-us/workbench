@@ -25,7 +25,7 @@ export const styles = reactStyles({
     marginLeft: '0.2rem'
   },
   text: {
-    fontSize: '13px',
+    fontSize: '14px',
     color: colors.primary,
     fontWeight: 400,
     lineHeight: '24px'
@@ -38,6 +38,7 @@ interface Props {
   descriptionStyle?: React.CSSProperties;
   header: any;
   index?: string;
+  indexStyle?: React.CSSProperties;
   indent?: boolean;
   largeHeader?: any;
   required?: boolean;
@@ -52,10 +53,10 @@ export const WorkspaceEditSection = (props: Props) => {
     <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),
       marginTop: (props.largeHeader ? 12 : 24)}}>
       {props.index && <FlexRow style={{...styles.header,
-        fontSize: (props.largeHeader ? 20 : 16)}}>
-        <div style={{marginRight: '0.4rem'}}>{props.index}</div>
+        fontSize: (props.largeHeader ? 18 : 14)}}>
+        <div style={{marginRight: '0.4rem', ...props.indexStyle}}>{props.index}</div>
         <div style={{...styles.header,
-          fontSize: (props.largeHeader ? 20 : 16)}}>
+          fontSize: (props.largeHeader ? 18 : 14)}}>
           {props.header}
         </div>
         {props.publiclyDisplayed &&
@@ -63,7 +64,7 @@ export const WorkspaceEditSection = (props: Props) => {
       </FlexRow>}
       {!props.index &&
       <div style={{...styles.header,
-        fontSize: (props.largeHeader ? 20 : 16)}}>
+        fontSize: (props.largeHeader ? 18 : 14)}}>
         {props.header}
       </div>
       }

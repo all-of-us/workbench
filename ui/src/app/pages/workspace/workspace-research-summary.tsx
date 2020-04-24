@@ -82,6 +82,7 @@ export class WorkspaceResearchSummary extends React.Component<Props, State > {
     return <WorkspaceEditSection data-test-id={rowId}
                                  header={researchPurpose.header}
                                  description={researchPurpose.description} index={index}
+                                 indexStyle={{marginRight: '0.2rem'}}
                                  indent>
       <TextArea style={styles.textArea}
                 id={rowId} name={rowId} value={this.state.researchValue}
