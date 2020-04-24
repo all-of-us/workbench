@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils;
 
 import java.sql.Timestamp;
 import java.util.Set;
+import javax.crypto.spec.PSource;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
@@ -125,12 +126,13 @@ public interface WorkspaceMapper {
   @Mapping(source = "dbUser", target = "creator")
   @Mapping(source = "firecloudWorkspace.name", target = "firecloudName")
   @Mapping(source = "firecloudWorkspace.workspaceId", target = "firecloudUuid")
+  @Mapping(source = "version", target = "version") // distinguish from DbUser version field
   @Mapping(source = "workspace.creationTime", target = "creationTime")
   @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevel")
   @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
   @Mapping(source = "workspace.name", target = "name")
   @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
-  @Mapping(source = "workspaceActiveStatus", target = "workspaceActiveStatusEnum") // transient
+
   @Mapping(target = "additionalNotes", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "ancestry", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "anticipatedFindings", ignore = true) // mapped in setResearchPurpose()
@@ -160,6 +162,8 @@ public interface WorkspaceMapper {
   @Mapping(target = "socialBehavioral", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "specificPopulationsEnum", ignore = true) // mapped in setResearchPurpose()
   @Mapping(target = "timeRequested", ignore = true) // mapped in setResearchPurpose()
+  @Mapping(target = "workspaceActiveStatusEnum", ignore = true) // transient
+  @Mapping(target = "workspaceId", ignore = true) // set by Hibernate on save()
   DbWorkspace toDbWorkspace(
       Workspace workspace,
       FirecloudWorkspace firecloudWorkspace,

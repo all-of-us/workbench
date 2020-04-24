@@ -38,11 +38,11 @@ public class TestMockFactory {
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
 
-    List<ResearchOutcomeEnum> ResearchOutcomeEnumsList = new ArrayList<>();
-    ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
+    List<ResearchOutcomeEnum> researchOutcomes = new ArrayList<>();
+    researchOutcomes.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
-        .id("1")
+        .id("1001")
         .name(workspaceName)
         .namespace(workspaceNameSpace)
         .dataAccessLevel(DataAccessLevel.PROTECTED)
@@ -71,7 +71,7 @@ public class TestMockFactory {
                 .timeReviewed(1500L)
                 .reviewRequested(true)
                 .disseminateResearchFindingList(disseminateResearchEnumsList)
-                .researchOutcomeList(ResearchOutcomeEnumsList)
+                .researchOutcomeList(researchOutcomes)
                 .approved(false));
   }
 

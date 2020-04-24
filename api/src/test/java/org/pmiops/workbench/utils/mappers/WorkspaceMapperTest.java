@@ -1,6 +1,7 @@
 package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.quartz.utils.PoolingConnectionProvider.DB_USER;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
@@ -62,8 +63,10 @@ public class WorkspaceMapperTest {
       ImmutableSet.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
   private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
 
+  private DbUser creatorUser;
   private DbWorkspace sourceDbWorkspace;
   private FirecloudWorkspace sourceFirecloudWorkspace;
+  private Workspace sorurceApiWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
 
@@ -97,7 +100,7 @@ public class WorkspaceMapperTest {
             .namespace(FIRECLOUD_NAMESPACE)
             .name(WORKSPACE_FIRECLOUD_NAME);
 
-    final DbUser creatorUser = new DbUser();
+    creatorUser = new DbUser();
     creatorUser.setUsername(CREATOR_EMAIL);
     creatorUser.setDataAccessLevelEnum(DATA_ACCESS_LEVEL);
     creatorUser.setUserId(CREATOR_USER_ID);
@@ -149,6 +152,26 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setResearchOutcomeEnumSet(RESEARCH_OUTCOMES);
     sourceDbWorkspace.setDisseminateResearchEnumSet(Collections.emptySet());
     sourceDbWorkspace.setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER);
+
+    sorurceApiWorkspace = new Workspace()
+        .id();
+
+//    ws = {Workspace@4197} "class Workspace {\n    id: aaaa-bbbb-cccc-dddd\n    etag: "2"\n    name: studyallthethings\n    namespace: aou-xxxxxxx\n    cdrVersionId: 2\n    creator: ojc@verily.biz\n    billingAccountName: billing-account\n    billingAccountType: FREE_TIER\n    googleBucketName: my-favorite-bucket\n    dataAccessLevel: registered\n    researchPurpose: class ResearchPurpose {\n        additionalNotes: null\n        approved: true\n        ancestry: false\n        anticipatedFindings: null\n        commercialPurpose: false\n        controlSet: true\n        diseaseFocusedResearch: true\n        diseaseOfFocus: leukemia\n        drugDevelopment: false\n        educational: true\n        intendedStudy: null\n        scientificApproach: null\n        methodsDevelopment: false\n        otherPopulationDetails: null\n        otherPurpose: true\n        otherPurposeDetails: I want to discover a new disease.\n        ethics: false\n        populationDetails: [GEOGRAPHY, DISABILITY_STATUS]\n        populationHealth: true\n        reasonFo"
+//    id = "aaaa-bbbb-cccc-dddd"
+//    etag = ""2""
+//    name = "studyallthethings"
+//    namespace = "aou-xxxxxxx"
+//    cdrVersionId = "2"
+//    creator = "ojc@verily.biz"
+//    billingAccountName = "billing-account"
+//    billingAccountType = {BillingAccountType@4208} "FREE_TIER"
+//    googleBucketName = "my-favorite-bucket"
+//    dataAccessLevel = {DataAccessLevel@4210} "registered"
+//    researchPurpose = {ResearchPurpose@4198} "class ResearchPurpose {\n    additionalNotes: null\n    approved: true\n    ancestry: false\n    anticipatedFindings: null\n    commercialPurpose: false\n    controlSet: true\n    diseaseFocusedResearch: true\n    diseaseOfFocus: leukemia\n    drugDevelopment: false\n    educational: true\n    intendedStudy: null\n    scientificApproach: null\n    methodsDevelopment: false\n    otherPopulationDetails: null\n    otherPurpose: true\n    otherPurposeDetails: I want to discover a new disease.\n    ethics: false\n    populationDetails: [GEOGRAPHY, DISABILITY_STATUS]\n    populationHealth: true\n    reasonForAllOfUs: We can't get this data anywhere else.\n    reviewRequested: false\n    socialBehavioral: false\n    timeRequested: 946684800000\n    timeReviewed: null\n    disseminateResearchFindingList: []\n    otherDisseminateResearchFindings: Everywhere except MIT.\n    researchOutcomeList: [DECREASE_ILLNESS_BURDEN]\n}"
+//    billingStatus = {BillingStatus@4211} "ACTIVE"
+//    creationTime = {Long@4212} 946684800000
+//    lastModifiedTime = {Long@4213} 946684800000
+//    published = {Boolean@4214} false
   }
 
   @Test
@@ -205,5 +228,15 @@ public class WorkspaceMapperTest {
     assertThat(rp.getResearchOutcomeList()).containsAllIn(RESEARCH_OUTCOMES);
     assertThat(rp.getDisseminateResearchFindingList()).isEmpty();
     assertThat(rp.getOtherDisseminateResearchFindings()).isEqualTo(DISSEMINATE_FINDINGS_OTHER);
+  }
+
+  @Test
+  public void testToDbWorkspace() {
+//        final DbWorkspace converted = workspaceMapper.toDbWorkspace(
+//            sourceWorkspace,
+//          sourceFirecloudWorkspace,
+//            creatorUser,
+//
+//        );
   }
 }
