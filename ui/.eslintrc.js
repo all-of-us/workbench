@@ -22,6 +22,10 @@ module.exports = {
       version: 'detect' 
     }
   },
+  
+  // These rules were ported over from our common-ui/tslint.json file
+  // The rules found here were ported and categorized using the tslint migration roadmap:
+  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/ROADMAP.md
   rules: {
     // 'prettier/prettier': 'warn',
 
