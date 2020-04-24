@@ -6583,10 +6583,6 @@ neo-async@^2.5.0, neo-async@^2.6.0:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.1.tgz#ac27ada66167fa8849a6addd837f6b189ad2081c"
 
-ng2-nouislider@^1.7.7:
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/ng2-nouislider/-/ng2-nouislider-1.8.2.tgz#4d4aab402d307020415da1714a5e9f46817fe97c"
-
 ngx-popper@^5.1.7:
   version "5.1.7"
   resolved "https://registry.yarnpkg.com/ngx-popper/-/ngx-popper-5.1.7.tgz#36c7924875a28a65f2a7cdb0504145af97cf3a05"
@@ -6769,9 +6765,17 @@ normalize-range@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/normalize-range/-/normalize-range-0.1.2.tgz#2d10c06bdfd312ea9777695a4d28439456b75942"
 
-nouislider@10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/nouislider/-/nouislider-10.0.0.tgz#166145168bc05701ef5168c17d171f79154c174e"
+nouislider-react@^3.3.7:
+  version "3.3.7"
+  resolved "https://registry.yarnpkg.com/nouislider-react/-/nouislider-react-3.3.7.tgz#4efbeb8a2407b990154e5a6819840f6752af0d58"
+  integrity sha512-vC2r66CAQrQCWmGXX8KTCy7uf/DnFN+z08brm9Yke9WiWTs9TXMlmjCj+vMbUXgLEyI3nDtAyScraoOBuqlmag==
+  dependencies:
+    nouislider "^14.1.1"
+
+nouislider@^14.1.1:
+  version "14.2.0"
+  resolved "https://registry.yarnpkg.com/nouislider/-/nouislider-14.2.0.tgz#c5125b5fa5b35013321843195d5a6f5afc576194"
+  integrity sha512-IeDy8kA3uEtQIS35izyWg9tF0ycNTXvXPxB1SpEAxGGty2MqOIqkyMpOjCqT7Oag99fPRGRGuzHuuemU9+hCmw==
 
 npm-bundled@^1.0.1:
   version "1.0.6"
