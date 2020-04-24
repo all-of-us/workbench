@@ -105,7 +105,7 @@ public class MailServiceImpl implements MailService {
             .subject("Instructions from your institution on using the Researcher Workbench")
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
 
-    sendWithRetries(msg, String.format("Welcome for %s", contactEmail));
+    sendWithRetries(msg, String.format("Institution user instructions for %s", contactEmail));
   }
 
   @Override
