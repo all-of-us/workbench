@@ -21,7 +21,7 @@ beforeEach(() => {
   props = {
     onComplete: onCompleteSpy,
     pdfPath: '/assets/documents/fake-document-path.pdf',
-    backOnPage: false
+    afterPrev: false
   };
 });
 
@@ -68,7 +68,7 @@ it('should call onComplete when next button is pressed', async() => {
 });
 
 it('should enable NEXT button and checkboxes should be selected if page is re-visited after Institution Page', async() => {
-  props.backOnPage = true;
+  props.afterPrev = true;
   const wrapper = mount(<AccountCreationTos {...props} />);
 
   expect(getPrivacyCheckbox(wrapper).prop('checked')).toBeTruthy();
