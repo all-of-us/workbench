@@ -9,7 +9,9 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {withStyle} from 'app/utils/index';
+import {reactStyles, withStyle} from 'app/utils/index';
+import {FlexRow} from "./flex";
+import {WorkspaceEditSection} from "../pages/workspace/workspace-edit-section";
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
@@ -81,6 +83,118 @@ export const ValidationError = ({children}) => {
     }}
   >{children}</div>;
 };
+
+interface TextAreaWithLengthValidationMessageProps {
+  id: string;
+  initialText: string;
+  maxCharacters: number;
+  tooLongWarningCharacters: number;
+  onChange: (s: string) => void;
+  tooShortWarningCharacters?: number;
+  tooShortWarning?: string;
+}
+
+interface TextAreaWithLengthValidationMessageState {
+  showTooShortWarning: boolean;
+  text: string;
+}
+
+export class TextAreaWithLengthValidationMessage extends React.Component<
+  TextAreaWithLengthValidationMessageProps,
+  TextAreaWithLengthValidationMessageState
+> {
+  constructor(props: TextAreaWithLengthValidationMessageProps) {
+    super(props);
+    this.state = {
+      showTooShortWarning: false,
+      text: props.initialText
+    }
+  }
+
+  onTextUpdate(text) {
+    if (this.state.showTooShortWarning && text.length >= 50) {
+      this.setState({showTooShortWarning: false});
+    }
+    this.setState({text: text});
+    this.props.onChange(text);
+  }
+
+  updateShowTooShortWarning() {
+    if (
+        this.state.text
+        && this.props.tooShortWarningCharacters
+        && this.props.tooShortWarning
+        && this.state.text.length < this.props.tooShortWarningCharacters
+    ) {
+      this.setState({showTooShortWarning: true});
+    } else {
+      this.setState({showTooShortWarning: false});
+    }
+  }
+
+  renderCharacterLimitMessage(textColor: string, message: string) {
+    return <div
+        data-test-id='charactersRemaining'
+        style={{color: textColor, marginLeft: 'auto', flex: '0 0 auto'}}
+    >
+      {message}
+    </div>
+  }
+
+  render() {
+    const {id, maxCharacters, tooShortWarning} = this.props;
+    const {showTooShortWarning, text} = this.state;
+
+    return <React.Fragment>
+      <TextArea
+          style={{
+            height: '15rem',
+            resize: 'none',
+            width: '48rem',
+            borderRadius: '3px 3px 0 0',
+            boderColor: colorWithWhiteness(colors.dark, 0.5)
+          }}
+          id={id}
+          value={text}
+          onBlur={() => this.updateShowTooShortWarning()}
+          onChange={v => this.onTextUpdate(v)}
+      />
+      <FlexRow
+          style={{
+            justifyContent: 'space-between',
+            width: '48rem',
+            backgroundColor: colorWithWhiteness(colors.primary, 0.95),
+            fontSize: 12,
+            colors: colors.primary,
+            padding: '0.25rem',
+            borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
+            border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
+          }}
+      >
+        {showTooShortWarning &&
+          <label
+              data-test-id='warning'
+              style={{color: colors.danger, justifyContent: 'flex-start'}}
+          >
+            {tooShortWarning}
+          </label>
+        }
+        {!text &&
+          this.renderCharacterLimitMessage(colors.primary, maxCharacters + ' characters remaining')
+        }
+        {text && text.length < maxCharacters &&
+          this.renderCharacterLimitMessage(colors.primary, (maxCharacters - text.length) + ' characters remaining')
+        }
+        {text && text.length === maxCharacters &&
+          this.renderCharacterLimitMessage(colors.danger, '0 characters remaining')
+        }
+        {text && text.length > maxCharacters &&
+          this.renderCharacterLimitMessage(colors.danger, (text.length - maxCharacters) + ' characters over')
+        }
+      </FlexRow>
+    </React.Fragment>
+  }
+}
 
 export const FormValidationErrorMessage = withStyle({
   color: colors.danger,
