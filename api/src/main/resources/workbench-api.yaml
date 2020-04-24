@@ -932,15 +932,32 @@ paths:
       tags:
       - workspaces
       description: 'Makes a workspace public to all AoU registered users. Requires
-        FEATURED_WORKSPACE_ADMIN authority.
-
-'
+        FEATURED_WORKSPACE_ADMIN authority.'
       operationId: unpublishWorkspace
       responses:
         200:
           description: success
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/admin/workspaces/heavy/{namespace}/":
+    get:
+      tags:
+        - workspaces
+      description: >
+        Provide details on a workspace, its creator and collaborators, and any active clusters.
+      operationId: getWorkspaceDetailsHeavy
+      responses:
+        200:
+          description: Workspace and other details
+          schema:
+              "$ref": "#/definitions/WorkspaceDetailsHeavyResponse"
+      parameters:
+        - in: path
+          name: namespace
+          description: Workspace namespace, a.k.a. Firecloud poject name.
+          required: true
+          type: string
+
   "/v1/admin/workspaces/review":
     get:
       tags:
@@ -7550,7 +7567,7 @@ definitions:
         format: int64
       conceptName:
         type: string
-  WorkspaceUsersClusters:
+  WorkspaceDetailsHeavy:
     type: object
     properties:
       creator:
@@ -7563,4 +7580,12 @@ definitions:
         "$ref": "#/definitions/Workspace"
       clusters:
         type: array
-        "$ref": "#/definitions/Cluster"
+        items:
+          "$ref": "#/definitions/Cluster"
+  WorkspaceDetailsHeavyResponse:
+    type: object
+    properties:
+      workspaces:
+        type: array
+        items:
+          "$ref": "#/definitions/WorkspaceDetailsHeavy"

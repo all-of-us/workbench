@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -37,7 +38,8 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
       CohortMapper.class,
       CohortReviewMapper.class,
       ConceptSetMapper.class,
-      DataSetMapper.class
+      DataSetMapper.class,
+      DbStorageEnums.class
     })
 public interface WorkspaceMapper {
 

@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -72,6 +74,8 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
+import org.pmiops.workbench.model.WorkspaceDetailsHeavy;
+import org.pmiops.workbench.model.WorkspaceDetailsHeavyResponse;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResourcesRequest;
@@ -681,6 +685,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     response.setItems(
         workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.DEVELOPER}) // TODO: there are other ways to do this
+  public ResponseEntity<WorkspaceDetailsHeavyResponse> getWorkspaceDetailsHeavy(String namespace) {
+    List<WorkspaceDetailsHeavy> details = workspaceService.getWorkspaceDetailsHeavy(namespace);
+    return ResponseEntity.ok(new WorkspaceDetailsHeavyResponse().workspaces(details));
   }
 
   @Override

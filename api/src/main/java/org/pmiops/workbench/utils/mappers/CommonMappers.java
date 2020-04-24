@@ -79,14 +79,6 @@ public class CommonMappers {
   //                                  ENUMS                                  //
   /////////////////////////////////////////////////////////////////////////////
 
-  public DataAccessLevel dataAccessLevelFromStorage(Short dataAccessLevel) {
-    return DbStorageEnums.dataAccessLevelFromStorage(dataAccessLevel);
-  }
-
-  public Short dataAccessLevelToStorage(DataAccessLevel dataAccessLevel) {
-    return DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
-  }
-
   public WorkspaceAccessLevel fcAccessLevelToApiAccessLevel(FirecloudWorkspaceAccessEntry acl) {
     return WorkspaceAccessLevel.fromValue(acl.getAccessLevel());
   }
@@ -98,14 +90,6 @@ public class CommonMappers {
     } else {
       return WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel());
     }
-  }
-
-  public AnnotationType annotationTypeFromStorage(Short annotationType) {
-    return DbStorageEnums.annotationTypeFromStorage(annotationType);
-  }
-
-  public Short annotationTypeToStorage(AnnotationType annotationType) {
-    return DbStorageEnums.annotationTypeToStorage(annotationType);
   }
 
   public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {

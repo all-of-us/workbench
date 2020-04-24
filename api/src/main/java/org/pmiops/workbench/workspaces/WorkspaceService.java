@@ -14,6 +14,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceDetailsHeavy;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
 public interface WorkspaceService {
@@ -106,4 +107,6 @@ public interface WorkspaceService {
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
   boolean maybeDeleteRecentWorkspace(long workspaceId);
+
+  List<WorkspaceDetailsHeavy> getWorkspaceDetailsHeavy(String workspaceNamespace);
 }

@@ -9,6 +9,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 
 @Mapper(
@@ -16,6 +17,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     uses = {
       AddressMapper.class,
       CommonMappers.class,
+      DbStorageEnums.class,
       DemographicSurveyMapper.class,
       InstitutionalAffiliationMapper.class,
       PageVisitMapper.class
@@ -69,27 +71,9 @@ public interface ProfileMapper {
   @Mapping(target = "version", ignore = true)
   DbUser profileToDbUser(Profile profile);
 
-  static Authority authorityFromStorage(Short authority) {
-    return DbStorageEnums.authorityFromStorage(authority);
-  }
 
-  static Short authorityToStorage(Authority authority) {
-    return DbStorageEnums.authorityToStorage(authority);
-  }
-
-  static Degree degreeFromStorage(Short degree) {
-    return DbStorageEnums.degreeFromStorage(degree);
-  }
-
-  static Short degreeToStorage(Degree degree) {
-    return DbStorageEnums.degreeToStorage(degree);
-  }
-
-  static EmailVerificationStatus emailVerificationStatusFromStorage(Short emailVerificationStatus) {
-    return DbStorageEnums.emailVerificationStatusFromStorage(emailVerificationStatus);
-  }
-
-  static Short emailVerificationStatusToStorage(EmailVerificationStatus emailVerificationStatus) {
-    return DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus);
-  }
+//  User toApiUser(DbUser dbUser, Profile profile);
+  @Mapping(source = "contactEmail", target = "email")
+  @Mapping(source = "username", target = "userName")
+  User toApiUser(DbUser dbUser);
 }
