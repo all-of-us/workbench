@@ -23,7 +23,7 @@ export default class Dialog {
       const modalElement = document.querySelector(selector);
       return modalElement.innerText;
     }, SELECTOR.dialogRoot);
-    console.log('dialog text = ' + modalText);
+    console.log('dialog: ' + modalText);
     return modalText;
   }
 
@@ -41,7 +41,7 @@ export default class Dialog {
   }
 
   async waitUntilDialogIsClosed() {
-    await this.page.waitForSelector(SELECTOR.dialogRoot, {visible: false});
+    await this.page.waitForSelector(SELECTOR.dialogRoot, {visible: false, timeout: 60000});
   }
 
   private async findDialog() {
