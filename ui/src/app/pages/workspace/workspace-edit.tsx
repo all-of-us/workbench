@@ -1109,21 +1109,25 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </FlexColumn>
             </FlexRow>
             <hr/>
-            <div>* Demographic variables for which data elements have been altered, partially
-              suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
-              the Data Dictionary for details.</div>
+            <FlexRow>
+              <div style={{marginRight: '0.2rem'}}>*</div>
+              <div>Demographic variables for which data elements have been altered, partially
+                suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
+                the Data Dictionary for details.</div>
+            </FlexRow>
+
             <hr/>
           </div>
-          <div style={{marginTop: '0.5rem'}}>
+          <FlexRow style={{marginTop: '0.5rem'}}>
             <RadioButton name='population'
-                         style={{marginRight: '0.5rem'}}
+                         style={{marginRight: '0.5rem', marginTop: '0.3rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
                          checked={populationChecked === false}/>
             <label style={styles.text}>No, my study will not center on underrepresented populations.
               I am interested in a diverse sample in general, or I am focused on populations that
               have been well represented in prior research.</label>
-          </div>
+          </FlexRow>
         </WorkspaceEditSection>
 
           {/* Request for review section*/}
