@@ -156,6 +156,11 @@ export const styles = reactStyles({
     borderRadius: '6px',
     marginRight: '20px',
     marginBottom: '5px'
+  },
+  researchPurposeDescription: {
+    marginLeft: '-0.9rem',
+    fontSize: 14,
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85)
   }
 });
 
@@ -957,8 +962,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-              description={<div style={{marginLeft: '-0.9rem', fontSize: 14,
-                backgroundColor: colorWithWhiteness(colors.accent, 0.85)}}>
+              description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>
               </div></div>

@@ -38,8 +38,8 @@ export const toolTipTextStigmatization = <div>
 
 
 export const ResearchPurposeDescription =
-    <div style={{display: 'inline'}}>The <AouTitle/> requires each data user of the
-      <AoU/> data to provide a meaningful description of the intended purpose of data use for
+    <div style={{display: 'inline'}}>The <AouTitle/> requires each data user of the <AoU/> data to
+      provide a meaningful description of the intended purpose of data use for
       each workspace they create. To provide transparency to <AoU/> Program participants, your
       answers below will be made available publicly in the <a target='_blank'
       href='https://www.researchallofus.org/research-projects-directory/'>Research Hub
