@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const WorkspaceResearchSummary = (props: Props) => {
-    return <WorkspaceEditSection
+  return <WorkspaceEditSection
         data-test-id={props.id}
         header={props.researchPurpose.header}
         description={props.researchPurpose.description}
