@@ -49,6 +49,7 @@ import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceFakeImpl;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
@@ -97,8 +98,7 @@ public class ExportWorkspaceData {
   // Importing the real one requires importing a large subtree of dependencies
   @Bean
   public WorkspaceService workspaceService() {
-    return new WorkspaceServiceImpl(
-        null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+    return new WorkspaceServiceFakeImpl();
   }
 
   @Bean
