@@ -472,8 +472,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      */
     makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
       let children: React.ReactNode;
-      // If its a sub category of Research purpose and not Education/Other
-      const isResearchPurpose = ResearchPurposeItems.indexOf(rp) > -1;
       if (rp.shortName === 'diseaseFocusedResearch') {
         children = this.makeDiseaseInput();
       } else if (rp.shortName === 'otherPurpose') {
