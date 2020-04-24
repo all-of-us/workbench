@@ -134,7 +134,7 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
 
   renderCharacterLimitMessage(textColor: string, message: string) {
     return <div
-        data-test-id='charactersRemaining'
+        data-test-id='characterLimit'
         style={{color: textColor, marginLeft: 'auto', flex: '0 0 auto'}}
     >
       {message}

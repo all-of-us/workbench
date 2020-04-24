@@ -287,7 +287,7 @@ describe('WorkspaceEdit', () => {
     const text  = 'intended Study text';
     // since its a new page the characters box for Intended study should say 1000 characters remaining
     let intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
-    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
+    expect(intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props.children)
       .toBe('1000 characters remaining');
 
     intendedStudySection.find('textarea#intendedStudyText').simulate('change', {target: {value: text}});
@@ -295,13 +295,13 @@ describe('WorkspaceEdit', () => {
     intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
     const charsRemaining = 1000 - text.length;
 
-    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
+    expect(intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props.children)
       .toContain(charsRemaining);
 
     // Warning message will appear onBlur
 
     intendedStudySection.find('textarea#intendedStudyText').simulate('blur');
-    expect(wrapper.find('[data-test-id="warningMsg"]').get(0).props.children)
+    expect(wrapper.find('[data-test-id="warning"]').get(0).props.children)
       .toContain('The description you entered seems too short.');
   });
 
@@ -311,7 +311,7 @@ describe('WorkspaceEdit', () => {
     const testInput = fp.repeat(1000, 'a');
     // since its a new page the characters box for Intended study should say 1000 characters remaining
     let intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
-    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0).props.children)
+    expect(intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props.children)
       .toBe('1000 characters remaining');
 
     intendedStudySection.find('textarea#intendedStudyText').simulate('change', {target: {value: testInput}});
@@ -319,11 +319,8 @@ describe('WorkspaceEdit', () => {
     intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
     const charsRemaining = 1000 - testInput.length;
 
-    expect(intendedStudySection.find('[data-test-id="characterMessage"]').get(0))
-        .toBeUndefined();
-
     expect(wrapper.find('[data-test-id="characterLimit"]').get(0).props.children)
-      .toContain('You have reached the character limit for this question');
+      .toContain('0 characters remaining');
   });
 
   it ('should show error message if Other primary purpose is more than 500 characters', async() => {
