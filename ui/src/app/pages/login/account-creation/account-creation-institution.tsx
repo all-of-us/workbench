@@ -104,6 +104,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
         loadingInstitutions: false,
         institutions: fp.sortBy( institution => institution.displayName, details.institutions)
       });
+      // Check email and populate appropriate icon In case page is loaded :
+      // after clicking PREVIOUS BUTTON from step 3 or
+      // if the fields were populated and researcher moves to TOS and back
+      if (this.props.profile && this.props.profile.contactEmail) {
+        this.checkEmail();
+      }
     } catch (e) {
       this.setState({
         loadingInstitutions: false,
