@@ -9,9 +9,8 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withStyle} from 'app/utils/index';
-import {FlexRow} from "./flex";
-import {WorkspaceEditSection} from "../pages/workspace/workspace-edit-section";
+import {withStyle} from 'app/utils/index';
+import {FlexRow} from './flex';
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
@@ -84,6 +83,20 @@ export const ValidationError = ({children}) => {
   >{children}</div>;
 };
 
+export const TextArea = ({style = {}, onChange, ...props}) => {
+  return <textarea
+      {...props}
+      onChange={onChange ? (e => onChange(e.target.value)) : undefined}
+      style={{
+        width: '100%',
+        borderColor: inputBorderColor, borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
+        padding: '0.25rem 0.5rem',
+        backgroundColor: colors.white,
+        ...style
+      }}
+  />;
+};
+
 interface TextAreaWithLengthValidationMessageProps {
   id: string;
   initialText: string;
@@ -108,7 +121,7 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
     this.state = {
       showTooShortWarning: false,
       text: props.initialText
-    }
+    };
   }
 
   onTextUpdate(text) {
@@ -138,7 +151,7 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
         style={{color: textColor, marginLeft: 'auto', flex: '0 0 auto'}}
     >
       {message}
-    </div>
+    </div>;
   }
 
   render() {
@@ -192,7 +205,7 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
           this.renderCharacterLimitMessage(colors.danger, (text.length - maxCharacters) + ' characters over')
         }
       </FlexRow>
-    </React.Fragment>
+    </React.Fragment>;
   }
 }
 
@@ -231,20 +244,6 @@ export const NumberInput = ({style = {}, value, onChange, ...props}) => {
       [fp.stubTrue, v => v.toString()]
     ])(value)}
     onChange={onChange ? (v => onChange(v === '' ? null : +v)) : undefined}
-  />;
-};
-
-export const TextArea = ({style = {}, onChange, ...props}) => {
-  return <textarea
-    {...props}
-    onChange={onChange ? (e => onChange(e.target.value)) : undefined}
-    style={{
-      width: '100%',
-      borderColor: inputBorderColor, borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
-      padding: '0.25rem 0.5rem',
-      backgroundColor: colors.white,
-      ...style
-    }}
   />;
 };
 

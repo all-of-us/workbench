@@ -1,8 +1,4 @@
-import {FlexRow} from 'app/components/flex';
-import {TextArea, TextAreaWithLengthValidationMessage} from 'app/components/inputs';
-import colors from 'app/styles/colors';
-import {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {TextAreaWithLengthValidationMessage} from 'app/components/inputs';
 import * as React from 'react';
 import {WorkspaceEditSection} from './workspace-edit-section';
 import {ResearchPurposeQuestion} from './workspace-edit-text';
@@ -36,9 +32,9 @@ export class WorkspaceResearchSummary extends React.Component<Props> {
           onChange={(s: string) => onChange(s)}
           tooLongWarningCharacters={950}
           tooShortWarningCharacters={50}
-          tooShortWarning={"The description you entered seems too short. Please consider " +
-            "adding more descriptive details to help the Program and your fellow Researchers " +
-            "understand your work."}
+          tooShortWarning={'The description you entered seems too short. Please consider ' +
+            'adding more descriptive details to help the Program and your fellow Researchers ' +
+            'understand your work.'}
        />
     </WorkspaceEditSection>;
   }

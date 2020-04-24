@@ -7,8 +7,7 @@ import {
   ErrorMessage,
   FormValidationErrorMessage,
   RadioButton,
-  styles as inputStyles,
-  TextArea, TextAreaWithLengthValidationMessage,
+  styles as inputStyles, TextAreaWithLengthValidationMessage,
   TextInput
 } from 'app/components/inputs';
 
@@ -17,7 +16,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   EducationalRole,
   IndustryRole,
@@ -42,7 +41,6 @@ import {
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
-import {WorkspaceEditSection} from "../../workspace/workspace-edit-section";
 
 const styles = reactStyles({
   ...commonStyles,
@@ -435,8 +433,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <InfoIcon style={{'height': '16px', 'paddingLeft': '2px'}}/>
         </TooltipTrigger>
       </div>;
-
-    const areaOfResearchCharactersRemaining = 2000 - areaOfResearch.length;
 
     const errors = this.validate();
 
