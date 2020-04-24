@@ -487,7 +487,7 @@ dependencies {
   compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
   compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
   compile "com.typesafe.netty:netty-reactive-streams:2.0.4"
-  compile "io.netty:netty-codec-http:4.1.44.Final"
+  compile "io.netty:netty-codec-http:4.1.46.Final"
   compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
   compile "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
