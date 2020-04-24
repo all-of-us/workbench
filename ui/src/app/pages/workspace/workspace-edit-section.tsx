@@ -1,6 +1,7 @@
 import {FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
@@ -43,6 +44,7 @@ interface Props {
   tooltip?: React.ReactNode;
   subHeader?: string;
   style?: any;
+  publiclyDisplayed?: boolean;
 }
 
 export const WorkspaceEditSection = (props: Props) => {
@@ -56,6 +58,8 @@ export const WorkspaceEditSection = (props: Props) => {
           fontSize: (props.largeHeader ? 20 : 16)}}>
           {props.header}
         </div>
+        {props.publiclyDisplayed &&
+        <PubliclyDisplayed style={{marginLeft: '1.5rem', marginTop: '-0.1rem'}}/>}
       </FlexRow>}
       {!props.index &&
       <div style={{...styles.header,

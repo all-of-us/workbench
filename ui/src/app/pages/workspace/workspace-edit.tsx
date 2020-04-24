@@ -157,6 +157,11 @@ export const styles = reactStyles({
     borderRadius: '6px',
     marginRight: '20px',
     marginBottom: '5px'
+  },
+  researchPurposeDescription: {
+    marginLeft: '-0.9rem',
+    fontSize: 14,
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85)
   }
 });
 
@@ -958,17 +963,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-              description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
+              description={<div style={styles.researchPurposeDescription}>
+                <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>
-              <i>Note that you are required to create separate Workspaces for each project
-                for which you access All of Us data, hence the responses below are expected
-                to be specific to the project for which you are creating this particular
-                Workspace.</i></div>
+              </div></div>
             }/>
 
         {/*Primary purpose */}
-        <WorkspaceEditSection header={researchPurposeQuestions[0].header}
-            description={researchPurposeQuestions[0].description} index='1.' indent>
+          <WorkspaceEditSection header={researchPurposeQuestions[0].header} publiclyDisplayed={true}
+                                description={researchPurposeQuestions[0].description} index='1.'
+                                indent={true}>
           <FlexRow>
             <FlexColumn>
               <FlexColumn  style={styles.researchPurposeRow}>
@@ -1004,7 +1008,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
         <WorkspaceEditSection
-          header={researchPurposeQuestions[1].header} indent
+          header={researchPurposeQuestions[1].header} indent={true} publiclyDisplayed={true}
           description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
@@ -1054,9 +1058,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </WorkspaceEditSection>
 
           {/*Underrespresented population section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
+        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent={true}
                               description={researchPurposeQuestions[7].description}
-                              style={{width: '48rem'}}>
+                              style={{width: '48rem'}} publiclyDisplayed={true}>
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
@@ -1115,7 +1119,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
           {/* Request for review section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent>
+        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent={true}>
           <FlexRow style={styles.text}><div>
             Any research that focuses on certain population characteristics or&nbsp;
             <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
