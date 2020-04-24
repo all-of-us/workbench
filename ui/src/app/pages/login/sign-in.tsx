@@ -300,7 +300,8 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
       case SignInStep.INVITATION_KEY:
         return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
           invitationKey: key,
-          currentStep: this.getNextStep(currentStep)
+          currentStep: this.getNextStep(currentStep),
+          isPreviousStep: false
         })}/>;
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
@@ -309,7 +310,8 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
             AnalyticsTracker.Registration.TOS();
             this.setState({
               termsOfServiceVersion: 1,
-              currentStep: this.getNextStep(currentStep)
+              currentStep: this.getNextStep(currentStep),
+              isPreviousStep: false
             });
           }} afterPrev={this.state.isPreviousStep}/>;
       case SignInStep.INSTITUTIONAL_AFFILIATION:
