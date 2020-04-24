@@ -4,8 +4,8 @@ import {FormSection} from 'app/components/forms';
 import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/icons';
 
 import {
-  Error as ErrorDiv,
   ErrorMessage,
+  FormValidationErrorMessage,
   RadioButton,
   styles as inputStyles,
   TextArea,
@@ -477,13 +477,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
               {this.state.usernameConflictError &&
               <div style={{height: '1.5rem'}}>
-                <ErrorDiv id='usernameConflictError'>
+                <FormValidationErrorMessage id='usernameConflictError'>
                   Username is already taken.
-                </ErrorDiv></div>}
+                </FormValidationErrorMessage></div>}
               {this.usernameInvalidError() &&
-                <div style={{height: '1.5rem'}}><ErrorDiv id='usernameError'>
+                <div style={{height: '1.5rem'}}><FormValidationErrorMessage id='usernameError'>
                   {username} is not a valid username.
-                </ErrorDiv></div>
+                </FormValidationErrorMessage></div>
               }
             </div>
           </Section>

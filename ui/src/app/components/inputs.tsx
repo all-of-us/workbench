@@ -82,6 +82,11 @@ export const ValidationError = ({children}) => {
   >{children}</div>;
 };
 
+export const FormValidationErrorMessage = withStyle({
+  color: colors.danger,
+  fontSize: 12
+})('div');
+
 export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...props}:
       {style?: React.CSSProperties, onChange: Function, onBlur: Function, [key: string]: any},
                                            ref: React.Ref<HTMLInputElement>) => {
