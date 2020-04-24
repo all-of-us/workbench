@@ -19,7 +19,14 @@ describe('Creating new workspaces', () => {
     await workspacesPage.load();
 
     // create workspace with "No Review Requested" radiobutton selected
-    await workspacesPage.createWorkspace(newWorkspaceName, 'Use All of Us free credits',);
+    const dialogTextContent = await workspacesPage.createWorkspace(newWorkspaceName, 'Use All of Us free credits',);
+
+    // Pick out few sentenses to verify
+    expect(dialogTextContent).toContain('Primary purpose of your project (Question 1)');
+    expect(dialogTextContent).toContain('Summary of research purpose (Question 2)');
+    expect(dialogTextContent).toContain('Will be displayed publicly to inform All of Us Research participants.');
+    expect(dialogTextContent).toContain('You can also make changes to your answers after you create your workspace.');
+
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
   });
 
@@ -61,13 +68,9 @@ describe('Creating new workspaces', () => {
 
     const finishButton = await workspacesPage.getCreateWorkspaceButton();
     await finishButton.waitUntilEnabled();
-
-    await finishButton.focus(); // bring button into viewport
-    await workspacesPage.clickAndWait(finishButton);
-    await workspacesPage.waitUntilNoSpinner();
+    await workspacesPage.clickCreateFinishButton(finishButton);
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
-
   });
 
   // helper function to check visible workspace link on Data page
