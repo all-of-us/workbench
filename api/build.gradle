@@ -1,5 +1,5 @@
-import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
+import io.swagger.codegen.config.CodegenConfigurator
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
@@ -462,7 +462,7 @@ dependencies {
   compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
   compile "com.github.fge:json-patch:1.9"
   compile "com.github.rholder:guava-retrying:2.0.0"
-  compile "com.google.api-client:google-api-client-appengine:1.23.0"
+  compile "com.google.api-client:google-api-client-appengine:1.30.0"
   compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3"
   compile "com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0"
   compile "com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0"
@@ -480,7 +480,7 @@ dependencies {
   compile "com.google.cloud:google-cloud-tasks:1.27.0"
   compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
   compile "com.google.guava:guava:26.0-jre"
-  compile "com.google.http-client:google-http-client-apache:1.29.2"
+  compile "com.google.http-client:google-http-client-apache:2.0.0"
   compile "com.google.oauth-client:google-oauth-client-jetty:1.30.3"
   compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
   compile "com.opsgenie.integration:sdk:2+"
