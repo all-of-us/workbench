@@ -430,10 +430,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     renderBillingDescription() {
       return <div>
-        The <i>All of Us</i> Program provides free credits for each registered user. If you use up your free credits,
-        you can request additional credits or use your own <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
-        'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>Google Cloud Platform
-        billing account</StyledAnchorTag>
+        The <i>All of Us</i> Program provides $300 in free credits per user. Please refer to
+        <StyledAnchorTag href={'https://aousupporthelp.zendesk.com/hc/en-us/sections' +
+        '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
+        </StyledAnchorTag> to learn more about the free credit
+        program and how it can be used. Once you have used up your free credits, you can request
+        additional credits by <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
+      'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>
+        &nbsp;contacting support</StyledAnchorTag>.
       </div>;
     }
 
@@ -923,7 +927,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         {serverConfigStore.getValue().enableBillingUpgrade &&
           (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
-                                description={this.renderBillingDescription()}>
+                                description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
               Select account
             </div>
