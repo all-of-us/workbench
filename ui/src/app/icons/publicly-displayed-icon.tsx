@@ -11,11 +11,6 @@ const styles = reactStyles({
     color: colors.accent,
     fontSize: '12px',
     fontWeight: 400
-  },
-  icon: {
-    marginLeft: '0.3rem',
-    width: '0.7rem',
-    marginBottom: '0.17rem'
   }
 });
 
@@ -63,7 +58,7 @@ export const PubliclyDisplayed = (props) => {
       <label style={styles.label}>
         Publicly displayed
         <TooltipTrigger content={toolTipContent} side='right'>
-          <InfoIcon style={styles.icon}/>
+          <InfoIcon style={{marginLeft: '0.5rem', width: '0.7rem'}}/>
         </TooltipTrigger>
       </label>
     </div>
