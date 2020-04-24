@@ -1,3 +1,4 @@
+import {reactStyles} from 'app/utils';
 import * as React from 'react';
 
 export const CustomBulletList = ({children}) => {
@@ -10,6 +11,13 @@ export const CustomBulletListItem = ({bullet, children}) => {
   </React.Fragment>;
 };
 
+const styles = reactStyles({
+  bulletAlignedList: {
+    listStylePosition: 'outside',
+    marginLeft: '1rem',
+  }
+});
+
 export const BulletAlignedUnorderedList = ({style = {}, children}) => {
-  return <ul style={{listStylePosition: 'outside', marginLeft: '1rem', ...style}}>{children}</ul>;
+  return <ul style={{...styles.bulletAlignedList, ...style}}>{children}</ul>;
 };

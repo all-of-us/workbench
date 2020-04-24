@@ -10,6 +10,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -1183,30 +1184,30 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               Cancel
             </Button>
             <TooltipTrigger content={
-              errors && <ul>
-                {errors.name && <div>{errors.name}</div>}
-                {errors.billingAccountName && <div>
-                  You must select a billing account</div>}
-                {errors.primaryPurpose && <div> You must choose at least one primary research
-                  purpose (Question 1)</div>}
-                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
-                {errors.otherPrimaryPurpose && <div> Other primary purpose should be of at most 500 characters</div>}
-                {errors.anticipatedFindings && <div> Answer for <i>What are the anticipated findings
-                  from the study? (Question 2.1)</i> cannot be empty</div>}
-                {errors.scientificApproach && <div> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</div>}
-                {errors.intendedStudy && <div> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question 2.3)</i> cannot be empty</div>}
-                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings (Question 3)</div>}
-                {errors.otherDisseminateResearchFindings && <div>
-                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</div>}
-                {errors.researchOutcoming && <div> You must specify the outcome of the research (Question 4)</div>}
-                {errors.populationChecked && <div>You must pick an answer Population of interest question (Question 5)</div>}
-                {errors.specificPopulation && <div> You must specify a population of study (Question 5)</div>}
-                {errors.otherSpecificPopulation && <div>
-                    Specific Population Other text should not be blank and should be at most 100 characters</div>}
-                {errors.reviewRequested && <div>You must pick an answer for review of stigmatizing research (Question 6)</div>}
-              </ul>
+              errors && <BulletAlignedUnorderedList>
+                {errors.name && <li>{errors.name}</li>}
+                {errors.billingAccountName && <li>
+                  You must select a billing account</li>}
+                {errors.primaryPurpose && <li> You must choose at least one primary research
+                  purpose (Question 1)</li>}
+                {errors.diseaseOfFocus && <li> You must specify a disease of focus and it should be at most 80 characters</li>}
+                {errors.otherPrimaryPurpose && <li> Other primary purpose should be of at most 500 characters</li>}
+                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
+                  from the study? (Question 2.1)</i> cannot be empty</li>}
+                {errors.scientificApproach && <li> Answer for <i>What are the scientific
+                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</li>}
+                {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
+                  (Question 2.3)</i> cannot be empty</li>}
+                {errors.disseminate && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
+                {errors.otherDisseminateResearchFindings && <li>
+                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}
+                {errors.researchOutcoming && <li> You must specify the outcome of the research (Question 4)</li>}
+                {errors.populationChecked && <li>You must pick an answer Population of interest question (Question 5)</li>}
+                {errors.specificPopulation && <li> You must specify a population of study (Question 5)</li>}
+                {errors.otherSpecificPopulation && <li>
+                    Specific Population Other text should not be blank and should be at most 100 characters</li>}
+                {errors.reviewRequested && <li>You must pick an answer for review of stigmatizing research (Question 6)</li>}
+              </BulletAlignedUnorderedList>
             } disabled={!errors}>
               <Button type='primary'
                       onClick={() => this.setState({showConfirmationModal: true})}
