@@ -424,7 +424,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataCountResponse response =
         controller
             .getParticipantCount(
-                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID,
+                testFilter)
             .getBody();
     assertThat(response.getCount()).isEqualTo(2);
   }
@@ -454,7 +458,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID,
+                testFilter)
             .getBody();
 
     assertResponse(response, ImmutableList.of(expectedCondition1(), expectedCondition2()));
@@ -464,7 +472,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID,
+                testFilter)
             .getBody();
 
     assertResponse(response, ImmutableList.of(expectedCondition2(), expectedCondition1()));
@@ -481,7 +493,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID,
+                testFilter)
             .getBody();
 
     assertResponse(response, ImmutableList.of(expectedCondition1()));
@@ -491,7 +507,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID,
+                testFilter)
             .getBody();
     assertResponse(response, ImmutableList.of(expectedCondition2()));
   }
@@ -505,7 +525,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID2,
+                testFilter)
             .getBody();
 
     assertResponse(response, ImmutableList.of(expectedAllEvents1()));
@@ -515,7 +539,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID2,
+                testFilter)
             .getBody();
 
     assertResponse(response, ImmutableList.of(expectedAllEvents2()));
