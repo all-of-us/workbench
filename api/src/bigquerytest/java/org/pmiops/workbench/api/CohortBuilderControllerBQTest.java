@@ -152,7 +152,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return ImmutableList.of("person", "death", "cb_search_person", "cb_search_all_events");
+    return ImmutableList.of(
+        "person", "death", "cb_search_person", "cb_search_all_events", "cb_criteria");
   }
 
   @Override
@@ -1281,7 +1282,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            ImmutableList.of(icd9().group(true).conceptId(2L)),
+            ImmutableList.of(icd9().group(true).conceptId(44823922L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
