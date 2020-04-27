@@ -2,8 +2,10 @@
 import {
   Button, StyledAnchorTag
 } from 'app/components/buttons';
+import {FlexColumn} from 'app/components/flex';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+
 
 import * as React from 'react';
 
@@ -325,7 +327,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
       </div> :
       <React.Fragment>
         <div style={styles.modalBackdrop}/>
-        <div style={{ ...styles.mainStyling, display: 'flex', flexDirection: 'column'}} data-test-id='quick-tour-react' className='quickTourReact'>
+        <FlexColumn style={{ ...styles.mainStyling}} data-test-id='quick-tour-react' className='quickTourReact'>
           <div style={styles.title}><i>All of Us</i> Researcher Workbench</div>
           <div style={styles.mainTitle}>Quick Tour</div>
           <div style={styles.breadcrumbs}>
@@ -406,7 +408,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
               </div>
             </div>
           </div>
-        </div>
+        </FlexColumn>
       </React.Fragment>;
   }
 }
