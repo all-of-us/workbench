@@ -625,6 +625,12 @@ tasks.withType(Test) {
       events "passed", "skipped", "failed"
     }
   }
+  reports {
+    // Write XML file (used by CircleCI, Jenkins, etc) to api/build/test-results/test
+    junitXml.enabled = true
+    // Write human-readable test report to api/build/reports/
+    html.enabled = true
+  }
 }
 
 appengine {  // App Engine tasks configuration
