@@ -140,6 +140,8 @@ definitions:
       findingsFromStudy:
         type: string
       focusOnUnderrepresentedPopulations:
+        description: Represents if researchers has selected YES for question Will your study focus
+          on any historically underrepresented populations
         type: boolean
       reviewRequested:
         type: boolean

@@ -1,6 +1,7 @@
 import {FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
@@ -24,7 +25,7 @@ export const styles = reactStyles({
     marginLeft: '0.2rem'
   },
   text: {
-    fontSize: '13px',
+    fontSize: '14px',
     color: colors.primary,
     fontWeight: 400,
     lineHeight: '24px'
@@ -37,12 +38,14 @@ interface Props {
   descriptionStyle?: React.CSSProperties;
   header: any;
   index?: string;
+  indexStyle?: React.CSSProperties;
   indent?: boolean;
   largeHeader?: any;
   required?: boolean;
   tooltip?: React.ReactNode;
   subHeader?: string;
   style?: any;
+  publiclyDisplayed?: boolean;
 }
 
 export const WorkspaceEditSection = (props: Props) => {
@@ -50,16 +53,18 @@ export const WorkspaceEditSection = (props: Props) => {
     <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),
       marginTop: (props.largeHeader ? 12 : 24)}}>
       {props.index && <FlexRow style={{...styles.header,
-        fontSize: (props.largeHeader ? 20 : 16)}}>
-        <div style={{marginRight: '0.4rem'}}>{props.index}</div>
+        fontSize: (props.largeHeader ? 18 : 14)}}>
+        <div style={{marginRight: '0.4rem', ...props.indexStyle}}>{props.index}</div>
         <div style={{...styles.header,
-          fontSize: (props.largeHeader ? 20 : 16)}}>
+          fontSize: (props.largeHeader ? 18 : 14)}}>
           {props.header}
         </div>
+        {props.publiclyDisplayed &&
+        <PubliclyDisplayed style={{marginLeft: '1.5rem', marginTop: '-0.1rem'}}/>}
       </FlexRow>}
       {!props.index &&
       <div style={{...styles.header,
-        fontSize: (props.largeHeader ? 20 : 16)}}>
+        fontSize: (props.largeHeader ? 18 : 14)}}>
         {props.header}
       </div>
       }

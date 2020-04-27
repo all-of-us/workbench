@@ -8,10 +8,10 @@ import {
   Clickable, StyledAnchorTag,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {CustomBulletList, CustomBulletListItem} from 'app/components/custom-bullet-list';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {CustomBulletList, CustomBulletListItem} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll';

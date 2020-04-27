@@ -87,8 +87,8 @@ export class AccountCreationSuccess
 
         <Divider verticalMargin='1rem' style={{width: '100%'}}/>
 
-        <TextColumn style={{fontSize: '14px'}}>
-          <div>
+        <TextColumn>
+          <div style={{fontSize: '16px'}}>
             Your contact email is: {this.props.profile.contactEmail}
           </div>
           <a style={{marginTop: '.25rem'}}

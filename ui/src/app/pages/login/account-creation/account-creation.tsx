@@ -4,11 +4,10 @@ import {FormSection} from 'app/components/forms';
 import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/icons';
 
 import {
-  Error as ErrorDiv,
   ErrorMessage,
+  FormValidationErrorMessage,
   RadioButton,
-  styles as inputStyles,
-  TextArea,
+  styles as inputStyles, TextAreaWithLengthValidationMessage,
   TextInput
 } from 'app/components/inputs';
 
@@ -17,7 +16,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   EducationalRole,
   IndustryRole,
@@ -30,6 +29,7 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
@@ -434,8 +434,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </TooltipTrigger>
       </div>;
 
-    const areaOfResearchCharactersRemaining = 2000 - areaOfResearch.length;
-
     const errors = this.validate();
 
     return <div id='account-creation'
@@ -476,13 +474,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
               {this.state.usernameConflictError &&
               <div style={{height: '1.5rem'}}>
-                <ErrorDiv id='usernameConflictError'>
+                <FormValidationErrorMessage id='usernameConflictError'>
                   Username is already taken.
-                </ErrorDiv></div>}
+                </FormValidationErrorMessage></div>}
               {this.usernameInvalidError() &&
-                <div style={{height: '1.5rem'}}><ErrorDiv id='usernameError'>
+                <div style={{height: '1.5rem'}}><FormValidationErrorMessage id='usernameError'>
                   {username} is not a valid username.
-                </ErrorDiv></div>
+                </FormValidationErrorMessage></div>
               }
             </div>
           </Section>
@@ -620,24 +618,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             style={{marginTop: '2rem'}}
             sectionHeaderStyles={{borderBottom: null}}
           >
-            <TextArea style={{height: '15rem', resize: 'none', width: '26rem', borderRadius: '3px 3px 0 0',
-              borderColor: colorWithWhiteness(colors.dark, 0.5)}}
-                      id='areaOfResearch'
-                      name='areaOfResearch'
-                      placeholder='Describe Your Current Research'
-                      value={areaOfResearch}
-                      onChange={v => this.updateProfileObject('areaOfResearch', v)}/>
-            <FlexRow style={{justifyContent: 'flex-end', width: '26rem',
-              backgroundColor: colorWithWhiteness(colors.primary, 0.85), fontSize: 12,
-              color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px',
-              border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
-              {
-                areaOfResearchCharactersRemaining >= 0 && <div>{areaOfResearchCharactersRemaining} characters remaining</div>
-              }
-              {
-                areaOfResearchCharactersRemaining < 0 && <div>{-areaOfResearchCharactersRemaining} characters over</div>
-              }
-            </FlexRow>
+            <TextAreaWithLengthValidationMessage
+              id={'areaOfResearch'}
+              initialText={areaOfResearch}
+              maxCharacters={2000}
+              onChange={(s: string) => this.updateProfileObject('areaOfResearch', s)}
+              tooLongWarningCharacters={1900}
+            />
           </Section>
           {/* TODO(RW-4361): remove after we switch to verified institutional affiliation */}
           {!requireInstitutionalVerification && <React.Fragment>
@@ -735,9 +722,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </Button>
             <TooltipTrigger content={errors && <React.Fragment>
               <div>Please review the following: </div>
-              <ul>
+              <BulletAlignedUnorderedList>
                 {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
-              </ul>
+              </BulletAlignedUnorderedList>
             </React.Fragment>} disabled={!errors}>
               <Button disabled={this.state.usernameCheckInProgress ||
                                 this.isUsernameValidationError() ||

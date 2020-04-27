@@ -23,9 +23,12 @@ export default class HomePage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitUntilTitleMatch(PAGE.TITLE);
-      await this.waitForTextExists(PAGE.HEADER);
-      await Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES);
+      await Promise.all([
+        this.waitUntilTitleMatch(PAGE.TITLE),
+        this.waitForTextExists(PAGE.HEADER),
+        Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
+        this.waitUntilNoSpinner(),
+      ]);
       return true;
     } catch (e) {
       return false;

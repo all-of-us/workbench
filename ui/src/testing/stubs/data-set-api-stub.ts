@@ -86,8 +86,7 @@ export class DataSetApiStub extends DataSetApi {
     });
   }
 
-  public getValuesFromDomain(workspaceNamespace: string, workspaceId: string, domain: string)
-    : Promise<DomainValuesResponse> {
+  public getValuesFromDomain(workspaceNamespace: string, workspaceId: string, domain: string): Promise<DomainValuesResponse> {
     const domainValueItems = [];
     switch (domain) {
       case 'CONDITION':

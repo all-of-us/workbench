@@ -1590,27 +1590,39 @@ Common.register_command({
 
 def delete_clusters(cmd_name, *args)
   ensure_docker cmd_name, args
+
+  common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
   op.add_option(
       "--min-age-days [DAYS]",
       ->(opts, v) { opts.min_age_days = v},
-      "Optional minimum age filter in days for clusters to delete, e.g. 21")
+      "Minimum age filter in days for clusters to delete, e.g. 21")
   op.add_option(
       "--ids [CLUSTER_ID1,...]",
       ->(opts, v) { opts.cluster_ids = v},
-      "Optional cluster IDs to delete, e.g. 'aou-test-f1-1/all-of-us'")
+      "Cluster IDs to delete, e.g. 'aou-test-f1-1/all-of-us'")
   op.add_option(
       "--nodry-run",
       ->(opts, _) { opts.dry_run = false},
       "Actually delete clusters, defaults to dry run")
+  op.add_validator ->(opts) {
+    unless (opts.min_age_days or opts.cluster_ids)
+      common.error "--ids or --min-age-days must be provided"
+      raise ArgumentError
+    end
+  }
+
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
 
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
-    common = Common.new
     common.run_inline %W{
        gradle manageClusters
       -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
@@ -1619,7 +1631,7 @@ end
 
 Common.register_command({
   :invocation => "delete-clusters",
-  :description => "Delete all clusters in this environment",
+  :description => "Delete clusters matching the provided criteria within an environment",
   :fn => ->(*args) { delete_clusters("delete-clusters", *args) }
 })
 

@@ -81,7 +81,7 @@
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
-    "enableComplianceTraining": false,
+    "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
@@ -101,7 +101,7 @@
     "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false,
-    "enableV3DataUserCodeOfConduct": false,
+    "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false
   },
   "actionAudit": {

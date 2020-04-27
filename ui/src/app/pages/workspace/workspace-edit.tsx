@@ -10,6 +10,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -145,7 +146,7 @@ export const styles = reactStyles({
     width: '100%',
   },
   text: {
-    fontSize: '13px',
+    fontSize: '14px',
     color: colors.primary,
     fontWeight: 400,
     lineHeight: '24px'
@@ -156,6 +157,11 @@ export const styles = reactStyles({
     borderRadius: '6px',
     marginRight: '20px',
     marginBottom: '5px'
+  },
+  researchPurposeDescription: {
+    marginLeft: '-0.9rem',
+    fontSize: 14,
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85)
   }
 });
 
@@ -466,8 +472,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      */
     makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
       let children: React.ReactNode;
-      // If its a sub category of Research purpose and not Education/Other
-      const isResearchPurpose = ResearchPurposeItems.indexOf(rp) > -1;
       if (rp.shortName === 'diseaseFocusedResearch') {
         children = this.makeDiseaseInput();
       } else if (rp.shortName === 'otherPurpose') {
@@ -485,7 +489,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   checked={!!this.state.workspace.researchPurpose[rp.shortName]}
                   onChange={e => this.updatePrimaryPurpose(rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
-          <label style={{...styles.shortDescription, fontSize: isResearchPurpose ? 14 : 16}} htmlFor={rp.uniqueId}>
+          <label style={{...styles.shortDescription, fontSize: 14}} htmlFor={rp.uniqueId}>
             {rp.shortDescription}
           </label>
           <div>
@@ -535,33 +539,44 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * options.
      */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-      return <div key={item.label}><strong>{item.label} *</strong>
-        {item.subCategory.map((sub, index) => <FlexRow key={sub.label}>
-          <CheckBox
-              manageOwnState={false}
-              wrapperStyle={styles.checkboxRow}
-              data-test-id={sub.shortName + '-checkbox'}
-              style={styles.checkboxStyle}
-              label={sub.label}
-              labelStyle={styles.text}
-              key={sub.label}
-              checked={this.specificPopulationCheckboxSelected(sub.shortName)}
-              onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
-              disabled={!this.state.populationChecked}/></FlexRow>)}
+      return <div key={item.label}>
+        <div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
+        {item.subCategory.map((sub, index) =>
+            <FlexRow key={sub.label} style={{...styles.categoryRow, paddingTop: '0rem'}}>
+              <CheckBox
+                  manageOwnState={false}
+                  wrapperStyle={styles.checkboxRow}
+                  data-test-id={sub.shortName + '-checkbox'}
+                  style={{...styles.checkboxStyle, marginTop: '0.1rem'}}
+                  key={sub.label}
+                  checked={this.specificPopulationCheckboxSelected(sub.shortName)}
+                  onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
+                  disabled={!this.state.populationChecked}/>
+              <FlexColumn>
+                <label style={styles.text}>
+                  {sub.label}
+                </label>
+              </FlexColumn>
+            </FlexRow>)}
       </div>;
     }
 
-    makeOutcomingResearchForm(item, I): React.ReactNode {
-      return <CheckBox
-          wrapperStyle={styles.checkboxRow}
-          style={styles.checkboxStyle}
-          label={item.label}
-          labelStyle={styles.text}
-          key={item.label}
-          checked={this.researchOutcomeCheckboxSelected(item.shortName)}
-          onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
-      />;
+    makeOutcomingResearchForm(item, index): React.ReactNode {
+      return <div key={index} style={{...styles.categoryRow, paddingTop: '0rem'}}>
+        <CheckBox
+            style={styles.checkboxStyle}
+            key={item.label}
+            checked={this.researchOutcomeCheckboxSelected(item.shortName)}
+            onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
+        />
+        <FlexColumn style={{marginTop: '-0.2rem'}}>
+          <label style={styles.text}>
+            {item.label}
+          </label>
+        </FlexColumn>
+      </div>;
     }
+
     renderHeader() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create:
@@ -882,12 +897,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        <div style={{width: '95%'}}>
+        <div style={{width: '1120px'}}>
           {this.state.loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
-          <FlexRow>
+          <FlexRow style={{alignItems: 'baseline'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
               value = {this.state.workspace.name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
@@ -911,7 +926,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </div>
             </TooltipTrigger>
             <TooltipTrigger content={toolTipText.cdrSelect}>
-              <InfoIcon style={{...styles.infoIcon}}/>
+              <InfoIcon style={{...styles.infoIcon, marginTop: '0.4rem'}}/>
             </TooltipTrigger>
           </FlexRow>
         </WorkspaceEditSection>
@@ -956,18 +971,17 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
-        <WorkspaceEditSection header='Research Use Statement Questions'
-              description={<div style={{marginLeft: '-0.9rem', fontSize: 14}}> {ResearchPurposeDescription}
+        <WorkspaceEditSection header='Research Use Statement Questions' largeHeader={true}
+              description={<div style={styles.researchPurposeDescription}>
+                <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>
-              <i>Note that you are required to create separate Workspaces for each project
-                for which you access All of Us data, hence the responses below are expected
-                to be specific to the project for which you are creating this particular
-                Workspace.</i></div>
+              </div></div>
             }/>
 
         {/*Primary purpose */}
-        <WorkspaceEditSection header={researchPurposeQuestions[0].header}
-            description={researchPurposeQuestions[0].description} index='1.' indent>
+          <WorkspaceEditSection header={researchPurposeQuestions[0].header} publiclyDisplayed={true}
+                                description={researchPurposeQuestions[0].description} index='1.'
+                                indent={true}>
           <FlexRow>
             <FlexColumn>
               <FlexColumn  style={styles.researchPurposeRow}>
@@ -982,7 +996,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     <button style={{...styles.shortDescription, border: 'none'}}
                             data-test-id='research-purpose-button'
                             onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
-                      Research purpose
+                      <label style={{fontSize: 14, marginLeft: '0.2rem'}}>Research purpose</label>
                       <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
                      </button>
                   </div>
@@ -1003,25 +1017,34 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
 
         <WorkspaceEditSection
-          header={researchPurposeQuestions[1].header} indent
+          header={researchPurposeQuestions[1].header} indent={true} publiclyDisplayed={true}
           description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[2]}
-                          researchValue={this.state.workspace.researchPurpose.intendedStudy}
-                          onChange={v => this.updateResearchPurpose('intendedStudy', v)}
-                          index='2.1' rowId='intendedStudyText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[2]}
+                researchValue={this.state.workspace.researchPurpose.intendedStudy}
+                onChange={v => this.updateResearchPurpose('intendedStudy', v)}
+                index='2.1'
+                id='intendedStudyText'
+            />
 
             {/* TextBox: scientific approaches section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[3]}
-                           researchValue={this.state.workspace.researchPurpose.scientificApproach}
-                            onChange={v => this.updateResearchPurpose('scientificApproach', v)}
-                           index='2.2' rowId='scientificApproachText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[3]}
+                researchValue={this.state.workspace.researchPurpose.scientificApproach}
+                onChange={v => this.updateResearchPurpose('scientificApproach', v)}
+                index='2.2'
+                id='scientificApproachText'
+            />
             {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[4]}
-                           researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
-                           onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
-                           index='2.3' rowId='anticipatedFindingsText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[4]}
+                researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
+                onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
+                index='2.3'
+                id='anticipatedFindingsText'
+            />
           </FlexColumn>
         </WorkspaceEditSection>
 
@@ -1053,9 +1076,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </WorkspaceEditSection>
 
           {/*Underrespresented population section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent
+        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent={true}
                               description={researchPurposeQuestions[7].description}
-                              style={{width: '48rem'}}>
+                              style={{width: '48rem'}} publiclyDisplayed={true}>
           <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
@@ -1081,7 +1104,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     style={styles.checkboxStyle}
                     data-test-id='other-specialPopulation-checkbox'
                     label='Other'
-                    labelStyle={styles.text}
+                    labelStyle={{...styles.text, fontWeight: 'bold'}}
                     checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                     disabled={!populationChecked}
@@ -1096,25 +1119,29 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </FlexColumn>
             </FlexRow>
             <hr/>
-            <div>* Demographic variables for which data elements have been altered, partially
-              suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
-              the Data Dictionary for details.</div>
+            <FlexRow>
+              <div style={{marginRight: '0.2rem'}}>*</div>
+              <div>Demographic variables for which data elements have been altered, partially
+                suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
+                the Data Dictionary for details.</div>
+            </FlexRow>
+
             <hr/>
           </div>
-          <div style={{marginTop: '0.5rem'}}>
+          <FlexRow style={{marginTop: '0.5rem'}}>
             <RadioButton name='population'
-                         style={{marginRight: '0.5rem'}}
+                         style={{marginRight: '0.5rem', marginTop: '0.3rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
                          checked={populationChecked === false}/>
             <label style={styles.text}>No, my study will not center on underrepresented populations.
               I am interested in a diverse sample in general, or I am focused on populations that
               have been well represented in prior research.</label>
-          </div>
+          </FlexRow>
         </WorkspaceEditSection>
 
           {/* Request for review section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent>
+        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent={true}>
           <FlexRow style={styles.text}><div>
             Any research that focuses on certain population characteristics or&nbsp;
             <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
@@ -1183,30 +1210,30 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               Cancel
             </Button>
             <TooltipTrigger content={
-              errors && <ul>
-                {errors.name && <div>{errors.name}</div>}
-                {errors.billingAccountName && <div>
-                  You must select a billing account</div>}
-                {errors.primaryPurpose && <div> You must choose at least one primary research
-                  purpose (Question 1)</div>}
-                {errors.diseaseOfFocus && <div> You must specify a disease of focus and it should be at most 80 characters</div>}
-                {errors.otherPrimaryPurpose && <div> Other primary purpose should be of at most 500 characters</div>}
-                {errors.anticipatedFindings && <div> Answer for <i>What are the anticipated findings
-                  from the study? (Question 2.1)</i> cannot be empty</div>}
-                {errors.scientificApproach && <div> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</div>}
-                {errors.intendedStudy && <div> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question 2.3)</i> cannot be empty</div>}
-                {errors.disseminate && <div> You must specific how you plan to disseminate your research findings (Question 3)</div>}
-                {errors.otherDisseminateResearchFindings && <div>
-                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</div>}
-                {errors.researchOutcoming && <div> You must specify the outcome of the research (Question 4)</div>}
-                {errors.populationChecked && <div>You must pick an answer Population of interest question (Question 5)</div>}
-                {errors.specificPopulation && <div> You must specify a population of study (Question 5)</div>}
-                {errors.otherSpecificPopulation && <div>
-                    Specific Population Other text should not be blank and should be at most 100 characters</div>}
-                {errors.reviewRequested && <div>You must pick an answer for review of stigmatizing research (Question 6)</div>}
-              </ul>
+              errors && <BulletAlignedUnorderedList>
+                {errors.name && <li>{errors.name}</li>}
+                {errors.billingAccountName && <li>
+                  You must select a billing account</li>}
+                {errors.primaryPurpose && <li> You must choose at least one primary research
+                  purpose (Question 1)</li>}
+                {errors.diseaseOfFocus && <li> You must specify a disease of focus and it should be at most 80 characters</li>}
+                {errors.otherPrimaryPurpose && <li> Other primary purpose should be of at most 500 characters</li>}
+                {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
+                  (Question 2.1)</i> must be between 0 and 1000 characters</li>}
+                {errors.scientificApproach && <li> Answer for <i>What are the scientific
+                  approaches you plan to use for your study (Question 2.2)</i> must be between 0 and 1000 characters</li>}
+                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
+                  from the study? (Question 2.3)</i> must be between 0 and 1000 characters</li>}
+                {errors.disseminate && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
+                {errors.otherDisseminateResearchFindings && <li>
+                    Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}
+                {errors.researchOutcoming && <li> You must specify the outcome of the research (Question 4)</li>}
+                {errors.populationChecked && <li>You must pick an answer Population of interest question (Question 5)</li>}
+                {errors.specificPopulation && <li> You must specify a population of study (Question 5)</li>}
+                {errors.otherSpecificPopulation && <li>
+                    Specific Population Other text should not be blank and should be at most 100 characters</li>}
+                {errors.reviewRequested && <li>You must pick an answer for review of stigmatizing research (Question 6)</li>}
+              </BulletAlignedUnorderedList>
             } disabled={!errors}>
               <Button type='primary'
                       onClick={() => this.setState({showConfirmationModal: true})}
