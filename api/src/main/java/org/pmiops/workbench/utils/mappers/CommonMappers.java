@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import javax.validation.constraints.Null;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -73,9 +74,10 @@ public class CommonMappers {
     return Etags.fromVersion(cdrVersion);
   }
 
+  @Nullable
   @Named("etagToCdrVersion")
-  public int etagToCdrVersion(String etag) {
-    return Etags.toVersion(etag);
+  public Integer etagToCdrVersion(@Nullable String etag) {
+    return Optional.ofNullable(etag).map(Etags::toVersion).orElse(null);
   }
 
   // Note that DbStorageEnums is a valid class for use in a MapStruct mapper directly, so there's

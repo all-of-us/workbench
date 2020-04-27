@@ -128,7 +128,8 @@ public interface WorkspaceMapper {
   @Mapping(source = "workspace.creationTime", target = "creationTime")
   @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevel")
   @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
-  @Mapping(source = "workspace.etag", target = "version", qualifiedByName = "etagToCdrVersion")
+  // Use default CDR version if null. There are really no other good options (i.e. a zero version is just wrong).
+  @Mapping(source = "workspace.etag", target = "version", qualifiedByName = "etagToCdrVersion", defaultValue = "1")
   @Mapping(source = "workspace.name", target = "name")
   @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
 
