@@ -332,7 +332,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
       </div> :
       <React.Fragment>
         <div style={styles.modalBackdrop}/>
-        <FlexColumn style={{ ...styles.mainStyling}} data-test-id='quick-tour-react' className='quickTourReact'>
+        <FlexColumn style={styles.mainStyling} data-test-id='quick-tour-react' className='quickTourReact'>
           <div style={styles.title}><i>All of Us</i> Researcher Workbench</div>
           <div style={styles.mainTitle}>Quick Tour</div>
           <div style={styles.breadcrumbs}>
