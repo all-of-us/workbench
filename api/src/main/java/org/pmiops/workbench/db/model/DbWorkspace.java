@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -149,6 +150,15 @@ public class DbWorkspace {
 
   public void setVersion(int version) {
     this.version = version;
+  }
+
+  /**
+   * The DbWorkspace version colmun corresponds to the integer form of an Etag.
+   * This convenience setter will make mapping these values easier.
+   * @return
+   */
+  public void setVersion(String etag) {
+    setVersion(Etags.toVersion(etag));
   }
 
   @Column(name = "name")

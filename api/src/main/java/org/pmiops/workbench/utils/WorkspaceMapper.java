@@ -125,10 +125,10 @@ public interface WorkspaceMapper {
   @Mapping(source = "dbUser", target = "creator")
   @Mapping(source = "firecloudWorkspace.name", target = "firecloudName")
   @Mapping(source = "firecloudWorkspace.workspaceId", target = "firecloudUuid")
-  @Mapping(source = "version", target = "version") // distinguish from DbUser version field
   @Mapping(source = "workspace.creationTime", target = "creationTime")
   @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevel")
   @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
+  @Mapping(source = "workspace.etag", target = "version", qualifiedByName = "etagToCdrVersion")
   @Mapping(source = "workspace.name", target = "name")
   @Mapping(source = "workspace.namespace", target = "workspaceNamespace")
 
@@ -167,11 +167,9 @@ public interface WorkspaceMapper {
       Workspace workspace,
       FirecloudWorkspace firecloudWorkspace,
       DbUser dbUser,
-      String billingAccountName,
       WorkspaceActiveStatus workspaceActiveStatus,
       Timestamp lastAccessedTime,
       BillingMigrationStatus billingMigrationStatus,
-      int version,
       DbCdrVersion dbCdrVersion,
       Set<DbCohort> dbCohorts,
       Set<DbDataset> dbDatasets);

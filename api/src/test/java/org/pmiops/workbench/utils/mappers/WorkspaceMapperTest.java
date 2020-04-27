@@ -1,13 +1,14 @@
 package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.quartz.utils.PoolingConnectionProvider.DB_USER;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,13 +66,20 @@ public class WorkspaceMapperTest {
   private static final ImmutableSet<ResearchOutcomeEnum> RESEARCH_OUTCOMES =
       ImmutableSet.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
   private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
-  public static final boolean PUBLISHED = false;
+  private static final boolean PUBLISHED = false;
+  private static final BillingMigrationStatus BILLING_MIGRATION_STATUS = BillingMigrationStatus.MIGRATED;
+  private static final String DISEASE_OF_FOCUS = "leukemia";
+  private static final String OTHER_PURPOSE_DETAILS = "I want to discover a new disease.";
+  private static final String ADDITIONAL_NOTES = "remember to wash hands.";
+  private static final String AOU_REASON = "We can't get this data anywhere else.";
+  private static final String INTENDED_STUDY = null;
 
+  private DbCdrVersion cdrVersion;
   private DbUser creatorUser;
   private DbWorkspace sourceDbWorkspace;
   private FirecloudWorkspace sourceFirecloudWorkspace;
   private ResearchPurpose sourceResearchPurpose;
-  private Workspace sorurceApiWorkspace;
+  private Workspace sourceApiWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
 
@@ -110,7 +118,7 @@ public class WorkspaceMapperTest {
     creatorUser.setDataAccessLevelEnum(DATA_ACCESS_LEVEL);
     creatorUser.setUserId(CREATOR_USER_ID);
 
-    final DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(CDR_VERSION_ID);
 
     sourceDbWorkspace = new DbWorkspace();
@@ -128,10 +136,10 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setCohorts(Collections.emptySet());
     sourceDbWorkspace.setDataSets(Collections.emptySet());
     sourceDbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    sourceDbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.MIGRATED);
+    sourceDbWorkspace.setBillingMigrationStatusEnum(BILLING_MIGRATION_STATUS);
     sourceDbWorkspace.setPublished(false);
     sourceDbWorkspace.setDiseaseFocusedResearch(true);
-    sourceDbWorkspace.setDiseaseOfFocus("leukemia");
+    sourceDbWorkspace.setDiseaseOfFocus(DISEASE_OF_FOCUS);
     sourceDbWorkspace.setMethodsDevelopment(false);
     sourceDbWorkspace.setControlSet(true);
     sourceDbWorkspace.setAncestry(false);
@@ -143,11 +151,11 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setEducational(true);
     sourceDbWorkspace.setDrugDevelopment(false);
     sourceDbWorkspace.setOtherPurpose(true);
-    sourceDbWorkspace.setOtherPurposeDetails("I want to discover a new disease.");
+    sourceDbWorkspace.setOtherPurposeDetails(OTHER_PURPOSE_DETAILS);
     sourceDbWorkspace.setOtherPopulationDetails(null);
-    sourceDbWorkspace.setAdditionalNotes(null);
-    sourceDbWorkspace.setReasonForAllOfUs("We can't get this data anywhere else.");
-    sourceDbWorkspace.setIntendedStudy(null);
+    sourceDbWorkspace.setAdditionalNotes(ADDITIONAL_NOTES);
+    sourceDbWorkspace.setReasonForAllOfUs(AOU_REASON);
+    sourceDbWorkspace.setIntendedStudy(INTENDED_STUDY);
     sourceDbWorkspace.setReviewRequested(false);
     sourceDbWorkspace.setApproved(true);
     sourceDbWorkspace.setTimeRequested(DB_CREATION_TIMESTAMP);
@@ -159,10 +167,37 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER);
 
     sourceResearchPurpose = new ResearchPurpose()
+        .additionalNotes(null)
+        .ancestry(false)
+        .anticipatedFindings("at least 2 four-leaf clovers")
+        .approved(null)
+        .commercialPurpose(false)
+        .controlSet(false)
+        .diseaseFocusedResearch(false)
+        .diseaseOfFocus(DISEASE_OF_FOCUS)
+        .disseminateResearchFindingList(Collections.emptyList())
+        .drugDevelopment(false)
+        .educational(false)
+        .ethics(false)
+        .intendedStudy(INTENDED_STUDY)
+        .methodsDevelopment(true)
+        .otherDisseminateResearchFindings(DISSEMINATE_FINDINGS_OTHER)
+        .otherPopulationDetails("")
+        .otherPurpose(false)
+        .otherPurposeDetails("")
+        .populationDetails(new ArrayList<>(SPECIFIC_POPULATIONS))
+        .populationHealth(false)
+        .reasonForAllOfUs(AOU_REASON)
+        .researchOutcomeList(new ArrayList<>(RESEARCH_OUTCOMES))
+        .reviewRequested(false)
+        .scientificApproach(null)
+        .socialBehavioral(false)
+        .timeRequested(null)
+        .timeReviewed(null);
 
-    sorurceApiWorkspace = new Workspace()
-      .id("a")
-      .etag("2")
+    sourceApiWorkspace = new Workspace()
+      .id(WORKSPACE_FIRECLOUD_NAME)
+      .etag(Etags.fromVersion(WORKSPACE_VERSION))
       .name("thequickbrownfox")
       .namespace("aou-xxxxxxx")
       .cdrVersionId("2")
@@ -194,53 +229,64 @@ public class WorkspaceMapperTest {
     assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
 
     final ResearchPurpose rp = ws.getResearchPurpose();
-    assertResearchPurposeMatches(rp);
+    assertResearchPurposeMatches(sourceDbWorkspace, rp);
 
     assertThat(ws.getCreationTime()).isEqualTo(DB_CREATION_TIMESTAMP.toInstant().toEpochMilli());
     assertThat(ws.getPublished()).isEqualTo(sourceDbWorkspace.getPublished());
   }
 
-  private void assertResearchPurposeMatches(ResearchPurpose rp) {
-    assertThat(rp.getAdditionalNotes()).isEqualTo(sourceDbWorkspace.getAdditionalNotes());
-    assertThat(rp.getApproved()).isEqualTo(sourceDbWorkspace.getApproved());
-    assertThat(rp.getAncestry()).isEqualTo(sourceDbWorkspace.getAncestry());
-    assertThat(rp.getAnticipatedFindings()).isEqualTo(sourceDbWorkspace.getAnticipatedFindings());
-    assertThat(rp.getCommercialPurpose()).isEqualTo(sourceDbWorkspace.getCommercialPurpose());
-    assertThat(rp.getControlSet()).isEqualTo(sourceDbWorkspace.getControlSet());
-    assertThat(rp.getDiseaseFocusedResearch())
-        .isEqualTo(sourceDbWorkspace.getDiseaseFocusedResearch());
-    assertThat(rp.getDiseaseOfFocus()).isEqualTo(sourceDbWorkspace.getDiseaseOfFocus());
-    assertThat(rp.getDrugDevelopment()).isEqualTo(sourceDbWorkspace.getDrugDevelopment());
-    assertThat(rp.getEducational()).isEqualTo(sourceDbWorkspace.getEducational());
-    assertThat(rp.getIntendedStudy()).isEqualTo(sourceDbWorkspace.getIntendedStudy());
-    assertThat(rp.getMethodsDevelopment()).isEqualTo(sourceDbWorkspace.getMethodsDevelopment());
-    assertThat(rp.getOtherPopulationDetails())
-        .isEqualTo(sourceDbWorkspace.getOtherPopulationDetails());
-    assertThat(rp.getOtherPurpose()).isEqualTo(sourceDbWorkspace.getOtherPurpose());
-    assertThat(rp.getOtherPurposeDetails()).isEqualTo(sourceDbWorkspace.getOtherPurposeDetails());
-    assertThat(rp.getPopulationDetails())
-        .containsExactlyElementsIn(sourceDbWorkspace.getSpecificPopulationsEnum());
-    assertThat(rp.getPopulationHealth()).isEqualTo(sourceDbWorkspace.getPopulationHealth());
-    assertThat(rp.getReasonForAllOfUs()).isEqualTo(sourceDbWorkspace.getReasonForAllOfUs());
-    assertThat(rp.getReviewRequested()).isEqualTo(sourceDbWorkspace.getReviewRequested());
-    assertThat(rp.getSocialBehavioral()).isEqualTo(sourceDbWorkspace.getSocialBehavioral());
-    assertThat(rp.getTimeRequested())
-        .isEqualTo(sourceDbWorkspace.getTimeRequested().toInstant().toEpochMilli());
-    assertThat(rp.getTimeReviewed()).isNull();
+  // Note that this can be used two ways, but the error messages' expected vs actal labels will
+  // be swapped if your research purpose is observed instead of expected.
+  private void assertResearchPurposeMatches(DbWorkspace dbWorkspace, ResearchPurpose researchPurpose) {
+    assertThat(researchPurpose.getAdditionalNotes()).isEqualTo(dbWorkspace.getAdditionalNotes());
+    assertThat(researchPurpose.getApproved()).isEqualTo(dbWorkspace.getApproved());
+    assertThat(researchPurpose.getAncestry()).isEqualTo(dbWorkspace.getAncestry());
+    assertThat(researchPurpose.getAnticipatedFindings()).isEqualTo(dbWorkspace.getAnticipatedFindings());
+    assertThat(researchPurpose.getCommercialPurpose()).isEqualTo(dbWorkspace.getCommercialPurpose());
+    assertThat(researchPurpose.getControlSet()).isEqualTo(dbWorkspace.getControlSet());
+    assertThat(researchPurpose.getDiseaseFocusedResearch())
+        .isEqualTo(dbWorkspace.getDiseaseFocusedResearch());
+    assertThat(researchPurpose.getDiseaseOfFocus()).isEqualTo(dbWorkspace.getDiseaseOfFocus());
+    assertThat(researchPurpose.getDrugDevelopment()).isEqualTo(dbWorkspace.getDrugDevelopment());
+    assertThat(researchPurpose.getEducational()).isEqualTo(dbWorkspace.getEducational());
+    assertThat(researchPurpose.getIntendedStudy()).isEqualTo(dbWorkspace.getIntendedStudy());
+    assertThat(researchPurpose.getMethodsDevelopment()).isEqualTo(dbWorkspace.getMethodsDevelopment());
+    assertThat(researchPurpose.getOtherPopulationDetails())
+        .isEqualTo(dbWorkspace.getOtherPopulationDetails());
+    assertThat(researchPurpose.getOtherPurpose()).isEqualTo(dbWorkspace.getOtherPurpose());
+    assertThat(researchPurpose.getOtherPurposeDetails()).isEqualTo(dbWorkspace.getOtherPurposeDetails());
+    assertThat(researchPurpose.getPopulationDetails())
+        .containsExactlyElementsIn(dbWorkspace.getSpecificPopulationsEnum());
+    assertThat(researchPurpose.getPopulationHealth()).isEqualTo(dbWorkspace.getPopulationHealth());
+    assertThat(researchPurpose.getReasonForAllOfUs()).isEqualTo(dbWorkspace.getReasonForAllOfUs());
+    assertThat(researchPurpose.getReviewRequested()).isEqualTo(dbWorkspace.getReviewRequested());
+    assertThat(researchPurpose.getSocialBehavioral()).isEqualTo(dbWorkspace.getSocialBehavioral());
+    assertThat(researchPurpose.getTimeRequested())
+        .isEqualTo(Optional.ofNullable(dbWorkspace.getTimeRequested())
+            .map(t -> t.toInstant().toEpochMilli()).orElse(null));
+    assertThat(researchPurpose.getTimeReviewed()).isNull();
 
-    assertThat(rp.getPopulationDetails()).containsAllIn(SPECIFIC_POPULATIONS);
-    assertThat(rp.getResearchOutcomeList()).containsAllIn(RESEARCH_OUTCOMES);
-    assertThat(rp.getDisseminateResearchFindingList()).isEmpty();
-    assertThat(rp.getOtherDisseminateResearchFindings()).isEqualTo(DISSEMINATE_FINDINGS_OTHER);
+    assertThat(researchPurpose.getPopulationDetails()).containsAllIn(SPECIFIC_POPULATIONS);
+    assertThat(researchPurpose.getResearchOutcomeList()).containsAllIn(RESEARCH_OUTCOMES);
+    assertThat(researchPurpose.getDisseminateResearchFindingList()).isEmpty();
+    assertThat(researchPurpose.getOtherDisseminateResearchFindings()).isEqualTo(DISSEMINATE_FINDINGS_OTHER);
   }
 
   @Test
   public void testToDbWorkspace() {
-//        final DbWorkspace converted = workspaceMapper.toDbWorkspace(
-//            sourceWorkspace,
-//          sourceFirecloudWorkspace,
-//            creatorUser,
-//
-//        );
+    final DbWorkspace convertedDbWorkspace = workspaceMapper.toDbWorkspace(
+        sourceApiWorkspace,
+        sourceFirecloudWorkspace,
+        creatorUser,
+        WorkspaceActiveStatus.ACTIVE,
+        Timestamp.from(DB_CREATION_TIMESTAMP.toInstant().plus(Duration.ofMinutes(15))),
+        BILLING_MIGRATION_STATUS,
+        cdrVersion,
+        Collections.emptySet(),
+        Collections.emptySet());
+
+    assertResearchPurposeMatches(convertedDbWorkspace, sourceApiWorkspace.getResearchPurpose());
+
+    //    assertThat(convertedDbWorkspace.)
   }
 }

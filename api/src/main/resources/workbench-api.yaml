@@ -4015,8 +4015,11 @@ definitions:
       additionalNotes:
         type: string
       approved:
+        description: >
+          If this research purpose was submitted for review,
+          true if approved, false otherwise. Null if not reviewed.
         type: boolean
-        default:
+        default: null
       ancestry:
         type: boolean
         default: false
