@@ -237,10 +237,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
-    boolean dataUseAgreementCompliant =
-        user.getDataUseAgreementCompletionTime() != null
-            || user.getDataUseAgreementBypassTime() != null
-            || !configProvider.get().access.enableDataUseAgreement;
+    boolean dataUseAgreementCompliant = false;
+    if (user.getDataUseAgreementBypassTime() != null
+        || !configProvider.get().access.enableDataUseAgreement) {
+      // Data use agreement version may be ignored, since it's bypassed on the user or env level.
+      dataUseAgreementCompliant = true;
+    } else if (user.getDataUseAgreementSignedVersion() == getCurrentDuccVersion()) {
+      // User has signed the most-recent DUCC version.
+      dataUseAgreementCompliant = true;
+    }
     boolean eraCommonsCompliant =
         user.getEraCommonsBypassTime() != null
             || !configProvider.get().access.enableEraCommons
