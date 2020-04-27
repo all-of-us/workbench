@@ -400,7 +400,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               <hr style={{...styles.verticalLine, width: '26rem'}}/>
               <FlexRow style={{marginTop: '1rem'}}>
                 {makeProfileInput({
-                  title: 'Username',
+                  title: 'User name',
                   valueKey: 'username',
                   disabled: true
                 })}
@@ -454,8 +454,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             <hr style={{...styles.verticalLine, width: '15.7rem'}}/>
             {profile && <FlexRow style={styles.freeCreditsBox}>
               <FlexColumn style={{marginLeft: '0.8rem'}}>
-                <div style={{marginTop: '0.4rem'}}><i>All of Us</i> Free credits used:</div>
-                <div>Remaining <i>All of Us</i> Free credits:</div>
+                <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
+                <div>Remaining <i>All of Us</i> free credits:</div>
               </FlexColumn>
               <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
                 <div style={{marginTop: '0.4rem'}}>{usdElement(profile.freeTierUsage)}</div>
