@@ -492,6 +492,45 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUA_VERSION);
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testSubmitDataUseAgreement_wrongVersion() {
+    createUser();
+    String duaInitials = "NIH";
+    profileController.submitDataUseAgreement(DUA_VERSION - 1, duaInitials);
+  }
+
+  @Test
+  public void test_outdatedDataUseAgreement() {
+    // force version number to 2 instead of 3
+    config.featureFlags.enableV3DataUserCodeOfConduct = false;
+    final int outdatedDuaVersion = 2;
+
+    final long userId = createUser().getUserId();
+
+    // bypass the other access requirements
+    final DbUser dbUser = userDao.findUserByUserId(userId);
+    dbUser.setBetaAccessBypassTime(TIMESTAMP);
+    dbUser.setComplianceTrainingBypassTime(TIMESTAMP);
+    dbUser.setEraCommonsBypassTime(TIMESTAMP);
+    dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);
+    userDao.save(dbUser);
+
+    // sign the outdated version
+
+    String duaInitials = "NIH";
+    assertThat(profileController.submitDataUseAgreement(outdatedDuaVersion, duaInitials).getStatusCode())
+            .isEqualTo(HttpStatus.OK);
+
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
+
+    // update and enforce the required version
+
+    config.featureFlags.enableV3DataUserCodeOfConduct = true;
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+  }
+
   @Test
   public void testMe_success() {
     config.featureFlags.requireInstitutionalVerification = false;
