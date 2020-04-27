@@ -6,7 +6,6 @@ import {FlexColumn} from 'app/components/flex';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 
-
 import * as React from 'react';
 
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
@@ -238,6 +237,12 @@ const styles = reactStyles({
     objectFit: 'contain',
     objectPosition: 'right top'
   },
+  panelGrid: {
+    flex: 1,
+    minHeight: 0,
+    marginTop: '5%',
+    display: 'grid'
+  },
   controls: {
     width: '100%',
     display: 'flex',
@@ -357,10 +362,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
             <div style={styles.divider}/>
           </div>
           <div style={{
-            flex: 1,
-            minHeight: 0,
-            marginTop: '5%',
-            display: 'grid',
+            ...styles.panelGrid,
             gridTemplateAreas: `'content image'
                                 'controls controls'`,
             columnGap: '1rem',
