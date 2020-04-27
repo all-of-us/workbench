@@ -81,7 +81,7 @@
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
-    "enableComplianceTraining": false,
+    "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
