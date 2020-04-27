@@ -223,27 +223,21 @@ const styles = reactStyles({
     textAlign: 'left'
   },
   panelRight: {
-    marginRight: '5%',
+    marginRight: '2rem',
     marginBottom: '5%',
-    width: '40%',
-    height: '90%',
+    maxHeight: '90%',
+    height: 'min-content',
     position: 'relative',
     display: 'flex',
     justifyContent: 'flex-end'
   },
   panelImage: {
-    width: '78%',
-    height: '95%',
-    marginTop: '5%',
-    marginLeft: '20%',
-    position: 'relative',
-    zIndex: 1,
-    display: 'inline'
+    width: '100%',
+    objectFit: 'contain',
+    objectPosition: 'right top'
   },
   controls: {
     width: '100%',
-    position: 'absolute',
-    bottom: '8%',
     display: 'flex',
     justifyContent: 'space-between'
   }
@@ -331,7 +325,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
       </div> :
       <React.Fragment>
         <div style={styles.modalBackdrop}/>
-        <div style={styles.mainStyling} data-test-id='quick-tour-react' className='quickTourReact'>
+        <div style={{ ...styles.mainStyling, display: 'flex', flexDirection: 'column'}} data-test-id='quick-tour-react' className='quickTourReact'>
           <div style={styles.title}><i>All of Us</i> Researcher Workbench</div>
           <div style={styles.mainTitle}>Quick Tour</div>
           <div style={styles.breadcrumbs}>
@@ -360,8 +354,18 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           <div style={{width: '100%', paddingTop: '5%'}}>
             <div style={styles.divider}/>
           </div>
-          <div style={styles.panel}>
-            <div style={{width: '75%'}}>
+          <div style={{
+            flex: 1,
+            minHeight: 0,
+            marginTop: '5%',
+            display: 'grid',
+            gridTemplateAreas: `'content image'
+                                'controls controls'`,
+            columnGap: '1rem',
+            gridTemplateColumns: '0.75fr 0.25fr',
+            gridTemplateRows: 'minmax(0, 1fr) 4rem'
+          }}>
+            <div style={{gridArea: 'content', overflowX: 'hidden', overflowY: 'auto'}}>
               <div style={styles.panelTitle}
                    data-test-id='panel-title'>
                 {panels[selected].title}
@@ -370,7 +374,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                 <div style={styles.panelText}>{panels[selected].content}</div>
               </div>
             </div>
-            <div style={styles.panelRight}>
+            <div style={{...styles.panelRight, gridArea: 'image'}}>
               <img src={panels[selected].image} style={styles.panelImage}/>
               {(selected !== 0) &&
               <div style={{
@@ -384,22 +388,22 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                   </div>
               </div>}
             </div>
-          </div>
-          <div style={styles.controls}>
-            <div style={{width: '50%'}}>
-              {selected !== 0 &&
-              <Button type='primaryOnDarkBackground' data-test-id='previous'
-                      style={{marginLeft: '10%'}}
-                      onClick={() => this.previous()}>Previous</Button>}
-            </div>
-            <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
-              {selected !== (panels.length - 1) &&
-              <Button type='primaryOnDarkBackground' data-test-id='close'
-                      onClick={() => this.close()}
-                      style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
-              <Button type='secondaryOnDarkBackground' data-test-id='next'
-                      style={{marginRight: '10%'}}
-                      onClick={() => this.next()}>{this.lastButtonText()}</Button>
+            <div style={{...styles.controls, alignItems: 'center', gridArea: 'controls', }}>
+              <div style={{width: '50%'}}>
+                {selected !== 0 &&
+                <Button type='primaryOnDarkBackground' data-test-id='previous'
+                        style={{marginLeft: '10%'}}
+                        onClick={() => this.previous()}>Previous</Button>}
+              </div>
+              <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
+                {selected !== (panels.length - 1) &&
+                <Button type='primaryOnDarkBackground' data-test-id='close'
+                        onClick={() => this.close()}
+                        style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
+                <Button type='secondaryOnDarkBackground' data-test-id='next'
+                        style={{marginRight: '10%'}}
+                        onClick={() => this.next()}>{this.lastButtonText()}</Button>
+              </div>
             </div>
           </div>
         </div>
