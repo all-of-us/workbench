@@ -242,7 +242,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         || !configProvider.get().access.enableDataUseAgreement) {
       // Data use agreement version may be ignored, since it's bypassed on the user or env level.
       dataUseAgreementCompliant = true;
-    } else if (user.getDataUseAgreementSignedVersion() == getCurrentDuccVersion()) {
+    } else if (user.getDataUseAgreementSignedVersion() != null
+        && user.getDataUseAgreementSignedVersion() == getCurrentDuccVersion()) {
       // User has signed the most-recent DUCC version.
       dataUseAgreementCompliant = true;
     }
@@ -370,7 +371,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (dbAddress != null) {
       dbAddress.setUser(dbUser);
     }
-    if (dbDemographicSurvey != null) dbDemographicSurvey.setUser(dbUser);
+    if (dbDemographicSurvey != null) {
+      dbDemographicSurvey.setUser(dbUser);
+    }
     // set via the older Institutional Affiliation flow, from the Demographic Survey
     if (dbAffiliations != null) {
       // We need an "effectively final" variable to be captured in the lambda
@@ -700,6 +703,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   /** Syncs the current user's training status from Moodle. */
+  @Override
   public DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     DbUser user = userProvider.get();
@@ -717,6 +721,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * we clear the completion/expiration dates from the database as the user will need to complete a
    * new training.
    */
+  @Override
   public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Skip sync for service account user rows.

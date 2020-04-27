@@ -503,7 +503,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void test_outdatedDataUseAgreement() {
     // force version number to 2 instead of 3
     config.featureFlags.enableV3DataUserCodeOfConduct = false;
-    final int outdatedDuaVersion = 2;
+    final int previousDuaVersion = DUA_VERSION - 1;
 
     final long userId = createUser().getUserId();
 
@@ -515,11 +515,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);
     userDao.save(dbUser);
 
-    // sign the outdated version
+    // sign the older version
 
     String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(outdatedDuaVersion, duaInitials).getStatusCode())
-            .isEqualTo(HttpStatus.OK);
+    assertThat(
+            profileController
+                .submitDataUseAgreement(previousDuaVersion, duaInitials)
+                .getStatusCode())
+        .isEqualTo(HttpStatus.OK);
 
     Profile profile = profileController.getMe().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
@@ -527,6 +530,11 @@ public class ProfileControllerTest extends BaseControllerTest {
     // update and enforce the required version
 
     config.featureFlags.enableV3DataUserCodeOfConduct = true;
+
+    // a bit of a hack here: use this to sync the registration status
+    // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
+    profileController.syncTwoFactorAuthStatus();
+
     profile = profileController.getMe().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
