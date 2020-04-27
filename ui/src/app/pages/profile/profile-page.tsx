@@ -576,22 +576,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           </div>
         </div>
 
-        {showDemographicSurveyModal && <Modal width={850}>
-          <DemographicSurvey
-              profile={currentProfile}
-              onCancelClick={() => {
-                this.setState({showDemographicSurveyModal: false});
-              }}
-              onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
-                const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
-                this.setState({showDemographicSurveyModal: false});
-                return savedProfile;
-              }}
-              enableCaptcha={false}
-              enablePrevious={false}
-              showStepCount={false}
-          />
-        </Modal>}
         {saveProfileErrorResponse &&
        <div>
           {profile && <FlexRow style={{

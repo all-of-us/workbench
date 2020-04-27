@@ -18,7 +18,7 @@ describe('ProfilePageComponent', () => {
   }
 
   function getDemographicSurveyButton(wrapper: ReactWrapper): ReactWrapper {
-    return wrapper.find('[data-test-id="demographics-survey-button"]')
+    return wrapper.find('[data-test-id="demographics-survey-button"]');
   }
 
   function getSaveProfileButton(wrapper: ReactWrapper): ReactWrapper {
