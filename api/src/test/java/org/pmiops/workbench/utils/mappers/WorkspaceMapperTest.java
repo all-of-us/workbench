@@ -46,7 +46,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceMapperTest {
 
   private static final String FIRECLOUD_NAMESPACE = "aou-xxxxxxx";
-  private static final String CREATOR_EMAIL = "ojc@verily.biz";
+  private static final String CREATOR_EMAIL = "jaycarlton@unit-test-researchallofus.org";
   private static final long CREATOR_USER_ID = 101L;
   private static final long WORKSPACE_DB_ID = 222L;
   private static final int WORKSPACE_VERSION = 2;
@@ -198,7 +198,7 @@ public class WorkspaceMapperTest {
     sourceApiWorkspace = new Workspace()
       .id(WORKSPACE_FIRECLOUD_NAME)
       .etag(Etags.fromVersion(WORKSPACE_VERSION))
-      .name("thequickbrownfox")
+      .name(WORKSPACE_AOU_NAME)
       .namespace("aou-xxxxxxx")
       .cdrVersionId("2")
       .creator("ojc@verily.biz")
@@ -285,8 +285,16 @@ public class WorkspaceMapperTest {
         Collections.emptySet(),
         Collections.emptySet());
 
+    assertThat(convertedDbWorkspace.getFirecloudName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
+    assertThat(convertedDbWorkspace.getVersion()).isEqualTo(WORKSPACE_VERSION);
+    assertThat(convertedDbWorkspace.getName()).isEqualTo(WORKSPACE_AOU_NAME);
+    assertThat(convertedDbWorkspace.getFirecloudUuid()).isEqualTo(FIRECLOUD_NAMESPACE);
+    assertThat(convertedDbWorkspace.getCdrVersion().getCdrVersionId()).isEqualTo(CDR_VERSION_ID);
+    assertThat(convertedDbWorkspace.getCreator().getUsername()).isEqualTo(CREATOR_EMAIL);
+    assertThat(convertedDbWorkspace.getDataAccessLevelEnum()).isEqualTo(DATA_ACCESS_LEVEL);
+    assertThat(convertedDbWorkspace.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+
     assertResearchPurposeMatches(convertedDbWorkspace, sourceApiWorkspace.getResearchPurpose());
 
-    //    assertThat(convertedDbWorkspace.)
   }
 }
