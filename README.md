@@ -4,6 +4,9 @@
 
 [Documentation on API Structure](https://github.com/all-of-us/workbench/blob/master/api/doc/code-structure.md)
 
+[UI Style Guide](https://github.com/all-of-us/workbench/blob/master/ui/docs/style-guide.md)
+
+
 ## Setup for Development
 
 System requirements:
@@ -77,8 +80,6 @@ After responding to changes, merge in GitHub.
 * Direct your editor to write swap files outside the source tree, so Webpack
 does not reload when they're updated.
 [Example for vim](https://github.com/angular/angular-cli/issues/4593).
-
-* The UI style guide can be found here: [Style Guide](https://github.com/all-of-us/workbench/blob/master/ui/docs/style-guide.md)
 
 ## Running the Dev Servers
 
