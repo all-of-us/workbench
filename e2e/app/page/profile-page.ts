@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
-import Textbox from 'app/aou-elements/textbox';
-import AuthenticatedPage from 'app/authenticated-page';
+import Textbox from 'app/element/textbox';
+import AuthenticatedPage from 'app/page/authenticated-page';
 
 
 export const PAGE = {
@@ -29,7 +29,10 @@ export default class ProfilePage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitForTextExists(PAGE.TITLE);
+      await Promise.all([
+        this.waitForTextExists(PAGE.TITLE),
+        this.waitUntilNoSpinner(),
+      ]);
       return true;
     } catch (e) {
       return false;

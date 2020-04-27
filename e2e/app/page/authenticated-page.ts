@@ -1,7 +1,8 @@
 import {Page} from 'puppeteer';
 import {PageUrl} from 'app/page-identifiers';
-import BasePage from 'app/base-page';
+import BasePage from 'app/page/base-page';
 import {performance} from 'perf_hooks';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 const SELECTOR = {
   signedInIndicator: 'body#body div',
@@ -36,8 +37,8 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async waitForLoad(): Promise<this> {
     if (!await this.isLoaded()) {
-      await this.saveHtmlToFile('PageIsNotLoaded');
-      await this.takeScreenshot('PageIsNotLoaded');
+      await savePageToFile(this.page, 'PageIsNotLoaded');
+      await takeScreenshot(this.page, 'PageIsNotLoaded');
       throw new Error('Page isLoaded() failed.');
     }
     await this.waitUntilNoSpinner();
@@ -88,7 +89,7 @@ export default abstract class AuthenticatedPage extends BasePage {
         }, {timeout: 90000}, selectr2);
       }
     } catch (err) {
-      await this.takeScreenshot('TimedOutWaitForSpinnerStop');
+      await takeScreenshot(this.page, 'TimedOutWaitForSpinnerStop');
       throw err;
     } finally {
       const finishTime = performance.now();

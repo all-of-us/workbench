@@ -20,7 +20,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   props = {
     onComplete: onCompleteSpy,
-    pdfPath: '/assets/documents/fake-document-path.pdf'
+    pdfPath: '/assets/documents/fake-document-path.pdf',
+    afterPrev: false
   };
 });
 
@@ -64,4 +65,13 @@ it('should call onComplete when next button is pressed', async() => {
   getNextButton(wrapper).simulate('click');
 
   expect(onCompleteSpy).toHaveBeenCalled();
+});
+
+it('should enable NEXT button and checkboxes should be selected if page is re-visited after Institution Page', async() => {
+  props.afterPrev = true;
+  const wrapper = mount(<AccountCreationTos {...props} />);
+
+  expect(getPrivacyCheckbox(wrapper).prop('checked')).toBeTruthy();
+  expect(getTosCheckbox(wrapper).prop('checked')).toBeTruthy();
+  expect(getNextButton(wrapper).prop('disabled')).toBeFalsy();
 });

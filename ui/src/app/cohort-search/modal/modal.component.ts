@@ -3,7 +3,7 @@ import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.se
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
-import {CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
+import {CriteriaType, DomainType, SearchParameter, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
 
@@ -45,23 +45,27 @@ export class ModalComponent implements OnInit, OnDestroy {
         // reset to default each time the modal is opened
         this.wizard = wizard;
         if (!this.open) {
-          this.title = wizard.domain === DomainType.PERSON ? typeToTitle(wizard.type) : domainToTitle(wizard.domain);
           this.selections = wizard.item.searchParameters;
           this.selectedIds = this.selections.map(s => s.parameterId);
-          if (this.initTree) {
-            this.hierarchyNode = {
-              domainId: wizard.domain,
-              type: wizard.type,
-              isStandard: wizard.standard,
-              id: 0,
-            };
-            this.backMode = 'tree';
-            this.mode = 'tree';
+          if (wizard.type === CriteriaType.DECEASED) {
+            this.selectDeceased();
           } else {
-            this.backMode = 'list';
-            this.mode = 'list';
+            this.title = wizard.domain === DomainType.PERSON ? typeToTitle(wizard.type) : domainToTitle(wizard.domain);
+            if (this.initTree) {
+              this.hierarchyNode = {
+                domainId: wizard.domain,
+                type: wizard.type,
+                isStandard: wizard.standard,
+                id: 0,
+              };
+              this.backMode = 'tree';
+              this.mode = 'tree';
+            } else {
+              this.backMode = 'list';
+              this.mode = 'list';
+            }
+            this.open = true;
           }
-          this.open = true;
         }
       });
   }
@@ -266,5 +270,21 @@ export class ModalComponent implements OnInit, OnDestroy {
     if (param.group) {
       this.groupSelections = this.groupSelections.filter(id => id !== param.id);
     }
+  }
+
+  selectDeceased() {
+    const param = {
+      parameterId: '',
+      type: CriteriaType.DECEASED.toString(),
+      name: 'Deceased',
+      group: false,
+      domain: DomainType.PERSON.toString(),
+      hasHierarchy: false,
+      ancestorData: false,
+      standard: true,
+      attributes: []
+    } as SearchParameter;
+    this.addSelection(param);
+    this.finish();
   }
 }

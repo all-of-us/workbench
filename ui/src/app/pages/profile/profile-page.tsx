@@ -18,7 +18,7 @@ import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registrat
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, ReactWrapperBase, renderUSD, withUserProfile} from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
@@ -589,9 +589,116 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               }}
               enableCaptcha={false}
               enablePrevious={false}
+              showStepCount={false}
           />
         </Modal>}
         {saveProfileErrorResponse &&
+       <div>
+          {profile && <FlexRow style={{
+            color: colors.primary, paddingRight: '0.5rem', justifyContent: 'flex-end'
+          }}>
+            <FlexColumn style={{alignItems: 'flex-end'}}>
+              <div><i>All of Us</i> FREE credits used:</div>
+              <div>Remaining <i>All of Us</i> FREE credits:</div>
+            </FlexColumn>
+            <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+              {renderUSD(profile.freeTierUsage)}
+              {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
+            </FlexColumn>
+          </FlexRow>}
+          <div>
+            <div style={styles.title}>Optional Demographics Survey</div>
+            <Button
+                type={'link'}
+                onClick={() => {
+                  this.setState({showDemographicSurveyModal: true});
+                }}
+                data-test-id={'demographics-survey-button'}
+            >Update Survey</Button>
+          </div>
+          <ProfileRegistrationStepStatus
+            title='Google 2-Step Verification'
+            wasBypassed={!!profile.twoFactorAuthBypassTime}
+            incompleteButtonText='Set Up'
+            completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
+            completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
+
+          {enableComplianceTraining && <ProfileRegistrationStepStatus
+            title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
+            wasBypassed={!!profile.complianceTrainingBypassTime}
+            incompleteButtonText='Access Training'
+            completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
+            completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />}
+
+          {enableEraCommons && <ProfileRegistrationStepStatus
+            title='eRA Commons Account'
+            wasBypassed={!!profile.eraCommonsBypassTime}
+            incompleteButtonText='Link'
+            completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
+            completeStep={getRegistrationTasksMap()['eraCommons'].onClick} >
+            <div>
+              {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
+                <div> Username: </div>
+                <div> { profile.eraCommonsLinkedNihUsername } </div>
+              </React.Fragment>}
+              {profile.eraCommonsLinkExpireTime != null &&
+              //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
+              profile.eraCommonsLinkExpireTime !== 0
+              && <React.Fragment>
+                <div> Link Expiration: </div>
+                <div>
+                  { moment.unix(profile.eraCommonsLinkExpireTime)
+                    .format('MMMM Do, YYYY, h:mm:ss A') }
+                </div>
+              </React.Fragment>}
+            </div>
+          </ProfileRegistrationStepStatus>}
+
+          {enableDataUseAgreement && <ProfileRegistrationStepStatus
+            title='Data User Code Of Conduct'
+            wasBypassed={!!profile.dataUseAgreementBypassTime}
+            incompleteButtonText='Sign'
+            completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
+            completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick} >
+            {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
+              <div> Agreement Renewal: </div>
+              <div>
+                { moment.unix(profile.dataUseAgreementCompletionTime / 1000)
+                    .add(1, 'year')
+                    .format('MMMM Do, YYYY') }
+              </div>
+            </React.Fragment>}
+            <a
+              onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
+              View current agreement
+            </a>
+          </ProfileRegistrationStepStatus>}
+        </div>}
+      {showDemographicSurveyModal && <Modal width={850}>
+        <DemographicSurvey
+            profile={currentProfile}
+            onCancelClick={() => {
+              this.setState({showDemographicSurveyModal: false});
+            }}
+            onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
+              const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
+              this.setState({showDemographicSurveyModal: false});
+              return savedProfile;
+            }}
+            enableCaptcha={false}
+            enablePrevious={false}
+            showStepCount={false}
+        />
+      </Modal>}
+      {saveProfileErrorResponse &&
         <Modal data-test-id='update-profile-error'>
           <ModalTitle>Error creating account</ModalTitle>
           <ModalBody>

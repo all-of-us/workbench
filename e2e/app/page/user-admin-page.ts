@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import AuthenticatedPage from 'app/authenticated-page';
+import AuthenticatedPage from 'app/page/authenticated-page';
 
 export const PAGE = {
   TITLE: 'User Admin Table',
@@ -13,7 +13,10 @@ export default class UserAdminPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitForTextExists(PAGE.TITLE);
+      await Promise.all([
+        this.waitForTextExists(PAGE.TITLE),
+        this.waitUntilNoSpinner(),
+      ]);
       return true;
     } catch (e) {
       return false;

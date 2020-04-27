@@ -325,8 +325,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         {registrationTasksToRender.map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
-              opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
-              minHeight: this.allTasksCompleted() ? '160px' : '305px'}}>
+              opacity: '0.6', maxHeight: this.allTasksCompleted() ? '190px' : '305px',
+              minHeight: this.allTasksCompleted() ? '190px' : '305px'}}>
             <FlexColumn style={{justifyContent: 'flex-start'}}>
               <div style={styles.cardHeader}>STEP {i + 1}</div>
               <div style={styles.cardHeader}>{card.title}</div>

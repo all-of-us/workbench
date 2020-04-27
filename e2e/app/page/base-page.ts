@@ -1,6 +1,5 @@
 import {ElementHandle, Page, Response} from 'puppeteer';
-import { ensureDir, writeFile } from 'fs-extra';
-import BaseElement from 'app/aou-elements/base-element';
+import BaseElement from 'app/element/base-element';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -9,12 +8,9 @@ import BaseElement from 'app/aou-elements/base-element';
 export default abstract class BasePage {
 
   page: Page;
-  DEFAULT_TIMEOUT_MILLISECONDS = 30000;
-  timeout;
 
-  protected constructor(page: Page, timeout?) {
+  protected constructor(page: Page) {
     this.page = page;
-    this.timeout = timeout || this.DEFAULT_TIMEOUT_MILLISECONDS;
   }
 
   async getPageTitle() : Promise<string> {
@@ -52,7 +48,7 @@ export default abstract class BasePage {
    */
   async clickAndWait(clickElement: ElementHandle | BaseElement) {
     return Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 0}),
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
       clickElement.click(),
     ]);
   }
@@ -65,7 +61,7 @@ export default abstract class BasePage {
     return await this.page.waitForFunction(txt => {
       const href = window.location.href;
       return href.includes(txt);
-    }, { timeout: this.timeout}, text);
+    }, {}, text);
   }
 
   /**
@@ -76,7 +72,7 @@ export default abstract class BasePage {
     return await this.page.waitForFunction(t => {
       const actualTitle = document.title;
       return actualTitle === t;
-    }, {timeout: this.timeout}, title);
+    }, {}, title);
   }
 
   /**
@@ -87,7 +83,7 @@ export default abstract class BasePage {
     return await this.page.waitForFunction((t) => {
       const actualTitle = document.title;
       return actualTitle.includes(t);
-    }, {timeout: this.timeout}, title)
+    }, {}, title)
   }
 
   /**
@@ -99,7 +95,7 @@ export default abstract class BasePage {
       const elem = document.querySelector(selector);
       const isVisible = elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length;
       return !!isVisible;
-    }, {timeout: this.timeout}, cssSelector);
+    }, {}, cssSelector);
   }
 
   /**
@@ -111,7 +107,7 @@ export default abstract class BasePage {
       const elem = document.querySelector(selector);
       const isVisible = elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length;
       return !isVisible;
-    }, {timeout: this.timeout}, cssSelector);
+    }, {}, cssSelector);
   }
 
   /**
@@ -122,7 +118,7 @@ export default abstract class BasePage {
   async waitForNumberElements(cssSelector: string, expectedCount: number) {
     return await this.page.waitForFunction((selector, count) => {
       return document.querySelectorAll(selector).length === count;
-    }, {timeout: this.timeout}, cssSelector, expectedCount);
+    }, {}, cssSelector, expectedCount);
   }
 
   /**
@@ -133,7 +129,7 @@ export default abstract class BasePage {
   async waitForNumberElementsIsBiggerThan(cssSelector: string, greaterThanCount: number) {
     return await this.page.waitForFunction((selector, count) => {
       return document.querySelectorAll(selector).length > count;
-    }, {timeout: this.timeout}, cssSelector, greaterThanCount);
+    }, {}, cssSelector, greaterThanCount);
   }
 
   /**
@@ -144,7 +140,7 @@ export default abstract class BasePage {
     return await this.page.waitForFunction(matchText => {
       const bodyText = document.querySelector('body').innerText;
       return bodyText.includes(matchText)
-    }, {timeout: this.timeout}, texts);
+    }, {}, texts);
   }
 
   /**
@@ -157,7 +153,7 @@ export default abstract class BasePage {
     return await this.page.waitForFunction((selector, attributeName, attributeValue) => {
       const element = document.querySelector(selector);
       return element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
-    }, {timeout: this.timeout}, cssSelector, attribute, value);
+    }, {}, cssSelector, attribute, value);
   }
 
   /**
@@ -172,7 +168,7 @@ export default abstract class BasePage {
       if (t !== undefined) {
         return t.innerText === expText;
       }
-    }, {timeout: 50000}, cssSelector, expectedText);
+    }, {}, cssSelector, expectedText);
 
     await this.page.waitForSelector(cssSelector, { visible: true });
   }
@@ -224,46 +220,6 @@ export default abstract class BasePage {
     return await this.page.evaluate(elem => {
       return elem !== null;
     }, element);
-  }
-
-  /**
-   * Take a full-page screenshot, save file in .png format in logs/screenshot directory.
-   * @param fileName
-   */
-  async takeScreenshot(fileName: string) {
-    const screenshotDir = 'logs/screenshot';
-    await ensureDir(screenshotDir);
-    const timestamp = new Date().getTime();
-    const screenshotFile = `${screenshotDir}/${fileName}_${timestamp}.png`;
-    await this.page.screenshot({path: screenshotFile, fullPage: true});
-    console.log('Saved screenshot ' + screenshotFile);
-  }
-
-  async saveToFile(fileName, data, suffix: string = 'html') {
-    const logDir = 'logs/html';
-    await ensureDir(logDir);
-    const fname = `${logDir}/${fileName}-${new Date().getTime()}.${suffix}`;
-    return new Promise((resolve, reject) => {
-      writeFile(fname, data, 'utf8', error => {
-        if (error) {
-          console.error(`save file failed. ` + error);
-          reject(false);
-        } else {
-          console.log('Saved file ' + fname);
-          resolve(true);
-        }
-      })
-    });
-  }
-
-  /**
-   * Save Html source to a file. Useful for test failure troubleshooting.
-   * @param {Puppeteer.Page} page
-   * @param {string} fileName
-   */
-  async saveHtmlToFile(fileName: string) {
-    const html = await this.page.content();
-    await this.saveToFile(fileName, html);
   }
 
 }

@@ -246,7 +246,8 @@ public class FireCloudServiceImpl implements FireCloudService {
             .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
             .projectName(projectName)
             .highSecurityNetwork(enableVpcFlowLogs)
-            .enableFlowLogs(enableVpcFlowLogs);
+            .enableFlowLogs(enableVpcFlowLogs)
+            .privateIpGoogleAccess(true);
 
     boolean enableVpcServicePerimeter = configProvider.get().featureFlags.enableVpcServicePerimeter;
     if (enableVpcServicePerimeter) {

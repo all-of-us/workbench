@@ -1,12 +1,12 @@
 import {ElementHandle, JSHandle, Page} from 'puppeteer';
-import {defaultFieldValues} from 'resources/data/user-registration-fields';
-import Button from 'app/aou-elements/button';
-import Checkbox from 'app/aou-elements/checkbox';
-import ClrIconLink from 'app/aou-elements/clr-icon-link';
-import SelectComponent from 'app/aou-elements/select-component';
-import Textarea from 'app/aou-elements/textarea';
-import Textbox from 'app/aou-elements/textbox';
-import BasePage from 'app/base-page';
+import {defaultFieldValues} from 'resources/data/user-registration-data';
+import Button from 'app/element/button';
+import Checkbox from 'app/element/checkbox';
+import ClrIconLink from 'app/element/clr-icon-link';
+import SelectMenu from 'app/component/select-menu';
+import Textarea from 'app/element/textarea';
+import Textbox from 'app/element/textbox';
+import BasePage from 'app/page/base-page';
 import {config} from 'resources/workbench-config';
 
 const faker = require('faker/locale/en_US');
@@ -38,7 +38,7 @@ export const LABEL_ALIAS = {
   READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms described above.',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
-  RESEARCH_BACKGROUND: 'describe your research background, experience, and research interests',
+  RESEARCH_BACKGROUND: 'Your research background, experience, and research interests',
   EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YEAR_OF_BIRTH: 'Year of Birth',
   INSTITUTION_EMAIL: 'Your institutional email address',
@@ -120,24 +120,24 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string) {
-    const dropdown = new SelectComponent(this.page);
+    const dropdown = new SelectMenu(this.page);
     await dropdown.select(selectTextValue);
   }
 
   async getInstitutionValue() {
-    const dropdown = new SelectComponent(this.page);
+    const dropdown = new SelectMenu(this.page);
     return await dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = new SelectComponent(this.page, LABEL_ALIAS.EDUCATION_LEVEL, 2);
+    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.EDUCATION_LEVEL, 2);
     await dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = new SelectComponent(this.page, LABEL_ALIAS.YEAR_OF_BIRTH, 2);
+    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.YEAR_OF_BIRTH, 2);
     await dropdown.select(year);
   }
 
@@ -145,13 +145,13 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 1: Fill out institution affiliation details
   async fillOutInstitution() {
-    const institutionSelect = new SelectComponent(this.page, 'Select your institution');
+    const institutionSelect = new SelectMenu(this.page, 'Select your institution', 2);
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
     const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
     await emailAddressTextbox.type(config.broadInstitutionEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
     await ClrIconLink.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
-    const roleSelect = new SelectComponent(this.page, 'describes your role');
+    const roleSelect = new SelectMenu(this.page, 'describes your role', 2);
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
 

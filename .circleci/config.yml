@@ -44,7 +44,7 @@ jobs:
       - run:
           name: Integration tests compile
           working_directory: ~/workbench/api
-          command: ./project.rb gradle compileBigquerytestJava compileIntegrationJava
+          command: ./project.rb gradle compile__bigquerytest__Java compile__integration__Java
       - run:
           name: Run Java Unit Tests
           working_directory: ~/workbench/api

@@ -3,6 +3,7 @@ package org.pmiops.workbench.billing;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Sets;
+import com.google.common.math.DoubleMath;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +46,10 @@ public class FreeTierBillingService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private static final Logger logger = Logger.getLogger(FreeTierBillingService.class.getName());
+
+  // somewhat arbitrary - 1 per million
+  private static final double COST_COMPARISON_TOLERANCE = 0.000001;
+  private static final double COST_FRACTION_TOLERANCE = 0.000001;
 
   @Autowired
   public FreeTierBillingService(
@@ -123,8 +128,16 @@ public class FreeTierBillingService {
     sendAlertsForCostThresholds(usersToThresholdCheck, previousUserCosts, userCosts);
   }
 
+  private int compareCosts(final double a, final double b) {
+    return DoubleMath.fuzzyCompare(a, b, COST_COMPARISON_TOLERANCE);
+  }
+
+  private int compareCostFractions(final double a, final double b) {
+    return DoubleMath.fuzzyCompare(a, b, COST_FRACTION_TOLERANCE);
+  }
+
   private boolean expiredByCost(final DbUser user, final double currentCost) {
-    return currentCost > getUserFreeTierDollarLimit(user);
+    return compareCosts(currentCost, getUserFreeTierDollarLimit(user)) > 0;
   }
 
   private void deactivateUserWorkspaces(final DbUser user) {
@@ -170,7 +183,7 @@ public class FreeTierBillingService {
 
     // this shouldn't happen, but it did (RW-4678)
     // alert if it happens again
-    if (currentCost < previousCost) {
+    if (compareCosts(currentCost, previousCost) < 0) {
       String msg =
           String.format(
               "User %s (%s) has %f in total free tier spending in BigQuery, "
@@ -186,9 +199,9 @@ public class FreeTierBillingService {
     final double previousFraction = previousCost / limit;
 
     for (final double threshold : thresholdsInDescOrder) {
-      if (currentFraction > threshold) {
+      if (compareCostFractions(currentFraction, threshold) > 0) {
         // only alert if we have not done so previously
-        if (previousFraction <= threshold) {
+        if (compareCostFractions(previousFraction, threshold) <= 0) {
           try {
             mailService.alertUserFreeTierDollarThreshold(
                 user, threshold, currentCost, remainingBalance);
@@ -260,7 +273,7 @@ public class FreeTierBillingService {
    */
   public boolean userHasRemainingFreeTierCredits(DbUser user) {
     return Optional.ofNullable(getCachedFreeTierUsage(user))
-        .map(usage -> getUserFreeTierDollarLimit(user) > usage)
+        .map(usage -> compareCosts(getUserFreeTierDollarLimit(user), usage) > 0)
         .orElse(true);
   }
 

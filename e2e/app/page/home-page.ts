@@ -1,8 +1,8 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {PageUrl} from 'app/page-identifiers';
-import Link from 'app/aou-elements/link';
-import {findIcon} from 'app/aou-elements/xpath-finder';
-import AuthenticatedPage from 'app/authenticated-page';
+import Link from 'app/element/link';
+import {findIcon} from 'app/element/xpath-finder';
+import AuthenticatedPage from 'app/page/authenticated-page';
 
 export const PAGE = {
   TITLE: 'Homepage',
@@ -23,9 +23,12 @@ export default class HomePage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitUntilTitleMatch(PAGE.TITLE);
-      await this.waitForTextExists(PAGE.HEADER);
-      await Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES);
+      await Promise.all([
+        this.waitUntilTitleMatch(PAGE.TITLE),
+        this.waitForTextExists(PAGE.HEADER),
+        Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
+        this.waitUntilNoSpinner(),
+      ]);
       return true;
     } catch (e) {
       return false;

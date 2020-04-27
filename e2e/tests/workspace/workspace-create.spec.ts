@@ -1,10 +1,11 @@
-import Link from 'app/aou-elements/link';
-import DataPage from 'app/data-page';
-import WorkspacesPage, {FIELD} from 'app/workspaces-page';
-import {signIn} from 'tests/app';
-import Button from 'app/aou-elements/button';
-import * as testData from 'resources/workspace-data';
+import Link from 'app/element/link';
+import DataPage from 'app/page/data-page';
+import WorkspacesPage, {FIELD} from 'app/page/workspaces-page';
+import {signIn} from 'utils/app-utils';
+import Button from 'app/element/button';
+import * as testData from 'resources/data/workspace-data';
 import {performActions} from 'utils/test-utils';
+import {makeWorkspaceName} from 'utils/str-utils';
 
 describe('Creating new workspaces', () => {
 
@@ -13,12 +14,19 @@ describe('Creating new workspaces', () => {
   });
 
   test('Create workspace - NO request for review', async () => {
-    const newWorkspaceName = `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
+    const newWorkspaceName = makeWorkspaceName();
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
     // create workspace with "No Review Requested" radiobutton selected
-    await workspacesPage.createWorkspace(newWorkspaceName, 'Use All of Us free credits',);
+    const dialogTextContent = await workspacesPage.createWorkspace(newWorkspaceName, 'Use All of Us free credits',);
+
+    // Pick out few sentenses to verify
+    expect(dialogTextContent).toContain('Primary purpose of your project (Question 1)');
+    expect(dialogTextContent).toContain('Summary of research purpose (Question 2)');
+    expect(dialogTextContent).toContain('Will be displayed publicly to inform All of Us Research participants.');
+    expect(dialogTextContent).toContain('You can also make changes to your answers after you create your workspace.');
+
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
   });
 
@@ -60,10 +68,7 @@ describe('Creating new workspaces', () => {
 
     const finishButton = await workspacesPage.getCreateWorkspaceButton();
     await finishButton.waitUntilEnabled();
-
-    await finishButton.focus(); // bring button into viewport
-    await workspacesPage.clickAndWait(finishButton);
-    await workspacesPage.waitUntilNoSpinner();
+    await workspacesPage.clickCreateFinishButton(finishButton);
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
   });

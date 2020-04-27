@@ -1,11 +1,12 @@
-import {Page} from 'puppeteer';
-import Button from 'app/aou-elements/button';
-import Checkbox from 'app/aou-elements/checkbox';
-import Select from 'app/aou-elements/select';
-import SelectComponent from 'app/aou-elements/select-component';
-import Textbox from 'app/aou-elements/textbox';
-import WebComponent from 'app/aou-elements/web-component';
-import AuthenticatedPage from 'app/authenticated-page';
+import {ElementHandle, Page} from 'puppeteer';
+import Button from 'app/element/button';
+import Checkbox from 'app/element/checkbox';
+import Select from 'app/element/select';
+import SelectMenu from 'app/component/select-menu';
+import Textbox from 'app/element/textbox';
+import WebComponent from 'app/element/web-component';
+import AuthenticatedPage from 'app/page/authenticated-page';
+import Dialog, {ButtonLabel} from 'app/component/dialog';
 
 const faker = require('faker/locale/en_US');
 
@@ -223,7 +224,7 @@ export const FIELD = {
       type: 'radiobutton',
       textOption: {textContains: LABEL_ALIAS.YES_FOCUS_ON_UNDERREPRESENTED_POPULATION}
     },
-    noOnUnderrepresentedPopulationRadiobutton: {
+    noUnderrepresentedPopulationRadiobutton: {
       type: 'radiobutton',
       textOption: {textContains: LABEL_ALIAS.NO_FOCUS_ON_UNDERREPRESENTED_POPULATION}
     },
@@ -280,7 +281,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     try {
       await this.waitUntilTitleMatch(PAGE.TITLE);
       await this.getWorkspaceNameTextbox();
-      await new SelectComponent(this.page, LABEL_ALIAS.SELECT_BILLING).getSelectedValue();
+      await new SelectMenu(this.page, LABEL_ALIAS.SELECT_BILLING).getSelectedValue();
       await this.getCreateWorkspaceButton();
       return true;
     } catch (e) {
@@ -424,11 +425,20 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   /**
    * Find and click the CREATE WORKSPACE (FINISH) button
    */
-  async clickCreateFinishButton(): Promise<void> {
-    const createButton = await this.getCreateWorkspaceButton();
-    await createButton.focus(); // bring into viewport
-    await this.clickAndWait(createButton);
+  async clickCreateFinishButton(button: ElementHandle | Button): Promise<string> {
+    await button.focus(); // bring into viewport
+    await button.click();
+
+    // confirm create in pop-up dialog
+    const dialog = new Dialog(this.page);
+    const dialogText = await dialog.getContent();
+    await Promise.all([
+      dialog.clickButton(ButtonLabel.Confirm),
+      dialog.waitUntilDialogIsClosed(),
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
+    ]);
     await this.waitUntilNoSpinner();
+    return dialogText;
   }
 
   async clickShareWithCollaboratorsCheckbox() {

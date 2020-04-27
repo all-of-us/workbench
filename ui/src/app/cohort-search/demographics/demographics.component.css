@@ -22,7 +22,7 @@ h3 {
   position: relative;
 }
 .ng2-nouislider {
-  margin-top: 0;
+  margin: 0;
 }
 .number-display {
   margin-top: 0.25rem;
@@ -70,23 +70,15 @@ h3 {
   font-size: 14px;
   font-weight: 500;
 }
-.disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
 .form-container {
   padding-left: 1rem;
   max-height: 15rem;
 }
 .form-container.age {
   margin: 0.5rem 1rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 1.5rem;
   border: 1px solid #cccccc;
   border-radius: 5px;
-}
-.form-container.age clr-checkbox {
-  margin-top: 1rem;
-  padding-left: 1rem;
 }
 .form-container .radio-inline {
   margin-right: 0.75rem;

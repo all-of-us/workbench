@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
@@ -14,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -173,163 +171,6 @@ public class CriteriaLookupUtilTest {
         ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
         lookupUtil.buildCriteriaLookupMap(searchRequest));
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
-  }
-
-  @Test
-  public void buildCriteriaLookupMapPPICriteria() {
-    DbCriteria surveyNode =
-        DbCriteria.builder()
-            .addParentId(0)
-            .addDomainId(DomainType.SURVEY.toString())
-            .addType(CriteriaType.PPI.toString())
-            .addSubtype(CriteriaSubType.SURVEY.toString())
-            .addGroup(true)
-            .addSelectable(true)
-            .addStandard(false)
-            .addConceptId("22")
-            .build();
-    saveCriteriaWithPath("0", surveyNode);
-    DbCriteria questionNode =
-        DbCriteria.builder()
-            .addParentId(surveyNode.getId())
-            .addDomainId(DomainType.SURVEY.toString())
-            .addType(CriteriaType.PPI.toString())
-            .addSubtype(CriteriaSubType.QUESTION.toString())
-            .addGroup(true)
-            .addSelectable(true)
-            .addStandard(false)
-            .addName("In what country were you born?")
-            .addConceptId("1586135")
-            .addSynonyms("[SURVEY_rank1]")
-            .build();
-    saveCriteriaWithPath(surveyNode.getPath(), questionNode);
-    DbCriteria answerNode =
-        DbCriteria.builder()
-            .addParentId(questionNode.getId())
-            .addDomainId(DomainType.SURVEY.toString())
-            .addType(CriteriaType.PPI.toString())
-            .addSubtype(CriteriaSubType.ANSWER.toString())
-            .addGroup(false)
-            .addSelectable(true)
-            .addStandard(false)
-            .addName("USA")
-            .addConceptId("5")
-            .addSynonyms("[SURVEY_rank1]")
-            .build();
-    saveCriteriaWithPath(questionNode.getPath(), answerNode);
-
-    // Survey search
-    List<Long> childConceptIds = ImmutableList.of(5L, 1586135L);
-    SearchParameter searchParameter =
-        new SearchParameter()
-            .domain(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.SURVEY.toString())
-            .group(true)
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(22L);
-    SearchRequest searchRequest =
-        new SearchRequest()
-            .addIncludesItem(
-                new SearchGroup()
-                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
-    assertEquals(
-        ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
-        lookupUtil.buildCriteriaLookupMap(searchRequest));
-
-    // Question search
-    childConceptIds = ImmutableList.of(5L);
-    searchParameter =
-        new SearchParameter()
-            .domain(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .group(true)
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(1586135L);
-    searchRequest =
-        new SearchRequest()
-            .addIncludesItem(
-                new SearchGroup()
-                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
-    assertEquals(
-        ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
-        lookupUtil.buildCriteriaLookupMap(searchRequest));
-
-    // Answer search
-    searchParameter =
-        new SearchParameter()
-            .domain(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .group(false)
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(5L);
-    searchRequest =
-        new SearchRequest()
-            .addIncludesItem(
-                new SearchGroup()
-                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
-    assertTrue(lookupUtil.buildCriteriaLookupMap(searchRequest).isEmpty());
-  }
-
-  @Test
-  public void buildCriteriaLookupMapConditionSnomedCriteria() {
-    DbCriteria snomedParent1 =
-        DbCriteria.builder()
-            .addParentId(0)
-            .addDomainId(DomainType.CONDITION.toString())
-            .addType(CriteriaType.SNOMED.toString())
-            .addGroup(true)
-            .addSelectable(true)
-            .addStandard(true)
-            .addConceptId("132277")
-            .addSynonyms("[CONDITION_rank1]")
-            .build();
-    saveCriteriaWithPath("0", snomedParent1);
-    DbCriteria snomedParent2 =
-        DbCriteria.builder()
-            .addParentId(snomedParent1.getId())
-            .addDomainId(DomainType.CONDITION.toString())
-            .addType(CriteriaType.SNOMED.toString())
-            .addGroup(true)
-            .addSelectable(true)
-            .addStandard(true)
-            .addConceptId("27835")
-            .addSynonyms("[CONDITION_rank1]")
-            .build();
-    saveCriteriaWithPath(snomedParent1.getPath(), snomedParent2);
-    DbCriteria snomedChild =
-        DbCriteria.builder()
-            .addParentId(snomedParent2.getId())
-            .addDomainId(DomainType.CONDITION.toString())
-            .addType(CriteriaType.SNOMED.toString())
-            .addGroup(false)
-            .addSelectable(true)
-            .addStandard(true)
-            .addConceptId("4099351")
-            .addSynonyms("[CONDITION_rank1]")
-            .build();
-    saveCriteriaWithPath(snomedParent2.getPath(), snomedChild);
-
-    List<Long> childConceptIds = ImmutableList.of(27835L, 4099351L);
-    SearchParameter searchParameter =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .group(true)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(132277L);
-    SearchRequest searchRequest =
-        new SearchRequest()
-            .addIncludesItem(
-                new SearchGroup()
-                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
-    assertEquals(
-        ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
-        lookupUtil.buildCriteriaLookupMap(searchRequest));
   }
 
   @Test

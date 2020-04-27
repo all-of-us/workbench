@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
-import EllipsisMenu from 'app/aou-elements/ellipsis-menu';
-import AuthenticatedPage from 'app/authenticated-page';
+import EllipsisMenu from 'app/component/ellipsis-menu';
+import AuthenticatedPage from 'app/page/authenticated-page';
 import {WorkspaceAction, PageTab} from 'app/page-identifiers';
 
 
@@ -12,6 +12,9 @@ export const TAB_SELECTOR = {
   showAllTab: '//*[@role="button"][(text()="Show All")]',
 };
 
+export const PAGE = {
+  TITLE: 'Data Page',
+};
 
 export default class DataPage extends AuthenticatedPage {
 
@@ -21,8 +24,11 @@ export default class DataPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitUntilTitleMatch('Data Page');
-      await this.page.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true});
+      await Promise.all([
+        this.waitUntilTitleMatch(PAGE.TITLE),
+        this.page.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true}),
+        this.waitUntilNoSpinner(),
+      ]);
       return true;
     } catch (e) {
       return false;

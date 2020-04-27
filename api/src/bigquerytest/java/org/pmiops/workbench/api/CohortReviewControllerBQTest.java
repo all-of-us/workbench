@@ -56,8 +56,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.PageFilterRequest;
@@ -65,7 +63,6 @@ import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantChartDataListResponse;
 import org.pmiops.workbench.model.ParticipantData;
 import org.pmiops.workbench.model.ParticipantDataListResponse;
-import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.VocabularyListResponse;
@@ -380,66 +377,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     assertEquals(
         expectedReview,
         controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody().getItems().get(0));
-  }
-
-  @Test
-  public void createCohortReview() {
-    DbCohort cohortWithoutReview = new DbCohort();
-    cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
-    String criteria =
-        "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
-            + "\"parameterId\":\"param1567486C34\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"domain\":\"CONDITION\",\"type\": "
-            + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1,\"value\":\"C34\"}],"
-            + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[]}";
-    cohortWithoutReview.setCriteria(criteria);
-    cohortWithoutReview = cohortDao.save(cohortWithoutReview);
-
-    CohortReview cohortReview =
-        controller
-            .createCohortReview(
-                NAMESPACE,
-                NAME,
-                cohortWithoutReview.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                new CreateReviewRequest().size(1))
-            .getBody();
-
-    assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
-    assertThat(cohortReview.getReviewSize()).isEqualTo(1);
-    assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus())
-        .isEqualTo(CohortStatus.NOT_REVIEWED);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getDeceased()).isEqualTo(false);
-  }
-
-  @Test
-  public void createCohortReviewWithEHRData() {
-    DbCohort cohortWithoutReview = new DbCohort();
-    cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
-    String criteria =
-        "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
-            + "\"parameterId\":\"param1567486C34\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"domain\":\"CONDITION\",\"type\": "
-            + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1,\"value\":\"C34\"}],"
-            + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[],\"dataFilters\":[\"HAS_EHR_DATA\"]}";
-    cohortWithoutReview.setCriteria(criteria);
-    cohortWithoutReview = cohortDao.save(cohortWithoutReview);
-
-    CohortReview cohortReview =
-        controller
-            .createCohortReview(
-                NAMESPACE,
-                NAME,
-                cohortWithoutReview.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                new CreateReviewRequest().size(1))
-            .getBody();
-
-    assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
-    assertThat(cohortReview.getReviewSize()).isEqualTo(1);
-    assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus())
-        .isEqualTo(CohortStatus.NOT_REVIEWED);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getDeceased()).isEqualTo(false);
   }
 
   @Test

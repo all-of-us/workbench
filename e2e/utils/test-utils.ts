@@ -1,12 +1,9 @@
-/**
- * @param fields Array
- */
 import {Page} from 'puppeteer';
-import Checkbox from 'app/aou-elements/checkbox';
-import RadioButton from 'app/aou-elements/radiobutton';
-import TextOptions from 'app/aou-elements/text-options';
-import Textarea from 'app/aou-elements/textarea';
-import Textbox from 'app/aou-elements/textbox';
+import Checkbox from 'app/element/checkbox';
+import RadioButton from 'app/element/radiobutton';
+import TextOptions from 'app/element/text-options';
+import Textarea from 'app/element/textarea';
+import Textbox from 'app/element/textbox';
 
 /**
  * Perform array of UI actions defined.
@@ -51,7 +48,7 @@ export async function performAction(
     break;
   case 'textarea':
     const textareaElement = await Textarea.forLabel(page, identifier.textOption);
-    await textareaElement.type(value, {delay: 0});
+    await textareaElement.type(value);
     await textareaElement.tabKey();
     break;
   default:

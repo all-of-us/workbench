@@ -7,15 +7,16 @@ import com.google.api.client.util.Sets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
+import java.util.stream.Stream;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -127,8 +128,8 @@ public final class CriteriaLookupUtil {
       Set<String> parentConceptIds =
           byParent.keySet().stream().map(c -> c.toString()).collect(Collectors.toSet());
 
-      List<DbCriteria> parents = Lists.newArrayList();
-      List<DbCriteria> leaves = Lists.newArrayList();
+      List<DbCriteriaLookup> parents = Lists.newArrayList();
+      List<DbCriteriaLookup> leaves = Lists.newArrayList();
       // This dao call returns the parents in addition to the criteria ancestors for each leave in
       // order to allow the client to determine the relationship between the returned Criteria.
       cbCriteriaDao
@@ -139,7 +140,7 @@ public final class CriteriaLookupUtil {
               parentConceptIds)
           .forEach(
               c -> {
-                if (parentConceptIds.contains(c.getConceptId())) {
+                if (parentConceptIds.contains(String.valueOf(c.getConceptId()))) {
                   parents.add(c);
                 } else {
                   leaves.add(c);
@@ -154,8 +155,8 @@ public final class CriteriaLookupUtil {
       Set<String> parentConceptIds =
           byParent.keySet().stream().map(c -> c.toString()).collect(Collectors.toSet());
 
-      List<DbCriteria> parents = Lists.newArrayList();
-      List<DbCriteria> leaves = Lists.newArrayList();
+      List<DbCriteriaLookup> parents = Lists.newArrayList();
+      List<DbCriteriaLookup> leaves = Lists.newArrayList();
       if (treeType.type.equals(CriteriaType.ICD9CM)) {
         // This dao call returns all parents matching the parentConceptIds.
         List<Long> ids =
@@ -174,7 +175,7 @@ public final class CriteriaLookupUtil {
                 treeType.domain.toString(), treeType.type.toString(), ids)
             .forEach(
                 c -> {
-                  if (c.getGroup() && parentConceptIds.contains(c.getConceptId())) {
+                  if (parentConceptIds.contains(String.valueOf(c.getConceptId()))) {
                     parents.add(c);
                   } else {
                     leaves.add(c);
@@ -194,11 +195,15 @@ public final class CriteriaLookupUtil {
                 .collect(Collectors.joining(","));
         // Find the entire hierarchy from parent to leaves. Each parent node is now encoded with
         // concept ids. The following lookups are in 2 separate calls for query efficiency
+        List<Long> longIds = new ArrayList<>();
+        if (!ids.isEmpty()) {
+          longIds = Stream.of(ids.split(",")).map(Long::parseLong).collect(Collectors.toList());
+        }
         cbCriteriaDao
-            .findCriteriaLeavesAndParentsByPath(ids)
+            .findCriteriaLeavesAndParentsByPath(longIds, ids)
             .forEach(
                 c -> {
-                  if (c.getGroup() && parentConceptIds.contains(c.getConceptId())) {
+                  if (parentConceptIds.contains(String.valueOf(c.getConceptId()))) {
                     parents.add(c);
                   } else {
                     leaves.add(c);
@@ -231,18 +236,19 @@ public final class CriteriaLookupUtil {
   }
 
   private void putLeavesOnParent(
-      Map<Long, Set<Long>> byParent, List<DbCriteria> parents, List<DbCriteria> leaves) {
-    for (DbCriteria c : leaves) {
+      Map<Long, Set<Long>> byParent,
+      List<DbCriteriaLookup> parents,
+      List<DbCriteriaLookup> leaves) {
+    for (DbCriteriaLookup c : leaves) {
       // Technically this could scale poorly with many criteria groups. We don't expect this
       // number to be very high as it requires a user action to add a group, but a better data
       // structure could be used here if this becomes too slow.
-      for (DbCriteria parent : parents) {
-        String path = parent.getPath();
-        if (c.getPath().startsWith(path)) {
-          if (StringUtils.isNotBlank(c.getConceptId())) {
-            long parentConceptId = Long.parseLong(parent.getConceptId());
+      for (DbCriteriaLookup parent : parents) {
+        if (c.getParentId().equals(parent.getParentId())) {
+          if (c.getConceptId() != null) {
+            long parentConceptId = parent.getConceptId();
             byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
-            byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
+            byParent.get(parentConceptId).add(c.getConceptId());
           }
         }
       }
