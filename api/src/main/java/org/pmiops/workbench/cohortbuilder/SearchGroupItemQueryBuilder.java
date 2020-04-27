@@ -81,8 +81,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String DRUG_SQL =
       "is_standard = %s and concept_id in (select distinct ca.descendant_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
-          + "join (\n"
-          + "select distinct c.concept_id\n"
+          + "join (select distinct c.concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "join (${childLookup}) a\n"
           + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
@@ -234,7 +233,7 @@ public final class SearchGroupItemQueryBuilder {
     addParamValueAndFormat(domain, queryParams, standardSearchParameters, queryParts, STANDARD);
     addParamValueAndFormat(domain, queryParams, sourceSearchParameters, queryParts, SOURCE);
     // need to OR all query parts together since they exist in the same search group item
-    String queryPartsSql = "(" + String.join(OR, queryParts) + ")\n";
+    String queryPartsSql = "(" + String.join(OR, queryParts) + ")";
     // format the base sql with all query parts
     String baseSql = BASE_SQL + queryPartsSql;
     // build modifier sql if modifiers exists
@@ -598,13 +597,7 @@ public final class SearchGroupItemQueryBuilder {
               .map(SearchParameter::getConceptId)
               .collect(Collectors.toList());
       // Only children exist so no need to do lookups
-      if (parents.isEmpty() && !children.isEmpty() && !DomainType.DRUG.toString().equals(domain)) {
-        String conceptIdsParam =
-            QueryParameterUtil.addQueryParameterValue(
-                queryParams, QueryParameterValue.array(children.toArray(new Long[0]), Long.class));
-        queryParts.add(
-            String.format(STANDARD_OR_SOURCE_SQL, standardOrSourceParam, conceptIdsParam));
-      } else {
+      if (!parents.isEmpty() || DomainType.DRUG.toString().equals(domain)) {
         // Parent nodes exist need to do lookups
         if (!parents.isEmpty()) {
           lookupSqlParts.add(
@@ -626,6 +619,12 @@ public final class SearchGroupItemQueryBuilder {
                 standardOrSourceParam);
         queryParts.add(
             lookupSql.replace("${childLookup}", String.join(UNION_TEMPLATE, lookupSqlParts)));
+      } else {
+        String conceptIdsParam =
+            QueryParameterUtil.addQueryParameterValue(
+                queryParams, QueryParameterValue.array(children.toArray(new Long[0]), Long.class));
+        queryParts.add(
+            String.format(STANDARD_OR_SOURCE_SQL, standardOrSourceParam, conceptIdsParam));
       }
     }
   }

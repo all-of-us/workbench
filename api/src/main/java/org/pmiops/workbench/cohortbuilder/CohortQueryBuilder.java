@@ -28,7 +28,7 @@ public class CohortQueryBuilder {
   private static final String COUNT_SQL_TEMPLATE =
       "select count(*) as count\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
-          + "where\n";
+          + "where ";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
       "select ${genderOrSex} as name,\n"
@@ -39,7 +39,7 @@ public class CohortQueryBuilder {
           + "end as ageRange,\n"
           + "count(*) as count\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
-          + "where\n";
+          + "where ";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
       "group by name, race, ageRange\n" + "order by name, race, ageRange\n";
