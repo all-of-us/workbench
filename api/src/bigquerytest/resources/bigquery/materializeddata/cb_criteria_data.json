@@ -1,0 +1,20 @@
+[
+  {
+    "id": 6,
+    "parent_id": 5,
+    "domain_id": "CONDITION",
+    "is_standard": 0,
+    "type": "ICD9CM",
+    "concept_id": 1,
+    "code": "001",
+    "name": "Cholera",
+    "est_count": 20,
+    "is_group": 0,
+    "is_selectable": 1,
+    "has_attribute": 0,
+    "has_hierarchy": 1,
+    "has_ancestor_data": 0,
+    "path": "1.5.6",
+    "synonyms": "Cholera|Cholera|Cholera"
+  }
+]
