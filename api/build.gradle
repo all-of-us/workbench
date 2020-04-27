@@ -481,7 +481,7 @@ dependencies {
   compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
   compile "com.google.guava:guava:26.0-jre"
   compile "com.google.http-client:google-http-client-apache:2.0.0"
-  compile "com.google.oauth-client:google-oauth-client-jetty:1.30.3"
+  compile "com.google.oauth-client:google-oauth-client-jetty:1.30.6"
   compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
   compile "com.opsgenie.integration:sdk:2+"
   compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
@@ -528,7 +528,7 @@ dependencies {
   }
 
   compile "org.springframework.retry:spring-retry:1.1.5.RELEASE"
-  compile "org.springframework.security:spring-security-web:4.2.13.RELEASE"
+  compile "org.springframework.security:spring-security-web:4.2.15.RELEASE"
 
   implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
   testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
