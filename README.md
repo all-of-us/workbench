@@ -4,14 +4,17 @@
 
 [Documentation on API Structure](https://github.com/all-of-us/workbench/blob/master/api/doc/code-structure.md)
 
+[UI Style Guide](https://github.com/all-of-us/workbench/blob/master/ui/docs/style-guide.md)
+
+
 ## Setup for Development
 
 System requirements:
 
   * [Docker CE](https://www.docker.com/community-edition)
     * Docker must be installed to build and run code (For Google workstations, see http://go/installdocker).
-    * __IMPORTANT__: be sure to allocate ~70-80% of available memory and swap to the Docker Engine. This should be 
-      at least 12GB memory and 2GB swap to avoid OOM isues. See https://docs.docker.com/docker-for-mac/#advanced for 
+    * __IMPORTANT__: be sure to allocate ~70-80% of available memory and swap to the Docker Engine. This should be
+      at least 12GB memory and 2GB swap to avoid OOM isues. See https://docs.docker.com/docker-for-mac/#advanced for
       screenshots and instructions for Mac.
   * [Ruby](https://www.ruby-lang.org/en/downloads/)
     * Our team's dev/ops scripts are written in Ruby. Most common operations are launched via the project.rb script at the root of each sub-project.
@@ -526,7 +529,7 @@ Once you have JUnit installed, go to the test file you want to run, right click 
 
 Choose `Edit Configurations...` from the dropdown at the left side of the top the menu bar
 and choose `Templates` -> `Remote`.  Click `Create configuration` in the top right.  This
-will create a Remote Configuration which you can name how you like.  Ensure that this 
+will create a Remote Configuration which you can name how you like.  Ensure that this
 configuration uses the port the API is listening on, *8001*.
 
 When this configuration is selected, clicking the debug icon (looks like a green bug) will
