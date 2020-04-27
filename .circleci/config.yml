@@ -55,7 +55,7 @@ jobs:
           working_directory: ~/workbench/api
           command: ./gradlew spotlessCheck
       - store_test_results:
-          path: ~workbench/api/build/test-results/test
+          path: ~/workbench/api/build/test-results/test
       - save_cache:
           paths:
             - ~/.gradle
