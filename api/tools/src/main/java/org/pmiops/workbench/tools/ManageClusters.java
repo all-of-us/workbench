@@ -236,6 +236,11 @@ public class ManageClusters {
           // Note: IDs are optional, this set may be empty.
           Set<String> ids = commaDelimitedStringToSet(args[2]);
           boolean dryRun = Boolean.valueOf(args[3]);
+
+          if (oldest == null && ids.isEmpty()) {
+            throw new IllegalArgumentException(
+                "must provide either a maximum age, or a list of ids for filtering of clusters");
+          }
           deleteClusters(apiUrl, oldest, ids, dryRun);
           return;
 
