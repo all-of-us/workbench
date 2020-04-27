@@ -74,7 +74,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 // Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
@@ -128,8 +127,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Mock private Provider<WorkbenchConfig> configProvider;
 
-  @Autowired private JdbcTemplate jdbcTemplate;
-
   private DbCriteria drugNode1;
   private DbCriteria drugNode2;
   private DbCriteria criteriaParent;
@@ -153,7 +150,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Override
   public List<String> getTableNames() {
     return ImmutableList.of(
-        "person", "death", "cb_search_person", "cb_search_all_events", "cb_criteria");
+        "person",
+        "death",
+        "cb_search_person",
+        "cb_search_all_events",
+        "cb_criteria",
+        "cb_criteria_ancestor");
   }
 
   @Override
@@ -189,14 +191,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     saveCriteriaWithPath("0", drugNode1);
     drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
-    jdbcTemplate.execute(
-        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
-    jdbcTemplate.execute(
-        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values ("
-            + 1520218
-            + ", "
-            + 1520218
-            + ")");
 
     criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
@@ -360,7 +354,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @After
   public void tearDown() {
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     delete(
         drugNode1,
         drugNode2,
