@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -55,6 +56,8 @@ public class WorkspaceMapperTest {
   private static final DataAccessLevel DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   private static final Timestamp DB_CREATION_TIMESTAMP =
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
+  private static final Timestamp DB_LAST_MODIFIED_TIMESTAMP =
+      Timestamp.from(Instant.parse("2011-10-31T00:00:00.00Z"));
   private static final int CDR_VERSION_ID = 2;
   private static final String FIRECLOUD_BUCKET_NAME = "my-favorite-bucket";
   private static final ImmutableSet<SpecificPopulationEnum> SPECIFIC_POPULATIONS =
@@ -62,10 +65,12 @@ public class WorkspaceMapperTest {
   private static final ImmutableSet<ResearchOutcomeEnum> RESEARCH_OUTCOMES =
       ImmutableSet.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
   private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
+  public static final boolean PUBLISHED = false;
 
   private DbUser creatorUser;
   private DbWorkspace sourceDbWorkspace;
   private FirecloudWorkspace sourceFirecloudWorkspace;
+  private ResearchPurpose sourceResearchPurpose;
   private Workspace sorurceApiWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
@@ -153,25 +158,24 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setDisseminateResearchEnumSet(Collections.emptySet());
     sourceDbWorkspace.setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER);
 
-    sorurceApiWorkspace = new Workspace()
-        .id();
+    sourceResearchPurpose = new ResearchPurpose()
 
-//    ws = {Workspace@4197} "class Workspace {\n    id: aaaa-bbbb-cccc-dddd\n    etag: "2"\n    name: studyallthethings\n    namespace: aou-xxxxxxx\n    cdrVersionId: 2\n    creator: ojc@verily.biz\n    billingAccountName: billing-account\n    billingAccountType: FREE_TIER\n    googleBucketName: my-favorite-bucket\n    dataAccessLevel: registered\n    researchPurpose: class ResearchPurpose {\n        additionalNotes: null\n        approved: true\n        ancestry: false\n        anticipatedFindings: null\n        commercialPurpose: false\n        controlSet: true\n        diseaseFocusedResearch: true\n        diseaseOfFocus: leukemia\n        drugDevelopment: false\n        educational: true\n        intendedStudy: null\n        scientificApproach: null\n        methodsDevelopment: false\n        otherPopulationDetails: null\n        otherPurpose: true\n        otherPurposeDetails: I want to discover a new disease.\n        ethics: false\n        populationDetails: [GEOGRAPHY, DISABILITY_STATUS]\n        populationHealth: true\n        reasonFo"
-//    id = "aaaa-bbbb-cccc-dddd"
-//    etag = ""2""
-//    name = "studyallthethings"
-//    namespace = "aou-xxxxxxx"
-//    cdrVersionId = "2"
-//    creator = "ojc@verily.biz"
-//    billingAccountName = "billing-account"
-//    billingAccountType = {BillingAccountType@4208} "FREE_TIER"
-//    googleBucketName = "my-favorite-bucket"
-//    dataAccessLevel = {DataAccessLevel@4210} "registered"
-//    researchPurpose = {ResearchPurpose@4198} "class ResearchPurpose {\n    additionalNotes: null\n    approved: true\n    ancestry: false\n    anticipatedFindings: null\n    commercialPurpose: false\n    controlSet: true\n    diseaseFocusedResearch: true\n    diseaseOfFocus: leukemia\n    drugDevelopment: false\n    educational: true\n    intendedStudy: null\n    scientificApproach: null\n    methodsDevelopment: false\n    otherPopulationDetails: null\n    otherPurpose: true\n    otherPurposeDetails: I want to discover a new disease.\n    ethics: false\n    populationDetails: [GEOGRAPHY, DISABILITY_STATUS]\n    populationHealth: true\n    reasonForAllOfUs: We can't get this data anywhere else.\n    reviewRequested: false\n    socialBehavioral: false\n    timeRequested: 946684800000\n    timeReviewed: null\n    disseminateResearchFindingList: []\n    otherDisseminateResearchFindings: Everywhere except MIT.\n    researchOutcomeList: [DECREASE_ILLNESS_BURDEN]\n}"
-//    billingStatus = {BillingStatus@4211} "ACTIVE"
-//    creationTime = {Long@4212} 946684800000
-//    lastModifiedTime = {Long@4213} 946684800000
-//    published = {Boolean@4214} false
+    sorurceApiWorkspace = new Workspace()
+      .id("a")
+      .etag("2")
+      .name("thequickbrownfox")
+      .namespace("aou-xxxxxxx")
+      .cdrVersionId("2")
+      .creator("ojc@verily.biz")
+      .billingAccountName("billing-account")
+      .billingAccountType(BillingAccountType.FREE_TIER)
+      .googleBucketName("buckekt-1")
+      .dataAccessLevel(DataAccessLevel.REGISTERED)
+      .researchPurpose(sourceResearchPurpose)
+      .billingStatus(BillingStatus.ACTIVE)
+      .creationTime(DB_CREATION_TIMESTAMP.getTime())
+      .lastModifiedTime(DB_CREATION_TIMESTAMP.getTime())
+      .published(PUBLISHED);
   }
 
   @Test

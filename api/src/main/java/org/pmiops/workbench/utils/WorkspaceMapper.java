@@ -2,7 +2,6 @@ package org.pmiops.workbench.utils;
 
 import java.sql.Timestamp;
 import java.util.Set;
-import javax.crypto.spec.PSource;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
