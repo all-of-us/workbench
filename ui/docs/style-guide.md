@@ -84,7 +84,3 @@ TODO: We need to build disabled functionality into that wrapper.
 Where possible, we prefer the use of async functions with the keyword `await` within them. If a function
 wants to make promises in parallel, prefer abstracting to other functions. If there is logic
 that needs to happen after all promises have resolved, use the `await all` function.
-
-##To Be Decided
-For consistency:
-* We should decide between px, em, rem and use them throughout
