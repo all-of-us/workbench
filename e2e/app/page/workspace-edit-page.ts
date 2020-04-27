@@ -99,7 +99,7 @@ export const FIELD = {
   PRIMARY_PURPOSE: { // fields in question #1
     researchPurposeCheckbox: {
       type: 'checkbox',
-      textOption: {text: LABEL_ALIAS.RESEARCH_PURPOSE, ancestorNodeLevel: 2}
+      textOption: {text: LABEL_ALIAS.RESEARCH_PURPOSE, ancestorNodeLevel: 3}
     },
     diseaseFocusedResearchCheckbox: {
       type: 'checkbox',
@@ -200,23 +200,23 @@ export const FIELD = {
   DESCRIBE_ANTICIPATED_OUTCOMES: {  // fields in question #4
     seeksIncreaseWellnessCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.INCREASE_WELLNESS, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.INCREASE_WELLNESS, ancestorNodeLevel: 2}
     },
     seeksToReduceHealthDisparitiesCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_REDUCE_HEALTH_DISPARITIES, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_REDUCE_HEALTH_DISPARITIES, ancestorNodeLevel: 2}
     },
     seeksToDevelopRiskAssessmentCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_DEVELOP_RISK_ASSESSMENT, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_DEVELOP_RISK_ASSESSMENT, ancestorNodeLevel: 2}
     },
     seeksToProvideEarlierDiagnosisCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_PROVIDE_EARLIER_ACCURATE_DIAGNOSIS, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_PROVIDE_EARLIER_ACCURATE_DIAGNOSIS, ancestorNodeLevel: 2}
     },
     seeksToReduceBurdenCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_REDUCE_BURDEN, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_REDUCE_BURDEN, ancestorNodeLevel: 2}
     }
   },
   POPULATION_OF_INTEREST: {  // fields in question #5
@@ -230,31 +230,31 @@ export const FIELD = {
     },
     raceMultiAncestryCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.RACE_MULTI_ANCESTRY, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.RACE_MULTI_ANCESTRY, ancestorNodeLevel: 2}
     },
     ageGroupsAdolescentsCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.AGE_GROUPS_ADOLESCENTS, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.AGE_GROUPS_ADOLESCENTS, ancestorNodeLevel: 2}
     },
     sexAtBirthCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEX_AT_BIRTH, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.SEX_AT_BIRTH, ancestorNodeLevel: 2}
     },
     genderIdentityCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.GENDER_IDENTITY, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.GENDER_IDENTITY, ancestorNodeLevel: 2}
     },
     geographyRuralCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.GEOGRAPHY_RURAL, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.GEOGRAPHY_RURAL, ancestorNodeLevel: 2}
     },
     educationLevelHighSchoolCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.EDUCATION_LEVEL_HIGHSCHOOL, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.EDUCATION_LEVEL_HIGHSCHOOL, ancestorNodeLevel: 2}
     },
     disabilityStatusWithDisabilityCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.DISABILITY_STATUS_WITH_DISABILITY, ancestorNodeLevel: 1}
+      textOption: {textContains: LABEL_ALIAS.DISABILITY_STATUS_WITH_DISABILITY, ancestorNodeLevel: 2}
     }
   },
   REQUEST_FOR_REVIEW: {  // fields in question #6
