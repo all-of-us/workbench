@@ -288,7 +288,7 @@ public class WorkspaceMapperTest {
     assertThat(convertedDbWorkspace.getFirecloudName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(convertedDbWorkspace.getVersion()).isEqualTo(WORKSPACE_VERSION);
     assertThat(convertedDbWorkspace.getName()).isEqualTo(WORKSPACE_AOU_NAME);
-    assertThat(convertedDbWorkspace.getFirecloudUuid()).isEqualTo(FIRECLOUD_NAMESPACE);
+    assertThat(convertedDbWorkspace.getWorkspaceNamespace()).isEqualTo(FIRECLOUD_NAMESPACE);
     assertThat(convertedDbWorkspace.getCdrVersion().getCdrVersionId()).isEqualTo(CDR_VERSION_ID);
     assertThat(convertedDbWorkspace.getCreator().getUsername()).isEqualTo(CREATOR_EMAIL);
     assertThat(convertedDbWorkspace.getDataAccessLevelEnum()).isEqualTo(DATA_ACCESS_LEVEL);
