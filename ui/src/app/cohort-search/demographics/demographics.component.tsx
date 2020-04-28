@@ -300,32 +300,32 @@ export class Demographics extends React.Component<Props, State> {
     }
   }
 
-  onMinChange(min: string) {
+  onMinChange(minAge: string) {
     const {maxAge} = this.state;
-    this.setState({minAge: min, sliderStart: [+min, +maxAge]}, () => this.updateAgeSelection());
+    this.setState({minAge});
   }
 
-  onMaxChange(max: string) {
+  onMaxChange(maxAge: string) {
     const {minAge} = this.state;
-    this.setState({maxAge: max, sliderStart: [+minAge, +max]}, () => this.updateAgeSelection());
+    this.setState({maxAge});
   }
 
-  checkMax() {
-    const min = this.demoForm.get('ageMin');
-    const max = this.demoForm.get('ageMax');
-    if (max.value < min.value) {
-      max.setValue(min.value);
+  onMaxBlur() {
+    const {minAge} = this.state;
+    let {maxAge} = this.state;
+    if (+maxAge < +minAge) {
+      maxAge = minAge;
     }
+    this.setState({maxAge, sliderStart: [+minAge, +maxAge]}, () => this.updateAgeSelection());
   }
 
-  checkMin() {
-    const min = this.demoForm.get('ageMin');
-    const max = this.demoForm.get('ageMax');
-    if (min.value > max.value) {
-      min.setValue(max.value);
-    } else if (min.value < this.state.minAge) {
-      min.setValue(this.state.minAge);
+  onMinBlur() {
+    const {maxAge} = this.state;
+    let {minAge} = this.state;
+    if (+minAge > +maxAge) {
+      minAge = maxAge;
     }
+    this.setState({minAge, sliderStart: [+minAge, +maxAge]}, () => this.updateAgeSelection());
   }
 
   updateAgeSelection() {
@@ -352,7 +352,8 @@ export class Demographics extends React.Component<Props, State> {
         this.setState({ageType: attributes[0].name});
       }
     } else {
-      this.updateAgeSelection();
+      // timeout prevents Angular 'ExpressionChangedAfterItHasBeenCheckedError' in CB modal component
+      setTimeout(() => this.updateAgeSelection());
     }
     if (!this.enableCBAgeTypeOptions) {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
@@ -490,9 +491,9 @@ export class Demographics extends React.Component<Props, State> {
               <input style={styles.ageInput}
                 type='number'
                 id='min-age'
-                min={defaultMinAge} max={defaultMaxAge}
+                min={defaultMinAge} max={maxAge}
                 value={minAge}
-                onBlur={() => this.checkMin()}
+                onBlur={() => this.onMinBlur()}
                 onChange={(e) => this.onMinChange(e.target.value)}/>
               <div style={styles.slider}>
                 {this.enableCBAgeTypeOptions && <div id='count-wrapper'>
@@ -515,9 +516,9 @@ export class Demographics extends React.Component<Props, State> {
               <input style={styles.ageInput}
                 type='number'
                 id='max-age'
-                min={defaultMinAge} max={defaultMaxAge}
+                min={minAge} max={defaultMaxAge}
                 value={maxAge}
-                onBlur={() => this.checkMax()}
+                onBlur={() => this.onMaxBlur()}
                 onChange={(e) => this.onMaxChange(e.target.value)}/>
             </div>
             {serverConfigStore.getValue().enableCBAgeTypeOptions && <div style={{marginLeft: '1rem'}}>
