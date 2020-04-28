@@ -4,9 +4,36 @@
 
 set -ex
 
-export BQ_PROJECT=$1  # project
-export BQ_DATASET=$2  # dataset
-export CDR_DATE=$3 # cdr date
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
+export CDR_DATE=$3          # cdr date
+export DATA_BROWSER=$4      # data browser flag
+export DRY_RUN=$5           # dry run
+
+if [ "$DRY_RUN" == true ]
+then
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_concept_ancestor")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.device_exposure")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
+  if [ "$BQ_PROJECT:$BQ_DATASET" != "all-of-us-ehr-dev:synthetic_cdr20180606" ]
+  then
+    test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence_ext")
+    test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence_ext")
+    test=$(bq show "$BQ_PROJECT:$BQ_DATASET.device_exposure_ext")
+    test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure_ext")
+    test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
+    test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement_ext")
+    test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence_ext")
+  fi
+  exit 0
+fi
 
 # Check that bq_dataset exists and exit if not
 datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)

@@ -6,6 +6,22 @@ set -ex
 
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
+export DRY_RUN=$3     # dry run
+
+if [ "$DRY_RUN" == true ]
+then
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_concept_ancestor")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.cb_criteria")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
+  exit 0
+fi
 
 # Check that bq_dataset exists and exit if not
 datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
