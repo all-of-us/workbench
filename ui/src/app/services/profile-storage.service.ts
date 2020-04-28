@@ -58,6 +58,7 @@ export class ProfileStorageService {
         this.nextUserProfileStore(profile);
         this.activeCall = false;
       }, (err) => {
+        this.profile.error(err);
         this.activeCall = false;
       });
   }
