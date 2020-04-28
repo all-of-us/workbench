@@ -215,7 +215,7 @@ export const FormValidationErrorMessage = withStyle({
 })('div');
 
 export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...props}:
-      {style?: React.CSSProperties, onChange: Function, onBlur: Function, Function, [key: string]: any},
+      {style?: React.CSSProperties, onChange: Function, onBlur: Function, [key: string]: any},
                                            ref: React.Ref<HTMLInputElement>) => {
   return <input
     {...props}
