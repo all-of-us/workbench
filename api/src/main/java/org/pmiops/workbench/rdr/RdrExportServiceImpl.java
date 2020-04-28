@@ -258,10 +258,11 @@ public class RdrExportServiceImpl implements RdrExportService {
                       ? verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText()
                       : roleEnum.toString();
 
-              new ResearcherVerifiedInstitutionalAffiliation()
-                  .institutionShortName(
-                      verifiedInstitutionalAffiliation.getInstitution().getShortName())
-                  .institutionalRole(role);
+              researcher.setVerifiedInstitutionalAffiliation(
+                  new ResearcherVerifiedInstitutionalAffiliation()
+                      .institutionShortName(
+                          verifiedInstitutionalAffiliation.getInstitution().getShortName())
+                      .institutionalRole(role));
             });
     return researcher;
   }
@@ -277,7 +278,8 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setStatus(
         org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum.fromValue(
             dbWorkspace.getWorkspaceActiveStatusEnum().toString()));
-    rdrWorkspace.setExcludeFromPublicDirectory(false);
+    setExcludeFromPublicDirectory(dbWorkspace.getCreator(), rdrWorkspace);
+
     rdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
     rdrWorkspace.setDiseaseFocusedResearchName(dbWorkspace.getDiseaseOfFocus());
     rdrWorkspace.setOtherPurpose(dbWorkspace.getOtherPurpose());
@@ -331,7 +333,6 @@ public class RdrExportServiceImpl implements RdrExportService {
               rdrWorkspace.getWorkspaceId()));
       return null;
     }
-
     return rdrWorkspace;
   }
 
@@ -434,5 +435,26 @@ public class RdrExportServiceImpl implements RdrExportService {
                 })
             .collect(Collectors.toList());
     rdrExportDao.save(exportList);
+  }
+
+  /**
+   * Set excludeFromPublicDirectory to true if the workspace creator is an operational user i.e has
+   * Institution as All of Us Program operational Use
+   *
+   * @param creatorUser
+   * @param rdrWorkspace
+   */
+  void setExcludeFromPublicDirectory(DbUser creatorUser, RdrWorkspace rdrWorkspace) {
+    rdrWorkspace.setExcludeFromPublicDirectory(false);
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(creatorUser)
+        .ifPresent(
+            verifiedInstitutionalAffiliation -> {
+              rdrWorkspace.setExcludeFromPublicDirectory(
+                  verifiedInstitutionalAffiliation
+                      .getInstitution()
+                      .getShortName()
+                      .equals("AouOps"));
+            });
   }
 }
