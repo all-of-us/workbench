@@ -502,7 +502,7 @@ export const DetailTabTable = withCurrentWorkspace()(
               if (!!filter) {
                 filters.items.push({
                   property: columns.find(c => c.name === col).filter,
-                  operator: Operator.EQUAL,
+                  operator: Operator.LIKE,
                   values: [filter]
                 });
               }
@@ -738,46 +738,15 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {domain, filterState: {tabs, vocab}} = this.props;
       const columnFilters = tabs[domain];
       const filterStyle = !columnFilters[column].includes('Select All') ? filterIcons.active : filterIcons.default;
-      if (!data) {
-        // return <i className='pi pi-filter' style={filterStyle} />;
-      }
       let options: Array<any>;
       const counts = {total: 0};
-      // data.forEach(item => {
-      //   counts[item[column]] = !!counts[item[column]] ? counts[item[column]] + 1 : 1;
-      //   counts.total++;
-      // });
       switch (column) {
         case 'domain':
-          options = domains.map(name => {
-            // return {name, count: counts[name] || 0};
-            return {name};
-          });
-          // options.sort((a, b) => b.count - a.count);
-          break;
-        case `${vocab}Code`:
-          options = Object.keys(counts).reduce((acc, name) => {
-            if (name !== 'total') {
-              acc.push({name, count: counts[name]});
-            }
-            return acc;
-          }, []);
-          options.sort((a, b) => b.count - a.count);
-          if (!columnFilters[column].includes('Select All')) {
-            columnFilters[column].forEach(name => {
-              if (!options.find(opt => opt.name === name)) {
-                options = [{name, count: 0}, ...options];
-              }
-            });
-          }
+          options = domains.map(name => ({name}));
           break;
         case `${vocab}Vocabulary`:
           const vocabs = vocabOptions.getValue() ? vocabOptions.getValue()[vocab] : {};
-          options = vocabs[domain] ? vocabs[domain].map(name => {
-            // return {name, count: counts[name] || 0};
-            return {name};
-          }) : [];
-          // options.sort((a, b) => b.count - a.count);
+          options = vocabs[domain] ? vocabs[domain].map(name => ({name})) : [];
           break;
       }
       options.push({name: 'Select All', count: counts.total});
@@ -793,8 +762,7 @@ export const DetailTabTable = withCurrentWorkspace()(
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
                        checked={columnFilters[column].includes(opt.name)}
                        onChange={($event) => this.updateData($event, column, options)}/>
-                {/* TODO Uncomment counts below once decision has been made for server-side implementation */}
-                <label> {opt.name} {/*({opt.count})*/} </label>
+                <label> {opt.name} </label>
               </div>}
             </React.Fragment>);
           }
@@ -824,8 +792,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
                    checked={columnFilters[column].includes('Select All')}
                    onChange={($event) => this.updateData($event, column, options)}/>
-            {/* TODO Uncomment total count below once decision has been made for server-side implementation */}
-            <label> Select All {/*({counts.total})*/} </label>
+            <label> Select All </label>
           </div>
         </OverlayPanel>
       </React.Fragment>;
@@ -869,7 +836,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             <i className='pi pi-times-circle' style={{margin: '0 5px'}} onClick={() => {
               tabFilterState[column] = '';
               this.setState({tabFilterState}, () => this.filterText());
-            }} />
+            }}
+            title='Clear filter'/>
           </div>
         </OverlayPanel>
       </React.Fragment>;
@@ -936,15 +904,14 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === `${vocab}Name`;
-        // TODO Uncomment code filters once decision has been made for server-side implementation
         const hasCheckboxFilter = [
           'domain',
           'sourceVocabulary',
           'standardVocabulary',
-          // 'sourceCode',
-          // 'standardCode'
         ].includes(col.name);
         const hasTextFilter = [
+          'sourceCode',
+          'standardCode',
           'sourceName',
           'standardName',
           'value',

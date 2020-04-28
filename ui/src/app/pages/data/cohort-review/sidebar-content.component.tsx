@@ -323,7 +323,6 @@ export const SidebarContent = fp.flow(
   }
 
   componentWillUnmount(): void {
-    console.log('unsub');
     this.subscription.unsubscribe();
   }
 
