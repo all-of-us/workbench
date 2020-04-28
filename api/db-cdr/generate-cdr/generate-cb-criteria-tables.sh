@@ -12,7 +12,7 @@ set -ex
 
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
-export DATA_BROWSER_FLAG=$3 # data browser flag
+export DATA_BROWSER=$3      # data browser flag
 export DRY_RUN=$4           # dry run
 
 if [ "$DRY_RUN" == false ]
@@ -1083,7 +1083,7 @@ then
   SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id,
       0,'PERSON',1,'SEX','Sex',1,0,0,0"
 
-  if [ "$DATA_BROWSER_FLAG" == false ]
+  if [ "$DATA_BROWSER" == false ]
   then
   echo "DEMO - Sex at birth children"
   bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \

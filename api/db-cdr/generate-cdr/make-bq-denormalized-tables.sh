@@ -7,12 +7,12 @@ set -e
 export BQ_PROJECT=$1          # project
 export BQ_DATASET=$2          # dataset
 export CDR_DATE=$3            # cdr date
-export DATA_BROWSER_FLAG=$4   # data browser flag
+export DATA_BROWSER=$4        # data browser flag
 export DRY_RUN=$5             # dry run
 
 echo ""
 echo 'Making denormalized search tables'
-if ./generate-cdr/make-bq-denormalized-search.sh $BQ_PROJECT $BQ_DATASET $CDR_DATE $DATA_BROWSER_FLAG $DRY_RUN
+if ./generate-cdr/make-bq-denormalized-search.sh $BQ_PROJECT $BQ_DATASET $CDR_DATE $DATA_BROWSER $DRY_RUN
 then
     echo "Making denormalized search tables complete"
 else
@@ -22,7 +22,7 @@ fi
 
 echo ""
 echo "Making criteria tables"
-if ./generate-cdr/generate-cb-criteria-tables.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER_FLAG $DRY_RUN
+if ./generate-cdr/generate-cb-criteria-tables.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER $DRY_RUN
 then
     echo "Making criteria tables complete"
 else
@@ -30,7 +30,7 @@ else
     exit 1
 fi
 
-if [ "$DATA_BROWSER_FLAG" == false ]
+if [ "$DATA_BROWSER" == false ]
 then
   echo ""
   echo "Making denormalized review tables"

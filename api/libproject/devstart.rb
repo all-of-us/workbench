@@ -773,7 +773,7 @@ Common.register_command({
 
 def make_bq_denormalized_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser_flag = false
+  op.opts.data_browser = false
   op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
@@ -791,8 +791,8 @@ def make_bq_denormalized_tables(cmd_name, *args)
     "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
   )
   op.add_option(
-    "--data-browser-flag [data-browser-flag]",
-    ->(opts, v) { opts.data_browser_flag = v},
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Default is false"
   )
   op.add_option(
@@ -804,7 +804,7 @@ def make_bq_denormalized_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser_flag} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -848,7 +848,7 @@ Generates big query denormalized tables for review. Used by cohort builder. Must
 
 def make_bq_denormalized_search(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser_flag = false
+  op.opts.data_browser = false
   op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
@@ -866,8 +866,8 @@ def make_bq_denormalized_search(cmd_name, *args)
     "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
   )
   op.add_option(
-    "--data-browser-flag [data-browser-flag]",
-    ->(opts, v) { opts.data_browser_flag = v},
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Default is false"
   )
   op.add_option(
@@ -879,7 +879,7 @@ def make_bq_denormalized_search(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser_flag} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -956,7 +956,7 @@ Must be run once when a new cdr is released",
 
 def generate_cb_criteria_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser_flag = false
+  op.opts.data_browser = false
   op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
@@ -969,8 +969,8 @@ def generate_cb_criteria_tables(cmd_name, *args)
     "BQ dataset. Required."
   )
   op.add_option(
-    "--data-browser-flag [data-browser-flag]",
-    ->(opts, v) { opts.data_browser_flag = v},
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Default is false"
   )
   op.add_option(
@@ -982,7 +982,7 @@ def generate_cb_criteria_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser_flag} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({

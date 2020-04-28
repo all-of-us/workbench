@@ -7,7 +7,7 @@ set -ex
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 export CDR_DATE=$3          # cdr date
-export DATA_BROWSER_FLAG=$4 # data browser flag
+export DATA_BROWSER=$4      # data browser flag
 export DRY_RUN=$5           # dry run
 
 if [ "$DRY_RUN" == false ]
@@ -39,7 +39,7 @@ then
   # insert person data into cb_search_person
   ################################################
   echo "Inserting person data into cb_search_person"
-  if [ "$DATA_BROWSER_FLAG" == true ]
+  if [ "$DATA_BROWSER" == true ]
   then
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
@@ -186,7 +186,7 @@ then
   # set has EHR data flag
   ################################################
   echo "set has EHR data flag in cb_search_person"
-  if [ "$BQ_PROJECT:$BQ_DATASET" == "all-of-us-ehr-dev:synthetic_cdr20180606" ] || [ "$DATA_BROWSER_FLAG" == true ]
+  if [ "$BQ_PROJECT:$BQ_DATASET" == "all-of-us-ehr-dev:synthetic_cdr20180606" ] || [ "$DATA_BROWSER" == true ]
   then
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
