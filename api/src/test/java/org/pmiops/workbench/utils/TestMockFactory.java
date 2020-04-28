@@ -32,6 +32,7 @@ import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
   public static final String BUCKET_NAME = "workspace-bucket";
+  private static final String CDR_VERSION_ID = "2";
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
@@ -42,16 +43,23 @@ public class TestMockFactory {
     ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
-        .id("1")
+        .id(workspaceNameToId(workspaceName))
+        .etag("\"1\"")
         .name(workspaceName)
         .namespace(workspaceNameSpace)
         .dataAccessLevel(DataAccessLevel.PROTECTED)
-        .cdrVersionId("1")
+        .cdrVersionId(CDR_VERSION_ID)
         .googleBucketName(BUCKET_NAME)
-        .billingAccountName("billing-account")
+        .billingAccountName("billingAccounts/00000-AAAAA-BBBBB")
         .billingAccountType(BillingAccountType.FREE_TIER)
+        .creationTime(1588097211621L)
+        .creator("jay@unit-test-research-aou.org")
+        .googleBucketName("fc-secure-111111-2222-AAAA-BBBB-000000000000")
+        .lastModifiedTime(1588097211621L)
+        .published(false)
         .researchPurpose(
             new ResearchPurpose()
+                .additionalNotes(null)
                 .diseaseFocusedResearch(true)
                 .diseaseOfFocus("cancer")
                 .methodsDevelopment(true)
@@ -73,6 +81,10 @@ public class TestMockFactory {
                 .disseminateResearchFindingList(disseminateResearchEnumsList)
                 .researchOutcomeList(ResearchOutcomeEnumsList)
                 .approved(false));
+  }
+
+  private String workspaceNameToId(String workspaceName) {
+    return "mynewestworkspace";
   }
 
   public FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {

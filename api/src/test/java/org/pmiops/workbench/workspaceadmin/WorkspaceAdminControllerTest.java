@@ -70,7 +70,7 @@ public class WorkspaceAdminControllerTest {
 
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
-  private static final String WORKSPACE_NAME = "name";
+  private static final String WORKSPACE_NAME = "Chicken & Noodle Pox";
 
   @TestConfiguration
   @Import({
