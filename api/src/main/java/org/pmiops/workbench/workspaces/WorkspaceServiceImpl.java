@@ -12,6 +12,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -31,6 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -247,7 +249,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         .collect(
             Collectors.toMap(
                 fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
-                fcWorkspace -> fcWorkspace));
+                Function.identity()));
   }
 
   @Override

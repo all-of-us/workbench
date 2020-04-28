@@ -134,6 +134,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setLastAccessedTime(
         Timestamp.from(DB_CREATION_TIMESTAMP.toInstant().plus(Duration.ofMinutes(15))));
     sourceDbWorkspace.setCohorts(Collections.emptySet());
+    sourceDbWorkspace.setConceptSets(Collections.emptySet());
     sourceDbWorkspace.setDataSets(Collections.emptySet());
     sourceDbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     sourceDbWorkspace.setBillingMigrationStatusEnum(BILLING_MIGRATION_STATUS);
