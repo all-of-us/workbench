@@ -1,4 +1,4 @@
-{
+ {
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
     "clusterMaxAgeDays": 14,

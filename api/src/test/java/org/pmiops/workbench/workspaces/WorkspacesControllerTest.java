@@ -648,8 +648,9 @@ public class WorkspacesControllerTest {
     verify(endUserCloudbillingProvider.get().projects())
         .updateBillingInfo(
             "projects/" + workspace.getNamespace(),
-            new ProjectBillingInfo().setBillingAccountName("billing-account"));
-    assertThat(workspace2.getBillingAccountName()).isEqualTo("billing-account");
+            new ProjectBillingInfo().setBillingAccountName(
+                TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
+    assertThat(workspace2.getBillingAccountName()).isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
 
     verify(mockZendesk, times(1)).createRequest(any());
   }

@@ -32,7 +32,8 @@ import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
   public static final String BUCKET_NAME = "workspace-bucket";
-  private static final String CDR_VERSION_ID = "2";
+  private static final String CDR_VERSION_ID = "1";
+  public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
@@ -50,7 +51,7 @@ public class TestMockFactory {
         .dataAccessLevel(DataAccessLevel.PROTECTED)
         .cdrVersionId(CDR_VERSION_ID)
         .googleBucketName(BUCKET_NAME)
-        .billingAccountName("billingAccounts/00000-AAAAA-BBBBB")
+        .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .billingAccountType(BillingAccountType.FREE_TIER)
         .creationTime(1588097211621L)
         .creator("jay@unit-test-research-aou.org")

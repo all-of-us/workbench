@@ -3820,6 +3820,14 @@ definitions:
     type: object
     required:
     - name
+    - researchPurpose
+    - etag
+    - namespace
+    - cdrVersionId
+    - creationTime
+    - dataAccessLevel
+    - googleBucketName
+    - billingStatus
     properties:
       id:
         type: string
