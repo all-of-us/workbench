@@ -734,7 +734,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     checkboxFilter(column: string) {
-      const {codeResults, data} = this.state;
+      const {codeResults} = this.state;
       const {domain, filterState: {tabs, vocab}} = this.props;
       const columnFilters = tabs[domain];
       const filterStyle = !columnFilters[column].includes('Select All') ? filterIcons.active : filterIcons.default;
