@@ -798,7 +798,7 @@ def make_bq_denormalized_tables(cmd_name, *args)
   op.add_option(
     "--dry-run [dry-run]",
     ->(opts, v) { opts.dry_run = v},
-    "Is this dry run. Default is false"
+    "Is this dry a run. Default is false"
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
   op.parse.validate
