@@ -44,7 +44,7 @@ public class SearchRequests {
           new SearchParameter()
               .domain(groupType)
               .type(type)
-              .group(true)
+              .group(false)
               .conceptId(1L)
               .value(code)
               .standard(false)
