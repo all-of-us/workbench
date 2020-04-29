@@ -31,7 +31,7 @@ import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
-import {WorkspaceListComponent} from './pages/workspace/workspace-list';
+// Import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
@@ -39,6 +39,7 @@ import {DisabledGuard} from './guards/disabled-guard.service';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
+import {AppRouterComponent} from './components/app-router-example';
 
 declare let gtag: Function;
 
@@ -83,13 +84,9 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            component: WorkspaceListComponent,
-            data: {
-              title: 'View Workspaces',
-              breadcrumb: BreadcrumbType.Workspaces
-            }
-          },
-          {
+            component: AppRouterComponent,
+            data: {}
+          }, {
             /* TODO The children under ./views need refactoring to use the data
              * provided by the route rather than double-requesting it.
              */
@@ -139,7 +136,7 @@ const routes: Routes = [
                     path: ':nbName',
                     component: NotebookRedirectComponent,
                     data: {
-                      // use the (urldecoded) captured value nbName
+                      // Use the (urldecoded) captured value nbName
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
                       minimizeChrome: true
@@ -300,10 +297,11 @@ const routes: Routes = [
         path: 'profile',
         component: ProfilePageComponent,
         data: {title: 'Profile'}
-      }, {
-        path: 'workspaces/build',
-        component: WorkspaceEditComponent,
-        data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
+      },
+      {
+        path: '**',
+        component: AppRouterComponent,
+        data: {title: 'Create Workspace'}
       }
     ]
   }
