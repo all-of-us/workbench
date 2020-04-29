@@ -35,6 +35,7 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -61,6 +62,7 @@ public class RdrExportServiceImplTest {
   @MockBean private UserDao mockUserDao;
   @MockBean private WorkspaceDao mockWorkspaceDao;
   @MockBean private WorkspaceService mockWorkspaceService;
+  @MockBean private InstitutionService institutionService;
   @MockBean private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private static final Instant NOW = Instant.now();
@@ -177,30 +179,6 @@ public class RdrExportServiceImplTest {
     verify(rdrExportDao, times(1)).save(anyList());
 
     RdrWorkspace rdrWorkspace = toRdrWorkspace(mockWorkspace);
-    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
-  }
-
-  @Test
-  public void exportWorkspace_CreatorNotOperationalUser() throws ApiException {
-
-    DbVerifiedInstitutionalAffiliation mockVerifiedInstitutionalAffiliation =
-        new DbVerifiedInstitutionalAffiliation();
-    mockVerifiedInstitutionalAffiliation.setInstitution(new DbInstitution().setShortName("AouOps"));
-    mockVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
-        InstitutionalRole.PROJECT_PERSONNEL);
-    when(verifiedInstitutionalAffiliationDao.findFirstByUser(dbUserWithEmail))
-        .thenReturn(Optional.of(mockVerifiedInstitutionalAffiliation));
-
-    List<Long> workspaceID = new ArrayList<>();
-    workspaceID.add(1l);
-    rdrExportService.exportWorkspaces(workspaceID);
-    verify(mockWorkspaceService)
-        .getFirecloudUserRoles(
-            mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
-    verify(rdrExportDao, times(1)).save(anyList());
-
-    RdrWorkspace rdrWorkspace = toRdrWorkspace(mockWorkspace);
-    rdrWorkspace.setExcludeFromPublicDirectory(true);
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
 
