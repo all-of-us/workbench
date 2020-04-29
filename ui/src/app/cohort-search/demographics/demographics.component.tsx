@@ -2,7 +2,6 @@ import {Component, Input} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import Nouislider from 'nouislider-react';
 import * as React from 'react';
-import {Subscription} from 'rxjs/Subscription';
 
 import {ageCountStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
@@ -131,6 +130,7 @@ const ageNode = {
 
 const defaultMinAge = '18';
 const defaultMaxAge = '120';
+const enableCBAgeTypeOptions = serverConfigStore.getValue().enableCBAgeTypeOptions;
 
 /*
  * Sorts a plain JS array of plain JS objects first by a 'count' key and then
@@ -164,10 +164,7 @@ interface State {
 }
 
 export class Demographics extends React.Component<Props, State> {
-  readonly criteriaType = CriteriaType;
-  subscription = new Subscription();
-  selectedNode: any;
-  enableCBAgeTypeOptions = serverConfigStore.getValue().enableCBAgeTypeOptions;
+  ageWrapper: HTMLDivElement;
   ageTypes = [
     {label: 'Current Age', type: AttrName.AGE.toString()},
     {label: 'Age at Consent', type: AttrName.AGEATCONSENT.toString()},
@@ -181,12 +178,11 @@ export class Demographics extends React.Component<Props, State> {
     ageRange: new FormControl([]),
     ageType: new FormControl(AttrName.AGE.toString()),
   });
-  get ageRange() { return this.demoForm.get('ageRange'); }
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      ageType: undefined,
+      ageType: AttrName.AGE.toString(),
       ageTypeNodes: undefined,
       calculating: false,
       count: null,
@@ -200,9 +196,8 @@ export class Demographics extends React.Component<Props, State> {
 
   componentDidMount(): void {
     if (this.props.wizard.type === CriteriaType.AGE) {
-      this.initAgeControls();
       this.initAgeRange();
-      if (this.enableCBAgeTypeOptions) {
+      if (enableCBAgeTypeOptions) {
         this.loadAgeNodesFromApi();
       } else {
         this.setState({loading: false});
@@ -217,10 +212,6 @@ export class Demographics extends React.Component<Props, State> {
     if (selections !== prevProps.selections && wizard.type !== CriteriaType.AGE) {
       this.calculate();
     }
-  }
-
-  componentWillUnmount(): void {
-    this.subscription.unsubscribe();
   }
 
   loadNodesFromApi() {
@@ -247,67 +238,8 @@ export class Demographics extends React.Component<Props, State> {
         acc[item.ageType].push(item);
         return acc;
       }, initialValue);
-      setTimeout(() => this.centerAgeCount());
-      this.setState({loading: false, ageTypeNodes});
+      this.setState({ageTypeNodes}, () => this.calculateAge());
     });
-  }
-
-    /*
-      * We want the two inputs to mirror the slider, so here we're wiring all
-      * three inputs together using the valueChanges Observable and the
-      * emitEvent option.  Setting emitEvent to false will prevent the other
-      * Observables from firing when a control is updated this way, hence
-      * preventing any infinite update cycles.
-      */
-  initAgeControls() {
-    const min = this.demoForm.get('ageMin');
-    const max = this.demoForm.get('ageMax');
-    this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
-      min.setValue(lo, {emitEvent: false});
-      max.setValue(hi, {emitEvent: false});
-      if (this.enableCBAgeTypeOptions) {
-        if (!!this.state.ageTypeNodes) {
-          this.centerAgeCount();
-        }
-      } else {
-        this.setState({count: null});
-      }
-    }));
-
-    this.subscription.add(min.valueChanges.subscribe(value => {
-      const [_, hi] = [...this.ageRange.value];
-      if (value <= hi && value >= this.state.minAge) {
-        this.ageRange.setValue([value, hi], {emitEvent: false});
-        if (!this.enableCBAgeTypeOptions) {
-          this.setState({count: null});
-        }
-      }
-    }));
-    this.subscription.add(max.valueChanges.subscribe(value => {
-      const [lo, _] = [...this.ageRange.value];
-      if (value >= lo) {
-        this.ageRange.setValue([lo, value], {emitEvent: false});
-        if (!this.enableCBAgeTypeOptions) {
-          this.setState({count: null});
-        }
-      }
-    }));
-    if (this.enableCBAgeTypeOptions) {
-      this.subscription.add(this.demoForm.get('ageType').valueChanges.subscribe(name => {
-        this.calculateAge();
-        this.props.select(this.selectedNode);
-      }));
-    }
-  }
-
-  onMinChange(minAge: string) {
-    const {maxAge} = this.state;
-    this.setState({minAge});
-  }
-
-  onMaxChange(maxAge: string) {
-    const {minAge} = this.state;
-    this.setState({maxAge});
   }
 
   onMaxBlur() {
@@ -315,6 +247,8 @@ export class Demographics extends React.Component<Props, State> {
     let {maxAge} = this.state;
     if (+maxAge < +minAge) {
       maxAge = minAge;
+    } else if (+maxAge > +defaultMaxAge || maxAge === '') {
+      maxAge = defaultMaxAge;
     }
     this.setState({maxAge, sliderStart: [+minAge, +maxAge]}, () => this.updateAgeSelection());
   }
@@ -324,6 +258,8 @@ export class Demographics extends React.Component<Props, State> {
     let {minAge} = this.state;
     if (+minAge > +maxAge) {
       minAge = maxAge;
+    } else if (+minAge < +defaultMinAge || minAge === '') {
+      minAge = defaultMinAge;
     }
     this.setState({minAge, sliderStart: [+minAge, +maxAge]}, () => this.updateAgeSelection());
   }
@@ -348,14 +284,14 @@ export class Demographics extends React.Component<Props, State> {
       const {attributes} = selections[0];
       const {operands} = attributes[0];
       this.setState({count: wizard.count, minAge: operands[0], maxAge: operands[1], sliderStart: [+operands[0], +operands[1]]});
-      if (this.enableCBAgeTypeOptions) {
+      if (enableCBAgeTypeOptions) {
         this.setState({ageType: attributes[0].name});
       }
     } else {
       // timeout prevents Angular 'ExpressionChangedAfterItHasBeenCheckedError' in CB modal component
       setTimeout(() => this.updateAgeSelection());
     }
-    if (!this.enableCBAgeTypeOptions) {
+    if (!enableCBAgeTypeOptions) {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       if (!ageCountStore.getValue()[cdrVersionId]) {
         // Get total age count for this cdr version if it doesn't exist in the store yet
@@ -367,26 +303,24 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   centerAgeCount() {
-    if (this.enableCBAgeTypeOptions) {
-      this.calculateAge();
-      const slider = document.getElementsByClassName('noUi-connect')[0] as HTMLElement;
+    if (enableCBAgeTypeOptions) {
+      const {maxAge, minAge} = this.state;
+      // get width as a % by dividing the selected age range by the full slider range
+      const width = (+maxAge - +minAge) / (+defaultMaxAge - +defaultMinAge) * 100;
+      // get left margin as a % by dividing the change in minAge by the full slider range
+      const marginLeft = (+minAge - +defaultMinAge) / (+defaultMaxAge - +defaultMinAge) * 100;
       const wrapper = document.getElementById('count-wrapper');
-      const count = document.getElementById('age-count');
-      wrapper.setAttribute(
-        'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
-      );
-      // set style properties also for cross-browser compatibility
-      wrapper.style.width = slider.offsetWidth.toString();
-      wrapper.style.left = slider.offsetLeft.toString();
-      if (!!count && slider.offsetWidth < count.offsetWidth) {
-        const margin = (slider.offsetWidth - count.offsetWidth) / 2;
-        count.setAttribute('style', 'margin-left: ' + margin + 'px;');
-        count.style.marginLeft = margin.toString();
+      if (!!wrapper) {
+        wrapper.setAttribute('style', `margin-left: ${marginLeft}%; width: ${width}%; text-align: center;`);
+        // set style properties also for cross-browser compatibility
+        wrapper.style.marginLeft = `${marginLeft}%`;
+        wrapper.style.width = `${width}%`;
+        wrapper.style.textAlign = 'center';
       }
     }
   }
 
-  selectOption = (opt: any) => {
+  selectOption(opt: any) {
     triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(opt.type)} - ${opt.name}`);
     this.props.select({...opt, name: `${typeToTitle(opt.type)} - ${opt.name}`});
   }
@@ -406,29 +340,28 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   calculateAge(init?: boolean) {
-    const {maxAge, minAge} = this.state;
-    if (this.enableCBAgeTypeOptions) {
-      const ageType = this.demoForm.get('ageType').value;
-      const min = this.demoForm.get('ageMin').value;
-      const max = this.demoForm.get('ageMax').value;
+    const {ageType, maxAge, minAge} = this.state;
+    if (enableCBAgeTypeOptions) {
       const count = this.state.ageTypeNodes[ageType]
-        .filter(node => node.age >= min && node.age <= max)
+        .filter(node => node.age >= minAge && node.age <= maxAge)
         .reduce((acc, node) => acc + node.count, 0);
-      this.setState({count});
+      this.setState({count, loading: false}, () => this.centerAgeCount());
     } else {
       if (!init || this.setTotalAge) {
         this.setState({calculating: true});
       }
       const {cdrVersionId} = currentWorkspaceStore.getValue();
-      const parameter = init ? {
+      const min = init ? defaultMinAge : minAge;
+      const max = init ? defaultMaxAge : maxAge;
+      const parameter = {
         ...ageNode,
-        name: `Age In Range ${minAge} - ${maxAge}`,
+        name: `Age In Range ${min} - ${max}`,
         attributes: [{
           name: AttrName.AGE,
           operator: Operator.BETWEEN,
-          operands: [minAge, maxAge]
+          operands: [min, max]
         }],
-      } : this.selectedNode;
+      };
       const request = {
         excludes: [],
         includes: [{
@@ -464,20 +397,18 @@ export class Demographics extends React.Component<Props, State> {
     const {selections, wizard} = this.props;
     return !this.state.loading
       && (selections && selections.length > 0)
-      && !(wizard.type === CriteriaType.AGE && this.enableCBAgeTypeOptions);
+      && !(wizard.type === CriteriaType.AGE && enableCBAgeTypeOptions);
   }
 
   // Checks if form is in its initial state and if a count already exists before setting the total age count
   get setTotalAge() {
-    const {maxAge, minAge} = this.state;
-    const min = this.demoForm.get('ageMin');
-    const max = this.demoForm.get('ageMax');
-    return min.value === minAge && max.value === maxAge && !this.state.count;
+    const {count, maxAge, minAge} = this.state;
+    return minAge === defaultMinAge && maxAge === defaultMaxAge && !count;
   }
 
   render() {
     const {selectedIds, wizard} = this.props;
-    const {calculating, count, loading, maxAge, minAge, nodes, sliderStart} = this.state;
+    const {ageType, calculating, count, loading, maxAge, minAge, nodes, sliderStart} = this.state;
     const isAge = wizard.type === CriteriaType.AGE;
     return loading
       ? <div style={{textAlign: 'center'}}><Spinner style={{marginTop: '3rem'}}/></div>
@@ -494,9 +425,13 @@ export class Demographics extends React.Component<Props, State> {
                 min={defaultMinAge} max={maxAge}
                 value={minAge}
                 onBlur={() => this.onMinBlur()}
-                onChange={(e) => this.onMinChange(e.target.value)}/>
-              <div style={styles.slider}>
-                {this.enableCBAgeTypeOptions && <div id='count-wrapper'>
+                onChange={(e) => this.setState({minAge: e.target.value}, () => {
+                  if (enableCBAgeTypeOptions) {
+                    this.calculateAge();
+                  }
+                })}/>
+              <div style={enableCBAgeTypeOptions ? {...styles.slider, marginBottom: '0.75rem'} : styles.slider}>
+                {enableCBAgeTypeOptions && <div ref={(el) => this.ageWrapper = el} id='count-wrapper'>
                   {calculating
                     ? <Spinner size={16}/>
                     : <span style={styles.count} id='age-count'>
@@ -505,12 +440,15 @@ export class Demographics extends React.Component<Props, State> {
                   }
                 </div>}
                 <Nouislider range={{min: +defaultMinAge, max: +defaultMaxAge}}
+                  instanceRef={() => {
+                    this.centerAgeCount();
+                  }}
                   onChange={() => this.updateAgeSelection()}
                   onUpdate={(v) => this.setState({maxAge: v[1].split('.')[0], minAge: v[0].split('.')[0]})}
                   start={sliderStart}
                   step={1}
                   connect
-                  onSlide={() => this.centerAgeCount()}
+                  onSlide={() => this.calculateAge()}
                   behaviour='drag'/>
               </div>
               <input style={styles.ageInput}
@@ -519,12 +457,19 @@ export class Demographics extends React.Component<Props, State> {
                 min={minAge} max={defaultMaxAge}
                 value={maxAge}
                 onBlur={() => this.onMaxBlur()}
-                onChange={(e) => this.onMaxChange(e.target.value)}/>
+                onChange={(e) => this.setState({maxAge: e.target.value}, () => {
+                  if (enableCBAgeTypeOptions) {
+                    this.calculateAge();
+                  }
+                })}/>
             </div>
-            {serverConfigStore.getValue().enableCBAgeTypeOptions && <div style={{marginLeft: '1rem'}}>
-              {this.ageTypes.map((ageType, a) => <div key={a} className='radio-inline'>
-                <input type='radio' id={`age_${a}`} value={ageType.type}/>
-                <label>{ageType.label}</label>
+            {enableCBAgeTypeOptions && <div style={{marginLeft: '1rem'}}>
+              {this.ageTypes.map((ageTypeRadio, a) => <div key={a} style={{display: 'inline-block', marginRight: '0.5rem'}}>
+                <input type='radio' name='ageType'
+                  style={{marginRight: '0.25rem'}}
+                  onChange={() => this.setState({ageType: ageTypeRadio.type}, () => this.calculateAge())}
+                  checked={ageTypeRadio.type === ageType}/>
+                <label>{ageTypeRadio.label}</label>
               </div>)}
             </div>}
           </div>
@@ -548,6 +493,7 @@ export class Demographics extends React.Component<Props, State> {
           : styles.countPreview}>
           {isAge && <div style={{float: 'left', marginRight: '0.25rem'}}>
             <button style={styles.calculateBtn} disabled={calculating || count !== null} onClick={() => this.calculateAge()}>
+              {calculating && <Spinner size={16}/>}
               Calculate
             </button>
           </div>}
