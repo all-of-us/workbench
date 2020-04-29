@@ -245,6 +245,8 @@ jobs:
           name: Java linting
           working_directory: ~/workbench/api
           command: ./gradlew spotlessCheck
+      - store_test_results:
+           path: ~/workbench/api/build/test-results/test
       - manage_api_cache:
           save: true
 
