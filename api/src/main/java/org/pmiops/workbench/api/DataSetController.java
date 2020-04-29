@@ -679,7 +679,7 @@ public class DataSetController implements DataSetApiDelegate {
     FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
     response.setItems(
         fieldList.stream()
-            .map(field -> new DomainValue().value(field.getName()))
+            .map(field -> new DomainValue().value(field.getName().toLowerCase()))
             .collect(Collectors.toList()));
 
     return ResponseEntity.ok(response);
