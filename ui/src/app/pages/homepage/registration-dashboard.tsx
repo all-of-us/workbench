@@ -119,7 +119,7 @@ interface RegistrationTask {
 // Important: The completion criteria here needs to be kept synchronized with
 // the server-side logic, else users can get stuck on the registration dashboard
 // without a next step:
-// https://github.com/all-of-us/workbench/blob/f3c5ba23219242b6e57166c30cbd2fc863f4188b/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
+// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   {
     key: 'twoFactorAuth',
