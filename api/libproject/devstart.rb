@@ -1261,28 +1261,28 @@ Common.register_command({
     :fn => ->(*args) {backfill_billing_project_owners("backfill-billing-project-owners", *args)}
 })
 
-def update_user_registered_status(cmd_name, args)
+def update_user_disabled_status(cmd_name, args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
-    "Project to update registered status for"
+    "Project to update disabled status for"
   )
   op.add_option(
     "--disabled [disabled]",
     ->(opts, v) { opts.disabled = v},
-    "Disabled state to set: true/false."
+    "Disabled state to set: true/false"
   )
   op.add_option(
     "--account [admin_account_email]",
     ->(opts, v) { opts.account = v},
-    "Workbench admin account to perform update registered status as."
+    "Workbench admin account to perform update disabled status as"
   )
   op.add_option(
     "--user [target_email]",
     ->(opts, v) { opts.user = v},
-    "User to grant or revoke registered access from."
+    "User to update the disabled status for"
   )
   op.add_validator ->(opts) {
     raise ArgumentError unless (opts.project and opts.disabled != nil and opts.account and opts.user)
@@ -1300,10 +1300,10 @@ def update_user_registered_status(cmd_name, args)
 end
 
 Common.register_command({
-  :invocation => "update-user-registered-status",
-  :description => "Adds or removes a specified user from the registered access domain.\n" \
-                  "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
-  :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
+  :invocation => "update-user-disabled-status",
+  :description => "Set a Workbench user's disabled status by email, using another Workbench admin account.\n" \
+                  "Requires four flags: --project [env project] --disabled [true/false], --account [admin email], and --user [target user email]",
+  :fn => ->(*args) { update_user_disabled_status("update_user_registered_status", args) }
 })
 
 def fetch_firecloud_user_profile(cmd_name, *args)
