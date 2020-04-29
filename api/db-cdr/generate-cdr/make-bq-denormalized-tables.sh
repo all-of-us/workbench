@@ -11,12 +11,12 @@ export DATA_BROWSER=$4        # data browser flag
 export DRY_RUN=$5             # dry run
 
 echo ""
-echo 'Making denormalized search tables'
-if ./generate-cdr/make-bq-denormalized-search.sh $BQ_PROJECT $BQ_DATASET $CDR_DATE $DATA_BROWSER $DRY_RUN
+echo 'Making denormalized search events table'
+if ./generate-cdr/make-bq-denormalized-search-events.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER $DRY_RUN
 then
-    echo "Making denormalized search tables complete"
+    echo "Making denormalized search table complete"
 else
-    echo "Making denormalized search tables failed!"
+    echo "Making denormalized search table failed!"
     exit 1
 fi
 
@@ -32,6 +32,17 @@ fi
 
 if [ "$DATA_BROWSER" == false ]
 then
+
+  echo ""
+  echo 'Making denormalized search person table'
+  if ./generate-cdr/make-bq-denormalized-search-person.sh $BQ_PROJECT $BQ_DATASET $CDR_DATE $DRY_RUN
+  then
+      echo "Making denormalized search person table complete"
+  else
+      echo "Making denormalized search person table failed!"
+      exit 1
+  fi
+
   echo ""
   echo "Making denormalized review tables"
   if ./generate-cdr/make-bq-denormalized-review.sh $BQ_PROJECT $BQ_DATASET $DRY_RUN
