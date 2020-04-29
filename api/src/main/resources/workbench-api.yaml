@@ -3426,6 +3426,7 @@ definitions:
   FeaturedWorkspaceCategory:
     type: string
     enum:
+    - DEMO_PROJECTS
     - PHENOTYPE_LIBRARY
     - TUTORIAL_WORKSPACES
   CdrVersionListResponse:
