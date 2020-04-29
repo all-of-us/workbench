@@ -12,6 +12,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
@@ -114,6 +115,11 @@ interface RegistrationTask {
 // This needs to be a function, because we want it to evaluate at call time,
 // not at compile time, to ensure that we make use of the server config store.
 // This is important so that we can feature flag off registration tasks.
+//
+// Important: The completion criteria here needs to be kept synchronized with
+// the server-side logic, else users can get stuck on the registration dashboard
+// without a next step:
+// https://github.com/all-of-us/workbench/blob/f3c5ba23219242b6e57166c30cbd2fc863f4188b/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   {
     key: 'twoFactorAuth',
@@ -160,7 +166,16 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
     completionTimestamp: (profile: Profile) => {
-      return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
+      if (profile.dataUseAgreementBypassTime) {
+        return profile.dataUseAgreementBypassTime;
+      }
+      // The DUA completion time field tracks the most recent DUA completion
+      // timestamp, but doesn't specify whether that DUA is currently active.
+      const requiredDuaVersion = getLiveDataUseAgreementVersion(serverConfigStore.getValue());
+      if (profile.dataUseAgreementSignedVersion === requiredDuaVersion) {
+        return profile.dataUseAgreementCompletionTime;
+      }
+      return null;
     },
     onClick: () => {
       AnalyticsTracker.Registration.EnterDUCC();
@@ -323,7 +338,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         </div>}
       <FlexRow style={{marginTop: '0.85rem'}}>
         {registrationTasksToRender.map((card, i) => {
-          return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
+          return <ResourceCardBase key={i} data-test-id={'registration-task-' + card.key}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '190px' : '305px',
               minHeight: this.allTasksCompleted() ? '190px' : '305px'}}>

@@ -23,6 +23,7 @@ describe('RegistrationDashboard', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
+      enableV3DataUserCodeOfConduct: true
     });
     props  = {
       eraCommonsLinked: false,
@@ -53,17 +54,17 @@ describe('RegistrationDashboard', () => {
     let wrapper = component();
 
     // initially, first tile should be enabled and second tile should be disabled
-    expect(wrapper.find('[data-test-id="registration-task-0"]')
+    expect(wrapper.find('[data-test-id="registration-task-twoFactorAuth"]')
       .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-id="registration-task-1"]')
+    expect(wrapper.find('[data-test-id="registration-task-eraCommons"]')
       .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeTruthy();
 
     props.twoFactorAuthCompleted = true;
     wrapper = component();
     // now, first tile should be disabled but completed and second tile should be enabled
-    expect(wrapper.find('[data-test-id="registration-task-0"]')
+    expect(wrapper.find('[data-test-id="registration-task-twoFactorAuth"]')
       .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
-    expect(wrapper.find('[data-test-id="registration-task-1"]')
+    expect(wrapper.find('[data-test-id="registration-task-eraCommons"]')
       .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
 
   });
