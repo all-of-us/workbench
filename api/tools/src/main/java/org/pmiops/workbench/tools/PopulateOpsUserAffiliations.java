@@ -39,22 +39,6 @@ public class PopulateOpsUserAffiliations {
 
   private static final Logger log = Logger.getLogger(PopulateOpsUserAffiliations.class.getName());
 
-  private static final Option importFilename =
-      Option.builder()
-          .longOpt("import-filename")
-          .desc("File containing CSV of ops users")
-          .required()
-          .hasArg()
-          .build();
-  private static final Option dryRunOpt =
-      Option.builder()
-          .longOpt("dry-run")
-          .desc("If specified, the tool runs in dry run mode; no modifications are made")
-          .build();
-
-  private static final Options options =
-      new Options().addOption(importFilename).addOption(dryRunOpt);
-
   private List<DbVerifiedInstitutionalAffiliation> prepareAffiliations(
       final String filename,
       UserDao userDao,
@@ -93,6 +77,21 @@ public class PopulateOpsUserAffiliations {
       UserDao userDao,
       InstitutionDao institutionDao,
       VerifiedInstitutionalAffiliationDao affiliationDao) {
+
+    final Option importFilename =
+        Option.builder()
+            .longOpt("import-filename")
+            .desc("File containing CSV of ops users")
+            .required()
+            .hasArg()
+            .build();
+    final Option dryRunOpt =
+        Option.builder()
+            .longOpt("dry-run")
+            .desc("If specified, the tool runs in dry run mode; no modifications are made")
+            .build();
+    final Options options = new Options().addOption(importFilename).addOption(dryRunOpt);
+
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
       boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
@@ -177,7 +176,8 @@ class OpsUser {
 
   private void checkField(String dbValue, String csvValue, String fieldName) {
     if (!dbValue.equals(csvValue)) {
-      log.warning(String.format(
+      log.warning(
+          String.format(
               "CSV and DB values do not match for user '%s', field '%s'. CSV = %s, DB = %s",
               userName, fieldName, csvValue, dbValue));
     }
