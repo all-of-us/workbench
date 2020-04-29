@@ -58,10 +58,15 @@ import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.FilterColumns;
+import org.pmiops.workbench.model.FilterList;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantChartDataListResponse;
 import org.pmiops.workbench.model.ParticipantData;
+import org.pmiops.workbench.model.ParticipantDataCountResponse;
 import org.pmiops.workbench.model.ParticipantDataListResponse;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
@@ -318,8 +323,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .sourceCode("0020")
         .sourceVocabulary("ICD9CM")
         .sourceName("Typhoid and paratyphoid fevers")
+        .standardName("Typhoid and paratyphoid fevers")
         .itemDate("2008-07-22 05:00:00 UTC")
-        .standardName("SNOMED")
         .ageAtEvent(28)
         .standardConceptId(1L)
         .sourceConceptId(1L)
@@ -343,8 +348,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .sourceCode("0021")
         .sourceVocabulary("ICD9CM")
         .sourceName("Typhoid and paratyphoid fevers")
+        .standardName("Typhoid and paratyphoid fevers")
         .itemDate("2008-08-01 05:00:00 UTC")
-        .standardName("SNOMED")
         .ageAtEvent(28)
         .standardConceptId(1L)
         .sourceConceptId(1L)
@@ -394,7 +399,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedCondition1(), expectedCondition2()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition1(), expectedCondition2()));
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -408,7 +413,73 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedCondition2(), expectedCondition1()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition2(), expectedCondition1()));
+  }
+
+  @Test
+  public void getParticipantConditionsCount() {
+    PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.CONDITION);
+
+    // no sort order or column
+    ParticipantDataCountResponse response =
+        controller
+            .getParticipantCount(
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID,
+                testFilter)
+            .getBody();
+    assertThat(response.getCount()).isEqualTo(2);
+  }
+
+  @Test
+  public void getParticipantConditionsFiltering() {
+    List<Filter> filters =
+        ImmutableList.of(
+            new Filter()
+                .operator(Operator.LIKE)
+                .property(FilterColumns.STANDARD_NAME)
+                .values(ImmutableList.of("typhoid")),
+            new Filter()
+                .operator(Operator.BETWEEN)
+                .property(FilterColumns.AGE_AT_EVENT)
+                .values(ImmutableList.of("20", "30")),
+            new Filter()
+                .operator(Operator.IN)
+                .property(FilterColumns.STANDARD_VOCABULARY)
+                .values(ImmutableList.of("ICD9CM", "SNOMED")));
+    PageFilterRequest testFilter =
+        new PageFilterRequest()
+            .domain(DomainType.CONDITION)
+            .filters(new FilterList().items(filters));
+
+    // no sort order or column
+    ParticipantDataListResponse response =
+        controller
+            .getParticipantData(
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID,
+                testFilter)
+            .getBody();
+
+    assertResponse(response, ImmutableList.of(expectedCondition1(), expectedCondition2()));
+
+    // added sort order
+    testFilter.sortOrder(SortOrder.DESC);
+    response =
+        controller
+            .getParticipantData(
+                NAMESPACE,
+                NAME,
+                reviewWithoutEHRData.getCohortReviewId(),
+                PARTICIPANT_ID,
+                testFilter)
+            .getBody();
+
+    assertResponse(response, ImmutableList.of(expectedCondition2(), expectedCondition1()));
   }
 
   @Test
@@ -429,7 +500,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedCondition1()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition1()));
 
     // page 2 should have 1 item
     testFilter.page(1);
@@ -442,7 +513,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 PARTICIPANT_ID,
                 testFilter)
             .getBody();
-    assertResponse(response, ImmutableList.of(expectedCondition2()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition2()));
   }
 
   @Test
@@ -461,7 +532,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedAllEvents1()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents1()));
 
     // page 2 should have 1 item
     testFilter.page(1);
@@ -475,7 +546,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedAllEvents2()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents2()));
   }
 
   @Test
@@ -493,7 +564,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedAllEvents1(), expectedAllEvents2()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents1(), expectedAllEvents2()));
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -507,7 +578,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 testFilter)
             .getBody();
 
-    assertResponse(response, ImmutableList.of(expectedAllEvents2(), expectedAllEvents1()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents2(), expectedAllEvents1()));
   }
 
   @Test
@@ -527,14 +598,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         new ParticipantChartData()
             .ageAtEvent(28)
             .rank(1)
-            .standardName("SNOMED")
+            .standardName("Typhoid and paratyphoid fevers")
             .standardVocabulary("SNOMED")
             .startDate("2008-07-22");
     ParticipantChartData expectedData2 =
         new ParticipantChartData()
             .ageAtEvent(28)
             .rank(1)
-            .standardName("SNOMED")
+            .standardName("Typhoid and paratyphoid fevers")
             .standardVocabulary("SNOMED")
             .startDate("2008-08-01");
     assertThat(response.getItems().size()).isEqualTo(2);
@@ -721,9 +792,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertResponse(
-      ParticipantDataListResponse response, List<ParticipantData> expectedData, int totalCount) {
+      ParticipantDataListResponse response, List<ParticipantData> expectedData) {
     List<ParticipantData> data = response.getItems();
-    assertThat(response.getCount()).isEqualTo(totalCount);
     assertThat(data.size()).isEqualTo(expectedData.size());
     int i = 0;
     for (ParticipantData actualData : data) {

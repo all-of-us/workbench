@@ -6,23 +6,23 @@ import static org.pmiops.workbench.model.FilterColumns.DOMAIN;
 import static org.pmiops.workbench.model.FilterColumns.DOSE;
 import static org.pmiops.workbench.model.FilterColumns.FIRST_MENTION;
 import static org.pmiops.workbench.model.FilterColumns.LAST_MENTION;
-import static org.pmiops.workbench.model.FilterColumns.NUM_OF_MENTIONS;
+import static org.pmiops.workbench.model.FilterColumns.NUM_MENTIONS;
 import static org.pmiops.workbench.model.FilterColumns.QUESTION;
 import static org.pmiops.workbench.model.FilterColumns.REF_RANGE;
 import static org.pmiops.workbench.model.FilterColumns.ROUTE;
 import static org.pmiops.workbench.model.FilterColumns.SOURCE_CODE;
 import static org.pmiops.workbench.model.FilterColumns.SOURCE_CONCEPT_ID;
 import static org.pmiops.workbench.model.FilterColumns.SOURCE_NAME;
-import static org.pmiops.workbench.model.FilterColumns.SOURCE_VOCAB;
+import static org.pmiops.workbench.model.FilterColumns.SOURCE_VOCABULARY;
 import static org.pmiops.workbench.model.FilterColumns.STANDARD_CODE;
 import static org.pmiops.workbench.model.FilterColumns.STANDARD_CONCEPT_ID;
 import static org.pmiops.workbench.model.FilterColumns.STANDARD_NAME;
-import static org.pmiops.workbench.model.FilterColumns.STANDARD_VOCAB;
-import static org.pmiops.workbench.model.FilterColumns.START_DATE;
+import static org.pmiops.workbench.model.FilterColumns.STANDARD_VOCABULARY;
+import static org.pmiops.workbench.model.FilterColumns.START_DATETIME;
 import static org.pmiops.workbench.model.FilterColumns.STRENGTH;
 import static org.pmiops.workbench.model.FilterColumns.SURVEY_NAME;
 import static org.pmiops.workbench.model.FilterColumns.UNIT;
-import static org.pmiops.workbench.model.FilterColumns.VAL_AS_NUMBER;
+import static org.pmiops.workbench.model.FilterColumns.VALUE_AS_NUMBER;
 import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
 
 import com.google.cloud.bigquery.BigQueryException;
@@ -85,6 +85,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.ParticipantData;
+import org.pmiops.workbench.model.ParticipantDataCountResponse;
 import org.pmiops.workbench.model.ParticipantDataListResponse;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
@@ -103,6 +104,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   public static final Integer PAGE = 0;
   public static final Integer PAGE_SIZE = 25;
+  public static final Integer MAX_PAGE_SIZE = 1000;
   public static final Integer MAX_REVIEW_SIZE = 10000;
   public static final Integer MIN_LIMIT = 1;
   public static final Integer MAX_LIMIT = 20;
@@ -556,6 +558,30 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
+  public ResponseEntity<ParticipantDataCountResponse> getParticipantCount(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      Long participantId,
+      PageFilterRequest request) {
+    DbCohortReview review = cohortReviewService.findCohortReview(cohortReviewId);
+    DbCohort cohort = cohortReviewService.findCohort(review.getCohortId());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
+        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+    // get the total records count for this participant per specified domain
+    TableResult result =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(
+                reviewQueryBuilder.buildCountQuery(
+                    participantId, request.getDomain(), createPageRequest(request))));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+    ParticipantDataCountResponse response =
+        new ParticipantDataCountResponse()
+            .count(bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
   public ResponseEntity<ParticipantDataListResponse> getParticipantData(
       String workspaceNamespace,
       String workspaceId,
@@ -570,31 +596,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     // this validates that the participant is in the requested review.
     cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId);
 
-    DomainType domain = request.getDomain();
-    PageRequest pageRequest = createPageRequest(request);
-
     TableResult result =
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
-                reviewQueryBuilder.buildQuery(participantId, domain, pageRequest)));
+                reviewQueryBuilder.buildQuery(
+                    participantId, request.getDomain(), createPageRequest(request))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     ParticipantDataListResponse response = new ParticipantDataListResponse();
     for (List<FieldValue> row : result.iterateAll()) {
-      response.addItemsItem(convertRowToParticipantData(rm, row, domain));
+      response.addItemsItem(convertRowToParticipantData(rm, row, request.getDomain()));
     }
 
-    if (result.getTotalRows() == pageRequest.getPageSize()) {
-      result =
-          bigQueryService.executeQuery(
-              bigQueryService.filterBigQueryConfig(
-                  reviewQueryBuilder.buildCountQuery(participantId, domain, pageRequest)));
-      rm = bigQueryService.getResultMapper(result);
-      response.count(
-          bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
-    } else {
-      response.count(result.getTotalRows());
-    }
     return ResponseEntity.ok(response);
   }
 
@@ -851,7 +864,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   private PageRequest createPageRequest(PageFilterRequest request) {
-    FilterColumns col = request.getDomain() == null ? FilterColumns.PARTICIPANTID : START_DATE;
+    FilterColumns col = request.getDomain() == null ? FilterColumns.PARTICIPANTID : START_DATETIME;
     String sortColumn = Optional.ofNullable(request.getSortColumn()).orElse(col).toString();
     int pageParam = Optional.ofNullable(request.getPage()).orElse(CohortReviewController.PAGE);
     int pageSizeParam =
@@ -877,20 +890,21 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Map<String, Integer> rm, List<FieldValue> row, DomainType domain) {
     if (!domain.equals(DomainType.SURVEY)) {
       return new ParticipantData()
-          .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATE.toString())))
+          .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATETIME.toString())))
           .domain(bigQueryService.getString(row, rm.get(DOMAIN.toString())))
           .standardName(bigQueryService.getString(row, rm.get(STANDARD_NAME.toString())))
           .ageAtEvent(bigQueryService.getLong(row, rm.get(AGE_AT_EVENT.toString())).intValue())
           .standardConceptId(bigQueryService.getLong(row, rm.get(STANDARD_CONCEPT_ID.toString())))
           .sourceConceptId(bigQueryService.getLong(row, rm.get(SOURCE_CONCEPT_ID.toString())))
-          .standardVocabulary(bigQueryService.getString(row, rm.get(STANDARD_VOCAB.toString())))
-          .sourceVocabulary(bigQueryService.getString(row, rm.get(SOURCE_VOCAB.toString())))
+          .standardVocabulary(
+              bigQueryService.getString(row, rm.get(STANDARD_VOCABULARY.toString())))
+          .sourceVocabulary(bigQueryService.getString(row, rm.get(SOURCE_VOCABULARY.toString())))
           .sourceName(bigQueryService.getString(row, rm.get(SOURCE_NAME.toString())))
           .sourceCode(bigQueryService.getString(row, rm.get(SOURCE_CODE.toString())))
           .standardCode(bigQueryService.getString(row, rm.get(STANDARD_CODE.toString())))
-          .value(bigQueryService.getString(row, rm.get(VAL_AS_NUMBER.toString())))
+          .value(bigQueryService.getString(row, rm.get(VALUE_AS_NUMBER.toString())))
           .visitType(bigQueryService.getString(row, rm.get(VISIT_TYPE.toString())))
-          .numMentions(bigQueryService.getString(row, rm.get(NUM_OF_MENTIONS.toString())))
+          .numMentions(bigQueryService.getString(row, rm.get(NUM_MENTIONS.toString())))
           .firstMention(
               row.get(rm.get(FIRST_MENTION.toString())).isNull()
                   ? ""
@@ -906,7 +920,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           .refRange(bigQueryService.getString(row, rm.get(REF_RANGE.toString())));
     } else {
       return new ParticipantData()
-          .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATE.toString())))
+          .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATETIME.toString())))
           .survey(bigQueryService.getString(row, rm.get(SURVEY_NAME.toString())))
           .question(bigQueryService.getString(row, rm.get(QUESTION.toString())))
           .answer(bigQueryService.getString(row, rm.get(ANSWER.toString())));
