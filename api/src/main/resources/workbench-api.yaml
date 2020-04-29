@@ -489,7 +489,7 @@ paths:
           description: Successfully created group
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/auth-domain/users":
+  "/v1/auth-domain/user":
     post:
       tags:
       - authDomain
@@ -521,6 +521,38 @@ paths:
       summary: enable/disable a user to an auth domain if you have ID verification
         authority
       operationId: updateUserDisabledStatus
+  "/v1/auth-domain/users":
+    post:
+      tags:
+      - authDomain
+      consumes:
+      - application/json
+      responses:
+        204:
+          description: Successfully Updated Users In Group
+        403:
+          description: You must be an admin of this group in order to enable/disable
+            members
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        404:
+          description: User not found
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: FireCloud Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+      parameters:
+      - in: body
+        name: request
+        description: Request containing a list of pairs of user emails and a disabled status to
+          update the users to
+        schema:
+          "$ref": "#definitions/UpdateUsersDisabledRequest"
+      summary: enable/disable a list of users to an auth domain if you have ID verification
+        authority
+      operationId: updateUsersDisabledStatus
   "/v1/user/{term}":
     get:
       tags:
@@ -5373,6 +5405,19 @@ definitions:
         description: Set to true to disable user in auth domain, false otherwise
         type: boolean
         default: false
+  UpdateUsersDisabledRequest:
+    type: object
+    required:
+    - emails
+    properties:
+      emailList:
+        type: array
+        items:
+          type: string
+      disabled:
+        description: Set to true do disable user in auth domain, false otherwise
+        type: boolean
+        default: false
   AuditBigQueryResponse:
     type: object
     properties:
@@ -5380,9 +5425,7 @@ definitions:
         type: integer
         format: int32
         description: 'Number of queries issues against the Curated data repository
-          which are flagged as possible audit issues. See logs/alerts for details.
-
-'
+          which are flagged as possible audit issues. See logs/alerts for details.'
   CheckClustersResponse:
     type: object
     properties:

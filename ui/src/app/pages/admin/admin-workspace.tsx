@@ -3,13 +3,14 @@ import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as moment from 'moment';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Error as ErrorDiv} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {clusterApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import {authDomainApi, clusterApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
 import {
@@ -18,7 +19,7 @@ import {
 } from 'app/utils/research-purpose';
 import {
   AdminFederatedWorkspaceDetailsResponse,
-  CloudStorageTraffic, ListClusterResponse,
+  CloudStorageTraffic, ListClusterResponse, Profile,
 } from 'generated/fetch';
 import {ReactFragment} from 'react';
 
@@ -171,6 +172,14 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     </div>;
   }
 
+  async updateUsersDisabledStatus(disable: boolean, emailList: string[]) {
+    this.setState({loadingData: true});
+    await authDomainApi().updateUsersDisabledStatus(
+        {emailList: emailList, disabled: disable}).then(_ => {
+    });
+    this.setState({loadingData: false});
+  }
+
   private async deleteCluster() {
     await clusterApi().deleteClustersInProject(
       this.props.urlParams.workspaceNamespace,
@@ -227,13 +236,21 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
             )}
           </div>
           <h3>Collaborators</h3>
-          <div className='collaborators' style={{marginTop: '1rem'}}>
-            {collaborators.map((userRole, i) =>
-              <div key={i}>
-                {userRole.email + ': ' + userRole.role}
-              </div>
-            )}
-          </div>
+          <FlexRow className='collaborators' style={{marginTop: '1rem'}}>
+            <FlexColumn>
+              {collaborators.map((userRole, i) =>
+                <div key={i}>
+                  {userRole.email + ': ' + userRole.role}
+                </div>
+              )}
+            </FlexColumn>
+            <FlexColumn>
+              <Button style={{marginLeft: '0.5rem'}}
+                      onClick={() => {
+                        this.updateUsersDisabledStatus(true, fp.map(userRole => userRole.email, collaborators));
+                      }}>Disable All Collaborators</Button>
+            </FlexColumn>
+          </FlexRow>
           <h3>Cohort Builder</h3>
           <div className='cohort-builder' style={{marginTop: '1rem'}}>
             {

@@ -60,6 +60,8 @@ public interface UserService {
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
+  List<DbUser> setDisabledStatusForUsers(List<DbUser> users, boolean disabled);
+
   List<DbUser> getAllUsers();
 
   void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue);
