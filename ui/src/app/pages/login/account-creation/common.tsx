@@ -130,6 +130,12 @@ export const Section = (props) => {
   </FormSection>;
 };
 
+export const OptionalSection = (props) => {
+  return <Section subHeader='(Optional)' subHeaderStyle={{fontStyle: 'italic'}} {...props}>
+    {props.children}
+  </Section>;
+};
+
 /**
  * Creates a form section with a dropdown input.
  *
@@ -137,7 +143,7 @@ export const Section = (props) => {
  * @constructor
  */
 export const DropDownSection = (props) => {
-  return <Section header={props.header} subHeader={props.subHeader}>
+  return <Section header={props.header} subHeader={props.subHeader} subHeaderStyle={props.subHeaderStyle}>
     <Dropdown placeholder='Select'
               options={props.options}
               style={{width: '50%'}}
@@ -145,3 +151,10 @@ export const DropDownSection = (props) => {
               onChange={(e) => props.onChange(e.value)}/>
   </Section>;
 };
+
+export const OptionalDropDownSection = (props) => {
+  return <DropDownSection subHeader='(Optional)' subHeaderStyle={{fontStyle: 'italic'}} {...props}>
+    {props.children}
+  </DropDownSection>;
+};
+

@@ -54,6 +54,11 @@ const styles = reactStyles({
   textAreaStyleOverride: {
     width: '100%',
     minWidth: '30rem'
+  },
+  optionalText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    fontWeight: 400
   }
 });
 
@@ -535,7 +540,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                         options={AccountCreationOptions.degree}
                                         containerStyle={styles.multiInputSpacing}
                                         value={this.state.profile.degrees}
-                                        labelText='Your degrees (optional)'
+                                        labelText={<div>Your degrees <span style={styles.optionalText}>
+                                          (optional)</span></div>}
                                         onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
                                         />
                 </FlexRow>
@@ -545,7 +551,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   <MultiSelectWithLabel placeholder={'Select one or more'}
                                         options={AccountCreationOptions.degree}
                                         value={this.state.profile.degrees}
-                                        labelText='Your degrees (optional)'
+                                        labelText={<div>Your degrees <span style={styles.optionalText}>
+                                          (optional)</span></div>}
                                         onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
                   />
                 </div>
@@ -700,7 +707,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 <div style={{maxWidth: '60%'}}>Your professional profile or bio page below, if available</div>
                 <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
               </FlexRow>
-              <div style={{...styles.asideText, marginTop: '.125rem'}}>(Optional)</div>
+              <div style={{...styles.asideText, ...styles.optionalText, marginTop: '.125rem'}}>(Optional)</div>
               <div style={{...styles.asideText, marginTop: '.5rem', marginBottom: '.5rem'}}>
                 You could provide a link to your faculty bio page from your institution's website,
                 your LinkedIn profile page, or another webpage featuring your work. This will

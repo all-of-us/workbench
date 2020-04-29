@@ -7,7 +7,11 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {AouTitle} from 'app/components/text-wrappers';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {DropDownSection, Section, TextInputWithLabel} from 'app/pages/login/account-creation/common';
+import {
+  OptionalDropDownSection,
+  OptionalSection,
+  TextInputWithLabel
+} from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
@@ -137,35 +141,34 @@ export class DemographicSurvey extends React.Component<Props, State> {
       </TextColumn>
 
       {/*Race section*/}
-      <Section header='Race' subHeader='(Optional)' subHeaderStyle={{fontStyle: 'italic'}}>
+      <OptionalSection header='Race'>
         <SelectAllText/>
         <FlexColumn style={styles.checkboxAreaContainer}>
           {AccountCreationOptions.race.map((race) => {
             return this.createOptionCheckbox('race', race);
           })}
         </FlexColumn>
-      </Section>
+      </OptionalSection>
 
       {/*Ethnicity section*/}
-      <DropDownSection data-test-id='dropdown-ethnicity'
+      <OptionalDropDownSection data-test-id='dropdown-ethnicity'
                        header='Ethnicity'
-                       subHeader='(Optional)'
                        options={AccountCreationOptions.ethnicity}
                        value={!!demographicSurvey ? demographicSurvey.ethnicity : null}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
 
       {/*Gender Identity section*/}
-      <Section header='Gender Identity' subHeader='(Optional)'>
+      <OptionalSection header='Gender Identity'>
         <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
             return this.createOptionCheckbox('genderIdentityList', genderIdentity);
           })}
         </FlexColumn>
-      </Section>
+      </OptionalSection>
 
-      <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
-or another sexual and/or gender minority?' subheader='(Optional)'>
+      <OptionalSection header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
+or another sexual and/or gender minority?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton data-test-id='radio-lgbtq-yes' id='radio-lgbtq-yes' onChange={
@@ -187,27 +190,26 @@ or another sexual and/or gender minority?' subheader='(Optional)'>
                             containerStyle={{width: '26rem', marginTop: '0.5rem'}} inputStyle={{width: '26rem'}}
                             onChange={(value) => this.updateDemographicAttribute('lgbtqIdentity', value)}
                             disabled={!!demographicSurvey ? !demographicSurvey.identifiesAsLgbtq : true}/>
-      </Section>
+      </OptionalSection>
 
       {/*Sex at birth section*/}
-      <Section header='Sex at birth' subHeader='(Optional)'>
+      <OptionalSection header='Sex at birth'>
         <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox('sexAtBirth', sexAtBirth);
           })}
         </FlexColumn>
-      </Section>
+      </OptionalSection>
 
       {/*Year of birth section*/}
-      <DropDownSection header='Year of Birth'
-                       subHeader='(Optional)'
+      <OptionalDropDownSection header='Year of Birth'
                        options={AccountCreationOptions.Years}
                        value={!!demographicSurvey ? demographicSurvey.yearOfBirth : null}
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
       {/*Disability section*/}
-      <Section header='Do you have a physical or cognitive disability?' subHeader='(Optional)'>
+      <OptionalSection header='Do you have a physical or cognitive disability?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes' onChange={
@@ -223,10 +225,9 @@ or another sexual and/or gender minority?' subheader='(Optional)'>
             <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
         </FlexColumn>
-      </Section>
+      </OptionalSection>
       {/*Education section*/}
-      <DropDownSection header='Highest Level of Education Completed'
-                       subHeader='(Optional)'
+      <OptionalDropDownSection header='Highest Level of Education Completed'
                        options={AccountCreationOptions.levelOfEducation}
                        value={!!demographicSurvey ? demographicSurvey.education : null}
                        onChange={(e) => this.updateDemographicAttribute('education', e)}/>
