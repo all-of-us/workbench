@@ -60,6 +60,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 public class WorkspaceAdminControllerTest {
+
+  public static final long DB_WORKSPACE_ID = 2222L;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
@@ -211,7 +213,7 @@ public class WorkspaceAdminControllerTest {
 
   private DbWorkspace createDbWorkspaceStub(Workspace workspace) {
     DbWorkspace dbWorkspace = new DbWorkspace();
-    dbWorkspace.setWorkspaceId(Long.parseLong(workspace.getId()));
+    dbWorkspace.setWorkspaceId(DB_WORKSPACE_ID);
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
     dbWorkspace.setFirecloudName(workspace.getGoogleBucketName());
