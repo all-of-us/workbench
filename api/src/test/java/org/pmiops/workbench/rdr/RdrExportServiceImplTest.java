@@ -14,10 +14,16 @@ import static org.mockito.Mockito.when;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,11 +31,18 @@ import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
+import org.pmiops.workbench.rdr.model.RdrWorkspace;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +62,8 @@ public class RdrExportServiceImplTest {
   @MockBean private UserDao mockUserDao;
   @MockBean private WorkspaceDao mockWorkspaceDao;
   @MockBean private WorkspaceService mockWorkspaceService;
+  @MockBean private InstitutionService institutionService;
+  @MockBean private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private static final Instant NOW = Instant.now();
   private static final Timestamp NOW_TIMESTAMP = Timestamp.from(NOW);
@@ -84,7 +99,6 @@ public class RdrExportServiceImplTest {
     dbUserWithEmail.setDegreesEnum(Collections.singletonList(Degree.NONE));
 
     when(mockUserDao.findUserByUserId(1L)).thenReturn(dbUserWithEmail);
-
     dbUserWithoutEmail = new DbUser();
     dbUserWithoutEmail.setUserId(2L);
     dbUserWithoutEmail.setCreationTime(NOW_TIMESTAMP);
@@ -98,7 +112,17 @@ public class RdrExportServiceImplTest {
     when(rdrExportDao.findByEntityTypeAndEntityId(anyShort(), anyLong())).thenReturn(null);
     mockWorkspace =
         buildDbWorkspace(1, "workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE);
+    mockWorkspace.setCreator(dbUserWithEmail);
     when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(1)).thenReturn(mockWorkspace);
+
+    DbVerifiedInstitutionalAffiliation mockVerifiedInstitutionalAffiliation =
+        new DbVerifiedInstitutionalAffiliation();
+    mockVerifiedInstitutionalAffiliation.setInstitution(
+        new DbInstitution().setShortName("mockInstitution"));
+    mockVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
+        InstitutionalRole.PROJECT_PERSONNEL);
+    when(verifiedInstitutionalAffiliationDao.findFirstByUser(dbUserWithEmail))
+        .thenReturn(Optional.of(mockVerifiedInstitutionalAffiliation));
   }
 
   private DbWorkspace buildDbWorkspace(
@@ -145,8 +169,30 @@ public class RdrExportServiceImplTest {
   }
 
   @Test
-  public void exportWorkspace_successful() throws ApiException {
-    doNothing().when(mockRdrApi).exportWorkspaces(anyList());
+  public void exportWorkspace() throws ApiException {
+    List<Long> workspaceID = new ArrayList<>();
+    workspaceID.add(1l);
+    rdrExportService.exportWorkspaces(workspaceID);
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(
+            mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
+    verify(rdrExportDao, times(1)).save(anyList());
+
+    RdrWorkspace rdrWorkspace = toRdrWorkspace(mockWorkspace);
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+  }
+
+  /**
+   * In case workspace has any specific population FocusOnUnderrepresentedPopulations should be true
+   *
+   * @throws ApiException
+   */
+  @Test
+  public void exportWorkspace_FocusOnUnderservedPopulation() throws ApiException {
+    Set<SpecificPopulationEnum> specificPopulationEnumsSet = new HashSet<SpecificPopulationEnum>();
+    specificPopulationEnumsSet.add(SpecificPopulationEnum.RACE_AA);
+    mockWorkspace.setSpecificPopulationsEnum(specificPopulationEnumsSet);
+    when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(1)).thenReturn(mockWorkspace);
 
     List<Long> workspaceID = new ArrayList<>();
     workspaceID.add(1l);
@@ -155,5 +201,61 @@ public class RdrExportServiceImplTest {
         .getFirecloudUserRoles(
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
     verify(rdrExportDao, times(1)).save(anyList());
+
+    RdrWorkspace rdrWorkspace = toRdrWorkspace(mockWorkspace);
+    rdrWorkspace
+        .getWorkspaceDemographic()
+        .setRaceEthnicity(Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.AA));
+    rdrWorkspace.setFocusOnUnderrepresentedPopulations(true);
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+  }
+
+  private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
+    ZoneOffset offset = OffsetDateTime.now().getOffset();
+    RdrWorkspace rdrWorkspace = new RdrWorkspace();
+    rdrWorkspace.setWorkspaceId(1);
+    rdrWorkspace.setName(dbWorkspace.getName());
+
+    rdrWorkspace.setCreationTime(dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
+    rdrWorkspace.setModifiedTime(
+        dbWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
+    rdrWorkspace.setStatus(RdrWorkspace.StatusEnum.ACTIVE);
+    rdrWorkspace.setWorkspaceUsers(new ArrayList());
+    rdrWorkspace.setExcludeFromPublicDirectory(false);
+    rdrWorkspace.setDiseaseFocusedResearch(false);
+    rdrWorkspace.setDiseaseFocusedResearchName(null);
+    rdrWorkspace.setOtherPurpose(false);
+    rdrWorkspace.setOtherPurposeDetails(null);
+    rdrWorkspace.setMethodsDevelopment(false);
+    rdrWorkspace.setControlSet(false);
+    rdrWorkspace.setAncestry(false);
+    rdrWorkspace.setSocialBehavioral(false);
+    rdrWorkspace.setPopulationHealth(false);
+    rdrWorkspace.setDrugDevelopment(false);
+    rdrWorkspace.setCommercialPurpose(false);
+    rdrWorkspace.setEducational(false);
+    rdrWorkspace.setEthicalLegalSocialImplications(false);
+    rdrWorkspace.setScientificApproaches("Scientific Approach");
+    rdrWorkspace.setReviewRequested(true);
+
+    rdrWorkspace.setFocusOnUnderrepresentedPopulations(false);
+    RdrWorkspaceDemographic workspaceDemographic = new RdrWorkspaceDemographic();
+    workspaceDemographic.setRaceEthnicity(
+        Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.UNSET));
+    workspaceDemographic.setAge(Arrays.asList(RdrWorkspaceDemographic.AgeEnum.UNSET));
+    workspaceDemographic.setSexAtBirth(RdrWorkspaceDemographic.SexAtBirthEnum.UNSET);
+    workspaceDemographic.setGenderIdentity(RdrWorkspaceDemographic.GenderIdentityEnum.UNSET);
+    workspaceDemographic.setSexualOrientation(RdrWorkspaceDemographic.SexualOrientationEnum.UNSET);
+    workspaceDemographic.setGeography(RdrWorkspaceDemographic.GeographyEnum.UNSET);
+    workspaceDemographic.setDisabilityStatus(RdrWorkspaceDemographic.DisabilityStatusEnum.UNSET);
+    workspaceDemographic.setAccessToCare(RdrWorkspaceDemographic.AccessToCareEnum.UNSET);
+    workspaceDemographic.setEducationLevel(RdrWorkspaceDemographic.EducationLevelEnum.UNSET);
+    workspaceDemographic.setIncomeLevel(RdrWorkspaceDemographic.IncomeLevelEnum.UNSET);
+    rdrWorkspace.setWorkspaceDemographic(workspaceDemographic);
+    if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
+      rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
+    }
+
+    return rdrWorkspace;
   }
 }
