@@ -28,6 +28,7 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_ID = '1';
   static DEFAULT_WORKSPACE_DESCRIPTION = 'Stub workspace';
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
+  static DEFAULT_WORKSPACE_ETAG = "1";
 }
 
 export class WorkspacesServiceStub {

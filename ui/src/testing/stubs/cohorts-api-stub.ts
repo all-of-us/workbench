@@ -81,7 +81,8 @@ export class CohortsApiStub extends CohortsApi {
     const stubWorkspace: Workspace = {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
       id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
+      namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      etag: WorkspaceStubVariables.DEFAULT_WORKSPACE_ETAG
     };
 
     this.cohorts = exampleCohortStubs;
