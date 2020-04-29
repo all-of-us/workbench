@@ -1275,27 +1275,28 @@ def update_user_registered_status(cmd_name, args)
     "Disabled state to set: true/false."
   )
   op.add_option(
-    "--account [account]",
+    "--account [admin_account_email]",
     ->(opts, v) { opts.account = v},
-    "Account to perform update registered status as."
+    "Workbench admin account to perform update registered status as."
   )
   op.add_option(
-    "--user [user]",
+    "--user [target_email]",
     ->(opts, v) { opts.user = v},
     "User to grant or revoke registered access from."
   )
+  op.add_validator ->(opts) {
+    raise ArgumentError unless (opts.project and opts.disabled != nil and opts.account and opts.user)
+  }
   op.parse.validate
 
-  common.run_inline %W{gcloud auth login}
+  common.run_inline %W{gcloud auth login #{op.opts.account}}
   token = common.capture_stdout %W{gcloud auth print-access-token}
   token = token.chomp
-  common.run_inline %W{gcloud config set account #{op.opts.account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
   payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
-  domain_name = get_auth_domain(op.opts.project)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
-      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/#{domain_name}/users}
+      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/users}
 end
 
 Common.register_command({
