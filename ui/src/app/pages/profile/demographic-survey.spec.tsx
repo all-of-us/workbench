@@ -59,5 +59,5 @@ it('should load existing profile data', async() => {
   expect(wrapper.find('[data-test-id="radio-lgbtq-yes"]').hostNodes().prop('checked')).toBeTruthy();
 
   // Ethnicity
-  expect(wrapper.find('[data-test-id="dropdown-ethnicity"]').prop('value')).toEqual(Ethnicity.HISPANIC);
+  expect(wrapper.find('[data-test-id="dropdown-ethnicity"]').first().prop('value')).toEqual(Ethnicity.HISPANIC);
 });
