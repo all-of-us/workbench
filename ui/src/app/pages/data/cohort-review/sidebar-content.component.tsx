@@ -281,6 +281,7 @@ export const SidebarContent = fp.flow(
     participant: ParticipantCohortStatus,
   }
 > {
+  private subscription;
   constructor(props) {
     super(props);
     this.state = {
@@ -297,20 +298,21 @@ export const SidebarContent = fp.flow(
   componentDidMount(): void {
     const {urlParams: {ns, wsid, pid, cid}} = this.props;
     cohortReviewApi()
-      .getParticipantCohortAnnotations(ns, wsid, cohortReviewStore.getValue().cohortReviewId, +pid)
-      .then(({items}) => {
-        this.setState({annotations: items});
-      });
+    .getParticipantCohortAnnotations(ns, wsid, cohortReviewStore.getValue().cohortReviewId, +pid)
+    .then(({items}) => {
+      this.setState({annotations: items});
+    });
     cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(ns, wsid, +cid)
-      .then(({items}) => {
-        this.setState({annotationDefinitions: items});
-      });
-    participantStore.subscribe(participant => this.setState({participant: participant || {} as ParticipantCohortStatus}));
+    .then(({items}) => {
+      this.setState({annotationDefinitions: items});
+    });
+    this.subscription = participantStore
+      .subscribe(participant => this.setState({participant: participant || {} as ParticipantCohortStatus}));
   }
 
   componentDidUpdate(prevProps: any): void {
     const {urlParams: {ns, wsid, pid}} = this.props;
-    if ((pid !== prevProps.urlParams.pid)) {
+    if (pid !== prevProps.urlParams.pid && !isNaN(+pid)) {
       // get values for annotations when switching participants
       cohortReviewApi()
       .getParticipantCohortAnnotations(ns, wsid, cohortReviewStore.getValue().cohortReviewId, +pid)
@@ -318,6 +320,10 @@ export const SidebarContent = fp.flow(
         this.setState({annotations: items});
       });
     }
+  }
+
+  componentWillUnmount(): void {
+    this.subscription.unsubscribe();
   }
 
   async saveStatus(v) {

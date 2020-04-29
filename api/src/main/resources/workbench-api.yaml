@@ -2798,6 +2798,31 @@ paths:
           description: A collection of ParticipantConditions.
           schema:
             "$ref": "#/definitions/ParticipantDataListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/count":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    - "$ref": "#/parameters/cohortReviewId"
+    - "$ref": "#/parameters/participantId"
+    post:
+      tags:
+      - cohortReview
+      consumes:
+      - application/json
+      description: Returns a count based on page, limit, order, sort column and/or filter.
+      operationId: getParticipantCount
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: request body for getting list of participant data.
+        schema:
+          "$ref": "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A count of Participants.
+          schema:
+            "$ref": "#/definitions/ParticipantDataCountResponse"
   ? "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}"
   : parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -6545,25 +6570,25 @@ definitions:
     - RACE
     - ETHNICITY
     - DECEASED
-    - START_DATE
+    - START_DATETIME
     - STANDARD_CODE
-    - STANDARD_VOCAB
+    - STANDARD_VOCABULARY
     - STANDARD_NAME
     - STANDARD_CONCEPT_ID
     - SOURCE_CODE
-    - SOURCE_VOCAB
+    - SOURCE_VOCABULARY
     - SOURCE_NAME
     - SOURCE_CONCEPT_ID
     - DOMAIN
     - AGE_AT_EVENT
-    - NUM_OF_MENTIONS
+    - NUM_MENTIONS
     - FIRST_MENTION
     - LAST_MENTION
     - VISIT_TYPE
     - ROUTE
     - DOSE
     - STRENGTH
-    - VAL_AS_NUMBER
+    - VALUE_AS_NUMBER
     - UNIT
     - REF_RANGE
     - SURVEY_NAME
@@ -6752,12 +6777,16 @@ definitions:
     type: object
     required:
     - items
-    - count
     properties:
       items:
         type: array
         items:
           "$ref": "#/definitions/ParticipantData"
+  ParticipantDataCountResponse:
+    type: object
+    required:
+    - count
+    properties:
       count:
         type: integer
         format: int64
