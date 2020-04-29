@@ -1351,48 +1351,54 @@ Common.register_command({
     :fn => ->(*args) {backfill_billing_project_owners("backfill-billing-project-owners", *args)}
 })
 
-def update_user_registered_status(cmd_name, args)
+def update_user_disabled_status(cmd_name, args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
-    "Project to update registered status for"
+    "Project to update disabled status for"
   )
   op.add_option(
     "--disabled [disabled]",
     ->(opts, v) { opts.disabled = v},
-    "Disabled state to set: true/false."
+    "Disabled state to set: true/false"
   )
   op.add_option(
-    "--account [account]",
+    "--account [admin_account_email]",
     ->(opts, v) { opts.account = v},
-    "Account to perform update registered status as."
+    "Workbench admin account to perform update disabled status as"
   )
   op.add_option(
-    "--user [user]",
+    "--user [target_email]",
     ->(opts, v) { opts.user = v},
-    "User to grant or revoke registered access from."
+    "User to update the disabled status for"
   )
+  op.add_validator ->(opts) {
+    raise ArgumentError unless (opts.project and opts.disabled != nil and opts.account and opts.user)
+  }
   op.parse.validate
 
-  common.run_inline %W{gcloud auth login}
+  common.run_inline %W{gcloud auth login #{op.opts.account}}
   token = common.capture_stdout %W{gcloud auth print-access-token}
   token = token.chomp
-  common.run_inline %W{gcloud config set account #{op.opts.account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
   payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
-  domain_name = get_auth_domain(op.opts.project)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
-      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/#{domain_name}/users}
+      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/users}
 end
 
 Common.register_command({
-  :invocation => "update-user-registered-status",
-  :description => "Adds or removes a specified user from the registered access domain.\n" \
-                  "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
-  :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
+  :invocation => "update-user-disabled-status",
+  :description => "Set a Workbench user's disabled status by email, using another Workbench admin account.\n" \
+                  "Disabling a user immediately revokes CDR access and restricted API access in the \n" \
+                  "Workbench, if they had access to begin with. When a disabled user loads the Workbench UI, \n" \
+                  "they are redirected to a page which explains that they are disabled. This is currently the \n" \
+                  "only automated means by which the user is notified of their disabled status.\n" \
+                  "This tool can be used as a manual backup to the Workbench user admin UI, which supports the same disable function.\n" \
+                  "Requires four flags: --project [env project] --disabled [true/false], --account [admin email], and --user [target user email]",
+  :fn => ->(*args) { update_user_disabled_status("update_user_registered_status", args) }
 })
 
 def fetch_firecloud_user_profile(cmd_name, *args)
