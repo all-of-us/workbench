@@ -1306,7 +1306,7 @@ Common.register_command({
                   "Workbench, if they had access to begin with. When a disabled user loads the Workbench UI, \n" \
                   "they are redirected to a page which explains that they are disabled. This is currently the \n" \
                   "only automated means by which the user is notified of their disabled status.\n" \
-                  "This tool can be used as a manual backup to the Workbench user admin UI, which supports the same disable function.\n" \n
+                  "This tool can be used as a manual backup to the Workbench user admin UI, which supports the same disable function.\n" \
                   "Requires four flags: --project [env project] --disabled [true/false], --account [admin email], and --user [target user email]",
   :fn => ->(*args) { update_user_disabled_status("update_user_registered_status", args) }
 })
