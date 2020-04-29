@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
@@ -61,7 +62,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class WorkspaceAdminControllerTest {
 
-  public static final long DB_WORKSPACE_ID = 2222L;
+  private static final long DB_WORKSPACE_ID = 2222L;
+  private static final String FIRECLOUD_WORKSPACE_CREATOR_USERNAME = "jay@allofus.biz";
+  private static final String WORKSPACE_NAME = "Gone with the Wind";
+  private static final String DB_WORKSPACE_FIRECLOUD_NAME = "gonewiththewind";
+  private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
+  private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
+
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
@@ -69,10 +76,6 @@ public class WorkspaceAdminControllerTest {
   @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private WorkspaceAdminController workspaceAdminController;
-
-  private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
-  private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
-  private static final String WORKSPACE_NAME = "Chicken & Noodle Pox";
 
   @TestConfiguration
   @Import({
@@ -100,29 +103,30 @@ public class WorkspaceAdminControllerTest {
 
   @Before
   public void setUp() {
-    TestMockFactory testMockFactory = new TestMockFactory();
+    final TestMockFactory testMockFactory = new TestMockFactory();
 
-    when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(NONSENSE_NAMESPACE))
+    when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(anyString()))
         .thenReturn(Optional.empty());
 
-    Workspace workspace = testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
-    DbWorkspace dbWorkspace = createDbWorkspaceStub(workspace);
+    final Workspace workspace = testMockFactory.createWorkspace(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME);
+    final DbWorkspace dbWorkspace = createDbWorkspaceStub(workspace);
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
         .thenReturn(Optional.of(dbWorkspace));
 
-    UserRole collaborator =
+    final UserRole collaborator =
         new UserRole().email("test@test.test").role(WorkspaceAccessLevel.WRITER);
-    List<UserRole> collaborators = new ArrayList<>();
-    collaborators.add(collaborator);
-    when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+    final List<UserRole> collaborators = ImmutableList.of(collaborator);
+    when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE,
+        DB_WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(collaborators);
 
-    AdminWorkspaceObjectsCounts objectsCounts =
+    final AdminWorkspaceObjectsCounts adminWorkspaceObjectsCounts =
         new AdminWorkspaceObjectsCounts().cohortCount(1).conceptSetCount(2).datasetCount(3);
     when(mockWorkspaceAdminService.getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId()))
-        .thenReturn(objectsCounts);
+        .thenReturn(adminWorkspaceObjectsCounts);
 
-    AdminWorkspaceCloudStorageCounts cloudStorageCounts =
+    final AdminWorkspaceCloudStorageCounts cloudStorageCounts =
         new AdminWorkspaceCloudStorageCounts()
             .notebookFileCount(1)
             .nonNotebookFileCount(2)
@@ -131,19 +135,19 @@ public class WorkspaceAdminControllerTest {
             WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()))
         .thenReturn(cloudStorageCounts);
 
-    org.pmiops.workbench.notebooks.model.ListClusterResponse listClusterResponse =
-        testMockFactory.createFcListClusterResponse();
-    List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clusters = new ArrayList<>();
-    clusters.add(listClusterResponse);
+    org.pmiops.workbench.notebooks.model.ListClusterResponse firecloudListClusterResponse =
+        testMockFactory.createFirecloudListClusterResponse();
+    List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clusters = ImmutableList.of(firecloudListClusterResponse);
     when(mockLeonardoNotebooksClient.listClustersByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(clusters);
 
     FirecloudWorkspace fcWorkspace =
-        testMockFactory.createFcWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "test");
+        testMockFactory.createFirecloudWorkspace(WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME,
+            FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
     FirecloudWorkspaceResponse fcWorkspaceResponse =
         new FirecloudWorkspaceResponse().workspace(fcWorkspace);
     when(mockFirecloudService.getWorkspaceAsService(
-            WORKSPACE_NAMESPACE, TestMockFactory.BUCKET_NAME))
+            WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(fcWorkspaceResponse);
   }
 
@@ -156,7 +160,8 @@ public class WorkspaceAdminControllerTest {
     AdminFederatedWorkspaceDetailsResponse workspaceDetailsResponse = response.getBody();
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(
+        WORKSPACE_NAME);
 
     AdminWorkspaceResources resources = workspaceDetailsResponse.getResources();
     AdminWorkspaceObjectsCounts objectsCounts = resources.getWorkspaceObjects();
@@ -211,12 +216,14 @@ public class WorkspaceAdminControllerTest {
         .containsExactly(1000L, 2000L);
   }
 
+  // TODO(jaycarlton) use  WorkspaceMapper.toDbWorkspace() once it's available RW 4803
   private DbWorkspace createDbWorkspaceStub(Workspace workspace) {
     DbWorkspace dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceId(DB_WORKSPACE_ID);
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
-    dbWorkspace.setFirecloudName(workspace.getGoogleBucketName());
+    // a.k.a. FirecloudWorkspace.name
+    dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME);
     ResearchPurpose researchPurpose = workspace.getResearchPurpose();
     dbWorkspace.setDiseaseFocusedResearch(researchPurpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(researchPurpose.getDiseaseOfFocus());

@@ -31,9 +31,10 @@ import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
-  public static final String BUCKET_NAME = "workspace-bucket";
+  public static final String BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
   private static final String CDR_VERSION_ID = "1";
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
+  private static final String WORKSPACE_FIRECLOUD_NAME = "gonewiththewind"; // should match workspace name w/o spaces
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
@@ -44,7 +45,7 @@ public class TestMockFactory {
     ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
-        .id(workspaceNameToId(workspaceName))
+        .id(WORKSPACE_FIRECLOUD_NAME)
         .etag("\"1\"")
         .name(workspaceName)
         .namespace(workspaceNameSpace)
@@ -55,7 +56,6 @@ public class TestMockFactory {
         .billingAccountType(BillingAccountType.FREE_TIER)
         .creationTime(1588097211621L)
         .creator("jay@unit-test-research-aou.org")
-        .googleBucketName("fc-secure-111111-2222-AAAA-BBBB-000000000000")
         .lastModifiedTime(1588097211621L)
         .published(false)
         .researchPurpose(
@@ -84,11 +84,7 @@ public class TestMockFactory {
                 .approved(false));
   }
 
-  private String workspaceNameToId(String workspaceName) {
-    return "mynewestworkspace";
-  }
-
-  public FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
+  public FirecloudWorkspace createFirecloudWorkspace(String ns, String name, String creator) {
     FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setWorkspaceId(ns);
@@ -98,7 +94,7 @@ public class TestMockFactory {
     return fcWorkspace;
   }
 
-  public ListClusterResponse createFcListClusterResponse() {
+  public ListClusterResponse createFirecloudListClusterResponse() {
     ListClusterResponse listClusterResponse =
         new ListClusterResponse()
             .clusterName("cluster")
@@ -113,7 +109,7 @@ public class TestMockFactory {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
               FirecloudWorkspace fcWorkspace =
-                  createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
+                  createFirecloudWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
 
               FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);
