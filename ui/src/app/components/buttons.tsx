@@ -300,7 +300,7 @@ export const StyledAnchorTag = ({href, style = {}, children, ...props}) => {
   return <a href={href}
             onClick={e => {
               // This does same page navigation iff there is no key pressed and target is not set.
-              if (props.target === undefined) {
+              if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
                 navigateAndPreventDefaultIfNoKeysPressed(e, href);
               }
             }}

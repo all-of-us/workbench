@@ -23,6 +23,7 @@ import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {
   Profile,
 } from 'generated/fetch';
@@ -229,10 +230,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async checkWorkspaces() {
-    workspacesApi().getWorkspaces().then(response => {
-      this.setState({
-        userHasWorkspaces: response.items.length > 0
-      });
+    const userWorkspaces = (await fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces())).items;
+    this.setState({
+      userHasWorkspaces: userWorkspaces.length > 0
     });
   }
 
@@ -359,8 +359,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                         This will keep your Workbench browser sessions isolated from your other Google accounts.
                                       </CustomBulletListItem>
                                       <CustomBulletListItem bullet='→'>
-                                        Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
-                                        from the left hand panel to browse through example workspaces.
+                                        Check out <StyledAnchorTag href='library'>Featured Workspaces</StyledAnchorTag> from
+                                        the left hand panel to browse through example workspaces.
                                       </CustomBulletListItem>
                                       <CustomBulletListItem bullet='→'>
                                         Browse through our <StyledAnchorTag href='https://aousupporthelp.zendesk.com/hc/en-us'>support
