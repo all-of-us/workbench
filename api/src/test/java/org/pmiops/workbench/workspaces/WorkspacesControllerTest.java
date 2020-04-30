@@ -212,7 +212,6 @@ public class WorkspacesControllerTest {
   private static final long NOW_TIME = NOW.getTime();
   private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
-  private static final String BUCKET_NAME = "workspace-bucket";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
 
@@ -257,6 +256,7 @@ public class WorkspacesControllerTest {
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
   private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
+  private static final String BUCKET_URI = String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
@@ -1223,7 +1223,7 @@ public class WorkspacesControllerTest {
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
     // assertion below will pass.
-    clonedFirecloudWorkspace.setBucketName(TestMockFactory.BUCKET_NAME);
+    clonedFirecloudWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
 
     mockBillingProjectBuffer("cloned-ns");
     final Workspace clonedWorkspace =
@@ -2509,8 +2509,8 @@ public class WorkspacesControllerTest {
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String newName = NotebooksService.withNotebookExtension("nb2");
     String newPath = NotebooksService.withNotebookExtension("notebooks/nb2");
-    String fullPath = "gs://workspace-bucket/" + newPath;
-    String origFullPath = "gs://workspace-bucket/" + nb1;
+    String fullPath =  BUCKET_URI + newPath;
+    String origFullPath = BUCKET_URI + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
@@ -2518,8 +2518,8 @@ public class WorkspacesControllerTest {
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService)
-        .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
-    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+        .copyBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1), BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
+    verify(cloudStorageService).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
@@ -2532,8 +2532,8 @@ public class WorkspacesControllerTest {
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String newName = "nb2";
     String newPath = NotebooksService.withNotebookExtension("notebooks/nb2");
-    String fullPath = "gs://workspace-bucket/" + newPath;
-    String origFullPath = "gs://workspace-bucket/" + nb1;
+    String fullPath = BUCKET_URI + newPath;
+    String origFullPath = BUCKET_URI + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
@@ -2541,8 +2541,8 @@ public class WorkspacesControllerTest {
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService)
-        .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
-    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+        .copyBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1), BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
+    verify(cloudStorageService).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
@@ -2574,12 +2574,12 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(
             BlobId.of(
-                BUCKET_NAME,
+                TestMockFactory.WORKSPACE_BUCKET_NAME,
                 "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
-            BlobId.of(BUCKET_NAME, "notebooks/" + expectedNotebookName));
+            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + expectedNotebookName));
 
     verify(userRecentResourceService)
-        .updateNotebookEntry(2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName);
+        .updateNotebookEntry(2l, 1l, BUCKET_URI + "notebooks/" + expectedNotebookName);
   }
 
   @Test
@@ -2607,9 +2607,9 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(
             BlobId.of(
-                BUCKET_NAME,
+                TestMockFactory.WORKSPACE_BUCKET_NAME,
                 "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
-            BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName));
+            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName));
   }
 
   @Test(expected = ForbiddenException.class)
@@ -2689,7 +2689,7 @@ public class WorkspacesControllerTest {
             .toWorkspaceNamespace(toWorkspace.getNamespace())
             .newName(newNotebookName);
 
-    BlobId newBlobId = BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName);
+    BlobId newBlobId = BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
 
     doReturn(Collections.singleton(newBlobId))
         .when(cloudStorageService)
@@ -2708,13 +2708,13 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String newPath = NotebooksService.withNotebookExtension("notebooks/Duplicate of nb1");
-    String fullPath = "gs://workspace-bucket/" + newPath;
+    String fullPath = BUCKET_URI + newPath;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
     workspacesController.cloneNotebook(
         workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
     verify(cloudStorageService)
-        .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+        .copyBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1), BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 
@@ -2723,12 +2723,12 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
-    String fullPath = "gs://workspace-bucket/" + nb1;
+    String fullPath = BUCKET_URI + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
     workspacesController.deleteNotebook(
         workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
-    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+    verify(cloudStorageService).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 
@@ -2877,12 +2877,12 @@ public class WorkspacesControllerTest {
     FirecloudWorkspace fcWorkspace =
         testMockFactory.createFirecloudWorkspace(
             testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
-    fcWorkspace.setBucketName(BUCKET_NAME);
+    fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL(acl);
 
     final String testNotebookPath = "notebooks/" + testNotebook;
-    doReturn(gcsMetadata).when(cloudStorageService).getMetadata(BUCKET_NAME, testNotebookPath);
+    doReturn(gcsMetadata).when(cloudStorageService).getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
 
     assertThat(
             workspacesController
@@ -2901,7 +2901,7 @@ public class WorkspacesControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+                WorkspacesController.notebookLockingEmailHash(TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 
@@ -2943,7 +2943,7 @@ public class WorkspacesControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+                WorkspacesController.notebookLockingEmailHash(TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 
@@ -2967,7 +2967,7 @@ public class WorkspacesControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+                WorkspacesController.notebookLockingEmailHash(TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 

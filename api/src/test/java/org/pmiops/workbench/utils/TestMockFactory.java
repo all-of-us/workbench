@@ -31,7 +31,7 @@ import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
-  public static final String BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
+  public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
   private static final String CDR_VERSION_ID = "1";
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
   private static final String WORKSPACE_FIRECLOUD_NAME = "gonewiththewind"; // should match workspace name w/o spaces
@@ -51,7 +51,7 @@ public class TestMockFactory {
         .namespace(workspaceNameSpace)
         .dataAccessLevel(DataAccessLevel.PROTECTED)
         .cdrVersionId(CDR_VERSION_ID)
-        .googleBucketName(BUCKET_NAME)
+        .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .billingAccountType(BillingAccountType.FREE_TIER)
         .creationTime(1588097211621L)
@@ -90,7 +90,7 @@ public class TestMockFactory {
     fcWorkspace.setWorkspaceId(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
-    fcWorkspace.setBucketName(BUCKET_NAME);
+    fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
     return fcWorkspace;
   }
 
