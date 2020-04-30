@@ -51,6 +51,10 @@ const styles = reactStyles({
     fontSize: 12,
     fontWeight: 400
   },
+  textAreaStyleOverride: {
+    width: '100%',
+    minWidth: '30rem'
+  }
 });
 
 const researchPurposeList = [
@@ -623,6 +627,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               initialText={areaOfResearch}
               maxCharacters={2000}
               onChange={(s: string) => this.updateProfileObject('areaOfResearch', s)}
+              textBoxStyleOverrides={styles.textAreaStyleOverride}
               tooLongWarningCharacters={1900}
             />
           </Section>

@@ -63,6 +63,25 @@ export const styles = {
     // Without explicit vertical align, this div is top-aligned when empty, which can cause some
     // excess space above the input element and layout jitter when an icon becomes shown.
     verticalAlign: 'middle',
+  },
+
+  textBoxWithLengthValidationTextBoxStyle: {
+    height: '15rem',
+    resize: 'none',
+    width: '48rem',
+    borderRadius: '3px 3px 0 0',
+    borderColor: colorWithWhiteness(colors.dark, 0.5)
+  },
+
+  textBoxWithLengthValidationValidationStyle: {
+    justifyContent: 'space-between',
+    width: '48rem',
+    backgroundColor: colorWithWhiteness(colors.primary, 0.95),
+    fontSize: 12,
+    colors: colors.primary,
+    padding: '0.25rem',
+    borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
   }
 };
 
@@ -105,6 +124,7 @@ interface TextAreaWithLengthValidationMessageProps {
   onChange: (s: string) => void;
   tooShortWarningCharacters?: number;
   tooShortWarning?: string;
+  textBoxStyleOverrides?: {};
 }
 
 interface TextAreaWithLengthValidationMessageState {
@@ -160,29 +180,14 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
 
     return <React.Fragment>
       <TextArea
-          style={{
-            height: '15rem',
-            resize: 'none',
-            width: '48rem',
-            borderRadius: '3px 3px 0 0',
-            boderColor: colorWithWhiteness(colors.dark, 0.5)
-          }}
+          style={{...styles.textBoxWithLengthValidationTextBoxStyle, ...this.props.textBoxStyleOverrides}}
           id={id}
           value={text}
           onBlur={() => this.updateShowTooShortWarning()}
           onChange={v => this.onTextUpdate(v)}
       />
       <FlexRow
-          style={{
-            justifyContent: 'space-between',
-            width: '48rem',
-            backgroundColor: colorWithWhiteness(colors.primary, 0.95),
-            fontSize: 12,
-            colors: colors.primary,
-            padding: '0.25rem',
-            borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-            border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
-          }}
+          style={{...styles.textBoxWithLengthValidationValidationStyle, ...this.props.textBoxStyleOverrides}}
       >
         {showTooShortWarning &&
           <label
