@@ -31,27 +31,37 @@ import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
-  public static final String BUCKET_NAME = "workspace-bucket";
+  public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
+  private static final String CDR_VERSION_ID = "1";
+  public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
+  private static final String WORKSPACE_FIRECLOUD_NAME =
+      "gonewiththewind"; // should match workspace name w/o spaces
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
 
-    List<ResearchOutcomeEnum> researchOutcomes = new ArrayList<>();
-    researchOutcomes.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
+    List<ResearchOutcomeEnum> ResearchOutcomeEnumsList = new ArrayList<>();
+    ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
-        .id("1001")
+        .id(WORKSPACE_FIRECLOUD_NAME)
+        .etag("\"1\"")
         .name(workspaceName)
         .namespace(workspaceNameSpace)
         .dataAccessLevel(DataAccessLevel.PROTECTED)
-        .cdrVersionId("1")
-        .googleBucketName(BUCKET_NAME)
-        .billingAccountName("billing-account")
+        .cdrVersionId(CDR_VERSION_ID)
+        .googleBucketName(WORKSPACE_BUCKET_NAME)
+        .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .billingAccountType(BillingAccountType.FREE_TIER)
+        .creationTime(1588097211621L)
+        .creator("jay@unit-test-research-aou.org")
+        .lastModifiedTime(1588097211621L)
+        .published(false)
         .researchPurpose(
             new ResearchPurpose()
+                .additionalNotes(null)
                 .diseaseFocusedResearch(true)
                 .diseaseOfFocus("cancer")
                 .methodsDevelopment(true)
@@ -75,17 +85,17 @@ public class TestMockFactory {
                 .approved(false));
   }
 
-  public FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
+  public FirecloudWorkspace createFirecloudWorkspace(String ns, String name, String creator) {
     FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setWorkspaceId(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
-    fcWorkspace.setBucketName(BUCKET_NAME);
+    fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
     return fcWorkspace;
   }
 
-  public ListClusterResponse createFcListClusterResponse() {
+  public ListClusterResponse createFirecloudListClusterResponse() {
     ListClusterResponse listClusterResponse =
         new ListClusterResponse()
             .clusterName("cluster")
@@ -100,7 +110,7 @@ public class TestMockFactory {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
               FirecloudWorkspace fcWorkspace =
-                  createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
+                  createFirecloudWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
 
               FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);
