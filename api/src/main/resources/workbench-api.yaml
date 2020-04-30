@@ -3977,7 +3977,7 @@ definitions:
   WorkspaceBillingUsageResponse:
     type: object
     required:
-    - cost
+    - cost  
     properties:
       cost:
         type: number

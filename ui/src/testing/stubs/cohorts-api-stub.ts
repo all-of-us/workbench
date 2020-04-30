@@ -1,8 +1,11 @@
 import {convertToResources, ConvertToResourcesArgs} from 'app/utils/resourceActions';
 import {
+  BillingAccountType,
+  BillingStatus,
   Cohort,
   CohortAnnotationsResponse,
   CohortsApi,
+  DataAccessLevel,
   EmptyResponse,
   ResourceType,
   Workspace,
@@ -10,6 +13,7 @@ import {
   WorkspaceResource
 } from 'generated/fetch';
 import {CohortListResponse} from 'generated/fetch/api';
+// import {BillingAccountType} from '../../generated';
 import {WorkspaceStubVariables} from './workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = 1;
@@ -79,10 +83,42 @@ export class CohortsApiStub extends CohortsApi {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
 
     const stubWorkspace: Workspace = {
-      name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
+      billingAccountType: BillingAccountType.USERPROVIDED,
+      billingAccountName: 'billing_accounts/333',
+      billingStatus: BillingStatus.ACTIVE,
+      cdrVersionId: '2',
+      creationTime: 1588259294000,
+      creator: 'user@aou.biz',
+      dataAccessLevel: DataAccessLevel.Registered,
+      etag: WorkspaceStubVariables.DEFAULT_WORKSPACE_ETAG,
+      googleBucketName: 'bucket-123-456',
       id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      lastModifiedTime: 1588259294000,
+      name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
       namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      etag: WorkspaceStubVariables.DEFAULT_WORKSPACE_ETAG
+      published: true,
+      researchPurpose: {
+        ancestry: false,
+        anticipatedFindings: '',
+        commercialPurpose: false,
+        controlSet: false,
+        diseaseFocusedResearch: false,
+        diseaseOfFocus: '',
+        drugDevelopment: false,
+        educational: false,
+        ethics: false,
+        intendedStudy: '',
+        methodsDevelopment: false,
+        otherPopulationDetails: '',
+        otherPurpose: false,
+        otherPurposeDetails: '',
+        populationDetails: [],
+        populationHealth: false,
+        reasonForAllOfUs: '',
+        reviewRequested: false,
+        scientificApproach: '',
+        socialBehavioral: false
+      },
     };
 
     this.cohorts = exampleCohortStubs;

@@ -34,7 +34,8 @@ public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
   private static final String CDR_VERSION_ID = "1";
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
-  private static final String WORKSPACE_FIRECLOUD_NAME = "gonewiththewind"; // should match workspace name w/o spaces
+  private static final String WORKSPACE_FIRECLOUD_NAME =
+      "gonewiththewind"; // should match workspace name w/o spaces
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();

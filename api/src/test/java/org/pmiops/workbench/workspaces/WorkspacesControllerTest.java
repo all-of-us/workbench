@@ -256,7 +256,8 @@ public class WorkspacesControllerTest {
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
   private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
-  private static final String BUCKET_URI = String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
+  private static final String BUCKET_URI =
+      String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
@@ -596,7 +597,8 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(workspace.getNamespace(), workspace.getName(), null));
+        testMockFactory.createFirecloudWorkspace(
+            workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
@@ -648,9 +650,10 @@ public class WorkspacesControllerTest {
     verify(endUserCloudbillingProvider.get().projects())
         .updateBillingInfo(
             "projects/" + workspace.getNamespace(),
-            new ProjectBillingInfo().setBillingAccountName(
-                TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
-    assertThat(workspace2.getBillingAccountName()).isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
+            new ProjectBillingInfo()
+                .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
+    assertThat(workspace2.getBillingAccountName())
+        .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
 
     verify(mockZendesk, times(1)).createRequest(any());
   }
@@ -2509,7 +2512,7 @@ public class WorkspacesControllerTest {
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String newName = NotebooksService.withNotebookExtension("nb2");
     String newPath = NotebooksService.withNotebookExtension("notebooks/nb2");
-    String fullPath =  BUCKET_URI + newPath;
+    String fullPath = BUCKET_URI + newPath;
     String origFullPath = BUCKET_URI + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
@@ -2518,7 +2521,9 @@ public class WorkspacesControllerTest {
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService)
-        .copyBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1), BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
+        .copyBlob(
+            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
+            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
@@ -2541,7 +2546,9 @@ public class WorkspacesControllerTest {
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService)
-        .copyBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1), BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
+        .copyBlob(
+            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
+            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
@@ -2689,7 +2696,8 @@ public class WorkspacesControllerTest {
             .toWorkspaceNamespace(toWorkspace.getNamespace())
             .newName(newNotebookName);
 
-    BlobId newBlobId = BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
+    BlobId newBlobId =
+        BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
 
     doReturn(Collections.singleton(newBlobId))
         .when(cloudStorageService)
@@ -2714,7 +2722,9 @@ public class WorkspacesControllerTest {
     workspacesController.cloneNotebook(
         workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
     verify(cloudStorageService)
-        .copyBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1), BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
+        .copyBlob(
+            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
+            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 
@@ -2768,7 +2778,8 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(workspace.getNamespace(), workspace.getName(), null));
+        testMockFactory.createFirecloudWorkspace(
+            workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
@@ -2787,7 +2798,8 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(workspace.getNamespace(), workspace.getName(), null));
+        testMockFactory.createFirecloudWorkspace(
+            workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
@@ -2805,7 +2817,8 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(workspace.getNamespace(), workspace.getName(), null));
+        testMockFactory.createFirecloudWorkspace(
+            workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
@@ -2823,7 +2836,8 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(workspace.getNamespace(), workspace.getName(), null));
+        testMockFactory.createFirecloudWorkspace(
+            workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
@@ -2882,7 +2896,9 @@ public class WorkspacesControllerTest {
     stubFcGetWorkspaceACL(acl);
 
     final String testNotebookPath = "notebooks/" + testNotebook;
-    doReturn(gcsMetadata).when(cloudStorageService).getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
+    doReturn(gcsMetadata)
+        .when(cloudStorageService)
+        .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
 
     assertThat(
             workspacesController
@@ -2901,7 +2917,8 @@ public class WorkspacesControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+                WorkspacesController.notebookLockingEmailHash(
+                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 
@@ -2943,7 +2960,8 @@ public class WorkspacesControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+                WorkspacesController.notebookLockingEmailHash(
+                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 
@@ -2967,7 +2985,8 @@ public class WorkspacesControllerTest {
             .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
                 LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+                WorkspacesController.notebookLockingEmailHash(
+                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
 

@@ -12,7 +12,6 @@ import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -108,8 +107,8 @@ public class WorkspaceAdminControllerTest {
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(anyString()))
         .thenReturn(Optional.empty());
 
-    final Workspace workspace = testMockFactory.createWorkspace(WORKSPACE_NAMESPACE,
-        WORKSPACE_NAME);
+    final Workspace workspace =
+        testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
     final DbWorkspace dbWorkspace = createDbWorkspaceStub(workspace);
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
         .thenReturn(Optional.of(dbWorkspace));
@@ -117,8 +116,8 @@ public class WorkspaceAdminControllerTest {
     final UserRole collaborator =
         new UserRole().email("test@test.test").role(WorkspaceAccessLevel.WRITER);
     final List<UserRole> collaborators = ImmutableList.of(collaborator);
-    when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE,
-        DB_WORKSPACE_FIRECLOUD_NAME))
+    when(mockWorkspaceService.getFirecloudUserRoles(
+            WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(collaborators);
 
     final AdminWorkspaceObjectsCounts adminWorkspaceObjectsCounts =
@@ -137,13 +136,14 @@ public class WorkspaceAdminControllerTest {
 
     org.pmiops.workbench.notebooks.model.ListClusterResponse firecloudListClusterResponse =
         testMockFactory.createFirecloudListClusterResponse();
-    List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clusters = ImmutableList.of(firecloudListClusterResponse);
+    List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clusters =
+        ImmutableList.of(firecloudListClusterResponse);
     when(mockLeonardoNotebooksClient.listClustersByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(clusters);
 
     FirecloudWorkspace fcWorkspace =
-        testMockFactory.createFirecloudWorkspace(WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME,
-            FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
+        testMockFactory.createFirecloudWorkspace(
+            WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME, FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
     FirecloudWorkspaceResponse fcWorkspaceResponse =
         new FirecloudWorkspaceResponse().workspace(fcWorkspace);
     when(mockFirecloudService.getWorkspaceAsService(
@@ -160,8 +160,7 @@ public class WorkspaceAdminControllerTest {
     AdminFederatedWorkspaceDetailsResponse workspaceDetailsResponse = response.getBody();
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(
-        WORKSPACE_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
 
     AdminWorkspaceResources resources = workspaceDetailsResponse.getResources();
     AdminWorkspaceObjectsCounts objectsCounts = resources.getWorkspaceObjects();
