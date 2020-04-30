@@ -316,19 +316,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       let workspace: Workspace = this.props.workspace;
       if (this.isMode(WorkspaceEditMode.Create)) {
         workspace = {
-          billingAccountType: undefined,
-          billingStatus: undefined,
-          cdrVersionId: '',
-          creationTime: 0,
-          creator: '',
-          dataAccessLevel: DataAccessLevel.Registered,
-          etag: '',
-          googleBucketName: '',
-          id: '',
-          lastModifiedTime: 0,
           name: '',
-          namespace: '',
-          published: false,
+          dataAccessLevel: DataAccessLevel.Registered,
+          cdrVersionId: '',
           researchPurpose: {
             ancestry: false,
             anticipatedFindings: '',
@@ -338,18 +328,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             diseaseOfFocus: '',
             drugDevelopment: false,
             educational: false,
-            ethics: false,
             intendedStudy: '',
+            scientificApproach: '',
             methodsDevelopment: false,
             otherPopulationDetails: '',
             otherPurpose: false,
             otherPurposeDetails: '',
+            ethics: false,
             populationDetails: [],
             populationHealth: false,
-            reasonForAllOfUs: '',
             reviewRequested: undefined,
-            scientificApproach: '',
             socialBehavioral: false,
+            reasonForAllOfUs: '',
           }
         };
       }
