@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {FormControl, FormGroup} from '@angular/forms';
 import Nouislider from 'nouislider-react';
 import * as React from 'react';
 
@@ -160,24 +159,16 @@ interface State {
   maxAge: string;
   minAge: string;
   nodes: Array<any>;
-  sliderStart: Array<number>;
 }
 
 export class Demographics extends React.Component<Props, State> {
   ageWrapper: HTMLDivElement;
+  slider: any;
   ageTypes = [
     {label: 'Current Age', type: AttrName.AGE.toString()},
     {label: 'Age at Consent', type: AttrName.AGEATCONSENT.toString()},
     {label: 'Age at CDR Date', type: AttrName.AGEATCDR.toString()}
   ];
-
-    /* The Demographics form controls and associated convenience lenses */
-  demoForm = new FormGroup({
-    ageMin: new FormControl(18),
-    ageMax: new FormControl(120),
-    ageRange: new FormControl([]),
-    ageType: new FormControl(AttrName.AGE.toString()),
-  });
 
   constructor(props: Props) {
     super(props);
@@ -190,16 +181,15 @@ export class Demographics extends React.Component<Props, State> {
       maxAge: defaultMaxAge,
       minAge: defaultMinAge,
       nodes: undefined,
-      sliderStart: [+defaultMinAge, +defaultMaxAge],
     };
   }
 
   componentDidMount(): void {
     if (this.props.wizard.type === CriteriaType.AGE) {
-      this.initAgeRange();
       if (enableCBAgeTypeOptions) {
         this.loadAgeNodesFromApi();
       } else {
+        this.initAgeRange();
         this.setState({loading: false});
       }
     } else {
@@ -238,54 +228,19 @@ export class Demographics extends React.Component<Props, State> {
         acc[item.ageType].push(item);
         return acc;
       }, initialValue);
-      this.setState({ageTypeNodes}, () => this.calculateAge());
+      this.setState({ageTypeNodes}, () => this.calculateAgeFromNodes());
     });
-  }
-
-  onMaxBlur() {
-    const {minAge} = this.state;
-    let {maxAge} = this.state;
-    if (+maxAge < +minAge) {
-      maxAge = minAge;
-    } else if (+maxAge > +defaultMaxAge || maxAge === '') {
-      maxAge = defaultMaxAge;
-    }
-    this.setState({maxAge, sliderStart: [+minAge, +maxAge]}, () => this.updateAgeSelection());
-  }
-
-  onMinBlur() {
-    const {maxAge} = this.state;
-    let {minAge} = this.state;
-    if (+minAge > +maxAge) {
-      minAge = maxAge;
-    } else if (+minAge < +defaultMinAge || minAge === '') {
-      minAge = defaultMinAge;
-    }
-    this.setState({minAge, sliderStart: [+minAge, +maxAge]}, () => this.updateAgeSelection());
-  }
-
-  updateAgeSelection() {
-    const {maxAge, minAge} = this.state;
-    const selectedNode = {
-      ...ageNode,
-      name: `Age In Range ${minAge} - ${maxAge}`,
-      attributes: [{
-        name: AttrName.AGE,
-        operator: Operator.BETWEEN,
-        operands: [minAge, maxAge]
-      }],
-    };
-    this.props.select(selectedNode);
   }
 
   initAgeRange() {
     const {selections, wizard} = this.props;
     if (selections.length) {
       const {attributes} = selections[0];
-      const {operands} = attributes[0];
-      this.setState({count: wizard.count, minAge: operands[0], maxAge: operands[1], sliderStart: [+operands[0], +operands[1]]});
+      const {name, operands} = attributes[0];
+      this.slider.set([+operands[0], +operands[1]]);
+      this.setState({count: wizard.count, maxAge: operands[1], minAge: operands[0]});
       if (enableCBAgeTypeOptions) {
-        this.setState({ageType: attributes[0].name});
+        this.setState({ageType: name});
       }
     } else {
       // timeout prevents Angular 'ExpressionChangedAfterItHasBeenCheckedError' in CB modal component
@@ -302,13 +257,109 @@ export class Demographics extends React.Component<Props, State> {
     }
   }
 
+  onMinChange(minAge: string) {
+    const {maxAge} = this.state;
+    let sliderMin = +minAge;
+    if (+minAge < +defaultMinAge) {
+      sliderMin = +defaultMinAge;
+    } else if (+minAge > +maxAge) {
+      sliderMin = +maxAge;
+    }
+    this.slider.set([sliderMin, null]);
+    this.setState({minAge}, () => {
+      if (enableCBAgeTypeOptions) {
+        this.calculateAgeFromNodes('min');
+      }
+    });
+  }
+
+  onMaxChange(maxAge: string) {
+    const {minAge} = this.state;
+    let sliderMax = +maxAge;
+    if (+maxAge > +defaultMaxAge) {
+      sliderMax = +defaultMaxAge;
+    } else if (+maxAge < +minAge) {
+      sliderMax = +minAge;
+    }
+    this.slider.set([null, sliderMax]);
+    this.setState({maxAge}, () => {
+      if (enableCBAgeTypeOptions) {
+        this.calculateAgeFromNodes('max');
+      }
+    });
+  }
+
+  onMaxBlur() {
+    const {minAge} = this.state;
+    let {maxAge} = this.state;
+    if (+maxAge < +minAge) {
+      maxAge = minAge;
+    } else if (+maxAge > +defaultMaxAge || maxAge === '') {
+      maxAge = defaultMaxAge;
+    }
+    this.slider.set([null, +maxAge]);
+    this.setState({maxAge}, () => this.updateAgeSelection());
+  }
+
+  onMinBlur() {
+    const {maxAge} = this.state;
+    let {minAge} = this.state;
+    if (+minAge > +maxAge) {
+      minAge = maxAge;
+    } else if (+minAge < +defaultMinAge || minAge === '') {
+      minAge = defaultMinAge;
+    }
+    this.slider.set([+minAge, null]);
+    this.setState({minAge}, () => this.updateAgeSelection());
+  }
+
+  onRadioChange(ageType: string) {
+    this.setState({ageType}, () => {
+      this.updateAgeSelection();
+      this.calculateAgeFromNodes();
+    });
+  }
+
+  onSliderInit(slider: any) {
+    this.slider = slider['noUiSlider'];
+    if (this.slider) {
+      this.initAgeRange();
+      this.centerAgeCount();
+    }
+  }
+
+  onSliderUpdate(range: Array<string>) {
+    const [min, max] = range.map(n => n.split('.')[0]);
+    // this.slider.set([+min, +max]);
+    this.setState({maxAge: max, minAge: min}, () => {
+      if (enableCBAgeTypeOptions) {
+        this.calculateAgeFromNodes();
+      }
+    });
+  }
+
+  updateAgeSelection() {
+    const {ageType, maxAge, minAge} = this.state;
+    const selectedNode = {
+      ...ageNode,
+      name: `Age In Range ${minAge} - ${maxAge}`,
+      attributes: [{
+        name: ageType,
+        operator: Operator.BETWEEN,
+        operands: [minAge, maxAge]
+      }],
+    };
+    this.props.select(selectedNode);
+  }
+
   centerAgeCount() {
-    if (enableCBAgeTypeOptions) {
-      const {maxAge, minAge} = this.state;
+    if (enableCBAgeTypeOptions && !!this.slider) {
+      // get range from slider element and convert the strings to numbers
+      const [sliderMin, sliderMax] = this.slider.get().map(v => +v);
       // get width as a % by dividing the selected age range by the full slider range
-      const width = (+maxAge - +minAge) / (+defaultMaxAge - +defaultMinAge) * 100;
+      const width = (sliderMax - sliderMin) / (+defaultMaxAge - +defaultMinAge) * 100;
       // get left margin as a % by dividing the change in minAge by the full slider range
-      const marginLeft = (+minAge - +defaultMinAge) / (+defaultMaxAge - +defaultMinAge) * 100;
+      const marginLeft = (sliderMin - +defaultMinAge) / (+defaultMaxAge - +defaultMinAge) * 100;
       const wrapper = document.getElementById('count-wrapper');
       if (!!wrapper) {
         wrapper.setAttribute('style', `margin-left: ${marginLeft}%; width: ${width}%; text-align: center;`);
@@ -340,57 +391,65 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   calculateAge(init?: boolean) {
-    const {ageType, maxAge, minAge} = this.state;
-    if (enableCBAgeTypeOptions) {
-      const count = this.state.ageTypeNodes[ageType]
-        .filter(node => node.age >= minAge && node.age <= maxAge)
-        .reduce((acc, node) => acc + node.count, 0);
-      this.setState({count, loading: false}, () => this.centerAgeCount());
-    } else {
-      if (!init || this.setTotalAge) {
-        this.setState({calculating: true});
-      }
-      const {cdrVersionId} = currentWorkspaceStore.getValue();
-      const min = init ? defaultMinAge : minAge;
-      const max = init ? defaultMaxAge : maxAge;
-      const parameter = {
-        ...ageNode,
-        name: `Age In Range ${min} - ${max}`,
-        attributes: [{
-          name: AttrName.AGE,
-          operator: Operator.BETWEEN,
-          operands: [min, max]
+    const {maxAge, minAge} = this.state;
+    if (!init || this.setTotalAge) {
+      this.setState({calculating: true});
+    }
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    const min = init ? defaultMinAge : minAge;
+    const max = init ? defaultMaxAge : maxAge;
+    const parameter = {
+      ...ageNode,
+      name: `Age In Range ${min} - ${max}`,
+      attributes: [{
+        name: AttrName.AGE,
+        operator: Operator.BETWEEN,
+        operands: [min, max]
+      }],
+    };
+    const request = {
+      excludes: [],
+      includes: [{
+        items: [{
+          type: DomainType.PERSON.toString(),
+          searchParameters: [mapParameter(parameter)],
+          modifiers: []
         }],
-      };
-      const request = {
-        excludes: [],
-        includes: [{
-          items: [{
-            type: DomainType.PERSON.toString(),
-            searchParameters: [mapParameter(parameter)],
-            modifiers: []
-          }],
-          temporal: false
-        }],
-        dataFilters: []
-      };
-      cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
-        if (init) {
-          const ageCounts = ageCountStore.getValue();
-          ageCounts[cdrVersionId] = response;
-          ageCountStore.next(ageCounts);
-          if (this.setTotalAge) {
-            this.setState({count: response});
-          }
-        } else {
+        temporal: false
+      }],
+      dataFilters: []
+    };
+    cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
+      if (init) {
+        const ageCounts = ageCountStore.getValue();
+        ageCounts[cdrVersionId] = response;
+        ageCountStore.next(ageCounts);
+        if (this.setTotalAge) {
           this.setState({count: response});
         }
-        this.setState({calculating: false});
-      }, (err) => {
-        console.error(err);
-        this.setState({calculating: false});
-      });
+      } else {
+        this.setState({count: response});
+      }
+      this.setState({calculating: false});
+    }, (err) => {
+      console.error(err);
+      this.setState({calculating: false});
+    });
+  }
+
+  calculateAgeFromNodes(minOrMax?: string) {
+    const {ageTypeNodes, ageType, maxAge, minAge} = this.state;
+    let max = +maxAge;
+    let min = +minAge;
+    if (minOrMax === 'min' && min > +max) {
+      min = max;
+    } else if (minOrMax === 'max' && max < min) {
+      max = min;
     }
+    const count = ageTypeNodes[ageType]
+      .filter(node => node.age >= min && node.age <= max)
+      .reduce((acc, node) => acc + node.count, 0);
+    this.setState({count, loading: false}, () => this.centerAgeCount());
   }
 
   get showPreview() {
@@ -408,7 +467,7 @@ export class Demographics extends React.Component<Props, State> {
 
   render() {
     const {selectedIds, wizard} = this.props;
-    const {ageType, calculating, count, loading, maxAge, minAge, nodes, sliderStart} = this.state;
+    const {ageType, calculating, count, loading, maxAge, minAge, nodes} = this.state;
     const isAge = wizard.type === CriteriaType.AGE;
     return loading
       ? <div style={{textAlign: 'center'}}><Spinner style={{marginTop: '3rem'}}/></div>
@@ -425,11 +484,7 @@ export class Demographics extends React.Component<Props, State> {
                 min={defaultMinAge} max={maxAge}
                 value={minAge}
                 onBlur={() => this.onMinBlur()}
-                onChange={(e) => this.setState({minAge: e.target.value}, () => {
-                  if (enableCBAgeTypeOptions) {
-                    this.calculateAge();
-                  }
-                })}/>
+                onChange={(e) => this.onMinChange(e.target.value)}/>
               <div style={enableCBAgeTypeOptions ? {...styles.slider, marginBottom: '0.75rem'} : styles.slider}>
                 {enableCBAgeTypeOptions && <div ref={(el) => this.ageWrapper = el} id='count-wrapper'>
                   {calculating
@@ -439,17 +494,14 @@ export class Demographics extends React.Component<Props, State> {
                     </span>
                   }
                 </div>}
-                <Nouislider range={{min: +defaultMinAge, max: +defaultMaxAge}}
-                  instanceRef={() => {
-                    this.centerAgeCount();
-                  }}
-                  onChange={() => this.updateAgeSelection()}
-                  onUpdate={(v) => this.setState({maxAge: v[1].split('.')[0], minAge: v[0].split('.')[0]})}
-                  start={sliderStart}
-                  step={1}
+                <Nouislider behaviour='drag'
                   connect
-                  onSlide={() => this.calculateAge()}
-                  behaviour='drag'/>
+                  instanceRef={(slider) => this.onSliderInit(slider)}
+                  onChange={() => this.updateAgeSelection()}
+                  onSlide={(v) => this.onSliderUpdate(v)}
+                  range={{min: +defaultMinAge, max: +defaultMaxAge}}
+                  start={[+defaultMinAge, +defaultMaxAge]}
+                  step={1}/>
               </div>
               <input style={styles.ageInput}
                 type='number'
@@ -457,17 +509,13 @@ export class Demographics extends React.Component<Props, State> {
                 min={minAge} max={defaultMaxAge}
                 value={maxAge}
                 onBlur={() => this.onMaxBlur()}
-                onChange={(e) => this.setState({maxAge: e.target.value}, () => {
-                  if (enableCBAgeTypeOptions) {
-                    this.calculateAge();
-                  }
-                })}/>
+                onChange={(e) => this.onMaxChange(e.target.value)}/>
             </div>
             {enableCBAgeTypeOptions && <div style={{marginLeft: '1rem'}}>
               {this.ageTypes.map((ageTypeRadio, a) => <div key={a} style={{display: 'inline-block', marginRight: '0.5rem'}}>
                 <input type='radio' name='ageType'
                   style={{marginRight: '0.25rem'}}
-                  onChange={() => this.setState({ageType: ageTypeRadio.type}, () => this.calculateAge())}
+                  onChange={() => this.onRadioChange(ageTypeRadio.type)}
                   checked={ageTypeRadio.type === ageType}/>
                 <label>{ageTypeRadio.label}</label>
               </div>)}
