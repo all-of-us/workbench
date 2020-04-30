@@ -58,8 +58,6 @@ public interface UserService {
 
   void setClusterRetryCount(int clusterRetryCount);
 
-  DbUser setDisabledStatus(Long userId, boolean disabled);
-
   List<DbUser> setDisabledStatusForUsers(List<DbUser> users, boolean disabled);
 
   List<DbUser> getAllUsers();

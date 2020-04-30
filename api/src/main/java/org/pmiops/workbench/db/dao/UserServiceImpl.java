@@ -544,18 +544,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser setDisabledStatus(Long userId, boolean disabled) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setDisabled(disabled);
-          return u;
-        },
-        user,
-        Agent.asAdmin(userProvider.get()));
-  }
-
-  @Override
   public List<DbUser> setDisabledStatusForUsers(List<DbUser> users, boolean disabled) {
     return users.stream()
         .map(

@@ -19,7 +19,7 @@ import {
 } from 'app/utils/research-purpose';
 import {
   AdminFederatedWorkspaceDetailsResponse,
-  CloudStorageTraffic, ListClusterResponse, Profile,
+  CloudStorageTraffic, ListClusterResponse, Profile, WorkspaceAccessLevel,
 } from 'generated/fetch';
 import {ReactFragment} from 'react';
 
@@ -172,9 +172,8 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     </div>;
   }
 
-  async updateUsersDisabledStatus(disable: boolean, emailList: string[]) {
-    this.setState({loadingData: true});
-    await authDomainApi().updateUsersDisabledStatus(
+  async updateDisabledStatusForUsers(emailList: string[], disable: boolean) {
+    await authDomainApi().updateDisabledStatusForUsers(
         {emailList: emailList, disabled: disable}).then(_ => {
     });
     this.setState({loadingData: false});
@@ -247,8 +246,10 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
             <FlexColumn>
               <Button style={{marginLeft: '0.5rem'}}
                       onClick={() => {
-                        this.updateUsersDisabledStatus(true, fp.map(userRole => userRole.email, collaborators));
-                      }}>Disable All Collaborators</Button>
+                        this.setState({loadingData: true});
+                        const writersAndOwners = fp.filter(userRole => userRole.role === WorkspaceAccessLevel.OWNER || userRole.role === WorkspaceAccessLevel.WRITER, collaborators);
+                        this.updateDisabledStatusForUsers(fp.map(userRole => userRole.email, writersAndOwners), true);
+                      }}>Disable Writers & Owners</Button>
             </FlexColumn>
           </FlexRow>
           <h3>Cohort Builder</h3>

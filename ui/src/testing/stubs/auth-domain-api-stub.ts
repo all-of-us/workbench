@@ -1,4 +1,4 @@
-import {AuthDomainApi, UpdateUserDisabledRequest} from 'generated/fetch';
+import {AuthDomainApi, UpdateDisabledStatusForUsersRequest} from 'generated/fetch';
 
 
 export class AuthDomainApiStub extends AuthDomainApi {
@@ -6,7 +6,7 @@ export class AuthDomainApiStub extends AuthDomainApi {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
   }
 
-  public updateUserDisabledStatus(request?: UpdateUserDisabledRequest): Promise<Response> {
+  public updateDisabledStatusForUsers(request?: UpdateDisabledStatusForUsersRequest): Promise<Response> {
     return new Promise<Response>(resolve => {
       resolve(new Response());
     });

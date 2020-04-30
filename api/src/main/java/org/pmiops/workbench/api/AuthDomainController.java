@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.UpdateDisabledStatusForUsersRequest;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.model.UpdateUsersDisabledRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +48,8 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
-    final DbUser targetDbUser = userDao.findUserByUsername(request.getEmail());
-    final Boolean previousDisabled = targetDbUser.getDisabled();
-    final DbUser updatedTargetUser =
-        userService.setDisabledStatus(targetDbUser.getUserId(), request.getDisabled());
-    auditAdminActions(request.getDisabled(), previousDisabled, updatedTargetUser);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Void> updateUsersDisabledStatus(UpdateUsersDisabledRequest request) {
+  public ResponseEntity<Void> updateDisabledStatusForUsers(
+      UpdateDisabledStatusForUsersRequest request) {
     final List<DbUser> dbUsers = userDao.findUsersByUsernameIn(request.getEmailList());
     final List<DbUser> updatedDbUsers =
         userService.setDisabledStatusForUsers(dbUsers, request.getDisabled());
