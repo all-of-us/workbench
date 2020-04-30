@@ -27,6 +27,7 @@ anchors:
       # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
       # so we bumped this down further to 2G.
       JAVA_TOOL_OPTIONS: -Xmx2g
+      # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       TERM: dumb
 
@@ -120,7 +121,7 @@ commands:
           name: "restore ui cache"
           keys:
             - v1-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
-            - v1-ui-cache-{{ .Branch }}
+            - v1-ui-cache-master
             - v1-ui-cache-
       - run:
           name: "workbench/ui: yarn install dependencies"
@@ -131,7 +132,7 @@ commands:
           paths:
             - ~/.cache/yarn
             - ui/node_modules
-          key: v1-ui-cache-{{ .Branch }}
+          key: v1-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
 
   install_e2e_dependencies:
     description: "workbench/e2e: yarn install, save and restore cache"
@@ -140,7 +141,7 @@ commands:
           name: "restore e2e cache"
           keys:
             - v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - v1-e2e-cache-{{ .Branch }}
+            - v1-e2e-cache-master
             - v1-e2e-cache-
       - run:
           name: "workbench/e2e: yarn install dependencies"
@@ -151,7 +152,7 @@ commands:
           paths:
             - ~/.cache/yarn
             - e2e/node_modules
-          key: v1-e2e-cache-{{ .Branch }}
+          key: v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
     description: "workbench/api: save or restore gradle cache"
@@ -166,61 +167,20 @@ commands:
       - when:
           condition: << parameters.save >>
           steps:
-            # splitting into multiple distinct caches. Refers to https://circleci.com/docs/2.0/caching/#cache-size
-            - save_cache:
-                name: "save api gradle/wrapper cache"
-                paths:
-                  - ~/.gradle/wrapper
-                key: v1-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
             - save_cache:
                 name: "save api gradle cache"
                 paths:
-                  - ~/.gradle/caches
+                  - ~/.gradle
                 key: v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - when:
           condition: << parameters.restore >>
           steps:
             - restore_cache:
-                name: "restore api gradle/wrapper cache"
-                keys:
-                  - v1-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
-                  - v1-gradle-wrapper-{{ .Branch }}
-                  - v1-gradle-wrapper-
-            - restore_cache:
                 name: "restore api gradle cache"
                 keys:
                   - v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v1-gradle-cache-{{ .Branch }}
+                  - v1-gradle-cache-master
                   - v1-gradle-cache-
-
-  manage_maven_cache:
-    description: "workbench/api: save or restore maven cache"
-    parameters:
-      save:
-        type: boolean
-        default: false
-      restore:
-        type: boolean
-        default: false
-    steps:
-      - when:
-          condition: << parameters.save >>
-          steps:
-            - save_cache:
-                name: "save build cache"
-                paths:
-                  - ~/.m2
-                  - ~/workbench/api/build/exploded-api/WEB-INF/lib/
-                key: v1-build-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-      - when:
-          condition: << parameters.restore >>
-          steps:
-            - restore_cache:
-                name: "restore build cache"
-                keys:
-                  - v1-build-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v1-build-cache-{{ .Branch }}
-                  - v1-build-cache-
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
@@ -325,8 +285,6 @@ jobs:
       # touches several top level folders {common,}api.
       - manage_api_cache:
           restore: true
-      - manage_maven_cache:
-          restore: true
       - activate_service_account_credential
       - deploy:
           name: Deploy API to "test" App Engine
@@ -339,8 +297,6 @@ jobs:
               --key-file circle-sa-key.json \
               --promote
       - manage_api_cache:
-          save: true
-      - manage_maven_cache:
           save: true
 
   api-deps-check:
@@ -465,8 +421,6 @@ jobs:
       - attach_workspace:
           at: .
       - install_ui_dependencies
-      - manage_maven_cache:
-          restore: true
       - activate_service_account_credential
       - deploy:
           name: Deploy UI to "test" App Engine
@@ -489,8 +443,6 @@ jobs:
       - checkout_init_git
       - manage_api_cache:
           restore: true
-      - manage_maven_cache:
-          restore: true
       - activate_service_account_credential
       - deploy:
           working_directory: ~/workbench/deploy
@@ -506,16 +458,13 @@ jobs:
               --promote
       - manage_api_cache:
           save: true
-      - manage_maven_cache:
-          save: true
+
 
   deploy-perf:
     <<: *defaults
     steps:
       - checkout_init_git
       - manage_api_cache:
-          restore: true
-      - manage_maven_cache:
           restore: true
       - activate_service_account_credential
       - deploy:
@@ -531,8 +480,6 @@ jobs:
               --key-file circle-sa-key.json \
               --promote
       - manage_api_cache:
-          save: true
-      - manage_maven_cache:
           save: true
 
 workflows:
