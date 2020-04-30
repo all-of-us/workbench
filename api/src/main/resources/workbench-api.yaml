@@ -542,17 +542,13 @@ paths:
       - in: query
         name: pageToken
         description: 'Pagination token retrieved from a previous call to user; used
-          for retrieving additional pages of results.
-
-'
+          for retrieving additional pages of results.'
         type: string
         required: false
       - in: query
         name: pageSize
         description: 'Maximum number of results to return in a response. Defaults
-          to 10.
-
-'
+          to 10.'
         type: integer
         required: false
       - in: query
@@ -577,9 +573,7 @@ paths:
     post:
       summary: Delete specified (or all if no specified list) clusters in a project
       description: 'An admin gated endpoint that deletes given clusters in a given
-        billing project.
-
-'
+        billing project.'
       operationId: deleteClustersInProject
       tags:
       - cluster
@@ -613,9 +607,7 @@ paths:
     get:
       summary: Get the user's workspace cluster.
       description: 'Returns the current user''s cluster, if any, which has been created
-        for the given workspace.
-
-'
+        for the given workspace.'
       operationId: getCluster
       tags:
       - cluster
@@ -652,9 +644,7 @@ paths:
     delete:
       summary: Delete a workspace cluster.
       description: 'TODO(RW-3695): updateCluster should be added as a PATCH endpoint
-        here.
-
-'
+        here.'
       operationId: deleteCluster
       tags:
       - cluster
@@ -674,9 +664,7 @@ paths:
       summary: Localize files to the user's cluster.
       description: 'Localizes files to the cluster for the current user and given
         workspace. As a side-effect, JSON workspace environment files will also be
-        localized to the cluster.
-
-'
+        localized to the cluster.'
       operationId: localize
       tags:
       - cluster
@@ -779,9 +767,7 @@ paths:
       consumes:
       - application/json
       description: 'Modifies the workspace definition with the specified ID and namespace;
-        fields that are omitted will not be modified
-
-'
+        fields that are omitted will not be modified'
       operationId: updateWorkspace
       parameters:
       - in: body
@@ -853,9 +839,7 @@ paths:
         that the entire ACL must be provided to this method (including all existing
         users and roles), not just the additional roles desired. Clients should first
         fetch existing ACLs via the getFirecloudWorkspaceUserRoles method, make any
-        changes desired, then pass the final list to this method.
-
-'
+        changes desired, then pass the final list to this method.'
       operationId: shareWorkspace
       parameters:
       - in: body
@@ -915,9 +899,7 @@ paths:
       tags:
       - workspaces
       description: 'Makes a workspace public to all AoU registered users. Requires
-        FEATURED_WORKSPACE_ADMIN authority.
-
-'
+        FEATURED_WORKSPACE_ADMIN authority.'
       operationId: publishWorkspace
       responses:
         200:
@@ -932,9 +914,7 @@ paths:
       tags:
       - workspaces
       description: 'Makes a workspace public to all AoU registered users. Requires
-        FEATURED_WORKSPACE_ADMIN authority.
-
-'
+        FEATURED_WORKSPACE_ADMIN authority.'
       operationId: unpublishWorkspace
       responses:
         200:
@@ -946,9 +926,7 @@ paths:
       tags:
       - workspaces
       description: 'Returns workspaces that need research purpose review. Requires
-        REVIEW_RESEARCH_PURPOSE authority.
-
-'
+        REVIEW_RESEARCH_PURPOSE authority.'
       operationId: getWorkspacesForReview
       responses:
         200:
@@ -959,9 +937,7 @@ paths:
     get:
       summary: Get details of Python files from google Bucket directory notebook
       description: 'Returns list of name and path of python files from google bucket,
-        directory notebook.
-
-'
+        directory notebook.'
       operationId: getNoteBookList
       tags:
       - workspaces
@@ -997,18 +973,14 @@ paths:
       - profile
       consumes:
       - application/json
-      description: 'Updates the given user to bypass the request access requirement
-
-'
+      description: 'Updates the given user to bypass the request access requirement'
       parameters:
       - in: body
         name: bypassed
         schema:
           "$ref": "#/definitions/AccessBypassRequest"
         description: 'Whether the requirement should be bypassed or not. Defaults
-          to true, so an empty body  will cause the requirement to be bypassed.
-
-'
+          to true, so an empty body  will cause the requirement to be bypassed.'
       operationId: unsafeSelfBypassAccessRequirement
       responses:
         200:
@@ -1030,9 +1002,7 @@ paths:
       consumes:
       - application/json
       description: 'Updates the given user to bypass the request access requirement,
-        e.g. "eraCommons", or "twoFactorAuth"
-
-'
+        e.g. "eraCommons", or "twoFactorAuth"'
       parameters:
       - "$ref": "#/parameters/userId"
       - in: body
@@ -1040,9 +1010,7 @@ paths:
         schema:
           "$ref": "#/definitions/AccessBypassRequest"
         description: 'Whether the requirement should be bypassed or not. Defaults
-          to true, so an empty body  will cause the requirement to be bypassed.
-
-'
+          to true, so an empty body  will cause the requirement to be bypassed.'
       operationId: bypassAccessRequirement
       responses:
         200:
@@ -1062,9 +1030,7 @@ paths:
       tags:
       - profile
       description: 'Returns a user''s profile for review.  Requires ACCESS_CONTROL_ADMIN
-        authority.
-
-'
+        authority.'
       parameters:
       - "$ref": "#/parameters/userId"
       operationId: getUser
@@ -1082,9 +1048,7 @@ paths:
       tags:
       - profile
       description: 'Returns a list of profiles for users to be reviewed. Requires
-        ACCESS_CONTROL_ADMIN authority.
-
-'
+        ACCESS_CONTROL_ADMIN authority.'
       operationId: getAllUsers
       responses:
         200:
@@ -1124,9 +1088,7 @@ paths:
       tags:
       - workspaceAdmin
       description: 'Given a workspace namespace (Google Cloud Platform  Project ID),
-        returns workspace details. Requires the WORKSPACES_VIEW authority.
-
-'
+        returns workspace details. Requires the WORKSPACES_VIEW authority.'
       operationId: getFederatedWorkspaceDetails
       responses:
         200:
@@ -1144,9 +1106,7 @@ paths:
       tags:
       - workspaceAdmin
       description: 'Returns a time series of cloud storage traffic for the given project.
-        Requires the WORKSPACES_VIEW authority.
-
-'
+        Requires the WORKSPACES_VIEW authority.'
       operationId: getCloudStorageTraffic
       responses:
         200:
@@ -1159,9 +1119,7 @@ paths:
       description: 'Clusters are created with a default machine configuration. Setting
         this override changes that configuration for subsequent cluster creations.
         This change only takes effect after a new cluster creation, e.g. due to standard
-        cluster expiration (~2w) or via manual reset. Requires DEVELOPER authority.
-
-'
+        cluster expiration (~2w) or via manual reset. Requires DEVELOPER authority.'
       operationId: updateClusterConfig
       tags:
       - cluster
@@ -1181,9 +1139,7 @@ paths:
       tags:
       - sumoLogic
       description: 'Registers an egress event detected by SumoLogic with the Workbench.
-        Forwards the event to Stackdriver for recording and potential alerting.
-
-'
+        Forwards the event to Stackdriver for recording and potential alerting.'
       operationId: logEgressEvent
       security: []
       parameters:
@@ -1196,9 +1152,7 @@ paths:
         name: X-API-KEY
         description: 'Semi-secret API key sent by SumoLogic. This will be checked
           against the set of valid API keys stored in the per-environment credentials
-          bucket.
-
-'
+          bucket.'
         required: true
         type: string
       responses:
@@ -1216,9 +1170,7 @@ paths:
       - offlineAudit
       - cron
       description: 'Endpoint meant to be called offline to trigger BigQuery auditing;
-        may be slow to execute. Only executable via App Engine cronjob.
-
-'
+        may be slow to execute. Only executable via App Engine cronjob.'
       operationId: auditBigQuery
       responses:
         200:
@@ -1233,9 +1185,7 @@ paths:
       - cron
       description: 'Endpoint meant to be called offline to trigger cluster checks
         and cleanup. Enforces upgrades for older cluster deployments. May be slow
-        to execute. Only executable via App Engine cronjob.
-
-'
+        to execute. Only executable via App Engine cronjob.'
       operationId: checkClusters
       responses:
         200:
@@ -1592,9 +1542,7 @@ paths:
       consumes:
       - application/json
       description: 'Modifies the cohort review with the specified ID; fields that
-        are omitted will not be modified
-
-'
+        are omitted will not be modified'
       operationId: updateCohortReview
       parameters:
       - in: body
@@ -1694,9 +1642,7 @@ paths:
       consumes:
       - application/json
       description: 'Modifies the cohort definition with the specified ID; fields that
-        are omitted will not be modified
-
-'
+        are omitted will not be modified'
       operationId: updateCohort
       parameters:
       - in: body
@@ -1728,9 +1674,7 @@ paths:
       - cohorts
       consumes:
       - application/json
-      description: 'Materializes a cohort for a given CDR version to specified output.
-
-'
+      description: 'Materializes a cohort for a given CDR version to specified output.'
       operationId: materializeCohort
       parameters:
       - in: body
@@ -1900,9 +1844,7 @@ paths:
       consumes:
       - application/json
       description: 'Modifies the name or description of the concept set with the specified
-        ID; fields that are omitted will not be modified
-
-'
+        ID; fields that are omitted will not be modified'
       operationId: updateConceptSet
       parameters:
       - in: body
@@ -1935,9 +1877,7 @@ paths:
       - conceptSets
       consumes:
       - application/json
-      description: 'Adds or removes concepts from the concept set.
-
-'
+      description: 'Adds or removes concepts from the concept set.'
       operationId: updateConceptSetConcepts
       parameters:
       - in: body
@@ -1979,9 +1919,7 @@ paths:
       tags:
       - concepts
       description: 'Returns information on the domains of data in the workspace''s
-        CDR version along with participant and concept counts
-
-'
+        CDR version along with participant and concept counts'
       operationId: getDomainInfo
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -1996,9 +1934,7 @@ paths:
       tags:
       - concepts
       description: 'Returns survey information in the workspace''s CDR version along
-        with participant and question count
-
-'
+        with participant and question count'
       operationId: getSurveyInfo
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2012,9 +1948,7 @@ paths:
     post:
       tags:
       - concepts
-      description: 'Searches for surveys in criteria table by synonyms or survey name
-
-'
+      description: 'Searches for surveys in criteria table by synonyms or survey name'
       operationId: searchSurveys
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2035,9 +1969,7 @@ paths:
     post:
       tags:
       - dataSet
-      description: 'Given a Data Set, return the SQL query built from it.
-
-'
+      description: 'Given a Data Set, return the SQL query built from it.'
       operationId: generateCode
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2053,9 +1985,7 @@ paths:
           "$ref": "#/definitions/DataSetRequest"
       responses:
         200:
-          description: 'A SQL query for each domain in the Data Set
-
-'
+          description: 'A SQL query for each domain in the Data Set'
           schema:
             "$ref": "#/definitions/DataSetCodeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets":
@@ -2075,9 +2005,7 @@ paths:
     post:
       tags:
       - dataSet
-      description: 'Creates Data Set
-
-'
+      description: 'Creates Data Set'
       operationId: createDataSet
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2217,9 +2145,7 @@ paths:
     post:
       tags:
       - dataSet
-      description: 'Exports a data set query to a notebook
-
-'
+      description: 'Exports a data set query to a notebook'
       operationId: exportToNotebook
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2242,9 +2168,7 @@ paths:
     post:
       tags:
       - dataSet
-      description: 'Preview data set
-
-'
+      description: 'Preview data set'
       operationId: previewDataSetByDomain
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2256,18 +2180,14 @@ paths:
           "$ref": "#/definitions/DataSetPreviewRequest"
       responses:
         200:
-          description: 'A SQL query for each domain in the Data Set
-
-'
+          description: 'A SQL query for each domain in the Data Set'
           schema:
             "$ref": "#/definitions/DataSetPreviewResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}":
     get:
       tags:
       - dataSet
-      description: 'Returns all column names/values for a given domain.
-
-'
+      description: 'Returns all column names/values for a given domain.'
       operationId: getValuesFromDomain
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2298,9 +2218,7 @@ paths:
       - cloudTask
       security: []
       description: 'Task handler which handle request from cloud task queue rdrQueueTest
-        to send Researcher data
-
-'
+        to send Researcher data'
       operationId: exportResearcherData
       consumes:
       - application/json
@@ -2313,9 +2231,7 @@ paths:
           "$ref": "#/definitions/ArrayOfLong"
       responses:
         200:
-          description: 'A SQL query for each domain in the Data Set
-
-'
+          description: 'A SQL query for each domain in the Data Set'
   "/v1/cloudTask/exportWorkspaceData":
     post:
       tags:
@@ -2323,9 +2239,7 @@ paths:
       - cloudTask
       security: []
       description: 'Task handler which handle request from cloud task queue rdrQueueTest
-        to send Workspace data
-
-'
+        to send Workspace data'
       operationId: exportWorkspaceData
       parameters:
       - in: body
@@ -2336,9 +2250,7 @@ paths:
           "$ref": "#/definitions/ArrayOfLong"
       responses:
         200:
-          description: 'A SQL query for each domain in the Data Set
-
-'
+          description: 'A SQL query for each domain in the Data Set'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -2500,9 +2412,7 @@ paths:
       consumes:
       - application/json
       description: 'Translates a data table specification into a SQL query to run
-        against the CDR.
-
-'
+        against the CDR.'
       operationId: getDataTableQuery
       parameters:
       - in: body
@@ -2524,9 +2434,7 @@ paths:
       - cohorts
       consumes:
       - application/json
-      description: 'Retrieves annotations for a cohort in the workspace
-
-'
+      description: 'Retrieves annotations for a cohort in the workspace'
       operationId: getCohortAnnotations
       parameters:
       - in: body
@@ -2547,9 +2455,7 @@ paths:
       - application/json
       description: 'Searches for concepts in concept table by name, and optionally
         filter on domain, vocabulary IDs, or standard concept status. Uses the CDR
-        version affiliated with the workspace specified in the path.
-
-'
+        version affiliated with the workspace specified in the path.'
       operationId: searchConcepts
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2572,9 +2478,7 @@ paths:
       - application/json
       description: 'Searches for concepts in concept table by name, and optionally
         filter on domain, vocabulary IDs, or standard concept status. Uses the CDR
-        version affiliated with the workspace specified in the path.
-
-'
+        version affiliated with the workspace specified in the path.'
       operationId: domainCounts
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2601,9 +2505,7 @@ paths:
       consumes:
       - application/json
       description: 'This endpoint will create an cohort review which is a participant
-        cohort sample specified by the review size parameter.
-
-'
+        cohort sample specified by the review size parameter.'
       operationId: createCohortReview
       parameters:
       - in: body
@@ -2630,9 +2532,7 @@ paths:
       - application/json
       description: 'Returns a collection of participants for the specified cohortId
         and cdrVersionId. This endpoint does pagination based on page, limit, order
-        and column.
-
-'
+        and column.'
       operationId: getParticipantCohortStatuses
       parameters:
       - in: body
@@ -2782,9 +2682,7 @@ paths:
       - application/json
       description: 'Returns a collection of participant data for the specified params
         based off the PageFilterRequest. This endpoint does pagination based on page,
-        limit, order and column.
-
-'
+        limit, order and column.'
       operationId: getParticipantData
       parameters:
       - in: body
@@ -2968,9 +2866,7 @@ paths:
     get:
       tags:
       - cohortBuilder
-      description: 'Returns criteria menu options
-
-'
+      description: 'Returns criteria menu options'
       operationId: findCriteriaMenuOptions
       responses:
         200:
@@ -2983,9 +2879,7 @@ paths:
     get:
       tags:
       - cohortBuilder
-      description: 'Returns a collection of criteria per search term
-
-'
+      description: 'Returns a collection of criteria per search term'
       operationId: findCriteriaByDomainAndSearchTerm
       parameters:
       - in: path
@@ -3014,9 +2908,7 @@ paths:
     get:
       tags:
       - cohortBuilder
-      description: 'Returns a collection of criteria per concept id
-
-'
+      description: 'Returns a collection of criteria per concept id'
       operationId: findStandardCriteriaByDomainAndConceptId
       parameters:
       - in: path
@@ -3042,9 +2934,7 @@ paths:
       tags:
       - cohortBuilder
       description: 'Returns a collection of criteria by optional query parameters
-        of the following: type, subtype, parentId and/or allChildren
-
-'
+        of the following: type, subtype, parentId and/or allChildren'
       operationId: findCriteriaBy
       parameters:
       - in: path
@@ -3398,9 +3288,7 @@ definitions:
     description: 'This enum is used by the older Institutional Affiliation flow associated
       with the Demographic Survey. The corresponding Verified Institutional Affiliation
       (newer flow) enum is OrganizationType. The two have slightly different values
-      and are therefore NOT COMPATIBLE. This enum may be deleted in the future.
-
-'
+      and are therefore NOT COMPATIBLE. This enum may be deleted in the future.'
   IndustryRole:
     type: string
     enum:
@@ -3413,9 +3301,7 @@ definitions:
       with the Demographic Survey. The corresponding Verified Institutional Affiliation
       (newer flow) enum is the UI-only InstitutionalRole_IND_HCNP. The two have slightly
       different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.
-
-'
+      in the future.'
   EducationalRole:
     type: string
     enum:
@@ -3427,9 +3313,7 @@ definitions:
       with the Demographic Survey. The corresponding Verified Institutional Affiliation
       (newer flow) enum is the UI-only InstitutionalRole_EDU. The two have slightly
       different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.
-
-'
+      in the future.'
   AcademicRole:
     type: string
     enum:
@@ -3445,9 +3329,7 @@ definitions:
       with the Demographic Survey. The corresponding Verified Institutional Affiliation
       (newer flow) enum is the UI-only InstitutionalRole_ARI. The two have slightly
       different values and are therefore NOT COMPATIBLE. This enum may be deleted
-      in the future.
-
-'
+      in the future.'
   FeaturedWorkspaceCategory:
     type: string
     enum:
@@ -3756,9 +3638,7 @@ definitions:
   BillingProjectStatus:
     type: string
     description: 'Initialization status of a Firecloud billing project for use with
-      Workbench.
-
-'
+      Workbench.'
     enum:
     - none
     - pending
@@ -3853,9 +3733,7 @@ definitions:
         type: string
         description: 'Entity tag for optimistic concurrency control. To be set during
           a read-modify-write to ensure that the client has not attempted to modify
-          a changed resource.
-
-'
+          a changed resource.'
       name:
         type: string
       namespace:
@@ -3920,9 +3798,7 @@ definitions:
         type: string
         description: 'Associated workspace etag retrieved via reading the workspaces
           API. If provided, validates that the workspace (and its user roles) has
-          not been modified since this etag was retrieved.
-
-'
+          not been modified since this etag was retrieved.'
       items:
         type: array
         items:
@@ -3932,9 +3808,7 @@ definitions:
     properties:
       workspaceEtag:
         type: string
-        description: 'Updated workspace etag after the share request has been applied.
-
-'
+        description: 'Updated workspace etag after the share request has been applied.'
       items:
         type: array
         items:
@@ -3964,9 +3838,7 @@ definitions:
           workspace. By default, duplicate follows the behavior of CreateWorkspace
           - it is shared solely with the creator as an OWNER. If true, all user roles
           are also copied onto the new workspace in addition to the caller becoming
-          an OWNER.
-
-'
+          an OWNER.'
       workspace:
         "$ref": "#/definitions/Workspace"
         description: |
@@ -4173,9 +4045,7 @@ definitions:
   UpdateClusterConfigRequest:
     description: 'Request to update the default cluster configuration for a given
       user. Fields of the config may be omitted, in which case a default will be used.
-      Set clusterConfig to null to clear it.
-
-'
+      Set clusterConfig to null to clear it.'
     type: object
     required:
     - userEmail
@@ -4222,9 +4092,7 @@ definitions:
           "$ref": "#/definitions/BillingAccount"
   BillingAccount:
     description: 'See https://cloud.google.com/billing/reference/rest/v1/billingAccounts#BillingAccount
-      for documentation on name, displayName, and isOpen.
-
-'
+      for documentation on name, displayName, and isOpen.'
     type: object
     required:
     - isFreeTier
@@ -4264,17 +4132,13 @@ definitions:
         type: string
         description: 'Entity tag for optimistic concurrency control. To be set during
           a read-modify-write to ensure that the client has not attempted to modify
-          a changed resource.
-
-'
+          a changed resource.'
       name:
         type: string
       criteria:
         description: 'Internal representation of the cohort definition. Clients should
           not depend directly on this, but instead call client functions to issue
-          a SQL query for the cohort.
-
-'
+          a SQL query for the cohort.'
         type: string
       type:
         type: string
@@ -4295,73 +4159,53 @@ definitions:
     properties:
       cohortName:
         description: 'The name of a cohort that is to be evaluated. Either this or
-          cohortSpec should be specified
-
-'
+          cohortSpec should be specified'
         type: string
       cohortSpec:
         description: 'JSON representation of a cohort to be evaluated (using the same
-          format used for saved cohorts). Either this or cohortName should be specified
-
-'
+          format used for saved cohorts). Either this or cohortName should be specified'
         type: string
       statusFilter:
         description: 'An array of status values; participants with these statuses
           will be included. Defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW]
           -- everything but EXCLUDED. Only valid for use with cohortName (cohorts
-          saved in the database.)
-
-'
+          saved in the database.)'
         type: array
         items:
           "$ref": "#/definitions/CohortStatus"
       cdrVersionName:
         description: 'The name of a CDR version to use when evaluating the cohort;
           if none is specified, the CDR version currently associated with the workspace
-          will be used
-
-'
+          will be used'
         type: string
       pageToken:
         description: 'Pagination token retrieved from a previous call to materializeCohort;
           used for retrieving additional pages of results. If this is specified, all
           other fields on MaterializeCohortRequest apart from pageSize must match
-          the values specified on the request that generated this token.
-
-'
+          the values specified on the request that generated this token.'
         type: string
       pageSize:
         description: 'Maximum number of results to return in a response. Defaults
-          to 1000.
-
-'
+          to 1000.'
         type: integer
         format: int32
       fieldSet:
         description: 'Specification defining what data to return for participants
-          in the cohort. Defaults to just participant IDs.
-
-'
+          in the cohort. Defaults to just participant IDs.'
         "$ref": "#/definitions/FieldSet"
   FieldSet:
     type: object
     description: 'A specification for fields to retrieve about participants in a cohort.
-      Exactly one of the properties below should be specified.
-
-'
+      Exactly one of the properties below should be specified.'
     properties:
       tableQuery:
         description: 'A query specifying how to pull data out of a single table. Either
-          this or annotationQuery should be set (not both.)
-
-'
+          this or annotationQuery should be set (not both.)'
         "$ref": "#/definitions/TableQuery"
       annotationQuery:
         description: 'A query specifying how to retrieve annotation values created
           about participants in a cohort during cohort review. Either this or tableQuery
-          should be set (not both.)
-
-'
+          should be set (not both.)'
         "$ref": "#/definitions/AnnotationQuery"
   MaterializeCohortResponse:
     type: object
@@ -4374,17 +4218,13 @@ definitions:
           In Python clients, this is a list[object] where each object is a dictionary.
           In Typescript clients, this is an Array<any> where each object is a dictionary.)
           Keys in the dictionaries will be the columns selected in the field set provided
-          in the request, and the values will be the values of those columns.
-
-'
+          in the request, and the values will be the values of those columns.'
         type: array
         items:
           type: object
       nextPageToken:
         description: 'Pagination token that can be used in a subsequent call to MaterializeCohortRequest
-          to retrieve more results. If not set, there are no more results to retrieve.
-
-'
+          to retrieve more results. If not set, there are no more results to retrieve.'
         type: string
   ConceptSetListResponse:
     type: object
@@ -4407,9 +4247,7 @@ definitions:
         type: string
         description: 'Entity tag for optimistic concurrency control. To be set during
           a read-modify-write to ensure that the client has not attempted to modify
-          a changed resource.
-
-'
+          a changed resource.'
       name:
         type: string
       domain:
@@ -4417,14 +4255,10 @@ definitions:
           for the concepts in this concept set. Note that the Domain values RACE,
           GENDER, and ETHNICITY are not allowed here; it makes sense to specify concepts
           in these domains in cohort criteria, but there isn''t much value in having
-          concept sets defined for them.
-
-'
+          concept sets defined for them.'
         "$ref": "#/definitions/Domain"
       survey:
-        description: 'Survey
-
-'
+        description: 'Survey'
         "$ref": "#/definitions/Surveys"
       description:
         type: string
@@ -4442,9 +4276,7 @@ definitions:
         type: integer
         format: int32
         description: 'Count of participants in the CDR version for the workspace containing
-          this concept set that match the specified concept set
-
-'
+          this concept set that match the specified concept set'
       concepts:
         description: Concepts in the concept set, in conceptName order.
         type: array
@@ -4472,22 +4304,16 @@ definitions:
       etag:
         type: string
         description: 'Etag of the concept set being modified. Validates that the concept
-          set has not been modified since this etag was retrieved.
-
-'
+          set has not been modified since this etag was retrieved.'
       addedIds:
         type: array
-        description: 'The IDs of concepts to be added to the concept set.
-
-'
+        description: 'The IDs of concepts to be added to the concept set.'
         items:
           type: integer
           format: int64
       removedIds:
         type: array
-        description: 'The IDs of concepts to be removed from the concept set.
-
-'
+        description: 'The IDs of concepts to be removed from the concept set.'
         items:
           type: integer
           format: int64
@@ -4504,41 +4330,31 @@ definitions:
         type: string
         description: 'Entity tag for optimistic concurrency control. To be set during
           a read-modify-write to ensure that the client has not attempted to modify
-          a changed resource.
-
-'
+          a changed resource.'
       workspaceId:
         type: integer
         format: int64
       includesAllParticipants:
         type: boolean
         default: false
-        description: 'Whether to include all participants or filter by cohorts
-
-'
+        description: 'Whether to include all participants or filter by cohorts'
       prePackagedConceptSet:
         "$ref": "#/definitions/PrePackagedConceptSetEnum"
       conceptSetIds:
         type: array
-        description: 'The ids of all concept sets in the data set
-
-'
+        description: 'The ids of all concept sets in the data set'
         items:
           type: integer
           format: int64
       cohortIds:
         type: array
-        description: 'The ids of all cohorts in the data set
-
-'
+        description: 'The ids of all cohorts in the data set'
         items:
           type: integer
           format: int64
       domainValuePairs:
         type: array
-        description: 'All the selected domain/value pairs in the data set
-
-'
+        description: 'All the selected domain/value pairs in the data set'
         items:
           "$ref": "#/definitions/DomainValuePair"
   PrePackagedConceptSetEnum:
@@ -4592,9 +4408,7 @@ definitions:
     type: object
     properties:
       domain:
-        description: 'Domain corresponding to an OMOP table.
-
-'
+        description: 'Domain corresponding to an OMOP table.'
         "$ref": "#/definitions/Domain"
       value:
         type: string
@@ -4610,9 +4424,7 @@ definitions:
         type: string
         description: 'Entity tag for optimistic concurrency control. To be set during
           a read-modify-write to ensure that the client has not attempted to modify
-          a changed resource.
-
-'
+          a changed resource.'
       includesAllParticipants:
         type: boolean
         default: false
@@ -4627,23 +4439,17 @@ definitions:
         description: Milliseconds since the UNIX epoch.
       conceptSets:
         type: array
-        description: 'All concept sets in the data set
-
-'
+        description: 'All concept sets in the data set'
         items:
           "$ref": "#/definitions/ConceptSet"
       cohorts:
         type: array
-        description: 'All cohorts in the data set
-
-'
+        description: 'All cohorts in the data set'
         items:
           "$ref": "#/definitions/Cohort"
       domainValuePairs:
         type: array
-        description: 'All the selected domain/value pairs in the data set
-
-'
+        description: 'All the selected domain/value pairs in the data set'
         items:
           "$ref": "#/definitions/DomainValuePair"
       prePackagedConceptSet:
@@ -4674,21 +4480,15 @@ definitions:
           for the concepts in this concept set. Note that the Domain values RACE,
           GENDER, and ETHNICITY are not allowed here; it makes sense to specify concepts
           in these domains in cohort criteria, but there isn''t much value in having
-          concept sets defined for them.
-
-'
+          concept sets defined for them.'
         "$ref": "#/definitions/Domain"
       query:
         type: string
         description: 'The parameterized BigQuery SQL string to fetch the domain-specific
-          subset of the data set from the CDR.
-
-'
+          subset of the data set from the CDR.'
       namedParameters:
         type: array
-        description: 'The set of named parameters to use for the SQL query.
-
-'
+        description: 'The set of named parameters to use for the SQL query.'
         items:
           "$ref": "#/definitions/NamedParameterEntry"
   NamedParameterEntry:
@@ -4712,9 +4512,7 @@ definitions:
         type: string
       parameterType:
         description: 'Should be any parameter allowed by bigquery, with the exception
-          of struct. The list of parameter types can be found here: https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types
-
-'
+          of struct. The list of parameter types can be found here: https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types'
         type: string
       arrayType:
         type: string
@@ -4731,32 +4529,24 @@ definitions:
       includesAllParticipants:
         type: boolean
         default: false
-        description: 'Whether to include all participants or filter by cohorts
-
-'
+        description: 'Whether to include all participants or filter by cohorts'
       prePackagedConceptSet:
         "$ref": "#/definitions/PrePackagedConceptSetEnum"
       conceptSetIds:
         type: array
-        description: 'The ids of all concept sets in the data set
-
-'
+        description: 'The ids of all concept sets in the data set'
         items:
           type: integer
           format: int64
       cohortIds:
         type: array
-        description: 'The ids of all cohorts in the data set
-
-'
+        description: 'The ids of all cohorts in the data set'
         items:
           type: integer
           format: int64
       values:
         type: array
-        description: 'All the selected values in the data set
-
-'
+        description: 'All the selected values in the data set'
         items:
           type: string
   DataSetPreviewResponse:
@@ -4792,14 +4582,10 @@ definitions:
     type: object
     properties:
       domain:
-        description: 'Domain corresponding to an OMOP table.
-
-'
+        description: 'Domain corresponding to an OMOP table.'
         "$ref": "#/definitions/Domain"
       survey:
-        description: 'Survey corresponding to an OMOP table.
-
-'
+        description: 'Survey corresponding to an OMOP table.'
         "$ref": "#/definitions/Surveys"
       values:
         "$ref": "#/definitions/DomainValuesResponse"
@@ -4814,9 +4600,7 @@ definitions:
           "$ref": "#/definitions/DomainValue"
   DomainValue:
     type: object
-    description: 'Domain values map to various column names in OMOP.
-
-'
+    description: 'Domain values map to various column names in OMOP.'
     required:
     - value
     properties:
@@ -4846,16 +4630,12 @@ definitions:
         type: string
         description: 'A query string that can be used to match a subset of the name
           (case-insensitively), the entire code value (case-insensitively), or the
-          concept ID. If not specified, all concepts are returned.
-
-'
+          concept ID. If not specified, all concepts are returned.'
       standardConceptFilter:
         description: 'STANDARD_CONCEPTS if only standard concepts should be returned,
           NON_STANDARD_CONCEPTS if only non-standard concepts should be returned;
           defaults to ALL_CONCEPTS, meaning both standard and non-standard concepts
-          will be returned.
-
-'
+          will be returned.'
         "$ref": "#/definitions/StandardConceptFilter"
       surveyName:
         description: The name of the survey clicked
@@ -4897,9 +4677,7 @@ definitions:
         format: int32
         description: 'Optional version of the TOS that the user has acknowledged during
           the sign-up flow. If null, the system assumes that the user has not acknowledged
-          any TOS during sign-up.
-
-'
+          any TOS during sign-up.'
   DuplicateCohortRequest:
     type: object
     properties:
@@ -4967,9 +4745,7 @@ definitions:
         type: string
       creationNonce:
         description: 'A value which can be used to secure API calls during the account
-          creation flow, prior to account login.
-
-'
+          creation flow, prior to account login.'
         type: string
       contactEmail:
         description: email address that can be used to contact the user
@@ -5032,18 +4808,14 @@ definitions:
         type: string
       institutionalAffiliations:
         description: 'A list of institutions the user is affiliated with. DEPRECATED
-          in favor of the newer verifiedInstitutionalAffiliation
-
-'
+          in favor of the newer verifiedInstitutionalAffiliation'
         type: array
         items:
           "$ref": "#/definitions/InstitutionalAffiliation"
       verifiedInstitutionalAffiliation:
         description: 'The institution the user is verified to be affiliated with,
           based on their email. Will be required for new users when this feature is
-          enabled in all environments.
-
-'
+          enabled in all environments.'
         "$ref": "#/definitions/VerifiedInstitutionalAffiliation"
       demographicSurvey:
         "$ref": "#/definitions/DemographicSurvey"
@@ -5132,16 +4904,12 @@ definitions:
         type: integer
         format: int32
         description: 'Version of the terms of service that the user last acknowledged.
-          May be null if the user has never acknowledged the Terms of Service.
-
-'
+          May be null if the user has never acknowledged the Terms of Service.'
       latestTermsOfServiceTime:
         type: integer
         format: int64
         description: 'Timestamp when the user last acknowledged the terms of service.
-          May be null if the user has never acknowledged the Terms of Service.
-
-'
+          May be null if the user has never acknowledged the Terms of Service.'
   InstitutionalAffiliation:
     type: object
     properties:
@@ -5327,9 +5095,7 @@ definitions:
         type: array
         description: 'Names of notebooks to localize. This is just the basename (no
           gs:// needed). This is interpreted as relative to the /notebooks directory
-          within the provided workspace''s Google Cloud Storage bucket.
-
-'
+          within the provided workspace''s Google Cloud Storage bucket.'
         items:
           type: string
       playgroundMode:
@@ -5346,9 +5112,7 @@ definitions:
         description: 'The directory on the notebook cluster file system where the
           requested files were localized. This is the "API" directory in Jupyter terms,
           which means it is a relative path in the Jupyter user-facing file system,
-          e.g. "foo/bar.ipynb".
-
-'
+          e.g. "foo/bar.ipynb".'
   UsernameTakenResponse:
     type: object
     required:
@@ -5406,18 +5170,14 @@ definitions:
         type: integer
         format: int32
         description: 'Number of queries issues against the Curated data repository
-          which are flagged as possible audit issues. See logs/alerts for details.
-
-'
+          which are flagged as possible audit issues. See logs/alerts for details.'
   CheckClustersResponse:
     type: object
     properties:
       clusterDeletionCount:
         type: integer
         format: int32
-        description: 'Number of clusters deleted during the check.
-
-'
+        description: 'Number of clusters deleted during the check.'
   User:
     type: object
     properties:
@@ -5443,9 +5203,7 @@ definitions:
           "$ref": "#/definitions/User"
       nextPageToken:
         description: 'Pagination token that can be used in a subsequent calls to retrieve
-          more results. If not set, there are no more results to retrieve.
-
-'
+          more results. If not set, there are no more results to retrieve.'
         type: string
   WorkspaceResourcesRequest:
     type: object
@@ -5514,9 +5272,7 @@ definitions:
     description: 'Is the billing account associated with this workspace available
       to incur costs?  For a free tier project, this indicates whether a user has
       an available balance in their quota.  For a user-provided billing account, this
-      corresponds to whether payment is valid and up to date.
-
-'
+      corresponds to whether payment is valid and up to date.'
     enum:
     - ACTIVE
     - INACTIVE
@@ -5524,9 +5280,7 @@ definitions:
     type: string
     description: 'Whether a billing project is provided by the Researcher Workbench
       as a Free Tier project subject to quota checks, or the project has a billing
-      account provided by the user
-
-'
+      account provided by the user'
     enum:
     - FREE_TIER
     - USER_PROVIDED
@@ -5535,9 +5289,7 @@ definitions:
     properties:
       bufferSize:
         description: 'Current size of the billing buffer, i.e. the number of projects
-          ready to be claimed.
-
-'
+          ready to be claimed.'
         type: integer
         format: int64
   StatusAlert:
@@ -5549,20 +5301,14 @@ definitions:
         format: int64
       title:
         description: 'Title of the status alert, e.g. ''Service Incident: December
-          6, 2019''
-
-'
+          6, 2019'''
         type: string
       message:
         description: 'The actual message of the status alert, e.g. ''AoU RW is down
-          because GCP is down''
-
-'
+          because GCP is down'''
         type: string
       link:
-        description: 'A URL linking to an incident report where users can read more
-
-'
+        description: 'A URL linking to an incident report where users can read more'
         type: string
   EgressEventRequest:
     type: object
@@ -5570,9 +5316,7 @@ definitions:
       eventsJsonArray:
         type: string
         description: 'A JSON string containing an array of JSON-encoded egress events.
-          See the EgressEvent definition for the expected schema of each event.
-
-'
+          See the EgressEvent definition for the expected schema of each event.'
   EgressEvent:
     type: object
     properties:
@@ -5588,9 +5332,7 @@ definitions:
         - prod
       time_window_duration:
         description: 'The duration of the time window during which the high-egress
-          event occurred, in seconds.
-
-'
+          event occurred, in seconds.'
         type: integer
         format: int64
       time_window_start:
@@ -5609,9 +5351,7 @@ definitions:
         format: double
       project_name:
         description: 'The Google Cloud project name associated with the workspace,
-          e.g. aou-rw-6b66533d. Always present.
-
-'
+          e.g. aou-rw-6b66533d. Always present.'
         type: string
       vm_name:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
@@ -5666,9 +5406,7 @@ definitions:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
       who wish to use the system. Does not include the sensitive email patterns used
-      to validate users.
-
-'
+      to validate users.'
     required:
     - shortName
     - displayName
@@ -5688,9 +5426,7 @@ definitions:
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
-          enumerated OrganizationTypes, or OrganizationType.OTHER if it is not
-
-'
+          enumerated OrganizationTypes, or OrganizationType.OTHER if it is not'
   InstitutionUserInstructions:
     type: object
     description: Institution-specific instructions for users to perform after registration.
@@ -5742,9 +5478,7 @@ definitions:
   InstitutionalRole:
     type: string
     description: 'The union of the roles researchers can have at Institutions of all
-      OrganizationTypes, derived from CAPS requirements.
-
-'
+      OrganizationTypes, derived from CAPS requirements.'
     enum:
     - UNDERGRADUATE
     - TRAINEE
@@ -5774,22 +5508,16 @@ definitions:
         type: string
         description: 'The longer, more descriptive name of the Institution where the
           user has a Verified Affiliation, such as ''Vanderbilt University Medical
-          Center''
-
-'
+          Center'''
       institutionalRoleEnum:
         "$ref": "#/definitions/InstitutionalRole"
         description: 'The user''s Institutional Role at this Institution if it is
           one of the enumerated InstitutionalRoles, or InstitutionalRole.OTHER if
-          it is not
-
-'
+          it is not'
       institutionalRoleOtherText:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
-          as text, if its enumerated type is OTHER
-
-'
+          as text, if its enumerated type is OTHER'
   AdminFederatedWorkspaceDetailsResponse:
     description: Admin-visible metadata about a workspace.
     type: object
@@ -5805,9 +5533,7 @@ definitions:
   AdminWorkspaceResources:
     description: 'A summary of application-level resources associated with a workspace.
       Includes data about Cohort Builder objects, analysis clusters, and cloud-storage
-      contents.
-
-'
+      contents.'
     type: object
     properties:
       workspaceObjects:
@@ -5852,9 +5578,7 @@ definitions:
         type: integer
         format: int64
         description: 'Timestamp, in milliseconds since Unix epoch, of the end point
-          of the time window covered by this time series point.
-
-'
+          of the time window covered by this time series point.'
       value:
         type: number
         format: double
@@ -5865,48 +5589,36 @@ definitions:
         description: 'The name of a cohort that data should be retrieved for. This
           and cohortSpec should not be used at the same time. If neither cohortName
           nor cohortSpec are specified, data will be extracted for everyone in the
-          CDR.
-
-'
+          CDR.'
         type: string
       cohortSpec:
         description: 'JSON representation of a cohort to be evaluated (using the same
           format used for saved cohorts). This and cohortName should not be used at
           the same time. If neither cohortName nor cohortSpec are specified, data
-          will be extracted for everyone in the CDR.
-
-'
+          will be extracted for everyone in the CDR.'
         type: string
       statusFilter:
         description: 'An array of status values; participants with these statuses
           will be included. Defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW]
           -- everything but EXCLUDED. Only valid for use with cohortName (cohorts
-          saved in the database.)
-
-'
+          saved in the database.)'
         type: array
         items:
           "$ref": "#/definitions/CohortStatus"
       cdrVersionName:
         description: 'The name of a CDR version to use when evaluating the cohort;
           if none is specified, the CDR version currently associated with the workspace
-          will be used
-
-'
+          will be used'
         type: string
       tableQuery:
         description: 'A query specifying how to pull data out of a single table. If
-          tableQuery is not specified, just Person.person_id will be extracted.
-
-'
+          tableQuery is not specified, just Person.person_id will be extracted.'
         "$ref": "#/definitions/TableQuery"
       maxResults:
         type: integer
         format: int64
         description: 'The maximum number of results returned in the data table. Defaults
-          to no limit (all matching results are returned.)
-
-'
+          to no limit (all matching results are returned.)'
   CdrQuery:
     type: object
     required:
@@ -5917,26 +5629,20 @@ definitions:
       sql:
         description: 'Google SQL to use when querying the CDR. If empty, it means
           no participants can possibly match the data table specification, and an
-          empty data table should be returned.
-
-'
+          empty data table should be returned.'
         type: string
       columns:
         description: 'An array of names to be used for the columns being returned
           by the query. (Note that related table aliases will be returned with ''.''
           as a separator, whereas ''__'' is used in the SQL.) This will be populated
-          even if sql is empty (i.e. there are no results.)
-
-'
+          even if sql is empty (i.e. there are no results.)'
         type: array
         items:
           type: string
       configuration:
         description: 'configuration for the BigQuery job (includes named parameters);
           you can pass this JSON dictionary in for the configuration when calling
-          methods like pandas.read_gbq().
-
-'
+          methods like pandas.read_gbq().'
         type: object
       bigqueryProject:
         description: name of the Google Cloud project containing the CDR dataset
@@ -5950,30 +5656,22 @@ definitions:
     - cohortName
     properties:
       cohortName:
-        description: 'The name of a cohort that annotations should be retrieved for.
-
-'
+        description: 'The name of a cohort that annotations should be retrieved for.'
         type: string
       statusFilter:
         description: 'An array of status values; participants with these statuses
           will have their annotations retrieved. Defaults to [NOT_REVIEWED, INCLUDED,
-          NEEDS_FURTHER_REVIEW] -- everything but EXCLUDED.
-
-'
+          NEEDS_FURTHER_REVIEW] -- everything but EXCLUDED.'
         type: array
         items:
           "$ref": "#/definitions/CohortStatus"
       cdrVersionName:
         description: 'The name of a CDR version to use when retrieving annotations;
           if none is specified, the CDR version currently associated with the workspace
-          will be used
-
-'
+          will be used'
         type: string
       annotationQuery:
-        description: 'Specification defining what annotations to retrieve.
-
-'
+        description: 'Specification defining what annotations to retrieve.'
         "$ref": "#/definitions/AnnotationQuery"
   CohortAnnotationsResponse:
     type: object
@@ -5981,9 +5679,7 @@ definitions:
     - results
     properties:
       columns:
-        description: 'An array of columns for the annotations being returned.
-
-'
+        description: 'An array of columns for the annotations being returned.'
         type: array
         items:
           type: string
@@ -5993,67 +5689,51 @@ definitions:
           Java, this is represented as Map<String, Object>[]. In Python clients, this
           is a list[object] where each object is a dictionary. In Typescript clients,
           this is an Array<any> where each object is a dictionary.) Keys in the dictionaries
-          will be "person_id", "review_status", or the name of an annotation.
-
-'
+          will be "person_id", "review_status", or the name of an annotation.'
         type: array
         items:
           type: object
   TableQuery:
     type: object
-    description: 'A specification for retrieving data from a single table.
-
-'
+    description: 'A specification for retrieving data from a single table.'
     required:
     - tableName
     properties:
       tableName:
         description: 'The name of a table containing a person_id column to retrieve
-          data from (e.g. person, observation); should be in the OMOP CDM 5.2 schema.
-
-'
+          data from (e.g. person, observation); should be in the OMOP CDM 5.2 schema.'
         externalDocs:
           description: OMOP CDM 5.2 schema definition
           url: https://github.com/OHDSI/CommonDataModel/blob/v5.2.0/PostgreSQL/OMOP%20CDM%20ddl%20-%20PostgreSQL.sql
         type: string
       columns:
         description: 'An array of columns to retrieve from the table, taken from the
-          table specified above. Defaults to all columns.
-
-'
+          table specified above. Defaults to all columns.'
         type: array
         items:
           type: string
       filters:
         description: 'Filters on the results. Only results matching the criteria specified
           in the filters will be returned. If both filters and conceptSetName are
-          specified, results must match both.
-
-'
+          specified, results must match both.'
         "$ref": "#/definitions/ResultFilters"
       conceptSetName:
         description: 'A name of a concept set in the workspace used to filter results;
           results must match one of the concepts in the named concept set. If both
-          filters and conceptSetName are specified, results must match both.
-
-'
+          filters and conceptSetName are specified, results must match both.'
         type: string
       orderBy:
         description: 'An array of columns to sort the resulting data by, taken from
           the table specified above, each one optionally enclosed in "DESCENDING()"
           for descending sort order. Default sort order is "person_id" (in ascending
-          order) followed by the ID of the specified table (in ascending order.)
-
-'
+          order) followed by the ID of the specified table (in ascending order.)'
         type: array
         items:
           type: string
   AnnotationQuery:
     type: object
     description: 'A specification for retrieving annotation values or review statuses
-      entered for participants.
-
-'
+      entered for participants.'
     properties:
       columns:
         description: 'An array of names of annotations to retrieve about participants,
@@ -6062,9 +5742,7 @@ definitions:
           and the names of all defined annotations in the cohort review. This is only
           valid in combination with the use of cohortName above. Only data for participants
           in the cohort review will be returned; if no cohort review has been created,
-          no results will be returned.
-
-'
+          no results will be returned.'
         type: array
         items:
           type: string
@@ -6073,9 +5751,7 @@ definitions:
           each one optionally enclosed in "DESCENDING()" for descending sort order.
           Specifies the order that results should be returned. Defaults to "person_id"
           (in ascending order). Annotations referenced in orderBy must also be present
-          in columns.
-
-'
+          in columns.'
         type: array
         items:
           type: string
@@ -6083,38 +5759,28 @@ definitions:
     type: object
     description: 'A list of filters applied to the results of a query. Only results
       matching the filter criteria should be returned. Exactly one of "allOf", "anyOf",
-      and "columnFilter" should be set.
-
-'
+      and "columnFilter" should be set.'
     properties:
       if_not:
         description: 'Set to true if a result matching allOf or anyOf below should
-          result in a result *not* being returned.
-
-'
+          result in a result *not* being returned.'
         type: boolean
         default: false
       allOf:
         description: 'A list of result filters. All filters matching means a result
-          should be returned (or not returned if "not" is true.)
-
-'
+          should be returned (or not returned if "not" is true.)'
         type: array
         items:
           "$ref": "#/definitions/ResultFilters"
       anyOf:
         description: 'A list of column filters. Any filters matching means a result
-          should be returned (or not returned if "not" is true.)
-
-'
+          should be returned (or not returned if "not" is true.)'
         type: array
         items:
           "$ref": "#/definitions/ResultFilters"
       columnFilter:
         description: 'A filter on a column in the table. Only a result matching this
-          filter should be returned (or not returned if "not" is true.)
-
-'
+          filter should be returned (or not returned if "not" is true.)'
         "$ref": "#/definitions/ColumnFilter"
   ColumnFilter:
     type: object
@@ -6123,60 +5789,42 @@ definitions:
     description: 'A filter applied to the results of a query, based on a column value
       in a table. Only results matching the filter will be returned. One (and only
       one) of the value columns should be populated. values and valueNumbers should
-      only be used in conjunction with the "in" operator.
-
-'
+      only be used in conjunction with the "in" operator.'
     properties:
       columnName:
-        description: 'The name of the column to filter on.
-
-'
+        description: 'The name of the column to filter on.'
         type: string
       operator:
         description: 'The operator to use when comparing values. Defaults to EQUAL.
-          If the "in" operator is used, either values or valueNumbers should be populated.
-
-'
+          If the "in" operator is used, either values or valueNumbers should be populated.'
         "$ref": "#/definitions/Operator"
         externalDocs:
           description: Documentation of BigQuery SQL operators
           url: https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#comparison-operators
       value:
-        description: 'A string to use in comparisons (case-sensitive).
-
-'
+        description: 'A string to use in comparisons (case-sensitive).'
         type: string
       values:
         description: 'An array of strings to use in comparisons (case-sensitive);
-          used with the "in" operator.
-
-'
+          used with the "in" operator.'
         type: array
         items:
           type: string
       valueDate:
         description: 'A date (yyyy-MM-dd) or datetime (yyyy-MM-dd HH:mm:ss zzz) value
-          to use in comparisons.
-
-'
+          to use in comparisons.'
         type: string
       valueNumber:
-        description: 'A number to use in comparisons (either integer or floating point.)
-
-'
+        description: 'A number to use in comparisons (either integer or floating point.)'
         type: number
       valueNumbers:
         description: 'An array of numbers to use in comparisons (used with the "in"
-          operator)
-
-'
+          operator)'
         type: array
         items:
           type: number
       valueNull:
-        description: 'Set to true if the column value should be compared to null.
-
-'
+        description: 'Set to true if the column value should be compared to null.'
         type: boolean
         default:
   CohortStatus:
@@ -6297,22 +5945,16 @@ definitions:
         type: string
         description: 'A query string that can be used to match a subset of the name
           (case-insensitively), the entire code value (case-insensitively), or the
-          concept ID. If not specified, all concepts are returned.
-
-'
+          concept ID. If not specified, all concepts are returned.'
       standardConceptFilter:
         description: 'STANDARD_CONCEPTS if only standard concepts should be returned,
           NON_STANDARD_CONCEPTS if only non-standard concepts should be returned;
           defaults to ALL_CONCEPTS, meaning both standard and non-standard concepts
-          will be returned.
-
-'
+          will be returned.'
         "$ref": "#/definitions/StandardConceptFilter"
       domain:
         description: 'The domain for the concepts returned (e.g. OBSERVATION, DRUG).
-          Note that this may map to multiple domain ID values in OMOP.
-
-'
+          Note that this may map to multiple domain ID values in OMOP.'
         "$ref": "#/definitions/Domain"
       surveyName:
         description: The name of the survey clicked
@@ -6335,16 +5977,12 @@ definitions:
         type: string
         description: 'A query string that can be used to match a subset of the name
           (case-insensitively), the entire code value (case-insensitively), or the
-          concept ID. If not specified, all concepts are returned.
-
-'
+          concept ID. If not specified, all concepts are returned.'
       standardConceptFilter:
         description: 'STANDARD_CONCEPTS if only standard concepts should be returned,
           NON_STANDARD_CONCEPTS if only non-standard concepts should be returned;
           defaults to ALL_CONCEPTS, meaning both standard and non-standard concepts
-          will be returned.
-
-'
+          will be returned.'
         "$ref": "#/definitions/StandardConceptFilter"
       surveyName:
         description: The name of the survey clicked
@@ -6417,9 +6055,7 @@ definitions:
         type: string
         description: 'Entity tag for optimistic concurrency control. To be set during
           a read-modify-write to ensure that the client has not attempted to modify
-          a changed resource.
-
-'
+          a changed resource.'
       creationTime:
         type: string
       lastModifiedTime:
@@ -6881,9 +6517,7 @@ definitions:
         type: string
         description: 'Entity tag for optimistic concurrency control. To be set during
           a read-modify-write to ensure that the client has not attempted to modify
-          a changed resource.
-
-'
+          a changed resource.'
       cohortId:
         type: integer
         format: int64
@@ -6963,31 +6597,23 @@ definitions:
     properties:
       id:
         description: 'Primary identifier which is unique within a CDR version. Value
-          may not be stable across different CDR versions.
-
-'
+          may not be stable across different CDR versions.'
         type: integer
         format: int64
       parentId:
         description: 'The parent id of the criteria. 0 if this is the root node of
-          a criteria tree.
-
-'
+          a criteria tree.'
         type: integer
         format: int64
       type:
         description: 'The tree type of this criteria, see TreeType. This will need
           to change to CriteriaType with the new implementation(change type below
-          to ref CriteriaType)
-
-'
+          to ref CriteriaType)'
         type: string
       subtype:
         description: 'The subtype of this criteria, see TreeSubType. This will need
           to change to CriteriaSubType with the new implementation(change type below
-          to ref CriteriaSubType)
-
-'
+          to ref CriteriaSubType)'
         type: string
       code:
         description: |
@@ -6999,9 +6625,7 @@ definitions:
         type: string
       count:
         description: 'Estimated number of participants in a particular CDR version
-          which have a least one event matching this criteria.
-
-'
+          which have a least one event matching this criteria.'
         type: integer
         format: int64
       group:
@@ -7011,9 +6635,7 @@ definitions:
       selectable:
         description: 'Whether or not a client can specify this criteria in a search
           request. Selecting a group implies selecting all criteria contained within
-          that group.
-
-'
+          that group.'
         type: boolean
         default: false
       conceptId:
@@ -7032,23 +6654,17 @@ definitions:
       hasAttributes:
         description: 'Whether this criteria has associated attributes which can be
           filtered by value during a search, for example a blood pressure measurement
-          criteria might have an associated measurement value attribute.
-
-'
+          criteria might have an associated measurement value attribute.'
         type: boolean
         default: false
       path:
         description: 'A "." delimited path of all parent criteria IDs. Does not include
-          the id for this criteria; root criteria nodes have a null path.
-
-'
+          the id for this criteria; root criteria nodes have a null path.'
         type: string
       value:
         description: 'A helper property to fully describe PPI/AGE data. Age holds
           the value of the age and for PPI it holds value as number or value as concept
-          id.
-
-'
+          id.'
         type: string
       hasHierarchy:
         description: Whether criteria is linked to a tree.
@@ -7136,9 +6752,7 @@ definitions:
     description: 'The SearchRequest describes the state of the Cohort Builder at any
       given moment. It contains two keys, `include` and `exclude`, each of which specifies
       an array of SearchGroups which are `AND`ed together, and which collectively
-      specify which subjects to include or exclude from the cohort.
-
-'
+      specify which subjects to include or exclude from the cohort.'
     type: object
     required:
     - includes
@@ -7181,9 +6795,7 @@ definitions:
             - value: A value
   SearchGroup:
     description: 'A SearchGroup is a container for groups of criteria which are `OR`ed
-      together.
-
-'
+      together.'
     type: object
     required:
     - temporal
@@ -7219,9 +6831,7 @@ definitions:
   SearchGroupItem:
     description: 'A SearchGroupItem is the "line item" of the Cohort Builder.  It
       specifies a set of criteria of a given kind, possibly alongside a set of modifiers,
-      the results of which are `OR`ed together with the other criteria in the group.
-
-'
+      the results of which are `OR`ed together with the other criteria in the group.'
     type: object
     required:
     - type
