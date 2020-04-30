@@ -3853,6 +3853,12 @@ definitions:
     - creationTime
     - dataAccessLevel
     - googleBucketName
+    - bilingAccontName
+    - billingAccountType
+    - id
+    - published
+    - lastModifiedTime
+    - creator
     - billingStatus
     example:
       billingAccountName: "billingAccounts/000000-AAAAAA-111111"
