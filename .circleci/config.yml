@@ -260,10 +260,6 @@ jobs:
           working_directory: ~/workbench/api
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
       - run:
-          name: Integration tests compile
-          working_directory: ~/workbench/api
-          command: ./project.rb gradle compile__bigquerytest__Java compile__integration__Java
-      - run:
           name: Run Java unit tests
           working_directory: ~/workbench/api
           command: ./project.rb test
@@ -558,7 +554,7 @@ workflows:
           filters: *filter_only_master_branch
           requires:
             - ui-build-test
-      # After merge PR to master branch, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
+      # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           filters: *filter_only_master_branch
           requires:
