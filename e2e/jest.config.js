@@ -25,7 +25,7 @@ module.exports = {
     "/tsc-out/"
   ],
   "testMatch": [
-    "<rootDir>/**/tests/**/*.spec.ts"
+    "<rootDir>/tests/**/*.spec.ts"
   ],
   "transformIgnorePatterns": [
     "<rootDir>/node_modules/(?!tests)"

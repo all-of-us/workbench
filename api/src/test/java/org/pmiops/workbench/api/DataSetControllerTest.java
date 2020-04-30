@@ -1077,7 +1077,7 @@ public class DataSetControllerTest {
 
     assertThat(domainValues)
         .containsExactly(
-            new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
+            new DomainValue().value("field_one"), new DomainValue().value("field_two"));
   }
 
   private JSONObject createDemoCriteria() {

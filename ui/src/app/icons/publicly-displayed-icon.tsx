@@ -45,7 +45,7 @@ const css = `
    }
  `;
 
-const toolTipContent = <span>The <AouTitle/> Research Program seeks to be transparent with
+const toolTipContent = <span>The <AouTitle/> seeks to be transparent with
   participants about who can access their data and for what purpose. Your answer to this question
   will be displayed in the Research Projects Directory on our public website.</span>;
 

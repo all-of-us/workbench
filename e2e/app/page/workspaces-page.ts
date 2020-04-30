@@ -94,13 +94,13 @@ export default class WorkspacesPage extends WorkspaceEditPage {
 
     // 2. Please provide a summary of your research purpose by responding to the questions below.
     const scientificQuestions = editPage.question2_scientificQuestionsIntendToStudy();
-    await (await scientificQuestions.asTextArea()).type(faker.lorem.paragraph());
+    await (await scientificQuestions.asTextArea()).paste(faker.lorem.paragraph());
 
     const scientificApproaches = editPage.question2_scientificApproaches();
-    await (await scientificApproaches.asTextArea()).type(faker.lorem.paragraph());
+    await (await scientificApproaches.asTextArea()).paste(faker.lorem.paragraph());
 
     const anticipatedFindings = editPage.question2_anticipatedFindings();
-    await (await anticipatedFindings.asTextArea()).type(faker.lorem.paragraph());
+    await (await anticipatedFindings.asTextArea()).paste(faker.lorem.paragraph());
 
     // 3. The All of Us Research Program encourages researchers to disseminate ....
     const publicationInJournal = editPage.publicationInJournal();

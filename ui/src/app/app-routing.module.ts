@@ -58,7 +58,7 @@ const routes: Routes = [
   }, {
     path: '',
     component: SignedInComponent,
-    canActivate: [SignInGuard, DisabledGuard],
+    canActivate: [SignInGuard],
     canActivateChild: [SignInGuard, DisabledGuard, RegistrationGuard],
     runGuardsAndResolvers: 'always',
     children: [

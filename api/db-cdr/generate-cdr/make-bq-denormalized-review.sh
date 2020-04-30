@@ -6,20 +6,25 @@ set -ex
 
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
+export DRY_RUN=$3     # dry run
 
-# Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
-if [ -z "$datasets" ]
+if [ "$DRY_RUN" == true ]
 then
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_concept_ancestor")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.cb_criteria")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
+  exit 0
 fi
-if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
-  echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
-else
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
+
+# Test that datset exists
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas

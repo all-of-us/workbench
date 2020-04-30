@@ -33,6 +33,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   private final InstitutionMapper institutionMapper;
   private final InstitutionUserInstructionsMapper institutionUserInstructionsMapper;
   private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
+  private final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
   @Autowired
   InstitutionServiceImpl(
@@ -179,5 +180,11 @@ public class InstitutionServiceImpl implements InstitutionService {
   public boolean deleteInstitutionUserInstructions(final String shortName) {
     final DbInstitution institution = getDbInstitutionOrThrow(shortName);
     return institutionUserInstructionsDao.deleteByInstitutionId(institution.getInstitutionId()) > 0;
+  }
+
+  @Override
+  public boolean validateOperationalUser(DbInstitution institution) {
+    return institution != null
+        && institution.getShortName().equals(OPERATIONAL_USER_INSTITUTION_SHORT_NAME);
   }
 }

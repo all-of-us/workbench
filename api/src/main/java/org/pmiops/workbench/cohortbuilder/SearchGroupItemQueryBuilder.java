@@ -15,7 +15,6 @@ import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.tempo
 import com.google.api.client.util.Sets;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import java.util.ArrayList;
@@ -44,6 +43,8 @@ public final class SearchGroupItemQueryBuilder {
 
   private static final int STANDARD = 1;
   private static final int SOURCE = 0;
+  private static final int GROUP = 1;
+  private static final int NOT_GROUP = 0;
 
   private static final ImmutableMap<AttrName, String> AGE_COLUMN_SQL_MAP =
       ImmutableMap.of(
@@ -67,15 +68,41 @@ public final class SearchGroupItemQueryBuilder {
       "select distinct person_id, entry_date, concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
           + "where ";
-  private static final String STANDARD_SQL = "(is_standard = %s and concept_id in unnest(%s))\n";
-  private static final String SOURCE_SQL = STANDARD_SQL;
+  private static final String STANDARD_OR_SOURCE_SQL =
+      "is_standard = %s and concept_id in unnest(%s)";
+  private static final String PARENT_STANDARD_OR_SOURCE_SQL =
+      "is_standard = %s and concept_id in (select distinct c.concept_id\n"
+          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "join (${childLookup}) a\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
+          + "where domain_id = %s\n"
+          + "and is_standard = %s\n"
+          + "and is_selectable = 1)";
+  private static final String DRUG_SQL =
+      "is_standard = %s and concept_id in (select distinct ca.descendant_id\n"
+          + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
+          + "join (select distinct c.concept_id\n"
+          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "join (${childLookup}) a\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
+          + "where domain_id = %s\n"
+          + "and is_standard = %s\n"
+          + "and is_selectable = 1) b on (ca.ancestor_id = b.concept_id))";
+  private static final String CHILD_LOOKUP =
+      "select cast(cr.id as string) as id\n"
+          + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
+          + "where domain_id = %s\n"
+          + "and is_standard = %s\n"
+          + "and concept_id in unnest(%s)\n"
+          + "and is_group = %s\n"
+          + "and is_selectable = 1\n";
   private static final String VALUE_AS_NUMBER =
-      "(is_standard = %s and concept_id = %s and value_as_number %s %s)\n";
+      "is_standard = %s and concept_id = %s and value_as_number %s %s\n";
   private static final String VALUE_AS_CONCEPT_ID =
-      "(is_standard = %s and concept_id = %s and value_as_concept_id %s unnest(%s))\n";
+      "is_standard = %s and concept_id = %s and value_as_concept_id %s unnest(%s)\n";
   private static final String VALUE_SOURCE_CONCEPT_ID =
-      "(is_standard = %s and concept_id = %s and value_source_concept_id %s unnest(%s))\n";
-  private static final String BP_SQL = "(is_standard = %s and concept_id in unnest(%s)";
+      "is_standard = %s and concept_id = %s and value_source_concept_id %s unnest(%s)\n";
+  private static final String BP_SQL = "is_standard = %s and concept_id in unnest(%s)";
   private static final String SYSTOLIC_SQL = " and systolic %s %s";
   private static final String DIASTOLIC_SQL = " and diastolic %s %s";
 
@@ -137,19 +164,17 @@ public final class SearchGroupItemQueryBuilder {
 
   /** Build the inner most sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
-      Map<SearchParameter, Set<Long>> criteriaLookup,
       Map<String, QueryParameterValue> queryParams,
       List<String> queryParts,
       SearchGroup searchGroup) {
     if (searchGroup.getTemporal()) {
       // build the outer temporal sql statement
-      String query = buildOuterTemporalQuery(criteriaLookup, queryParams, searchGroup);
+      String query = buildOuterTemporalQuery(queryParams, searchGroup);
       queryParts.add(query);
     } else {
       for (SearchGroupItem searchGroupItem : searchGroup.getItems()) {
         // build regular sql statement
-        String query =
-            buildBaseQuery(criteriaLookup, queryParams, searchGroupItem, searchGroup.getMention());
+        String query = buildBaseQuery(queryParams, searchGroupItem, searchGroup.getMention());
         queryParts.add(query);
       }
     }
@@ -157,36 +182,25 @@ public final class SearchGroupItemQueryBuilder {
 
   /** Build the inner most sql */
   private static String buildBaseQuery(
-      Map<SearchParameter, Set<Long>> criteriaLookup,
       Map<String, QueryParameterValue> queryParams,
       SearchGroupItem searchGroupItem,
       TemporalMention mention) {
-    Set<Long> standardChildConceptIds = new HashSet<>();
-    Set<Long> sourceChildConceptIds = new HashSet<>();
+    Set<SearchParameter> standardSearchParameters = new HashSet<>();
+    Set<SearchParameter> sourceSearchParameters = new HashSet<>();
     List<String> queryParts = new ArrayList<>();
+    String domain = searchGroupItem.getType();
 
     // When building sql for demographics - we query against the person table
-    if (DomainType.PERSON.toString().equals(searchGroupItem.getType())) {
+    if (DomainType.PERSON.toString().equals(domain)) {
       return buildDemoSql(queryParams, searchGroupItem);
     }
-    boolean standard = false;
-    boolean source = false;
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
       if (param.getAttributes().isEmpty()) {
         if (param.getStandard()) {
-          // make sure we only add the standard concept ids sql template once
-          if (!standard) {
-            queryParts.add(STANDARD_SQL);
-            standard = true;
-          }
-          standardChildConceptIds.addAll(childConceptIds(criteriaLookup, ImmutableList.of(param)));
+          standardSearchParameters.add(param);
         } else {
-          if (!source) {
-            queryParts.add(SOURCE_SQL);
-            source = true;
-          }
-          sourceChildConceptIds.addAll(childConceptIds(criteriaLookup, ImmutableList.of(param)));
+          sourceSearchParameters.add(param);
         }
       } else {
         StringBuilder bpSql = new StringBuilder(BP_SQL);
@@ -212,14 +226,14 @@ public final class SearchGroupItemQueryBuilder {
           QueryParameterValue cids =
               QueryParameterValue.array(bpConceptIds.toArray(new Long[0]), Long.class);
           String conceptIdsParam = QueryParameterUtil.addQueryParameterValue(queryParams, cids);
-          queryParts.add(String.format(bpSql.toString(), standardParam, conceptIdsParam) + ")\n");
+          queryParts.add(String.format(bpSql.toString(), standardParam, conceptIdsParam) + "\n");
         }
       }
     }
-    addParamValueAndFormat(queryParams, standardChildConceptIds, queryParts, STANDARD);
-    addParamValueAndFormat(queryParams, sourceChildConceptIds, queryParts, SOURCE);
+    addParamValueAndFormat(domain, queryParams, standardSearchParameters, queryParts, STANDARD);
+    addParamValueAndFormat(domain, queryParams, sourceSearchParameters, queryParts, SOURCE);
     // need to OR all query parts together since they exist in the same search group item
-    String queryPartsSql = "(" + String.join(OR, queryParts) + ")\n";
+    String queryPartsSql = "(" + String.join(OR, queryParts) + ")";
     // format the base sql with all query parts
     String baseSql = BASE_SQL + queryPartsSql;
     // build modifier sql if modifiers exists
@@ -308,9 +322,7 @@ public final class SearchGroupItemQueryBuilder {
    * https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8
    */
   private static String buildOuterTemporalQuery(
-      Map<SearchParameter, Set<Long>> criteriaLookup,
-      Map<String, QueryParameterValue> params,
-      SearchGroup searchGroup) {
+      Map<String, QueryParameterValue> params, SearchGroup searchGroup) {
     List<String> temporalQueryParts1 = new ArrayList<>();
     List<String> temporalQueryParts2 = new ArrayList<>();
     ListMultimap<Integer, SearchGroupItem> temporalGroups = getTemporalGroups(searchGroup);
@@ -320,7 +332,7 @@ public final class SearchGroupItemQueryBuilder {
       // key of one indicates belonging to the second temporal group
       boolean isFirstGroup = key == 0;
       for (SearchGroupItem tempGroup : tempGroups) {
-        String query = buildBaseQuery(criteriaLookup, params, tempGroup, searchGroup.getMention());
+        String query = buildBaseQuery(params, tempGroup, searchGroup.getMention());
         if (isFirstGroup) {
           temporalQueryParts1.add(query);
         } else {
@@ -560,25 +572,76 @@ public final class SearchGroupItemQueryBuilder {
 
   /** Add source or standard concept ids and set params * */
   private static void addParamValueAndFormat(
+      String domain,
       Map<String, QueryParameterValue> queryParams,
-      Set<Long> childConceptIds,
+      Set<SearchParameter> searchParameters,
       List<String> queryParts,
       int standardOrSource) {
-    if (!childConceptIds.isEmpty()) {
-      String standardParam =
+    if (!searchParameters.isEmpty()) {
+      String domainParam =
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams, QueryParameterValue.string(domain));
+      String standardOrSourceParam =
           QueryParameterUtil.addQueryParameterValue(
               queryParams, QueryParameterValue.int64(standardOrSource));
-      QueryParameterValue cids =
-          QueryParameterValue.array(childConceptIds.toArray(new Long[0]), Long.class);
-      String conceptIdsParam = QueryParameterUtil.addQueryParameterValue(queryParams, cids);
-      for (int i = 0; i < queryParts.size(); i++) {
-        String part = queryParts.get(i);
-        if (part.equals(STANDARD_SQL)) {
-          queryParts.set(i, String.format(part, standardParam, conceptIdsParam));
-          break;
+
+      List<String> lookupSqlParts = new ArrayList<>();
+      Map<Boolean, List<SearchParameter>> parentsAndChildren =
+          searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::getGroup));
+      List<Long> parents =
+          parentsAndChildren.get(true).stream()
+              .map(SearchParameter::getConceptId)
+              .collect(Collectors.toList());
+      List<Long> children =
+          parentsAndChildren.get(false).stream()
+              .map(SearchParameter::getConceptId)
+              .collect(Collectors.toList());
+      // Only children exist so no need to do lookups
+      if (!parents.isEmpty() || DomainType.DRUG.toString().equals(domain)) {
+        // Parent nodes exist need to do lookups
+        if (!parents.isEmpty()) {
+          lookupSqlParts.add(
+              generateLookupSql(queryParams, parents, domainParam, standardOrSourceParam, GROUP));
         }
+        if (!children.isEmpty()) {
+          lookupSqlParts.add(
+              generateLookupSql(
+                  queryParams, children, domainParam, standardOrSourceParam, NOT_GROUP));
+        }
+
+        String lookupSql =
+            String.format(
+                DomainType.DRUG.toString().equals(domain)
+                    ? DRUG_SQL
+                    : PARENT_STANDARD_OR_SOURCE_SQL,
+                standardOrSourceParam,
+                domainParam,
+                standardOrSourceParam);
+        queryParts.add(
+            lookupSql.replace("${childLookup}", String.join(UNION_TEMPLATE, lookupSqlParts)));
+      } else {
+        String conceptIdsParam =
+            QueryParameterUtil.addQueryParameterValue(
+                queryParams, QueryParameterValue.array(children.toArray(new Long[0]), Long.class));
+        queryParts.add(
+            String.format(STANDARD_OR_SOURCE_SQL, standardOrSourceParam, conceptIdsParam));
       }
     }
+  }
+
+  private static String generateLookupSql(
+      Map<String, QueryParameterValue> queryParams,
+      List<Long> conceptIds,
+      String domainParam,
+      String standardOrSourceParam,
+      int i) {
+    String conceptIdsParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+    String isGroupParam =
+        QueryParameterUtil.addQueryParameterValue(queryParams, QueryParameterValue.int64(i));
+    return String.format(
+        CHILD_LOOKUP, domainParam, standardOrSourceParam, conceptIdsParam, isGroupParam);
   }
 
   /** Helper method to return a modifier. */

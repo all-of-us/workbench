@@ -468,6 +468,26 @@ public class InstitutionServiceTest {
     service.deleteInstitutionUserInstructions("not found");
   }
 
+  @Test
+  public void validate_OperationalUser() {
+    DbInstitution institution = new DbInstitution();
+    institution.setShortName("AouOps");
+    assertThat(service.validateOperationalUser(institution)).isTrue();
+  }
+
+  @Test
+  public void validate_NonOperationalUser() {
+    DbInstitution institution = new DbInstitution();
+    institution.setShortName("MockAouOps");
+    assertThat(service.validateOperationalUser(institution)).isFalse();
+  }
+
+  @Test
+  public void validate_OperationalUser_nullInstitution() {
+    DbInstitution institution = null;
+    assertThat(service.validateOperationalUser(institution)).isFalse();
+  }
+
   // Institutions' email domains and addresses are Lists but have no inherent order,
   // so they can't be directly compared for equality
   private void assertEqualInstitutions(Institution actual, final Institution expected) {

@@ -8,65 +8,35 @@
 # ./project.rb generate-cb-criteria-tables --bq-project aou-res-curation-prod --bq-dataset deid_output_20181116
 # ./project.rb generate-cb-criteria-tables --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606
 
+set -ex
 
-set -xeuo pipefail
-IFS=$'\n\t'
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
+export DATA_BROWSER=$3      # data browser flag
+export DRY_RUN=$4           # dry run
 
-# --cdr=cdr_version ... *optional
-USAGE="./generate-cdr/generate-cb-criteria-tables.sh --bq-project <PROJECT> --bq-dataset <DATASET>"
-
-while [ $# -gt 0 ]; do
-  echo "1 is $1"
-  case "$1" in
-    --bq-project) BQ_PROJECT=$2; shift 2;;
-    --bq-dataset) BQ_DATASET=$2; shift 2;;
-    -- ) shift; break ;;
-    * ) break ;;
-  esac
-done
-
-
-if [ -z "${BQ_PROJECT}" ]
+if [ "$DRY_RUN" == true ]
 then
-  echo "Usage: $USAGE"
-  exit 1
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.cb_search_all_events")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_criteria")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_criteria_ancestor")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.death")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_relationship")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_ancestor")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_synonym")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
+  exit 0
 fi
 
-if [ -z "${BQ_DATASET}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-# Check that bq_project exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
-if [ -z "$datasets" ]
-then
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
-if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
-  echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
-else
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
-
-# Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
-if [ -z "$datasets" ]
-then
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
-re=\\b$BQ_DATASET\\b
-if [[ $datasets =~ $re ]]; then
-  echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
-else
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
-
+# Test that datset exists
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 
 ################################################
 # CREATE TABLES
