@@ -42,8 +42,8 @@ public class TestMockFactory {
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
 
-    List<ResearchOutcomeEnum> ResearchOutcomeEnumsList = new ArrayList<>();
-    ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
+    List<ResearchOutcomeEnum> researchOutcomes = new ArrayList<>();
+    researchOutcomes.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
         .id(WORKSPACE_FIRECLOUD_NAME)

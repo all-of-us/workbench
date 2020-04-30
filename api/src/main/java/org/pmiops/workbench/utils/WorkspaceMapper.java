@@ -93,6 +93,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "billingStatus", ignore = true) // not updated by Research Purpose
   @Mapping(target = "cdrVersion", ignore = true) // not updated by Research Purpose
   @Mapping(target = "cohorts", ignore = true) // not updated by Research Purpose
+  @Mapping(target = "conceptSets", ignore = true)
   @Mapping(target = "creationTime", ignore = true) // not updated by Research Purpose
   @Mapping(target = "creator", ignore = true) // not updated by Research Purpose
   @Mapping(target = "dataAccessLevel", ignore = true) // not updated by Research Purpose
