@@ -14,19 +14,8 @@ then
   exit 0
 fi
 
-# Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
-if [ -z "$datasets" ]
-then
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
-if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
-  echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
-else
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
+# Test that datset exists
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 
 ################################################
 # CREATE LINKING TABLE

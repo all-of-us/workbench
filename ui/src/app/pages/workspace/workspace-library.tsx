@@ -5,8 +5,8 @@ import {AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
-import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -27,7 +27,7 @@ const styles = reactStyles({
     marginTop: '0.5rem', borderStyle: 'none'
   },
   iconStyling: {
-    color: colors.primary, marginRight: '0.5rem', marginLeft: '0.5rem'
+    color: colors.primary, marginRight: '0.5rem', marginLeft: '0.5rem', height: 24, width: 24
   },
   menuLink: {
     color: colors.accent, fontSize: 14, fontWeight: 600, display: 'flex',
@@ -52,7 +52,8 @@ const styles = reactStyles({
 const libraryTabs = {
   PUBLISHED_WORKSPACES: {
     title: 'Published Workspaces',
-    icon: 'bookmark',
+    // TODO: Find the right icon when we intend to release this.
+    icon: '/assets/icons/phenotype-library.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !featuredWorkspaces.find(featuredWorkspace =>
         workspace.workspace.id === featuredWorkspace.id && workspace.workspace.namespace === featuredWorkspace.namespace));
@@ -63,7 +64,7 @@ const libraryTabs = {
     description: <div>These workspaces demonstrate how computable electronic phenotypes can be implemented within
       the <i>All of Us</i> dataset using examples of previously published phenotype algorithms. You can open the
       workspaces to view them or “duplicate” the workspaces to edit and execute the algorithms.</div>,
-    icon: 'dna',
+    icon: '/assets/icons/phenotype-library.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
         workspace.workspace.id === featuredWorkspace.id &&
@@ -76,12 +77,27 @@ const libraryTabs = {
     description: <div>These workspaces provide instructions for key Researcher Workbench components and representations
       of the <i>All of Us</i> dataset. You can open the workspaces to view them or “duplicate” the workspaces to edit
       and execute them.</div>,
-    icon: 'library',
+    icon: '/assets/icons/tutorial-workspaces.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
         workspace.workspace.id === featuredWorkspace.id &&
         workspace.workspace.namespace === featuredWorkspace.namespace &&
         featuredWorkspace.category === FeaturedWorkspaceCategory.TUTORIALWORKSPACES));
+    }
+  },
+  DEMO_PROJECTS: {
+    title: 'Demonstration Projects',
+    description: <div>Workspaces included here are meant to demonstrate end-to-end analyses that can be performed
+      using <AoU/> Data. The current set of Research Example Analyses were developed as part of <AoU/> Demonstration
+      Projects. They are aimed at demonstrating the quality, utility, and diversity of <AoU/> data by replicating
+      previously published studies. You can open the workspaces to view them or “duplicate” the workspaces to edit
+      and execute them.</div>,
+    icon: '/assets/icons/demonstration.svg',
+    filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
+      return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
+        workspace.workspace.id === featuredWorkspace.id &&
+        workspace.workspace.namespace === featuredWorkspace.namespace &&
+        featuredWorkspace.category === FeaturedWorkspaceCategory.DEMOPROJECTS));
     }
   }
 };
@@ -92,7 +108,7 @@ const LibraryTab: React.FunctionComponent<{
     return <Clickable style={selected ? {...styles.menuLink, ...styles.menuLinkSelected}
     : styles.menuLink}
                       onClick={onClick} hover={styles.menuLinkSelected}>
-      <ClrIcon shape={icon} style={styles.iconStyling} class='is-solid' size={24}/>
+      <img src={icon} style={styles.iconStyling}/>
       {title}
     </Clickable>;
   };
@@ -144,11 +160,13 @@ export const WorkspaceLibrary = withUserProfile()
     ? [
       libraryTabs.PUBLISHED_WORKSPACES,
       libraryTabs.PHENOTYPE_LIBRARY,
-      libraryTabs.TUTORIAL_WORKSPACES
+      libraryTabs.TUTORIAL_WORKSPACES,
+      libraryTabs.DEMO_PROJECTS
     ]
     : [
       libraryTabs.PHENOTYPE_LIBRARY,
-      libraryTabs.TUTORIAL_WORKSPACES
+      libraryTabs.TUTORIAL_WORKSPACES,
+      libraryTabs.DEMO_PROJECTS
     ];
 
   async componentDidMount() {
@@ -236,8 +254,7 @@ export const WorkspaceLibrary = withUserProfile()
         <Header style={{textTransform: 'uppercase'}}>Researcher Workbench Workspace Library</Header>
         <FlexColumn style={{marginTop: '2rem'}}>
           <FlexRow>
-            <ClrIcon shape={currentTab.icon} style={styles.iconStyling}
-                     class='is-solid' size={24}/>
+            <img src={currentTab.icon} style={styles.iconStyling}/>
             <div style={{color: colors.primary, fontSize: 18, fontWeight: 600}}>
               {currentTab.title}
               {currentTab.description && <div style={{color: colors.primary, fontWeight: 400,
