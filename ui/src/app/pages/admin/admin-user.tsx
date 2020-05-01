@@ -77,7 +77,7 @@ export const AdminUser = withUserProfile()(class extends React.Component<
   async updateDisabledStatusForUsers(profile: Profile, disable: boolean) {
     this.setState({reloadingProfile: profile});
     authDomainApi().updateDisabledStatusForUsers(
-      {emailList: [profile.username], disabled: disable}).then(_ => {
+      {usernameList: [profile.username], disabled: disable}).then(_ => {
         this.reloadProfile(profile);
       });
   }

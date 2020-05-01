@@ -172,9 +172,9 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     </div>;
   }
 
-  async updateDisabledStatusForUsers(emailList: string[], disable: boolean) {
+  async updateDisabledStatusForUsers(usernameList: string[], disable: boolean) {
     await authDomainApi().updateDisabledStatusForUsers(
-        {emailList: emailList, disabled: disable}).then(_ => {
+        {usernameList: usernameList, disabled: disable}).then(_ => {
     });
     this.setState({loadingData: false});
   }

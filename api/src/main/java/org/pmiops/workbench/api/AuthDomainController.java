@@ -58,7 +58,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     dbUsers.forEach(
         user -> {
           auditAdminActions(
-              newDisabledStatusByUserId.get(user.getUserId()), oldDisabledStatusByUserId.get(user.getUserId()), user);
+              newDisabledStatusByUserId.get(user.getUserId()),
+              oldDisabledStatusByUserId.get(user.getUserId()),
+              user);
         });
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
