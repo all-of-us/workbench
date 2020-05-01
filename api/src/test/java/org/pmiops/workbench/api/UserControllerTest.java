@@ -20,7 +20,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -67,8 +66,6 @@ public class UserControllerTest {
   private static long incrementedUserId = 1;
   private static final Cloudbilling testCloudbilling = TestMockFactory.createMockedCloudbilling();
 
-  @Mock private static FreeTierBillingService testFreeTierBillingService;
-
   @TestConfiguration
   @Import({
     UserController.class,
@@ -79,7 +76,8 @@ public class UserControllerTest {
     ComplianceService.class,
     DirectoryService.class,
     AdminActionHistoryDao.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    FreeTierBillingService.class,
   })
   static class Configuration {
 
@@ -109,16 +107,13 @@ public class UserControllerTest {
     Cloudbilling getCloudBilling() {
       return testCloudbilling;
     }
-
-    @Bean
-    FreeTierBillingService getFreeTierBillingService() {
-      return testFreeTierBillingService;
-    }
   }
 
   @Autowired UserController userController;
   @Autowired UserDao userDao;
   @Autowired FireCloudService fireCloudService;
+
+  @Autowired FreeTierBillingService mockFreeTierBillingService;
 
   @Before
   public void setUp() {
@@ -305,7 +300,7 @@ public class UserControllerTest {
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
@@ -327,7 +322,7 @@ public class UserControllerTest {
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
@@ -348,7 +343,7 @@ public class UserControllerTest {
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
@@ -368,7 +363,7 @@ public class UserControllerTest {
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
@@ -386,7 +381,7 @@ public class UserControllerTest {
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
@@ -407,7 +402,7 @@ public class UserControllerTest {
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
@@ -428,7 +423,7 @@ public class UserControllerTest {
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
@@ -453,7 +448,7 @@ public class UserControllerTest {
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
