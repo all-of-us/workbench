@@ -80,7 +80,7 @@ describe('RegistrationDashboard', () => {
     serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: true});
     props.betaAccessGranted = true;
     const wrapper = component();
-    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(1);
+    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
   });
 
   it('should not display a warning when enableBetaAccess is false', () => {
