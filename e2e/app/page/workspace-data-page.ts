@@ -101,12 +101,23 @@ export default class WorkspaceDataPage extends AuthenticatedPage {
     throw new Error(`Failed to find page tab with name ${tabName}`);
   }
 
-  async createCohortsLink(): Promise<ElementHandle> {
+  async createCohortsButton(): Promise<ElementHandle> {
     return findIcon(this.page, {text: LABEL_ALIAS.COHORTS}, 'plus-circle');
   }
 
-  async createDataSetsLink(): Promise<ElementHandle> {
+  async createDataSetsButton(): Promise<ElementHandle> {
     return findIcon(this.page, {text: LABEL_ALIAS.DATASETS}, 'plus-circle');
   }
+
+  async includeParticipant(): Promise<void> {
+    const includeGroupsSelector = '//*[@id="list-include-groups"]';
+
+  }
+
+  async excludeParticipant(): Promise<void> {
+    const includeGroupsSelector = '//*[@id="list-exclude-groups"]';
+
+  }
+
 
 }
