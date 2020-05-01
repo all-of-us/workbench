@@ -170,8 +170,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         .setAuthentication(
             new UserAuthentication(user, OAuth2Userinfo, token, UserType.RESEARCHER));
 
-    // TODO: setup this in the context, get rid of log statement
-    log.log(Level.FINE, "{0} logged in", OAuth2Userinfo.getEmail());
+    // This log line is currently the the only reliable way to associate a particular App Engine
+    // request log
+    // with the authenticated user identity, which is critical information for debugging.
+    // TODO(jaycarlton) replace this log line with a UserInfo entry in a dedicated Stackdriver Auth
+    // log.
+    log.log(Level.INFO, "{0} logged in", OAuth2Userinfo.getEmail());
 
     if (!hasRequiredAuthority(method, user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);

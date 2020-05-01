@@ -295,7 +295,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
-    const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
+    const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.getValue();
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
 
@@ -310,7 +310,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
       <div style={styles.mainHeader}>Complete Registration</div>
-      {canUnsafeSelfBypass &&
+      {unsafeAllowSelfBypass &&
         <div data-test-id='self-bypass'
              style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>
           {bypassActionComplete &&
@@ -329,7 +329,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           }
         </div>
       }
-      {!betaAccessGranted &&
+      {enableBetaAccess && !betaAccessGranted &&
         <div data-test-id='beta-access-warning'
              style={{...baseStyles.card, ...styles.warningModal, margin: '1rem 0 0'}}>
           <ClrIcon shape='warning-standard' class='is-solid'
