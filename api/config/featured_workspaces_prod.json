@@ -59,6 +59,18 @@
       "namespace": "aou-rw-e5dfb446",
       "id": "duplicateofbreastcancerphenotypev2",
       "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Demo - Medication Sequencing",
+      "namespace": "aou-rw-e436e43e",
+      "id": "demomedicationsequencing",
+      "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - PheWAS Smoking",
+      "namespace": "aou-rw-269aaeea",
+      "id": "demophewassmoking",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }
