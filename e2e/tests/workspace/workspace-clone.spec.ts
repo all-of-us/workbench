@@ -1,7 +1,7 @@
 import WorkspacesPage from 'app/page/workspaces-page';
 import {signIn} from 'utils/app-utils';
 import {WorkspaceAccessLevel, WorkspaceAction} from 'app/page-identifiers';
-import DataPage from 'app/page/data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import * as fp from 'lodash/fp';
 
@@ -35,7 +35,7 @@ describe('Clone workspace', () => {
       await workspacesPage.clickCreateFinishButton(finishButton);
 
       // wait for Data page
-      const dataPage = new DataPage(page);
+      const dataPage = new WorkspaceDataPage(page);
       await dataPage.waitForLoad();
       // save Data page URL for comparison
       const workspaceDataUrl1 = await page.url();
@@ -60,7 +60,7 @@ describe('Clone workspace', () => {
       const aWorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
       await aWorkspaceCard.clickWorkspaceName();
 
-      const dataPage = new DataPage(page);
+      const dataPage = new WorkspaceDataPage(page);
       await dataPage.waitForLoad();
 
       await dataPage.selectWorkspaceAction(WorkspaceAction.DUPLICATE);

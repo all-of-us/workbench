@@ -1,8 +1,8 @@
-import {Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {WorkspaceAction, PageTab} from 'app/page-identifiers';
-
+import {findIcon} from '../element/xpath-finder';
 
 export const TAB_SELECTOR = {
   cohortsTab: '//*[@role="button"][(text()="Cohorts")]',
@@ -16,7 +16,13 @@ export const PAGE = {
   TITLE: 'Data Page',
 };
 
-export default class DataPage extends AuthenticatedPage {
+
+export const LABEL_ALIAS = {
+  COHORTS: 'Cohorts',
+  DATASETS: 'Datasets',
+};
+
+export default class WorkspaceDataPage extends AuthenticatedPage {
 
   constructor(page: Page) {
     super(page);
@@ -56,6 +62,14 @@ export default class DataPage extends AuthenticatedPage {
       await tab.dispose();
     }
     throw new Error(`Failed to find page tab with name ${tabName}`);
+  }
+
+  async createCohortsLink(): Promise<ElementHandle> {
+    return findIcon(this.page, {text: LABEL_ALIAS.COHORTS}, 'plus-circle');
+  }
+
+  async createDataSetsLink(): Promise<ElementHandle> {
+    return findIcon(this.page, {text: LABEL_ALIAS.DATASETS}, 'plus-circle');
   }
 
 }
