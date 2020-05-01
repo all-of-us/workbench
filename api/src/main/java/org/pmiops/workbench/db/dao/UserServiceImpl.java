@@ -544,13 +544,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public List<DbUser> setDisabledStatusForUsers(List<DbUser> users, boolean disabled) {
+  public List<DbUser> setDisabledStatusForUsers(List<DbUser> users, boolean isDisabled) {
     return users.stream()
         .map(
             user ->
                 updateUserWithRetries(
                     (u) -> {
-                      u.setDisabled(disabled);
+                      u.setDisabled(isDisabled);
                       return u;
                     },
                     user,

@@ -110,11 +110,11 @@ public class AuthDomainControllerTest {
     final DbUser createdUser = createUser(oldDisabledValue);
 
     final boolean newDisabledValue = true;
-    ArrayList emailList = new ArrayList<String>();
-    emailList.add(PRIMARY_EMAIL);
+    ArrayList usernameList = new ArrayList<String>();
+    usernameList.add(PRIMARY_EMAIL);
     UpdateDisabledStatusForUsersRequest request =
         new UpdateDisabledStatusForUsersRequest()
-            .emailList(emailList)
+            .usernameList(usernameList)
             .disabled(newDisabledValue);
     ResponseEntity<Void> response = this.authDomainController.updateDisabledStatusForUsers(request);
     verify(mockAuthDomainAuditAdapter)
@@ -130,11 +130,11 @@ public class AuthDomainControllerTest {
     final DbUser createdUser = createUser(oldDisabledValue);
 
     final boolean newDisabledValue = false;
-    ArrayList emailList = new ArrayList<String>();
-    emailList.add(PRIMARY_EMAIL);
+    ArrayList usernameList = new ArrayList<String>();
+    usernameList.add(PRIMARY_EMAIL);
     UpdateDisabledStatusForUsersRequest request =
         new UpdateDisabledStatusForUsersRequest()
-            .emailList(emailList)
+            .usernameList(usernameList)
             .disabled(newDisabledValue);
 
     ResponseEntity<Void> response = this.authDomainController.updateDisabledStatusForUsers(request);
