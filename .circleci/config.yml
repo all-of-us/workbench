@@ -1,5 +1,10 @@
 version: 2.1
 
+orbs:
+  browser-tools: circleci/browser-tools@1.0.0
+  docker: circleci/docker@1.0.1
+  gradle: circleci/gradle@2.1.0
+
 # -------------------------
 #   PARAMETERS
 # -------------------------
@@ -481,6 +486,41 @@ jobs:
               --promote
       - manage_api_cache:
           save: true
+
+  build-test-docker:
+    resource_class: medium+
+    parallelism: 3
+    docker:
+      - image: cimg/openjdk:8.0.242-node
+      - image: circleci/mysql:5.7.30-ram
+          environment:
+            - MYSQL_ROOT_PASSWORD=ubuntu
+            - MYSQL_USER=ubuntu
+            - MYSQL_PASSWORD=ubuntu
+      working_directory: ~/workbench
+      environment:
+        JAVA_TOOL_OPTIONS: -Xmx2g
+        TERM: dumb
+        MYSQL_ROOT_PASSWORD: ubuntu
+        WORKBENCH_ENV: dev
+        CI: true
+        NODE_ENV: development
+    steps:
+      - checkout_init_git
+      - browser-tools/install-chrome
+      - docker/install-dockerize
+      - activate_service_account_credential
+      - run:
+        # MySQL sometimes refuses connections by the time we attempt to apply
+        # data migrations. Watch the port for 2m for startup.
+          name: Await MySQL start up
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - run:
+          name: Run local migrations
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-migrations
+      - run_e2e_test
+
 
 workflows:
   build-test-deploy:
