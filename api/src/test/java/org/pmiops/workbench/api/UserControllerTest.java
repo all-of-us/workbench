@@ -263,9 +263,9 @@ public class UserControllerTest {
   }
 
   // Combinatorial tests for listBillingAccounts:
+  // enableBillingUpgrade feature flag on/off
   // free tier available vs. expired
   // cloud accounts available vs. none
-  // enableBillingUpgrade feature flag on/off
 
   final BillingAccount freeTierBillingAccount =
       new BillingAccount()
@@ -297,10 +297,10 @@ public class UserControllerTest {
               .isFreeTier(false)
               .isOpen(true));
 
-  // free tier available, cloud accounts exist, billing upgrade is true
+  // billing upgrade is true, free tier is available, cloud accounts exist
 
   @Test
-  public void listBillingAccounts_freeYES_cloudYES_upgradeYES() throws IOException {
+  public void listBillingAccounts_upgradeYES_freeYES_cloudYES() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
@@ -319,73 +319,31 @@ public class UserControllerTest {
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // free tier available, cloud accounts exist, billing upgrade is false
+  // billing upgrade is true, free tier is available, no cloud accounts
 
   @Test
-  public void listBillingAccounts_freeYES_cloudYES_upgradeNO() throws IOException {
+  public void listBillingAccounts_upgradeYES_freeYES_cloudNO() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
-    config.featureFlags.enableBillingUpgrade = false;
+    config.featureFlags.enableBillingUpgrade = true;
 
     when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
-        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
+            .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
 
     final List<BillingAccount> expectedWorkbenchBillingAccounts =
-        Lists.newArrayList(freeTierBillingAccount);
+            Lists.newArrayList(freeTierBillingAccount);
 
     final WorkbenchListBillingAccountsResponse response =
-        userController.listBillingAccounts().getBody();
+            userController.listBillingAccounts().getBody();
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // free tier available, no cloud accounts, billing upgrade is true
+  // billing upgrade is true, free tier is expired, cloud accounts exist
 
   @Test
-  public void listBillingAccounts_freeYES_cloudNO_upgradeYES() throws IOException {
-    config.billing = new BillingConfig();
-    config.billing.accountId = "free-tier";
-    config.featureFlags.enableBillingUpgrade = false;
-
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
-
-    when(testCloudbilling.billingAccounts().list().execute())
-        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
-
-    final List<BillingAccount> expectedWorkbenchBillingAccounts =
-        Lists.newArrayList(freeTierBillingAccount);
-
-    final WorkbenchListBillingAccountsResponse response =
-        userController.listBillingAccounts().getBody();
-    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
-  }
-
-  // free tier available, no cloud accounts, billing upgrade is false
-
-  @Test
-  public void listBillingAccounts_freeYES_cloudNO_upgradeNO() throws IOException {
-    config.billing = new BillingConfig();
-    config.billing.accountId = "free-tier";
-    config.featureFlags.enableBillingUpgrade = false;
-
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
-
-    when(testCloudbilling.billingAccounts().list().execute())
-        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
-
-    final List<BillingAccount> expectedWorkbenchBillingAccounts =
-        Lists.newArrayList(freeTierBillingAccount);
-
-    final WorkbenchListBillingAccountsResponse response =
-        userController.listBillingAccounts().getBody();
-    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
-  }
-
-  // free tier expired, cloud accounts exist, billing upgrade is true
-
-  @Test
-  public void listBillingAccounts_freeNO_cloudYES_upgradeYES() throws IOException {
+  public void listBillingAccounts_upgradeYES_freeNO_cloudYES() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
@@ -393,19 +351,79 @@ public class UserControllerTest {
     when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
-        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
+            .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
 
     final List<BillingAccount> expectedWorkbenchBillingAccounts = cloudbillingAccountsInWorkbench;
+
+    final WorkbenchListBillingAccountsResponse response =
+            userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
+  }
+
+  // billing upgrade is true, free tier is expired, no cloud accounts
+
+  @Test
+  public void listBillingAccounts_upgradeYES_freeNO_cloudNO() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = true;
+
+    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+            .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+
+    final WorkbenchListBillingAccountsResponse response =
+            userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEmpty();
+  }
+
+  // billing upgrade is false, free tier is available, cloud accounts exist
+
+  @Test
+  public void listBillingAccounts_upgradeNO_freeYES_cloudYES() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = false;
+
+    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts =
+        Lists.newArrayList(freeTierBillingAccount);
 
     final WorkbenchListBillingAccountsResponse response =
         userController.listBillingAccounts().getBody();
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // free tier expired, cloud accounts exist, billing upgrade is false
+  // billing upgrade is false, free tier is available, no cloud accounts
 
   @Test
-  public void listBillingAccounts_freeNO_cloudYES_upgradeNO() throws IOException {
+  public void listBillingAccounts_upgradeNO_freeYES_cloudNO() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = false;
+
+    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts =
+        Lists.newArrayList(freeTierBillingAccount);
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
+  }
+
+  // billing upgrade is false, free tier is expired, cloud accounts exist
+
+  @Test
+  public void listBillingAccounts_upgradeNO_freeNO_cloudYES() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
@@ -427,28 +445,10 @@ public class UserControllerTest {
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
-  // free tier expired, no cloud accounts, billing upgrade is true
+  // billing upgrade is false, free tier is expired, no cloud accounts
 
   @Test
-  public void listBillingAccounts_freeNO_cloudNO_upgradeYES() throws IOException {
-    config.billing = new BillingConfig();
-    config.billing.accountId = "free-tier";
-    config.featureFlags.enableBillingUpgrade = true;
-
-    when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
-
-    when(testCloudbilling.billingAccounts().list().execute())
-        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
-
-    final WorkbenchListBillingAccountsResponse response =
-        userController.listBillingAccounts().getBody();
-    assertThat(response.getBillingAccounts()).isEmpty();
-  }
-
-  // free tier expired, no cloud accounts, billing upgrade is false
-
-  @Test
-  public void listBillingAccounts_freeNO_cloudNO_upgradeNO() throws IOException {
+  public void listBillingAccounts_upgradeNO_freeNO_cloudNO() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
