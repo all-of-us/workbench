@@ -457,7 +457,7 @@ jobs:
               --git-version "${CIRCLE_TAG}" \
               --app-version "${CIRCLE_TAG}" \
               --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file circle-sa-key.json \
+              --key-file ~/workbench/api/circle-sa-key.json \
               --promote
       - manage_api_cache:
           save: true
@@ -480,7 +480,7 @@ jobs:
               --git-version "${CIRCLE_TAG}" \
               --app-version "${CIRCLE_TAG}" \
               --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file circle-sa-key.json \
+              --key-file ~/workbench/api/circle-sa-key.json \
               --promote
       - manage_api_cache:
           save: true
