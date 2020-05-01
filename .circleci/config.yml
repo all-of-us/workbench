@@ -493,10 +493,10 @@ jobs:
     docker:
       - image: cimg/openjdk:8.0.242-node
       - image: circleci/mysql:5.7.30-ram
-          environment:
-            - MYSQL_ROOT_PASSWORD=ubuntu
-            - MYSQL_USER=ubuntu
-            - MYSQL_PASSWORD=ubuntu
+        environment:
+          - MYSQL_ROOT_PASSWORD=ubuntu
+          - MYSQL_USER=ubuntu
+          - MYSQL_PASSWORD=ubuntu
       working_directory: ~/workbench
       environment:
         JAVA_TOOL_OPTIONS: -Xmx2g
