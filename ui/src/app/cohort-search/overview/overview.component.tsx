@@ -409,7 +409,7 @@ export const ListOverview = withCurrentWorkspace()(
       const {cohort} = this.props;
       const {ageType, apiError, chartData, currentGraphOptions, deleting, description, existingCohorts, genderOrSexType, loading,
         name, nameTouched, refreshing, saveModalOpen, saveError, saving, stackChart, total} = this.state;
-      const disableIcon = loading || !cohort;
+      const disableIcon = loading || !cohort.id;
       const disableSave = loading || saving || this.definitionErrors || !total;
       const disableRefresh = ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
       const invalid = nameTouched && (!name || !name.trim());
