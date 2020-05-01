@@ -8,6 +8,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {serverConfigStore} from 'app/utils/navigation';
 import {
   Profile,
 } from 'generated/fetch';
@@ -142,7 +143,7 @@ export const AdminUser = withUserProfile()(class extends React.Component<
 
   render() {
     const {contentLoaded, profiles} = this.state;
-
+    const {enableBetaAccess} = serverConfigStore.getValue();
     return <div style={{position: 'relative'}}>
       <h2>User Admin Table</h2>
       {contentLoaded ?
@@ -155,8 +156,8 @@ export const AdminUser = withUserProfile()(class extends React.Component<
                   headerStyle={{width: '20%'}} sortable={true}/>
           <Column field='contactEmail' header='Contact Email' sortable={true}
                   bodyStyle={{...styles.colStyle, width: '19%'}} headerStyle={{width: '19%'}}/>
-          <Column field='betaAccessRequestTime' header='Beta Access Time Requested' sortable={true}
-                  bodyStyle={{...styles.colStyle, width: '15%'}} headerStyle={{width: '15%'}}/>
+          {enableBetaAccess && <Column field='betaAccessRequestTime' header='Beta Access Time Requested' sortable={true}
+                  bodyStyle={{...styles.colStyle, width: '15%'}} headerStyle={{width: '15%'}}/>}
           <Column field='userLockout' header='User Lockout'
                   bodyStyle={{...styles.colStyle, width: '10%'}} headerStyle={{width: '10%'}}/>
           <Column field='bypass' header='Bypass'
