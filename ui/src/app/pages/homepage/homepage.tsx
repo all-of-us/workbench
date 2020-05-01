@@ -230,9 +230,12 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async checkWorkspaces() {
-    const userWorkspaces = (await fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces())).items;
+    const userWorkspacesResponse = (await fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces()));
+    if (userWorkspacesResponse === null) {
+      return;
+    }
     this.setState({
-      userHasWorkspaces: userWorkspaces.length > 0
+      userHasWorkspaces: userWorkspacesResponse.items.length > 0
     });
   }
 
