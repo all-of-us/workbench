@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sun.tools.javac.util.List;
 import java.time.Instant;
+import java.util.ArrayList;
 import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,9 +110,11 @@ public class AuthDomainControllerTest {
     final DbUser createdUser = createUser(oldDisabledValue);
 
     final boolean newDisabledValue = true;
+    ArrayList emailList = new ArrayList<String>();
+    emailList.add(PRIMARY_EMAIL);
     UpdateDisabledStatusForUsersRequest request =
         new UpdateDisabledStatusForUsersRequest()
-            .emailList(List.of(PRIMARY_EMAIL))
+            .emailList(emailList)
             .disabled(newDisabledValue);
     ResponseEntity<Void> response = this.authDomainController.updateDisabledStatusForUsers(request);
     verify(mockAuthDomainAuditAdapter)
@@ -128,9 +130,11 @@ public class AuthDomainControllerTest {
     final DbUser createdUser = createUser(oldDisabledValue);
 
     final boolean newDisabledValue = false;
+    ArrayList emailList = new ArrayList<String>();
+    emailList.add(PRIMARY_EMAIL);
     UpdateDisabledStatusForUsersRequest request =
         new UpdateDisabledStatusForUsersRequest()
-            .emailList(List.of(PRIMARY_EMAIL))
+            .emailList(emailList)
             .disabled(newDisabledValue);
 
     ResponseEntity<Void> response = this.authDomainController.updateDisabledStatusForUsers(request);

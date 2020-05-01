@@ -49,14 +49,16 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   public ResponseEntity<Void> updateDisabledStatusForUsers(
       UpdateDisabledStatusForUsersRequest request) {
     final List<DbUser> dbUsers = userDao.findUsersByUsernameIn(request.getEmailList());
+    final Map<Long, Boolean> oldDisabledStatusByUserId =
+        dbUsers.stream().collect(Collectors.toMap(DbUser::getUserId, DbUser::getDisabled));
     final List<DbUser> updatedDbUsers =
         userService.setDisabledStatusForUsers(dbUsers, request.getDisabled());
-    final Map<Long, Boolean> updatedDbUsersByUserId =
+    final Map<Long, Boolean> newDisabledStatusByUserId =
         updatedDbUsers.stream().collect(Collectors.toMap(DbUser::getUserId, DbUser::getDisabled));
     dbUsers.forEach(
         user -> {
           auditAdminActions(
-              updatedDbUsersByUserId.get(user.getUserId()), request.getDisabled(), user);
+              newDisabledStatusByUserId.get(user.getUserId()), oldDisabledStatusByUserId.get(user.getUserId()), user);
         });
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
