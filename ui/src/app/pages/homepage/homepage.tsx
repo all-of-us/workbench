@@ -231,11 +231,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   async checkWorkspaces() {
     const userWorkspacesResponse = (await fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces()));
-    if (userWorkspacesResponse === null) {
-      return;
-    }
     this.setState({
-      userHasWorkspaces: userWorkspacesResponse.items.length > 0
+      userHasWorkspaces: userWorkspacesResponse && userWorkspacesResponse.items.length > 0
     });
   }
 
