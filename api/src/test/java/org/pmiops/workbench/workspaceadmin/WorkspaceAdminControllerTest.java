@@ -108,11 +108,7 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(Optional.empty());
 
     final Workspace workspace =
-<<<<<<< HEAD
         testMockFactory.buildWorkspaceModelForCreate(WORKSPACE_NAME);
-=======
-        testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
->>>>>>> master
     final DbWorkspace dbWorkspace = createDbWorkspaceStub(workspace);
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
         .thenReturn(Optional.of(dbWorkspace));

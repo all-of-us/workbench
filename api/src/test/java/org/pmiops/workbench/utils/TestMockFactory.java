@@ -10,6 +10,7 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,13 +61,11 @@ public class TestMockFactory {
    * @param workspaceName User-created Workspace name.
    * @return
    */
-  public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
-    List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
-    disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
-    disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
-
-    List<ResearchOutcomeEnum> researchOutcomes = new ArrayList<>();
-    researchOutcomes.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
+  public Workspace buildWorkspaceModelForCreate(String workspaceName) {
+    List<DisseminateResearchEnum> disseminateResearchEnumsList = ImmutableList.of(
+        DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES,
+        DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
+    List<ResearchOutcomeEnum> researchOutcomes = ImmutableList.of(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
         .name(workspaceName)
@@ -140,7 +139,8 @@ public class TestMockFactory {
     doAnswer(
             invocation -> {
               DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+              //noinspection ResultOfMethodCallIgnored
+              doReturn("aou-rw-local1-aaaa0000").when(entry).getFireCloudProjectName();
               return entry;
             })
         .when(billingProjectBufferService)
