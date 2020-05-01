@@ -506,15 +506,15 @@ jobs:
       CI: true
       NODE_ENV: development
     steps:
-      - checkout_init_git
-      - browser-tools/install-chrome
-      - docker/install-dockerize
-      - activate_service_account_credential
       - run:
         # MySQL sometimes refuses connections by the time we attempt to apply
         # data migrations. Watch the port for 2m for startup.
           name: Await MySQL start up
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - checkout_init_git
+      - browser-tools/install-chrome
+      - docker/install-dockerize
+      - activate_service_account_credential
       - run:
           name: Run local migrations
           working_directory: ~/workbench/api
