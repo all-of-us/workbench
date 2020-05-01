@@ -269,15 +269,16 @@ public class UserControllerTest {
           .name("billingAccounts/free-tier")
           .isOpen(true);
 
-  static final List<com.google.api.services.cloudbilling.model.BillingAccount> cloudbillingAccounts =
-      Lists.newArrayList(
-          new com.google.api.services.cloudbilling.model.BillingAccount()
-              .setName("googlebucks")
-              .setDisplayName("Paid using your credit card"),
-          new com.google.api.services.cloudbilling.model.BillingAccount()
-              .setName("a2")
-              .setDisplayName("Account 2 - Open")
-              .setOpen(true));
+  static final List<com.google.api.services.cloudbilling.model.BillingAccount>
+      cloudbillingAccounts =
+          Lists.newArrayList(
+              new com.google.api.services.cloudbilling.model.BillingAccount()
+                  .setName("googlebucks")
+                  .setDisplayName("Paid using your credit card"),
+              new com.google.api.services.cloudbilling.model.BillingAccount()
+                  .setName("a2")
+                  .setDisplayName("Account 2 - Open")
+                  .setOpen(true));
 
   static final List<BillingAccount> cloudbillingAccountsInWorkbench =
       Lists.newArrayList(
