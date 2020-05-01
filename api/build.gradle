@@ -611,10 +611,9 @@ task bigQueryTest(type: Test) {
 }
 
 tasks.withType(Test) {
-  maxParallelForks = 5
-  forkEvery = 50
+  // maxParallelForks = 1
+  // forkEvery = 50
   maxHeapSize = "1024m"
-  minHeapSize = "1024m"
   testLogging {
     // Causes the correct line to be reported on an exception.
     exceptionFormat "full"
