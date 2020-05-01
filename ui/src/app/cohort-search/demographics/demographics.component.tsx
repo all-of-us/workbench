@@ -190,7 +190,6 @@ export class Demographics extends React.Component<Props, State> {
       if (serverConfigStore.getValue().enableCBAgeTypeOptions) {
         this.loadAgeNodesFromApi();
       } else {
-        this.initAgeRange();
         this.setState({loading: false});
       }
     } else {
@@ -274,6 +273,8 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({minAge}, () => {
       if (serverConfigStore.getValue().enableCBAgeTypeOptions) {
         this.calculateAgeFromNodes('min');
+      } else {
+        this.setState({count: null});
       }
     });
   }
@@ -290,6 +291,8 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({maxAge}, () => {
       if (serverConfigStore.getValue().enableCBAgeTypeOptions) {
         this.calculateAgeFromNodes('max');
+      } else {
+        this.setState({count: null});
       }
     });
   }
@@ -339,6 +342,8 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({maxAge: max, minAge: min}, () => {
       if (serverConfigStore.getValue().enableCBAgeTypeOptions) {
         this.calculateAgeFromNodes();
+      } else {
+        this.setState({count: null});
       }
     });
   }
@@ -474,6 +479,7 @@ export class Demographics extends React.Component<Props, State> {
     const {selectedIds, wizard} = this.props;
     const {ageType, calculating, count, loading, maxAge, minAge, nodes} = this.state;
     const isAge = wizard.type === CriteriaType.AGE;
+    const calcDisabled = calculating || count !== null;
     return loading
       ? <div style={{textAlign: 'center'}}><Spinner style={{marginTop: '3rem'}}/></div>
       : <React.Fragment>
@@ -547,8 +553,10 @@ export class Demographics extends React.Component<Props, State> {
         }
         {this.showPreview && <div style={isAge ? {...styles.countPreview, ...styles.agePreview} : styles.countPreview}>
           {isAge && <div style={{float: 'left', marginRight: '0.25rem'}}>
-            <button style={styles.calculateBtn} disabled={calculating || count !== null} onClick={() => this.calculateAge()}>
-              {calculating && <Spinner size={16}/>}
+            <button style={calcDisabled ? {...styles.calculateBtn, opacity: 0.4} : styles.calculateBtn}
+              disabled={calcDisabled}
+              onClick={() => this.calculateAge()}>
+              {calculating && <Spinner style={{marginRight: '0.25rem'}} size={16}/>}
               Calculate
             </button>
           </div>}

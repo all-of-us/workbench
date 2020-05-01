@@ -14,7 +14,6 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType} from 'generated';
 import {CohortBuilderApi} from 'generated/fetch';
-import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
@@ -41,7 +40,6 @@ describe('ModalComponent', () => {
         ClarityModule,
         FormsModule,
         NgxPopperModule,
-        NouisliderModule,
         ReactiveFormsModule,
       ],
     })
