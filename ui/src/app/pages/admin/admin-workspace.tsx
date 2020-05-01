@@ -248,10 +248,10 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
                       onClick={() => {
                         this.setState({loadingData: true});
                         const writersAndOwners = fp.filter(
-                            userRole =>
+                          userRole =>
                                 userRole.role === WorkspaceAccessLevel.OWNER
                                 || userRole.role === WorkspaceAccessLevel.WRITER,
-                            collaborators
+                          collaborators
                         );
                         this.updateDisabledStatusForUsers(fp.map(userRole => userRole.email, writersAndOwners), true);
                       }}>Disable Writers & Owners</Button>
