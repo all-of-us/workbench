@@ -4,6 +4,7 @@ orbs:
   browser-tools: circleci/browser-tools@1.0.0
   docker: circleci/docker@1.0.1
   gradle: circleci/gradle@2.1.0
+  gcp-cli: circleci/gcp-cli@1.0.0
 
 # -------------------------
 #   PARAMETERS
@@ -511,6 +512,8 @@ jobs:
         # data migrations. Watch the port for 2m for startup.
           name: Await MySQL start up
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - gcp-cli/install_and_initialize_cli:
+          executor: gcp-cli/google
       - checkout_init_git
       # - browser-tools/install-chrome
       - docker/install-dockerize
