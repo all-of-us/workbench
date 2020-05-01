@@ -3730,6 +3730,55 @@ definitions:
     type: object
     required:
     - name
+    example:
+      billingAccountName: "billingAccounts/000000-AAAAAA-111111"
+      billingAccountType: "FREE_TIER"
+      billingStatus: "ACTIVE"
+      cdrVersionId: "2"
+      creationTime: 1588097211621
+      creator: "user@aou-domain.org"
+      dataAccessLevel: "registered"
+      etag: "\"1\""
+      googleBucketName: "gcs-bucket-AAAAAAAA-BBBBB"
+      id: "mynewestworkspace"
+      lastModifiedTime: 1588097211621
+      name: "my newest workspace"
+      namespace: "aou-rw-test-11112222"
+      published: false
+      researchPurpose:
+        additionalNotes: null
+        ancestry: false
+        anticipatedFindings: >
+          varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed
+          lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa
+          eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor
+          pellentesque elit
+        approved: null
+        commercialPurpose: true
+        controlSet: false
+        diseaseFocusedResearch: false
+        diseaseOfFocus: "Chicken Pox"
+        disseminateResearchFindingList: ["PRESS_RELEASE", "PUBLICATION_COMMUNITY_BASED_BLOG", "PUBLICATION_PERSONAL_BLOG"]
+        drugDevelopment: false
+        educational: true
+        ethics: false
+        intendedStudy: >
+          varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed
+          lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa
+          eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor
+          eu augue ut lectus arcu bibendum at varius vel pharetra vel turpis nunc eget lorem dolor
+        methodsDevelopment: false
+        otherDisseminateResearchFindings: "varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed"
+        otherPopulationDetails: "varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed"
+        otherPurpose: true
+        otherPurposeDetails: "no real purpose"
+        populationDetails: []
+        populationHealth: false
+        reasonForAllOfUs: "varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed"
+        researchOutcomeList: ["IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS", "DECREASE_ILLNESS_BURDEN"]
+        reviewRequested: false
+        scientificApproach: "varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed"
+        socialBehavioral: false
     properties:
       id:
         type: string
