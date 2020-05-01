@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sun.tools.javac.util.List;
 import java.time.Instant;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -27,7 +28,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.UpdateUserDisabledRequest;
+import org.pmiops.workbench.model.UpdateDisabledStatusForUsersRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.Providers;
@@ -109,9 +110,9 @@ public class AuthDomainControllerTest {
     final DbUser createdUser = createUser(oldDisabledValue);
 
     final boolean newDisabledValue = true;
-    UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
-    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+    UpdateDisabledStatusForUsersRequest request =
+        new UpdateDisabledStatusForUsersRequest().emailList(List.of(PRIMARY_EMAIL)).disabled(newDisabledValue);
+    ResponseEntity<Void> response = this.authDomainController.updateDisabledStatusForUsers(request);
     verify(mockAuthDomainAuditAdapter)
         .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -125,10 +126,10 @@ public class AuthDomainControllerTest {
     final DbUser createdUser = createUser(oldDisabledValue);
 
     final boolean newDisabledValue = false;
-    UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
+    UpdateDisabledStatusForUsersRequest request =
+        new UpdateDisabledStatusForUsersRequest().emailList(List.of(PRIMARY_EMAIL)).disabled(newDisabledValue);
 
-    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+    ResponseEntity<Void> response = this.authDomainController.updateDisabledStatusForUsers(request);
     verify(mockAuthDomainAuditAdapter)
         .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);

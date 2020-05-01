@@ -12,8 +12,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateDisabledStatusForUsersRequest;
-import org.pmiops.workbench.model.UpdateUserDisabledRequest;
-import org.pmiops.workbench.model.UpdateUsersDisabledRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
