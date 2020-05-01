@@ -345,7 +345,6 @@ sourceSets {
     }
     compileClasspath += generated.output
     runtimeClasspath += generated.output
-    jvmArgs '-Xmx1g'
   }
 
   //
@@ -612,6 +611,10 @@ task bigQueryTest(type: Test) {
 }
 
 tasks.withType(Test) {
+  maxParallelForks = 2
+  forkEvery = 100
+  maxHeapSize = "1024m"
+  minHeapSize = "1024m"
   testLogging {
     // Causes the correct line to be reported on an exception.
     exceptionFormat "full"
