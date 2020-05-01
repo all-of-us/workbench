@@ -209,10 +209,11 @@ commands:
 jobs:
   api-build-test:
     <<: *java_defaults
+    resource_class: medium+
     steps:
       - checkout_init_git
-      - ensure_branch_has_changes:
-          dir_name: "api"
+      #- ensure_branch_has_changes:
+          #dir_name: "api"
       - manage_api_cache:
           restore: true
       - run:
