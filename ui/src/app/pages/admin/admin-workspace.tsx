@@ -1,9 +1,9 @@
 import {Component} from '@angular/core';
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
-import * as fp from 'lodash/fp';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -19,7 +19,7 @@ import {
 } from 'app/utils/research-purpose';
 import {
   AdminFederatedWorkspaceDetailsResponse,
-  CloudStorageTraffic, ListClusterResponse, Profile, WorkspaceAccessLevel,
+  CloudStorageTraffic, ListClusterResponse, WorkspaceAccessLevel,
 } from 'generated/fetch';
 import {ReactFragment} from 'react';
 
@@ -175,7 +175,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
   async updateDisabledStatusForUsers(usernameList: string[], disable: boolean) {
     await authDomainApi().updateDisabledStatusForUsers(
         {usernameList: usernameList, disabled: disable}).then(_ => {
-    });
+        });
     this.setState({loadingData: false});
   }
 
@@ -247,7 +247,12 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
               <Button style={{marginLeft: '0.5rem'}}
                       onClick={() => {
                         this.setState({loadingData: true});
-                        const writersAndOwners = fp.filter(userRole => userRole.role === WorkspaceAccessLevel.OWNER || userRole.role === WorkspaceAccessLevel.WRITER, collaborators);
+                        const writersAndOwners = fp.filter(
+                            userRole =>
+                                userRole.role === WorkspaceAccessLevel.OWNER
+                                || userRole.role === WorkspaceAccessLevel.WRITER,
+                            collaborators
+                        );
                         this.updateDisabledStatusForUsers(fp.map(userRole => userRole.email, writersAndOwners), true);
                       }}>Disable Writers & Owners</Button>
             </FlexColumn>
