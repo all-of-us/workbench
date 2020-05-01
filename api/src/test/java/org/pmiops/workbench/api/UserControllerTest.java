@@ -330,13 +330,13 @@ public class UserControllerTest {
     when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
-            .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
 
     final List<BillingAccount> expectedWorkbenchBillingAccounts =
-            Lists.newArrayList(freeTierBillingAccount);
+        Lists.newArrayList(freeTierBillingAccount);
 
     final WorkbenchListBillingAccountsResponse response =
-            userController.listBillingAccounts().getBody();
+        userController.listBillingAccounts().getBody();
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
@@ -351,12 +351,12 @@ public class UserControllerTest {
     when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
-            .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
 
     final List<BillingAccount> expectedWorkbenchBillingAccounts = cloudbillingAccountsInWorkbench;
 
     final WorkbenchListBillingAccountsResponse response =
-            userController.listBillingAccounts().getBody();
+        userController.listBillingAccounts().getBody();
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
@@ -371,10 +371,10 @@ public class UserControllerTest {
     when(testFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
-            .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
 
     final WorkbenchListBillingAccountsResponse response =
-            userController.listBillingAccounts().getBody();
+        userController.listBillingAccounts().getBody();
     assertThat(response.getBillingAccounts()).isEmpty();
   }
 
