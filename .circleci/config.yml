@@ -497,14 +497,14 @@ jobs:
           - MYSQL_ROOT_PASSWORD=ubuntu
           - MYSQL_USER=ubuntu
           - MYSQL_PASSWORD=ubuntu
-      working_directory: ~/workbench
-      environment:
-        JAVA_TOOL_OPTIONS: -Xmx2g
-        TERM: dumb
-        MYSQL_ROOT_PASSWORD: ubuntu
-        WORKBENCH_ENV: dev
-        CI: true
-        NODE_ENV: development
+    working_directory: ~/workbench
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx2g
+      TERM: dumb
+      MYSQL_ROOT_PASSWORD: ubuntu
+      WORKBENCH_ENV: dev
+      CI: true
+      NODE_ENV: development
     steps:
       - checkout_init_git
       - browser-tools/install-chrome
