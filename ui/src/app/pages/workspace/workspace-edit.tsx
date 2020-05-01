@@ -965,9 +965,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                           }
                         }}
               />
-              {freeTierCreditsBalance > 0.0 && <div style={styles.freeCreditsBalanceClickable}>
+              <div style={styles.freeCreditsBalanceClickable}>
                 <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View FREE credits balance</Clickable>
-              </div>}
+              </div>
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
