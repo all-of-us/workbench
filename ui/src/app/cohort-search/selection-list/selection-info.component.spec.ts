@@ -1,7 +1,7 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
 import {NgxPopperModule} from 'ngx-popper';
-import {SelectionInfoComponent} from './selection-info.component';
+import {SelectionInfoComponent} from './selection-list.component';
 
 describe('SelectionInfoComponent', () => {
   let component: SelectionInfoComponent;
