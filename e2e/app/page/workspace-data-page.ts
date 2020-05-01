@@ -30,9 +30,14 @@ export const LABEL_ALIAS = {
 };
 
 export const FIELD = {
-  createNewWorkspaceButton: {
+  createCohortsButton: {
     textOption: {
       text: LABEL_ALIAS.COHORTS
+    }
+  },
+  createDatasetsButton: {
+    textOption: {
+      text: LABEL_ALIAS.DATASETS
     }
   }
 };
