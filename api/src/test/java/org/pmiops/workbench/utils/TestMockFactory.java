@@ -33,8 +33,10 @@ import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
+  private static final String CDR_VERSION_ID = "1";
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
-  private static final String FIRECLOUD_PROJECT_NAME = "aou-rw-env-01234567";
+  private static final String WORKSPACE_FIRECLOUD_NAME =
+      "gonewiththewind"; // should match workspace name w/o spaces
 
   /**
    * Create an initial workspace (like the kind that comes from the UI for createWorkspace.
@@ -58,7 +60,7 @@ public class TestMockFactory {
    * @param workspaceName User-created Workspace name.
    * @return
    */
-  public Workspace buildWorkspaceModelForCreate(String workspaceName) {
+  public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
@@ -134,14 +136,14 @@ public class TestMockFactory {
         .createWorkspace(anyString(), anyString());
   }
 
-  public void stubBufferBillingProject(BillingProjectBufferService mockBillingProjectBufferService) {
+  public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {
     doAnswer(
             invocation -> {
               DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-              doReturn(FIRECLOUD_PROJECT_NAME).when(entry).getFireCloudProjectName();
+              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
               return entry;
             })
-        .when(mockBillingProjectBufferService)
+        .when(billingProjectBufferService)
         .assignBillingProject(any());
   }
 
