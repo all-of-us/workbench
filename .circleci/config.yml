@@ -115,59 +115,47 @@ commands:
 
   install_ui_dependencies:
     description: "workbench/ui: yarn install, save and restore cache"
-    parameters:
-      version:
-        type: string
-      key_prefix:
-        type: string
-        default: << parameters.version >>-yarn-ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
     steps:
       # caching: https://circleci.com/docs/2.0/caching/
       - restore_cache:
+          name: "restore ui cache"
           keys:
-            # restore cache strategy:
-            # Check for the latest cache from your branch.
-            # If that fails, then check for the latest from master branch.
-            # If that fails, then check for the latest from any branch
-            - << parameters.key_prefix >>-{{ .Branch }}
-            - << parameters.key_prefix >>-master
-            - << parameters.key_prefix >>
+            - v1-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
+            - v1-ui-cache-master
+            - v1-ui-cache-
       - run:
           name: "workbench/ui: yarn install dependencies"
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
       - save_cache:
+          name: "save ui cache"
           paths:
             - ~/.cache/yarn
             - ui/node_modules
-          key: << parameters.key_prefix >>-{{ .Branch }}
+          key: v1-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
 
   install_e2e_dependencies:
     description: "workbench/e2e: yarn install, save and restore cache"
-    parameters:
-      version:
-        type: string
-      key_prefix:
-        type: string
-        default: << parameters.version >>-yarn-e2e-cache-{{ checksum "~/workbench/e2e/yarn.lock" }}
     steps:
       - restore_cache:
+          name: "restore e2e cache"
           keys:
-            - << parameters.key_prefix >>-{{ .Branch }}
-            - << parameters.key_prefix >>-master
-            - << parameters.key_prefix >>
+            - v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v1-e2e-cache-master
+            - v1-e2e-cache-
       - run:
           name: "workbench/e2e: yarn install dependencies"
           working_directory: ~/workbench/e2e
           command: yarn install --frozen-lockfile --non-interactive
       - save_cache:
+          name: "save e2e cache"
           paths:
             - ~/.cache/yarn
             - e2e/node_modules
-          key: << parameters.key_prefix >>-{{ .Branch }}
+          key: v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
-    description: "workbench/api: save, restore or save_and_restore gradle cache"
+    description: "workbench/api: save or restore gradle cache"
     parameters:
       save:
         type: boolean
@@ -175,39 +163,38 @@ commands:
       restore:
         type: boolean
         default: false
-      key_prefix:
-        type: string
-        default: v1-api-cache-{{ checksum "~/workbench/api/build.gradle" }}
     steps:
       - when:
           condition: << parameters.save >>
           steps:
             - save_cache:
+                name: "save api gradle cache"
                 paths:
-                  - ~/.gradle/caches
-                  - ~/.gradle/wrapper
-                  - ~/.m2
-                  - ~/workbench/api/build/exploded-api/WEB-INF/lib/
-                key: << parameters.key_prefix >>-{{ .Branch }}
+                  - ~/.gradle
+                key: v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - when:
           condition: << parameters.restore >>
           steps:
             - restore_cache:
+                name: "restore api gradle cache"
                 keys:
-                  - << parameters.key_prefix >>-{{ .Branch }}
-                  - << parameters.key_prefix >>-master
-                  - << parameters.key_prefix >>
+                  - v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                  - v1-gradle-cache-master
+                  - v1-gradle-cache-
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
     steps:
       - run:
+          name: Update Puppeteer test environment variables
+          command: |
+            echo 'export USER_NAME=$PUPPETEER_TEST_USER' >> $BASH_ENV
+            echo 'export PASSWORD=$PUPPETEER_TEST_USER_PASSWORD' >> $BASH_ENV
+            echo 'export INVITATION_KEY=$PUPPETEER_TEST_REGISTRATION_KEY' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
           name: Run puppeteer e2e tests
           working_directory: ~/workbench/e2e
-          environment:
-            USER_NAME: $PUPPETEER_TEST_USER
-            PASSWORD: $PUPPETEER_TEST_USER_PASSWORD
-            INVITATION_KEY: $PUPPETEER_TEST_REGISTRATION_KEY
           # parallelism used to run e2e tests
           command: yarn test:ci $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
       - store_artifacts:
@@ -232,10 +219,6 @@ jobs:
           name: Validate Swagger definitions
           working_directory: ~/workbench/api
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
-      - run:
-          name: Integration tests compile
-          working_directory: ~/workbench/api
-          command: ./project.rb gradle compile__bigquerytest__Java compile__integration__Java
       - run:
           name: Run Java unit tests
           working_directory: ~/workbench/api
@@ -313,7 +296,8 @@ jobs:
               --version circle-ci-test \
               --key-file circle-sa-key.json \
               --promote
-
+      - manage_api_cache:
+          save: true
 
   api-deps-check:
     <<: *java_defaults
@@ -383,8 +367,7 @@ jobs:
           working_directory: ~/workbench
           command: |
             ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
-      - install_ui_dependencies:
-          version: "v1"
+      - install_ui_dependencies
       - run:
           name: Yarn codegen
           working_directory: ~/workbench/ui
@@ -426,8 +409,8 @@ jobs:
     parallelism: 3
     steps:
       - checkout_init_git
-      - install_e2e_dependencies:
-          version: "v1"
+      - halt_job_noncode_changes
+      - install_e2e_dependencies
       - run_e2e_test
 
   ui-deploy-to-test:
@@ -437,8 +420,7 @@ jobs:
       # Use "ui-build-test" job's workspace here to avoid redoing the setup.
       - attach_workspace:
           at: .
-      - install_ui_dependencies:
-          version: "v1"
+      - install_ui_dependencies
       - activate_service_account_credential
       - deploy:
           name: Deploy UI to "test" App Engine
@@ -464,6 +446,7 @@ jobs:
       - activate_service_account_credential
       - deploy:
           working_directory: ~/workbench/deploy
+          name: Deploy API and UI to "staging" App Engine
           command: |
             ./project.rb deploy \
               --project all-of-us-rw-staging \
@@ -473,7 +456,9 @@ jobs:
               --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
               --key-file circle-sa-key.json \
               --promote
-          name: Deploy API and UI to "staging" App Engine
+      - manage_api_cache:
+          save: true
+
 
   deploy-perf:
     <<: *defaults
@@ -483,6 +468,7 @@ jobs:
           restore: true
       - activate_service_account_credential
       - deploy:
+          name: Deploy API and UI to "perf" App Engine
           working_directory: ~/workbench/deploy
           command: |
             ./project.rb deploy \
@@ -493,7 +479,8 @@ jobs:
               --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
               --key-file circle-sa-key.json \
               --promote
-          name: Deploy API and UI to "perf" App Engine
+      - manage_api_cache:
+          save: true
 
 workflows:
   build-test-deploy:
@@ -514,7 +501,7 @@ workflows:
           filters: *filter_only_master_branch
           requires:
             - ui-build-test
-      # After merge PR to master branch, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
+      # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
       - puppeteer-e2e-test:
           filters: *filter_only_master_branch
           requires:
