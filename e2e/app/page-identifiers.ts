@@ -18,9 +18,3 @@ export enum PageUrl {
    WORKSPACES = config.uiBaseUrl + config.workspacesUrlPath,
    ADMIN = config.uiBaseUrl + config.adminUrlPath,
 }
-
-export enum PageTab {
-   DATA = 'DATA',
-   ANALYSIS = 'ANALYSIS',
-   ABOUT = 'ABOUT'
-}
