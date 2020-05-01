@@ -3538,20 +3538,28 @@ definitions:
       enableComplianceTraining:
         type: boolean
         default: false
-        description: Whether the compliance training access module is enabled.
-      enableDataUseAgreement:
-        type: boolean
-        default: false
-        description: Whether the data use agreement access module is enabled.
+        description: Whether the Compliance Training access module is enabled.
       enableEraCommons:
         type: boolean
         default: false
         description: Whether the eRA Commons access module is enabled.
+      enableDataUseAgreement:
+        type: boolean
+        default: false
+        description: Whether the Data Use Agreement access module is enabled.
+      enableBetaAccess:
+        type: boolean
+        default: false
+        description: Whether the Beta Access module is enabled.
       unsafeAllowSelfBypass:
         type: boolean
         default: false
         description: Whether a user is allowed to self-bypass. Only enabled in test
           environments.
+      requireInvitationKey:
+        type: boolean
+        default: false
+        description: Whether the current environment requires an invitation key for signup.
       defaultFreeCreditsDollarLimit:
         type: number
         format: double
@@ -3564,10 +3572,6 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for billing upgrade
-      requireInvitationKey:
-        type: boolean
-        default: false
-        description: Whether the current environment requires an invitation key for signup.
       requireInstitutionalVerification:
         type: boolean
         default: false

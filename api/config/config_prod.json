@@ -84,9 +84,9 @@
     "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
-    "enableBetaAccess": true,
+    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
-    "requireInvitationKey": true
+    "requireInvitationKey": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
