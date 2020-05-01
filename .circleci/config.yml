@@ -227,6 +227,10 @@ jobs:
           working_directory: ~/workbench/api
           command: ./project.rb test
       - run:
+          name: Stop gradle daemon
+          working_directory: ~/workbench/api
+          command: gradle --stop
+      - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
           working_directory: ~/workbench/api
