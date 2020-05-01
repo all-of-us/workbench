@@ -262,14 +262,14 @@ public class UserControllerTest {
   // free tier available vs. expired
   // cloud accounts available vs. none
 
-  final BillingAccount freeTierBillingAccount =
+  static final BillingAccount freeTierBillingAccount =
       new BillingAccount()
           .isFreeTier(true)
           .displayName("Use All of Us free credits")
           .name("billingAccounts/free-tier")
           .isOpen(true);
 
-  final List<com.google.api.services.cloudbilling.model.BillingAccount> cloudbillingAccounts =
+  static final List<com.google.api.services.cloudbilling.model.BillingAccount> cloudbillingAccounts =
       Lists.newArrayList(
           new com.google.api.services.cloudbilling.model.BillingAccount()
               .setName("googlebucks")
@@ -279,7 +279,7 @@ public class UserControllerTest {
               .setDisplayName("Account 2 - Open")
               .setOpen(true));
 
-  final List<BillingAccount> cloudbillingAccountsInWorkbench =
+  static final List<BillingAccount> cloudbillingAccountsInWorkbench =
       Lists.newArrayList(
           new BillingAccount()
               .name("googlebucks")
