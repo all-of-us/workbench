@@ -1741,7 +1741,7 @@ def describe_cluster(cmd_name, *args)
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
-      "Optional project ID; by default will infer the project form the cluster ID")
+      "Optional project ID; by default will infer the project from the cluster ID")
   op.add_validator ->(opts) { raise ArgumentError unless opts.cluster_id }
   op.parse.validate
 
