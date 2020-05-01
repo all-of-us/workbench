@@ -131,18 +131,10 @@ public class ManageClusters {
     System.out.println(PRETTY_GSON.toJson(resp.getData()));
     System.out.printf("\n\nTo inspect logs in cloud storage, run the following:\n\n");
 
-    // TODO(PD-4740): Use impersonation here instead.
-    String keyPath = String.format("/tmp/%s-key.json", workbenchProjectId);
     System.out.printf(
-        "    gcloud iam service-accounts keys create %s --iam-account %s\n",
-        keyPath, workbenchServiceAccount);
-    System.out.printf("    gcloud auth activate-service-account --key-file %s\n\n", keyPath);
-    System.out.printf("    gsutil ls gs://%s/**\n", cluster.getStagingBucket());
-    System.out.printf("    gsutil cat ... # inspect or copy logs\n\n");
-    System.out.printf("    # Delete the key when done\n");
+        "    gsutil -i %s ls gs://%s/**\n", workbenchServiceAccount, cluster.getStagingBucket());
     System.out.printf(
-        "    gcloud iam service-accounts keys delete $(jq -r .private_key_id %s) --iam-account %s\n\n",
-        keyPath, workbenchServiceAccount);
+        "    gsutil -i %s cat ... # inspect or copy logs\n\n", workbenchServiceAccount);
   }
 
   private static void deleteClusters(
