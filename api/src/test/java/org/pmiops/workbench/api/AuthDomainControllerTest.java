@@ -111,7 +111,9 @@ public class AuthDomainControllerTest {
 
     final boolean newDisabledValue = true;
     UpdateDisabledStatusForUsersRequest request =
-        new UpdateDisabledStatusForUsersRequest().emailList(List.of(PRIMARY_EMAIL)).disabled(newDisabledValue);
+        new UpdateDisabledStatusForUsersRequest()
+            .emailList(List.of(PRIMARY_EMAIL))
+            .disabled(newDisabledValue);
     ResponseEntity<Void> response = this.authDomainController.updateDisabledStatusForUsers(request);
     verify(mockAuthDomainAuditAdapter)
         .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
@@ -127,7 +129,9 @@ public class AuthDomainControllerTest {
 
     final boolean newDisabledValue = false;
     UpdateDisabledStatusForUsersRequest request =
-        new UpdateDisabledStatusForUsersRequest().emailList(List.of(PRIMARY_EMAIL)).disabled(newDisabledValue);
+        new UpdateDisabledStatusForUsersRequest()
+            .emailList(List.of(PRIMARY_EMAIL))
+            .disabled(newDisabledValue);
 
     ResponseEntity<Void> response = this.authDomainController.updateDisabledStatusForUsers(request);
     verify(mockAuthDomainAuditAdapter)
