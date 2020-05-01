@@ -70,9 +70,23 @@ describe('RegistrationDashboard', () => {
   });
 
   it('should display a warning when beta access has not been granted', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: true});
     props.betaAccessGranted = false;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(1);
+  });
+
+  it('should clear warning when user has been granted beta access', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: true});
+    props.betaAccessGranted = true;
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(1);
+  });
+
+  it('should not display a warning when enableBetaAccess is false', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: false});
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
   });
 
   it('should display a success message when all tasks have been completed', () => {
