@@ -953,7 +953,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <Dropdown style={{width: '14rem'}}
                         value={this.state.workspace.billingAccountName}
                         options={this.buildBillingAccountOptions()}
-                        disabled={freeTierCreditsBalance < 0.0 && !enableBillingUpgrade}
+                        disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
                         onChange={e => {
                           if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
                             this.setState({
