@@ -259,7 +259,7 @@ public class WorkspacesControllerTest {
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
-  @Autowired private BillingProjectBufferService billingProjectBufferService;
+  @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
@@ -305,7 +305,6 @@ public class WorkspacesControllerTest {
     LogsBasedMetricServiceFakeImpl.class
   })
   @MockBean({
-    BillingProjectBufferService.class,
     CohortMaterializationService.class,
     ConceptBigQueryService.class,
     CdrBigQuerySchemaConfigService.class,
@@ -423,7 +422,7 @@ public class WorkspacesControllerTest {
     CLOCK.setInstant(NOW.toInstant());
 
     fcWorkspaceAcl = createWorkspaceACL();
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubBufferBillingProject(mockBillingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     when(mockZendesk.createRequest(any())).thenReturn(new Request());
@@ -466,7 +465,7 @@ public class WorkspacesControllerTest {
   private void mockBillingProjectBuffer(String projectName) {
     DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
-    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
+    doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any());
   }
 
   private Blob mockBlob(String bucket, String path) {
@@ -566,8 +565,8 @@ public class WorkspacesControllerTest {
     when(bigQueryService.getBoolean(null, 6)).thenReturn(false);
   }
 
-  private Workspace createWorkspace() {
-    return testMockFactory.createWorkspace("namespace", "name");
+  private Workspace stubWorkspace() {
+    return testMockFactory.buildWorkspaceModelForCreate("name");
   }
 
   public Cohort createDefaultCohort(String name) {
@@ -591,7 +590,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void getWorkspaces() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(mockWorkspaceAuditor).fireCreateAction(any(Workspace.class), anyLong());
 
@@ -607,7 +606,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspace() throws Exception {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
 
@@ -662,7 +661,7 @@ public class WorkspacesControllerTest {
   public void testCreateWorkspace_resetBillingAccountOnFailedSave() throws Exception {
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
 
     try {
       workspacesController.createWorkspace(workspace).getBody();
@@ -688,7 +687,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspace_UpdateBillingAccount() throws IOException {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace.setBillingAccountName("new-account");
 
     workspacesController.createWorkspace(workspace);
@@ -703,7 +702,7 @@ public class WorkspacesControllerTest {
   public void testCreateWorkspace_UpdateBillingAccount_flagFalse() {
     workbenchConfig.featureFlags.enableBillingUpgrade = false;
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace.setBillingAccountName("new-account");
 
     workspacesController.createWorkspace(workspace);
@@ -715,7 +714,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspace_doNotUpdateBillingForFreeTier() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
 
     workspacesController.createWorkspace(workspace);
@@ -726,7 +725,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspaceAlreadyApproved() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace.getResearchPurpose().setApproved(true);
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -740,7 +739,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspace_createDeleteCycleSameName() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
 
     Set<String> uniqueIds = new HashSet<>();
     for (int i = 0; i < 3; i++) {
@@ -754,14 +753,14 @@ public class WorkspacesControllerTest {
 
   @Test(expected = FailedPreconditionException.class)
   public void testCreateWorkspace_archivedCdrVersionThrows() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace.setCdrVersionId(archivedCdrVersionId);
     workspacesController.createWorkspace(workspace).getBody();
   }
 
   @Test
   public void testDeleteWorkspace() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
@@ -776,7 +775,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testApproveWorkspace() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ResearchPurpose researchPurpose = ws.getResearchPurpose();
     researchPurpose.setApproved(null);
     researchPurpose.setTimeReviewed(null);
@@ -794,7 +793,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspace() throws Exception {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
@@ -827,7 +826,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     doReturn(false)
@@ -849,7 +848,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspace_freeTierBilling_noCreditsRemaining() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     doReturn(false)
@@ -870,7 +869,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspace_freeTierBilling_hasCreditsRemaining() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbWorkspace dbWorkspace =
@@ -901,7 +900,7 @@ public class WorkspacesControllerTest {
       throws Exception {
     final String closedBillingAccountName = "closed-billing-account";
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     final String namespace = workspace.getNamespace();
     final String firecloudName = workspace.getId();
@@ -930,7 +929,7 @@ public class WorkspacesControllerTest {
       throws Exception {
     final String closedBillingAccountName = "closed-billing-account";
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     final String namespace = workspace.getNamespace();
     final String firecloudName = workspace.getId();
@@ -958,7 +957,7 @@ public class WorkspacesControllerTest {
   public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount()
       throws Exception {
     final String openBillingAccountName = "open-billing-account";
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbWorkspace dbWorkspace =
@@ -986,7 +985,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspace_resetBillingOnFailedSave() throws Exception {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     final String originalBillingAccountName = workspace.getBillingAccountName();
 
@@ -1018,7 +1017,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceResearchPurpose() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws.getResearchPurpose().reviewRequested(true);
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -1058,7 +1057,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceResearchPurpose_cannotUpdateReviewRequest() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws.getResearchPurpose().setReviewRequested(false);
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -1076,7 +1075,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void testReaderUpdateWorkspaceThrows() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
@@ -1091,7 +1090,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ConflictException.class)
   public void testUpdateWorkspaceStaleThrows() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(
@@ -1112,7 +1111,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceInvalidEtagsThrow() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
     // TODO: Refactor to be a @Parameterized test case.
@@ -1131,7 +1130,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testRejectAfterApproveThrows() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
@@ -1152,14 +1151,14 @@ public class WorkspacesControllerTest {
     ResearchPurpose researchPurpose;
     String nameForRequested = "requestedButNotApprovedYet";
     // requested approval, but not approved
-    ws = createWorkspace();
+    ws = stubWorkspace();
     ws.setName(nameForRequested);
     researchPurpose = ws.getResearchPurpose();
     researchPurpose.setApproved(null);
     researchPurpose.setTimeReviewed(null);
     workspacesController.createWorkspace(ws);
     // already approved
-    ws = createWorkspace();
+    ws = stubWorkspace();
     ws.setName("alreadyApproved");
     researchPurpose = ws.getResearchPurpose();
     ws = workspacesController.createWorkspace(ws).getBody();
@@ -1168,7 +1167,7 @@ public class WorkspacesControllerTest {
     workspacesController.reviewWorkspace(ws.getNamespace(), ws.getId(), request);
 
     // no approval requested
-    ws = createWorkspace();
+    ws = stubWorkspace();
     ws.setName("noApprovalRequested");
     researchPurpose = ws.getResearchPurpose();
     researchPurpose.setReviewRequested(false);
@@ -1187,7 +1186,7 @@ public class WorkspacesControllerTest {
   public void testCloneWorkspace() throws Exception {
     stubFcGetGroup();
     stubFcGetWorkspaceACL();
-    Workspace originalWorkspace = createWorkspace();
+    Workspace originalWorkspace = stubWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
     final String newBillingAccountName = "cloned-billing-account";
 
@@ -1274,7 +1273,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspace_resetBillingOnFailedSave() throws Exception {
-    Workspace originalWorkspace = createWorkspace();
+    Workspace originalWorkspace = stubWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
@@ -1320,7 +1319,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspace_doNotUpdateBillingForFreeTier() {
-    Workspace originalWorkspace = createWorkspace();
+    Workspace originalWorkspace = stubWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -1385,7 +1384,7 @@ public class WorkspacesControllerTest {
     stubFcGetWorkspaceACL();
     Long participantId = 1L;
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     Cohort c1 = createDefaultCohort("c1");
@@ -1684,7 +1683,7 @@ public class WorkspacesControllerTest {
   public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() {
     stubFcGetWorkspaceACL();
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
@@ -1751,7 +1750,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testCloneWorkspace_Dataset() {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbWorkspace dbWorkspace =
@@ -1933,7 +1932,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceDifferentOwner() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbUser cloner = new DbUser();
@@ -1972,7 +1971,7 @@ public class WorkspacesControllerTest {
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
     String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
 
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    Workspace workspace = workspacesController.createWorkspace(stubWorkspace()).getBody();
 
     Workspace modWorkspace =
         new Workspace()
@@ -1997,7 +1996,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testCloneWorkspaceBadCdrVersion() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    Workspace workspace = workspacesController.createWorkspace(stubWorkspace()).getBody();
 
     Workspace modWorkspace =
         new Workspace()
@@ -2015,7 +2014,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = FailedPreconditionException.class)
   public void testCloneWorkspaceArchivedCdrVersionThrows() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    Workspace workspace = workspacesController.createWorkspace(stubWorkspace()).getBody();
 
     Workspace modWorkspace =
         new Workspace()
@@ -2037,7 +2036,7 @@ public class WorkspacesControllerTest {
     DbUser cloner = createUser("cloner@gmail.com");
     DbUser reader = createUser("reader@gmail.com");
     DbUser writer = createUser("writer@gmail.com");
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    Workspace workspace = workspacesController.createWorkspace(stubWorkspace()).getBody();
     List<UserRole> collaborators =
         new ArrayList<>(
             Arrays.asList(
@@ -2125,7 +2124,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testCloneWorkspaceBadRequest() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -2139,7 +2138,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = NotFoundException.class)
   public void testClonePermissionDenied() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     // Clone with a different user.
@@ -2170,7 +2169,7 @@ public class WorkspacesControllerTest {
     DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
 
     stubFcGetWorkspaceACL();
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
@@ -2209,7 +2208,7 @@ public class WorkspacesControllerTest {
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
 
     stubFcGetWorkspaceACL();
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest =
         new ShareWorkspaceRequest()
@@ -2260,7 +2259,7 @@ public class WorkspacesControllerTest {
                             .put("canCompute", true)
                             .put("canShare", true))));
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest =
         new ShareWorkspaceRequest()
@@ -2286,7 +2285,7 @@ public class WorkspacesControllerTest {
   public void testShareWorkspaceNoRoleFailure() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
@@ -2314,7 +2313,7 @@ public class WorkspacesControllerTest {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
@@ -2390,7 +2389,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testStaleShareWorkspace() {
     stubFcGetGroup();
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
@@ -2420,7 +2419,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testUnableToShareWithNonExistentUser() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     addUserRoleToShareWorkspaceRequest(
@@ -2507,7 +2506,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testRenameNotebookInWorkspace() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String newName = NotebooksService.withNotebookExtension("nb2");
@@ -2532,7 +2531,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testRenameNotebookWoExtension() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String newName = "nb2";
@@ -2557,11 +2556,11 @@ public class WorkspacesControllerTest {
 
   @Test
   public void copyNotebook() {
-    Workspace fromWorkspace = createWorkspace();
+    Workspace fromWorkspace = stubWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.buildWorkspaceModelForCreate("toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
     String expectedNotebookName = newNotebookName + NotebooksService.NOTEBOOK_EXTENSION;
@@ -2591,11 +2590,11 @@ public class WorkspacesControllerTest {
 
   @Test
   public void copyNotebook_onlyAppendsSuffixIfNeeded() {
-    Workspace fromWorkspace = createWorkspace();
+    Workspace fromWorkspace = stubWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.buildWorkspaceModelForCreate("toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 
@@ -2621,11 +2620,11 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void copyNotebook_onlyHasReadPermissionsToDestination() {
-    Workspace fromWorkspace = createWorkspace();
+    Workspace fromWorkspace = stubWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.buildWorkspaceModelForCreate("toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     stubGetWorkspace(
         toWorkspace.getNamespace(),
@@ -2649,7 +2648,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void copyNotebook_noAccessOnSource() {
-    Workspace fromWorkspace = testMockFactory.createWorkspace("fromWorkspaceNs", "fromworkspace");
+    Workspace fromWorkspace = testMockFactory.buildWorkspaceModelForCreate("fromworkspace");
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     stubGetWorkspace(
         fromWorkspace.getNamespace(),
@@ -2658,7 +2657,7 @@ public class WorkspacesControllerTest {
         WorkspaceAccessLevel.NO_ACCESS);
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.buildWorkspaceModelForCreate("toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     stubGetWorkspace(
         toWorkspace.getNamespace(),
@@ -2682,11 +2681,11 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ConflictException.class)
   public void copyNotebook_alreadyExists() {
-    Workspace fromWorkspace = createWorkspace();
+    Workspace fromWorkspace = stubWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+    Workspace toWorkspace = testMockFactory.buildWorkspaceModelForCreate("toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 
@@ -2712,7 +2711,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneNotebook() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String newPath = NotebooksService.withNotebookExtension("notebooks/Duplicate of nb1");
@@ -2730,7 +2729,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testDeleteNotebook() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String fullPath = BUCKET_URI + nb1;
@@ -2747,7 +2746,7 @@ public class WorkspacesControllerTest {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
     stubFcGetWorkspaceACL();
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
@@ -2772,7 +2771,7 @@ public class WorkspacesControllerTest {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
@@ -2792,7 +2791,7 @@ public class WorkspacesControllerTest {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
@@ -2811,7 +2810,7 @@ public class WorkspacesControllerTest {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
@@ -2830,7 +2829,7 @@ public class WorkspacesControllerTest {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
 
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
@@ -3002,7 +3001,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testGetBillingUsageWithNoSpend() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
@@ -3013,7 +3012,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testGetBillingUsage() {
     Double cost = new Double(150.50d);
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     DbWorkspace dbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
@@ -3029,7 +3028,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void testGetBillingUsageWithoutAccess() {
-    Workspace ws = createWorkspace();
+    Workspace ws = stubWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
@@ -3081,7 +3080,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void getUserRecentWorkspaces() {
-    Workspace workspace = createWorkspace();
+    Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(
         workspace.getNamespace(),
@@ -3100,7 +3099,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void cloneNotebook_validateActiveBilling() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    Workspace workspace = workspacesController.createWorkspace(stubWorkspace()).getBody();
 
     DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
@@ -3115,7 +3114,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void renameNotebook_validateActiveBilling() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    Workspace workspace = workspacesController.createWorkspace(stubWorkspace()).getBody();
 
     DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
@@ -3132,7 +3131,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void copyNotebook_validateActiveBilling() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    Workspace workspace = workspacesController.createWorkspace(stubWorkspace()).getBody();
 
     DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
@@ -3188,7 +3187,7 @@ public class WorkspacesControllerTest {
   @Test
   public void getWorkspaceResources() {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    Workspace workspace = workspacesController.createWorkspace(stubWorkspace()).getBody();
 
     Cohort cohort =
         cohortsController

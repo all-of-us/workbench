@@ -48,13 +48,13 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     })
 public interface WorkspaceMapper {
 
-  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
-  @Mapping(target = "creator", source = "fcWorkspace.createdBy")
-  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
-  @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "id", source = "fcWorkspace.name")
-  @Mapping(target = "name", source = "dbWorkspace.name")
-  @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(source = "dbWorkspace", target = "researchPurpose")
+  @Mapping(source = "dbWorkspace.cdrVersion", target = "cdrVersionId")
+  @Mapping(source = "dbWorkspace.name", target = "name")
+  @Mapping(source = "dbWorkspace.version", target = "etag", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(source = "fcWorkspace.bucketName", target = "googleBucketName")
+  @Mapping(source = "fcWorkspace.createdBy", target = "creator")
+  @Mapping(source = "fcWorkspace.name", target = "id")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")

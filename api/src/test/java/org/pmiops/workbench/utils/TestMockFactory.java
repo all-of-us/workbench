@@ -33,12 +33,32 @@ import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
-  private static final String CDR_VERSION_ID = "1";
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
-  private static final String WORKSPACE_FIRECLOUD_NAME =
-      "gonewiththewind"; // should match workspace name w/o spaces
+  private static final String FIRECLOUD_PROJECT_NAME = "aou-rw-env-01234567";
 
-  public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
+  /**
+   * Create an initial workspace (like the kind that comes from the UI for createWorkspace.
+   *
+   * The follwoing properties are not provided by the UI by filled in by WorkspacesController.createWorkspace():
+   * additionalNotes
+   * approved
+   * billingAccountType
+   * billingStatus
+   * cdrVersionId
+   * creationTime
+   * creator
+   * etag
+   * googleBucketName
+   * id
+   * lastModifiedTime
+   * namespace
+   * published
+   * timeRequested
+   * timeReviewed
+   * @param workspaceName User-created Workspace name.
+   * @return
+   */
+  public Workspace buildWorkspaceModelForCreate(String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
@@ -47,44 +67,31 @@ public class TestMockFactory {
     researchOutcomes.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
-        .id(WORKSPACE_FIRECLOUD_NAME)
-        .etag("\"1\"")
         .name(workspaceName)
-        .namespace(workspaceNameSpace)
         .dataAccessLevel(DataAccessLevel.PROTECTED)
-        .cdrVersionId(CDR_VERSION_ID)
-        .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
-        .billingAccountType(BillingAccountType.FREE_TIER)
-        .creationTime(1588097211621L)
-        .creator("jay@unit-test-research-aou.org")
-        .lastModifiedTime(1588097211621L)
-        .published(false)
-        .billingStatus(BillingStatus.ACTIVE)
         .researchPurpose(
             new ResearchPurpose()
+                .additionalNotes("additional notes")
                 .additionalNotes(null)
+                .ancestry(true)
+                .anticipatedFindings("anticipated findings")
+                .approved(false)
+                .commercialPurpose(true)
+                .controlSet(true)
                 .diseaseFocusedResearch(true)
                 .diseaseOfFocus("cancer")
-                .methodsDevelopment(true)
-                .controlSet(true)
-                .ancestry(true)
-                .commercialPurpose(true)
-                .socialBehavioral(true)
-                .populationHealth(true)
-                .educational(true)
-                .drugDevelopment(true)
-                .populationDetails(Collections.emptyList())
-                .additionalNotes("additional notes")
-                .reasonForAllOfUs("reason for aou")
-                .intendedStudy("intended study")
-                .anticipatedFindings("anticipated findings")
-                .timeRequested(1000L)
-                .timeReviewed(1500L)
-                .reviewRequested(true)
                 .disseminateResearchFindingList(disseminateResearchEnumsList)
+                .drugDevelopment(true)
+                .educational(true)
+                .intendedStudy("intended study")
+                .methodsDevelopment(true)
+                .populationDetails(Collections.emptyList())
+                .populationHealth(true)
+                .reasonForAllOfUs("reason for aou")
                 .researchOutcomeList(researchOutcomes)
-                .approved(false));
+                .reviewRequested(true)
+                .socialBehavioral(true));
   }
 
   public FirecloudWorkspace createFirecloudWorkspace(String ns, String name, String creator) {
@@ -127,14 +134,14 @@ public class TestMockFactory {
         .createWorkspace(anyString(), anyString());
   }
 
-  public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {
+  public void stubBufferBillingProject(BillingProjectBufferService mockBillingProjectBufferService) {
     doAnswer(
             invocation -> {
               DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+              doReturn(FIRECLOUD_PROJECT_NAME).when(entry).getFireCloudProjectName();
               return entry;
             })
-        .when(billingProjectBufferService)
+        .when(mockBillingProjectBufferService)
         .assignBillingProject(any());
   }
 
