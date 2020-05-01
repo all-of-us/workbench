@@ -247,10 +247,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        this.setState(prevState => fp.set(
-          ['workspace', 'billingAccountName'],
-          billingAccounts.find(billingAccount => billingAccount.isFreeTier).name,
-          prevState));
+        const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
+        if (maybeFreeTierAccount) {
+          this.setState(prevState => fp.set(
+            ['workspace', 'billingAccountName'],
+            maybeFreeTierAccount.name,
+            prevState));
+        }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
 
@@ -294,14 +297,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     async componentDidMount() {
-      if (serverConfigStore.getValue().enableBillingUpgrade) {
-        this.fetchBillingAccounts();
-      } else {
-        // This is a temporary hack to set the billing account name property to anything
-        // so that it passes validation. The server ignores the value if the feature flag
-        // is turned off so any value is fine.
-        this.setState(fp.set(['workspace', 'billingAccountName'], 'free-tier'));
-      }
+      await this.fetchBillingAccounts();
     }
 
     /**
@@ -826,22 +822,25 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     buildBillingAccountOptions() {
+      const {enableBillingUpgrade} = serverConfigStore.getValue();
       const options = this.state.billingAccounts.map(a => ({
         label: a.displayName,
         value: a.name,
         disabled: !a.isOpen
       }));
-
-      options.push({
-        label: 'Create a new billing account',
-        value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-        disabled: false
-      });
+      if (enableBillingUpgrade) {
+        options.push({
+          label: 'Create a new billing account',
+          value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+          disabled: false
+        });
+      }
 
       return options;
     }
 
     render() {
+      const {enableBillingUpgrade} = serverConfigStore.getValue();
       const {
         populationChecked,
         workspace: {
@@ -939,8 +938,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             onChange={v => this.setState({cloneUserRole: v})}/>
         </WorkspaceEditSection>
         }
-        {serverConfigStore.getValue().enableBillingUpgrade &&
-          (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
+        {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
@@ -955,6 +953,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <Dropdown style={{width: '14rem'}}
                         value={this.state.workspace.billingAccountName}
                         options={this.buildBillingAccountOptions()}
+                        disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
                         onChange={e => {
                           if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
                             this.setState({
@@ -965,9 +964,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                           }
                         }}
               />
-              {freeTierCreditsBalance > 0.0 && <div style={styles.freeCreditsBalanceClickable}>
+              <div style={styles.freeCreditsBalanceClickable}>
                 <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View FREE credits balance</Clickable>
-              </div>}
+              </div>
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>

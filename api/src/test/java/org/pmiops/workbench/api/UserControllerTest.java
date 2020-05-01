@@ -16,10 +16,12 @@ import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import org.apache.commons.collections4.ListUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
@@ -74,7 +76,8 @@ public class UserControllerTest {
     ComplianceService.class,
     DirectoryService.class,
     AdminActionHistoryDao.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    FreeTierBillingService.class,
   })
   static class Configuration {
 
@@ -109,6 +112,8 @@ public class UserControllerTest {
   @Autowired UserController userController;
   @Autowired UserDao userDao;
   @Autowired FireCloudService fireCloudService;
+
+  @Autowired FreeTierBillingService mockFreeTierBillingService;
 
   @Before
   public void setUp() {
@@ -252,91 +257,213 @@ public class UserControllerTest {
     assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
   }
 
+  // Combinatorial tests for listBillingAccounts:
+  // enableBillingUpgrade feature flag on/off
+  // free tier available vs. expired
+  // cloud accounts available vs. none
+
+  static final BillingAccount freeTierBillingAccount =
+      new BillingAccount()
+          .isFreeTier(true)
+          .displayName("Use All of Us free credits")
+          .name("billingAccounts/free-tier")
+          .isOpen(true);
+
+  static final List<com.google.api.services.cloudbilling.model.BillingAccount>
+      cloudbillingAccounts =
+          Lists.newArrayList(
+              new com.google.api.services.cloudbilling.model.BillingAccount()
+                  .setName("googlebucks")
+                  .setDisplayName("Paid using your credit card"),
+              new com.google.api.services.cloudbilling.model.BillingAccount()
+                  .setName("a2")
+                  .setDisplayName("Account 2 - Open")
+                  .setOpen(true));
+
+  static final List<BillingAccount> cloudbillingAccountsInWorkbench =
+      Lists.newArrayList(
+          new BillingAccount()
+              .name("googlebucks")
+              .displayName("Paid using your credit card")
+              .isFreeTier(false)
+              .isOpen(false),
+          new BillingAccount()
+              .name("a2")
+              .displayName("Account 2 - Open")
+              .isFreeTier(false)
+              .isOpen(true));
+
+  // billing upgrade is true, free tier is available, cloud accounts exist
+
   @Test
-  public void listBillingAccounts() throws IOException {
+  public void listBillingAccounts_upgradeYES_freeYES_cloudYES() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
-    final com.google.api.services.cloudbilling.model.BillingAccount cloudbillingAccount1 =
-        new com.google.api.services.cloudbilling.model.BillingAccount()
-            .setName("googlebucks")
-            .setDisplayName("Paid using your credit card");
-
-    final com.google.api.services.cloudbilling.model.BillingAccount cloudbillingAccount2 =
-        new com.google.api.services.cloudbilling.model.BillingAccount()
-            .setName("a2")
-            .setDisplayName("Account 2 - Open")
-            .setOpen(true);
-
-    final List<com.google.api.services.cloudbilling.model.BillingAccount> cloudbillingAccounts =
-        Lists.newArrayList(cloudbillingAccount1, cloudbillingAccount2);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
 
-    // the list always starts with the free tier account
-    final BillingAccount freeTierBillingAccount =
-        new BillingAccount()
-            .isFreeTier(true)
-            .displayName("Use All of Us free credits")
-            .name("billingAccounts/free-tier")
-            .isOpen(true);
-
-    final BillingAccount workbenchBillingAccount1 =
-        new BillingAccount()
-            .name("googlebucks")
-            .displayName("Paid using your credit card")
-            .isFreeTier(false)
-            .isOpen(false);
-
-    final BillingAccount workbenchBillingAccount2 =
-        new BillingAccount()
-            .name("a2")
-            .displayName("Account 2 - Open")
-            .isFreeTier(false)
-            .isOpen(true);
-
     final List<BillingAccount> expectedWorkbenchBillingAccounts =
-        Lists.newArrayList(
-            freeTierBillingAccount, workbenchBillingAccount1, workbenchBillingAccount2);
+        ListUtils.union(
+            Lists.newArrayList(freeTierBillingAccount), cloudbillingAccountsInWorkbench);
 
     final WorkbenchListBillingAccountsResponse response =
         userController.listBillingAccounts().getBody();
     assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
+  // billing upgrade is true, free tier is available, no cloud accounts
+
   @Test
-  public void listBillingAccount_nullCloudResponse() throws IOException {
+  public void listBillingAccounts_upgradeYES_freeYES_cloudNO() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
-    // the list always starts with the free tier account
-    final BillingAccount freeTierBillingAccount =
-        new BillingAccount()
-            .isFreeTier(true)
-            .displayName("Use All of Us free credits")
-            .name("billingAccounts/free-tier")
-            .isOpen(true);
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts =
+        Lists.newArrayList(freeTierBillingAccount);
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
+  }
+
+  // billing upgrade is true, free tier is expired, cloud accounts exist
+
+  @Test
+  public void listBillingAccounts_upgradeYES_freeNO_cloudYES() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = true;
+
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts = cloudbillingAccountsInWorkbench;
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
+  }
+
+  // billing upgrade is true, free tier is expired, no cloud accounts
+
+  @Test
+  public void listBillingAccounts_upgradeYES_freeNO_cloudNO() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = true;
+
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
     when(testCloudbilling.billingAccounts().list().execute())
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
 
     final WorkbenchListBillingAccountsResponse response =
         userController.listBillingAccounts().getBody();
-    assertThat(response.getBillingAccounts()).containsExactly(freeTierBillingAccount);
+    assertThat(response.getBillingAccounts()).isEmpty();
   }
 
+  // billing upgrade is false, free tier is available, cloud accounts exist
+
   @Test
-  public void listBillingAccount_upgradeFlagFalse() {
+  public void listBillingAccounts_upgradeNO_freeYES_cloudYES() throws IOException {
     config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts =
+        Lists.newArrayList(freeTierBillingAccount);
+
     final WorkbenchListBillingAccountsResponse response =
         userController.listBillingAccounts().getBody();
-    assertThat(response.getBillingAccounts()).isEmpty();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
+  }
+
+  // billing upgrade is false, free tier is available, no cloud accounts
+
+  @Test
+  public void listBillingAccounts_upgradeNO_freeYES_cloudNO() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = false;
+
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts =
+        Lists.newArrayList(freeTierBillingAccount);
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
+  }
+
+  // billing upgrade is false, free tier is expired, cloud accounts exist
+
+  @Test
+  public void listBillingAccounts_upgradeNO_freeNO_cloudYES() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = false;
+
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(cloudbillingAccounts));
+
+    // because billing upgrade is false, the user's only option is free credits.
+    // we continue to display it, but we disable the dropdown control in the UI.
+    // see RW-4857
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts =
+        Lists.newArrayList(freeTierBillingAccount);
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
+  }
+
+  // billing upgrade is false, free tier is expired, no cloud accounts
+
+  @Test
+  public void listBillingAccounts_upgradeNO_freeNO_cloudNO() throws IOException {
+    config.billing = new BillingConfig();
+    config.billing.accountId = "free-tier";
+    config.featureFlags.enableBillingUpgrade = false;
+
+    when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
+
+    when(testCloudbilling.billingAccounts().list().execute())
+        .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
+
+    // because billing upgrade is false, the user's only option is free credits.
+    // we continue to display it, but we disable the dropdown control in the UI.
+    // see RW-4857
+
+    final List<BillingAccount> expectedWorkbenchBillingAccounts =
+        Lists.newArrayList(freeTierBillingAccount);
+
+    final WorkbenchListBillingAccountsResponse response =
+        userController.listBillingAccounts().getBody();
+    assertThat(response.getBillingAccounts()).isEqualTo(expectedWorkbenchBillingAccounts);
   }
 
   /*
