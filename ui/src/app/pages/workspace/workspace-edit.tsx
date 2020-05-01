@@ -971,7 +971,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
-        <WorkspaceEditSection header='Research Use Statement Questions' largeHeader={true}
+        <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
+          <div>Research Use Statement Questions</div>
+          <StyledAnchorTag href='https://aousupporthelp.zendesk.com/knowledge/articles/360042673211/en-us?brand_id=360001438652'
+                           target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
+            Best practices for Research Use Statement questions
+          </StyledAnchorTag>
+        </FlexRow>} largeHeader={true}
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>
