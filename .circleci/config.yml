@@ -491,6 +491,7 @@ jobs:
   build-test-docker:
     resource_class: medium+
     parallelism: 3
+    executor: gcp-cli/google
     docker:
       - image: cimg/openjdk:8.0.242-node
       - image: circleci/mysql:5.7.30-ram
@@ -515,8 +516,7 @@ jobs:
       - checkout_init_git
       # - browser-tools/install-chrome
       - docker/install-dockerize
-      - gcp-cli/install_and_initialize_cli:
-          executor: gcp-cli/google
+      - gcp-cli/install
       - activate_service_account_credential
       - run:
           name: Run local migrations
