@@ -345,6 +345,7 @@ sourceSets {
     }
     compileClasspath += generated.output
     runtimeClasspath += generated.output
+    jvmArgs '-Xmx1g'
   }
 
   //
