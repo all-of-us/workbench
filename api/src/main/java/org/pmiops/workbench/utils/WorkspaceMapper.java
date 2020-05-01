@@ -1,6 +1,7 @@
 package org.pmiops.workbench.utils;
 
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Set;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
@@ -120,6 +121,10 @@ public interface WorkspaceMapper {
       target = "cohorts",
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
   @Mapping(
+      source = "dbConceptSets",
+      target = "conceptSets",
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+  @Mapping(
       source = "dbDatasets",
       target = "dataSets",
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
@@ -174,8 +179,29 @@ public interface WorkspaceMapper {
       BillingMigrationStatus billingMigrationStatus,
       DbCdrVersion dbCdrVersion,
       Set<DbCohort> dbCohorts,
-      Set<DbDataset> dbDatasets);
+      Set<DbDataset> dbDatasets,
+      Set<DbConceptSet> dbConceptSets);
 
+  default DbWorkspace toDbWorkspace(
+      Workspace workspace,
+      FirecloudWorkspace firecloudWorkspace,
+      DbUser dbUser,
+      WorkspaceActiveStatus workspaceActiveStatus,
+      Timestamp lastAccessedTime,
+      BillingMigrationStatus billingMigrationStatus,
+      DbCdrVersion dbCdrVersion) {
+    return toDbWorkspace(
+        workspace,
+        firecloudWorkspace,
+        dbUser,
+        workspaceActiveStatus,
+        lastAccessedTime,
+        billingMigrationStatus,
+        dbCdrVersion,
+        Collections.emptySet(),
+        Collections.emptySet(),
+        Collections.emptySet());
+  }
   /**
    * Helper method to insert the Research Purpose fields into the DbWorkspace after mapping all
    * other fields. While it's certainly possible to do <code>

@@ -273,14 +273,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceMapper.toDbWorkspace(
             workspace,
-            firecloudWorkspace, // not created yet
+            firecloudWorkspace,
             dbUser,
             WorkspaceActiveStatus.ACTIVE,
             now,
             BillingMigrationStatus.NEW,
-            liveCdrVersion,
-            Collections.emptySet(),
-            Collections.emptySet());
+            liveCdrVersion);
 
     if (workspace.getResearchPurpose().getReviewRequested()) {
       // Use a consistent timestamp.

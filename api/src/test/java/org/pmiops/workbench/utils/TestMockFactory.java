@@ -21,6 +21,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingAccountType;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -59,6 +60,7 @@ public class TestMockFactory {
         .creator("jay@unit-test-research-aou.org")
         .lastModifiedTime(1588097211621L)
         .published(false)
+        .billingStatus(BillingStatus.ACTIVE)
         .researchPurpose(
             new ResearchPurpose()
                 .additionalNotes(null)

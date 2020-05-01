@@ -1,4 +1,4 @@
-# All of Us Workbench API Structure & Technologies
+# All of Us Workbench API Server Structure & Technologies
 
 The _All of Us_ Workbench API is largely built on [Spring Boot](https://spring.io/projects/spring-boot). It also uses [Swagger](https://swagger.io/) for autogenerating REST APIs.
 

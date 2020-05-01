@@ -282,9 +282,7 @@ public class WorkspaceMapperTest {
         WorkspaceActiveStatus.ACTIVE,
         Timestamp.from(DB_CREATION_TIMESTAMP.toInstant().plus(Duration.ofMinutes(15))),
         BILLING_MIGRATION_STATUS,
-        cdrVersion,
-        Collections.emptySet(),
-        Collections.emptySet());
+        cdrVersion);
 
     assertThat(convertedDbWorkspace.getFirecloudName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(convertedDbWorkspace.getVersion()).isEqualTo(WORKSPACE_VERSION);
