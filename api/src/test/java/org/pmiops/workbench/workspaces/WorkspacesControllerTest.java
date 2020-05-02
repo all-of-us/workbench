@@ -48,7 +48,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,7 +55,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -274,7 +272,7 @@ public class WorkspacesControllerTest {
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
   @MockBean private ConceptBigQueryService conceptBigQueryService;
-  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private FireCloudService mockFirecloudService;
   @MockBean private UserRecentResourceService mockUserRecentResourceService;
 
 
@@ -420,7 +418,7 @@ public class WorkspacesControllerTest {
 
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(mockBillingProjectBufferService);
-    testMockFactory.stubCreateFcWorkspace(mockFireCloudService);
+    testMockFactory.stubCreateFcWorkspace(mockFirecloudService);
 
     when(mockZendesk.createRequest(any())).thenReturn(new Request());
 
@@ -452,30 +450,14 @@ public class WorkspacesControllerTest {
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
   }
 
-  private JSONObject createDemoCriteria() {
-    JSONObject criteria = new JSONObject();
-    criteria.append("includes", new JSONArray());
-    criteria.append("excludes", new JSONArray());
-    return criteria;
-  }
-
   private void mockBillingProjectBuffer(String projectName) {
     DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
     doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any());
   }
 
-  private Blob mockBlob(String bucket, String path) {
-    Blob blob = mock(Blob.class);
-    when(blob.getBlobId()).thenReturn(BlobId.of(bucket, path));
-    when(blob.getBucket()).thenReturn(bucket);
-    when(blob.getName()).thenReturn(path);
-    when(blob.getSize()).thenReturn(5_000L);
-    return blob;
-  }
-
   private void stubFcUpdateWorkspaceACL() {
-    when(mockFireCloudService.updateWorkspaceACL(anyString(), anyString(), anyList()))
+    when(mockFirecloudService.updateWorkspaceACL(anyString(), anyString(), anyList()))
         .thenReturn(new FirecloudWorkspaceACLUpdateResponseList());
   }
 
@@ -484,13 +466,13 @@ public class WorkspacesControllerTest {
   }
 
   private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
-    when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
+    when(mockFirecloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
   }
 
   private void stubFcGetGroup() {
     FirecloudManagedGroupWithMembers testGrp = new FirecloudManagedGroupWithMembers();
     testGrp.setGroupEmail("test@firecloud.org");
-    when(mockFireCloudService.getGroup(anyString())).thenReturn(testGrp);
+    when(mockFirecloudService.getGroup(anyString())).thenReturn(testGrp);
   }
 
   private void stubGetWorkspace(
@@ -503,11 +485,11 @@ public class WorkspacesControllerTest {
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     doReturn(fcResponse)
-        .when(mockFireCloudService)
+        .when(mockFirecloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<FirecloudWorkspaceResponse> workspaceResponses = mockFireCloudService.getWorkspaces(any());
+    List<FirecloudWorkspaceResponse> workspaceResponses = mockFirecloudService.getWorkspaces(any());
     workspaceResponses.add(fcResponse);
-    doReturn(workspaceResponses).when(mockFireCloudService).getWorkspaces(any());
+    doReturn(workspaceResponses).when(mockFirecloudService).getWorkspaces(any());
   }
 
   /**
@@ -521,7 +503,7 @@ public class WorkspacesControllerTest {
     fcResponse.setName(name);
     fcResponse.setCreatedBy(creator);
 
-    when(mockFireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name)))
+    when(mockFirecloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name)))
         .thenReturn(fcResponse);
 
     return fcResponse;
@@ -529,14 +511,12 @@ public class WorkspacesControllerTest {
 
   private void stubBigQueryCohortCalls() {
     TableResult queryResult = mock(TableResult.class);
+    // TODO(jaycarlton): this is suspicious. We shouldn't need a naked generic.
     Iterable testIterable =
-        new Iterable() {
-          @Override
-          public Iterator iterator() {
-            List<FieldValue> list = new ArrayList<>();
-            list.add(null);
-            return list.iterator();
-          }
+        () -> {
+          List<FieldValue> list = new ArrayList<>();
+          list.add(null);
+          return list.iterator();
         };
     Map<String, Integer> rm =
         ImmutableMap.<String, Integer>builder()
@@ -597,7 +577,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(mockFireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(mockFirecloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -606,7 +586,7 @@ public class WorkspacesControllerTest {
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = stubWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(mockFireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
+    verify(mockFirecloudService).createWorkspace(workspace.getNamespace(), workspace.getId());
 
     stubGetWorkspace(
         workspace.getNamespace(),
@@ -2082,9 +2062,9 @@ public class WorkspacesControllerTest {
                         .put("canCompute", true)
                         .put("canShare", true)));
 
-    when(mockFireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
+    when(mockFirecloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(workspaceAclsFromCloned);
-    when(mockFireCloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getName()))
+    when(mockFirecloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getName()))
         .thenReturn(workspaceAclsFromOriginal);
 
     currentUser = cloner;
@@ -2112,7 +2092,7 @@ public class WorkspacesControllerTest {
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(collaborators);
 
-    verify(mockFireCloudService)
+    verify(mockFirecloudService)
         .updateWorkspaceACL(
             eq("cloned-ns"),
             eq("cloned"),
@@ -2147,7 +2127,7 @@ public class WorkspacesControllerTest {
     currentUser = userDao.save(cloner);
 
     // Permission denied manifests as a 404 in Firecloud.
-    when(mockFireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+    when(mockFirecloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenThrow(new NotFoundException());
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
@@ -2196,7 +2176,7 @@ public class WorkspacesControllerTest {
 
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
-    verify(mockFireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
+    verify(mockFirecloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
   }
 
   @Test
@@ -2221,10 +2201,10 @@ public class WorkspacesControllerTest {
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
-    verify(mockFireCloudService, times(1))
+    verify(mockFirecloudService, times(1))
         .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
-    verify(mockFireCloudService, never()).addOwnerToBillingProject(eq(writerUser.getUsername()), any());
-    verify(mockFireCloudService, never())
+    verify(mockFirecloudService, never()).addOwnerToBillingProject(eq(writerUser.getUsername()), any());
+    verify(mockFirecloudService, never())
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
   }
 
@@ -2234,7 +2214,7 @@ public class WorkspacesControllerTest {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
 
-    when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
+    when(mockFirecloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
             createWorkspaceACL(
                 new JSONObject()
@@ -2271,12 +2251,12 @@ public class WorkspacesControllerTest {
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
-    verify(mockFireCloudService, times(1))
+    verify(mockFirecloudService, times(1))
         .removeOwnerFromBillingProject(
             ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
-    verify(mockFireCloudService, never())
+    verify(mockFirecloudService, never())
         .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
-    verify(mockFireCloudService, never()).addOwnerToBillingProject(any(), any());
+    verify(mockFirecloudService, never()).addOwnerToBillingProject(any(), any());
   }
 
   @Test
@@ -2350,7 +2330,7 @@ public class WorkspacesControllerTest {
                         .put("accessLevel", "READER")
                         .put("canCompute", false)
                         .put("canShare", false)));
-    when(mockFireCloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACLs);
+    when(mockFirecloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACLs);
 
     CLOCK.increment(1000);
     stubFcUpdateWorkspaceACL();
@@ -2374,7 +2354,7 @@ public class WorkspacesControllerTest {
     shareWorkspaceRequest.addItemsItem(reader);
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
-    verify(mockFireCloudService)
+    verify(mockFirecloudService)
         .updateWorkspaceACL(
             any(),
             any(),
@@ -2430,7 +2410,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testNotebookFileList() {
-    when(mockFireCloudService.getWorkspace("project", "workspace"))
+    when(mockFirecloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
                 .workspace(new FirecloudWorkspace().bucketName("bucket")));
@@ -2459,7 +2439,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testNotebookFileListOmitsExtraDirectories() {
-    when(mockFireCloudService.getWorkspace("project", "workspace"))
+    when(mockFirecloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
                 .workspace(new FirecloudWorkspace().bucketName("bucket")));
@@ -2480,7 +2460,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testNotebookFileListNotFound() {
-    when(mockFireCloudService.getWorkspace("mockProject", "mockWorkspace"))
+    when(mockFirecloudService.getWorkspace("mockProject", "mockWorkspace"))
         .thenThrow(new NotFoundException());
     try {
       workspacesController.getNoteBookList("mockProject", "mockWorkspace");
@@ -2492,7 +2472,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testEmptyFireCloudWorkspaces() {
-    when(mockFireCloudService.getWorkspaces(any())).thenReturn(new ArrayList<>());
+    when(mockFirecloudService.getWorkspaces(any())).thenReturn(new ArrayList<>());
     try {
       ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response =
           workspacesController.getWorkspaces();
@@ -2778,7 +2758,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(mockFireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(mockFirecloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
         .isEqualTo(1);
@@ -2798,7 +2778,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(mockFireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(mockFirecloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -2817,7 +2797,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(mockFireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(mockFirecloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -2836,7 +2816,7 @@ public class WorkspacesControllerTest {
         testMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(mockFireCloudService).getWorkspaces(any());
+    doReturn(Collections.singletonList(fcResponse)).when(mockFirecloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);
   }
