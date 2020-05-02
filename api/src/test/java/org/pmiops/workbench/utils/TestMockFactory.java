@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.Cloudbilling.BillingAccounts;
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
@@ -36,41 +37,23 @@ public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
   private static final String CDR_VERSION_ID = "1";
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
-  private static final String WORKSPACE_FIRECLOUD_NAME =
-      "gonewiththewind"; // should match workspace name w/o spaces
+  public static final String WORKSPACE_NAMESPACE = "aou-rw-local1-aaaa0000";
+  public static final String WORKSPACE_CREATOR_USERNAME = "jay@unit-test-research-aou.org";
 
   /**
    * Create an initial workspace (like the kind that comes from the UI for createWorkspace.
    *
-   * The follwoing properties are not provided by the UI by filled in by WorkspacesController.createWorkspace():
-   * additionalNotes
-   * approved
-   * billingAccountType
-   * billingStatus
-   * cdrVersionId
-   * creationTime
-   * creator
-   * etag
-   * googleBucketName
-   * id
-   * lastModifiedTime
-   * namespace
-   * published
-   * timeRequested
-   * timeReviewed
+   * Many properties are not provided by the UI by filled in by WorkspacesController.createWorkspace():
    * @param workspaceName User-created Workspace name.
    * @return
    */
   public Workspace buildWorkspaceModelForCreate(String workspaceName) {
-    List<DisseminateResearchEnum> disseminateResearchEnumsList = ImmutableList.of(
-        DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES,
-        DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
-    List<ResearchOutcomeEnum> researchOutcomes = ImmutableList.of(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
-
     return new Workspace()
         .name(workspaceName)
         .dataAccessLevel(DataAccessLevel.PROTECTED)
+        .cdrVersionId(CDR_VERSION_ID)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
+        .creator(WORKSPACE_CREATOR_USERNAME)
         .researchPurpose(
             new ResearchPurpose()
                 .additionalNotes("additional notes")
@@ -82,7 +65,9 @@ public class TestMockFactory {
                 .controlSet(true)
                 .diseaseFocusedResearch(true)
                 .diseaseOfFocus("cancer")
-                .disseminateResearchFindingList(disseminateResearchEnumsList)
+                .disseminateResearchFindingList(ImmutableList.of(
+                    DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES,
+                    DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS))
                 .drugDevelopment(true)
                 .educational(true)
                 .intendedStudy("intended study")
@@ -90,19 +75,18 @@ public class TestMockFactory {
                 .populationDetails(Collections.emptyList())
                 .populationHealth(true)
                 .reasonForAllOfUs("reason for aou")
-                .researchOutcomeList(researchOutcomes)
+                .researchOutcomeList(ImmutableList.of(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT))
                 .reviewRequested(true)
                 .socialBehavioral(true));
   }
 
-  public FirecloudWorkspace createFirecloudWorkspace(String ns, String name, String creator) {
-    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
-    fcWorkspace.setNamespace(ns);
-    fcWorkspace.setWorkspaceId(ns);
-    fcWorkspace.setName(name);
-    fcWorkspace.setCreatedBy(creator);
-    fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
-    return fcWorkspace;
+  public FirecloudWorkspace createFirecloudWorkspace(String namespace, String firecloudWorkspaceName, String creatorUsername) {
+    return new FirecloudWorkspace()
+      .namespace(namespace)
+      .workspaceId(namespace)
+      .name(firecloudWorkspaceName)
+      .createdBy(creatorUsername)
+      .bucketName(WORKSPACE_BUCKET_NAME);
   }
 
   public ListClusterResponse createFirecloudListClusterResponse() {
@@ -140,7 +124,7 @@ public class TestMockFactory {
             invocation -> {
               DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
               //noinspection ResultOfMethodCallIgnored
-              doReturn("aou-rw-local1-aaaa0000").when(entry).getFireCloudProjectName();
+              doReturn(WORKSPACE_NAMESPACE).when(entry).getFireCloudProjectName();
               return entry;
             })
         .when(billingProjectBufferService)
@@ -148,7 +132,7 @@ public class TestMockFactory {
   }
 
   public static Cloudbilling createMockedCloudbilling() {
-    Cloudbilling cloudbilling = mock(Cloudbilling.class);
+    Cloudbilling mockCloudbilling = mock(Cloudbilling.class);
     Cloudbilling.Projects projects = mock(Cloudbilling.Projects.class);
 
     try {
@@ -167,11 +151,11 @@ public class TestMockFactory {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    doReturn(projects).when(cloudbilling).projects();
+    doReturn(projects).when(mockCloudbilling).projects();
 
-    Cloudbilling.BillingAccounts billingAccounts = mock(Cloudbilling.BillingAccounts.class);
-    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
-    Cloudbilling.BillingAccounts.List listRequest = mock(Cloudbilling.BillingAccounts.List.class);
+    BillingAccounts billingAccounts = mock(BillingAccounts.class);
+    BillingAccounts.Get getRequest = mock(BillingAccounts.Get.class);
+    BillingAccounts.List listRequest = mock(BillingAccounts.List.class);
 
     try {
       doReturn(new BillingAccount().setOpen(true)).when(getRequest).execute();
@@ -183,7 +167,7 @@ public class TestMockFactory {
       throw new RuntimeException(e);
     }
 
-    doReturn(billingAccounts).when(cloudbilling).billingAccounts();
-    return cloudbilling;
+    doReturn(billingAccounts).when(mockCloudbilling).billingAccounts();
+    return mockCloudbilling;
   }
 }

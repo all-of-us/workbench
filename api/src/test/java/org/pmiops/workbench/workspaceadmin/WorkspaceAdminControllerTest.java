@@ -66,6 +66,7 @@ public class WorkspaceAdminControllerTest {
   private static final String WORKSPACE_NAME = "Gone with the Wind";
   private static final String DB_WORKSPACE_FIRECLOUD_NAME = "gonewiththewind";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
+  // TODO(jaycarlton): we can use more liberal matchers to avoid the need to specify a bad namespace
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
 
   @MockBean private CloudMonitoringService mockCloudMonitoringService;

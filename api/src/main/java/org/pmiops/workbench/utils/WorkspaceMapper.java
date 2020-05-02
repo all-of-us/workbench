@@ -130,6 +130,7 @@ public interface WorkspaceMapper {
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
   @Mapping(source = "dbUser", target = "creator")
   @Mapping(source = "firecloudWorkspace.name", target = "firecloudName")
+  // dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
   @Mapping(source = "firecloudWorkspace.workspaceId", target = "firecloudUuid")
   @Mapping(source = "workspace.creationTime", target = "creationTime")
   @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevel")
