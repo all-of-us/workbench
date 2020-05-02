@@ -124,9 +124,9 @@ public interface EmployeeMapper {
 }
 ```
 
-This compiles, but gives warnings
-```java
-/Users/jaycarlton/repos/workbench/api/src/main/java/org/pmiops/workbench/utils/mappers/examples/EmployeeMapper.java:8: warning: Unmapped target properties: "name, department, salary".
+Using `./gradlew compileJava`, I see that this compiles, but gives warnings
+```
+examples/EmployeeMapper.java:8: warning: Unmapped target properties: "name, department, salary".
   EmployeeModel toModel(EmployeeDbEntity employeeDbEntity);
                 ^
 ```
@@ -175,7 +175,7 @@ public interface EmployeeMapper {
 ```
 
 On compiling this, we have a shorter error message:
-```java
+```
 EmployeeMapper.java:11: warning: Unmapped target properties: "department, salary".
 ```
 

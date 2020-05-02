@@ -10,7 +10,7 @@ public interface EmployeeMapper {
   @Mapping(source = "employeeDbEntity", target = "name", qualifiedByName = "toFullName")
   EmployeeModel toModel(EmployeeDbEntity employeeDbEntity);
 
-  @Named("toFullName")
+//  @Named("toFullName")
   default String toName(EmployeeDbEntity employeeDbEntity) {
     return String.format("%s %s", employeeDbEntity.getFirstName(), employeeDbEntity.getLastName());
   }
