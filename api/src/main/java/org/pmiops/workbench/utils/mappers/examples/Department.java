@@ -15,7 +15,7 @@ public enum Department {
     return departmentCode;
   }
 
-  public Department fromDepartmentCode(int code) {
+  public static Department fromDepartmentCode(int code) {
     switch(code) {
       case 0:
         return SALES;

@@ -12,4 +12,8 @@ public interface EmployeeMapper {
   default String toNickname(EmployeeDbEntity employeeDbEntity) {
     return String.format("%s %s", employeeDbEntity.getFirstName(), employeeDbEntity.getLastName());
   }
+
+//  default Department toDepartment(EmployeeDbEntity employeeDbEntity) {
+//    return Department.fromDepartmentCode(employeeDbEntity.getDepartmentCode());
+//  }
 }

@@ -235,7 +235,7 @@ What if we hadn't named it `toName()`? I tried that just now and the answer was 
 it generated a line like `employeeModel.setName( toNickname( employeeDbEntity ) );`. I, for one,
 welcome our new automatically programmed overlords.
 
-We have two more propertis to fix: the enum `department`, and the `double salary`. Let's start with
+We have two more properties to fix: the enum `department`, and the `double salary`. Let's start with
 the enum.
 
 ## Tips & Strategies
