@@ -132,6 +132,13 @@ public interface WorkspaceMapper {
   @Mapping(source = "firecloudWorkspace.name", target = "firecloudName")
   // dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
   @Mapping(source = "firecloudWorkspace.workspaceId", target = "firecloudUuid")
+  // billing_account_type has a default in the database, so we only overwrite it if the source
+  // is non-null
+  @Mapping(source = "workspace.billingAccountType", target = "billingAccountType", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  @Mapping(
+      source = "workspace.billingStatus",
+      target = "billingStatus",
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
   @Mapping(source = "workspace.creationTime", target = "creationTime")
   @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevel")
   @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")

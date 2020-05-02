@@ -593,6 +593,7 @@ public class WorkspacesControllerTest {
         workspace.getName(),
         LOGGED_IN_USER_EMAIL);
 
+    // TODO(jaycarlton) avoid mocking after effectively starting the test
     stubGetWorkspace(firecloudWorkspace, WorkspaceAccessLevel.OWNER);
 
     Workspace workspace2 =
