@@ -236,9 +236,207 @@ it generated a line like `employeeModel.setName( toNickname( employeeDbEntity ) 
 welcome our new automatically programmed overlords.
 
 We have two more properties to fix: the enum `department`, and the `double salary`. Let's start with
-the enum.
+the enum. It's class definition looks like this:
+```java
+public enum Department {
+  SALES(0),
+  MARKETING(1),
+  IT(2);
+
+  private int departmentCode;
+
+  Department(int departmentCode) {
+    this.departmentCode = departmentCode;
+  }
+
+  public int getDepartmentCode() {
+    return departmentCode;
+  }
+
+  public static Department fromDepartmentCode(int code) {
+    switch(code) {
+      case 0:
+        return SALES;
+      case 1:
+        return MARKETING;
+      case 2:
+        return IT;
+      default:
+        return SALES; // they never know their code, so probably them
+    }
+  }
+}
+```
+
+I thought I'd be clever and just pull in the enum type via a `uses` directive at the top of the mapper:
+```java
+@Mapper(uses = Department.class)
+```
+This did exactly the wrong thing. It generated the class without errors, but then failed to compile:
+```java
+public class EmployeeMapperImpl implements EmployeeMapper {
+
+    private final Department department = new Department();
+
+    @Override
+    public EmployeeModel toModel(EmployeeDbEntity employeeDbEntity) {
+        if ( employeeDbEntity == null ) {
+            return null;
+        }
+
+        EmployeeModel employeeModel = department.clone();
+
+        employeeModel.setName( toNickname( employeeDbEntity ) );
+        employeeModel.setAddress( employeeDbEntity.getAddress() );
+
+        return employeeModel;
+    }
+}
+```
+
+New errors:
+```
+> Task :compileJava 
+/Users/jaycarlton/repos/workbench/api/src/main/java/org/pmiops/workbench/utils/mappers/examples/EmployeeMapper.java:10: warning: Unmapped target properties: "department, salary".
+  EmployeeModel toModel(EmployeeDbEntity employeeDbEntity);
+                ^
+/Users/jaycarlton/repos/workbench/api/build/generated/sources/annotationProcessor/java/main/org/pmiops/workbench/utils/mappers/examples/EmployeeMapperImpl.java:12: error: enum types may not be instantiated
+    private final Department department = new Department();
+                                          ^
+/Users/jaycarlton/repos/workbench/api/build/generated/sources/annotationProcessor/java/main/org/pmiops/workbench/utils/mappers/examples/EmployeeMapperImpl.java:20: error: clone() has protected access in Enum
+        EmployeeModel employeeModel = department.clone();
+                                                ^
+/Users/jaycarlton/repos/workbench/api/build/generated/sources/annotationProcessor/java/main/org/pmiops/workbench/utils/mappers/examples/EmployeeMapperImpl.java:20: error: incompatible types: Object cannot be converted to EmployeeModel
+        EmployeeModel employeeModel = department.clone();
+                                                      ^
+```
+
+Fine, we can do it the less slick but more reliable way:
+
+```java
+@Mapper(uses = SampleEnumMapper.class)
+public interface EmployeeMapper {
+
+  @Mapping(source = "employeeDbEntity", target = "name")
+  @Mapping(source = "employeeDbEntity.departmentCode", target = "department")
+  EmployeeModel toModel(EmployeeDbEntity employeeDbEntity);
+
+  default String toNickname(EmployeeDbEntity employeeDbEntity) {
+    return String.format("%s %s", employeeDbEntity.getFirstName(), employeeDbEntity.getLastName());
+  }
+}
+```
+
+where the new `SampleEnumMapper` looks like:
+```java
+@Mapper
+public interface SampleEnumMapper {
+  default Department toDepartment(int departmentCode) {
+    return Department.fromDepartmentCode(departmentCode);
+  }
+}
+```
+
+I'm sure there's a way to do this without creating another mapper class. Anyway, this gives us 
+```java
+public class EmployeeMapperImpl implements EmployeeMapper {
+
+    private final SampleEnumMapper sampleEnumMapper = Mappers.getMapper( SampleEnumMapper.class );
+
+    @Override
+    public EmployeeModel toModel(EmployeeDbEntity employeeDbEntity) {
+        if ( employeeDbEntity == null ) {
+            return null;
+        }
+
+        EmployeeModel employeeModel = new EmployeeModel();
+
+        employeeModel.setName( toNickname( employeeDbEntity ) );
+        employeeModel.setDepartment( sampleEnumMapper.toDepartment( employeeDbEntity.getDepartmentCode() ) );
+        employeeModel.setAddress( employeeDbEntity.getAddress() );
+
+        return employeeModel;
+    }
+}
+```
+Our `@Mapping` instruction let MapStruct know which source property (an int) to match to the target
+property (`Department`). There was only one such method, so it was selected.
+
+To see what happens when there's ambiguity, add another method to `SampleEnumMapper`:
+```java
+  default Department anotherOne(int anInt) {
+    return Department.SALES;
+  }
+```
+
+This gives us a helpful, if verbose error message and breaks the build. I've stripped the packages
+and full paths for clarity:
+```
+> Task :compileJava 
+examples/EmployeeMapper.java:11: error: Ambiguous mapping methods found for mapping property 
+"int departmentCode" to Department: 
+  Department SampleEnumMapper.toDepartment(int departmentCode),
+  Department SampleEnumMapper.anotherOne(int anInt).
+  EmployeeModel toModel(EmployeeDbEntity employeeDbEntity);
+```
+
+
+Finally, for the salary mapping, we need to do real math. The database stores an hourly rate as a
+double (never do this), and the API exposes an annual salary. We assume 2000.0 hours in a work year.
+
+We can do this via a simple method `toAnnualSalary()`
+```java
+@Mapper(uses = SampleEnumMapper.class)
+public interface EmployeeMapper {
+
+  double HOURS_IN_YEAR = 2000.0;
+
+  @Mapping(source = "employeeDbEntity", target = "name")
+  @Mapping(source = "employeeDbEntity.departmentCode", target = "department")
+  @Mapping(source = "employeeDbEntity.hourlyRate", target = "salary")
+  EmployeeModel toModel(EmployeeDbEntity employeeDbEntity);
+
+  default String toNickname(EmployeeDbEntity employeeDbEntity) {
+    return String.format("%s %s", employeeDbEntity.getFirstName(), employeeDbEntity.getLastName());
+  }
+
+  default double toAnnalSalary(double hourlyRate) {
+    return hourlyRate * HOURS_IN_YEAR;
+  }
+}
+```
+
+This compiles with no warnings, and our mapper implementation is now:
+```java
+public class EmployeeMapperImpl implements EmployeeMapper {
+
+    private final SampleEnumMapper sampleEnumMapper = Mappers.getMapper( SampleEnumMapper.class );
+
+    @Override
+    public EmployeeModel toModel(EmployeeDbEntity employeeDbEntity) {
+        if ( employeeDbEntity == null ) {
+            return null;
+        }
+
+        EmployeeModel employeeModel = new EmployeeModel();
+
+        employeeModel.setName( toNickname( employeeDbEntity ) );
+        employeeModel.setDepartment( sampleEnumMapper.toDepartment( employeeDbEntity.getDepartmentCode() ) );
+        employeeModel.setSalary( toAnnalSalary( employeeDbEntity.getHourlyRate() ) );
+        employeeModel.setAddress( employeeDbEntity.getAddress() );
+
+        return employeeModel;
+    }
+}
+```
 
 ## Tips & Strategies
+
+### Stub it so it builds, and go one property at a time
+For big target classes, put in some temporary `ignore` statements or other hacks just to get it
+to the point that it generates the implemmentation class and actually compiles without errors. Then
+proceed one property at a time until all the warnings are gone.
+ 
 ### Proofread the generated code
 First, you should *always* look at the generated code and step through it in the debugger. This is
 because, while the codegen should be deterministic, most of us don't go around with its order of
@@ -248,6 +446,14 @@ with common names, you may find that `foo.id` is getting used instead of `bar.id
 
 In general, the library gives very reasonable error
 messages and is very cranky at compile time. This is A Good Thing.
+
+## Write tests for mappers
+It's pretty tedious to write tests for generated code, as the computer is coding faster than you.
+I still think it's worth it, because,
+- it documents usage of your generated methods
+- you catch things the compiler can't (such as when a string format changes)
+- it's a good opportunity to update old test code
+- It makes it look less magical
 
 ### Consider other use cases
 It's possible to write a mapper from a type to itself and use that as a copy constructor of sorts.
