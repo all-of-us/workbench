@@ -27,16 +27,17 @@ Consider an `EmployeeModel` class:
 public class EmployeeModel {
   private String name;
   private Department department;
+  private String address;
   private double salary;
 
-  // Zero-arg constructor is required for mapping target classes.
   public EmployeeModel() {
   }
 
   public EmployeeModel(String name,
-      Department department, double salary) {
+      Department department, String address, double salary) {
     this.name = name;
     this.department = department;
+    this.address = address;
     this.salary = salary;
   }
 
@@ -64,23 +65,35 @@ public class EmployeeModel {
   public double getWeeklySalary() {
     return getSalary() / 52.0;
   }
+
+  public String getAddress() {
+    return address;
+  }
+
+  public void setAddress(String address) {
+    this.address = address;
+  }
 }
 ```
 
 Additionally, we have a (nearly) corresponding entity in the database. (Hibernate bindings omitted.)
 ```java
+// ORM details omitted.
 public class EmployeeDbEntity {
 
-  String firstName;
-  String lastName;
-  int departmentCode; // corresponds to enum
-  double hourlyRate;
+  private String firstName;
+  private String lastName;
+  private int departmentCode; // corresponds to enum
+  private double hourlyRate;
+  private String address;
 
-  public EmployeeDbEntity(String firstName, String lastName, int departmentCode, double hourlyRate) {
+  public EmployeeDbEntity(String firstName, String lastName, int departmentCode, double hourlyRate,
+      String address) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.departmentCode = departmentCode;
     this.hourlyRate = hourlyRate;
+    this.address = address;
   }
 
   public String getFirstName() {
@@ -110,6 +123,13 @@ public class EmployeeDbEntity {
   public void setLastName(String lastName) {
     this.lastName = lastName;
   }
+
+  public String getAddress() {
+    return address;
+  }
+  public void setAddress(String address) {
+    this.address = address;
+  }
 }
 ```
 
@@ -131,11 +151,12 @@ examples/EmployeeMapper.java:8: warning: Unmapped target properties: "name, depa
                 ^
 ```
 
-So the good news is I've successfully generated a mapper. The bad news is that it's a trivial one.
+So the good news is I've successfully generated a mapper. The bad news is that it's only one for
+four properties.
 ```java
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2020-05-02T17:24:53-0400",
+    date = "2020-05-02T18:10:18-0400",
     comments = "version: 1.3.1.Final, compiler: javac, environment: Java 1.8.0_221 (Oracle Corporation)"
 )
 public class EmployeeMapperImpl implements EmployeeMapper {
@@ -148,26 +169,28 @@ public class EmployeeMapperImpl implements EmployeeMapper {
 
         EmployeeModel employeeModel = new EmployeeModel();
 
+        employeeModel.setAddress( employeeDbEntity.getAddress() );
+
         return employeeModel;
     }
 }
 ```
 
-In this case we need to add a method to build a full name from first & last names. Let's pretend our
+To fix the name mapping we need to add a method to build a full name from first & last names. Let's pretend our
 system didn't already have a good one, and add it directly in the mapper itself for brevity. To do
 this, we need to create a `default` method on the interface, which is a relatively new facility in
 Java to make life easier in this kind of situation.
 
-Our default method could be thought of as a mapper, though I didn't write it that way.
+Our default method is itself another mapper, though you want to be careful when the source type of
+such a mapper is a common type like String or Timestamp.
 
 ```java
 @Mapper
 public interface EmployeeMapper {
 
-  @Mapping(source = "employeeDbEntity", target = "name", qualifiedByName = "toFullName")
+  @Mapping(source = "employeeDbEntity", target = "name")
   EmployeeModel toModel(EmployeeDbEntity employeeDbEntity);
 
-  @Named("toFullName")
   default String toName(EmployeeDbEntity employeeDbEntity) {
     return String.format("%s %s", employeeDbEntity.getFirstName(), employeeDbEntity.getLastName());
   }
@@ -191,12 +214,29 @@ public class EmployeeMapperImpl implements EmployeeMapper {
 
         EmployeeModel employeeModel = new EmployeeModel();
 
-        employeeModel.setName( toName( employeeDbEntity ) );
+        employeeModel.setName( toName( employeeDbEntity ) ); // <-- our default mapper method
+        employeeModel.setAddress( employeeDbEntity.getAddress() );
 
         return employeeModel;
     }
 }
 ```
+
+If you're following along, notice that MapStruct is being clever here, but not too clever
+(by design). Since our `EmployeeDbEntity` class doesn't have an attribute named `name`
+(or a `getName()` method), it doesn't just grab any String property from that class and hope for the
+best. We had to tell it in a `@Mapping` annotation that it can in fact get a `String` called "name" from this
+`employeeDbEntity` if it looks a little harder.
+
+Since our default method takes in the entity and returns a string, this is a good candidate, and
+that's what it uses.
+
+What if we hadn't named it `toName()`? I tried that just now and the answer was slightly surprising:
+it generated a line like `employeeModel.setName( toNickname( employeeDbEntity ) );`. I, for one,
+welcome our new automatically programmed overlords.
+
+We have two more propertis to fix: the enum `department`, and the `double salary`. Let's start with
+the enum.
 
 ## Tips & Strategies
 ### Proofread the generated code

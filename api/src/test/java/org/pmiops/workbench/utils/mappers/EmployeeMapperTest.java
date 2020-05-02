@@ -28,7 +28,8 @@ public class EmployeeMapperTest {
 
   @Test
   testToModel() {
-    final EmployeeDbEntity employeeDbEntity = new EmployeeDbEntity("John", "Doe", 2, "3.00");
+    final EmployeeDbEntity employeeDbEntity = new EmployeeDbEntity("John", "Doe", 2, "3.00",
+        address);
 
     final EmployeeModel employeeModel = employeeMapper.toModel(employeeDbEntity);
     assertThat(employeeModel.getDepartment()).isEqualTo(Department.MARKETING);

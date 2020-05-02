@@ -3,15 +3,17 @@ package org.pmiops.workbench.utils.mappers.examples;
 public class EmployeeModel {
   private String name;
   private Department department;
+  private String address;
   private double salary;
 
   public EmployeeModel() {
   }
 
   public EmployeeModel(String name,
-      Department department, double salary) {
+      Department department, String address, double salary) {
     this.name = name;
     this.department = department;
+    this.address = address;
     this.salary = salary;
   }
 
@@ -38,5 +40,13 @@ public class EmployeeModel {
 
   public double getWeeklySalary() {
     return getSalary() / 52.0;
+  }
+
+  public String getAddress() {
+    return address;
+  }
+
+  public void setAddress(String address) {
+    this.address = address;
   }
 }

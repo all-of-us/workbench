@@ -1,17 +1,21 @@
 package org.pmiops.workbench.utils.mappers.examples;
 
+// ORM details omitted.
 public class EmployeeDbEntity {
 
-  String firstName;
-  String lastName;
-  int departmentCode; // corresponds to enum
-  double hourlyRate;
+  private String firstName;
+  private String lastName;
+  private int departmentCode; // corresponds to enum
+  private double hourlyRate;
+  private String address;
 
-  public EmployeeDbEntity(String firstName, String lastName, int departmentCode, double hourlyRate) {
+  public EmployeeDbEntity(String firstName, String lastName, int departmentCode, double hourlyRate,
+      String address) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.departmentCode = departmentCode;
     this.hourlyRate = hourlyRate;
+    this.address = address;
   }
 
   public String getFirstName() {
@@ -40,5 +44,12 @@ public class EmployeeDbEntity {
   }
   public void setLastName(String lastName) {
     this.lastName = lastName;
+  }
+
+  public String getAddress() {
+    return address;
+  }
+  public void setAddress(String address) {
+    this.address = address;
   }
 }
