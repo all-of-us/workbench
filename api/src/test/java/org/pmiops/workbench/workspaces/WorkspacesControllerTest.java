@@ -476,8 +476,8 @@ public class WorkspacesControllerTest {
   }
 
   private void stubGetWorkspace(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
-    stubGetWorkspace(testMockFactory.createFirecloudWorkspace(ns, name, creator), access);
+      String ns, String name, String creatorUsername, WorkspaceAccessLevel workspaceAccessLevel) {
+    stubGetWorkspace(testMockFactory.createFirecloudWorkspace(ns, name, creatorUsername), workspaceAccessLevel);
   }
 
   private void stubGetWorkspace(FirecloudWorkspace fcWorkspace, WorkspaceAccessLevel access) {
@@ -588,16 +588,19 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(mockFirecloudService).createWorkspace(workspace.getNamespace(), workspace.getId());
 
-    stubGetWorkspace(
+    final FirecloudWorkspace firecloudWorkspace = testMockFactory.createFirecloudWorkspace(
         workspace.getNamespace(),
         workspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
+        LOGGED_IN_USER_EMAIL);
+
+    stubGetWorkspace(firecloudWorkspace, WorkspaceAccessLevel.OWNER);
+
     Workspace workspace2 =
         workspacesController
             .getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getWorkspace();
+
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);

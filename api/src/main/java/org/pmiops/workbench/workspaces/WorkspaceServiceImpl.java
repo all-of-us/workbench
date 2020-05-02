@@ -209,10 +209,16 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return getWorkspaceImpl(dbWorkspace);
   }
 
+  /**
+   *
+   * @param workspaceNamespace aka the firecloud project
+   * @param workspaceFireclodName aka the workspaceId
+   * @return
+   */
   @Transactional
   @Override
-  public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+  public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceFireclodName) {
+    DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceFireclodName);
     return getWorkspaceImpl(dbWorkspace);
   }
 

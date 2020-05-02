@@ -9,7 +9,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +108,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
-  private final FireCloudService fireCloudService;
+  private final FireCloudService mockFireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final LogsBasedMetricService logsBasedMetricService;
   private final NotebooksService notebooksService;
@@ -130,7 +129,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CdrVersionDao cdrVersionDao,
       UserDao userDao,
       Provider<DbUser> userProvider,
-      FireCloudService fireCloudService,
+      FireCloudService mockFireCloudService,
       CloudStorageService cloudStorageService,
       Provider<Zendesk> zendeskProvider,
       FreeTierBillingService freeTierBillingService,
@@ -147,7 +146,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
-    this.fireCloudService = fireCloudService;
+    this.mockFireCloudService = mockFireCloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.cloudStorageService = cloudStorageService;
     this.zendeskProvider = zendeskProvider;
@@ -162,7 +161,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private String getRegisteredUserDomainEmail() {
     FirecloudManagedGroupWithMembers registeredDomainGroup =
-        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
+        mockFireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
     return registeredDomainGroup.getGroupEmail();
   }
 
@@ -175,7 +174,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
+  private DbCdrVersion getCdrVersionById(String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
@@ -207,11 +206,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private FirecloudWorkspace attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
-    return fireCloudService.createWorkspace(
-        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
-  }
-
   private void maybeFileZendeskReviewRequest(Workspace workspace) {
     if (!workspace.getResearchPurpose().getReviewRequested()) {
       return;
@@ -240,15 +234,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
-    return ResponseEntity.ok(
-        recordOperationTime(() -> createWorkspaceImpl(workspace), "createWorkspace"));
-  }
-
-  // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService &
-  // WorkspaceServiceImpl
-  private Workspace createWorkspaceImpl(Workspace workspace) {
-    validateWorkspaceApiModel(workspace);
+  public ResponseEntity<Workspace> createWorkspace(Workspace workspaceEgg) throws BadRequestException {
+    validateWorkspaceApiModel(workspaceEgg);
 
     DbUser dbUser = userProvider.get();
 
@@ -263,24 +250,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
-        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    final FirecloudWorkspace firecloudWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
+        generateFirecloudWorkspaceId(workspaceNamespace, workspaceEgg.getName());
+    final FirecloudWorkspace firecloudWorkspace = mockFireCloudService.createWorkspace(
+        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
 
     final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    final DbCdrVersion liveCdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
+    final DbCdrVersion dbCdrVersion = getCdrVersionById(workspaceEgg.getCdrVersionId());
 
     DbWorkspace dbWorkspace =
         workspaceMapper.toDbWorkspace(
-            workspace,
+            workspaceEgg,
             firecloudWorkspace,
             dbUser,
             WorkspaceActiveStatus.ACTIVE,
             now,
             BillingMigrationStatus.NEW,
-            liveCdrVersion);
+            dbCdrVersion);
 
-    if (workspace.getResearchPurpose().getReviewRequested()) {
+    if (workspaceEgg.getResearchPurpose().getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
@@ -288,7 +276,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The initial billing account fixup could be done in the mapper, but we don't
     try {
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workspace.getBillingAccountName());
+          dbWorkspace, workspaceEgg.getBillingAccountName());
     } catch (ServerErrorException e) {
       // Will be addressed with RW-4440
       throw new ServerErrorException(
@@ -310,10 +298,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace);
+    final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     maybeFileZendeskReviewRequest(createdWorkspace);
-    return createdWorkspace;
+    return ResponseEntity.ok(createdWorkspace);
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -330,14 +318,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private void setDbWorkspaceFields(
       DbWorkspace dbWorkspace,
-      DbUser user,
-      FirecloudWorkspaceId workspaceId,
-      FirecloudWorkspace fcWorkspace,
+      DbUser dbUser,
+      FirecloudWorkspaceId firecloudWorkspaceId,
+      FirecloudWorkspace firecloudWorkspace,
       Timestamp createdAndLastModifiedTime) {
-    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
-    dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
+    dbWorkspace.setFirecloudName(firecloudWorkspaceId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(firecloudWorkspaceId.getWorkspaceNamespace());
+    dbWorkspace.setCreator(dbUser);
+    dbWorkspace.setFirecloudUuid(firecloudWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(createdAndLastModifiedTime);
     dbWorkspace.setLastModifiedTime(createdAndLastModifiedTime);
     dbWorkspace.setVersion(DEFALT_WORKSPACE_VERSION);
@@ -383,13 +371,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private Workspace updateWorkspaceImpl(
-      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+      String workspaceNamespace, String firecloudWorkspaceName, UpdateWorkspaceRequest request) {
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, firecloudWorkspaceName);
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
+        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
     FirecloudWorkspace fcWorkspace =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
+        mockFireCloudService.getWorkspace(workspaceNamespace, firecloudWorkspaceName).getWorkspace();
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
     }
@@ -490,7 +478,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     FirecloudWorkspaceId toFcWorkspaceId =
         generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
     FirecloudWorkspace toFcWorkspace =
-        fireCloudService.cloneWorkspace(
+        mockFireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
             toFcWorkspaceId.getWorkspaceNamespace(),
@@ -526,7 +514,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
-      final DbCdrVersion reqCdrVersion = getLiveCdrVersionId(reqCdrVersionId);
+      final DbCdrVersion reqCdrVersion = getCdrVersionById(reqCdrVersionId);
       dbWorkspace.setCdrVersion(reqCdrVersion);
       dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
     }
@@ -777,7 +765,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Retrieving the workspace is done first, which acts as an access check.
     String bucketName =
-        fireCloudService
+        mockFireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();

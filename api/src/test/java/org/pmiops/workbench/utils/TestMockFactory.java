@@ -34,7 +34,8 @@ import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 
 public class TestMockFactory {
-  public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
+  public static final String FIRECLOUD_WORKSPACE_UUID = "111111-2222-AAAA-BBBB-000000000000";
+  public static final String WORKSPACE_BUCKET_NAME = "fc-secure-" + FIRECLOUD_WORKSPACE_UUID;
   private static final String CDR_VERSION_ID = "1";
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
   public static final String WORKSPACE_NAMESPACE = "aou-rw-local1-aaaa0000";
@@ -80,10 +81,11 @@ public class TestMockFactory {
                 .socialBehavioral(true));
   }
 
+  // HACK HACK HELP!!!
   public FirecloudWorkspace createFirecloudWorkspace(String namespace, String firecloudWorkspaceName, String creatorUsername) {
     return new FirecloudWorkspace()
       .namespace(namespace)
-      .workspaceId(namespace)
+      .workspaceId(FIRECLOUD_WORKSPACE_UUID)
       .name(firecloudWorkspaceName)
       .createdBy(creatorUsername)
       .bucketName(WORKSPACE_BUCKET_NAME);

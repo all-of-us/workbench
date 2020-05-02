@@ -728,7 +728,9 @@ paths:
       parameters:
       - in: body
         name: workspace
-        description: workspace definition
+        description: >
+          Initial Workspace object, including all required fields. Several read-only fields will
+          be filled in by the server and included in the returned Worskapce.
         schema:
           "$ref": "#/definitions/Workspace"
       responses:
