@@ -56,6 +56,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CopyRequest;
+import org.pmiops.workbench.model.CreateWorkspaceRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
@@ -239,14 +240,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
+  public ResponseEntity<Workspace> createWorkspace(CreateWorkspaceRequest createWorkspaceRequest) throws BadRequestException {
     return ResponseEntity.ok(
-        recordOperationTime(() -> createWorkspaceImpl(workspace), "createWorkspace"));
+        recordOperationTime(() -> createWorkspaceImpl(createWorkspaceRequest), "createWorkspace"));
   }
 
   // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService &
   // WorkspaceServiceImpl
-  private Workspace createWorkspaceImpl(Workspace workspace) {
+  private Workspace createWorkspaceImpl(CreateWorkspaceRequest workspace) {
     validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
@@ -320,14 +321,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return createdWorkspace;
   }
 
-  private void validateWorkspaceApiModel(Workspace workspace) {
-    if (Strings.isNullOrEmpty(workspace.getName())) {
+  private void validateWorkspaceApiModel(CreateWorkspaceRequest createWorkspaceRequest) {
+    if (Strings.isNullOrEmpty(createWorkspaceRequest.getName())) {
       throw new BadRequestException("missing required field 'name'");
-    } else if (workspace.getResearchPurpose() == null) {
+    } else if (createWorkspaceRequest.getResearchPurpose() == null) {
       throw new BadRequestException("missing required field 'researchPurpose'");
-    } else if (workspace.getDataAccessLevel() == null) {
+    } else if (createWorkspaceRequest.getDataAccessLevel() == null) {
       throw new BadRequestException("missing required field 'dataAccessLevel'");
-    } else if (workspace.getName().length() > 80) {
+    } else if (createWorkspaceRequest.getName().length() > 80) {
       throw new BadRequestException("DbWorkspace name must be 80 characters or less");
     }
   }

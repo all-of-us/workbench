@@ -730,7 +730,7 @@ paths:
         name: workspace
         description: workspace definition
         schema:
-          "$ref": "#/definitions/Workspace"
+          "$ref": "#/definitions/CreateWorkspaceRequest"
       responses:
         200:
           description: The workspace that was created.
@@ -3726,6 +3726,37 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/WorkspaceResponse"
+  CreateWorkspaceRequest:
+    type: object
+    required:
+      - billingAccountName
+      - cdrVersionId
+      - creator
+      - dataAccessLevel
+      - name
+      - researchPurpose
+    properties:
+      billingAccountName:
+        type: string
+        description: >
+          Name of Google Cloud Platform account responsible for billing for this
+          workspace. This will be used to locate the registerd billing account and
+          determine its status and type.
+      cdrVersionId:
+        type: string
+        description: Version staring for AoU Curated Data Repository
+      creator:
+        type: string
+        description: Username of user creating this workspace
+      dataAccessLevel:
+        "$ref": "#/definitions/DataAccessLevel"
+        description: CDR access level for this workspace
+      name:
+        type: string
+        description: User-specified name for the workspace. May contain non-ascii characters
+      researchPurpose:
+        "$ref": "#/definitions/ResearchPurpose"
+        description: User-specified research purpose for the workspace
   Workspace:
     type: object
     required:
