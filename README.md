@@ -1,11 +1,14 @@
 # Workbench
 
-[![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
+## Development Guides
+CircleCI Test Status [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
 
-[Documentation on API Structure](https://github.com/all-of-us/workbench/blob/master/api/doc/code-structure.md)
+[Documentation on API Structure](api/docs/code-structure.md)
 
-[UI Style Guide](https://github.com/all-of-us/workbench/blob/master/ui/docs/style-guide.md)
+[UI Style Guide](ui/docs/style-guide.md)
 
+### Best Practices Guides
+[MapStruct](api/doc/mapstruct.md)
 
 ## Setup for Development
 
