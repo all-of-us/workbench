@@ -82,6 +82,8 @@ public class WorkspaceMapperTest {
   private Workspace sourceApiWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
+  public static final Timestamp LAST_ACCESSED_TIME = Timestamp
+      .from(DB_CREATION_TIMESTAMP.toInstant().plus(Duration.ofMinutes(15)));
 
   @TestConfiguration
   @Import({
@@ -280,7 +282,8 @@ public class WorkspaceMapperTest {
         sourceFirecloudWorkspace,
         creatorUser,
         WorkspaceActiveStatus.ACTIVE,
-        Timestamp.from(DB_CREATION_TIMESTAMP.toInstant().plus(Duration.ofMinutes(15))),
+        DB_CREATION_TIMESTAMP,
+        LAST_ACCESSED_TIME,
         BILLING_MIGRATION_STATUS,
         cdrVersion);
 

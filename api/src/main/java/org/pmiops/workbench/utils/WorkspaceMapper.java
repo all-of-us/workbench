@@ -139,9 +139,11 @@ public interface WorkspaceMapper {
       source = "workspace.billingStatus",
       target = "billingStatus",
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  @Mapping(source = "workspace.creationTime", target = "creationTime")
+
+  @Mapping(source = "creationTime", target = "creationTime") // not set in workspace "egg" object
   @Mapping(source = "workspace.dataAccessLevel", target = "dataAccessLevel")
-  @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime")
+  @Mapping(source = "lastAccessedTime", target = "lastAccessedTime") // not set in workspace "egg" object
+  @Mapping(source = "workspace.lastModifiedTime", target = "lastModifiedTime") // not set in workspace "egg" object
   // Use default CDR version if null. There are really no other good options (i.e. a zero version is just wrong).
   @Mapping(source = "workspace.etag", target = "version", qualifiedByName = "etagToCdrVersion", defaultValue = "1")
   @Mapping(source = "workspace.name", target = "name")
@@ -183,6 +185,7 @@ public interface WorkspaceMapper {
       FirecloudWorkspace firecloudWorkspace,
       DbUser dbUser,
       WorkspaceActiveStatus workspaceActiveStatus,
+      Timestamp creationTime,
       Timestamp lastAccessedTime,
       BillingMigrationStatus billingMigrationStatus,
       DbCdrVersion dbCdrVersion,
@@ -195,6 +198,7 @@ public interface WorkspaceMapper {
       FirecloudWorkspace firecloudWorkspace,
       DbUser dbUser,
       WorkspaceActiveStatus workspaceActiveStatus,
+      Timestamp creationTime,
       Timestamp lastAccessedTime,
       BillingMigrationStatus billingMigrationStatus,
       DbCdrVersion dbCdrVersion) {
@@ -203,6 +207,7 @@ public interface WorkspaceMapper {
         firecloudWorkspace,
         dbUser,
         workspaceActiveStatus,
+        creationTime,
         lastAccessedTime,
         billingMigrationStatus,
         dbCdrVersion,

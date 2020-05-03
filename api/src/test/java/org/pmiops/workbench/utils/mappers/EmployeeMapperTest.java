@@ -16,6 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class EmployeeMapperTest {
+
+  public static final String ADDRESS = "123 Sesame Street";
   @Autowired
   private EmployeeMapper employeeMapper;
 
@@ -27,12 +29,14 @@ public class EmployeeMapperTest {
   }
 
   @Test
-  testToModel() {
-    final EmployeeDbEntity employeeDbEntity = new EmployeeDbEntity("John", "Doe", 2, "3.00",
-        address);
+  public void testToModel() {
+    final EmployeeDbEntity employeeDbEntity = new EmployeeDbEntity("John", "Doe", 2, 3.00,
+        ADDRESS);
 
     final EmployeeModel employeeModel = employeeMapper.toModel(employeeDbEntity);
-    assertThat(employeeModel.getDepartment()).isEqualTo(Department.MARKETING);
-    assertThat(employeeModel.getSalary() - 6000.0).isWithin(0.50);
+    assertThat(employeeModel.getDepartment()).isEqualTo(Department.IT);
+    assertThat(employeeModel.getSalary()).isWithin(1.0e-6).of(6000.0);
+    assertThat(employeeModel.getName()).isEqualTo("John Doe");
+    assertThat(employeeModel.getAddress()).isEqualTo(ADDRESS);
   }
 }

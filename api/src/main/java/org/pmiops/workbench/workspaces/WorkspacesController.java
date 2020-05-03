@@ -256,6 +256,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
+    // HACK - can't really pass this in as separate argment, as it's in two places
+    workspaceEgg.setCreationTime(now.getTime());
+    workspaceEgg.setLastModifiedTime(now.getTime());
     final DbCdrVersion dbCdrVersion = getCdrVersionById(workspaceEgg.getCdrVersionId());
 
     DbWorkspace dbWorkspace =
@@ -264,6 +267,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             firecloudWorkspace,
             dbUser,
             WorkspaceActiveStatus.ACTIVE,
+            now,
             now,
             BillingMigrationStatus.NEW,
             dbCdrVersion);
