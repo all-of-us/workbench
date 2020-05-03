@@ -560,16 +560,49 @@ the read-only `etag` column in the `workspace` table:
 // Use default CDR version if null. There are really no other good options (i.e. a zero version is just wrong).
 @Mapping(source = "workspace.etag", target = "version", qualifiedByName = "etagToCdrVersion", defaultValue = "1")
 ```
+## Semi-advanced topics
 
-## Pulling in other mappers
+### Mapping to a subset of target properties
+If you need to map from an object with sub-objects to a target type that's flat, there are two
+stratgegies. The first is to use dot indexing in the `@Mapping` annotation, for example
+`@Mapping(source = "employee.contact.address", target = "address")`. This works well, but the
+generated code will look sloppy if you have to do this many times (e.g. for ResearchPurpose).
+If you want to have the address member on the source accessed only once in the mapping (e.g. if it
+involves some expensive calculation or network call), then it's better to have a separate method
+using `@MappingTarget` on the target type. Something like the following may work
+```java
+default void setAddress(@MappingTarget DbEmployee dbEmployee, EmployeeModel employee) {
+  dbEmployee.setAddress(employee.address);
+}
+```
+
+You could also elect to have a setter for this object on the target class itself, but then you may
+lose some of the benefits of MapStruct's compile-time checking.
+
+Finally, note that this hierarchical mismatch may be a design smell.
+
+### Pulling in other mappers
 The `uses` directive instructs MapStruct to look for candidates in external classes. We have one
 class just for this purpose called `CommonMappers`. Additionally, classes exposing public static
 methods, such as `DbStorageEnums` can be used to good effect.
 
-## Gotchas
-- Default values defined by database
-- False positive matches
-- Timestamp vs SqlTimestamp
-SqlTimestamp is slightly special, and many of the generated time conversions are not _quite_ what we
+### Using the `@AfterMapping` annotation
+Sometimes it's desirable to perform some fixup or post-mapping operations. While this should not be
+common, it's a handy tool to have around. In the case of target types that are generated from
+`swagger-codegen`, often the default constructor is lacking. For example it does not initialize
+array members to empty arrays but leaves them as null. We can fix this with an appropriate
+after mapping method that initializes those fields if they're not already.
+
+### Using DAOs
+If you specify `componentModel = "spring"` in the top-level `@Mapper` annotation, you can inject
+Spring beans and services. If you go this route, be sure to document and test all side effects. I'm
+not sure what the convention should be on whether a target Hibernate entity should be saved inside
+the mapping method or not.
+
+## False positive matches
+Although the rules used in the codegen are reliable, they may not be intuitive when you're dealing
+with large classes with many similar fields of the same types. In particular for this project,
+be very careful with various combinations of `Workspace`, `DbWorkspace`, and `FirecloudWorkspace`. 
+- Timestamp vs SqlTimestamp. SqlTimestamp is slightly special, and many of the generated time conversions are not _quite_ what we
 want. For example, we spun our own Sql Timestamps to String mapper
 - Application-specific order dependence
