@@ -430,6 +430,8 @@ public class EmployeeMapperImpl implements EmployeeMapper {
 }
 ```
 
+### Testing
+It's pretty easy to add a test case 
 ## Tips & Strategies
 
 ### Stub it so it builds, and go one property at a time

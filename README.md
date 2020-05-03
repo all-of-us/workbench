@@ -8,7 +8,7 @@ CircleCI Test Status [![CircleCI Build Status](https://circleci.com/gh/all-of-us
 [UI Style Guide](ui/docs/style-guide.md)
 
 ### Best Practices Guides
-[MapStruct](api/doc/mapstruct.md)
+[MapStruct](api/docs/mapstruct.md)
 
 ## Setup for Development
 
