@@ -209,7 +209,7 @@
   },
   {
     "person_id": 2,
-    "entry_date": "2009-12-04",
+    "entry_date": "2009-12-03",
     "concept_id": 10,
     "domain": "Visit",
     "age_at_event": 38,
@@ -396,7 +396,7 @@
     "age_at_event": 38,
     "visit_occurrence_id": 1,
     "visit_concept_id": 1,
-    "is_standard": 1
+    "is_standard": 0
   },
   {
     "person_id": 1,
