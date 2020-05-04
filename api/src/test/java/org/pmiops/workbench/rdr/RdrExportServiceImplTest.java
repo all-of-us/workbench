@@ -71,7 +71,7 @@ public class RdrExportServiceImplTest {
 
   private DbUser dbUserWithEmail;
   private DbUser dbUserWithoutEmail;
-  private DbWorkspace mockWorkspace;
+  private DbWorkspace mockWorkspace, mockDeletedWorkspace;
 
   @TestConfiguration
   @Import({RdrExportServiceImpl.class})
@@ -114,6 +114,11 @@ public class RdrExportServiceImplTest {
         buildDbWorkspace(1, "workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE);
     mockWorkspace.setCreator(dbUserWithEmail);
     when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(1)).thenReturn(mockWorkspace);
+
+    mockDeletedWorkspace =
+        buildDbWorkspace(2, "workspace_del", "workspaceNs", WorkspaceActiveStatus.DELETED);
+
+    when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(2)).thenReturn(mockDeletedWorkspace);
 
     DbVerifiedInstitutionalAffiliation mockVerifiedInstitutionalAffiliation =
         new DbVerifiedInstitutionalAffiliation();
@@ -178,7 +183,7 @@ public class RdrExportServiceImplTest {
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
     verify(rdrExportDao, times(1)).save(anyList());
 
-    RdrWorkspace rdrWorkspace = toRdrWorkspace(mockWorkspace);
+    RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
 
@@ -202,7 +207,7 @@ public class RdrExportServiceImplTest {
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
     verify(rdrExportDao, times(1)).save(anyList());
 
-    RdrWorkspace rdrWorkspace = toRdrWorkspace(mockWorkspace);
+    RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
     rdrWorkspace
         .getWorkspaceDemographic()
         .setRaceEthnicity(Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.AA));
@@ -210,10 +215,33 @@ public class RdrExportServiceImplTest {
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
 
-  private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
+
+  /**
+   * For deleted workspace RDR should send the status as INACTIVE
+   *
+   * @throws ApiException
+   */
+  @Test
+  public void exportWorkspace_DeletedWorkspace() throws ApiException {
+
+    List<Long> workspaceID = new ArrayList<>();
+    workspaceID.add(2l);
+    rdrExportService.exportWorkspaces(workspaceID);
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(
+            mockDeletedWorkspace.getWorkspaceNamespace(), mockDeletedWorkspace.getFirecloudName());
+    verify(rdrExportDao, times(1)).save(anyList());
+
+    RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockDeletedWorkspace);
+    rdrWorkspace.setStatus(RdrWorkspace.StatusEnum.INACTIVE);
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+  }
+
+
+  private RdrWorkspace toDefaultRdrWorkspace(DbWorkspace dbWorkspace) {
     ZoneOffset offset = OffsetDateTime.now().getOffset();
     RdrWorkspace rdrWorkspace = new RdrWorkspace();
-    rdrWorkspace.setWorkspaceId(1);
+    rdrWorkspace.setWorkspaceId((int)dbWorkspace.getWorkspaceId());
     rdrWorkspace.setName(dbWorkspace.getName());
 
     rdrWorkspace.setCreationTime(dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
