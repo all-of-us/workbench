@@ -42,7 +42,11 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   helpContent = 'data';
   sidebarOpen = false;
   notebookStyles = false;
+<<<<<<< HEAD
   contentFullHeightOverride = false;
+=======
+  notebookRouterOutletContainerStyles = false;
+>>>>>>> add helptext to notebooks, fix styles
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -221,8 +225,13 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         this.notebookStyles = true;
       }
 
+<<<<<<< HEAD
       if (child.snapshot.data.contentFullHeightOverride) {
         this.contentFullHeightOverride = true;
+=======
+      if (child.snapshot.data.notebookRouterOutletContainerStyles) {
+        this.notebookRouterOutletContainerStyles = true;
+>>>>>>> add helptext to notebooks, fix styles
       }
 
       if (child.firstChild) {
