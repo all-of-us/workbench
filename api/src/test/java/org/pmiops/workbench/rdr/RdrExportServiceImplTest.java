@@ -215,7 +215,6 @@ public class RdrExportServiceImplTest {
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
 
-
   /**
    * For deleted workspace RDR should send the status as INACTIVE
    *
@@ -237,11 +236,10 @@ public class RdrExportServiceImplTest {
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
 
-
   private RdrWorkspace toDefaultRdrWorkspace(DbWorkspace dbWorkspace) {
     ZoneOffset offset = OffsetDateTime.now().getOffset();
     RdrWorkspace rdrWorkspace = new RdrWorkspace();
-    rdrWorkspace.setWorkspaceId((int)dbWorkspace.getWorkspaceId());
+    rdrWorkspace.setWorkspaceId((int) dbWorkspace.getWorkspaceId());
     rdrWorkspace.setName(dbWorkspace.getName());
 
     rdrWorkspace.setCreationTime(dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
