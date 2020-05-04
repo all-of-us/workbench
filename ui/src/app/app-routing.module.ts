@@ -142,9 +142,12 @@ const routes: Routes = [
                       // use the (urldecoded) captured value nbName
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
+                      // The iframe we use to display the Jupyter notebook does something strange
+                      // to the height calculation of the container, which is normally set to auto.
+                      // Setting this flag sets the container to 100% so that no content is clipped.
+                      contentFullHeightOverride: true,
                       helpContent: 'notebookStorage',
                       notebookHelpSidebarStyles: true,
-                      notebookRouterOutletContainerStyles: true,
                       minimizeChrome: true
                     }
                   }, {
