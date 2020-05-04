@@ -47,6 +47,7 @@ import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {openZendeskWidget} from 'app/utils/zendesk';
 import {
   ArchivalStatus,
   BillingAccount,
@@ -162,7 +163,12 @@ export const styles = reactStyles({
     marginLeft: '-0.9rem',
     fontSize: 14,
     backgroundColor: colorWithWhiteness(colors.accent, 0.85)
-  }
+  },
+  link: {
+    color: colors.accent,
+    cursor: 'pointer',
+    textDecoration: 'none'
+  },
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -430,6 +436,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       );
     }
 
+    openContactWidget() {
+      const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
+      openZendeskWidget(givenName, familyName, username, contactEmail);
+    }
+
     renderBillingDescription() {
       return <div>
         The <i>All of Us</i> Program provides $300 in free credits per user. Please refer to
@@ -437,9 +448,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
         </StyledAnchorTag> to learn more about the free credit
         program and how it can be used. Once you have used up your free credits, you can request
-        additional credits by <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
-      'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>
-        &nbsp;contacting support</StyledAnchorTag>.
+        additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
       </div>;
     }
 
