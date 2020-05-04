@@ -16,7 +16,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.netty.handler.logging.LogLevel;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
@@ -71,7 +70,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseL
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -84,6 +82,7 @@ import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -118,6 +117,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final FreeTierBillingService freeTierBillingService;
   private Provider<WorkspacesApi> endUserWorkspacesApiProvider;
   private ProfileMapper profileMapper;
+  private UserMapper userMapper;
 
   private FireCloudService fireCloudService;
   private Clock clock;
@@ -139,8 +139,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       FreeTierBillingService freeTierBillingService,
-      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API) Provider<WorkspacesApi> endUserWorkspacesApiProvider,
-      ProfileMapper profileMapper) {
+      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API)
+          Provider<WorkspacesApi> endUserWorkspacesApiProvider,
+      ProfileMapper profileMapper,
+      UserMapper userMapper) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
@@ -157,6 +159,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.freeTierBillingService = freeTierBillingService;
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
     this.profileMapper = profileMapper;
+    this.userMapper = userMapper;
   }
 
   /**
@@ -587,7 +590,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
+        userRoles.add(userMapper.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()
@@ -818,7 +821,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<WorkspaceDetailsHeavy> getWorkspaceDetailsHeavy(String workspaceNamespace) {
-    final List<DbWorkspace> dbWorkspaces = workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace);
+    final List<DbWorkspace> dbWorkspaces =
+        workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace);
 
     return dbWorkspaces.stream()
         .map(this::getWorkspaceDetailsHeavy)
@@ -832,24 +836,25 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
     final Map<String, FirecloudWorkspaceAccessEntry> usernameToAccessLevel;
     try {
-      usernameToAccessLevel = FirecloudTransforms.extractAclResponse(
-          workspacesApi.getWorkspaceAcl(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()));
+      usernameToAccessLevel =
+          FirecloudTransforms.extractAclResponse(
+              workspacesApi.getWorkspaceAcl(
+                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()));
     } catch (ApiException e) {
       log.log(Level.WARNING, "Error getting FireCloud workspaces API", e);
       throw new RuntimeException(e);
     }
 
-    final List<User> collaborators = usernameToAccessLevel.keySet().stream()
-        .map(userDao::findUserByUsername)
-        .map(profileMapper::toApiUser)
-        .collect(Collectors.toList());
+    final List<User> collaborators =
+        usernameToAccessLevel.keySet().stream()
+            .map(userDao::findUserByUsername)
+            .map(profileMapper::toApiUser)
+            .collect(Collectors.toList());
 
     return new WorkspaceDetailsHeavy()
         .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
         .creator(profileMapper.toApiUser(creator))
         .collaborators(collaborators)
         .clusters(Collections.emptyList());
-
   }
 }
