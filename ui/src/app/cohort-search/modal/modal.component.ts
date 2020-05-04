@@ -233,10 +233,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.modifiersDisabled = disabled;
   }
 
-  get disableFlag() {
-    return this.selections.length === 0 || this.modifiersDisabled;
-  }
-
   setTreeSearchTerms = (input: string) => {
     this.treeSearchTerms = input;
   }

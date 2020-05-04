@@ -118,7 +118,6 @@
                 Cancel
               </button>
               <button type="button"
-                [disabled]="disableFlag"
                 (click)="finish()"
                 class="btn btn-primary">
                 Finish
@@ -132,8 +131,8 @@
             <crit-selection-list
               [back]="back"
               [cancel]="close"
+              [disableFinish]="modifiersDisabled"
               [domain]="wizard.domain"
-              [errors]="[]"
               [finish]="finish"
               [removeSelection]="removeSelection"
               [selections]="selections"

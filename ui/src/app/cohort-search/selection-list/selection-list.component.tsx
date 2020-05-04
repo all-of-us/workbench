@@ -27,6 +27,10 @@ const styles = reactStyles({
     padding: '0rem 0.75rem',
     textTransform: 'uppercase',
   },
+  disabled: {
+    opacity: 0.4,
+    pointerEvents: 'none'
+  },
   itemInfo: {
     width: '100%',
     minWidth: 0,
@@ -132,8 +136,8 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
 interface Props {
   back: Function;
   cancel: Function;
+  disableFinish: boolean;
   domain: DomainType;
-  errors: Array<string>;
   finish: Function;
   removeSelection: Function;
   selections: Array<any>;
@@ -159,35 +163,39 @@ export class SelectionList extends React.Component<Props> {
   }
 
   render() {
-    const {back, cancel, errors, finish, removeSelection, selections, setView} = this.props;
+    const {back, cancel, disableFinish, finish, removeSelection, selections, setView} = this.props;
     return <div style={styles.selectionPanel}>
       <h5 style={styles.selectionTitle}>Selected Criteria</h5>
       <div style={styles.selectionContainer}>
         {selections.map((selection, s) =>
-          <SelectionInfo index={s} selection={selection} removeSelection={() => removeSelection(selection)}/>
+          <SelectionInfo key={s}
+            index={s}
+            selection={selection}
+            removeSelection={() => removeSelection(selection)}/>
         )}
       </div>
       <div style={styles.buttonContainer}>
-        <button type='button'
-          style={{...styles.button, background: 'transparent', color: colors.dark, fontSize: '14px'}}
+        <button style={{...styles.button, background: 'transparent', color: colors.dark, fontSize: '14px'}}
           onClick={() => cancel()}>
           Cancel
         </button>
-        {this.showNext && <button type='button'
-          style={{...styles.button, background: colors.primary, color: colors.white}}
-          disabled={selections.length === 0}
-          onClick={() => setView('modifiers')}>
+        {this.showNext && <button onClick={() => setView('modifiers')}
+          style={{
+            ...styles.button,
+            ...(selections.length === 0 ? styles.disabled : {}),
+            background: colors.primary, color: colors.white}}>
           Next
         </button>}
-        {this.showBack && <button type='button'
-          style={{...styles.button, background: colors.primary, color: colors.white}}
+        {this.showBack && <button style={{...styles.button, background: colors.primary, color: colors.white}}
           onClick={() => back()}>
           Back
         </button>}
-        <button type='button'
-          style={{...styles.button, background: colors.primary, color: colors.white}}
-          disabled={errors.length > 0}
-          onClick={() => finish()}>
+        <button onClick={() => finish()}
+          style={{
+            ...styles.button,
+            ...((selections.length === 0 || disableFinish) ? styles.disabled : {}),
+            background: colors.primary, color: colors.white
+          }}>
           Finish
         </button>
       </div>
@@ -202,14 +210,14 @@ export class SelectionList extends React.Component<Props> {
 export class SelectionListComponent extends ReactWrapperBase {
   @Input('back') back: Props['back'];
   @Input('cancel') cancel: Props['cancel'];
+  @Input('disableFinish') disableFinish: Props['disableFinish'];
   @Input('domain') domain: Props['domain'];
-  @Input('errors') errors: Props['errors'];
   @Input('finish') finish: Props['finish'];
   @Input('removeSelection') removeSelection: Props['removeSelection'];
   @Input('selections') selections: Props['selections'];
   @Input('setView') setView: Props['setView'];
   @Input('view') view: Props['view'];
   constructor() {
-    super(SelectionList, ['back', 'cancel', 'domain', 'errors', 'finish', 'removeSelection', 'selections', 'setView', 'view']);
+    super(SelectionList, ['back', 'cancel', 'disableFinish', 'domain', 'finish', 'removeSelection', 'selections', 'setView', 'view']);
   }
 }
