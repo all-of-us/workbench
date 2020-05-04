@@ -26,35 +26,15 @@ fi
 # Test that datset exists
 test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 
+# Create bq tables we have json schema for
+schema_path=generate-cdr/bq-schemas
+
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.ds_condition_occurrence
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/ds_condition_occurrence.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.ds_condition_occurrence
+
 ################################################
 # CREATE TABLES
 ################################################
-echo "CREATE TABLE - ds_condition_occurrence"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_condition_occurrence\`
-(
-    PERSON_ID                       INT64,
-    CONDITION_CONCEPT_ID            INT64,
-    STANDARD_CONCEPT_NAME           STRING,
-    STANDARD_CONCEPT_CODE           STRING,
-    STANDARD_VOCABULARY             STRING,
-    CONDITION_START_DATETIME        TIMESTAMP,
-    CONDITION_END_DATETIME          TIMESTAMP,
-    CONDITION_TYPE_CONCEPT_ID       INT64,
-    CONDITION_TYPE_CONCEPT_NAME     STRING,
-    STOP_REASON                     STRING,
-    VISIT_OCCURRENCE_ID             INT64,
-    VISIT_OCCURRENCE_CONCEPT_NAME   STRING,
-    CONDITION_SOURCE_VALUE          STRING,
-    CONDITION_SOURCE_CONCEPT_ID     INT64,
-    SOURCE_CONCEPT_NAME             STRING,
-    SOURCE_CONCEPT_CODE             STRING,
-    SOURCE_VOCABULARY               STRING,
-    CONDITION_STATUS_SOURCE_VALUE   STRING,
-    CONDITION_STATUS_CONCEPT_ID     INT64,
-    CONDITION_STATUS_CONCEPT_NAME   STRING
-)"
-
 echo "CREATE TABLE - ds_drug_exposure"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_drug_exposure\`

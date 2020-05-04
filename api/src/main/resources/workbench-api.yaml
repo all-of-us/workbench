@@ -4563,7 +4563,7 @@ definitions:
     type: string
     enum:
     - NONE
-    - DEMOGRAPHICS
+    - PERSON
     - SURVEY
     - BOTH
   DataSetExportRequest:

@@ -24,8 +24,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.BigQueryDataSetTableInfo;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.ServerUnavailableException;
@@ -147,28 +147,13 @@ public class BigQueryService {
     return row.get(index).getStringValue();
   }
 
-  public FieldList getTableFieldsFromDomain(Domain d) {
+  public FieldList getTableFieldsFromDomain(Domain domain) {
     DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-    String tableName;
-    if (Domain.CONDITION.equals(d)) {
-      tableName = "ds_condition_occurrence";
-    } else if (Domain.PROCEDURE.equals(d)) {
-      tableName = "ds_procedure_occurrence";
-    } else if (Domain.DRUG.equals(d)) {
-      tableName = "ds_drug_exposure";
-    } else if (Domain.MEASUREMENT.equals(d)) {
-      tableName = "ds_measurement";
-    } else if (Domain.SURVEY.equals(d)) {
-      tableName = "ds_survey";
-    } else if (Domain.PERSON.equals(d)) {
-      tableName = "ds_person";
-    } else if (Domain.OBSERVATION.equals(d)) {
-      tableName = "ds_observation";
-    } else {
-      throw new BadRequestException("Invalid domain, unable to fetch fields from table");
-    }
     TableId tableId =
-        TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
+        TableId.of(
+            cdrVersion.getBigqueryProject(),
+            cdrVersion.getBigqueryDataset(),
+            BigQueryDataSetTableInfo.getTableName(domain));
 
     return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
   }

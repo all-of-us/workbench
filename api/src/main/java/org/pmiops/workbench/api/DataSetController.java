@@ -54,7 +54,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -320,69 +319,41 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
-    DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
-    // Generate a query for the preview.
-    Map<String, QueryJobConfiguration> bigQueryJobConfig =
-        dataSetService.domainToBigQueryConfig(dataSetRequest);
-
-    if (bigQueryJobConfig.size() > 1) {
-      throw new BadRequestException(
-          "There should never be a preview request with more than one domain");
-    }
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
-    QueryJobConfiguration queryJobConfiguration =
-        bigQueryJobConfig.get(dataSetPreviewRequest.getDomain().toString());
 
-    String originalQuery = queryJobConfiguration.getQuery();
-    TableResult queryResponse;
-    try {
-      String query = originalQuery.concat(" LIMIT " + NO_OF_PREVIEW_ROWS);
+    QueryJobConfiguration previewBigQueryJobConfig =
+        dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
 
-      queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
+    TableResult queryResponse =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(previewBigQueryJobConfig),
+            APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
 
-      /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
-       * before that limit is exceeded, or we get a 500 error with the following type:
-       * com.google.apphosting.runtime.HardDeadlineExceededError
-       * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
-       */
-      queryResponse =
-          bigQueryService.executeQuery(
-              bigQueryService.filterBigQueryConfig(queryJobConfiguration),
-              APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
-    } catch (Exception ex) {
-      if ((ex.getCause() != null
-          && ex.getCause().getMessage() != null
-          && ex.getCause().getMessage().contains("Read timed out"))) {
-        throw new GatewayTimeoutException(
-            "Timeout while querying the CDR to pull preview information.");
-      } else {
-        throw ex;
-      }
+    if (queryResponse.getTotalRows() != 0) {
+      valuePreviewList.addAll(
+          queryResponse.getSchema().getFields().stream()
+              .map(fields -> new DataSetPreviewValueList().value(fields.getName()))
+              .collect(Collectors.toList()));
+
+      queryResponse
+          .getValues()
+          .forEach(
+              fieldValueList -> {
+                addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
+              });
+
+      queryResponse
+          .getSchema()
+          .getFields()
+          .forEach(
+              fields -> {
+                formatTimestampValues(valuePreviewList, fields);
+              });
+
+      Collections.sort(
+          valuePreviewList,
+          Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
     }
-
-    valuePreviewList.addAll(
-        queryResponse.getSchema().getFields().stream()
-            .map(fields -> new DataSetPreviewValueList().value(fields.getName()))
-            .collect(Collectors.toList()));
-
-    queryResponse
-        .getValues()
-        .forEach(
-            fieldValueList -> {
-              addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
-            });
-
-    queryResponse
-        .getSchema()
-        .getFields()
-        .forEach(
-            fields -> {
-              formatTimestampValues(valuePreviewList, fields);
-            });
-
-    Collections.sort(
-        valuePreviewList,
-        Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
 
     previewQueryResponse.setDomain(dataSetPreviewRequest.getDomain());
     previewQueryResponse.setValues(valuePreviewList);
@@ -675,8 +646,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
 
-    Domain domain = Domain.valueOf(domainValue);
-    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
+    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(Domain.valueOf(domainValue));
     response.setItems(
         fieldList.stream()
             .map(field -> new DomainValue().value(field.getName().toLowerCase()))
