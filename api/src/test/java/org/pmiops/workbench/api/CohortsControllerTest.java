@@ -65,11 +65,14 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.model.BillingAccountType;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.CreateWorkspaceRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DuplicateCohortRequest;
@@ -91,6 +94,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -153,34 +157,37 @@ public class CohortsControllerTest {
 
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
+  public static final String BILLING_ACCOUNT_NAME = "billing-account";
+
   private static DbUser currentUser;
 
-  @Autowired WorkspacesController workspacesController;
-  @Autowired CohortsController cohortsController;
-  @Autowired ConceptSetsController conceptSetsController;
-  @Autowired BillingProjectBufferService billingProjectBufferService;
-
-  Workspace workspace;
-  Workspace workspace2;
-  DbCdrVersion cdrVersion;
-  SearchRequest searchRequest;
-  String cohortCriteria;
+  private Workspace workspace;
+  private Workspace workspace2;
+  private DbCdrVersion cdrVersion;
+  private SearchRequest searchRequest;
+  private String cohortCriteria;
   private TestMockFactory testMockFactory;
-  @Autowired WorkspaceService workspaceService;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortDao cohortDao;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired ConceptDao conceptDao;
-  @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired DataSetService dataSetService;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired UserDao userDao;
-  @Autowired CohortMaterializationService cohortMaterializationService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired UserService userService;
-  @Autowired CloudStorageService cloudStorageService;
-  @Autowired CdrVersionService cdrVersionService;
-  @Autowired ComplianceService complianceService;
+
+  @Autowired private BillingProjectBufferService billingProjectBufferService;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private CdrVersionService cdrVersionService;
+  @Autowired private CloudStorageService cloudStorageService;
+  @Autowired private CohortDao cohortDao;
+  @Autowired private CohortMaterializationService cohortMaterializationService;
+  @Autowired private CohortReviewDao cohortReviewDao;
+  @Autowired private CohortsController cohortsController;
+  @Autowired private ComplianceService complianceService;
+  @Autowired private ConceptDao conceptDao;
+  @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private ConceptSetsController conceptSetsController;
+  @Autowired private DataSetService dataSetService;
+  @Autowired private FireCloudService fireCloudService;
+  @Autowired private UserDao userDao;
+  @Autowired private UserRecentResourceService userRecentResourceService;
+  @Autowired private UserService userService;
+  @Autowired private WorkspaceMapper workspaceMapper;
+  @Autowired private WorkspacesController workspacesController;
+  @Autowired private WorkspaceService workspaceService;
 
   @TestConfiguration
   @Import({
@@ -197,6 +204,7 @@ public class CohortsControllerTest {
     DataSetMapperImpl.class,
     NotebooksServiceImpl.class,
     WorkspacesController.class,
+    WorkspaceMapper.class,
     CohortsController.class,
     ConceptSetsController.class,
     WorkspaceMapperImpl.class,
@@ -256,7 +264,6 @@ public class CohortsControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    testMockFactory = new TestMockFactory();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
     DbUser user = new DbUser();
@@ -274,21 +281,39 @@ public class CohortsControllerTest {
     searchRequest = SearchRequests.males();
     cohortCriteria = new Gson().toJson(searchRequest);
 
-    workspace = new Workspace();
-    workspace.setName(WORKSPACE_NAME);
-    workspace.setNamespace(WORKSPACE_NAMESPACE);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
-    workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace.setBillingAccountName("billing-account");
+    // TODO(jaycarlton): see if the TestMockFactory methods sffice here
+    final CreateWorkspaceRequest createWorkspaceRequest1 = new CreateWorkspaceRequest()
+        .name(WORKSPACE_NAME)
+        .billingAccountName(BILLING_ACCOUNT_NAME)
+        .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
+        .dataAccessLevel(DataAccessLevel.PROTECTED)
+        .researchPurpose(new ResearchPurpose());
 
-    workspace2 = new Workspace();
-    workspace2.setName(WORKSPACE_NAME_2);
-    workspace2.setNamespace(WORKSPACE_NAMESPACE);
-    workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
-    workspace2.setResearchPurpose(new ResearchPurpose());
-    workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace2.setBillingAccountName("billing-account");
+//    workspace = workspaceMapper.toWorkspaceTestFixture(createWorkspaceRequest,
+//        BillingAccountType.FREE_TIER,
+//        BillingStatus.ACTIVE,
+//        101L,
+//        "",
+//        "",
+//        "",
+//        202L,
+//        WORKSPACE_NAMESPACE,
+//        false);
+
+    final CreateWorkspaceRequest createWorkspaceRequest2 = new CreateWorkspaceRequest()
+        .name(WORKSPACE_NAME_2)
+        .billingAccountName(BILLING_ACCOUNT_NAME)
+        .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
+        .dataAccessLevel(DataAccessLevel.PROTECTED)
+        .researchPurpose(new ResearchPurpose());
+
+//    workspace2 = new Workspace();
+//    workspace2.setName(WORKSPACE_NAME_2);
+//    workspace2.setNamespace(WORKSPACE_NAMESPACE);
+//    workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
+//    workspace2.setResearchPurpose(new ResearchPurpose());
+//    workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+//    workspace2.setBillingAccountName(BILLING_ACCOUNT_NAME);
 
     CLOCK.setInstant(NOW);
 
@@ -298,8 +323,8 @@ public class CohortsControllerTest {
     cohort.setType("demo");
     cohort.setCriteria(createDemoCriteria().toString());
 
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspace2 = workspacesController.createWorkspace(workspace2).getBody();
+    workspace = workspacesController.createWorkspace(createWorkspaceRequest1).getBody();
+    workspace2 = workspacesController.createWorkspace(createWorkspaceRequest2).getBody();
 
     stubGetWorkspace(
         workspace.getNamespace(), WORKSPACE_NAME, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);

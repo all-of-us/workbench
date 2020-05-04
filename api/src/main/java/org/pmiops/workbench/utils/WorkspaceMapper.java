@@ -206,20 +206,11 @@ public interface WorkspaceMapper {
 
   Workspace clone(Workspace workspace);
   /**
-   * Conversion method for building test stubs. Note that in reality we take
-   * a CreateWorkspaceRequest, build a DbWorkspace, save it to the database (where
-   * certain defaults are assigned) and then convert to an output Workspace API model.
-   * @param createWorkspaceRequest
-   * @param billingAccountType
-   * @param billingStatus
-   * @param creationTime
-   * @param etag
-   * @param googleBucketName
-   * @param id
-   * @param lastModifiedTime
-   * @param namespace
-   * @param published
-   * @return
+   * Conversion method for building test stubs. Note that in reality we take a
+   * CreateWorkspaceRequest, build a DbWorkspace, save it to the database (where certain defaults
+   * are assigned) and then convert to an output Workspace API model. This bypass method
+   * is suitable for test cases that aren't interested in exercising WorkspacesController.
+   *
    */
   @VisibleForTesting
   Workspace toWorkspaceTestFixture(

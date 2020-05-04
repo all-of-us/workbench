@@ -40,33 +40,39 @@ public class TestMockFactory {
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
   private static final String WORKSPACE_FIRECLOUD_NAME =
       "gonewiththewind"; // should match workspace name w/o spaces
-  private static final Instant WORKSPACE_CREATION_INSTANT = Instant.parse("2020-02-10T09:30:00.00Z");
-  private static final Instant WORKSPACE_MODIFIED_INSTANT = Instant.parse("2020-02-10T09:30:00.00Z");
+  private static final Instant WORKSPACE_CREATION_INSTANT =
+      Instant.parse("2020-02-10T09:30:00.00Z");
+  private static final Instant WORKSPACE_MODIFIED_INSTANT =
+      Instant.parse("2020-02-10T09:30:00.00Z");
   private static final Instant REVIEW_REQUESTED_INSTANT = Instant.parse("2020-05-01T09:30:00.00Z");
   private static final Instant REVIEWED_INSTANT = Instant.parse("2020-05-03T09:30:00.00Z");
-  public static final ResearchPurpose RESEARCH_PURPOSE = new ResearchPurpose()
-      .additionalNotes("additional notes")
-      .additionalNotes(null)
-      .ancestry(true)
-      .anticipatedFindings("anticipated findings")
-      .approved(false)
-      .commercialPurpose(true)
-      .controlSet(true)
-      .diseaseFocusedResearch(true)
-      .diseaseOfFocus("cancer")
-      .disseminateResearchFindingList(ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES, DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS))
-      .drugDevelopment(true)
-      .educational(true)
-      .intendedStudy("intended study")
-      .methodsDevelopment(true)
-      .populationDetails(Collections.emptyList())
-      .populationHealth(true)
-      .reasonForAllOfUs("reason for aou")
-      .researchOutcomeList(ImmutableList.of(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT))
-      .reviewRequested(true)
-      .socialBehavioral(true)
-      .timeRequested(REVIEW_REQUESTED_INSTANT.toEpochMilli())
-      .timeReviewed(REVIEWED_INSTANT.toEpochMilli());
+  public static final ResearchPurpose RESEARCH_PURPOSE =
+      new ResearchPurpose()
+          .additionalNotes("additional notes")
+          .additionalNotes(null)
+          .ancestry(true)
+          .anticipatedFindings("anticipated findings")
+          .approved(false)
+          .commercialPurpose(true)
+          .controlSet(true)
+          .diseaseFocusedResearch(true)
+          .diseaseOfFocus("cancer")
+          .disseminateResearchFindingList(
+              ImmutableList.of(
+                  DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES,
+                  DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS))
+          .drugDevelopment(true)
+          .educational(true)
+          .intendedStudy("intended study")
+          .methodsDevelopment(true)
+          .populationDetails(Collections.emptyList())
+          .populationHealth(true)
+          .reasonForAllOfUs("reason for aou")
+          .researchOutcomeList(ImmutableList.of(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT))
+          .reviewRequested(true)
+          .socialBehavioral(true)
+          .timeRequested(REVIEW_REQUESTED_INSTANT.toEpochMilli())
+          .timeReviewed(REVIEWED_INSTANT.toEpochMilli());
   public static final String WORKSPACE_CREATOR_USERNAME = "jay@unit-test-research-aou.org";
   public static final String WORKSPACE_ETAG = "\"2\"";
   public static final boolean WORKSPACE_PUBLISHED = false;
@@ -79,9 +85,7 @@ public class TestMockFactory {
     this.workspaceMapper = workspaceMapper;
   }
 
-  /**
-   * Builds a fully-populated Workspace object, such as you get from calling CreateWorkspace
-   */
+  /** Builds a fully-populated Workspace object, such as you get from calling CreateWorkspace */
   public Workspace makeCreatedWorkspace(String workspaceNamespace, String workspaceName) {
     final CreateWorkspaceRequest createWorkspaceRequest = makeCreateWorkspaceRequest(workspaceName);
     return workspaceMapper.toWorkspaceTestFixture(

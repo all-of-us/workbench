@@ -74,6 +74,7 @@ public class WorkspaceAdminControllerTest {
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
   @MockBean private WorkspaceService mockWorkspaceService;
 
+  @Autowired private TestMockFactory testMockFactory;
   @Autowired private WorkspaceAdminController workspaceAdminController;
 
   @TestConfiguration
@@ -83,6 +84,7 @@ public class WorkspaceAdminControllerTest {
     CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    TestMockFactory.class,
     WorkspaceAdminController.class,
     WorkspaceMapperImpl.class,
   })
@@ -102,8 +104,6 @@ public class WorkspaceAdminControllerTest {
 
   @Before
   public void setUp() {
-    final TestMockFactory testMockFactory = new TestMockFactory();
-
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(anyString()))
         .thenReturn(Optional.empty());
 

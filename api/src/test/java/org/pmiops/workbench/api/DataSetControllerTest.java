@@ -47,7 +47,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -190,53 +189,52 @@ public class DataSetControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static DbUser currentUser;
 
-  private String cohortCriteria;
-  private SearchRequest searchRequest;
-  private TestMockFactory testMockFactory;
   private Workspace workspace;
 
-  @Autowired BillingProjectBufferService billingProjectBufferService;
-  @Autowired BigQueryService bigQueryService;
-  @Autowired CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-  @Autowired WorkspaceResourcesService workspaceResourcesService;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CdrVersionService cdrVersionService;
-  @Autowired CloudStorageService cloudStorageService;
-  @Autowired Provider<Cloudbilling> cloudBillingProvider;
-  @Autowired CohortDao cohortDao;
-  @Autowired CohortFactory cohortFactory;
-  @Autowired CohortMapper cohortMapper;
-  @Autowired CohortMaterializationService cohortMaterializationService;
-  @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired CohortReviewMapper cohortReviewMapper;
-  @Autowired CohortReviewService cohortReviewService;
-  @Autowired ConceptBigQueryService conceptBigQueryService;
-  @Autowired ConceptDao conceptDao;
-  @Autowired ConceptService conceptService;
-  @Autowired ConceptSetService conceptSetService;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired DataSetDao dataSetDao;
-  @Mock DataSetMapper dataSetMapper;
-  @Autowired ConceptSetMapper conceptSetMapper;
-  @Autowired DataSetService dataSetService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired FreeTierBillingService freeTierBillingService;
-  @Autowired CohortQueryBuilder cohortQueryBuilder;
-  @Autowired TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
-  @Autowired UserDao userDao;
-  @Mock Provider<DbUser> userProvider;
-  @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
-  @Autowired NotebooksService notebooksService;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired UserService userService;
-  @Autowired WorkspaceDao workspaceDao;
-  @Autowired WorkspaceService workspaceService;
-  @Autowired WorkspaceAuditor workspaceAuditor;
-  @Autowired WorkspaceMapper workspaceMapper;
-  @Autowired LogsBasedMetricService logsBasedMetricService;
-  @Autowired Provider<Zendesk> mockZendeskProvider;
-  @MockBean MonitoringService mockMonitoringService;
+  @Autowired private BigQueryService bigQueryService;
+  @Autowired private BillingProjectBufferService billingProjectBufferService;
+  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private CdrVersionService cdrVersionService;
+  @Autowired private CloudStorageService cloudStorageService;
+  @Autowired private CohortDao cohortDao;
+  @Autowired private CohortFactory cohortFactory;
+  @Autowired private CohortMapper cohortMapper;
+  @Autowired private CohortMaterializationService cohortMaterializationService;
+  @Autowired private CohortQueryBuilder cohortQueryBuilder;
+  @Autowired private CohortReviewDao cohortReviewDao;
+  @Autowired private CohortReviewMapper cohortReviewMapper;
+  @Autowired private CohortReviewService cohortReviewService;
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
+  @Autowired private ConceptDao conceptDao;
+  @Autowired private ConceptService conceptService;
+  @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private ConceptSetMapper conceptSetMapper;
+  @Autowired private ConceptSetService conceptSetService;
+  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired private DataSetDao dataSetDao;
+  @Autowired private DataSetService dataSetService;
+  @Autowired private FireCloudService fireCloudService;
+  @Autowired private FreeTierBillingService freeTierBillingService;
+  @Autowired private LogsBasedMetricService logsBasedMetricService;
+  @Autowired private NotebooksService notebooksService;
+  @Autowired private Provider<Cloudbilling> cloudBillingProvider;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private Provider<Zendesk> mockZendeskProvider;
+  @Autowired private TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
+  @Autowired private TestMockFactory testMockFactory;
+  @Autowired private UserDao userDao;
+  @Autowired private UserRecentResourceService userRecentResourceService;
+  @Autowired private UserService userService;
+  @Autowired private WorkspaceAuditor workspaceAuditor;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceMapper workspaceMapper;
+  @Autowired private WorkspaceResourcesService workspaceResourcesService;
+  @Autowired private WorkspaceService workspaceService;
+
+  @MockBean private MonitoringService mockMonitoringService;
+  @MockBean private DataSetMapper mockDataSetMapper;
+  @MockBean private Provider<DbUser> mockUserProvider;
 
   @TestConfiguration
   @Import({
@@ -250,6 +248,7 @@ public class DataSetControllerTest {
     ConceptSetService.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
+    TestMockFactory.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
@@ -268,7 +267,6 @@ public class DataSetControllerTest {
     ComplianceService.class,
     ConceptBigQueryService.class,
     DataSetService.class,
-    DataSetMapper.class,
     FireCloudService.class,
     FreeTierBillingService.class,
     DirectoryService.class,
@@ -324,7 +322,6 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    testMockFactory = new TestMockFactory();
     dataSetService =
         new DataSetServiceImpl(
             bigQueryService,
@@ -345,11 +342,11 @@ public class DataSetControllerTest {
                 conceptSetDao,
                 dataDictionaryEntryDao,
                 dataSetDao,
-                dataSetMapper,
+                mockDataSetMapper,
                 dataSetService,
                 fireCloudService,
                 notebooksService,
-                userProvider,
+                mockUserProvider,
                 workspaceService,
                 conceptSetMapper));
     WorkspacesController workspacesController =
@@ -359,7 +356,7 @@ public class DataSetControllerTest {
             workspaceResourcesService,
             cdrVersionDao,
             userDao,
-            userProvider,
+            mockUserProvider,
             fireCloudService,
             cloudStorageService,
             mockZendeskProvider,
@@ -380,7 +377,7 @@ public class DataSetControllerTest {
             cohortReviewDao,
             conceptSetDao,
             cohortMaterializationService,
-            userProvider,
+            mockUserProvider,
             CLOCK,
             cdrVersionService,
             userRecentResourceService);
@@ -391,7 +388,7 @@ public class DataSetControllerTest {
             conceptService,
             conceptBigQueryService,
             userRecentResourceService,
-            userProvider,
+            mockUserProvider,
             CLOCK,
             conceptSetMapper);
     doAnswer(
@@ -417,7 +414,7 @@ public class DataSetControllerTest {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
-    when(userProvider.get()).thenReturn(user);
+    when(mockUserProvider.get()).thenReturn(user);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
@@ -439,9 +436,9 @@ public class DataSetControllerTest {
     stubGetWorkspaceAcl(
         workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
-    searchRequest = SearchRequests.males();
+    SearchRequest searchRequest = SearchRequests.males();
 
-    cohortCriteria = new Gson().toJson(searchRequest);
+    String cohortCriteria = new Gson().toJson(searchRequest);
 
     Cohort cohort = new Cohort().name(COHORT_ONE_NAME).criteria(cohortCriteria);
     cohort =

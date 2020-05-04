@@ -240,7 +240,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> createWorkspace(CreateWorkspaceRequest createWorkspaceRequest) throws BadRequestException {
+  public ResponseEntity<Workspace> createWorkspace(CreateWorkspaceRequest createWorkspaceRequest)
+      throws BadRequestException {
     return ResponseEntity.ok(
         recordOperationTime(() -> createWorkspaceImpl(createWorkspaceRequest), "createWorkspace"));
   }
