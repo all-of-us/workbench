@@ -7,16 +7,20 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.WorkspaceAdminApiDelegate;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
+import org.pmiops.workbench.model.AdminWorkspaceCollaboratorData;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.Authority;
@@ -44,6 +48,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   private final WorkspaceAdminService workspaceAdminService;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
+  private final UserService userService;
 
   @Autowired
   public WorkspaceAdminController(
@@ -52,13 +57,15 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       LeonardoNotebooksClient leonardoNotebooksClient,
       WorkspaceAdminService workspaceAdminService,
       WorkspaceMapper workspaceMapper,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      UserService userService) {
     this.cloudMonitoringService = cloudMonitoringService;
     this.fireCloudService = fireCloudService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.workspaceAdminService = workspaceAdminService;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
+    this.userService = userService;
   }
 
   @Override
@@ -93,8 +100,21 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       DbWorkspace dbWorkspace = workspaceMaybe.get();
 
       String workspaceFirecloudName = dbWorkspace.getFirecloudName();
-      List<UserRole> collaborators =
+      List<UserRole> userRoles =
           workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName);
+      userRoles.forEach(System.err::println);
+      List<String> usernamesList = userRoles.stream().map(UserRole::getEmail).collect(Collectors.toList());
+      List<DbUser> users = userService.findUsersByUsernames(usernamesList);
+      Map<String, Boolean> disabledStatusByUsername = users.stream()
+          .collect(Collectors.toMap(DbUser::getUsername, DbUser::getDisabled));
+      List<AdminWorkspaceCollaboratorData> adminWorkspaceCollaboratorDataList = userRoles.stream()
+          .map(userRole -> new AdminWorkspaceCollaboratorData()
+              .disabled(disabledStatusByUsername.get(userRole.getEmail()))
+              .email(userRole.getEmail())
+              .familyName(userRole.getFamilyName())
+              .givenName(userRole.getGivenName())
+              .role(userRole.getRole()))
+          .collect(Collectors.toList());
 
       AdminWorkspaceObjectsCounts adminWorkspaceObjects =
           workspaceAdminService.getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId());
@@ -132,7 +152,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       return ResponseEntity.ok(
           new AdminFederatedWorkspaceDetailsResponse()
               .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace))
-              .collaborators(collaborators)
+              .collaborators(adminWorkspaceCollaboratorDataList)
               .resources(resources));
     } else {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

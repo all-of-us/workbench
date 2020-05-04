@@ -25,6 +25,8 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -33,6 +35,7 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
+import org.pmiops.workbench.model.AdminWorkspaceCollaboratorData;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
@@ -65,6 +68,7 @@ public class WorkspaceAdminControllerTest {
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
   @MockBean private WorkspaceService mockWorkspaceService;
+  @MockBean private UserService mockUserService;
 
   @Autowired private WorkspaceAdminController workspaceAdminController;
 
@@ -85,6 +89,7 @@ public class WorkspaceAdminControllerTest {
   @MockBean({
     CloudStorageService.class,
     NotebooksService.class,
+    UserService.class,
   })
   static class Configuration {
     @Bean
@@ -108,12 +113,23 @@ public class WorkspaceAdminControllerTest {
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
         .thenReturn(Optional.of(dbWorkspace));
 
+    String email = "test@test.test";
+
     UserRole collaborator =
-        new UserRole().email("test@test.test").role(WorkspaceAccessLevel.WRITER);
+        new UserRole().email(email).role(WorkspaceAccessLevel.WRITER);
     List<UserRole> collaborators = new ArrayList<>();
     collaborators.add(collaborator);
     when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
         .thenReturn(collaborators);
+
+    DbUser dbUser = new DbUser();
+    dbUser.setUsername(email);
+    dbUser.setDisabled(false);
+    List<DbUser> dbUsers = new ArrayList<>();
+    dbUsers.add(dbUser);
+    List<String> usernames = new ArrayList<>();
+    usernames.add(email);
+    when(mockUserService.findUsersByUsernames(usernames)).thenReturn(dbUsers);
 
     AdminWorkspaceObjectsCounts objectsCounts =
         new AdminWorkspaceObjectsCounts().cohortCount(1).conceptSetCount(2).datasetCount(3);
@@ -173,6 +189,10 @@ public class WorkspaceAdminControllerTest {
     assertThat(cluster.getClusterName()).isEqualTo("cluster");
     assertThat(cluster.getGoogleProject()).isEqualTo("google-project");
     assertThat(cluster.getStatus()).isEqualTo(ClusterStatus.STOPPED);
+
+    List<AdminWorkspaceCollaboratorData> collaborators = workspaceDetailsResponse.getCollaborators();
+    assertThat(collaborators.size()).isEqualTo(1);
+    assertThat(collaborators.get(0).getDisabled()).isFalse();
   }
 
   @Test

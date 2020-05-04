@@ -69,6 +69,8 @@ public interface UserService {
 
   List<DbUser> findUsersBySearchString(String term, Sort sort);
 
+  List<DbUser> findUsersByUsernames(List<String> usernames);
+
   @Deprecated
   DbUser syncComplianceTrainingStatusV1()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;

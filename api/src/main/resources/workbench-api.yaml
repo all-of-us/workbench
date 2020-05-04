@@ -1124,9 +1124,7 @@ paths:
       tags:
       - workspaceAdmin
       description: 'Given a workspace namespace (Google Cloud Platform  Project ID),
-        returns workspace details. Requires the WORKSPACES_VIEW authority.
-
-'
+        returns workspace details. Requires the WORKSPACES_VIEW authority.'
       operationId: getFederatedWorkspaceDetails
       responses:
         200:
@@ -5365,7 +5363,7 @@ definitions:
   UpdateDisabledStatusForUsersRequest:
     type: object
     required:
-    - emailList
+    - usernameList
     properties:
       usernameList:
         type: array
@@ -5773,15 +5771,13 @@ definitions:
       collaborators:
         type: array
         items:
-          "$ref": "#/definitions/UserRole"
+          "$ref": "#/definitions/AdminWorkspaceCollaboratorData"
       resources:
         "$ref": "#/definitions/AdminWorkspaceResources"
   AdminWorkspaceResources:
     description: 'A summary of application-level resources associated with a workspace.
       Includes data about Cohort Builder objects, analysis clusters, and cloud-storage
-      contents.
-
-'
+      contents.'
     type: object
     properties:
       workspaceObjects:
@@ -5811,6 +5807,23 @@ definitions:
       storageBytesUsed:
         type: integer
         format: int64
+  AdminWorkspaceCollaboratorData:
+    type: object
+    required:
+      - email
+      - role
+      - disabled
+    properties:
+      email:
+        type: string
+      givenName:
+        type: string
+      familyName:
+        type: string
+      role:
+        "$ref": "#/definitions/WorkspaceAccessLevel"
+      disabled:
+        type: boolean
   CloudStorageTraffic:
     type: object
     properties:

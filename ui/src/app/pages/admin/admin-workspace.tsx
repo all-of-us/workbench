@@ -88,12 +88,6 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
     }
   }
 
-  maybeGetFederatedWorkspaceInformation(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      return this.getFederatedWorkspaceInformation();
-    }
-  }
-
   workspaceInfoField(labelText, divContents) {
     return <FlexRow style={{width: '80%', maxWidth: '1000px'}}>
       <PurpleLabel
@@ -236,21 +230,32 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           </div>
           <h3>Collaborators</h3>
           <FlexRow className='collaborators' style={{marginTop: '1rem'}}>
-            <FlexColumn>
-              {collaborators.map((userRole, i) =>
-                <div key={i}>
-                  {userRole.email + ': ' + userRole.role}
-                </div>
-              )}
-            </FlexColumn>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Role</th>
+                      <th>Disabled</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {collaborators.map((collaborator, i) =>
+                        <tr key={i}>
+                          <td>{collaborator.email}</td>
+                          <td>{collaborator.role}</td>
+                          <td>{collaborator.disabled}</td>
+                        </tr>
+                    )}
+                  </tbody>
+                </table>
             <FlexColumn>
               <Button style={{marginLeft: '0.5rem'}}
                       onClick={() => {
                         this.setState({loadingData: true});
                         const writersAndOwners = fp.filter(
-                          userRole =>
-                                userRole.role === WorkspaceAccessLevel.OWNER
-                                || userRole.role === WorkspaceAccessLevel.WRITER,
+                            collaborator =>
+                                collaborator.role === WorkspaceAccessLevel.OWNER
+                                || collaborator.role === WorkspaceAccessLevel.WRITER,
                           collaborators
                         );
                         this.updateDisabledStatusForUsers(fp.map(userRole => userRole.email, writersAndOwners), true);
