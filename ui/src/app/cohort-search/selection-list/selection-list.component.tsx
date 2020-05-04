@@ -3,8 +3,78 @@ import * as React from 'react';
 
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
-import {ReactWrapperBase} from 'app/utils';
+import {TooltipTrigger} from 'app/components/popups';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {DomainType} from 'generated/fetch';
+
+const styles = reactStyles({
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    marginTop: '0.5rem',
+    padding: '0.45rem 0rem'
+  },
+  button: {
+    border: 'none',
+    borderRadius: '0.3rem',
+    cursor: 'pointer',
+    fontSize: '12px',
+    height: '1.5rem',
+    letterSpacing: '0.02rem',
+    lineHeight: '0.75rem',
+    margin: '0.25rem 0.5rem',
+    padding: '0rem 0.75rem',
+    textTransform: 'uppercase',
+  },
+  itemInfo: {
+    width: '100%',
+    minWidth: 0,
+    flex: 1,
+    display: 'flex',
+    flexFlow: 'row nowrap',
+    justifyContent: 'flex-start'
+  },
+  itemName: {
+    flex: 1,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  },
+  removeSelection: {
+    background: 'none',
+    border: 0,
+    color: colors.danger,
+    cursor: 'pointer',
+    marginRight: '0.25rem',
+    padding: 0
+  },
+  selectionContainer: {
+    background: colors.white,
+    border: `2px solid ${colors.primary}`,
+    borderRadius: '5px',
+    height: 'calc(100% - 150px)',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    width: '95%',
+  },
+  selectionItem: {
+    display: 'flex',
+    fontSize: '14px',
+    padding: '0.2rem 0.5rem 0',
+    width: '100%',
+  },
+  selectionPanel: {
+    background: colorWithWhiteness(colors.black, 0.95),
+    height: '100%',
+    padding: '0.5rem 0 0 1rem',
+  },
+  selectionTitle: {
+    color: colors.primary,
+    margin: 0,
+    padding: '0.5rem 0'
+  }
+});
 
 interface SelectionInfoProps {
   index: number;
@@ -12,9 +82,20 @@ interface SelectionInfoProps {
   removeSelection: Function;
 }
 
-export class SelectionInfo extends React.Component<SelectionInfoProps> {
+interface SelectionInfoState {
+  truncated: boolean;
+}
+
+export class SelectionInfo extends React.Component<SelectionInfoProps, SelectionInfoState> {
+  name: HTMLDivElement;
   constructor(props: SelectionInfoProps) {
     super(props);
+    this.state = {truncated: false};
+  }
+
+  componentDidMount(): void {
+    const {offsetWidth, scrollWidth} = this.name;
+    this.setState({truncated: scrollWidth > offsetWidth});
   }
 
   get showType() {
@@ -27,21 +108,23 @@ export class SelectionInfo extends React.Component<SelectionInfoProps> {
 
   render() {
     const {selection, removeSelection} = this.props;
-    return <div className='container'>
-      <button type='button' style={{margin: 0, padding: '0 0.25rem'}}
-        className='btn btn-icon btn-link btn-sm text-danger'
-        onClick={() => removeSelection()}>
+    const itemName = <React.Fragment>
+      {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
+      {nameDisplay(selection)} {attributeDisplay(selection)}
+    </React.Fragment>;
+    return <div style={styles.selectionItem}>
+      <button style={styles.removeSelection} onClick={() => removeSelection()}>
         <ClrIcon shape='times-circle'/>
       </button>
-      <span className='item-info'>
-        {this.showOr && <small className='selection-or font-weight-bold'>OR</small>}
-        {!!selection.group && <small className='text-muted'>Group</small>}
-        <small className='name'>
-          {this.showType && <strong>{typeDisplay(selection)}</strong>}
-          <span className='text-size text-muted'>{nameDisplay(selection)}</span>
-          <span className='text-muted'>{attributeDisplay(selection)}</span>
-        </small>
-      </span>
+      <div style={styles.itemInfo}>
+        {this.showOr && <strong>OR&nbsp;</strong>}
+        {!!selection.group && <span>Group&nbsp;</span>}
+        <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
+          <div style={styles.itemName} ref={(e) => this.name = e}>
+            {itemName}
+          </div>
+        </TooltipTrigger>
+      </div>
     </div>;
   }
 }
@@ -77,32 +160,34 @@ export class SelectionList extends React.Component<Props> {
 
   render() {
     const {back, cancel, errors, finish, removeSelection, selections, setView} = this.props;
-    return <div className='panel-right-container'>
-      <h5 className='selection-title'>Selected Criteria</h5>
-      <div className='panel-right selected'>
+    return <div style={styles.selectionPanel}>
+      <h5 style={styles.selectionTitle}>Selected Criteria</h5>
+      <div style={styles.selectionContainer}>
         {selections.map((selection, s) =>
           <SelectionInfo index={s} selection={selection} removeSelection={() => removeSelection(selection)}/>
         )}
       </div>
-      <div className='footer'>
-        <button type='button' onClick={() => cancel()} className='btn btn-link'>
+      <div style={styles.buttonContainer}>
+        <button type='button'
+          style={{...styles.button, background: 'transparent', color: colors.dark, fontSize: '14px'}}
+          onClick={() => cancel()}>
           Cancel
         </button>
         {this.showNext && <button type='button'
+          style={{...styles.button, background: colors.primary, color: colors.white}}
           disabled={selections.length === 0}
-          onClick={() => setView('modifiers')}
-          className='btn btn-primary'>
+          onClick={() => setView('modifiers')}>
           Next
         </button>}
         {this.showBack && <button type='button'
-          onClick={back()}
-          className='btn btn-primary'>
+          style={{...styles.button, background: colors.primary, color: colors.white}}
+          onClick={() => back()}>
           Back
         </button>}
         <button type='button'
+          style={{...styles.button, background: colors.primary, color: colors.white}}
           disabled={errors.length > 0}
-          onClick={finish()}
-          className='btn btn-primary'>
+          onClick={() => finish()}>
           Finish
         </button>
       </div>
@@ -112,7 +197,7 @@ export class SelectionList extends React.Component<Props> {
 
 @Component({
   selector: 'crit-selection-list',
-  template: '<div #root></div>'
+  template: '<div #root style="height: 100%"></div>'
 })
 export class SelectionListComponent extends ReactWrapperBase {
   @Input('back') back: Props['back'];

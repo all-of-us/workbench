@@ -130,11 +130,11 @@
         <div *ngIf="wizard.type !== criteriaType.AGE" class="col padding-zero" [ngClass]="sidebarClass">
           <div class="content right" *ngIf="open">
             <crit-selection-list
-              [back]="back()"
-              [cancel]="close()"
+              [back]="back"
+              [cancel]="close"
               [domain]="wizard.domain"
               [errors]="[]"
-              [finish]="finish()"
+              [finish]="finish"
               [removeSelection]="removeSelection"
               [selections]="selections"
               [setView]="setMode"

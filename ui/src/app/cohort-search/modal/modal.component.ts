@@ -83,7 +83,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  close() {
+  close = () => {
     wizardStore.next(undefined);
     this.attributesNode = undefined;
     this.autocompleteSelection = undefined;
@@ -110,7 +110,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  finish() {
+  finish = () => {
     const {domain, groupId, item, role, type} = this.wizard;
     if (domain === DomainType.PERSON) {
       triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
@@ -200,7 +200,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.wizard.domain === DomainType.PERSON && this.wizard.type !== CriteriaType.AGE;
   }
 
-  setMode(mode: any) {
+  setMode = (mode: any) => {
     if (mode === 'modifiers') {
       triggerEvent(
         'Cohort Builder Search',
