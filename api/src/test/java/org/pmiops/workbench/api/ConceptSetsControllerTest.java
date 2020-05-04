@@ -61,6 +61,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.CreateWorkspaceRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -168,77 +169,59 @@ public class ConceptSetsControllerTest {
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
   private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
   private static final DbConcept CONCEPT_4 = makeConcept(CLIENT_CONCEPT_4);
-
   private static final String USER_EMAIL = "bob@gmail.com";
-  private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE_NAME_2 = "name2";
-  private static final Instant NOW = Instant.now();
+  private static final Instant NOW = Instant.parse("2005-01-01T07:00:00.00Z");
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+
   private static DbUser currentUser;
+
   private Workspace workspace;
   private Workspace workspace2;
-  private TestMockFactory testMockFactory;
 
-  @Autowired BillingProjectBufferService billingProjectBufferService;
-
-  @Autowired WorkspaceService workspaceService;
-
-  @Autowired ConceptSetDao conceptSetDao;
-
-  @Autowired CdrVersionDao cdrVersionDao;
-
-  @Autowired ConceptDao conceptDao;
-
-  @Autowired ConceptSetService conceptSetService;
-
-  @Autowired ConceptService conceptService;
-
-  @Autowired DataSetService dataSetService;
-
-  @Autowired WorkspaceDao workspaceDao;
-
-  @Autowired UserDao userDao;
-
-  @Autowired CloudStorageService cloudStorageService;
-
-  @Autowired NotebooksService notebooksService;
-
-  @Autowired UserService userService;
-
-  @Autowired FireCloudService fireCloudService;
-
-  @Autowired ConceptSetsController conceptSetsController;
-
-  @Autowired UserRecentResourceService userRecentResourceService;
-
-  @Autowired ConceptBigQueryService conceptBigQueryService;
-
-  @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
-
-  @Autowired WorkspacesController workspacesController;
-
-  @Autowired WorkspaceAuditor workspaceAuditor;
+  @Autowired private BillingProjectBufferService billingProjectBufferService;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private CloudStorageService cloudStorageService;
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
+  @Autowired private ConceptDao conceptDao;
+  @Autowired private ConceptService conceptService;
+  @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private ConceptSetsController conceptSetsController;
+  @Autowired private ConceptSetService conceptSetService;
+  @Autowired private DataSetService dataSetService;
+  @Autowired private FireCloudService fireCloudService;
+  @Autowired private NotebooksService notebooksService;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private TestMockFactory testMockFactory;
+  @Autowired private UserDao userDao;
+  @Autowired private UserRecentResourceService userRecentResourceService;
+  @Autowired private UserService userService;
+  @Autowired private WorkspaceAuditor workspaceAuditor;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspacesController workspacesController;
+  @Autowired private WorkspaceService workspaceService;
 
   @TestConfiguration
   @Import({
-    WorkspaceResourcesServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CommonMappers.class,
+    ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetsController.class,
-    ConceptService.class,
     ConceptSetService.class,
     DataSetMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
+    TestMockFactory.class,
     UserServiceTestConfiguration.class,
-    WorkspacesController.class,
     WorkspaceMapperImpl.class,
-    WorkspaceServiceImpl.class,
+    WorkspaceResourcesServiceImpl.class,
+    WorkspacesController.class,
+    WorkspaceServiceImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -248,11 +231,11 @@ public class ConceptSetsControllerTest {
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
+    FreeTierBillingService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
-    WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    FreeTierBillingService.class
+    WorkspaceAuditor.class
   })
   static class Configuration {
 
@@ -289,8 +272,6 @@ public class ConceptSetsControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    testMockFactory = new TestMockFactory();
-
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
@@ -309,24 +290,22 @@ public class ConceptSetsControllerTest {
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    workspace = new Workspace();
-    workspace.setName(WORKSPACE_NAME);
-    workspace.setNamespace(WORKSPACE_NAMESPACE);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
-    workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace.setBillingAccountName("billing-account");
+    final CreateWorkspaceRequest createWorkspaceRequest = new CreateWorkspaceRequest();
+    createWorkspaceRequest.setName(WORKSPACE_NAME);
+    createWorkspaceRequest.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    createWorkspaceRequest.setResearchPurpose(new ResearchPurpose());
+    createWorkspaceRequest.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    createWorkspaceRequest.setBillingAccountName("billing-account");
 
-    workspace2 = new Workspace();
-    workspace2.setName(WORKSPACE_NAME_2);
-    workspace2.setNamespace(WORKSPACE_NAMESPACE);
-    workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
-    workspace2.setResearchPurpose(new ResearchPurpose());
-    workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace2.setBillingAccountName("billing-account");
+    final CreateWorkspaceRequest createWorkspaceRequest2 = new CreateWorkspaceRequest();
+    createWorkspaceRequest2.setName(WORKSPACE_NAME_2);
+    createWorkspaceRequest2.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    createWorkspaceRequest2.setResearchPurpose(new ResearchPurpose());
+    createWorkspaceRequest2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    createWorkspaceRequest2.setBillingAccountName("billing-account");
 
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspace2 = workspacesController.createWorkspace(workspace2).getBody();
+    workspace = workspacesController.createWorkspace(createWorkspaceRequest).getBody();
+    workspace2 = workspacesController.createWorkspace(createWorkspaceRequest2).getBody();
     stubGetWorkspace(
         workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspaceAcl(

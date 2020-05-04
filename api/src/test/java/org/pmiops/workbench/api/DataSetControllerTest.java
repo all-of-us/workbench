@@ -108,6 +108,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.CreateWorkspaceRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
@@ -161,6 +162,7 @@ import org.zendesk.client.v2.Zendesk;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DataSetControllerTest {
+
   private static final String COHORT_ONE_NAME = "cohort";
   private static final String COHORT_TWO_NAME = "cohort two";
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
@@ -178,6 +180,7 @@ public class DataSetControllerTest {
   private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
   private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
       QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
+  public static final String BILLING_ACCOUNT_NAME = "billing-account";
 
   private Long COHORT_ONE_ID;
   private Long COHORT_TWO_ID;
@@ -422,15 +425,22 @@ public class DataSetControllerTest {
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
+//
+//    final CreateWorkspaceRequest createWorkspaceRequest1 = new CreateWorkspaceRequest()
+//        .name(WORKSPACE_NAME)
+//        .billingAccountName(BILLING_ACCOUNT_NAME)
+//        .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
+//        .dataAccessLevel(DataAccessLevel.PROTECTED)
+//        .researchPurpose(new ResearchPurpose());
 
-    workspace = new Workspace();
-    workspace.setName(WORKSPACE_NAME);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
-    workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace.setBillingAccountName("billing-account");
+    final CreateWorkspaceRequest createWorkspaceRequest = new CreateWorkspaceRequest()
+      .name(WORKSPACE_NAME)
+      .billingAccountName(BILLING_ACCOUNT_NAME)
+      .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
+      .dataAccessLevel(DataAccessLevel.PROTECTED)
+      .researchPurpose(new ResearchPurpose());
 
-    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspace = workspacesController.createWorkspace(createWorkspaceRequest).getBody();
     stubGetWorkspace(
         workspace.getNamespace(), workspace.getName(), USER_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspaceAcl(
