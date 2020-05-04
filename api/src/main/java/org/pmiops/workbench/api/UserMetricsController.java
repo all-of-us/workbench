@@ -38,6 +38,7 @@ import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +57,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private final FireCloudService fireCloudService;
   private final CloudStorageService cloudStorageService;
   private final CommonMappers commonMappers;
+  private FirecloudMapper firecloudMapper;
   private int distinctWorkspacelimit = 5;
 
   // TODO(jaycarlton): migrate these private functions to MapStruct
@@ -117,7 +119,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
-      CommonMappers commonMappers) {
+      CommonMappers commonMappers,
+      FirecloudMapper firecloudMapper) {
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userRecentResourceService = userRecentResourceService;
@@ -125,6 +128,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
     this.commonMappers = commonMappers;
+    this.firecloudMapper = firecloudMapper;
   }
 
   @VisibleForTesting
@@ -270,7 +274,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       resource.setWorkspaceBillingStatus(BillingStatus.ACTIVE);
     }
     resource.setPermission(
-        commonMappers.fcWorkspaceResponseToApiWorkspaceAccessLevel(workspaceDetails).toString());
+        firecloudMapper.fcWorkspaceResponseToApiWorkspaceAccessLevel(workspaceDetails).toString());
     resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
     resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
     return resource;

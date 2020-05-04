@@ -85,20 +85,14 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public void deleteWorkspace(DbWorkspace dbWorkspace) {
-
-  }
+  public void deleteWorkspace(DbWorkspace dbWorkspace) {}
 
   @Override
-  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-
-  }
+  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {}
 
   @Override
   public void validateActiveBilling(String workspaceNamespace, String workspaceId)
-      throws ForbiddenException {
-
-  }
+      throws ForbiddenException {}
 
   @Override
   public List<DbWorkspace> findForReview() {
@@ -106,13 +100,13 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
-
-  }
+  public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {}
 
   @Override
-  public DbWorkspace updateWorkspaceAcls(DbWorkspace workspace,
-      Map<String, WorkspaceAccessLevel> userRoleMap, String registeredUsersGroup) {
+  public DbWorkspace updateWorkspaceAcls(
+      DbWorkspace workspace,
+      Map<String, WorkspaceAccessLevel> userRoleMap,
+      String registeredUsersGroup) {
     return null;
   }
 
@@ -122,8 +116,8 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace,
-      String workspaceId) {
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(
+      String workspaceNamespace, String workspaceId) {
     return null;
   }
 
@@ -134,8 +128,8 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(String workspaceNamespace,
-      String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
+  public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
     return null;
   }
 
@@ -151,14 +145,14 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(WorkspaceAccessLevel updatedAccess,
-      FirecloudWorkspaceACLUpdate currentUpdate) {
+  public FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
+      WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate) {
     return null;
   }
 
   @Override
-  public DbWorkspace setPublished(DbWorkspace workspace, String publishedWorkspaceGroup,
-      boolean publish) {
+  public DbWorkspace setPublished(
+      DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
     return null;
   }
 
@@ -168,8 +162,8 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace, long userId,
-      Timestamp lastAccessDate) {
+  public DbUserRecentWorkspace updateRecentWorkspaces(
+      DbWorkspace workspace, long userId, Timestamp lastAccessDate) {
     return null;
   }
 

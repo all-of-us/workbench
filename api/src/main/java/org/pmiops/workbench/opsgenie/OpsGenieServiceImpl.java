@@ -10,7 +10,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.EgressEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,15 +60,16 @@ public class OpsGenieServiceImpl implements OpsGenieService {
   }
 
   private String getAlertDescription(EgressEvent egressEvent) {
-//    final DbWorkspace dbWorkspace = workspaceDao.findAllByWorkspaceNamespace(egressEvent.getVmName());
+    //    final DbWorkspace dbWorkspace =
+    // workspaceDao.findAllByWorkspaceNamespace(egressEvent.getVmName());
     return String.format("Workspace project: %s\n", egressEvent.getProjectName())
         + String.format("Workspace Name (Jupyter VM name): %s\n", egressEvent.getVmName())
         + String.format(
-        "Egress detected: %.2f Mib in %d secs\n\n",
-        egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
+            "Egress detected: %.2f Mib in %d secs\n\n",
+            egressEvent.getEgressMib(), egressEvent.getTimeWindowDuration())
         + String.format(
-        "Workspace Admin Console (Prod Admin User): %s/admin/workspaces/%s/\n",
-        workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getProjectName())
+            "Workspace Admin Console (Prod Admin User): %s/admin/workspaces/%s/\n",
+            workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getProjectName())
         + "Playbook Entry: https://broad.io/aou-high-egress-event";
   }
 

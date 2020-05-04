@@ -7,15 +7,8 @@ import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -78,19 +71,6 @@ public class CommonMappers {
   /////////////////////////////////////////////////////////////////////////////
   //                                  ENUMS                                  //
   /////////////////////////////////////////////////////////////////////////////
-
-  public WorkspaceAccessLevel fcAccessLevelToApiAccessLevel(FirecloudWorkspaceAccessEntry acl) {
-    return WorkspaceAccessLevel.fromValue(acl.getAccessLevel());
-  }
-
-  public WorkspaceAccessLevel fcWorkspaceResponseToApiWorkspaceAccessLevel(
-      FirecloudWorkspaceResponse fcResponse) {
-    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-      return WorkspaceAccessLevel.OWNER;
-    } else {
-      return WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel());
-    }
-  }
 
   public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {

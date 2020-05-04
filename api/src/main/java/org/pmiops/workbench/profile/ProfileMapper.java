@@ -5,9 +5,6 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.institution.InstitutionalAffiliationMapper;
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -71,8 +68,7 @@ public interface ProfileMapper {
   @Mapping(target = "version", ignore = true)
   DbUser profileToDbUser(Profile profile);
 
-
-//  User toApiUser(DbUser dbUser, Profile profile);
+  //  User toApiUser(DbUser dbUser, Profile profile);
   @Mapping(source = "contactEmail", target = "email")
   @Mapping(source = "username", target = "userName")
   User toApiUser(DbUser dbUser);

@@ -968,4 +968,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
+
+  @Override
+  public Optional<DbUser> getByUsername(String username) {
+    return Optional.ofNullable(userDao.findUserByUsername(username));
+  }
 }
