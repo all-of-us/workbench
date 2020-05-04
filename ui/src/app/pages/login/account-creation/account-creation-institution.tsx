@@ -394,7 +394,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                  onClick={() => {
                    AnalyticsTracker.Registration.InstitutionNotListed();
                  }}>
-                submitting a request
+                submitting a request.
               </a>
             </div>
             <TextInputWithLabel containerStyle={{marginTop: '1rem', width: null}}
