@@ -42,6 +42,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   helpContent = 'data';
   sidebarOpen = false;
   notebookStyles = false;
+  notebookRouterOutletContainerStyles = false;
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -218,6 +219,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     while (child) {
       if (child.snapshot.data.notebookHelpSidebarStyles) {
         this.notebookStyles = true;
+      }
+
+      if (child.snapshot.data.notebookRouterOutletContainerStyles) {
+        this.notebookRouterOutletContainerStyles = true;
       }
 
       if (child.firstChild) {

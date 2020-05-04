@@ -142,6 +142,9 @@ const routes: Routes = [
                       // use the (urldecoded) captured value nbName
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
+                      helpContent: 'notebookStorage',
+                      notebookHelpSidebarStyles: true,
+                      notebookRouterOutletContainerStyles: true,
                       minimizeChrome: true
                     }
                   }, {
@@ -150,7 +153,7 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      helpContent: 'preview',
+                      helpContent: 'notebookStorage',
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
