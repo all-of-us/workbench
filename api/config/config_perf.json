@@ -87,7 +87,7 @@
     "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
-    "enableBetaAccess": true,
+    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
     "requireInvitationKey": false
   },
@@ -104,7 +104,7 @@
     "enableMoodleV2Api": true,
     "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false,
-    "enableV3DataUserCodeOfConduct": false,
+    "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false
   },
   "actionAudit": {

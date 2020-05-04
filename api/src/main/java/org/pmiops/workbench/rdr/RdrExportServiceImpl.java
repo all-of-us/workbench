@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.RdrEntityEnums;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -52,6 +53,8 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
   private UserDao userDao;
+
+  private InstitutionService institutionService;
   private WorkspaceService workspaceService;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
@@ -64,6 +67,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       Provider<RdrApi> rdrApiProvider,
       RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
+      InstitutionService institutionService,
       WorkspaceService workspaceService,
       UserDao userDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
@@ -71,6 +75,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = rdrApiProvider;
     this.workspaceDao = workspaceDao;
+    this.institutionService = institutionService;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
@@ -258,10 +263,11 @@ public class RdrExportServiceImpl implements RdrExportService {
                       ? verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText()
                       : roleEnum.toString();
 
-              new ResearcherVerifiedInstitutionalAffiliation()
-                  .institutionShortName(
-                      verifiedInstitutionalAffiliation.getInstitution().getShortName())
-                  .institutionalRole(role);
+              researcher.setVerifiedInstitutionalAffiliation(
+                  new ResearcherVerifiedInstitutionalAffiliation()
+                      .institutionShortName(
+                          verifiedInstitutionalAffiliation.getInstitution().getShortName())
+                      .institutionalRole(role));
             });
     return researcher;
   }
@@ -277,7 +283,8 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setStatus(
         org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum.fromValue(
             dbWorkspace.getWorkspaceActiveStatusEnum().toString()));
-    rdrWorkspace.setExcludeFromPublicDirectory(false);
+    setExcludeFromPublicDirectory(dbWorkspace.getCreator(), rdrWorkspace);
+
     rdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
     rdrWorkspace.setDiseaseFocusedResearchName(dbWorkspace.getDiseaseOfFocus());
     rdrWorkspace.setOtherPurpose(dbWorkspace.getOtherPurpose());
@@ -331,7 +338,6 @@ public class RdrExportServiceImpl implements RdrExportService {
               rdrWorkspace.getWorkspaceId()));
       return null;
     }
-
     return rdrWorkspace;
   }
 
@@ -434,5 +440,24 @@ public class RdrExportServiceImpl implements RdrExportService {
                 })
             .collect(Collectors.toList());
     rdrExportDao.save(exportList);
+  }
+
+  /**
+   * Set excludeFromPublicDirectory to true if the workspace creator is an operational user i.e has
+   * Institution as All of Us Program operational Use
+   *
+   * @param creatorUser
+   * @param rdrWorkspace
+   */
+  void setExcludeFromPublicDirectory(DbUser creatorUser, RdrWorkspace rdrWorkspace) {
+    rdrWorkspace.setExcludeFromPublicDirectory(false);
+    verifiedInstitutionalAffiliationDao
+        .findFirstByUser(creatorUser)
+        .ifPresent(
+            verifiedInstitutionalAffiliation -> {
+              rdrWorkspace.setExcludeFromPublicDirectory(
+                  institutionService.validateOperationalUser(
+                      verifiedInstitutionalAffiliation.getInstitution()));
+            });
   }
 }

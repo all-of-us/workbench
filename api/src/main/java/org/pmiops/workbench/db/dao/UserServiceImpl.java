@@ -47,6 +47,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -237,10 +238,16 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
-    boolean dataUseAgreementCompliant =
-        user.getDataUseAgreementCompletionTime() != null
-            || user.getDataUseAgreementBypassTime() != null
-            || !configProvider.get().access.enableDataUseAgreement;
+    boolean dataUseAgreementCompliant = false;
+    if (user.getDataUseAgreementBypassTime() != null
+        || !configProvider.get().access.enableDataUseAgreement) {
+      // Data use agreement version may be ignored, since it's bypassed on the user or env level.
+      dataUseAgreementCompliant = true;
+    } else if (user.getDataUseAgreementSignedVersion() != null
+        && user.getDataUseAgreementSignedVersion() == getCurrentDuccVersion()) {
+      // User has signed the most-recent DUCC version.
+      dataUseAgreementCompliant = true;
+    }
     boolean eraCommonsCompliant =
         user.getEraCommonsBypassTime() != null
             || !configProvider.get().access.enableEraCommons
@@ -365,7 +372,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (dbAddress != null) {
       dbAddress.setUser(dbUser);
     }
-    if (dbDemographicSurvey != null) dbDemographicSurvey.setUser(dbUser);
+    if (dbDemographicSurvey != null) {
+      dbDemographicSurvey.setUser(dbUser);
+    }
     // set via the older Institutional Affiliation flow, from the Demographic Survey
     if (dbAffiliations != null) {
       // We need an "effectively final" variable to be captured in the lambda
@@ -394,6 +403,41 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       }
       // If a user already existed (due to multiple requests trying to create a user simultaneously)
       // just return it.
+    }
+    return dbUser;
+  }
+
+  /**
+   * Save updated dbUser object if requireInstitutionalVerification is enabled: Get the existing
+   * dbExistingVerifiedInstitutionalAffiliation and update it with Institution role and other text
+   *
+   * @param dbUser
+   * @param dbVerifiedAffiliation
+   * @return
+   */
+  @Override
+  public DbUser updateUserWithConflictHandling(
+      DbUser dbUser, DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
+    try {
+      dbUser = userDao.save(dbUser);
+      boolean requireInstitutionalVerification =
+          configProvider.get().featureFlags.requireInstitutionalVerification;
+      if (requireInstitutionalVerification) {
+        DbVerifiedInstitutionalAffiliation dbExistingVerifiedInstitutionalAffiliation =
+            verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).get();
+        dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
+            dbVerifiedAffiliation.getInstitutionalRoleEnum());
+        if (dbVerifiedAffiliation.getInstitutionalRoleEnum().equals(InstitutionalRole.OTHER)) {
+          dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText(
+              dbVerifiedAffiliation.getInstitutionalRoleOtherText());
+        } else {
+          dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText("");
+        }
+        this.verifiedInstitutionalAffiliationDao.save(dbExistingVerifiedInstitutionalAffiliation);
+      }
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for user update", e);
+      throw new ConflictException("Failed due to concurrent modification");
     }
     return dbUser;
   }
@@ -695,6 +739,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   /** Syncs the current user's training status from Moodle. */
+  @Override
   public DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     DbUser user = userProvider.get();
@@ -712,6 +757,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * we clear the completion/expiration dates from the database as the user will need to complete a
    * new training.
    */
+  @Override
   public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Skip sync for service account user rows.

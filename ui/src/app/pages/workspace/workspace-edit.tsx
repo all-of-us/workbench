@@ -47,6 +47,7 @@ import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {openZendeskWidget} from 'app/utils/zendesk';
 import {
   ArchivalStatus,
   BillingAccount,
@@ -146,7 +147,7 @@ export const styles = reactStyles({
     width: '100%',
   },
   text: {
-    fontSize: '13px',
+    fontSize: '14px',
     color: colors.primary,
     fontWeight: 400,
     lineHeight: '24px'
@@ -162,7 +163,12 @@ export const styles = reactStyles({
     marginLeft: '-0.9rem',
     fontSize: 14,
     backgroundColor: colorWithWhiteness(colors.accent, 0.85)
-  }
+  },
+  link: {
+    color: colors.accent,
+    cursor: 'pointer',
+    textDecoration: 'none'
+  },
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -247,10 +253,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        this.setState(prevState => fp.set(
-          ['workspace', 'billingAccountName'],
-          billingAccounts.find(billingAccount => billingAccount.isFreeTier).name,
-          prevState));
+        const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
+        if (maybeFreeTierAccount) {
+          this.setState(prevState => fp.set(
+            ['workspace', 'billingAccountName'],
+            maybeFreeTierAccount.name,
+            prevState));
+        }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
 
@@ -294,14 +303,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     async componentDidMount() {
-      if (serverConfigStore.getValue().enableBillingUpgrade) {
-        this.fetchBillingAccounts();
-      } else {
-        // This is a temporary hack to set the billing account name property to anything
-        // so that it passes validation. The server ignores the value if the feature flag
-        // is turned off so any value is fine.
-        this.setState(fp.set(['workspace', 'billingAccountName'], 'free-tier'));
-      }
+      await this.fetchBillingAccounts();
     }
 
     /**
@@ -434,6 +436,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       );
     }
 
+    openContactWidget() {
+      const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
+      openZendeskWidget(givenName, familyName, username, contactEmail);
+    }
+
     renderBillingDescription() {
       return <div>
         The <i>All of Us</i> Program provides $300 in free credits per user. Please refer to
@@ -441,9 +448,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
         </StyledAnchorTag> to learn more about the free credit
         program and how it can be used. Once you have used up your free credits, you can request
-        additional credits by <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
-      'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>
-        &nbsp;contacting support</StyledAnchorTag>.
+        additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
+        contacting support</span>.
       </div>;
     }
 
@@ -472,8 +478,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      */
     makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
       let children: React.ReactNode;
-      // If its a sub category of Research purpose and not Education/Other
-      const isResearchPurpose = ResearchPurposeItems.indexOf(rp) > -1;
       if (rp.shortName === 'diseaseFocusedResearch') {
         children = this.makeDiseaseInput();
       } else if (rp.shortName === 'otherPurpose') {
@@ -491,7 +495,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   checked={!!this.state.workspace.researchPurpose[rp.shortName]}
                   onChange={e => this.updatePrimaryPurpose(rp.shortName, e)}/>
         <FlexColumn style={{marginTop: '-0.2rem'}}>
-          <label style={{...styles.shortDescription, fontSize: isResearchPurpose ? 14 : 16}} htmlFor={rp.uniqueId}>
+          <label style={{...styles.shortDescription, fontSize: 14}} htmlFor={rp.uniqueId}>
             {rp.shortDescription}
           </label>
           <div>
@@ -541,33 +545,44 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      * options.
      */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-      return <div key={item.label}><strong>{item.label} *</strong>
-        {item.subCategory.map((sub, index) => <FlexRow key={sub.label}>
-          <CheckBox
-              manageOwnState={false}
-              wrapperStyle={styles.checkboxRow}
-              data-test-id={sub.shortName + '-checkbox'}
-              style={styles.checkboxStyle}
-              label={sub.label}
-              labelStyle={styles.text}
-              key={sub.label}
-              checked={this.specificPopulationCheckboxSelected(sub.shortName)}
-              onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
-              disabled={!this.state.populationChecked}/></FlexRow>)}
+      return <div key={item.label}>
+        <div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
+        {item.subCategory.map((sub, index) =>
+            <FlexRow key={sub.label} style={{...styles.categoryRow, paddingTop: '0rem'}}>
+              <CheckBox
+                  manageOwnState={false}
+                  wrapperStyle={styles.checkboxRow}
+                  data-test-id={sub.shortName + '-checkbox'}
+                  style={{...styles.checkboxStyle, marginTop: '0.1rem'}}
+                  key={sub.label}
+                  checked={this.specificPopulationCheckboxSelected(sub.shortName)}
+                  onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
+                  disabled={!this.state.populationChecked}/>
+              <FlexColumn>
+                <label style={styles.text}>
+                  {sub.label}
+                </label>
+              </FlexColumn>
+            </FlexRow>)}
       </div>;
     }
 
-    makeOutcomingResearchForm(item, I): React.ReactNode {
-      return <CheckBox
-          wrapperStyle={styles.checkboxRow}
-          style={styles.checkboxStyle}
-          label={item.label}
-          labelStyle={styles.text}
-          key={item.label}
-          checked={this.researchOutcomeCheckboxSelected(item.shortName)}
-          onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
-      />;
+    makeOutcomingResearchForm(item, index): React.ReactNode {
+      return <div key={index} style={{...styles.categoryRow, paddingTop: '0rem'}}>
+        <CheckBox
+            style={styles.checkboxStyle}
+            key={item.label}
+            checked={this.researchOutcomeCheckboxSelected(item.shortName)}
+            onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
+        />
+        <FlexColumn style={{marginTop: '-0.2rem'}}>
+          <label style={styles.text}>
+            {item.label}
+          </label>
+        </FlexColumn>
+      </div>;
     }
+
     renderHeader() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create:
@@ -817,22 +832,25 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     buildBillingAccountOptions() {
+      const {enableBillingUpgrade} = serverConfigStore.getValue();
       const options = this.state.billingAccounts.map(a => ({
         label: a.displayName,
         value: a.name,
         disabled: !a.isOpen
       }));
-
-      options.push({
-        label: 'Create a new billing account',
-        value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-        disabled: false
-      });
+      if (enableBillingUpgrade) {
+        options.push({
+          label: 'Create a new billing account',
+          value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+          disabled: false
+        });
+      }
 
       return options;
     }
 
     render() {
+      const {enableBillingUpgrade} = serverConfigStore.getValue();
       const {
         populationChecked,
         workspace: {
@@ -888,12 +906,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        <div style={{width: '95%'}}>
+        <div style={{width: '1120px'}}>
           {this.state.loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
-          <FlexRow>
+          <FlexRow style={{alignItems: 'baseline'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
               value = {this.state.workspace.name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
@@ -917,7 +935,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </div>
             </TooltipTrigger>
             <TooltipTrigger content={toolTipText.cdrSelect}>
-              <InfoIcon style={{...styles.infoIcon}}/>
+              <InfoIcon style={{...styles.infoIcon, marginTop: '0.4rem'}}/>
             </TooltipTrigger>
           </FlexRow>
         </WorkspaceEditSection>
@@ -930,8 +948,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             onChange={v => this.setState({cloneUserRole: v})}/>
         </WorkspaceEditSection>
         }
-        {serverConfigStore.getValue().enableBillingUpgrade &&
-          (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
+        {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
@@ -946,6 +963,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <Dropdown style={{width: '14rem'}}
                         value={this.state.workspace.billingAccountName}
                         options={this.buildBillingAccountOptions()}
+                        disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
                         onChange={e => {
                           if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
                             this.setState({
@@ -956,13 +974,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                           }
                         }}
               />
-              {freeTierCreditsBalance > 0.0 && <div style={styles.freeCreditsBalanceClickable}>
+              <div style={styles.freeCreditsBalanceClickable}>
                 <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View FREE credits balance</Clickable>
-              </div>}
+              </div>
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
-        <WorkspaceEditSection header='Research Use Statement Questions'
+        <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
+          <div>Research Use Statement Questions</div>
+          <StyledAnchorTag href='https://aousupporthelp.zendesk.com/hc/en-us/articles/360042673211-Examples-of-research-purpose-descriptions-'
+                           target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
+            Best practices for Research Use Statement questions
+          </StyledAnchorTag>
+        </FlexRow>} largeHeader={true}
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>
@@ -987,7 +1011,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     <button style={{...styles.shortDescription, border: 'none'}}
                             data-test-id='research-purpose-button'
                             onClick={() => this.setState({showResearchPurpose: !this.state.showResearchPurpose})}>
-                      Research purpose
+                      <label style={{fontSize: 14, marginLeft: '0.2rem'}}>Research purpose</label>
                       <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
                      </button>
                   </div>
@@ -1012,21 +1036,30 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
             {/* TextBox: scientific question(s) researcher intend to study Section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[2]}
-                          researchValue={this.state.workspace.researchPurpose.intendedStudy}
-                          onChange={v => this.updateResearchPurpose('intendedStudy', v)}
-                          index='2.1' rowId='intendedStudyText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[2]}
+                researchValue={this.state.workspace.researchPurpose.intendedStudy}
+                onChange={v => this.updateResearchPurpose('intendedStudy', v)}
+                index='2.1'
+                id='intendedStudyText'
+            />
 
             {/* TextBox: scientific approaches section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[3]}
-                           researchValue={this.state.workspace.researchPurpose.scientificApproach}
-                            onChange={v => this.updateResearchPurpose('scientificApproach', v)}
-                           index='2.2' rowId='scientificApproachText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[3]}
+                researchValue={this.state.workspace.researchPurpose.scientificApproach}
+                onChange={v => this.updateResearchPurpose('scientificApproach', v)}
+                index='2.2'
+                id='scientificApproachText'
+            />
             {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceResearchSummary researchPurpose={researchPurposeQuestions[4]}
-                           researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
-                           onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
-                           index='2.3' rowId='anticipatedFindingsText'/>
+            <WorkspaceResearchSummary
+                researchPurpose={researchPurposeQuestions[4]}
+                researchValue={this.state.workspace.researchPurpose.anticipatedFindings}
+                onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
+                index='2.3'
+                id='anticipatedFindingsText'
+            />
           </FlexColumn>
         </WorkspaceEditSection>
 
@@ -1086,7 +1119,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     style={styles.checkboxStyle}
                     data-test-id='other-specialPopulation-checkbox'
                     label='Other'
-                    labelStyle={styles.text}
+                    labelStyle={{...styles.text, fontWeight: 'bold'}}
                     checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                     disabled={!populationChecked}
@@ -1101,21 +1134,25 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </FlexColumn>
             </FlexRow>
             <hr/>
-            <div>* Demographic variables for which data elements have been altered, partially
-              suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
-              the Data Dictionary for details.</div>
+            <FlexRow>
+              <div style={{marginRight: '0.2rem'}}>*</div>
+              <div>Demographic variables for which data elements have been altered, partially
+                suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
+                the Data Dictionary for details.</div>
+            </FlexRow>
+
             <hr/>
           </div>
-          <div style={{marginTop: '0.5rem'}}>
+          <FlexRow style={{marginTop: '0.5rem'}}>
             <RadioButton name='population'
-                         style={{marginRight: '0.5rem'}}
+                         style={{marginRight: '0.5rem', marginTop: '0.3rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
                          checked={populationChecked === false}/>
             <label style={styles.text}>No, my study will not center on underrepresented populations.
               I am interested in a diverse sample in general, or I am focused on populations that
               have been well represented in prior research.</label>
-          </div>
+          </FlexRow>
         </WorkspaceEditSection>
 
           {/* Request for review section*/}
@@ -1196,12 +1233,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   purpose (Question 1)</li>}
                 {errors.diseaseOfFocus && <li> You must specify a disease of focus and it should be at most 80 characters</li>}
                 {errors.otherPrimaryPurpose && <li> Other primary purpose should be of at most 500 characters</li>}
-                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
-                  from the study? (Question 2.1)</i> cannot be empty</li>}
-                {errors.scientificApproach && <li> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question 2.2)</i> cannot be empty</li>}
                 {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question 2.3)</i> cannot be empty</li>}
+                  (Question 2.1)</i> must be between 0 and 1000 characters</li>}
+                {errors.scientificApproach && <li> Answer for <i>What are the scientific
+                  approaches you plan to use for your study (Question 2.2)</i> must be between 0 and 1000 characters</li>}
+                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
+                  from the study? (Question 2.3)</i> must be between 0 and 1000 characters</li>}
                 {errors.disseminate && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
                 {errors.otherDisseminateResearchFindings && <li>
                     Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}

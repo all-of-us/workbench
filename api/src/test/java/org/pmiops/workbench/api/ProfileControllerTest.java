@@ -492,6 +492,53 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUA_VERSION);
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testSubmitDataUseAgreement_wrongVersion() {
+    createUser();
+    String duaInitials = "NIH";
+    profileController.submitDataUseAgreement(DUA_VERSION - 1, duaInitials);
+  }
+
+  @Test
+  public void test_outdatedDataUseAgreement() {
+    // force version number to 2 instead of 3
+    config.featureFlags.enableV3DataUserCodeOfConduct = false;
+    final int previousDuaVersion = DUA_VERSION - 1;
+
+    final long userId = createUser().getUserId();
+
+    // bypass the other access requirements
+    final DbUser dbUser = userDao.findUserByUserId(userId);
+    dbUser.setBetaAccessBypassTime(TIMESTAMP);
+    dbUser.setComplianceTrainingBypassTime(TIMESTAMP);
+    dbUser.setEraCommonsBypassTime(TIMESTAMP);
+    dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);
+    userDao.save(dbUser);
+
+    // sign the older version
+
+    String duaInitials = "NIH";
+    assertThat(
+            profileController
+                .submitDataUseAgreement(previousDuaVersion, duaInitials)
+                .getStatusCode())
+        .isEqualTo(HttpStatus.OK);
+
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
+
+    // update and enforce the required version
+
+    config.featureFlags.enableV3DataUserCodeOfConduct = true;
+
+    // a bit of a hack here: use this to sync the registration status
+    // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
+    profileController.syncTwoFactorAuthStatus();
+
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+  }
+
   @Test
   public void testMe_success() {
     config.featureFlags.requireInstitutionalVerification = false;
@@ -781,6 +828,62 @@ public class ProfileControllerTest extends BaseControllerTest {
     String newName =
         "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
     profile.setGivenName(newName);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_nullAddress() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setAddress(null);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_nullCountry() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().country(null);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_nullState() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().state(null);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_nullZipCode() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.getAddress().zipCode(null);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_emptyReasonForResearch() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setAreaOfResearch("");
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_UpdateUserName() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setUsername("newUserName@fakeDomain.com");
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_badRequest_UpdateContactEmail() {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setContactEmail("newContact@fakeDomain.com");
     profileController.updateProfile(profile);
   }
 

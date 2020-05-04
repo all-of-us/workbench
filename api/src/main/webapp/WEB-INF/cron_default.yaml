@@ -56,6 +56,9 @@ cron:
   target: api
 - description: 'Export user and workspace data to RDR'
   url: /v1/cron/exportToRdr
-  schedule: every 24 hours
-  timezone: UTC
+  # RDR export is hard-coded to 9pm CT, to align with VUMC expectations that the daily export is run at a time
+  # that is (1) after the close of normal business working hours, and (2) early enough in the evening that the
+  # entire export (and downstream data flows) can complete before start of the next business day.
+  schedule: every day 21:00
+  timezone: America/Chicago
   target: api

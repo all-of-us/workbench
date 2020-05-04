@@ -79,4 +79,12 @@ public interface InstitutionService {
    * @return whether user instructions were deleted
    */
   boolean deleteInstitutionUserInstructions(final String shortName);
+
+  /**
+   * Validates if the institution is for operational User
+   *
+   * @param institution
+   * @return
+   */
+  boolean validateOperationalUser(DbInstitution institution);
 }

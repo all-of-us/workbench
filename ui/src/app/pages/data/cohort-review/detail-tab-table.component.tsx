@@ -10,7 +10,7 @@ import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, PageFilterRequest, SortOrder} from 'generated/fetch';
+import {DomainType, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -18,6 +18,7 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
+import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   container: {
@@ -106,13 +107,13 @@ const styles = reactStyles({
     color: colors.accent,
   },
   textSearch: {
-    width: '85%',
+    width: '95%',
     borderRadius: '4px',
     backgroundColor: colors.light,
     marginLeft: '5px'
   },
   textInput: {
-    width: '85%',
+    width: '75%',
     padding: '0 0 0 5px',
     border: 0,
     backgroundColor: 'transparent',
@@ -169,7 +170,8 @@ const filterIcons = {
   }
 };
 
-const rows = 25;
+const rowsPerPage = 25;
+const lazyLoadSize = 125;
 const domains = [
   DomainType.CONDITION,
   DomainType.PROCEDURE,
@@ -238,94 +240,287 @@ interface State {
   data: Array<any>;
   filteredData: Array<any>;
   loading: boolean;
+  updating: boolean;
+  loadingPrevious: boolean;
+  page: number;
   start: number;
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
   codeResults: any;
   error: boolean;
+  lazyLoad: boolean;
+  totalCount: number;
+  requestPage: number;
+  range: Array<number>;
+  tabFilterState: any;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     codeInputChange: Function;
+    private countAborter = new AbortController();
+    private dataAborter = new AbortController();
     constructor(props: Props) {
       super(props);
       this.state = {
         data: null,
         filteredData: null,
         loading: true,
+        updating: false,
+        loadingPrevious: false,
+        page: 0,
         start: 0,
-        sortField: null,
+        sortField: props.columns[0].name,
         sortOrder: 1,
         expandedRows: [],
         codeResults: null,
         error: false,
+        lazyLoad: false,
+        totalCount: null,
+        requestPage: 0,
+        range: [0, 124],
+        tabFilterState: JSON.parse(JSON.stringify(props.filterState.tabs[props.domain]))
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
 
     componentDidMount() {
-      this.getParticipantData();
+      this.getParticipantData(true);
     }
 
     componentDidUpdate(prevProps: any) {
-      const {participantId, updateState} = this.props;
+      const {domain, filterState, participantId, updateState} = this.props;
+      const {lazyLoad, loading} = this.state;
       if (prevProps.participantId !== participantId) {
+        if (loading) {
+          // cancel any pending count or data calls
+          this.abortPendingApiCalls(true);
+        }
         this.setState({
           data: null,
           filteredData: null,
+          lazyLoad: false,
           loading: true,
           error: false,
-        });
-        this.getParticipantData();
+          page: 0,
+          start: 0,
+        }, () => this.getParticipantData(true));
       } else if (prevProps.updateState !== updateState) {
-        this.filterData();
+        const tabFilterState = JSON.parse(JSON.stringify(filterState.tabs[domain]));
+        if (lazyLoad) {
+          if (loading) {
+            // cancel any pending count or data calls
+            this.abortPendingApiCalls(true);
+          }
+          this.setState({
+            data: null,
+            filteredData: null,
+            loading: true,
+            error: false,
+            tabFilterState
+          }, () => this.getParticipantData(true));
+        } else {
+          this.setState({tabFilterState}, () => this.filterData());
+        }
       }
     }
 
-    getParticipantData() {
-      try {
-        const {columns, domain, participantId,
-          workspace: {id, namespace}} = this.props;
-        const pageFilterRequest = {
-          page: 0,
-          pageSize: 10000,
-          sortOrder: SortOrder.Asc,
-          sortColumn: columns[0].name,
-          domain: domain,
-        } as PageFilterRequest;
+    componentWillUnmount(): void {
+      this.abortPendingApiCalls();
+    }
 
-        cohortReviewApi().getParticipantData(
-          namespace,
-          id,
-          cohortReviewStore.getValue().cohortReviewId,
-          participantId,
-          pageFilterRequest
-        ).then(response => {
-          response.items.forEach(item => {
+    async getParticipantData(getCount: boolean) {
+      try {
+        const {columns, domain} = this.props;
+        const {range, sortField, sortOrder} = this.state;
+        let {lazyLoad, page, start, totalCount} = this.state;
+        const filters = this.getFilters();
+        if (filters !== null) {
+          const pageFilterRequest = {
+            page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
+            pageSize: lazyLoadSize,
+            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            sortColumn: columns.find(col => col.name === sortField).filter,
+            domain,
+            filters: lazyLoad ? filters : {items: []}
+          } as PageFilterRequest;
+          if (getCount) {
+            // call api for count with no filters to get total count
+            await this.callCountApi(pageFilterRequest).then(async(count) => {
+              totalCount = count;
+              if (lazyLoad) {
+                if (start > totalCount) {
+                  // If the data was filtered to a smaller count than the previous start, reset to the last page of the new data
+                  start = Math.floor((totalCount - 1) / rowsPerPage) * rowsPerPage;
+                  page = start / rowsPerPage;
+                  pageFilterRequest.page = Math.floor(totalCount / lazyLoadSize);
+                }
+              } else {
+                lazyLoad = totalCount > 1000;
+                if (lazyLoad) {
+                  pageFilterRequest.filters = filters;
+                  pageFilterRequest.pageSize = lazyLoadSize;
+                  if (filters.items.length) {
+                    // if filters exist, call api for count a second time to get the filtered count
+                    await this.callCountApi(pageFilterRequest).then(filteredCount => {
+                      totalCount = filteredCount;
+                      if (start > totalCount) {
+                        // If the data was filtered to a smaller count than the previous start, reset to the last page of the new data
+                        start = Math.floor(totalCount / rowsPerPage) * rowsPerPage;
+                        pageFilterRequest.page = Math.floor(totalCount / lazyLoadSize);
+                      }
+                    });
+                  }
+                } else {
+                  pageFilterRequest.pageSize = totalCount;
+                }
+              }
+            });
+          }
+          this.callDataApi(pageFilterRequest).then(data => {
+            if (lazyLoad) {
+              const end = Math.min(range[0] + lazyLoadSize, totalCount);
+              this.setState({data, filteredData: data, loading: false, lazyLoad, page, range: [range[0], end], start, totalCount});
+            } else {
+              this.setState({data, loading: false, lazyLoad, range: [0, totalCount - 1]});
+              this.filterData();
+            }
+          });
+        }
+      } catch (error) {
+        // Ignore abort errors since those were intentional
+        if (error.name !== 'AbortError') {
+          console.error(error);
+          this.setState({loading: false, error: true});
+        }
+      }
+    }
+
+    updatePageData(previous: boolean) {
+      try {
+        this.setState({loadingPrevious: previous, updating: true, error: false});
+        const {columns, domain} = this.props;
+        const {range, sortField, sortOrder} = this.state;
+        let {filteredData} = this.state;
+        const requestPage = previous ? range[0] / lazyLoadSize : (filteredData.length + range[0]) / lazyLoadSize;
+        const filters = this.getFilters();
+        if (filters !== null) {
+          const pageFilterRequest = {
+            page: requestPage,
+            pageSize: lazyLoadSize,
+            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            sortColumn: columns.find(col => col.name === sortField).filter,
+            domain: domain,
+            filters
+          } as PageFilterRequest;
+          this.callDataApi(pageFilterRequest).then(data => {
+            if (previous) {
+              filteredData = [...data, ...filteredData];
+              if (filteredData.length > (lazyLoadSize * 3)) {
+                filteredData = filteredData.slice(0, filteredData.length - lazyLoadSize);
+                range[1] -= lazyLoadSize;
+              }
+            } else {
+              filteredData = [...filteredData, ...data];
+              if (filteredData.length > (lazyLoadSize * 3)) {
+                filteredData = filteredData.slice(lazyLoadSize);
+                range[0] += lazyLoadSize;
+              }
+            }
+            this.setState({data, filteredData, range, loadingPrevious: false, updating: false});
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        this.setState({loadingPrevious: false, updating: false, error: true});
+      }
+    }
+
+    async callDataApi(request: PageFilterRequest) {
+      const {domain, participantId, workspace: {id, namespace}} = this.props;
+      const {cohortReviewId} = cohortReviewStore.getValue();
+      let data = [];
+      await cohortReviewApi()
+        .getParticipantData(namespace, id, cohortReviewId, participantId, request, {signal: this.dataAborter.signal})
+        .then(response => {
+          data = response.items.map(item => {
             if (domain === DomainType.VITAL || domain === DomainType.LAB) {
               item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
             item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+            return item;
           });
-          this.setState({
-            data: response.items,
-            loading: false,
-          });
-          this.filterData();
         });
-      } catch (error) {
-        console.log(error);
-        this.setState({
-          loading: false,
-          error: true
+      return data;
+    }
+
+    async callCountApi(request: PageFilterRequest) {
+      const {participantId, workspace: {id, namespace}} = this.props;
+      const {cohortReviewId} = cohortReviewStore.getValue();
+      let count = null;
+      await cohortReviewApi()
+        .getParticipantCount(namespace, id, cohortReviewId, participantId, request, {signal: this.countAborter.signal})
+        .then(response => {
+          count = response.count;
         });
+      return count;
+    }
+
+    abortPendingApiCalls(reset?: boolean) {
+      this.countAborter.abort();
+      this.dataAborter.abort();
+      if (reset) {
+        this.countAborter = new AbortController();
+        this.dataAborter = new AbortController();
       }
+    }
+
+    getFilters() {
+      const {columns, domain, filterState} = this.props;
+      const filters = {items: []};
+      const columnFilters = filterState.tabs[domain];
+      if (!!columnFilters) {
+        for (const col in columnFilters) {
+          if (columnFilters.hasOwnProperty(col)) {
+            const filter = columnFilters[col];
+            if (Array.isArray(filter)) {
+              // checkbox filters
+              if (!filter.length) {
+                // No filters checked so clear the data, don't call api
+                this.setState({data: [], filteredData: null, loading: false});
+                return null;
+              } else if (!filter.includes('Select All')) {
+                filters.items.push({
+                  property: columns.find(c => c.name === col).filter,
+                  operator: Operator.IN,
+                  values: filter
+                });
+              }
+            } else {
+              // text filters
+              if (!!filter) {
+                filters.items.push({
+                  property: columns.find(c => c.name === col).filter,
+                  operator: Operator.LIKE,
+                  values: [filter]
+                });
+              }
+            }
+          }
+        }
+      }
+      return filters;
     }
 
     onSort = (event: any) => {
       this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
+      const {lazyLoad, page} = this.state;
+      if (lazyLoad) {
+        const start = Math.floor(page / 5) * lazyLoadSize;
+        const range = [start, start + lazyLoadSize - 1];
+        this.setState({loading: true, range}, () => this.getParticipantData(false));
+      }
     }
 
     columnSort = (sortField: string) => {
@@ -335,10 +530,30 @@ export const DetailTabTable = withCurrentWorkspace()(
       } else {
         this.setState({sortField, sortOrder: 1});
       }
+      const {lazyLoad, start} = this.state;
+      if (lazyLoad) {
+        const rangeStart = Math.floor(start / lazyLoadSize) * lazyLoadSize;
+        const range = [rangeStart, rangeStart + lazyLoadSize - 1];
+        console.log(range);
+        this.setState({loading: true, range}, () => this.getParticipantData(false));
+      }
     }
 
     onPage = (event: any) => {
-      this.setState({start: event.first});
+      const {lazyLoad, page, range, totalCount} = this.state;
+      if (lazyLoad) {
+        if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
+          range[0] -= lazyLoadSize;
+          this.setState({page: event.page, range, start: event.first}, () => this.updatePageData(true));
+        } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2)) && range[1] < totalCount) {
+          range[1] = Math.min(totalCount, range[1] + lazyLoadSize);
+          this.setState({page: event.page, range, start: event.first}, () => this.updatePageData(false));
+        } else {
+          this.setState({page: event.page, range, start: event.first});
+        }
+      } else {
+        this.setState({page: event.page, range, start: event.first});
+      }
     }
 
     overlayTemplate = (rowData: any, column: any) => {
@@ -396,11 +611,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     filterData() {
       let {data, start} = this.state;
-      const {
-        domain,
-        filterState,
-        filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}, vocab}
-      } = this.props;
+      const {domain, filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}, tabs, vocab}} = this.props;
       /* Global filters */
       if (dateMin || dateMax) {
         const min = dateMin ? Date.parse(dateMin) : 0;
@@ -433,36 +644,38 @@ export const DetailTabTable = withCurrentWorkspace()(
         'itemTime',
         'survey'
       ];
-      const columnFilters = filterState.tabs[domain];
+      const columnFilters = tabs[domain];
       if (!columnFilters) {
-        if (data.length < start + rows) {
-          start = Math.floor(data.length / rows) * rows;
+        if (data.length < start + rowsPerPage) {
+          start = Math.floor(data.length / rowsPerPage) * rowsPerPage;
         }
         this.setState({filteredData: data, start: start});
       } else {
         for (const col in columnFilters) {
-          // Makes sure we only filter by correct concept type (standard/source)
-          if (columnCheck.includes(col)) {
-            if (Array.isArray(columnFilters[col])) {
-              // checkbox filters
-              if (!columnFilters[col].length) {
-                data = [];
-                break;
-              } else if (!columnFilters[col].includes('Select All')
-                && !(vocab === 'source' && domain === DomainType.OBSERVATION)) {
-                data = data.filter(row => columnFilters[col].includes(row[col]));
-              }
-            } else {
-              // text filters
-              if (columnFilters[col]) {
-                data = data.filter(row =>
-                  row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase()));
+          if (columnFilters.hasOwnProperty(col)) {
+            // Makes sure we only filter by correct concept type (standard/source)
+            if (columnCheck.includes(col)) {
+              if (Array.isArray(columnFilters[col])) {
+                // checkbox filters
+                if (!columnFilters[col].length) {
+                  data = [];
+                  break;
+                } else if (!columnFilters[col].includes('Select All')
+                  && !(vocab === 'source' && domain === DomainType.OBSERVATION)) {
+                  data = data.filter(row => columnFilters[col].includes(row[col]));
+                }
+              } else {
+                // text filters
+                if (columnFilters[col]) {
+                  data = data.filter(row =>
+                    row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase()));
+                }
               }
             }
           }
         }
-        if (data && data.length < start + rows) {
-          start = Math.floor(data.length / rows) * rows;
+        if (data && data.length < start + rowsPerPage) {
+          start = Math.floor(data.length / rowsPerPage) * rowsPerPage;
         }
         this.setState({filteredData: data, start: start});
       }
@@ -507,9 +720,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    filterText = (input: string, column: string) => {
+    filterText = () => {
       const {domain, filterState, getFilteredData} = this.props;
-      filterState.tabs[domain][column] = input;
+      const {tabFilterState} = this.state;
+      filterState.tabs[domain] = tabFilterState;
       getFilteredData(filterState);
     }
 
@@ -520,47 +734,19 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     checkboxFilter(column: string) {
-      const {codeResults, data} = this.state;
-      const {domain, filterState, filterState: {vocab}} = this.props;
-      const columnFilters = filterState.tabs[domain];
-      if (!data) {
-        return <i className='pi pi-filter' style={filterIcons.default} />;
-      }
-      const counts = {total: 0};
+      const {codeResults} = this.state;
+      const {domain, filterState: {tabs, vocab}} = this.props;
+      const columnFilters = tabs[domain];
+      const filterStyle = !columnFilters[column].includes('Select All') ? filterIcons.active : filterIcons.default;
       let options: Array<any>;
-      data.forEach(item => {
-        counts[item[column]] = !!counts[item[column]] ? counts[item[column]] + 1 : 1;
-        counts.total++;
-      });
+      const counts = {total: 0};
       switch (column) {
         case 'domain':
-          options = domains.map(name => {
-            return {name, count: counts[name] || 0};
-          });
-          options.sort((a, b) => b.count - a.count);
-          break;
-        case `${vocab}Code`:
-          options = Object.keys(counts).reduce((acc, name) => {
-            if (name !== 'total') {
-              acc.push({name, count: counts[name]});
-            }
-            return acc;
-          }, []);
-          options.sort((a, b) => b.count - a.count);
-          if (!columnFilters[column].includes('Select All')) {
-            columnFilters[column].forEach(name => {
-              if (!options.find(opt => opt.name === name)) {
-                options = [{name, count: 0}, ...options];
-              }
-            });
-          }
+          options = domains.map(name => ({name}));
           break;
         case `${vocab}Vocabulary`:
-          const vocabs = vocabOptions.getValue()[vocab];
-          options = vocabs[domain] ? vocabs[domain].map(name => {
-            return {name, count: counts[name] || 0};
-          }) : [];
-          options.sort((a, b) => b.count - a.count);
+          const vocabs = vocabOptions.getValue() ? vocabOptions.getValue()[vocab] : {};
+          options = vocabs[domain] ? vocabs[domain].map(name => ({name})) : [];
           break;
       }
       options.push({name: 'Select All', count: counts.total});
@@ -572,26 +758,25 @@ export const DetailTabTable = withCurrentWorkspace()(
         : options.reduce((acc, opt, i) => {
           if (!codeResults || codeResults.has(opt.name)) {
             acc.push(<React.Fragment key={i}>
-              {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
+              {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0 0.3rem 0.4rem'}}>
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
                        checked={columnFilters[column].includes(opt.name)}
                        onChange={($event) => this.updateData($event, column, options)}/>
-                <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
+                <label> {opt.name} </label>
               </div>}
             </React.Fragment>);
           }
           return acc;
         }, []);
-      const filtered = !columnFilters[column].includes('Select All');
       let fl: any;
       return <React.Fragment>
         <i className='pi pi-filter'
-           style={filtered ? filterIcons.active : filterIcons.default}
+           style={filterStyle}
            onClick={(e) => {
              this.filterEvent(column);
              fl.toggle(e);
            }}/>
-        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+        <OverlayPanel style={{left: '359.531px!important', textAlign: 'left'}} className='filterOverlay'
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           {column === `${vocab}Code` && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
@@ -607,7 +792,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
                    checked={columnFilters[column].includes('Select All')}
                    onChange={($event) => this.updateData($event, column, options)}/>
-            <label style={{paddingLeft: '0.4rem'}}> Select All ({counts.total}) </label>
+            <label> Select All </label>
           </div>
         </OverlayPanel>
       </React.Fragment>;
@@ -615,6 +800,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     textFilter(column: string) {
       const {domain, filterState} = this.props;
+      const {tabFilterState} = this.state;
       const columnFilters = filterState.tabs[domain];
       const filtered = !!columnFilters[column];
       let fl: any, ip: any;
@@ -626,16 +812,32 @@ export const DetailTabTable = withCurrentWorkspace()(
             fl.toggle(e);
             ip.focus();
           }}/>
-        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
-                      ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
+        <OverlayPanel style={{left: '359.531px!important'}}
+          className='filterOverlay'
+          ref={(el) => fl = el} dismissable={true}
+          onHide={() => {
+            if (columnFilters[column] !== tabFilterState[column]) {
+              tabFilterState[column] = columnFilters[column];
+              this.setState({tabFilterState});
+            }
+          }}>
           <div style={styles.textSearch}>
-            <i className='pi pi-search' style={{margin: '0 5px'}} />
+            <i className='pi pi-search' style={{cursor: 'default', margin: '0 5px'}} />
             <TextInput
               ref={(i) => ip = i}
               style={styles.textInput}
-              value={columnFilters[column]}
-              onChange={(e) => this.filterText(e, column)}
+              value={tabFilterState[column]}
+              onChange={(v) => {
+                tabFilterState[column] = v;
+                this.setState({tabFilterState});
+              }}
+              onKeyUp={e => e.key === Key.Enter && this.filterText()}
               placeholder={'Search'} />
+            <i className='pi pi-times-circle' style={{margin: '0 5px'}} onClick={() => {
+              tabFilterState[column] = '';
+              this.setState({tabFilterState}, () => this.filterText());
+            }}
+            title='Clear filter'/>
           </div>
         </OverlayPanel>
       </React.Fragment>;
@@ -676,19 +878,28 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {loading, start, sortField, sortOrder} = this.state;
+      const {expandedRows, loading, lazyLoad, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;
       const {columns, filterState: {vocab}, tabName} = this.props;
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
+      let value = null;
+      let max;
       if (filteredData !== null) {
-        const lastRowOfPage = (start + rows) > filteredData.length
-          ? start + rows - (start + rows - filteredData.length) : start + rows;
-        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${filteredData.length} records `;
+        max = lazyLoad ? totalCount : filteredData.length;
+        const lastRowOfPage = Math.min(start + rowsPerPage, max);
+        pageReportTemplate = `${(start + 1).toLocaleString()} -
+          ${lastRowOfPage.toLocaleString()} of
+          ${max.toLocaleString()} records `;
+        const pageStart = loadingPrevious ? start - range[0] - lazyLoadSize : start - range[0];
+        value = lazyLoad
+          ? (loadingPrevious && pageStart < 0 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage))
+          : filteredData;
       }
       let paginatorTemplate = 'CurrentPageReport';
-      if (filteredData && filteredData.length > rows) {
+      if (max > rowsPerPage) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
+      const spinner = loading || (updating && value && value.length === 0);
       const cols = columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
@@ -697,10 +908,10 @@ export const DetailTabTable = withCurrentWorkspace()(
           'domain',
           'sourceVocabulary',
           'standardVocabulary',
-          'sourceCode',
-          'standardCode'
         ].includes(col.name);
         const hasTextFilter = [
+          'sourceCode',
+          'standardCode',
           'sourceName',
           'standardName',
           'value',
@@ -736,36 +947,37 @@ export const DetailTabTable = withCurrentWorkspace()(
           field={col.name}
           header={header}
           headerStyle={isExpanderNeeded ? styles.graphStyle : {}}
-          sortable
+          sortable={!!col.filter}
           body={overlayTemplate}/>;
       });
       return <div style={styles.container}>
         <style>{datatableStyles}</style>
         <DataTable
-          expandedRows={this.state.expandedRows}
+          expandedRows={expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
           rowClassName = {this.hideGraphIcon}
           style={styles.table}
-          value={filteredData}
+          value={value}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
+          lazy={lazyLoad}
           paginator
-          alwaysShowPaginator={false}
-          paginatorTemplate={filteredData && filteredData.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={filteredData && filteredData.length ? pageReportTemplate : ''}
+          paginatorTemplate={!spinner && !!value ? paginatorTemplate : ''}
+          currentPageReportTemplate={!spinner && !!value ? pageReportTemplate : ''}
           onPage={this.onPage}
+          alwaysShowPaginator={false}
           first={start}
-          rows={rows}
-          totalRecords={filteredData && filteredData.length}
+          rows={rowsPerPage}
+          totalRecords={max}
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
           footer={this.errorMessage()}>
           {cols}
         </DataTable>
-        {loading && <SpinnerOverlay />}
+        {spinner && <SpinnerOverlay />}
       </div>;
     }
   }

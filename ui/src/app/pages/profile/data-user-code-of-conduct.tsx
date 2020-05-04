@@ -15,6 +15,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
@@ -87,7 +88,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
 
     submitDataUserCodeOfConduct(initials) {
       this.setState({submitting: true});
-      const dataUseAgreementVersion = serverConfigStore.getValue().enableV3DataUserCodeOfConduct ? 3 : 2;
+      const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.getValue());
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
         window.history.back();

@@ -4,11 +4,10 @@ import {FormSection} from 'app/components/forms';
 import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/icons';
 
 import {
-  Error as ErrorDiv,
   ErrorMessage,
+  FormValidationErrorMessage,
   RadioButton,
-  styles as inputStyles,
-  TextArea,
+  styles as inputStyles, TextAreaWithLengthValidationMessage,
   TextInput
 } from 'app/components/inputs';
 
@@ -17,7 +16,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   EducationalRole,
   IndustryRole,
@@ -52,6 +51,15 @@ const styles = reactStyles({
     fontSize: 12,
     fontWeight: 400
   },
+  textAreaStyleOverride: {
+    width: '100%',
+    minWidth: '30rem'
+  },
+  optionalText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    fontWeight: 400
+  }
 });
 
 const researchPurposeList = [
@@ -435,8 +443,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </TooltipTrigger>
       </div>;
 
-    const areaOfResearchCharactersRemaining = 2000 - areaOfResearch.length;
-
     const errors = this.validate();
 
     return <div id='account-creation'
@@ -477,13 +483,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
               {this.state.usernameConflictError &&
               <div style={{height: '1.5rem'}}>
-                <ErrorDiv id='usernameConflictError'>
+                <FormValidationErrorMessage id='usernameConflictError'>
                   Username is already taken.
-                </ErrorDiv></div>}
+                </FormValidationErrorMessage></div>}
               {this.usernameInvalidError() &&
-                <div style={{height: '1.5rem'}}><ErrorDiv id='usernameError'>
+                <div style={{height: '1.5rem'}}><FormValidationErrorMessage id='usernameError'>
                   {username} is not a valid username.
-                </ErrorDiv></div>
+                </FormValidationErrorMessage></div>
               }
             </div>
           </Section>
@@ -534,7 +540,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                         options={AccountCreationOptions.degree}
                                         containerStyle={styles.multiInputSpacing}
                                         value={this.state.profile.degrees}
-                                        labelText='Your degrees (optional)'
+                                        labelText={<div>Your degrees <span style={styles.optionalText}>
+                                          (optional)</span></div>}
                                         onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
                                         />
                 </FlexRow>
@@ -544,7 +551,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   <MultiSelectWithLabel placeholder={'Select one or more'}
                                         options={AccountCreationOptions.degree}
                                         value={this.state.profile.degrees}
-                                        labelText='Your degrees (optional)'
+                                        labelText={<div>Your degrees <span style={styles.optionalText}>
+                                          (optional)</span></div>}
                                         onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
                   />
                 </div>
@@ -621,24 +629,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             style={{marginTop: '2rem'}}
             sectionHeaderStyles={{borderBottom: null}}
           >
-            <TextArea style={{height: '15rem', resize: 'none', width: '26rem', borderRadius: '3px 3px 0 0',
-              borderColor: colorWithWhiteness(colors.dark, 0.5)}}
-                      id='areaOfResearch'
-                      name='areaOfResearch'
-                      placeholder='Describe Your Current Research'
-                      value={areaOfResearch}
-                      onChange={v => this.updateProfileObject('areaOfResearch', v)}/>
-            <FlexRow style={{justifyContent: 'flex-end', width: '26rem',
-              backgroundColor: colorWithWhiteness(colors.primary, 0.85), fontSize: 12,
-              color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px',
-              border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
-              {
-                areaOfResearchCharactersRemaining >= 0 && <div>{areaOfResearchCharactersRemaining} characters remaining</div>
-              }
-              {
-                areaOfResearchCharactersRemaining < 0 && <div>{-areaOfResearchCharactersRemaining} characters over</div>
-              }
-            </FlexRow>
+            <TextAreaWithLengthValidationMessage
+              id={'areaOfResearch'}
+              initialText={areaOfResearch}
+              maxCharacters={2000}
+              onChange={(s: string) => this.updateProfileObject('areaOfResearch', s)}
+              textBoxStyleOverrides={styles.textAreaStyleOverride}
+              tooLongWarningCharacters={1900}
+            />
           </Section>
           {/* TODO(RW-4361): remove after we switch to verified institutional affiliation */}
           {!requireInstitutionalVerification && <React.Fragment>
@@ -709,7 +707,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 <div style={{maxWidth: '60%'}}>Your professional profile or bio page below, if available</div>
                 <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
               </FlexRow>
-              <div style={{...styles.asideText, marginTop: '.125rem'}}>(Optional)</div>
+              <div style={{...styles.asideText, ...styles.optionalText, marginTop: '.125rem'}}>(Optional)</div>
               <div style={{...styles.asideText, marginTop: '.5rem', marginBottom: '.5rem'}}>
                 You could provide a link to your faculty bio page from your institution's website,
                 your LinkedIn profile page, or another webpage featuring your work. This will

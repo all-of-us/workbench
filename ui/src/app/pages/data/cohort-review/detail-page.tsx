@@ -52,7 +52,7 @@ export const DetailPage = withCurrentWorkspace()(
         const {cohortReviewId} = cohortReviewStore.getValue();
         getVocabOptions(namespace, id, cohortReviewId);
       }
-      participantStore.subscribe(participant => this.setState({participant}));
+      this.subscription.add(participantStore.subscribe(participant => this.setState({participant})));
     }
 
     componentWillUnmount() {

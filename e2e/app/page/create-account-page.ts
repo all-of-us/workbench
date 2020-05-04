@@ -78,7 +78,7 @@ export default class CreateAccountPage extends BasePage {
 
   async scrollToLastPdfPage(): Promise<ElementHandle> {
     const selector = '.react-pdf__Document :last-child.react-pdf__Page.pdf-page';
-    const pdfPage = await this.page.waitForSelector(selector);
+    const pdfPage = await this.page.waitForSelector(selector, {visible: true});
     await this.page.evaluate(el => el.scrollIntoView(), pdfPage);
     return pdfPage;
   }
