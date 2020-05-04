@@ -29,11 +29,7 @@
                     [shareFunction]="handleShareAction"
                     [sidebarOpen]="sidebarOpen"
                     [notebookStyles]="notebookStyles"></app-help-sidebar>
-<<<<<<< HEAD
   <div [style.margin-right]="helpContent ? '45px' : 0" [style.height]="helpContent && !contentFullHeightOverride ? 'auto': '100%'">
-=======
-  <div [style.margin-right]="helpContent ? '45px' : 0" [style.height]="helpContent && !notebookRouterOutletContainerStyles ? 'auto': '100%'">
->>>>>>> add helptext to notebooks, fix styles
     <router-outlet *ngIf="workspace"></router-outlet>
   </div>
 </ng-container>
