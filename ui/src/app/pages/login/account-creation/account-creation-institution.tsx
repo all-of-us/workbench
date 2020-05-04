@@ -387,14 +387,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             </ErrorDiv>
             }
             <div style={{marginTop: '.5rem'}}>
-              <label style={styles.text}>
-                Don't see your institution listed? Help us add it to our growing list by </label>
-              <a href={'https://www.researchallofus.org/institutional-agreements/'} target='_blank'
+              <a href={'https://www.researchallofus.org/institutional-agreements'} target='_blank'
                  style={{color: colors.accent}}
                  onClick={() => {
                    AnalyticsTracker.Registration.InstitutionNotListed();
                  }}>
-                submitting a request
+              Don't see your institution listed?
               </a>
             </div>
             <TextInputWithLabel containerStyle={{marginTop: '1rem', width: null}}
