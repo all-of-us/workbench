@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils;
 
 import static org.mapstruct.NullValuePropertyMappingStrategy.*;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,7 +20,10 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.model.BillingAccountType;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CdrVersion;
+import org.pmiops.workbench.model.CreateWorkspaceRequest;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
@@ -199,4 +203,34 @@ public interface WorkspaceMapper {
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());
   }
+
+  Workspace clone(Workspace workspace);
+  /**
+   * Conversion method for building test stubs. Note that in reality we take
+   * a CreateWorkspaceRequest, build a DbWorkspace, save it to the database (where
+   * certain defaults are assigned) and then convert to an output Workspace API model.
+   * @param createWorkspaceRequest
+   * @param billingAccountType
+   * @param billingStatus
+   * @param creationTime
+   * @param etag
+   * @param googleBucketName
+   * @param id
+   * @param lastModifiedTime
+   * @param namespace
+   * @param published
+   * @return
+   */
+  @VisibleForTesting
+  Workspace toWorkspaceTestFixture(
+      CreateWorkspaceRequest createWorkspaceRequest,
+      BillingAccountType billingAccountType,
+      BillingStatus billingStatus,
+      long creationTime,
+      String etag,
+      String googleBucketName,
+      String id,
+      long lastModifiedTime,
+      String namespace,
+      boolean published);
 }

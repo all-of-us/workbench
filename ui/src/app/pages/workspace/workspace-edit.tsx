@@ -52,6 +52,7 @@ import {
   BillingAccount,
   CdrVersion,
   CdrVersionListResponse,
+  CreateWorkspaceRequest,
   DataAccessLevel,
   DisseminateResearchEnum,
   Profile,
@@ -307,14 +308,27 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
      *
      * This is where logic lives to auto-set the CDR version and
      * "reviewRequested" flag, which depend on the workspace state & edit mode.
+     *
+     * The CreateWorkspceRequest type should be assignable from Workspace, which
+     * means this method can continue to serve for both create and edit.
      */
     createInitialWorkspaceState(): Workspace {
       let workspace: Workspace = this.props.workspace;
       if (this.isMode(WorkspaceEditMode.Create)) {
         workspace = {
-          name: '',
-          dataAccessLevel: DataAccessLevel.Registered,
+          billingAccountName: '',
+          billingAccountType: undefined,
+          billingStatus: undefined,
           cdrVersionId: '',
+          creationTime: 0,
+          creator: '',
+          dataAccessLevel: DataAccessLevel.Registered,
+          etag: '',
+          googleBucketName: '',
+          id: '',
+          lastModifiedTime: 0,
+          name: '',
+          namespace: '',
           researchPurpose: {
             ancestry: false,
             anticipatedFindings: '',
@@ -336,7 +350,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             reviewRequested: undefined,
             socialBehavioral: false,
             reasonForAllOfUs: '',
-          }
+          },
+          published: false,
         };
       }
 
