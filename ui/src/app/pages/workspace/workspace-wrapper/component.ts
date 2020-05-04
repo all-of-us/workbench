@@ -42,15 +42,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   helpContent = 'data';
   sidebarOpen = false;
   notebookStyles = false;
-<<<<<<< HEAD
-<<<<<<< HEAD
+  // The iframe we use to display the Jupyter notebook does something strange
+  // to the height calculation of the container, which is normally set to auto.
+  // Setting this flag sets the container to 100% so that no content is clipped.
   contentFullHeightOverride = false;
-=======
-  notebookRouterOutletContainerStyles = false;
->>>>>>> add helptext to notebooks, fix styles
-=======
-  contentFullHeightOverride = false;
->>>>>>> review comments
 
   bugReportOpen: boolean;
   bugReportDescription = '';
