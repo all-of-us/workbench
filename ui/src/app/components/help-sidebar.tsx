@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
-import {faBook, faEllipsisV, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {faBook, faEllipsisV, faFolderOpen, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -172,6 +172,14 @@ const icons = [{
   page: null,
   style: {fontSize: '21px'},
   tooltip: 'Help Tips',
+}, {
+  id: 'notebookStorage',
+  disabled: false,
+  faicon: faFolderOpen,
+  label: 'Workspace Storage',
+  page: 'notebookStorage',
+  style: {fontSize: '21px'},
+  tooltip: 'Workspace Storage',
 // }, {
 //   id: 'thunderstorm',
 //   disabled: true,
@@ -216,6 +224,7 @@ interface Props {
   setSidebarState: Function;
   shareFunction: Function;
   sidebarOpen: boolean;
+  notebookStorageContent: string;
   notebookStyles: boolean;
   workspace: WorkspaceData;
 }
@@ -416,9 +425,16 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     render() {
-      const {helpContent, setSidebarState, notebookStyles, sidebarOpen} = this.props;
+      const {helpContent, setSidebarState, notebookStorageContent, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
-      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
+
+      const displayContent = filteredContent !== undefined
+          ? filteredContent
+          : helpContent !== null
+              ? sidebarContent[helpContent]
+              : '';
+      const storageContent = sidebarContent[notebookStorageContent];
+
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
@@ -428,27 +444,31 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {this.renderWorkspaceMenu()}
-          {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
-            <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
-              <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
-                   onClick={() => {
-                     if (icon.id !== 'dataDictionary') {
-                       this.onIconClick(icon);
-                     }
-                   }}
-                   onMouseOver={() => this.setState({tooltipId: i})}
-                   onMouseOut={() => this.setState({tooltipId: undefined})}>
-                {icon.id === 'dataDictionary'
-                  ? <a href={dataDictionaryUrl} target='_blank'>
-                      <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
-                    </a>
-                  : icon.faIcon === null
-                    ? <img src={proIcons[icon.id]} style={icon.style} />
-                    : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
-                }
+          {icons.map((icon, i) =>
+            (!icon.page || icon.page === helpContent || icon.page === notebookStorageContent) &&
+              <div key={i} style={{display: 'table'}}>
+                <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
+                  <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+                       onClick={() => {
+                         if (icon.id !== 'dataDictionary') {
+                           this.onIconClick(icon);
+                         }
+                       }}
+                       onMouseOver={() => this.setState({tooltipId: i})}
+                       onMouseOut={() => this.setState({tooltipId: undefined})}>
+                    {icon.id === 'dataDictionary'
+                      ? <a href={dataDictionaryUrl} target='_blank'>
+                          <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
+                        </a>
+                      : icon.faIcon === null
+                        ? <img src={proIcons[icon.id]} style={icon.style} />
+                        : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
+                    }
+                  </div>
+                </TooltipTrigger>
               </div>
-            </TooltipTrigger>
-          </div>)}
+            )
+          }
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
@@ -466,19 +486,35 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
               </div>
               {!!displayContent && displayContent.length > 0
                 ? displayContent.map((section, s) => <div key={s}>
-                  <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
-                  {section.content.map((content, c) => {
-                    return typeof content === 'string'
-                      ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
-                      : <div key={c}>
-                        <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
-                        {content.content.map((item, i) =>
-                          <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>
-                        )}
-                      </div>;
-                  })}
-                </div>)
+                    <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
+                    {section.content.map((content, c) => {
+                      return typeof content === 'string'
+                          ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
+                          : <div key={c}>
+                            <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
+                            {content.content.map((item, i) =>
+                                <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>
+                            )}
+                          </div>;
+                    })}
+                  </div>)
                 : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
+              }
+              {!!storageContent && storageContent.length > 0
+                  ? storageContent.map((section, s) => <div key={s}>
+                    <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
+                    {section.content.map((content, c) => {
+                      return typeof content === 'string'
+                          ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
+                          : <div key={c}>
+                            <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
+                            {content.content.map((item, i) =>
+                                <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>
+                            )}
+                          </div>;
+                    })}
+                  </div>)
+                  : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
               }
             </div>
             <div style={contentStyle('annotations')}>
@@ -509,8 +545,9 @@ export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
   @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
+  @Input('notebookStorageContent') notebookStorageContent: Props['notebookStorageContent'];
   @Input('notebookStyles') notebookStyles: Props['notebookStyles'];
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
+    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStorageContent', 'notebookStyles']);
   }
 }

@@ -105,7 +105,8 @@ const routes: Routes = [
                   breadcrumb: BreadcrumbType.Workspace,
                   helpContent: 'about'
                 }
-              }, {
+              },
+              {
                 path: 'edit',
                 component: WorkspaceEditComponent,
                 data: {
@@ -114,7 +115,8 @@ const routes: Routes = [
                   breadcrumb: BreadcrumbType.WorkspaceEdit,
                   helpContent: 'edit'
                 }
-              }, {
+              },
+              {
                 path: 'duplicate',
                 component: WorkspaceEditComponent,
                 data: {
@@ -147,6 +149,7 @@ const routes: Routes = [
                       // Setting this flag sets the container to 100% so that no content is clipped.
                       contentFullHeightOverride: true,
                       helpContent: 'notebookStorage',
+                      notebookStorageContent: 'notebookStorage',
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
@@ -156,7 +159,7 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      helpContent: 'notebookStorage',
+                      notebookStorageContent: 'notebookStorage',
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }

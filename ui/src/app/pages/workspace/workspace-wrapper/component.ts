@@ -41,6 +41,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   userRoles?: UserRole[];
   helpContent = 'data';
   sidebarOpen = false;
+  notebookStorageContent = '';
   notebookStyles = false;
   // The iframe we use to display the Jupyter notebook does something strange
   // to the height calculation of the container, which is normally set to auto.
@@ -230,6 +231,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
       if (child.firstChild) {
         child = child.firstChild;
+      } else if (child.snapshot.data && child.snapshot.data.notebookStorageContent) {
+        this.notebookStorageContent = child.snapshot.data.notebookStorageContent;
+        this.helpContent = null;
+        child = null;
       } else if (child.snapshot.data && child.snapshot.data.helpContent) {
         this.helpContent = child.snapshot.data.helpContent;
         child = null;
