@@ -448,7 +448,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
         </StyledAnchorTag> to learn more about the free credit
         program and how it can be used. Once you have used up your free credits, you can request
-        additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+        additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>contact us</span>.
       </div>;
     }
 
