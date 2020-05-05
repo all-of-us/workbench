@@ -6,7 +6,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
-import {DomainType} from 'generated/fetch';
+import {Criteria, DomainType} from 'generated/fetch';
 
 const styles = reactStyles({
   buttonContainer: {
@@ -80,9 +80,13 @@ const styles = reactStyles({
   }
 });
 
+interface Selection extends Criteria {
+  parameterId: string;
+}
+
 interface SelectionInfoProps {
   index: number;
-  selection: any;
+  selection: Selection;
   removeSelection: Function;
 }
 
@@ -103,11 +107,16 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
   }
 
   get showType() {
-    return ![DomainType.PHYSICALMEASUREMENT, DomainType.DRUG, DomainType.SURVEY].includes(this.props.selection.domainId);
+    return ![
+      DomainType.PHYSICALMEASUREMENT.toString(),
+      DomainType.DRUG.toString(),
+      DomainType.SURVEY.toString()
+    ].includes(this.props.selection.domainId);
   }
+
   get showOr() {
     const {index, selection} = this.props;
-    return index > 0 && selection.domainId !== DomainType.PERSON;
+    return index > 0 && selection.domainId !== DomainType.PERSON.toString();
   }
 
   render() {
@@ -140,7 +149,7 @@ interface Props {
   domain: DomainType;
   finish: Function;
   removeSelection: Function;
-  selections: Array<any>;
+  selections: Array<Selection>;
   setView: Function;
   view: string;
 }
