@@ -832,6 +832,16 @@ task loadInstitutions(type: JavaExec) {
   }
 }
 
+// See project.rb command: populate-ops-user-affiliations
+task populateOpsUserAffiliations(type: JavaExec) {
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.PopulateOpsUserAffiliations"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 // See project.rb command: backfill-billing-project-owners
 task backfillBillingProjectOwners(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
