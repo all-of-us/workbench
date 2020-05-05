@@ -84,23 +84,25 @@
     "enableComplianceTraining": false,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
-    "enableBetaAccess": true,
+    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
-    "requireInvitationKey": true
+    "requireInvitationKey": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableRdrExport": false,
-    "enableBillingLockout": false,
+    "enableBillingLockout": true,
+    "enableBillingUpgrade": false,
     "enableSumoLogicEventHandling": true,
-    "useKeylessDelegatedCredentials": false,
+    "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": true,
-    "enableMoodleV2Api": false,
-    "requireInstitutionalVerification": false,
+    "enableMoodleV2Api": true,
+    "requireInstitutionalVerification": true,
     "enableCBAgeTypeOptions": false,
-    "enableV3DataUserCodeOfConduct": false
+    "enableV3DataUserCodeOfConduct": true,
+    "enableEventDateModifier": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-preprod"
