@@ -192,13 +192,11 @@ class OpsUser {
   public DbUser dbCheck(UserDao userDao, VerifiedInstitutionalAffiliationDao affiliationDao) {
     final DbUser dbUser = userDao.findUserByUsername(userName);
 
+    // fatal errors: something is quite wrong and we need to recheck our assumptions!
+
     if (dbUser == null) {
       throw new RuntimeException(String.format("User %s was not found in the DB", userName));
     }
-
-    checkField(dbUser.getGivenName(), firstName, "First Name");
-    checkField(dbUser.getFamilyName(), lastName, "Last Name");
-    checkField(dbUser.getContactEmail(), contactEmail, "Contact Email");
 
     affiliationDao
         .findFirstByUser(dbUser)
@@ -209,6 +207,13 @@ class OpsUser {
                       "User %s is already affiliated with institution '%s'",
                       userName, affiliation.getInstitution().getDisplayName()));
             });
+
+    // some of these are acceptable mismatches, like "Dan" instead of "Daniel"
+    // warn only, don't stop
+
+    checkField(dbUser.getGivenName(), firstName, "First Name");
+    checkField(dbUser.getFamilyName(), lastName, "Last Name");
+    checkField(dbUser.getContactEmail(), contactEmail, "Contact Email");
 
     return dbUser;
   }
