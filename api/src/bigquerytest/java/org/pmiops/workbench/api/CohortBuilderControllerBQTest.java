@@ -1048,12 +1048,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void anyMentionOfCPTParent5DaysAfterICD10Child() {
-    SearchGroupItem icd9SGI =
+  public void anyMentionOfCPT5DaysAfterICD10Child() {
+    SearchGroupItem cptSGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(
-                icd9().type(CriteriaType.CPT4.toString()).group(true).conceptId(0L))
+                icd9().type(CriteriaType.CPT4.toString()).group(false).conceptId(1L))
             .temporalGroup(0)
             .addModifiersItem(visitModifier());
     SearchGroupItem icd10SGI =
@@ -1062,10 +1062,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .addSearchParametersItem(icd10())
             .temporalGroup(1);
 
-    // Any Mention Of ICD9 5 Days After ICD10
+    // Any Mention Of CPT 5 Days After ICD10
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(ImmutableList.of(icd9SGI, icd10SGI))
+            .items(ImmutableList.of(cptSGI, icd10SGI))
             .temporal(true)
             .mention(TemporalMention.ANY_MENTION)
             .time(TemporalTime.X_DAYS_AFTER)
@@ -1501,7 +1501,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), ImmutableList.of(snomed), new ArrayList<>());
+            DomainType.PROCEDURE.toString(), ImmutableList.of(snomed), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
@@ -1914,7 +1914,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
     SearchRequest searchRequest =
         createSearchRequests(
-            ppiQuestion.getType(), ImmutableList.of(ppiQuestion), new ArrayList<>());
+            ppiQuestion.getDomain(), ImmutableList.of(ppiQuestion), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
