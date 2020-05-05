@@ -921,24 +921,6 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/admin/workspaces/heavy/{namespace}/":
-    get:
-      tags:
-        - workspaces
-      description: >
-        Provide details on a workspace, its creator and collaborators, and any active clusters.
-      operationId: getWorkspaceDetailsHeavy
-      responses:
-        200:
-          description: Workspace and other details
-          schema:
-              "$ref": "#/definitions/WorkspaceDetailsHeavyResponse"
-      parameters:
-        - in: path
-          name: namespace
-          description: Workspace namespace, a.k.a. Firecloud poject name.
-          required: true
-          type: string
 
   "/v1/admin/workspaces/review":
     get:
@@ -7271,28 +7253,6 @@ definitions:
         format: int64
       conceptName:
         type: string
-  WorkspaceDetailsHeavy:
-    type: object
-    properties:
-      creator:
-        "$ref": "#/definitions/User"
-      collaborators:
-        type: array
-        items:
-          "$ref": "#/definitions/User"
-      workspace:
-        "$ref": "#/definitions/Workspace"
-      clusters:
-        type: array
-        items:
-          "$ref": "#/definitions/Cluster"
-  WorkspaceDetailsHeavyResponse:
-    type: object
-    properties:
-      workspaces:
-        type: array
-        items:
-          "$ref": "#/definitions/WorkspaceDetailsHeavy"
   WorkspaceUserAdminView:
     type: object
     required:

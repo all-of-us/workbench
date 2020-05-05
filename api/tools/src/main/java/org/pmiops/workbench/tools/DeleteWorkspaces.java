@@ -84,7 +84,6 @@ public class DeleteWorkspaces {
         workspaceDao,
         null,
         null,
-        null,
         null);
   }
 

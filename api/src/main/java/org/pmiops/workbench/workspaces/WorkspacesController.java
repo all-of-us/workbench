@@ -686,13 +686,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.DEVELOPER}) // TODO: there are other ways to do this
-  public ResponseEntity<WorkspaceDetailsHeavyResponse> getWorkspaceDetailsHeavy(String namespace) {
-    List<WorkspaceDetailsHeavy> details = workspaceService.getWorkspaceDetailsHeavy(namespace);
-    return ResponseEntity.ok(new WorkspaceDetailsHeavyResponse().workspaces(details));
-  }
-
-  @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(
       String workspaceNamespace, String workspaceId) {
     return ResponseEntity.ok(

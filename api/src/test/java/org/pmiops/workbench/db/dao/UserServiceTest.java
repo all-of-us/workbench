@@ -68,7 +68,6 @@ public class UserServiceTest {
   @MockBean private ComplianceService mockComplianceService;
   @MockBean private DirectoryService mockDirectoryService;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
-  @MockBean private AdminActionHistoryDao mockAdminActionHistoryDao;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
   @Autowired private UserService userService;
