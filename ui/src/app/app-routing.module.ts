@@ -38,6 +38,7 @@ import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
+import {NOTEBOOK_HELP_CONTENT} from "./components/help-sidebar";
 
 
 declare let gtag: Function;
@@ -148,7 +149,7 @@ const routes: Routes = [
                       // to the height calculation of the container, which is normally set to auto.
                       // Setting this flag sets the container to 100% so that no content is clipped.
                       contentFullHeightOverride: true,
-                      helpContent: 'notebookStorage',
+                      helpContent: NOTEBOOK_HELP_CONTENT,
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
@@ -158,7 +159,7 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      helpContent: 'notebookStorage',
+                      helpContent: NOTEBOOK_HELP_CONTENT,
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }

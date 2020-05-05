@@ -163,16 +163,19 @@ const iconStyles = {
     width: 27
   }
 };
+
+export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
+
 // TODO uncomment 'thunderstorm' icon when cluster configuration function is ready
 const icons = (helpContent) => {
   return [{
     id: 'help',
     disabled: false,
-    faIcon: helpContent === 'notebookStorage' ? faFolderOpen : faInfoCircle,
-    label: 'Help Icon',
+    faIcon: helpContent === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
+    label: helpContent === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
     page: null,
     style: {fontSize: '21px'},
-    tooltip: 'Help Tips',
+    tooltip: helpContent === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
 // }, {
 //   id: 'thunderstorm',
 //   disabled: true,
@@ -461,16 +464,18 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
             <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
             <div style={contentStyle('help')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
-              <div style={styles.textSearch}>
-                <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
-                <input
-                  type='text'
-                  style={styles.textInput}
-                  value={searchTerm}
-                  onChange={(e) => this.onInputChange(e.target.value)}
-                  placeholder={'Search'} />
-              </div>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContent === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
+              {helpContent !== NOTEBOOK_HELP_CONTENT &&
+                <div style={styles.textSearch}>
+                  <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
+                  <input
+                    type='text'
+                    style={styles.textInput}
+                    value={searchTerm}
+                    onChange={(e) => this.onInputChange(e.target.value)}
+                    placeholder={'Search'} />
+                </div>
+              }
               {!!displayContent && displayContent.length > 0
                 ? displayContent.map((section, s) => <div key={s}>
                     <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
