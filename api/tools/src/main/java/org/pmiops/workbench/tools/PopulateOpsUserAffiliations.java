@@ -53,9 +53,10 @@ public class PopulateOpsUserAffiliations {
         institutionDao
             .findOneByShortName(institutionShortName)
             .orElseThrow(
-                () -> new RuntimeException(
+                () ->
+                    new RuntimeException(
                         String.format(
-                                "Could not find '%s' Institution in the DB", institutionShortName)));
+                            "Could not find '%s' Institution in the DB", institutionShortName)));
 
     return OpsUser.parseInput(filename).stream()
         .map(
@@ -64,7 +65,7 @@ public class PopulateOpsUserAffiliations {
                 throw new RuntimeException(
                     String.format(
                         "User %s not marked as '%s' in the input CSV",
-                            opsUser.userName, actionForInclusion));
+                        opsUser.userName, actionForInclusion));
               }
 
               final DbUser dbUser = opsUser.dbCheck(userDao, affiliationDao);
