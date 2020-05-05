@@ -15,7 +15,7 @@ import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
   ageContainer: {
-    border: '1px solid #cccccc',
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
     borderRadius: '5px',
     margin: '0.5rem 1rem',
     maxHeight: '15rem',
@@ -133,9 +133,9 @@ const ageNode = {
 };
 
 const ageTypes = [
-  {label: 'Current Age', type: AttrName.AGE.toString()},
-  {label: 'Age at Consent', type: AttrName.AGEATCONSENT.toString()},
-  {label: 'Age at CDR Date', type: AttrName.AGEATCDR.toString()}
+  {label: 'Current Age', type: AttrName.AGE},
+  {label: 'Age at Consent', type: AttrName.AGEATCONSENT},
+  {label: 'Age at CDR Date', type: AttrName.AGEATCDR}
 ];
 
 const defaultMinAge = '18';
@@ -149,15 +149,17 @@ function sortByCountThenName(critA, critB) {
         ? (critA.name > critB.name ? 1 : -1)
         : diff;
 }
+
 interface Props {
+  count: number;
+  criteriaType: CriteriaType;
   select: Function;
   selectedIds: Array<string>;
   selections: Array<any>;
-  wizard: any;
 }
 
 interface State {
-  ageType: any;
+  ageType: AttrName;
   ageTypeNodes: any;
   calculating: boolean;
   count: number;
@@ -169,12 +171,15 @@ interface State {
 
 export class Demographics extends React.Component<Props, State> {
   ageWrapper: HTMLDivElement;
-  slider: any;
+  slider: {
+    get: Function;
+    set: Function;
+  };
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      ageType: AttrName.AGE.toString(),
+      ageType: AttrName.AGE,
       ageTypeNodes: undefined,
       calculating: false,
       count: null,
@@ -186,7 +191,7 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   componentDidMount(): void {
-    if (this.props.wizard.type === CriteriaType.AGE) {
+    if (this.props.criteriaType === CriteriaType.AGE) {
       if (serverConfigStore.getValue().enableCBAgeTypeOptions) {
         this.loadAgeNodesFromApi();
       } else {
@@ -198,51 +203,48 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Readonly<Props>): void {
-    const {selections, wizard} = this.props;
-    if (selections !== prevProps.selections && wizard.type !== CriteriaType.AGE) {
+    const {criteriaType, selections} = this.props;
+    if (selections !== prevProps.selections && criteriaType !== CriteriaType.AGE) {
       this.calculate();
     }
   }
 
-  loadNodesFromApi() {
-    const {selections, wizard} = this.props;
+  async loadNodesFromApi() {
+    const {criteriaType, selections} = this.props;
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({loading: true});
-    cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), wizard.type).then(response => {
-      const nodes = response.items
-        .filter(item => item.parentId !== 0)
-        .sort(sortByCountThenName)
-        .map(node => ({...node, parameterId: `param${node.conceptId || node.code}`}));
-      if (selections.length) {
-        this.calculate(true);
-      }
-      this.setState({loading: false, nodes});
-    });
+    const response = await cohortBuilderApi().findCriteriaBy(+cdrVersionId, DomainType.PERSON.toString(), criteriaType.toString());
+    const nodes = response.items.filter(item => item.parentId !== 0)
+      .sort(sortByCountThenName)
+      .map(node => ({...node, parameterId: `param${node.conceptId || node.code}`}));
+    if (selections.length) {
+      this.calculate(true);
+    }
+    this.setState({loading: false, nodes});
   }
 
-  loadAgeNodesFromApi() {
+  async loadAgeNodesFromApi() {
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     const initialValue = {
-      [AttrName.AGE.toString()]: [],
-      [AttrName.AGEATCONSENT.toString()]: [],
-      [AttrName.AGEATCDR.toString()]: []
+      [AttrName.AGE]: [],
+      [AttrName.AGEATCONSENT]: [],
+      [AttrName.AGEATCDR]: []
     };
-    cohortBuilderApi().findAgeTypeCounts(+cdrVersionId).then(response => {
-      const ageTypeNodes = response.items.reduce((acc, item) => {
-        acc[item.ageType].push(item);
-        return acc;
-      }, initialValue);
-      this.setState({ageTypeNodes}, () => this.calculateAgeFromNodes());
-    });
+    const response = await cohortBuilderApi().findAgeTypeCounts(+cdrVersionId);
+    const ageTypeNodes = response.items.reduce((acc, item) => {
+      acc[item.ageType].push(item);
+      return acc;
+    }, initialValue);
+    this.setState({ageTypeNodes}, () => this.calculateAgeFromNodes());
   }
 
   initAgeRange() {
-    const {selections, wizard} = this.props;
+    const {count, selections} = this.props;
     if (selections.length) {
       const {attributes} = selections[0];
       const {name, operands} = attributes[0];
       this.slider.set([+operands[0], +operands[1]]);
-      this.setState({count: wizard.count, maxAge: operands[1], minAge: operands[0]});
+      this.setState({count, maxAge: operands[1], minAge: operands[0]});
       if (serverConfigStore.getValue().enableCBAgeTypeOptions) {
         this.setState({ageType: name});
       }
@@ -321,14 +323,14 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({minAge}, () => this.updateAgeSelection());
   }
 
-  onRadioChange(ageType: string) {
+  onRadioChange(ageType: AttrName) {
     this.setState({ageType}, () => {
       this.updateAgeSelection();
       this.calculateAgeFromNodes();
     });
   }
 
-  onSliderInit(slider: any) {
+  onSliderInit(slider: React.ReactNode) {
     this.slider = slider['noUiSlider'];
     if (this.slider) {
       this.initAgeRange();
@@ -354,7 +356,7 @@ export class Demographics extends React.Component<Props, State> {
       ...ageNode,
       name: `Age In Range ${minAge} - ${maxAge}`,
       attributes: [{
-        name: ageType,
+        name: ageType.toString(),
         operator: Operator.BETWEEN,
         operands: [minAge, maxAge]
       }],
@@ -400,7 +402,7 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({count});
   }
 
-  calculateAge(init?: boolean) {
+  async calculateAge(init?: boolean) {
     const {maxAge, minAge} = this.state;
     if (!init || this.setTotalAge) {
       this.setState({calculating: true});
@@ -429,7 +431,8 @@ export class Demographics extends React.Component<Props, State> {
       }],
       dataFilters: []
     };
-    cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
+    try {
+      const response = await cohortBuilderApi().countParticipants(+cdrVersionId, request);
       if (init) {
         const ageCounts = ageCountStore.getValue();
         ageCounts[cdrVersionId] = response;
@@ -441,10 +444,10 @@ export class Demographics extends React.Component<Props, State> {
         this.setState({count: response});
       }
       this.setState({calculating: false});
-    }, (err) => {
+    } catch (err) {
       console.error(err);
       this.setState({calculating: false});
-    });
+    }
   }
 
   calculateAgeFromNodes(minOrMax?: string) {
@@ -463,10 +466,10 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   get showPreview() {
-    const {selections, wizard} = this.props;
+    const {criteriaType, selections} = this.props;
     return !this.state.loading
       && (selections && selections.length > 0)
-      && !(wizard.type === CriteriaType.AGE && serverConfigStore.getValue().enableCBAgeTypeOptions);
+      && !(criteriaType === CriteriaType.AGE && serverConfigStore.getValue().enableCBAgeTypeOptions);
   }
 
   // Checks if form is in its initial state and if a count already exists before setting the total age count
@@ -476,9 +479,9 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   render() {
-    const {selectedIds, wizard} = this.props;
+    const {criteriaType, selectedIds} = this.props;
     const {ageType, calculating, count, loading, maxAge, minAge, nodes} = this.state;
-    const isAge = wizard.type === CriteriaType.AGE;
+    const isAge = criteriaType === CriteriaType.AGE;
     const calcDisabled = calculating || count !== null;
     return loading
       ? <div style={{textAlign: 'center'}}><Spinner style={{marginTop: '3rem'}}/></div>
@@ -581,12 +584,13 @@ export class Demographics extends React.Component<Props, State> {
   template: '<div #root></div>'
 })
 export class DemographicsComponent extends ReactWrapperBase {
+  @Input('count') count: Props['count'];
+  @Input('criteriaType') criteriaType: Props['criteriaType'];
   @Input('select') select: Props['select'];
   @Input('selectedIds') selectedIds: Props['selectedIds'];
   @Input('selections') selections: Props['selections'];
-  @Input('wizard') wizard: Props['wizard'];
 
   constructor() {
-    super(Demographics, ['select', 'selectedIds', 'selections', 'wizard']);
+    super(Demographics, ['count', 'criteriaType', 'select', 'selectedIds', 'selections']);
   }
 }
