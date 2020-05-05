@@ -420,10 +420,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     render() {
       const {helpContent, setSidebarState, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
-
-      const displayContent = filteredContent !== undefined
-          ? filteredContent
-          : sidebarContent[helpContent];
+      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
 
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
