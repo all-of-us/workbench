@@ -167,15 +167,18 @@ const iconStyles = {
 export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 
 // TODO uncomment 'thunderstorm' icon when cluster configuration function is ready
-const icons = (helpContent) => {
+// helpContentKey is the json key for the block of help content that is being displayed on this
+// sidebar. If the block of help content is about notebook storage, we want to display a different
+// icon on the sidebar and different tooltip, etc.
+const icons = (helpContentKey: string) => {
   return [{
     id: 'help',
     disabled: false,
-    faIcon: helpContent === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
-    label: helpContent === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
+    faIcon: helpContentKey === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
+    label: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
     page: null,
     style: {fontSize: '21px'},
-    tooltip: helpContent === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
+    tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
 // }, {
 //   id: 'thunderstorm',
 //   disabled: true,
@@ -216,7 +219,7 @@ const analyticsLabels = {
 
 interface Props {
   deleteFunction: Function;
-  helpContent: string;
+  helpContentKey: string;
   profileState: any;
   setSidebarState: Function;
   shareFunction: Function;
@@ -336,8 +339,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     analyticsEvent(type: string, label?: string) {
-      const {helpContent} = this.props;
-      const analyticsLabel = analyticsLabels[helpContent];
+      const {helpContentKey} = this.props;
+      const analyticsLabel = analyticsLabels[helpContentKey];
       if (analyticsLabel) {
         const eventLabel = label ? `${label} - ${analyticsLabel}` : analyticsLabel;
         AnalyticsTracker.Sidebar[type](eventLabel);
@@ -421,9 +424,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     render() {
-      const {helpContent, setSidebarState, notebookStyles, sidebarOpen} = this.props;
+      const {helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
-      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
+      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
 
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
@@ -434,8 +437,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {this.renderWorkspaceMenu()}
-          {icons(helpContent).map((icon, i) =>
-            (!icon.page || icon.page === helpContent) &&
+          {icons(helpContentKey).map((icon, i) =>
+            (!icon.page || icon.page === helpContentKey) &&
               <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
@@ -448,11 +451,11 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
                        onMouseOut={() => this.setState({tooltipId: undefined})}>
                     {icon.id === 'dataDictionary'
                       ? <a href={dataDictionaryUrl} target='_blank'>
-                          <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
+                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
                         </a>
                       : icon.faIcon === null
                         ? <img src={proIcons[icon.id]} style={icon.style} />
-                        : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
+                        : <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
                     }
                   </div>
                 </TooltipTrigger>
@@ -464,8 +467,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
             <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
             <div style={contentStyle('help')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContent === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
-              {helpContent !== NOTEBOOK_HELP_CONTENT &&
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
+              {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
                 <div style={styles.textSearch}>
                   <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
                   <input
@@ -517,12 +520,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
-  @Input('helpContent') helpContent: Props['helpContent'];
+  @Input('helpContentKey') helpContentKey: Props['helpContentKey'];
   @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
   @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
   @Input('notebookStyles') notebookStyles: Props['notebookStyles'];
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
+    super(HelpSidebar, ['deleteFunction', 'helpContentKey', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
   }
 }
