@@ -605,6 +605,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .value("Deceased");
   }
 
+  private static SearchParameter survey() {
+    return new SearchParameter()
+        .domain(DomainType.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.SURVEY.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(22L);
+  }
+
   private static Modifier ageModifier() {
     return new Modifier()
         .name(ModifierType.AGE_AT_EVENT)
@@ -1037,6 +1048,36 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void anyMentionOfCPTParent5DaysAfterICD10Child() {
+    SearchGroupItem icd9SGI =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .addSearchParametersItem(
+                icd9().type(CriteriaType.CPT4.toString()).group(true).conceptId(0L))
+            .temporalGroup(0)
+            .addModifiersItem(visitModifier());
+    SearchGroupItem icd10SGI =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .addSearchParametersItem(icd10())
+            .temporalGroup(1);
+
+    // Any Mention Of ICD9 5 Days After ICD10
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(ImmutableList.of(icd9SGI, icd10SGI))
+            .temporal(true)
+            .mention(TemporalMention.ANY_MENTION)
+            .time(TemporalTime.X_DAYS_AFTER)
+            .timeValue(5L);
+
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
   public void anyMentionOfCPTWithIn5DaysOfVisit() {
     SearchGroupItem cptSGI =
         new SearchGroupItem()
@@ -1456,6 +1497,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsSnomedParentProcedure() {
+    SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), ImmutableList.of(snomed), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
   public void countSubjectsVisit() {
     SearchRequest searchRequest =
         createSearchRequests(
@@ -1842,6 +1894,70 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
+  public void countSubjectsSurvey() {
+    // Survey
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.SURVEY.toString(), ImmutableList.of(survey()), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsQuestion() {
+    // Question
+    SearchParameter ppiQuestion =
+        survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            ppiQuestion.getType(), ImmutableList.of(ppiQuestion), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsSurveyValueSourceConceptId() {
+    // value source concept id
+    List<Attribute> attributes =
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.CAT)
+                .operator(Operator.IN)
+                .operands(ImmutableList.of("7")));
+    SearchParameter ppiValueAsConceptId =
+        survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            ppiValueAsConceptId.getType(),
+            ImmutableList.of(ppiValueAsConceptId),
+            new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsSurveyValueAsNumber() {
+    // value as number
+    List<Attribute> attributes =
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.EQUAL)
+                .operands(ImmutableList.of("7")));
+    SearchParameter ppiValueAsNumer =
+        survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            ppiValueAsNumer.getType(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
   }
 
   @Test
