@@ -519,9 +519,8 @@ export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
   @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
-  @Input('notebookStorageContent') notebookStorageContent: Props['notebookStorageContent'];
   @Input('notebookStyles') notebookStyles: Props['notebookStyles'];
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStorageContent', 'notebookStyles']);
+    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
   }
 }

@@ -22,7 +22,7 @@
   <app-bug-report *ngIf="bugReportOpen"
                   [bugReportDescription]="bugReportDescription"
                   [onClose]="closeBugReport"></app-bug-report>
-  <app-help-sidebar *ngIf="helpContent || notebookStorageContent"
+  <app-help-sidebar *ngIf="helpContent"
                     [deleteFunction]="openConfirmDelete"
                     [helpContent]="helpContent"
                     [setSidebarState]="setSidebarState"
