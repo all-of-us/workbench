@@ -164,22 +164,15 @@ const iconStyles = {
   }
 };
 // TODO uncomment 'thunderstorm' icon when cluster configuration function is ready
-const icons = [{
-  id: 'help',
-  disabled: false,
-  faIcon: faInfoCircle,
-  label: 'Help Icon',
-  page: null,
-  style: {fontSize: '21px'},
-  tooltip: 'Help Tips',
-}, {
-  id: 'notebookStorage',
-  disabled: false,
-  faicon: faFolderOpen,
-  label: 'Workspace Storage',
-  page: 'notebookStorage',
-  style: {fontSize: '21px'},
-  tooltip: 'Workspace Storage',
+const icons = (helpContent) => {
+  return [{
+    id: 'help',
+    disabled: false,
+    faIcon: helpContent === 'notebookStorage' ? faFolderOpen : faInfoCircle,
+    label: 'Help Icon',
+    page: null,
+    style: {fontSize: '21px'},
+    tooltip: 'Help Tips',
 // }, {
 //   id: 'thunderstorm',
 //   disabled: true,
@@ -188,23 +181,24 @@ const icons = [{
 //   page: null,
 //   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
 //   tooltip: 'Compute Configuration',
-}, {
-  id: 'dataDictionary',
-  disabled: false,
-  faIcon: faBook,
-  label: 'Data Dictionary Icon',
-  page: null,
-  style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
-  tooltip: 'Data Dictionary',
-}, {
-  id: 'annotations',
-  disabled: false,
-  faIcon: faEdit,
-  label: 'Annotations Icon',
-  page: 'reviewParticipantDetail',
-  style: {fontSize: '20px', marginLeft: '3px'},
-  tooltip: 'Annotations',
-}];
+  }, {
+    id: 'dataDictionary',
+    disabled: false,
+    faIcon: faBook,
+    label: 'Data Dictionary Icon',
+    page: null,
+    style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
+    tooltip: 'Data Dictionary',
+  }, {
+    id: 'annotations',
+    disabled: false,
+    faIcon: faEdit,
+    label: 'Annotations Icon',
+    page: 'reviewParticipantDetail',
+    style: {fontSize: '20px', marginLeft: '3px'},
+    tooltip: 'Annotations',
+  }];
+};
 
 const analyticsLabels = {
   about: 'About Page',
@@ -224,7 +218,6 @@ interface Props {
   setSidebarState: Function;
   shareFunction: Function;
   sidebarOpen: boolean;
-  notebookStorageContent: string;
   notebookStyles: boolean;
   workspace: WorkspaceData;
 }
@@ -425,15 +418,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     render() {
-      const {helpContent, setSidebarState, notebookStorageContent, notebookStyles, sidebarOpen} = this.props;
+      const {helpContent, setSidebarState, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
 
       const displayContent = filteredContent !== undefined
           ? filteredContent
-          : helpContent !== null
-              ? sidebarContent[helpContent]
-              : '';
-      const storageContent = sidebarContent[notebookStorageContent];
+          : sidebarContent[helpContent];
 
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
@@ -444,8 +434,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {this.renderWorkspaceMenu()}
-          {icons.map((icon, i) =>
-            (!icon.page || icon.page === helpContent || icon.page === notebookStorageContent) &&
+          {icons(helpContent).map((icon, i) =>
+            (!icon.page || icon.page === helpContent) &&
               <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
@@ -499,22 +489,6 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
                     })}
                   </div>)
                 : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
-              }
-              {!!storageContent && storageContent.length > 0
-                  ? storageContent.map((section, s) => <div key={s}>
-                    <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
-                    {section.content.map((content, c) => {
-                      return typeof content === 'string'
-                          ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
-                          : <div key={c}>
-                            <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
-                            {content.content.map((item, i) =>
-                                <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>
-                            )}
-                          </div>;
-                    })}
-                  </div>)
-                  : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
               }
             </div>
             <div style={contentStyle('annotations')}>

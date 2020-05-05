@@ -149,7 +149,6 @@ const routes: Routes = [
                       // Setting this flag sets the container to 100% so that no content is clipped.
                       contentFullHeightOverride: true,
                       helpContent: 'notebookStorage',
-                      notebookStorageContent: 'notebookStorage',
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
@@ -159,7 +158,7 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      notebookStorageContent: 'notebookStorage',
+                      helpContent: 'notebookStorage',
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
