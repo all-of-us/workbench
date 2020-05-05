@@ -35,6 +35,7 @@ import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
+import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {DisabledGuard} from './guards/disabled-guard.service';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
@@ -103,25 +104,27 @@ const routes: Routes = [
                 data: {
                   title: 'View Workspace Details',
                   breadcrumb: BreadcrumbType.Workspace,
-                  helpContent: 'about'
+                  helpContentKey: 'about'
                 }
-              }, {
+              },
+              {
                 path: 'edit',
                 component: WorkspaceEditComponent,
                 data: {
                   title: 'Edit Workspace',
                   mode: WorkspaceEditMode.Edit,
                   breadcrumb: BreadcrumbType.WorkspaceEdit,
-                  helpContent: 'edit'
+                  helpContentKey: 'edit'
                 }
-              }, {
+              },
+              {
                 path: 'duplicate',
                 component: WorkspaceEditComponent,
                 data: {
                   title: 'Duplicate Workspace',
                   mode: WorkspaceEditMode.Duplicate,
                   breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                  helpContent: 'duplicate'
+                  helpContentKey: 'duplicate'
                 }
               },
               {
@@ -133,7 +136,7 @@ const routes: Routes = [
                     data: {
                       title: 'View Notebooks',
                       breadcrumb: BreadcrumbType.Workspace,
-                      helpContent: 'notebooks'
+                      helpContentKey: 'notebooks'
                     }
                   }, {
                     path: ':nbName',
@@ -146,7 +149,7 @@ const routes: Routes = [
                       // to the height calculation of the container, which is normally set to auto.
                       // Setting this flag sets the container to 100% so that no content is clipped.
                       contentFullHeightOverride: true,
-                      helpContent: 'notebookStorage',
+                      helpContentKey: NOTEBOOK_HELP_CONTENT,
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
@@ -156,7 +159,7 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      helpContent: 'notebookStorage',
+                      helpContentKey: NOTEBOOK_HELP_CONTENT,
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
@@ -172,7 +175,7 @@ const routes: Routes = [
                     data: {
                       title: 'Data Page',
                       breadcrumb: BreadcrumbType.Workspace,
-                      helpContent: 'data'
+                      helpContentKey: 'data'
                     }
                   },
                   {
@@ -181,7 +184,7 @@ const routes: Routes = [
                     data: {
                       title: 'Dataset Page',
                       breadcrumb: BreadcrumbType.Dataset,
-                      helpContent: 'datasetBuilder'
+                      helpContentKey: 'datasetBuilder'
                     }
                   },
                   {
@@ -190,7 +193,7 @@ const routes: Routes = [
                     data: {
                       title: 'Edit Dataset',
                       breadcrumb: BreadcrumbType.Dataset,
-                      helpContent: 'datasetBuilder'
+                      helpContentKey: 'datasetBuilder'
                     }
                   }, {
                     path: 'cohorts',
@@ -201,7 +204,7 @@ const routes: Routes = [
                         data: {
                           title: 'Cohort Actions',
                           breadcrumb: BreadcrumbType.Cohort,
-                          helpContent: 'cohortBuilder'
+                          helpContentKey: 'cohortBuilder'
                         },
                       },
                       {
@@ -217,7 +220,7 @@ const routes: Routes = [
                             data: {
                               title: 'Review Cohort Participants',
                               breadcrumb: BreadcrumbType.Cohort,
-                              helpContent: 'reviewParticipants'
+                              helpContentKey: 'reviewParticipants'
                             }
                           }, {
                             path: 'participants',
@@ -225,7 +228,7 @@ const routes: Routes = [
                             data: {
                               title: 'Review Cohort Participants',
                               breadcrumb: BreadcrumbType.Cohort,
-                              helpContent: 'reviewParticipants'
+                              helpContentKey: 'reviewParticipants'
                             }
                           }, {
                             path: 'cohort-description',
@@ -233,7 +236,7 @@ const routes: Routes = [
                             data: {
                               title: 'Review Cohort Description',
                               breadcrumb: BreadcrumbType.Cohort,
-                              helpContent: 'cohortDescription'
+                              helpContentKey: 'cohortDescription'
                             }
                           }, {
                             path: 'participants/:pid',
@@ -242,7 +245,7 @@ const routes: Routes = [
                               title: 'Participant Detail',
                               breadcrumb: BreadcrumbType.Participant,
                               shouldReuse: true,
-                              helpContent: 'reviewParticipantDetail'
+                              helpContentKey: 'reviewParticipantDetail'
                             }
                           }
                         ],
@@ -255,7 +258,7 @@ const routes: Routes = [
                     data: {
                       title: 'Search Concepts',
                       breadcrumb: BreadcrumbType.SearchConcepts,
-                      helpContent: 'conceptSets'
+                      helpContentKey: 'conceptSets'
                     }
                   },
                   {
@@ -266,7 +269,7 @@ const routes: Routes = [
                       data: {
                         title: 'Concept Set',
                         breadcrumb: BreadcrumbType.ConceptSet,
-                        helpContent: 'conceptSets'
+                        helpContentKey: 'conceptSets'
                       },
                     }, {
                       path: ':csid/actions',
@@ -274,7 +277,7 @@ const routes: Routes = [
                       data: {
                         title: 'Concept Set Actions',
                         breadcrumb: BreadcrumbType.ConceptSet,
-                        helpContent: 'conceptSets'
+                        helpContentKey: 'conceptSets'
                       },
                     }, ]
                   }

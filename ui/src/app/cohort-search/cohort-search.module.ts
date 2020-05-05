@@ -34,7 +34,7 @@ const routes: Routes = [{
   data: {
     title: 'Build Cohort Criteria',
     breadcrumb: BreadcrumbType.CohortAdd,
-    helpContent: 'cohortBuilder'
+    helpContentKey: 'cohortBuilder'
   },
 }];
 
