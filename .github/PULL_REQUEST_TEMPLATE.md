@@ -24,5 +24,6 @@ Please also:
 - [ ] The JIRA story has been moved to Dev Review
 - [ ] This PR includes appropriate unit tests
 - [ ] I have run and tested this change locally
+- [ ] If this includes a UI change, I have taken screen recordings or screenshots of the new behavior and notified the PO and UX designer
 - [ ] If this includes an API change, I have updated the appropriate Swagger definitions and notified API consumers
 - [ ] If this includes a new feature flag, I have created and linked new JIRA tickets to (a) turn on the feature flag and (b) remove it later
