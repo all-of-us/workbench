@@ -29,6 +29,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
@@ -280,9 +281,13 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setCreationTime(dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
     rdrWorkspace.setModifiedTime(
         dbWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
-    rdrWorkspace.setStatus(
-        org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum.fromValue(
-            dbWorkspace.getWorkspaceActiveStatusEnum().toString()));
+
+    RdrWorkspace.StatusEnum workspaceRDRStatus =
+        dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE
+            ? RdrWorkspace.StatusEnum.ACTIVE
+            : RdrWorkspace.StatusEnum.INACTIVE;
+
+    rdrWorkspace.setStatus(workspaceRDRStatus);
     setExcludeFromPublicDirectory(dbWorkspace.getCreator(), rdrWorkspace);
 
     rdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
