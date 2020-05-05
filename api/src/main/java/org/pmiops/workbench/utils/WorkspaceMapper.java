@@ -31,9 +31,9 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
     config = MapStructConfig.class,
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     uses = {
-      CommonMappers.class,
       CohortMapper.class,
       CohortReviewMapper.class,
+      CommonMappers.class,
       ConceptSetMapper.class,
       DataSetMapper.class,
       DbStorageEnums.class,

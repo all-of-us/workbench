@@ -22,7 +22,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -58,11 +57,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.ApiException;
-import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -70,17 +65,14 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseL
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceDetailsHeavy;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,8 +129,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       FreeTierBillingService freeTierBillingService,
-      UserMapper userMapper
-  ) {
+      UserMapper userMapper) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
