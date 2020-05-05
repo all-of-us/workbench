@@ -108,5 +108,4 @@ public interface WorkspaceService {
 
   boolean maybeDeleteRecentWorkspace(long workspaceId);
 
-  List<WorkspaceDetailsHeavy> getWorkspaceDetailsHeavy(String workspaceNamespace);
 }

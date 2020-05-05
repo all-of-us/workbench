@@ -115,12 +115,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final FreeTierBillingService freeTierBillingService;
-  private Provider<WorkspacesApi> endUserWorkspacesApiProvider;
-  private ProfileMapper profileMapper;
-  private UserMapper userMapper;
+  private final UserMapper userMapper;
 
-  private FireCloudService fireCloudService;
-  private Clock clock;
+  private final FireCloudService fireCloudService;
+  private final Clock clock;
 
   @Autowired
   public WorkspaceServiceImpl(
@@ -139,10 +137,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       FreeTierBillingService freeTierBillingService,
-      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API)
-          Provider<WorkspacesApi> endUserWorkspacesApiProvider,
-      ProfileMapper profileMapper,
-      UserMapper userMapper) {
+      UserMapper userMapper
+  ) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
@@ -157,8 +153,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.freeTierBillingService = freeTierBillingService;
-    this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
-    this.profileMapper = profileMapper;
     this.userMapper = userMapper;
   }
 
@@ -817,44 +811,5 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .build())
         .collect(ImmutableList.toImmutableList());
-  }
-
-  @Override
-  public List<WorkspaceDetailsHeavy> getWorkspaceDetailsHeavy(String workspaceNamespace) {
-    final List<DbWorkspace> dbWorkspaces =
-        workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace);
-
-    return dbWorkspaces.stream()
-        .map(this::getWorkspaceDetailsHeavy)
-        .collect(ImmutableList.toImmutableList());
-  }
-
-  private WorkspaceDetailsHeavy getWorkspaceDetailsHeavy(DbWorkspace dbWorkspace) {
-    final WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
-
-    final DbUser creator = dbWorkspace.getCreator();
-
-    final Map<String, FirecloudWorkspaceAccessEntry> usernameToAccessLevel;
-    try {
-      usernameToAccessLevel =
-          FirecloudTransforms.extractAclResponse(
-              workspacesApi.getWorkspaceAcl(
-                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()));
-    } catch (ApiException e) {
-      log.log(Level.WARNING, "Error getting FireCloud workspaces API", e);
-      throw new RuntimeException(e);
-    }
-
-    final List<User> collaborators =
-        usernameToAccessLevel.keySet().stream()
-            .map(userDao::findUserByUsername)
-            .map(profileMapper::toApiUser)
-            .collect(Collectors.toList());
-
-    return new WorkspaceDetailsHeavy()
-        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
-        .creator(profileMapper.toApiUser(creator))
-        .collaborators(collaborators)
-        .clusters(Collections.emptyList());
   }
 }

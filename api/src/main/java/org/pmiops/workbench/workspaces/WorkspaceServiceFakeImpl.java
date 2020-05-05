@@ -176,9 +176,4 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   public boolean maybeDeleteRecentWorkspace(long workspaceId) {
     return false;
   }
-
-  @Override
-  public List<WorkspaceDetailsHeavy> getWorkspaceDetailsHeavy(String workspaceNamespace) {
-    return null;
-  }
 }
