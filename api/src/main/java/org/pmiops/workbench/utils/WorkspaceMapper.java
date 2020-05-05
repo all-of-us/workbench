@@ -32,9 +32,9 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
     componentModel = "spring",
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     uses = {
-      CommonMappers.class,
       CohortMapper.class,
       CohortReviewMapper.class,
+      CommonMappers.class,
       ConceptSetMapper.class,
       DataSetMapper.class,
       DbStorageEnums.class,

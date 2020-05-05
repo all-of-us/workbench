@@ -17,8 +17,6 @@ import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -40,7 +38,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.profile.AddressMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -63,7 +60,6 @@ public class WorkspaceServiceTest {
 
   @TestConfiguration
   @Import({
-    AddressMapperImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     ConceptSetMapperImpl.class,
@@ -99,7 +95,6 @@ public class WorkspaceServiceTest {
     DbUser user() {
       return currentUser;
     }
-
   }
 
   @MockBean private Clock mockClock;
@@ -120,11 +115,9 @@ public class WorkspaceServiceTest {
   private static final String DEFAULT_WORKSPACE_NAMESPACE = "namespace";
 
   private final AtomicLong workspaceIdIncrementer = new AtomicLong(1);
+
   @Before
   public void setUp() {
-    // TODO(jaycarlton): we should be able to remove this line
-    MockitoAnnotations.initMocks(this);
-
     doReturn(NOW).when(mockClock).instant();
 
     firecloudWorkspaceResponses.clear();
@@ -341,7 +334,8 @@ public class WorkspaceServiceTest {
     currentUser.setUsername(DEFAULT_USERNAME);
     currentUser.setUserId(OTHER_USER_ID);
 
-    final List<DbUserRecentWorkspace> otherRecentWorkspaces = workspaceService.getRecentWorkspaces();
+    final List<DbUserRecentWorkspace> otherRecentWorkspaces =
+        workspaceService.getRecentWorkspaces();
     assertThat(otherRecentWorkspaces.size()).isEqualTo(1);
     assertThat(otherRecentWorkspaces.get(0).getWorkspaceId())
         .isEqualTo(dbWorkspaces.get(0).getWorkspaceId());
