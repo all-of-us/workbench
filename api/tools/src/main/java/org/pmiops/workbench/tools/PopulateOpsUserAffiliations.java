@@ -39,6 +39,9 @@ public class PopulateOpsUserAffiliations {
 
   private static final Logger log = Logger.getLogger(PopulateOpsUserAffiliations.class.getName());
 
+  private static final String institutionShortName = "AouOps";
+  private static final String actionForInclusion = "To Remain";
+
   private List<DbVerifiedInstitutionalAffiliation> prepareAffiliations(
       final String filename,
       UserDao userDao,
@@ -48,17 +51,20 @@ public class PopulateOpsUserAffiliations {
 
     final DbInstitution aouOps =
         institutionDao
-            .findOneByShortName("AouOps")
+            .findOneByShortName(institutionShortName)
             .orElseThrow(
-                () -> new RuntimeException("Could not find 'AouOps' Institution in the DB"));
+                () -> new RuntimeException(
+                        String.format(
+                                "Could not find '%s' Institution in the DB", institutionShortName)));
 
     return OpsUser.parseInput(filename).stream()
         .map(
             opsUser -> {
-              if (!opsUser.action.equals("To Remain")) {
+              if (!opsUser.action.equals(actionForInclusion)) {
                 throw new RuntimeException(
                     String.format(
-                        "User %s not marked as 'To Remain' in the input CSV", opsUser.userName));
+                        "User %s not marked as '%s' in the input CSV",
+                            opsUser.userName, actionForInclusion));
               }
 
               final DbUser dbUser = opsUser.dbCheck(userDao, affiliationDao);
