@@ -235,15 +235,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     }
   }
 
-  setVerifiedInstitutionRole(newRole) {
-    this.setState(fp.set(['currentProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], newRole));
-
-  }
-
   get saveProfileErrorMessage() {
-    if (this.props.profileState.profile && !this.props.profileState.profile.verifiedInstitutionalAffiliation) {
-      return 'Institution cannot be empty contact admin';
-    }
     return 'You must correct errors before saving.';
   }
 
@@ -363,7 +355,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   render() {
     const {profileState: {profile}} = this.props;
     const {currentProfile, saveProfileErrorResponse, updating, showDemographicSurveyModal} = this.state;
-    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
+    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, requireInstitutionalVerification} =
       serverConfigStore.getValue();
     const {
       givenName, familyName, areaOfResearch,
@@ -455,25 +447,29 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                   valueKey: 'verifiedInstitutionalAffiliation.institutionDisplayName',
                   disabled: true
                 })}
-                {!profile.verifiedInstitutionalAffiliation && <div style={{color: colors.danger}}>
-                    Institution cannot be empty. Please contact admin
-                </div>}
+                {requireInstitutionalVerification && !profile.verifiedInstitutionalAffiliation &&
+                  <div style={{color: colors.danger}}>
+                    Institution cannot be empty. Please contact admin.
+                  </div>}
               </FlexColumn>
               <FlexColumn>
                 <div style={styles.inputLabel}>Your Role</div>
                 {profile.verifiedInstitutionalAffiliation &&
-                <Dropdown style={{width: '12.5rem'}} data-test-id='role-dropdown'
-                          placeholder='Your Role'
-                          options={this.getRoleOptions()}
-                          onChange={(v) => this.setVerifiedInstitutionRole(v.value)}
-                          value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
+                  <Dropdown style={{width: '12.5rem'}}
+                            data-test-id='role-dropdown'
+                            placeholder='Your Role'
+                            options={this.getRoleOptions()}
+                            disabled={true}
+                            value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
+
                 {currentProfile.verifiedInstitutionalAffiliation &&
                 currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum &&
                 currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum ===
                 InstitutionalRole.OTHER && <div>{makeProfileInput({
                   title: '',
                   valueKey: ['verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'],
-                  style: {marginTop: '1rem'}
+                  style: {marginTop: '1rem'},
+                  disabled: true
                 })}
                 </div>}
               </FlexColumn>
@@ -653,14 +649,14 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               Cancel
             </Button>
             <TooltipTrigger
-              side='top'
-              content={(!!errors || !profile.verifiedInstitutionalAffiliation) && this.saveProfileErrorMessage}>
+                side='top'
+                content={!!errors && this.saveProfileErrorMessage}>
               <Button
-                data-test-id='save_profile'
-                type='purplePrimary'
-                style={{marginLeft: 40}}
-                onClick={() => this.saveProfile(currentProfile)}
-                disabled={!!errors || fp.isEqual(profile, currentProfile) || !profile.verifiedInstitutionalAffiliation}
+                  data-test-id='save_profile'
+                  type='purplePrimary'
+                  style={{marginLeft: 40}}
+                  onClick={() => this.saveProfile(currentProfile)}
+                  disabled={!!errors || fp.isEqual(profile, currentProfile)}
               >
                 Save Profile
               </Button>
