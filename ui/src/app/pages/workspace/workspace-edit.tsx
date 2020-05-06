@@ -975,7 +975,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         }}
               />
               <div style={styles.freeCreditsBalanceClickable}>
-                <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View FREE credits balance</Clickable>
+                <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View free credits balance</Clickable>
               </div>
             </FlexRow>
           </WorkspaceEditSection>}
