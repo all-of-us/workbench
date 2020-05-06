@@ -40,6 +40,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -78,6 +79,7 @@ public class WorkspaceAuditorTest {
     ConceptSetMapperImpl.class,
     CommonMappers.class,
     DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
     WorkspaceAuditorImpl.class,
     WorkspaceMapperImpl.class,
   })
