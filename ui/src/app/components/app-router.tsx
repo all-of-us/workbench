@@ -12,7 +12,7 @@ export const usePath = () => {
 export const SubRoute = ({children}) => <Switch>{children}</Switch>;
 export const AppRouter = ({children}) => <BrowserRouter><SubRoute>{children}</SubRoute></BrowserRouter>;
 
-export const RouteLink = ({href, style = {}, children}) => <Link style={{...style}} to={href}>{children}</Link>;
+export const RouteLink = ({path, style = {}, children}) => <Link style={{...style}} to={path}>{children}</Link>;
 
 export const AppRoute = ({path, data = {}, component: Component}) => {
   const routeParams = useParams();

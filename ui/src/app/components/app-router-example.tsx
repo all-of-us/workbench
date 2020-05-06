@@ -13,14 +13,18 @@ const authGuard = {
   redirectPath: '/test'
 };
 
+const registeredGuard = {
+  needsRedirect: () => true,
+  redirectPath: '/test'
+};
+
 const SubComponent = () => {
   const path = usePath();
   return <Fragment>
-    <RouteLink href={`${path}/sub1`}>Sub 1</RouteLink>
-    <RouteLink href={`${path}/sub2`} >Sub 2 (Will Redirect)</RouteLink>
+    <AppRoute path='/workspaces/build' component={BuildWorkspace}/>
     <SubRoute>
-      <AppRoute path={`${path}/sub1`} component={() => <div>Test 1</div>}/>
-      <ProtectedRoutes guards={[authGuard]} path={`${path}/sub2`}>
+      <ProtectedRoutes guards={[authGuard, registeredGuard]} path={`${path}`}>
+        <AppRoute path={`${path}/sub1`} component={() => <div>Test 1</div>}/>
         <AppRoute path={`${path}/sub2`} component={() => <div>Test 2</div>}/>)}
       </ProtectedRoutes>
     </SubRoute>
@@ -30,7 +34,7 @@ const SubComponent = () => {
 const RouteTest = ({urlParams}) => {
   const {value} = urlParams;
   return <Fragment>
-    <RouteLink href='/test'>RouteLink To Test</RouteLink>
+    <RouteLink path='/test'>RouteLink To Test</RouteLink>
     <div>URL Parameter value: {value}</div>
   </Fragment>;
 };
@@ -40,9 +44,9 @@ export const AppRouterEx: React.FunctionComponent<any> = () =>
     <AppRoute path='/route/:value' component={RouteTest}></AppRoute>
     <AppRoute path='/test' component={() => {
       return <div style={{display: 'flex', flexDirection: 'column'}}>
-          <RouteLink href='/workspaces'>React Workspace</RouteLink>
-          <RouteLink href='/route/value'>Route </RouteLink>
-          <RouteLink href='/comp'>Sub Components</RouteLink>
+          <RouteLink path='/workspaces'>React Workspace</RouteLink>
+          <RouteLink path='/route/value'>Route </RouteLink>
+          <RouteLink path='/comp'>Sub Components</RouteLink>
           <div>Hello</div>
         </div>;
     }
