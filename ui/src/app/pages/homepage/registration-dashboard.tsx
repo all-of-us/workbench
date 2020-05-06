@@ -237,7 +237,14 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   }
 
   allTasksCompleted(): boolean {
-    return this.taskCompletionList.every(v => v);
+    const {betaAccessGranted} = this.props;
+    const {enableBetaAccess} = serverConfigStore.getValue();
+
+    // Beta access is awkwardly not treated as a task in the completion list. So we manually
+    // check whether (1) beta access requirement is turned off for this env, or (2) the user
+    // has been granted beta access.
+    return this.taskCompletionList.every(v => v) &&
+      (!enableBetaAccess || betaAccessGranted);
   }
 
   isEnabled(i: number): boolean {
@@ -386,13 +393,14 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         </div>
         <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
       </AlertWarning>}
-      {(this.allTasksCompleted() && betaAccessGranted) &&
-      <div style={{...baseStyles.card, ...styles.warningModal, marginRight: 0}}
-           data-test-id='success-message'>
-        You successfully completed all the required steps to access the Researcher Workbench.
-        <Button style={{marginLeft: '0.5rem'}}
-                onClick={() => window.location.reload()}>Get Started</Button>
-      </div>}
+      {this.allTasksCompleted() &&
+        <div style={{...baseStyles.card, ...styles.warningModal, marginRight: 0}}
+             data-test-id='success-message'>
+          You successfully completed all the required steps to access the Researcher Workbench.
+          <Button style={{marginLeft: '0.5rem'}}
+                  onClick={() => window.location.reload()}>Get Started</Button>
+        </div>
+      }
       {this.state.twoFactorAuthModalOpen && <Modal width={500}>
           <ModalTitle style={styles.twoFactorAuthModalHeader}>Redirecting to turn on Google 2-step Verification</ModalTitle>
           <ModalBody>

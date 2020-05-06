@@ -74,6 +74,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 // Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
@@ -127,6 +128,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Mock private Provider<WorkbenchConfig> configProvider;
 
+  @Autowired private JdbcTemplate jdbcTemplate;
+
   private DbCriteria drugNode1;
   private DbCriteria drugNode2;
   private DbCriteria criteriaParent;
@@ -149,13 +152,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return ImmutableList.of(
-        "person",
-        "death",
-        "cb_search_person",
-        "cb_search_all_events",
-        "cb_criteria",
-        "cb_criteria_ancestor");
+    return ImmutableList.of("person", "death", "cb_search_person", "cb_search_all_events");
   }
 
   @Override
@@ -191,6 +188,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     saveCriteriaWithPath("0", drugNode1);
     drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values ("
+            + 1520218
+            + ", "
+            + 1520218
+            + ")");
 
     criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
@@ -331,7 +336,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .addStandard(false)
             .addName("USA")
             .addConceptId("5")
-            .addSynonyms("[SURVEY_rank1]")
             .build();
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
 
@@ -354,6 +358,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @After
   public void tearDown() {
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     delete(
         drugNode1,
         drugNode2,
@@ -603,6 +608,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .standard(true)
         .ancestorData(false)
         .value("Deceased");
+  }
+
+  private static SearchParameter survey() {
+    return new SearchParameter()
+        .domain(DomainType.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.SURVEY.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(22L);
   }
 
   private static Modifier ageModifier() {
@@ -1275,7 +1291,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            ImmutableList.of(icd9().group(true).conceptId(44823922L)),
+            ImmutableList.of(icd9().group(true).conceptId(2L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
@@ -1845,6 +1861,31 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsSurveyValueSourceConceptId() {
+    // value source concept id
+    List<Attribute> attributes =
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.CAT)
+                .operator(Operator.IN)
+                .operands(ImmutableList.of("7")));
+    SearchParameter ppiValueAsConceptId =
+        survey()
+            .group(false)
+            .subtype(CriteriaSubType.ANSWER.toString())
+            .conceptId(5L)
+            .attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            ppiValueAsConceptId.getType(),
+            ImmutableList.of(ppiValueAsConceptId),
+            new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
   public void findDemoChartInfo() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
@@ -1961,7 +2002,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
-    cbCriteriaDao.save(criteria);
+    criteria = cbCriteriaDao.save(criteria);
   }
 
   private void delete(DbCriteria... criteriaList) {

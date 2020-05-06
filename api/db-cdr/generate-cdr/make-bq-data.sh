@@ -531,19 +531,18 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SET x.question_count = y.num_questions
 FROM
     (
-        SELECT b.concept_id, count(*) as num_questions
-        FROM \`${BQ_PROJECT}.${BQ_DATASET}.prep_criteria_ancestor\` a
-        LEFT JOIN \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\` b on a.ANCESTOR_ID = b.ID
-        WHERE ancestor_id in
+        SELECT ancestor_concept_id, count(*) as num_questions
+        FROM \`${BQ_PROJECT}.${BQ_DATASET}.prep_concept_ancestor\`
+        WHERE ancestor_concept_id in
             (
-                SELECT id
+                SELECT concept_id
                 FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
                     and parent_id = 0
             )
         GROUP BY 1
     ) y
-WHERE x.concept_id = y.concept_id"
+WHERE x.concept_id = y.ancestor_concept_id"
 
 ########################
 # concept_relationship #

@@ -47,6 +47,7 @@ import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {openZendeskWidget} from 'app/utils/zendesk';
 import {
   ArchivalStatus,
   BillingAccount,
@@ -162,7 +163,12 @@ export const styles = reactStyles({
     marginLeft: '-0.9rem',
     fontSize: 14,
     backgroundColor: colorWithWhiteness(colors.accent, 0.85)
-  }
+  },
+  link: {
+    color: colors.accent,
+    cursor: 'pointer',
+    textDecoration: 'none'
+  },
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -430,6 +436,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       );
     }
 
+    openContactWidget() {
+      const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
+      openZendeskWidget(givenName, familyName, username, contactEmail);
+    }
+
     renderBillingDescription() {
       return <div>
         The <i>All of Us</i> Program provides $300 in free credits per user. Please refer to
@@ -437,9 +448,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
         </StyledAnchorTag> to learn more about the free credit
         program and how it can be used. Once you have used up your free credits, you can request
-        additional credits by <StyledAnchorTag href={'https://aousupporthelp.zendesk.' +
-      'com/hc/en-us/articles/360039539411-How-to-Create-a-Billing-Account>'} target='_blank'>
-        &nbsp;contacting support</StyledAnchorTag>.
+        additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
+        contacting support</span>.
       </div>;
     }
 
@@ -965,12 +975,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         }}
               />
               <div style={styles.freeCreditsBalanceClickable}>
-                <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View FREE credits balance</Clickable>
+                <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View free credits balance</Clickable>
               </div>
             </FlexRow>
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
-        <WorkspaceEditSection header='Research Use Statement Questions' largeHeader={true}
+        <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
+          <div>Research Use Statement Questions</div>
+          <StyledAnchorTag href='https://aousupporthelp.zendesk.com/hc/en-us/articles/360042673211-Examples-of-research-purpose-descriptions-'
+                           target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
+            Best practices for Research Use Statement questions
+          </StyledAnchorTag>
+        </FlexRow>} largeHeader={true}
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
               <br/><br/>

@@ -18,6 +18,7 @@ describe('RegistrationDashboard', () => {
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     serverConfigStore.next({
+      enableBetaAccess: true,
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
@@ -25,13 +26,13 @@ describe('RegistrationDashboard', () => {
       enableEraCommons: true,
       enableV3DataUserCodeOfConduct: true
     });
-    props  = {
+    props = {
       eraCommonsLinked: false,
       eraCommonsLoading: false,
       eraCommonsError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
-      betaAccessGranted: true,
+      betaAccessGranted: false,
       twoFactorAuthCompleted: false,
       dataUserCodeOfConductCompleted: false
     };
@@ -85,11 +86,25 @@ describe('RegistrationDashboard', () => {
 
   it('should not display a warning when enableBetaAccess is false', () => {
     serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: false});
+    props.betaAccessGranted = false;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
   });
 
   it('should display a success message when all tasks have been completed', () => {
+    props.betaAccessGranted = true;
+    props.eraCommonsLinked = true;
+    props.trainingCompleted = true;
+    props.twoFactorAuthCompleted = true;
+    props.dataUserCodeOfConductCompleted = true;
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
+  });
+
+  it('should display a success message when complete and enableBetaAccess is false', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: false});
+    // When enableBetaAccess is false, we shouldn't need to have been granted beta access.
+    props.betaAccessGranted = false;
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;

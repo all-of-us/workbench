@@ -82,6 +82,15 @@ ENVIRONMENTS = {
     :featured_workspaces_json => "featured_workspaces_stable.json",
     :gae_vars => TEST_GAE_VARS
   },
+  "all-of-us-rw-preprod" => {
+    :env_name => "preprod",
+    :api_endpoint_host => "api.preprod-workbench.researchallofus.org",
+    :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
+    :config_json => "config_preprod.json",
+    :cdr_versions_json => "cdr_versions_preprod.json",
+    :featured_workspaces_json => "featured_workspaces_preprod.json",
+    :gae_vars => TEST_GAE_VARS
+  },
   "all-of-us-rw-prod" => {
     :env_name => "prod",
     :api_endpoint_host => "api.workbench.researchallofus.org",
@@ -1294,10 +1303,11 @@ def create_auth_domain(cmd_name, args)
   token = token.chomp
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
+  api_base_url = get_server_config(op.opts.project)["apiBaseUrl"]
 
   domain_name = get_auth_domain(op.opts.project)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
-     https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}}
+     #{api_base_url}/v1/auth-domain/#{domain_name}}
 end
 
 Common.register_command({
@@ -1562,6 +1572,60 @@ Common.register_command({
     :invocation => LOAD_INSTITUTIONS_CMD,
     :description => "Load institutions specified in given file.",
     :fn => ->(*args) {load_institutions(LOAD_INSTITUTIONS_CMD, *args)}
+})
+
+def populate_ops_user_affiliations(cmd_name, *args)
+  common = Common.new
+  ensure_docker(cmd_name, args)
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  op.add_typed_option(
+      "--import-filename [import-filename]",
+      String,
+      ->(opts, v) { opts.importFilename = v},
+      "CSV File containing list of ops users to assign the ops institution")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  gradle_args = ([
+      ["--import-filename", op.opts.importFilename]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    gradle_args += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle populateOpsUserAffiliations
+       -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+POPULATE_OPS_USER_AFFILIATIONS_CMD = "populate-ops-user-affiliations"
+
+Common.register_command({
+    :invocation => POPULATE_OPS_USER_AFFILIATIONS_CMD,
+    :description => "Populate the institutional affiliations for the ops users in the specified CSV file.",
+    :fn => ->(*args) {populate_ops_user_affiliations(POPULATE_OPS_USER_AFFILIATIONS_CMD, *args)}
 })
 
 def delete_workspaces(cmd_name, *args)
@@ -2173,6 +2237,11 @@ def get_billing_config(project)
   return JSON.parse(File.read("config/#{config_json}"))["billing"]
 end
 
+def get_server_config(project)
+  config_json = must_get_env_value(project, :config_json)
+  return JSON.parse(File.read("config/#{config_json}"))["server"]
+end
+
 def get_billing_project_prefix(project)
   return get_billing_config(project)["projectNamePrefix"]
 end
@@ -2428,7 +2497,7 @@ def setup_project_data(gcc, cdr_db_name)
   common.status "Writing DB credentials file..."
   write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password)
   common.status "Setting root password..."
-  run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
+  run_with_redirects("gcloud sql users set-password root --host % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
                      root_password)
   # Don't delete the credentials created here; they will be stored in GCS and reused during

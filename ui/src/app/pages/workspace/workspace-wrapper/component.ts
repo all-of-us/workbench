@@ -39,9 +39,13 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   menuDataLoading = false;
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
-  helpContent = 'data';
+  helpContentKey = 'data';
   sidebarOpen = false;
   notebookStyles = false;
+  // The iframe we use to display the Jupyter notebook does something strange
+  // to the height calculation of the container, which is normally set to auto.
+  // Setting this flag sets the container to 100% so that no content is clipped.
+  contentFullHeightOverride = false;
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -69,14 +73,14 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
       this.setSidebarState(true);
     }
     this.tabPath = this.getTabPath();
-    this.setHelpContentAndMaybeSetNotebookStyles();
+    this.setHelpContentKeyAndMaybeSetNotebookStyles();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(() => {
           this.tabPath = this.getTabPath();
-          this.setHelpContentAndMaybeSetNotebookStyles();
+          this.setHelpContentKeyAndMaybeSetNotebookStyles();
           // Close sidebar on route change unless navigating between participants in cohort review
-          if (this.helpContent !== 'reviewParticipantDetail') {
+          if (this.helpContentKey !== 'reviewParticipantDetail') {
             this.setSidebarState(false);
           }
         }));
@@ -213,20 +217,24 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   // This function does multiple things so we don't have to have two separate'
   // where loops on the route.
-  setHelpContentAndMaybeSetNotebookStyles() {
+  setHelpContentKeyAndMaybeSetNotebookStyles() {
     let child = this.route.firstChild;
     while (child) {
       if (child.snapshot.data.notebookHelpSidebarStyles) {
         this.notebookStyles = true;
       }
 
+      if (child.snapshot.data.contentFullHeightOverride) {
+        this.contentFullHeightOverride = true;
+      }
+
       if (child.firstChild) {
         child = child.firstChild;
-      } else if (child.snapshot.data && child.snapshot.data.helpContent) {
-        this.helpContent = child.snapshot.data.helpContent;
+      } else if (child.snapshot.data && child.snapshot.data.helpContentKey) {
+        this.helpContentKey = child.snapshot.data.helpContentKey;
         child = null;
       } else {
-        this.helpContent = null;
+        this.helpContentKey = null;
         child = null;
       }
     }
