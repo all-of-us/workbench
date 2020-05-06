@@ -138,6 +138,7 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -195,90 +196,93 @@ public class DataSetControllerTest {
   private TestMockFactory testMockFactory;
   private Workspace workspace;
 
-  @Autowired BillingProjectBufferService billingProjectBufferService;
-  @Autowired BigQueryService bigQueryService;
-  @Autowired CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-  @Autowired WorkspaceResourcesService workspaceResourcesService;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CdrVersionService cdrVersionService;
-  @Autowired CloudStorageService cloudStorageService;
-  @Autowired Provider<Cloudbilling> cloudBillingProvider;
-  @Autowired CohortDao cohortDao;
-  @Autowired CohortFactory cohortFactory;
-  @Autowired CohortMapper cohortMapper;
-  @Autowired CohortMaterializationService cohortMaterializationService;
-  @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired CohortReviewMapper cohortReviewMapper;
-  @Autowired CohortReviewService cohortReviewService;
-  @Autowired ConceptBigQueryService conceptBigQueryService;
-  @Autowired ConceptDao conceptDao;
-  @Autowired ConceptService conceptService;
-  @Autowired ConceptSetService conceptSetService;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired DataSetDao dataSetDao;
-  @Mock DataSetMapper dataSetMapper;
-  @Autowired ConceptSetMapper conceptSetMapper;
-  @Autowired DataSetService dataSetService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired FreeTierBillingService freeTierBillingService;
-  @Autowired CohortQueryBuilder cohortQueryBuilder;
-  @Autowired TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
-  @Autowired UserDao userDao;
-  @Mock Provider<DbUser> userProvider;
-  @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
-  @Autowired NotebooksService notebooksService;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired UserService userService;
-  @Autowired WorkspaceDao workspaceDao;
-  @Autowired WorkspaceService workspaceService;
-  @Autowired WorkspaceAuditor workspaceAuditor;
-  @Autowired WorkspaceMapper workspaceMapper;
-  @Autowired LogsBasedMetricService logsBasedMetricService;
-  @Autowired Provider<Zendesk> mockZendeskProvider;
+  @Autowired private BigQueryService bigQueryService;
+  @Autowired private BillingProjectBufferService billingProjectBufferService;
+  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private CdrVersionService cdrVersionService;
+  @Autowired private CloudStorageService cloudStorageService;
+  @Autowired private CohortDao cohortDao;
+  @Autowired private CohortFactory cohortFactory;
+  @Autowired private CohortMapper cohortMapper;
+  @Autowired private CohortMaterializationService cohortMaterializationService;
+  @Autowired private CohortQueryBuilder cohortQueryBuilder;
+  @Autowired private CohortReviewDao cohortReviewDao;
+  @Autowired private CohortReviewMapper cohortReviewMapper;
+  @Autowired private CohortReviewService cohortReviewService;
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
+  @Autowired private ConceptDao conceptDao;
+  @Autowired private ConceptService conceptService;
+  @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private ConceptSetMapper conceptSetMapper;
+  @Autowired private ConceptSetService conceptSetService;
+  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired private DataSetDao dataSetDao;
+  @Autowired private DataSetService dataSetService;
+  @Autowired private FireCloudService fireCloudService;
+  @Autowired private FreeTierBillingService freeTierBillingService;
+  @Autowired private LogsBasedMetricService logsBasedMetricService;
+  @Autowired private NotebooksService notebooksService;
+  @Autowired private Provider<Cloudbilling> cloudBillingProvider;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private Provider<Zendesk> mockZendeskProvider;
+  @Autowired private TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
+  @Autowired private UserDao userDao;
+  @Autowired private UserRecentResourceService userRecentResourceService;
+  @Autowired private UserService userService;
+  @Autowired private WorkspaceAuditor workspaceAuditor;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceMapper workspaceMapper;
+  @Autowired private WorkspaceResourcesService workspaceResourcesService;
+  @Autowired private WorkspaceService workspaceService;
+
   @MockBean MonitoringService mockMonitoringService;
+
+  @Mock DataSetMapper dataSetMapper;
+  @Mock Provider<DbUser> userProvider;
 
   @TestConfiguration
   @Import({
-    WorkspaceResourcesServiceImpl.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
+    CommonMappers.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     DataSetServiceImpl.class,
+    FirecloudMapperImpl.class,
+    LogsBasedMetricServiceFakeImpl.class,
     TestBigQueryCdrSchemaConfig.class,
+    UserServiceTestConfiguration.class,
+    WorkspaceMapperImpl.class,
+    WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceMapperImpl.class,
-    CommonMappers.class,
-    LogsBasedMetricServiceFakeImpl.class,
-    UserServiceTestConfiguration.class,
   })
   @MockBean({
-    BillingProjectBufferService.class,
     BigQueryService.class,
+    BillingProjectBufferService.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
     CloudStorageService.class,
     CohortCloningService.class,
     CohortMaterializationService.class,
+    CohortQueryBuilder.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    DataSetService.class,
     DataSetMapper.class,
+    DataSetService.class,
+    DirectoryService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
-    DirectoryService.class,
+    FreeTierBillingService.class,
     NotebooksService.class,
-    CohortQueryBuilder.class,
     UserRecentResourceService.class,
-    WorkspaceAuditor.class,
     UserServiceAuditor.class,
+    WorkspaceAuditor.class,
     Zendesk.class,
-    FreeTierBillingService.class
   })
   static class Configuration {
 
