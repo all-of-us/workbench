@@ -402,7 +402,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
              data-test-id='success-message'>
           You successfully completed all the required steps to access the Researcher Workbench.
           <Button style={{marginLeft: '0.5rem'}}
-                  onClick={() => window.location.reload()}>Get Started</Button>
+                  onClick={() => navigate([''])}>Get Started</Button>
         </div>
       }
       {this.state.twoFactorAuthModalOpen && <Modal width={500}>

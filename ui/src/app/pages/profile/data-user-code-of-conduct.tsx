@@ -16,7 +16,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
-import {serverConfigStore} from 'app/utils/navigation';
+import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';
@@ -93,7 +93,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
       const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.getValue());
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
-        window.history.back();
+        navigate(['']);
       });
     }
 
