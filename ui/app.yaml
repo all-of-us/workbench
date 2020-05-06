@@ -65,6 +65,7 @@ handlers:
         https://*.googleapis.com
         https://*.zdassets.com
         https://aousupporthelp.zendesk.com
+        https://aousupporthelp1580753096.zendesk.com
         https://www.google-analytics.com;
       child-src
         https://accounts.google.com
