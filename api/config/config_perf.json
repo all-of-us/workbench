@@ -95,7 +95,7 @@
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableRdrExport": false,
+    "enableRdrExport": true,
     "enableBillingLockout": true,
     "enableBillingUpgrade": true,
     "enableSumoLogicEventHandling": true,
