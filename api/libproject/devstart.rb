@@ -1259,7 +1259,7 @@ Common.register_command({
   :fn => ->(*args) { run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-def write_db_creds_file(project, cdr_db_name, root_password, workbench_password)
+def write_db_creds_file(project, cdr_db_name, root_password, workbench_password, readonly_password)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -1277,6 +1277,8 @@ def write_db_creds_file(project, cdr_db_name, root_password, workbench_password)
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
+      db_creds_file.puts "DEV_READONLY_DB_USER=dev-readonly"
+      db_creds_file.puts "DEV_READONLY_DB_PASSWORD=#{readonly_password}"
       db_creds_file.close
 
       copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
@@ -2020,20 +2022,36 @@ def connect_to_cloud_db(cmd_name, *args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-    "--root",
-    ->(opts, _) { opts.root = true },
-    "Connect as root")
+    "--db-user [user]",
+    ->(opts, v) { opts.db_user = v },
+    "Optional database user to connect as, defaults to 'dev-readonly'")
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
+
+  if op.opts.db_user.nil?
+    op.opts.db_user = "dev-readonly"
+  end
+
   env = read_db_vars(gcc)
+  db_password = nil
+  case op.opts.db_user
+  when "dev-readonly"
+    db_password = env["DEV_READONLY_DB_PASSWORD"]
+  when "workbench"
+    db_password = env["WORKBENCH_DB_PASSWORD"]
+  when "root"
+    db_password = env["MYSQL_ROOT_PASSWORD"]
+  else
+    raise ArgumentError.new(
+            "invalid --db-user provided, wanted 'workbench', 'dev-readonly', or 'root', got '#{op.opts.db_user}'")
+  end
+
   CloudSqlProxyContext.new(gcc.project).run do
-    password = op.opts.root ? env["MYSQL_ROOT_PASSWORD"] : env["WORKBENCH_DB_PASSWORD"]
-    user = op.opts.root ? "root" : env["WORKBENCH_DB_USER"]
     common.run_inline %W{
-      mysql --host=127.0.0.1 --port=3307 --user=#{user}
-      --database=#{env["DB_NAME"]} --password=#{password}},
-      password
+      mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user}
+      --database=#{env["DB_NAME"]} --password=#{db_password}},
+      db_password
   end
 end
 
@@ -2490,12 +2508,12 @@ def create_project_resources(gcc)
 end
 
 def setup_project_data(gcc, cdr_db_name)
-  root_password, workbench_password = random_password(), random_password()
+  root_password, workbench_password, readonly_password = random_password(), random_password(), random_password()
 
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password)
+  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password, readonly_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root --host % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
