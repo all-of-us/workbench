@@ -130,7 +130,7 @@ def ensure_docker(cmd_name, args=nil)
   args = (args or [])
   unless Workbench.in_docker?
     ensure_docker_sync()
-    docker_run([cmd_name] + args)
+    docker_run(%W{./project.rb #{cmd_name}} + args)
   end
 end
 
@@ -395,7 +395,7 @@ Common.register_command({
 
 def validate_swagger(cmd_name, args)
   ensure_docker cmd_name, args
-  Common.new.run_inline %W{gradle validateSwagger} + args
+  Common.new.run_inline %W{./gradlew validateSwagger} + args
 end
 
 Common.register_command({
