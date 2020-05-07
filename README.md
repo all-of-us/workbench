@@ -1,8 +1,17 @@
 # Workbench
-
-## Development Guides
 CircleCI Test Status [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
 
+## Introduction
+The [All of Us Research Program](https://allofus.nih.gov/) Researcher Workbench is a platform for researchers to work with program
+data in a secure and convenient way. It provides users with an environment for running Jupyter notebooks
+in R or Python that can access data in the program's Curated Data Repository. For information on research
+opportunities see the [official website](https://allofus.nih.gov/get-involved/opportunities-researchers).
+
+While the code in this repository is available according to the terms of our  [licence](LICENSE.txt), not all features
+are available for external use. In particular, it's not crrenlty possible for third parties to build and
+deploy their own instance of the Researcher Workbench solely from the code here.
+
+## Development Guides
 [Documentation on API Structure](api/docs/code-structure.md)
 
 [UI Style Guide](ui/docs/style-guide.md)
