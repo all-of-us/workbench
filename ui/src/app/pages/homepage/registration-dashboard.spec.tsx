@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/navigation';
-import {RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
+import {getGoogleSecurityUrlWithAccountChooser, RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
@@ -123,6 +123,12 @@ describe('RegistrationDashboard', () => {
     serverConfigStore.next({...serverConfigStore.getValue(), unsafeAllowSelfBypass: true});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(1);
+  });
+
+  it('should generate expected account switcher URL', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), gsuiteDomain: 'fake-research-aou.org'});
+    expect(getGoogleSecurityUrlWithAccountChooser()).toMatch(
+      /https:\/\/accounts.google.com\/AccountChooser\?continue=(.*?)\&hd=fake-research-aou\.org/);
   });
 
 });

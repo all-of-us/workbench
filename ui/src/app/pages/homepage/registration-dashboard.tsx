@@ -71,18 +71,21 @@ const styles = reactStyles({
   },
 });
 
+export function getGoogleSecurityUrlWithAccountChooser(): string {
+  const accountChooserBase = 'https://accounts.google.com/AccountChooser';
+  const url = new URL(accountChooserBase);
+  url.searchParams.set('continue', 'https://myaccount.google.com/signinoptions/two-step-verification/enroll');
+  // If available, set the 'hd' param to give Google a hint that we want to force login to this
+  // specific G Suite domain.
+  if (serverConfigStore.getValue()) {
+    url.searchParams.set('hd', serverConfigStore.getValue().gsuiteDomain);
+  }
+  return url.toString();
+}
+
 function redirectToGoogleSecurity(): void {
   AnalyticsTracker.Registration.TwoFactorAuth();
-  let url = 'https://myaccount.google.com/signinoptions/two-step-verification/enroll';
-  const {profile} = userProfileStore.getValue();
-  // The profile should always be available at this point, but avoid making an
-  // implicit hard dependency on that, since the authuser'less URL is still useful.
-  if (profile.username) {
-    // Attach the authuser, in case users are using Google multilogin - their
-    // AoU researcher account is unlikely to be their primary Google login.
-    url += `?authuser=${profile.username}`;
-  }
-  window.open(url, '_blank');
+  window.open(getGoogleSecurityUrlWithAccountChooser(), '_blank');
 }
 
 function redirectToNiH(): void {
