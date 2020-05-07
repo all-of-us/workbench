@@ -54,6 +54,7 @@ handlers:
         https://api-dot-all-of-us-rw-perf.appspot.com
         https://api-dot-all-of-us-rw-stable.appspot.com
         https://api.stable.fake-research-aou.org
+        https://api.preprod-workbench.researchallofus.org
         https://api.workbench.researchallofus.org
         https://leonardo.dsde-dev.broadinstitute.org
         https://leonardo.dsde-perf.broadinstitute.org

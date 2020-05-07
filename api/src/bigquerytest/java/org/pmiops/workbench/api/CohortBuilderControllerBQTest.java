@@ -336,7 +336,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .addStandard(false)
             .addName("USA")
             .addConceptId("5")
-            .addSynonyms("[SURVEY_rank1]")
             .build();
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
 
@@ -609,6 +608,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .standard(true)
         .ancestorData(false)
         .value("Deceased");
+  }
+
+  private static SearchParameter survey() {
+    return new SearchParameter()
+        .domain(DomainType.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.SURVEY.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(22L);
   }
 
   private static Modifier ageModifier() {
@@ -1851,6 +1861,31 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsSurveyValueSourceConceptId() {
+    // value source concept id
+    List<Attribute> attributes =
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.CAT)
+                .operator(Operator.IN)
+                .operands(ImmutableList.of("7")));
+    SearchParameter ppiValueAsConceptId =
+        survey()
+            .group(false)
+            .subtype(CriteriaSubType.ANSWER.toString())
+            .conceptId(5L)
+            .attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            ppiValueAsConceptId.getType(),
+            ImmutableList.of(ppiValueAsConceptId),
+            new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
   public void findDemoChartInfo() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
@@ -1967,7 +2002,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
-    cbCriteriaDao.save(criteria);
+    criteria = cbCriteriaDao.save(criteria);
   }
 
   private void delete(DbCriteria... criteriaList) {

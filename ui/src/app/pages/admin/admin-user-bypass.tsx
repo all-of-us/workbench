@@ -68,12 +68,16 @@ export class AdminUserBypass extends React.Component<
 
   render() {
     const {selectedModules, open} = this.state;
+    const {enableBetaAccess,
+      enableComplianceTraining,
+      enableEraCommons,
+      enableDataUseAgreement} = serverConfigStore.getValue();
     return <PopupTrigger
         side='bottom'
         onClose={() => {this.cancel(); this.setState({open: false}); }}
         onOpen={() => this.setState({open: true})}
         content={<FlexColumn style={{padding: '1rem'}}>
-          <FlexRow style={{justifyContent: 'space-between'}}>
+          {enableBetaAccess && <FlexRow style={{justifyContent: 'space-between'}}>
             <Toggle name='Beta Access'
                     enabled={selectedModules.includes(AccessModule.BETAACCESS)}
                     data-test-id='beta-access-toggle'
@@ -82,24 +86,24 @@ export class AdminUserBypass extends React.Component<
             <TooltipTrigger content={'Grant beta access to a user.  This replaces verify/reject.'}>
               <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
             </TooltipTrigger>
-          </FlexRow>
-          <hr style={{width: '100%', marginBottom: '0.5rem'}}/>
-          <Toggle name='Compliance Training'
+          </FlexRow>}
+          {enableBetaAccess && <hr style={{width: '100%', marginBottom: '0.5rem'}}/>}
+          {enableComplianceTraining && <Toggle name='Compliance Training'
                   enabled={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
                   data-test-id='compliance-training-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); } }/>
-          <Toggle name='eRA Commons Linking'
+                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); } }/>}
+          {enableEraCommons && <Toggle name='eRA Commons Linking'
                   enabled={selectedModules.includes(AccessModule.ERACOMMONS)}
                   data-test-id='era-commons-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); } } />
+                    fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); } } />}
           <Toggle name='Two Factor Auth'
                   enabled={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
                   data-test-id='two-factor-auth-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}/>
-          {serverConfigStore.getValue().enableDataUseAgreement && <Toggle name='Data Use Agreement'
+          {enableDataUseAgreement && <Toggle name='Data Use Agreement'
                   enabled={selectedModules.includes(AccessModule.DATAUSEAGREEMENT)}
                   data-test-id='data-use-agreement-toggle'
                   onToggle={() => {this.setState({selectedModules:

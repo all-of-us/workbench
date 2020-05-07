@@ -84,15 +84,15 @@
     "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
-    "enableBetaAccess": true,
+    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
-    "requireInvitationKey": true
+    "requireInvitationKey": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableRdrExport": false,
+    "enableRdrExport": true,
     "enableBillingLockout": true,
     "enableBillingUpgrade": false,
     "enableSumoLogicEventHandling": true,

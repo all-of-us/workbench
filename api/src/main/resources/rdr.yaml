@@ -97,7 +97,7 @@ definitions:
         format: date-time
       status:
         type: string
-        description: Workspace Status
+        description: INACTIVE Represents the workspace is deleted or Pending Deletion
         enum:
           - ACTIVE
           - INACTIVE
@@ -107,6 +107,7 @@ definitions:
           $ref: '#/definitions/RdrWorkspaceUser'
       excludeFromPublicDirectory:
         type: boolean
+        description: Set to true if the creator of the workspace is an Operational User
       diseaseFocusedResearch:
         type: boolean
       diseaseFocusedResearchName:

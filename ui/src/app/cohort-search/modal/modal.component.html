@@ -118,7 +118,6 @@
                 Cancel
               </button>
               <button type="button"
-                [disabled]="disableFlag"
                 (click)="finish()"
                 class="btn btn-primary">
                 Finish
@@ -129,43 +128,16 @@
 
         <div *ngIf="wizard.type !== criteriaType.AGE" class="col padding-zero" [ngClass]="sidebarClass">
           <div class="content right" *ngIf="open">
-            <div class="panel-right-container">
-              <h5 class="selection-title">Selected Criteria</h5>
-              <div class="panel-right selected">
-                <crit-list-selection-info
-                  *ngFor="let parameter of selections; let p = index"
-                  [index]="p"
-                  [parameter]="parameter"
-                  [remove]="removeSelection">
-                </crit-list-selection-info>
-              </div>
-              <div class="footer">
-                <button type="button"
-                  (click)="close()"
-                  class="btn btn-link">
-                  Cancel
-                </button>
-                <button  *ngIf="showNext"
-                  type="button"
-                  [disabled]="selections.length === 0"
-                  (click)="mode = 'modifiers'"
-                  class="btn btn-primary">
-                  Next
-                </button>
-                <button *ngIf="showBack"
-                  type="button"
-                  (click)="back()"
-                  class="btn btn-primary">
-                  Back
-                </button>
-                <button type="button"
-                  [disabled]="disableFlag"
-                  (click)="finish()"
-                  class="btn btn-primary">
-                  Finish
-                </button>
-              </div>
-            </div>
+            <crit-selection-list
+              [back]="back"
+              [close]="close"
+              [disableFinish]="disableFinish"
+              [domain]="wizard.domain"
+              [finish]="finish"
+              [removeSelection]="removeSelection"
+              [selections]="selections"
+              [setView]="setMode"
+              [view]="mode"></crit-selection-list>
           </div>
         </div>
       </div>

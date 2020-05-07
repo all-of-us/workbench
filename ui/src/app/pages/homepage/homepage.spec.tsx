@@ -49,6 +49,7 @@ describe('HomepageComponent', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
+      enableV3DataUserCodeOfConduct: true
     });
   });
 
@@ -94,6 +95,40 @@ describe('HomepageComponent', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="registration-dashboard"]').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should show DUCC task as incomplete for user who has signed old version', async () => {
+    const newProfile = {
+      ...profile,
+      dataUseAgreementBypassTime: null,
+      dataUseAgreementCompletionTime: 1000,
+      dataUseAgreementSignedVersion: 2, // Old version
+      dataAccessLevel: DataAccessLevel.Unregistered
+    };
+    serverConfigStore.next({...serverConfigStore.getValue()});
+    userProfileStore.next({profile: newProfile, reload, updateCache});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    const duccTask = wrapper.find('[data-test-id="registration-task-dataUserCodeOfConduct"]');
+    expect(duccTask.find('[data-test-id="registration-task-link"]').exists()).toBeTruthy();
+    expect(duccTask.find('[data-test-id="completed-button"]').exists()).toBeFalsy();
+  });
+
+  it('should show DUCC task as completed for user who has signed current version', async () => {
+    const newProfile = {
+      ...profile,
+      dataUseAgreementBypassTime: null,
+      dataUseAgreementCompletionTime: 1000,
+      dataUseAgreementSignedVersion: 3, // Live version
+      dataAccessLevel: DataAccessLevel.Unregistered
+    };
+    serverConfigStore.next({...serverConfigStore.getValue()});
+    userProfileStore.next({profile: newProfile, reload, updateCache});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    const duccTask = wrapper.find('[data-test-id="registration-task-dataUserCodeOfConduct"]');
+    expect(duccTask.find('[data-test-id="registration-task-link"]').exists()).toBeFalsy();
+    expect(duccTask.find('[data-test-id="completed-button"]').exists()).toBeTruthy();
   });
 
   it('should not display the quick tour if registration dashboard is open', async () => {

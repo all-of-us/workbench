@@ -18,19 +18,21 @@ describe('RegistrationDashboard', () => {
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     serverConfigStore.next({
+      enableBetaAccess: true,
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
+      enableV3DataUserCodeOfConduct: true
     });
-    props  = {
+    props = {
       eraCommonsLinked: false,
       eraCommonsLoading: false,
       eraCommonsError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
-      betaAccessGranted: true,
+      betaAccessGranted: false,
       twoFactorAuthCompleted: false,
       dataUserCodeOfConductCompleted: false
     };
@@ -53,28 +55,56 @@ describe('RegistrationDashboard', () => {
     let wrapper = component();
 
     // initially, first tile should be enabled and second tile should be disabled
-    expect(wrapper.find('[data-test-id="registration-task-0"]')
+    expect(wrapper.find('[data-test-id="registration-task-twoFactorAuth"]')
       .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-id="registration-task-1"]')
+    expect(wrapper.find('[data-test-id="registration-task-eraCommons"]')
       .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeTruthy();
 
     props.twoFactorAuthCompleted = true;
     wrapper = component();
     // now, first tile should be disabled but completed and second tile should be enabled
-    expect(wrapper.find('[data-test-id="registration-task-0"]')
+    expect(wrapper.find('[data-test-id="registration-task-twoFactorAuth"]')
       .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
-    expect(wrapper.find('[data-test-id="registration-task-1"]')
+    expect(wrapper.find('[data-test-id="registration-task-eraCommons"]')
       .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
 
   });
 
   it('should display a warning when beta access has not been granted', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: true});
     props.betaAccessGranted = false;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(1);
   });
 
+  it('should clear warning when user has been granted beta access', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: true});
+    props.betaAccessGranted = true;
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
+  });
+
+  it('should not display a warning when enableBetaAccess is false', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: false});
+    props.betaAccessGranted = false;
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
+  });
+
   it('should display a success message when all tasks have been completed', () => {
+    props.betaAccessGranted = true;
+    props.eraCommonsLinked = true;
+    props.trainingCompleted = true;
+    props.twoFactorAuthCompleted = true;
+    props.dataUserCodeOfConductCompleted = true;
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
+  });
+
+  it('should display a success message when complete and enableBetaAccess is false', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: false});
+    // When enableBetaAccess is false, we shouldn't need to have been granted beta access.
+    props.betaAccessGranted = false;
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;

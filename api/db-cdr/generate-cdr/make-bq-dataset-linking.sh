@@ -6,20 +6,16 @@ set -ex
 
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
+export DRY_RUN=$3     # dry run
 
-# Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
-if [ -z "$datasets" ]
+if [ "$DRY_RUN" == true ]
 then
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
+  test=$(bq ls "$BQ_PROJECT:$BQ_DATASET")
+  exit 0
 fi
-if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
-  echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
-else
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
+
+# Test that datset exists
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 
 ################################################
 # CREATE LINKING TABLE

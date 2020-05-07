@@ -17,6 +17,12 @@
       "namespace": "aou-rw-local1-65b2c024",
       "id": "duplicateoftest2",
       "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "Test Demo Project",
+      "namespace": "aou-rw-local1-3b6f0e2b",
+      "id": "testdemoproject",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

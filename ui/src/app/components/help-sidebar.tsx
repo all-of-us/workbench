@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
-import {faBook, faEllipsisV, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {faBook, faEllipsisV, faFolderOpen, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -163,15 +163,22 @@ const iconStyles = {
     width: 27
   }
 };
+
+export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
+
 // TODO uncomment 'thunderstorm' icon when cluster configuration function is ready
-const icons = [{
-  id: 'help',
-  disabled: false,
-  faIcon: faInfoCircle,
-  label: 'Help Icon',
-  page: null,
-  style: {fontSize: '21px'},
-  tooltip: 'Help Tips',
+// helpContentKey is the json key for the block of help content that is being displayed on this
+// sidebar. If the block of help content is about notebook storage, we want to display a different
+// icon on the sidebar and different tooltip, etc.
+const icons = (helpContentKey: string) => {
+  return [{
+    id: 'help',
+    disabled: false,
+    faIcon: helpContentKey === NOTEBOOK_HELP_CONTENT ? faFolderOpen : faInfoCircle,
+    label: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Storage Icon' : 'Help Icon',
+    page: null,
+    style: {fontSize: '21px'},
+    tooltip: helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace Storage' : 'Help Tips',
 // }, {
 //   id: 'thunderstorm',
 //   disabled: true,
@@ -180,23 +187,24 @@ const icons = [{
 //   page: null,
 //   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
 //   tooltip: 'Compute Configuration',
-}, {
-  id: 'dataDictionary',
-  disabled: false,
-  faIcon: faBook,
-  label: 'Data Dictionary Icon',
-  page: null,
-  style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
-  tooltip: 'Data Dictionary',
-}, {
-  id: 'annotations',
-  disabled: false,
-  faIcon: faEdit,
-  label: 'Annotations Icon',
-  page: 'reviewParticipantDetail',
-  style: {fontSize: '20px', marginLeft: '3px'},
-  tooltip: 'Annotations',
-}];
+  }, {
+    id: 'dataDictionary',
+    disabled: false,
+    faIcon: faBook,
+    label: 'Data Dictionary Icon',
+    page: null,
+    style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
+    tooltip: 'Data Dictionary',
+  }, {
+    id: 'annotations',
+    disabled: false,
+    faIcon: faEdit,
+    label: 'Annotations Icon',
+    page: 'reviewParticipantDetail',
+    style: {fontSize: '20px', marginLeft: '3px'},
+    tooltip: 'Annotations',
+  }];
+};
 
 const analyticsLabels = {
   about: 'About Page',
@@ -211,7 +219,7 @@ const analyticsLabels = {
 
 interface Props {
   deleteFunction: Function;
-  helpContent: string;
+  helpContentKey: string;
   profileState: any;
   setSidebarState: Function;
   shareFunction: Function;
@@ -331,8 +339,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     analyticsEvent(type: string, label?: string) {
-      const {helpContent} = this.props;
-      const analyticsLabel = analyticsLabels[helpContent];
+      const {helpContentKey} = this.props;
+      const analyticsLabel = analyticsLabels[helpContentKey];
       if (analyticsLabel) {
         const eventLabel = label ? `${label} - ${analyticsLabel}` : analyticsLabel;
         AnalyticsTracker.Sidebar[type](eventLabel);
@@ -416,9 +424,10 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     render() {
-      const {helpContent, setSidebarState, notebookStyles, sidebarOpen} = this.props;
+      const {helpContentKey, setSidebarState, notebookStyles, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
-      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
+      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
+
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
@@ -428,56 +437,62 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       return <React.Fragment>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {this.renderWorkspaceMenu()}
-          {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
-            <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
-              <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
-                   onClick={() => {
-                     if (icon.id !== 'dataDictionary') {
-                       this.onIconClick(icon);
-                     }
-                   }}
-                   onMouseOver={() => this.setState({tooltipId: i})}
-                   onMouseOut={() => this.setState({tooltipId: undefined})}>
-                {icon.id === 'dataDictionary'
-                  ? <a href={dataDictionaryUrl} target='_blank'>
-                      <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
-                    </a>
-                  : icon.faIcon === null
-                    ? <img src={proIcons[icon.id]} style={icon.style} />
-                    : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} />
-                }
+          {icons(helpContentKey).map((icon, i) =>
+            (!icon.page || icon.page === helpContentKey) &&
+              <div key={i} style={{display: 'table'}}>
+                <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
+                  <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+                       onClick={() => {
+                         if (icon.id !== 'dataDictionary') {
+                           this.onIconClick(icon);
+                         }
+                       }}
+                       onMouseOver={() => this.setState({tooltipId: i})}
+                       onMouseOut={() => this.setState({tooltipId: undefined})}>
+                    {icon.id === 'dataDictionary'
+                      ? <a href={dataDictionaryUrl} target='_blank'>
+                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+                        </a>
+                      : icon.faIcon === null
+                        ? <img src={proIcons[icon.id]} style={icon.style} />
+                        : <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + i} icon={icon.faIcon} style={icon.style} />
+                    }
+                  </div>
+                </TooltipTrigger>
               </div>
-            </TooltipTrigger>
-          </div>)}
+            )
+          }
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
             <ClrIcon shape='times' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
             <div style={contentStyle('help')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
-              <div style={styles.textSearch}>
-                <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
-                <input
-                  type='text'
-                  style={styles.textInput}
-                  value={searchTerm}
-                  onChange={(e) => this.onInputChange(e.target.value)}
-                  placeholder={'Search'} />
-              </div>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
+              {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
+                <div style={styles.textSearch}>
+                  <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
+                  <input
+                    type='text'
+                    style={styles.textInput}
+                    value={searchTerm}
+                    onChange={(e) => this.onInputChange(e.target.value)}
+                    placeholder={'Search'} />
+                </div>
+              }
               {!!displayContent && displayContent.length > 0
                 ? displayContent.map((section, s) => <div key={s}>
-                  <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
-                  {section.content.map((content, c) => {
-                    return typeof content === 'string'
-                      ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
-                      : <div key={c}>
-                        <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
-                        {content.content.map((item, i) =>
-                          <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>
-                        )}
-                      </div>;
-                  })}
-                </div>)
+                    <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
+                    {section.content.map((content, c) => {
+                      return typeof content === 'string'
+                          ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
+                          : <div key={c}>
+                            <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
+                            {content.content.map((item, i) =>
+                                <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>
+                            )}
+                          </div>;
+                    })}
+                  </div>)
                 : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
               }
             </div>
@@ -505,12 +520,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
-  @Input('helpContent') helpContent: Props['helpContent'];
+  @Input('helpContentKey') helpContentKey: Props['helpContentKey'];
   @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
   @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
   @Input('notebookStyles') notebookStyles: Props['notebookStyles'];
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
+    super(HelpSidebar, ['deleteFunction', 'helpContentKey', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
   }
 }

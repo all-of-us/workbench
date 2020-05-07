@@ -12,6 +12,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
@@ -114,6 +115,11 @@ interface RegistrationTask {
 // This needs to be a function, because we want it to evaluate at call time,
 // not at compile time, to ensure that we make use of the server config store.
 // This is important so that we can feature flag off registration tasks.
+//
+// Important: The completion criteria here needs to be kept synchronized with
+// the server-side logic, else users can get stuck on the registration dashboard
+// without a next step:
+// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   {
     key: 'twoFactorAuth',
@@ -160,7 +166,16 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
     completionTimestamp: (profile: Profile) => {
-      return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
+      if (profile.dataUseAgreementBypassTime) {
+        return profile.dataUseAgreementBypassTime;
+      }
+      // The DUA completion time field tracks the most recent DUA completion
+      // timestamp, but doesn't specify whether that DUA is currently active.
+      const requiredDuaVersion = getLiveDataUseAgreementVersion(serverConfigStore.getValue());
+      if (profile.dataUseAgreementSignedVersion === requiredDuaVersion) {
+        return profile.dataUseAgreementCompletionTime;
+      }
+      return null;
     },
     onClick: () => {
       AnalyticsTracker.Registration.EnterDUCC();
@@ -222,7 +237,14 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   }
 
   allTasksCompleted(): boolean {
-    return this.taskCompletionList.every(v => v);
+    const {betaAccessGranted} = this.props;
+    const {enableBetaAccess} = serverConfigStore.getValue();
+
+    // Beta access is awkwardly not treated as a task in the completion list. So we manually
+    // check whether (1) beta access requirement is turned off for this env, or (2) the user
+    // has been granted beta access.
+    return this.taskCompletionList.every(v => v) &&
+      (!enableBetaAccess || betaAccessGranted);
   }
 
   isEnabled(i: number): boolean {
@@ -280,7 +302,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
-    const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
+    const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.getValue();
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
 
@@ -295,7 +317,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
       <div style={styles.mainHeader}>Complete Registration</div>
-      {canUnsafeSelfBypass &&
+      {unsafeAllowSelfBypass &&
         <div data-test-id='self-bypass'
              style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>
           {bypassActionComplete &&
@@ -314,7 +336,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           }
         </div>
       }
-      {!betaAccessGranted &&
+      {enableBetaAccess && !betaAccessGranted &&
         <div data-test-id='beta-access-warning'
              style={{...baseStyles.card, ...styles.warningModal, margin: '1rem 0 0'}}>
           <ClrIcon shape='warning-standard' class='is-solid'
@@ -323,7 +345,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         </div>}
       <FlexRow style={{marginTop: '0.85rem'}}>
         {registrationTasksToRender.map((card, i) => {
-          return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
+          return <ResourceCardBase key={i} data-test-id={'registration-task-' + card.key}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '190px' : '305px',
               minHeight: this.allTasksCompleted() ? '190px' : '305px'}}>
@@ -371,13 +393,14 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         </div>
         <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
       </AlertWarning>}
-      {(this.allTasksCompleted() && betaAccessGranted) &&
-      <div style={{...baseStyles.card, ...styles.warningModal, marginRight: 0}}
-           data-test-id='success-message'>
-        You successfully completed all the required steps to access the Researcher Workbench.
-        <Button style={{marginLeft: '0.5rem'}}
-                onClick={() => window.location.reload()}>Get Started</Button>
-      </div>}
+      {this.allTasksCompleted() &&
+        <div style={{...baseStyles.card, ...styles.warningModal, marginRight: 0}}
+             data-test-id='success-message'>
+          You successfully completed all the required steps to access the Researcher Workbench.
+          <Button style={{marginLeft: '0.5rem'}}
+                  onClick={() => window.location.reload()}>Get Started</Button>
+        </div>
+      }
       {this.state.twoFactorAuthModalOpen && <Modal width={500}>
           <ModalTitle style={styles.twoFactorAuthModalHeader}>Redirecting to turn on Google 2-step Verification</ModalTitle>
           <ModalBody>

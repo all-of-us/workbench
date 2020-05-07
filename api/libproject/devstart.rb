@@ -82,6 +82,15 @@ ENVIRONMENTS = {
     :featured_workspaces_json => "featured_workspaces_stable.json",
     :gae_vars => TEST_GAE_VARS
   },
+  "all-of-us-rw-preprod" => {
+    :env_name => "preprod",
+    :api_endpoint_host => "api.preprod-workbench.researchallofus.org",
+    :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
+    :config_json => "config_preprod.json",
+    :cdr_versions_json => "cdr_versions_preprod.json",
+    :featured_workspaces_json => "featured_workspaces_preprod.json",
+    :gae_vars => TEST_GAE_VARS
+  },
   "all-of-us-rw-prod" => {
     :env_name => "prod",
     :api_endpoint_host => "api.workbench.researchallofus.org",
@@ -773,6 +782,9 @@ Common.register_command({
 
 def make_bq_denormalized_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.cdr_date = Date.today.to_s
+  op.opts.data_browser = false
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -788,11 +800,21 @@ def make_bq_denormalized_tables(cmd_name, *args)
     ->(opts, v) { opts.cdr_date = v},
     "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Is this run for data browser. Default is false"
+  )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry a run. Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -804,6 +826,7 @@ Generates big query denormalized tables for search and review. Used by cohort bu
 
 def make_bq_denormalized_review(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -814,11 +837,16 @@ def make_bq_denormalized_review(cmd_name, *args)
     ->(opts, v) { opts.bq_dataset = v},
     "BQ dataset. Required."
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -828,8 +856,48 @@ Generates big query denormalized tables for review. Used by cohort builder. Must
   :fn => ->(*args) { make_bq_denormalized_review("make-bq-denormalized-review", *args) }
 })
 
-def make_bq_denormalized_search(cmd_name, *args)
+def make_bq_denormalized_search_events(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.opts.dry_run = false
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Is this run for data browser. Default is false"
+  )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
+end
+
+Common.register_command({
+  :invocation => "make-bq-denormalized-search-events",
+  :description => "make-bq-denormalized-search-events --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_search_events("make-bq-denormalized-search-events", *args) }
+})
+
+def make_bq_denormalized_search_person(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -845,22 +913,28 @@ def make_bq_denormalized_search(cmd_name, *args)
     ->(opts, v) { opts.cdr_date = v},
     "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.dry_run}}
 end
 
 Common.register_command({
-  :invocation => "make-bq-denormalized-search",
-  :description => "make-bq-denormalized-search --bq-project <PROJECT> --bq-dataset <DATASET> --cdr-date <YYYY-mm-dd>
+  :invocation => "make-bq-denormalized-search-person",
+  :description => "make-bq-denormalized-search-person --bq-project <PROJECT> --bq-dataset <DATASET> --cdr-date <YYYY-mm-dd>
 Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_search("make-bq-denormalized-search", *args) }
+  :fn => ->(*args) { make_bq_denormalized_search_person("make-bq-denormalized-search-person", *args) }
 })
 
 def make_bq_denormalized_dataset(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -871,22 +945,28 @@ def make_bq_denormalized_dataset(cmd_name, *args)
     ->(opts, v) { opts.bq_dataset = v},
     "BQ dataset. Required."
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
-                            :invocation => "make-bq-denormalized-dataset",
-                            :description => "make-bq-denormalized-dataset --bq-project <PROJECT> --bq-dataset <DATASET>
+  :invocation => "make-bq-denormalized-dataset",
+  :description => "make-bq-denormalized-dataset --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates big query denormalized dataset tables. Used by Data Set Builder. Must be run once when a new cdr is released",
-                            :fn => ->(*args) { make_bq_denormalized_dataset("make-bq-denormalized-dataset", *args) }
-                        })
+  :fn => ->(*args) { make_bq_denormalized_dataset("make-bq-denormalized-dataset", *args) }
+})
 
 def make_bq_dataset_linking(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -897,43 +977,62 @@ def make_bq_dataset_linking(cmd_name, *args)
     ->(opts, v) { opts.bq_dataset = v},
     "BQ dataset. Required."
   )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
-                            :invocation => "make-bq-dataset-linking",
-                            :description => "make-bq-dataset-linking --bq-project <PROJECT> --bq-dataset <DATASET>
+  :invocation => "make-bq-dataset-linking",
+  :description => "make-bq-dataset-linking --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates big query dataset linking tables. Used by Data Set Builder to show users values information.
 Must be run once when a new cdr is released",
-                            :fn => ->(*args) { make_bq_dataset_linking("make-bq-dataset-linking", *args) }
-                        })
-
-def generate_criteria_table(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-criteria-table.sh} + args
-end
-
-Common.register_command({
-  :invocation => "generate-criteria-table",
-  :description => "generate-criteria-table --bq-project <PROJECT> --bq-dataset <DATASET>
-Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { generate_criteria_table(*args) }
+  :fn => ->(*args) { make_bq_dataset_linking("make-bq-dataset-linking", *args) }
 })
 
-def generate_cb_criteria_tables(*args)
+def generate_cb_criteria_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.opts.dry_run = false
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Is this run for data browser. Default is false"
+  )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
   :invocation => "generate-cb-criteria-tables",
   :description => "generate-cb-criteria-tables --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { generate_cb_criteria_tables(*args) }
+  :fn => ->(*args) { generate_cb_criteria_tables("generate_cb_criteria_tables", *args) }
 })
 
 def generate_private_cdr_counts(cmd_name, *args)
@@ -1204,10 +1303,11 @@ def create_auth_domain(cmd_name, args)
   token = token.chomp
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
+  api_base_url = get_server_config(op.opts.project)["apiBaseUrl"]
 
   domain_name = get_auth_domain(op.opts.project)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
-     https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}}
+     #{api_base_url}/v1/auth-domain/#{domain_name}}
 end
 
 Common.register_command({
@@ -1261,48 +1361,54 @@ Common.register_command({
     :fn => ->(*args) {backfill_billing_project_owners("backfill-billing-project-owners", *args)}
 })
 
-def update_user_registered_status(cmd_name, args)
+def update_user_disabled_status(cmd_name, args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
-    "Project to update registered status for"
+    "Project to update disabled status for"
   )
   op.add_option(
     "--disabled [disabled]",
     ->(opts, v) { opts.disabled = v},
-    "Disabled state to set: true/false."
+    "Disabled state to set: true/false"
   )
   op.add_option(
-    "--account [account]",
+    "--account [admin_account_email]",
     ->(opts, v) { opts.account = v},
-    "Account to perform update registered status as."
+    "Workbench admin account to perform update disabled status as"
   )
   op.add_option(
-    "--user [user]",
+    "--user [target_email]",
     ->(opts, v) { opts.user = v},
-    "User to grant or revoke registered access from."
+    "User to update the disabled status for"
   )
+  op.add_validator ->(opts) {
+    raise ArgumentError unless (opts.project and opts.disabled != nil and opts.account and opts.user)
+  }
   op.parse.validate
 
-  common.run_inline %W{gcloud auth login}
+  common.run_inline %W{gcloud auth login #{op.opts.account}}
   token = common.capture_stdout %W{gcloud auth print-access-token}
   token = token.chomp
-  common.run_inline %W{gcloud config set account #{op.opts.account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
   payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
-  domain_name = get_auth_domain(op.opts.project)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
-      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/#{domain_name}/users}
+      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/users}
 end
 
 Common.register_command({
-  :invocation => "update-user-registered-status",
-  :description => "Adds or removes a specified user from the registered access domain.\n" \
-                  "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
-  :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
+  :invocation => "update-user-disabled-status",
+  :description => "Set a Workbench user's disabled status by email, using another Workbench admin account.\n" \
+                  "Disabling a user immediately revokes CDR access and restricted API access in the \n" \
+                  "Workbench, if they had access to begin with. When a disabled user loads the Workbench UI, \n" \
+                  "they are redirected to a page which explains that they are disabled. This is currently the \n" \
+                  "only automated means by which the user is notified of their disabled status.\n" \
+                  "This tool can be used as a manual backup to the Workbench user admin UI, which supports the same disable function.\n" \
+                  "Requires four flags: --project [env project] --disabled [true/false], --account [admin email], and --user [target user email]",
+  :fn => ->(*args) { update_user_disabled_status("update_user_registered_status", args) }
 })
 
 def fetch_firecloud_user_profile(cmd_name, *args)
@@ -1466,6 +1572,60 @@ Common.register_command({
     :invocation => LOAD_INSTITUTIONS_CMD,
     :description => "Load institutions specified in given file.",
     :fn => ->(*args) {load_institutions(LOAD_INSTITUTIONS_CMD, *args)}
+})
+
+def populate_ops_user_affiliations(cmd_name, *args)
+  common = Common.new
+  ensure_docker(cmd_name, args)
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  op.add_typed_option(
+      "--import-filename [import-filename]",
+      String,
+      ->(opts, v) { opts.importFilename = v},
+      "CSV File containing list of ops users to assign the ops institution")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  gradle_args = ([
+      ["--import-filename", op.opts.importFilename]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    gradle_args += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle populateOpsUserAffiliations
+       -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+POPULATE_OPS_USER_AFFILIATIONS_CMD = "populate-ops-user-affiliations"
+
+Common.register_command({
+    :invocation => POPULATE_OPS_USER_AFFILIATIONS_CMD,
+    :description => "Populate the institutional affiliations for the ops users in the specified CSV file.",
+    :fn => ->(*args) {populate_ops_user_affiliations(POPULATE_OPS_USER_AFFILIATIONS_CMD, *args)}
 })
 
 def delete_workspaces(cmd_name, *args)
@@ -1645,7 +1805,7 @@ def describe_cluster(cmd_name, *args)
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
-      "Optional project ID; by default will infer the project form the cluster ID")
+      "Optional project ID; by default will infer the project from the cluster ID")
   op.add_validator ->(opts) { raise ArgumentError unless opts.cluster_id }
   op.parse.validate
 
@@ -2077,6 +2237,11 @@ def get_billing_config(project)
   return JSON.parse(File.read("config/#{config_json}"))["billing"]
 end
 
+def get_server_config(project)
+  config_json = must_get_env_value(project, :config_json)
+  return JSON.parse(File.read("config/#{config_json}"))["server"]
+end
+
 def get_billing_project_prefix(project)
   return get_billing_config(project)["projectNamePrefix"]
 end
@@ -2332,7 +2497,7 @@ def setup_project_data(gcc, cdr_db_name)
   common.status "Writing DB credentials file..."
   write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password)
   common.status "Setting root password..."
-  run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
+  run_with_redirects("gcloud sql users set-password root --host % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
                      root_password)
   # Don't delete the credentials created here; they will be stored in GCS and reused during

@@ -582,8 +582,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             color: colors.primary, paddingRight: '0.5rem', justifyContent: 'flex-end'
           }}>
             <FlexColumn style={{alignItems: 'flex-end'}}>
-              <div><i>All of Us</i> FREE credits used:</div>
-              <div>Remaining <i>All of Us</i> FREE credits:</div>
+              <div><i>All of Us</i> free credits used:</div>
+              <div>Remaining <i>All of Us</i> free credits:</div>
             </FlexColumn>
             <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
               {renderUSD(profile.freeTierUsage)}
