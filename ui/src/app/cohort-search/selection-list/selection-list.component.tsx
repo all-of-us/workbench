@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -16,20 +17,12 @@ const styles = reactStyles({
     padding: '0.45rem 0rem'
   },
   button: {
-    border: 'none',
-    borderRadius: '0.3rem',
-    cursor: 'pointer',
     fontSize: '12px',
     height: '1.5rem',
     letterSpacing: '0.02rem',
     lineHeight: '0.75rem',
     margin: '0.25rem 0.5rem',
     padding: '0rem 0.75rem',
-    textTransform: 'uppercase',
-  },
-  disabled: {
-    opacity: 0.4,
-    pointerEvents: 'none'
   },
   itemInfo: {
     width: '100%',
@@ -144,7 +137,7 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
 
 interface Props {
   back: Function;
-  cancel: Function;
+  close: Function;
   disableFinish: boolean;
   domain: DomainType;
   finish: Function;
@@ -172,7 +165,7 @@ export class SelectionList extends React.Component<Props> {
   }
 
   render() {
-    const {back, cancel, disableFinish, finish, removeSelection, selections, setView} = this.props;
+    const {back, close, disableFinish, finish, removeSelection, selections, setView} = this.props;
     return <div style={styles.selectionPanel}>
       <h5 style={styles.selectionTitle}>Selected Criteria</h5>
       <div style={styles.selectionContainer}>
@@ -184,29 +177,26 @@ export class SelectionList extends React.Component<Props> {
         )}
       </div>
       <div style={styles.buttonContainer}>
-        <button style={{...styles.button, background: 'transparent', color: colors.dark, fontSize: '14px'}}
-          onClick={() => cancel()}>
+        <Button type='link'
+          style={{...styles.button, color: colors.dark, fontSize: '14px'}}
+          onClick={() => close()}>
           Cancel
-        </button>
-        {this.showNext && <button onClick={() => setView('modifiers')}
-          style={{
-            ...styles.button,
-            ...(selections.length === 0 ? styles.disabled : {}),
-            background: colors.primary, color: colors.white}}>
+        </Button>
+        {this.showNext && <Button type='primary' onClick={() => setView('modifiers')}
+          style={styles.button}
+          disabled={selections.length === 0}>
           Next
-        </button>}
-        {this.showBack && <button style={{...styles.button, background: colors.primary, color: colors.white}}
+        </Button>}
+        {this.showBack && <Button type='primary'
+          style={styles.button}
           onClick={() => back()}>
           Back
-        </button>}
-        <button onClick={() => finish()}
-          style={{
-            ...styles.button,
-            ...((selections.length === 0 || disableFinish) ? styles.disabled : {}),
-            background: colors.primary, color: colors.white
-          }}>
+        </Button>}
+        <Button type='primary' onClick={() => finish()}
+          style={styles.button}
+          disabled={selections.length === 0 || disableFinish}>
           Finish
-        </button>
+        </Button>
       </div>
     </div>;
   }
@@ -218,7 +208,7 @@ export class SelectionList extends React.Component<Props> {
 })
 export class SelectionListComponent extends ReactWrapperBase {
   @Input('back') back: Props['back'];
-  @Input('cancel') cancel: Props['cancel'];
+  @Input('close') close: Props['close'];
   @Input('disableFinish') disableFinish: Props['disableFinish'];
   @Input('domain') domain: Props['domain'];
   @Input('finish') finish: Props['finish'];
@@ -227,6 +217,6 @@ export class SelectionListComponent extends ReactWrapperBase {
   @Input('setView') setView: Props['setView'];
   @Input('view') view: Props['view'];
   constructor() {
-    super(SelectionList, ['back', 'cancel', 'disableFinish', 'domain', 'finish', 'removeSelection', 'selections', 'setView', 'view']);
+    super(SelectionList, ['back', 'close', 'disableFinish', 'domain', 'finish', 'removeSelection', 'selections', 'setView', 'view']);
   }
 }

@@ -29,7 +29,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   backMode: string;
   count = 0;
   loadingSubtree = false;
-  modifiersDisabled = false;
+  disableFinish = false;
   conceptType: string = null;
   wizard: any;
   attributesNode: any;
@@ -230,7 +230,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   modifiersFlag = (disabled: boolean) => {
-    this.modifiersDisabled = disabled;
+    this.disableFinish = disabled;
   }
 
   setTreeSearchTerms = (input: string) => {

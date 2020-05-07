@@ -130,8 +130,8 @@
           <div class="content right" *ngIf="open">
             <crit-selection-list
               [back]="back"
-              [cancel]="close"
-              [disableFinish]="modifiersDisabled"
+              [close]="close"
+              [disableFinish]="disableFinish"
               [domain]="wizard.domain"
               [finish]="finish"
               [removeSelection]="removeSelection"
