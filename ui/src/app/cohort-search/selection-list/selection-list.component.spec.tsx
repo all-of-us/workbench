@@ -7,7 +7,7 @@ import {SelectionList} from './selection-list.component';
 describe('SelectionList', () => {
   it('should create', () => {
     const wrapper = shallow(<SelectionList back={() => {}}
-                                           cancel={() => {}}
+                                           close={() => {}}
                                            disableFinish={false}
                                            domain={DomainType.CONDITION}
                                            finish={() => {}}
