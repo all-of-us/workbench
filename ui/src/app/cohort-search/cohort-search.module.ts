@@ -17,7 +17,7 @@ import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
-import {SelectionInfoComponent} from './selection-info/selection-info.component';
+import {SelectionListComponent} from './selection-list/selection-list.component';
 import {CriteriaTreeComponent} from './tree/tree.component';
 
 import {BreadcrumbType} from 'app/utils/navigation';
@@ -63,7 +63,7 @@ const routes: Routes = [{
     OverviewComponent,
     SearchGroupListComponent,
     ListSearchComponent,
-    SelectionInfoComponent,
+    SelectionListComponent,
     SafeHtmlPipe,
   ],
   providers: [TitleCasePipe]
