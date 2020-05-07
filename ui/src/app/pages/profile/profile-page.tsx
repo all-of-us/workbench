@@ -283,16 +283,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       }[v] || validate.prettify(v))
     });
 
-    // render a float value as US currency, rounded to cents: 255.372793 -> $255.37
-    const usdElement = (value: number) => {
-      value = value || 0.0;
-      if (value < 0.0) {
-        return <div style={{fontWeight: 600}}>-${(-value).toFixed(2)}</div>;
-      } else {
-        return <div style={{fontWeight: 600}}>${(value).toFixed(2)}</div>;
-      }
-    };
-
     const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
       let errorText = profile && errors && errors[valueKey];
       if (valueKey && Array.isArray(valueKey) && valueKey.length > 1) {
@@ -458,8 +448,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 <div>Remaining <i>All of Us</i> free credits:</div>
               </FlexColumn>
               <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                <div style={{marginTop: '0.4rem'}}>{usdElement(profile.freeTierUsage)}</div>
-                {usdElement(profile.freeTierDollarQuota - profile.freeTierUsage)}
+                <div style={{marginTop: '0.4rem'}}>{renderUSD(profile.freeTierUsage)}</div>
+                {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
               </FlexColumn>
             </FlexRow>}
             <div style={styles.title}>Requirements for All
