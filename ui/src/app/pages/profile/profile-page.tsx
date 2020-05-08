@@ -1,16 +1,16 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
-import * as moment from 'moment';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
+import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
@@ -18,7 +18,13 @@ import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registrat
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, renderUSD, withUserProfile} from 'app/utils';
+import {
+  displayDateWithoutHours,
+  reactStyles,
+  ReactWrapperBase,
+  renderUSD,
+  withUserProfile
+} from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
@@ -36,17 +42,22 @@ const styles = reactStyles({
   inputLabel: {
     color: colors.primary,
     fontSize: 14,
-    fontWeight: 500,
-    lineHeight: '18px',
+    fontWeight: 600,
+    lineHeight: '22px',
     marginBottom: 6
   },
   inputStyle: {
     width: 300,
+    height: 40,
+    fontSize: 14,
     marginRight: 20
   },
-  longInputStyle: {
-    height: 175, width: 420,
+  longInputContainerStyle: {
+    width: 420,
     resize: 'both'
+  },
+  longInputHeightStyle: {
+    height: 175,
   },
   box: {
     backgroundColor: colors.white,
@@ -89,6 +100,11 @@ const styles = reactStyles({
     marginBottom: '1.4rem',
     color: colors.primary,
     backgroundColor: colorWithWhiteness(colors.disabled, 0.7)
+  },
+  updateSurveyButton: {
+    textTransform: 'none',
+    padding: 0,
+    height: 'auto'
   }
 });
 
@@ -112,6 +128,12 @@ const validators = {
   state: {...required, ...notTooLong(95)},
   country: {...required, ...notTooLong(95)}
 };
+
+enum RegistrationStepStatus {
+  COMPLETED,
+  BYPASSED,
+  UNCOMPLETE
+}
 
 interface ProfilePageProps {
   profileState: {
@@ -250,6 +272,94 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     }
   }
 
+  getRegistrationStatus(completionTime: number, bypassTime: number) {
+    return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
+      bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
+  }
+
+  private bypassedText(bypassTime) {
+    return <React.Fragment>
+      <div>Bypassed on:</div>
+      <div>{displayDateWithoutHours(bypassTime)}</div>
+    </React.Fragment>;
+  }
+
+  private getTwoFactorAuthCardText(profile) {
+    switch (this.getRegistrationStatus(profile.twoFactorAuthCompletionTime, profile.twoFactorAuthBypassTime)) {
+      case RegistrationStepStatus.COMPLETED:
+        return <React.Fragment>
+          <div>Completed on:</div>
+          <div>{displayDateWithoutHours(profile.twoFactorAuthCompletionTime)}</div>
+        </React.Fragment>;
+      case RegistrationStepStatus.BYPASSED:
+        return this.bypassedText(profile.twoFactorAuthBypassTime);
+      default:
+        return;
+    }
+  }
+
+  private getEraCommonsCardText(profile) {
+    switch (this.getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
+      case RegistrationStepStatus.COMPLETED:
+        return <div>
+          {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
+              <div> Username:</div>
+              <div> {profile.eraCommonsLinkedNihUsername} </div>
+          </React.Fragment>}
+          {profile.eraCommonsLinkExpireTime != null &&
+          //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
+          profile.eraCommonsLinkExpireTime !== 0
+          && <React.Fragment>
+              <div> Completed on:</div>
+              <div>
+                {displayDateWithoutHours(profile.eraCommonsCompletionTime)}
+              </div>
+          </React.Fragment>}
+        </div>;
+      case RegistrationStepStatus.BYPASSED:
+        return this.bypassedText(profile.twoFactorAuthBypassTime);
+      default:
+        return;
+    }
+  }
+
+  private getComplianceTrainingText(profile) {
+    switch (this.getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
+      case RegistrationStepStatus.COMPLETED:
+        return <React.Fragment>
+          <div>Training Completed</div>
+          <div>{displayDateWithoutHours(profile.complianceTrainingCompletionTime)}</div>
+        </React.Fragment>;
+      case RegistrationStepStatus.BYPASSED:
+        return this.bypassedText(profile.complianceTrainingBypassTime);
+      default:
+        return;
+    }
+  }
+
+  private getDataUseAgreementText(profile) {
+    const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
+      View code of conduct
+    </a>;
+    switch (this.getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
+      case RegistrationStepStatus.COMPLETED:
+        return <React.Fragment>
+          <div>Signed On:</div>
+          <div>
+            {displayDateWithoutHours(profile.dataUseAgreementCompletionTime)}
+          </div>
+          {universalText}
+        </React.Fragment>;
+      case RegistrationStepStatus.BYPASSED:
+        return <React.Fragment>
+          {this.bypassedText(profile.dataUseAgreementBypassTime)}
+          {universalText}
+        </React.Fragment>;
+      case RegistrationStepStatus.UNCOMPLETE:
+        return universalText;
+    }
+  }
+
   render() {
     const {profileState: {profile}} = this.props;
     const {currentProfile, saveProfileErrorResponse, updating, showDemographicSurveyModal} = this.state;
@@ -292,19 +402,28 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
         value: fp.get(valueKey, currentProfile) || '',
         onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
         invalid: !!errorText,
+        style: props.style,
+        maxCharacters: props.maxCharacters,
+        tooLongWarningCharacters: props.tooLongWarningCharacters,
         ...props
       };
+      const id = props.id || valueKey;
 
       return <div style={{marginBottom: 40}}>
         <div style={styles.inputLabel}>{title}</div>
-        {isLong ? <TextArea  data-test-id={props.id || valueKey}
-            style={styles.longInputStyle}
+        {isLong ? <TextAreaWithLengthValidationMessage
+            id={id} data-test-id={id}
+            heightOverride={styles.longInputHeightStyle}
+            initialText={inputProps.value}
+            maxCharacters={inputProps.maxCharacters}
+            tooLongWarningCharacters={inputProps.tooLongWarningCharacters}
             {...inputProps}
+            textBoxStyleOverrides={{...styles.longInputContainerStyle, ...inputProps.style}}
           />  :
             <TooltipTrigger content='This field cannot be edited' disabled={!props.disabled}>
           <TextInput  data-test-id={props.id || valueKey}
-            style={styles.inputStyle}
             {...inputProps}
+            style={{...styles.inputStyle, ...inputProps.style}}
           /></TooltipTrigger>}
         <ValidationError>{errorText}</ValidationError>
       </div>;
@@ -329,7 +448,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 valueKey: 'familyName'
               })}
             </FlexRow>
-            <FlexRow style={{height: '6rem'}}>
+            <FlexRow>
               <FlexColumn>
                 {makeProfileInput({
                   title: 'Your Institution',
@@ -337,11 +456,10 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                   disabled: true
                 })}
                 {!profile.verifiedInstitutionalAffiliation && <div style={{color: colors.danger}}>
-                  Institution cannot be empty. Please contact admin
+                    Institution cannot be empty. Please contact admin
                 </div>}
               </FlexColumn>
-
-              <FlexColumn style={{marginBottom: 40}}>
+              <FlexColumn>
                 <div style={styles.inputLabel}>Your Role</div>
                 {profile.verifiedInstitutionalAffiliation &&
                 <Dropdown style={{width: '12.5rem'}} data-test-id='role-dropdown'
@@ -349,7 +467,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                           options={this.getRoleOptions()}
                           onChange={(v) => this.setVerifiedInstitutionRole(v.value)}
                           value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
-
                 {currentProfile.verifiedInstitutionalAffiliation &&
                 currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum &&
                 currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum ===
@@ -380,6 +497,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                     inform the <i>AoU</i> Research Participants.
                   </div>
                 </FlexColumn>,
+                maxCharacters: 2000,
+                tooLongWarningCharacters: 1900,
                 valueKey: 'areaOfResearch',
                 isLong: true,
                 style: {width: '26rem'}
@@ -438,38 +557,37 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               </FlexRow>
             </div>
           </div>
-          <div style={{width: '16rem', marginRight: '4rem'}}>
+          <div style={{width: '20rem', marginRight: '4rem'}}>
             <div style={styles.title}>Free credits balance
             </div>
             <hr style={{...styles.verticalLine, width: '15.7rem'}}/>
             {profile && <FlexRow style={styles.freeCreditsBox}>
-              <FlexColumn style={{marginLeft: '0.8rem'}}>
-                <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
-                <div>Remaining <i>All of Us</i> free credits:</div>
-              </FlexColumn>
-              <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                <div style={{marginTop: '0.4rem'}}>{renderUSD(profile.freeTierUsage)}</div>
-                {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
-              </FlexColumn>
+                <FlexColumn style={{marginLeft: '0.8rem'}}>
+                    <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
+                    <div>Remaining <i>All of Us</i> free credits:</div>
+                </FlexColumn>
+                <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                    <div style={{marginTop: '0.4rem'}}>{renderUSD(profile.freeTierUsage)}</div>
+                  {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
+                </FlexColumn>
             </FlexRow>}
-            <div style={styles.title}>Requirements for All
+            <div style={styles.title}>
+              Requirements for <AoU/> Workbench access
             </div>
             <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
-            <div>
+            <FlexRow>
               <ProfileRegistrationStepStatus
-                  title='Turn on Google 2-Step Verification'
-                  wasBypassed={!!profile.twoFactorAuthBypassTime}
-                  incompleteButtonText='Set Up'
-                  completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-                  completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
-                  isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}/>
-
-
-            </div>
-            <div>
-
+                title='Turn on Google 2-Step Verification'
+                wasBypassed={!!profile.twoFactorAuthBypassTime}
+                incompleteButtonText='Set Up'
+                completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
+                completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
+                isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
+                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}>
+                {this.getTwoFactorAuthCardText(profile)}
+              </ProfileRegistrationStepStatus>
               {enableEraCommons && <ProfileRegistrationStepStatus
+                  containerStylesOverride={{marginLeft: '0.5rem'}}
                   title='Connect Your eRA Commons Account'
                   wasBypassed={!!profile.eraCommonsBypassTime}
                   incompleteButtonText='Link'
@@ -477,35 +595,22 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                   completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
                   isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
                   completeStep={getRegistrationTasksMap()['eraCommons'].onClick}>
-                <div>
-                  {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
-                    <div> Username:</div>
-                    <div> {profile.eraCommonsLinkedNihUsername} </div>
-                  </React.Fragment>}
-                  {profile.eraCommonsLinkExpireTime != null &&
-                  //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
-                  profile.eraCommonsLinkExpireTime !== 0
-                  && <React.Fragment>
-                    <div> Link Expiration:</div>
-                    <div>
-                      {moment.unix(profile.eraCommonsLinkExpireTime)
-                          .format('MMMM Do, YYYY, h:mm:ss A')}
-                    </div>
-                  </React.Fragment>}
-                </div>
+                {this.getEraCommonsCardText(profile)}
               </ProfileRegistrationStepStatus>}
-
+            </FlexRow>
+            <FlexRow style={{marginTop: 3}}>
               {enableComplianceTraining && <ProfileRegistrationStepStatus
                   title={<span><i>All of Us</i> Responsible Conduct of Research Training'</span>}
-                wasBypassed={!!profile.complianceTrainingBypassTime}
-                incompleteButtonText='Access Training'
-                completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
-                completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
-                isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />}
-
-
+                  wasBypassed={!!profile.complianceTrainingBypassTime}
+                  incompleteButtonText='Access Training'
+                  completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
+                  completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
+                  isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
+                  completeStep={getRegistrationTasksMap()['complianceTraining'].onClick}>
+                {this.getComplianceTrainingText(profile)}
+              </ProfileRegistrationStepStatus>}
               {enableDataUseAgreement && <ProfileRegistrationStepStatus
+                  containerStylesOverride={{marginLeft: '0.5rem'}}
                   title='Sign Data User Code Of Conduct'
                   wasBypassed={!!profile.dataUseAgreementBypassTime}
                   incompleteButtonText='Sign'
@@ -514,30 +619,27 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                   isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
                   completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
                   childrenStyle={{marginLeft: '0rem'}}>
-                {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
-                  <div> Agreement Renewal:</div>
-                  <div>
-                    {moment.unix(profile.dataUseAgreementCompletionTime / 1000)
-                        .add(1, 'year')
-                        .format('MMMM Do, YYYY')}
-                  </div>
-                </React.Fragment>}
-                <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
-                  View current agreement
-                </a>
+                {this.getDataUseAgreementText(profile)}
               </ProfileRegistrationStepStatus>}
-            </div>
+            </FlexRow>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
 
               <div style={styles.title}>Optional Demographics Survey</div>
               <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
-              <Button
+              <div style={{color: colors.primary, fontSize: '14px'}}>
+                <div>Survey Completed</div>
+                {/*If a user has created an account, they have, by definition, completed the demographic survey*/}
+                <div>{displayDateWithoutHours(profile.demographicSurveyCompletionTime !== null ?
+                  profile.demographicSurveyCompletionTime : profile.firstSignInTime)}</div>
+                <Button
                   type={'link'}
+                  style={styles.updateSurveyButton}
                   onClick={() => {
                     this.setState({showDemographicSurveyModal: true});
                   }}
                   data-test-id={'demographics-survey-button'}
-              >Update Survey</Button>
+                >Update Survey</Button>
+              </div>
             </div>
           </div>
         </FlexRow>
@@ -548,152 +650,62 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             <Button type='link'
                     onClick={() => this.setState({currentProfile: profile})}
             >
-              Discard Changes
+              Cancel
             </Button>
             <TooltipTrigger
-                side='top'
-                content={(!!errors || !profile.verifiedInstitutionalAffiliation) && this.saveProfileErrorMessage}>
+              side='top'
+              content={(!!errors || !profile.verifiedInstitutionalAffiliation) && this.saveProfileErrorMessage}>
               <Button
-                  data-test-id='save_profile'
-                  type='purplePrimary'
-                  style={{marginLeft: 40}}
-                  onClick={() => this.saveProfile(currentProfile)}
-                  disabled={!!errors || fp.isEqual(profile, currentProfile) || !profile.verifiedInstitutionalAffiliation}
+                data-test-id='save_profile'
+                type='purplePrimary'
+                style={{marginLeft: 40}}
+                onClick={() => this.saveProfile(currentProfile)}
+                disabled={!!errors || fp.isEqual(profile, currentProfile) || !profile.verifiedInstitutionalAffiliation}
               >
                 Save Profile
               </Button>
             </TooltipTrigger>
           </div>
         </div>
-
-        {saveProfileErrorResponse &&
-       <div>
-          {profile && <FlexRow style={{
-            color: colors.primary, paddingRight: '0.5rem', justifyContent: 'flex-end'
-          }}>
-            <FlexColumn style={{alignItems: 'flex-end'}}>
-              <div><i>All of Us</i> free credits used:</div>
-              <div>Remaining <i>All of Us</i> free credits:</div>
-            </FlexColumn>
-            <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-              {renderUSD(profile.freeTierUsage)}
-              {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
-            </FlexColumn>
-          </FlexRow>}
-          <div>
-            <div style={styles.title}>Optional Demographics Survey</div>
-            <Button
-                type={'link'}
-                onClick={() => {
-                  this.setState({showDemographicSurveyModal: true});
+        {showDemographicSurveyModal && <Modal width={850}>
+            <DemographicSurvey
+                profile={currentProfile}
+                onCancelClick={() => {
+                  this.setState({showDemographicSurveyModal: false});
                 }}
-                data-test-id={'demographics-survey-button'}
-            >Update Survey</Button>
-          </div>
-          <ProfileRegistrationStepStatus
-            title='Google 2-Step Verification'
-            wasBypassed={!!profile.twoFactorAuthBypassTime}
-            incompleteButtonText='Set Up'
-            completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-            completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
-            isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-            completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
-
-          {enableComplianceTraining && <ProfileRegistrationStepStatus
-            title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
-            wasBypassed={!!profile.complianceTrainingBypassTime}
-            incompleteButtonText='Access Training'
-            completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
-            completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
-            isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-            completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />}
-
-          {enableEraCommons && <ProfileRegistrationStepStatus
-            title='eRA Commons Account'
-            wasBypassed={!!profile.eraCommonsBypassTime}
-            incompleteButtonText='Link'
-            completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
-            completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
-            isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
-            completeStep={getRegistrationTasksMap()['eraCommons'].onClick} >
-            <div>
-              {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
-                <div> Username: </div>
-                <div> { profile.eraCommonsLinkedNihUsername } </div>
-              </React.Fragment>}
-              {profile.eraCommonsLinkExpireTime != null &&
-              //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
-              profile.eraCommonsLinkExpireTime !== 0
-              && <React.Fragment>
-                <div> Link Expiration: </div>
-                <div>
-                  { moment.unix(profile.eraCommonsLinkExpireTime)
-                    .format('MMMM Do, YYYY, h:mm:ss A') }
-                </div>
-              </React.Fragment>}
-            </div>
-          </ProfileRegistrationStepStatus>}
-
-          {enableDataUseAgreement && <ProfileRegistrationStepStatus
-            title='Data User Code Of Conduct'
-            wasBypassed={!!profile.dataUseAgreementBypassTime}
-            incompleteButtonText='Sign'
-            completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
-            completionTimestamp={getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile)}
-            isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
-            completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick} >
-            {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
-              <div> Agreement Renewal: </div>
-              <div>
-                { moment.unix(profile.dataUseAgreementCompletionTime / 1000)
-                    .add(1, 'year')
-                    .format('MMMM Do, YYYY') }
-              </div>
-            </React.Fragment>}
-            <a
-              onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
-              View current agreement
-            </a>
-          </ProfileRegistrationStepStatus>}
-        </div>}
-      {showDemographicSurveyModal && <Modal width={850}>
-        <DemographicSurvey
-            profile={currentProfile}
-            onCancelClick={() => {
-              this.setState({showDemographicSurveyModal: false});
-            }}
-            onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
-              const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
-              this.setState({showDemographicSurveyModal: false});
-              return savedProfile;
-            }}
-            enableCaptcha={false}
-            enablePrevious={false}
-            showStepCount={false}
-        />
-      </Modal>}
-      {saveProfileErrorResponse &&
+                onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
+                  const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
+                  this.setState({showDemographicSurveyModal: false});
+                  return savedProfile;
+                }}
+                enableCaptcha={false}
+                enablePrevious={false}
+                showStepCount={false}
+            />
+        </Modal>}
+        {saveProfileErrorResponse &&
         <Modal data-test-id='update-profile-error'>
-          <ModalTitle>Error creating account</ModalTitle>
-          <ModalBody>
-            <div>An error occurred while updating your profile. The following message was
-              returned:
-            </div>
-            <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
-              "{saveProfileErrorResponse.message}"
-            </div>
-            <div>
-              Please try again or contact <a
-                href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={() => this.setState({saveProfileErrorResponse: null})}
-                    type='primary'>Close</Button>
-          </ModalFooter>
+            <ModalTitle>Error creating account</ModalTitle>
+            <ModalBody>
+                <div>An error occurred while updating your profile. The following message was
+                    returned:
+                </div>
+                <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+                    "{saveProfileErrorResponse.message}"
+                </div>
+                <div>
+                    Please try again or contact <a
+                    href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+                </div>
+            </ModalBody>
+            <ModalFooter>
+                <Button onClick={() => this.setState({saveProfileErrorResponse: null})}
+                        type='primary'>Close</Button>
+            </ModalFooter>
         </Modal>
         }
-      </div></FadeBox>;
+      </div>
+    </FadeBox>;
   }
 });
 
