@@ -21,7 +21,8 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   reactStyles,
-  ReactWrapperBase, renderUSD,
+  ReactWrapperBase,
+  renderUSD,
   withUserProfile
 } from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
@@ -561,14 +562,14 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </div>
             <hr style={{...styles.verticalLine, width: '15.7rem'}}/>
             {profile && <FlexRow style={styles.freeCreditsBox}>
-              <FlexColumn style={{marginLeft: '0.8rem'}}>
-                <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
-                <div>Remaining <i>All of Us</i> free credits:</div>
-              </FlexColumn>
-              <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                <div style={{marginTop: '0.4rem'}}>{renderUSD(profile.freeTierUsage)}</div>
-                {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
-              </FlexColumn>
+                <FlexColumn style={{marginLeft: '0.8rem'}}>
+                    <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
+                    <div>Remaining <i>All of Us</i> free credits:</div>
+                </FlexColumn>
+                <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                    <div style={{marginTop: '0.4rem'}}>{renderUSD(profile.freeTierUsage)}</div>
+                  {renderUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}
+                </FlexColumn>
             </FlexRow>}
             <div style={styles.title}>
               Requirements for <AoU/> Workbench access
