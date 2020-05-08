@@ -510,7 +510,7 @@ jobs:
       - checkout_init_git
       - manage_api_cache:
           restore: true
-      - activate_service_account_creds
+      - activate_service_account_credential
       - run:
           name: Await MySQL startup
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
