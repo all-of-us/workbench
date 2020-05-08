@@ -9,7 +9,7 @@ SET PASSWORD FOR '${WORKBENCH_DB_USER}'@'%' = '${WORKBENCH_DB_PASSWORD}';
 SET PASSWORD FOR '${LIQUIBASE_DB_USER}'@'%' = '${LIQUIBASE_DB_PASSWORD}';
 
 -- Grant readonly access to all tables, captures Workbench, CDR, and Liquibase.
-GRANT SELECT, CREATE TEMPORARY TABLES ON * TO '${DEV_READONLY_DB_USER}'@'%';
+GRANT SELECT, CREATE TEMPORARY TABLES ON *.* TO '${DEV_READONLY_DB_USER}'@'%';
 
 -- Give main db access and wildcard permission to cdr databases for workbench
 -- cdr* is the older and/or local naming convention, synth_r_*, r_* is new
