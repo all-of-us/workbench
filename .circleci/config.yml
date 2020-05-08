@@ -490,7 +490,6 @@ jobs:
     resource_class: medium+
     docker:
         - image: allofustest/workbench:buildimage-0.0.16
-        - image: buildkite/puppeteer:v3.0.1
         - image: mysql:5.7
           environment:
             - MYSQL_ROOT_PASSWORD=ubuntu
