@@ -507,8 +507,8 @@ jobs:
     working_directory: ~/workbench
     parallelism: 1
     steps:
-      - git_checkout
-      - api_cache:
+      - checkout_init_git
+      - manage_api_cache:
           restore: true
       - activate_service_account_creds
       - run:
