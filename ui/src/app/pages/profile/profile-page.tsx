@@ -598,7 +598,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 {this.getEraCommonsCardText(profile)}
               </ProfileRegistrationStepStatus>}
             </FlexRow>
-            <FlexRow>
+            <FlexRow style={{marginTop: 3}}>
               {enableComplianceTraining && <ProfileRegistrationStepStatus
                   title={<span><i>All of Us</i> Responsible Conduct of Research Training'</span>}
                   wasBypassed={!!profile.complianceTrainingBypassTime}
