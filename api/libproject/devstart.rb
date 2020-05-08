@@ -2024,7 +2024,9 @@ def connect_to_cloud_db(cmd_name, *args)
   op.add_option(
     "--db-user [user]",
     ->(opts, v) { opts.db_user = v },
-    "Optional database user to connect as, defaults to 'dev-readonly'")
+    "Optional database user to connect as, defaults to 'dev-readonly'. " +
+    "To perform mutations use 'workbench'. Avoid using 'root' unless " +
+    "absolutely necessary.")
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
@@ -2034,20 +2036,24 @@ def connect_to_cloud_db(cmd_name, *args)
   end
 
   env = read_db_vars(gcc)
-  db_password = nil
-  case op.opts.db_user
-  when "dev-readonly"
-    db_password = env["DEV_READONLY_DB_PASSWORD"]
-  when "workbench"
-    db_password = env["WORKBENCH_DB_PASSWORD"]
-  when "root"
-    db_password = env["MYSQL_ROOT_PASSWORD"]
-  else
-    raise ArgumentError.new(
-            "invalid --db-user provided, wanted 'workbench', 'dev-readonly', or 'root', got '#{op.opts.db_user}'")
+  user_to_password = {
+    "dev-readonly" => env["DEV_READONLY_DB_PASSWORD"],
+    "workbench" => env["WORKBENCH_DB_PASSWORD"],
+    "root" => env["MYSQL_ROOT_PASSWORD"]
+  }
+  unless user_to_password.has_key? op.opts.db_user
+    Common.new.error(
+      "invalid --db-user provided, wanted one of #{user_to_password.keys}, got '#{op.opts.db_user}'")
+    exit 1
   end
+  db_password = user_to_password[op.opts.db_user]
 
   CloudSqlProxyContext.new(gcc.project).run do
+    if op.opts.db_user == "dev-readonly"
+      common.status ""
+      common.status "Database session will be read-only; use --db-user to change this"
+      common.status ""
+    end
     common.run_inline %W{
       mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user}
       --database=#{env["DB_NAME"]} --password=#{db_password}},
@@ -2508,7 +2514,9 @@ def create_project_resources(gcc)
 end
 
 def setup_project_data(gcc, cdr_db_name)
-  root_password, workbench_password, readonly_password = random_password(), random_password(), random_password()
+  root_password = random_password()
+  workbench_password = random_password()
+  readonly_password = random_password()
 
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
