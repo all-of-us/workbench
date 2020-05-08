@@ -130,12 +130,12 @@ def ensure_docker(cmd_name, args=nil)
   args = (args or [])
   unless Workbench.in_docker?
     ensure_docker_sync()
-    exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
+    docker_run(%W{./project.rb #{cmd_name}} + args)
   end
 end
 
 def init_new_cdr_db(args)
-  Common.new.run_inline %W{docker-compose run cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
+  Common.new.run_inline %W{docker-compose run --rm cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
 end
 
 # exec against a live local API server - used for script access to a local API
@@ -210,7 +210,7 @@ def dev_up()
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
       common.run_inline %W{
-        docker-compose run db-scripts ./run-migrations.sh main
+        docker-compose run --rm db-scripts ./run-migrations.sh main
       }
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
@@ -219,7 +219,7 @@ def dev_up()
     common.status "Loading configs & data..."
     bm = Benchmark.measure {
       common.run_inline %W{
-        docker-compose run api-scripts ./libproject/load_local_data_and_configs.sh
+        docker-compose run --rm api-scripts ./libproject/load_local_data_and_configs.sh
       }
     }
     common.status "Loading configs complete (#{format_benchmark(bm)})"
@@ -395,7 +395,7 @@ Common.register_command({
 
 def validate_swagger(cmd_name, args)
   ensure_docker cmd_name, args
-  Common.new.run_inline %W{gradle validateSwagger} + args
+  Common.new.run_inline %W{./gradlew validateSwagger} + args
 end
 
 Common.register_command({
@@ -631,7 +631,7 @@ Common.register_command({
 def run_local_all_migrations()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  common.run_inline %W{docker-compose run --rm db-scripts ./run-migrations.sh main}
 
   init_new_cdr_db %W{--cdr-db-name cdr}
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
@@ -771,7 +771,7 @@ Common.register_command({
 def run_local_rw_migrations()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  common.run_inline %W{docker-compose run --rm db-scripts ./run-migrations.sh main}
 end
 
 Common.register_command({
@@ -814,7 +814,7 @@ def make_bq_denormalized_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -846,7 +846,7 @@ def make_bq_denormalized_review(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -884,7 +884,7 @@ def make_bq_denormalized_search_events(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -922,7 +922,7 @@ def make_bq_denormalized_search_person(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -954,7 +954,7 @@ def make_bq_denormalized_dataset(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -986,7 +986,7 @@ def make_bq_dataset_linking(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -1025,7 +1025,7 @@ def generate_cb_criteria_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -1067,7 +1067,7 @@ def generate_private_cdr_counts(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.workbench_project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
   end
 end
 
@@ -1119,7 +1119,7 @@ def copy_bq_tables(cmd_name, *args)
   ServiceAccountContext.new(op.opts.sa_project).run do
     common = Common.new
     common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
-    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
+    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
   end
 end
 
@@ -1160,7 +1160,7 @@ def cloudsql_import(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-cloudsql-import
+    common.run_inline %W{docker-compose run --rm db-cloudsql-import
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket} --file #{op.opts.file}}
   end
@@ -1177,7 +1177,7 @@ Import bucket of files or a single file in a bucket to a cloudsql database",
 
 def generate_local_cdr_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-cdr-db.sh} + args
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-local-cdr-db.sh} + args
 end
 
 Common.register_command({
@@ -1190,7 +1190,7 @@ Creates and populates local mysql database from data in bucket made by generate-
 
 def generate_local_count_dbs(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-count-dbs.sh} + args
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-local-count-dbs.sh} + args
 end
 
 Common.register_command({
@@ -1203,7 +1203,7 @@ Creates and populates local mysql databases cdr<VERSION> from data in bucket mad
 
 def mysqldump_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-mysqldump.sh} + args
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-mysqldump.sh} + args
 end
 
 
@@ -1229,7 +1229,7 @@ def local_mysql_import(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-local-mysql-import
+  common.run_inline %W{docker-compose run --rm db-local-mysql-import
         --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket}}
 end
 Common.register_command({
@@ -1243,7 +1243,7 @@ Imports .sql file to local mysql instance",
 def run_drop_cdr_db()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
+  common.run_inline %W{docker-compose run --rm cdr-scripts ./run-drop-db.sh}
 end
 
 Common.register_command({
@@ -1737,7 +1737,7 @@ def set_authority_local(cmd_name, *args)
 
   app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]"]
   common = Common.new
-  common.run_inline %W{docker-compose run api-scripts ./gradlew setAuthority} + app_args
+  common.run_inline %W{docker-compose run --rm api-scripts ./gradlew setAuthority} + app_args
 end
 
 Common.register_command({
@@ -1994,7 +1994,7 @@ def update_cdr_versions_local(cmd_name, *args)
   versions_file = 'config/cdr_versions_local.json'
   app_args = ["-PappArgs=['/w/api/" + versions_file + "',false]"]
   common = Common.new
-  common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions} + app_args
+  common.run_inline %W{docker-compose run --rm api-scripts ./gradlew updateCdrVersions} + app_args
 end
 
 Common.register_command({
