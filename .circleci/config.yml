@@ -499,7 +499,6 @@ jobs:
       JAVA_TOOL_OPTIONS: -Xmx2g
       TERM: dumb
       MYSQL_ROOT_PASSWORD: ubuntu
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       WORKBENCH_ENV: local
       CI: true
       NODE_ENV: development
