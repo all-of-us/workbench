@@ -5,6 +5,8 @@ conversion or mapping functions between an object instance and an instance of
 a corresponding object in a class designed for another architectural tier, protocol, or technology.
 It works mainly by matching types and names via reflection, or using programmer-provided
 hints where that strategy isn't effective.
+
+If you haven't worked with MapStruct, please see the [tutorial](./tutorials/mapstruct-tutorial.md).
 ## Is this a gimmick? Why do I need it?
 Everything MapStruct does is simple and deterministic, and every programmer has done it before. So why
 bring in another library and codegen step? What's the advantage?
@@ -48,6 +50,8 @@ I still think it's worth it, because,
 
 ### Consider other use cases
 It's possible to write a mapper from a type to itself and use that as a copy constructor of sorts.
+Additionally, these methods may perform validation or fixup on values (for example to pick a default
+based on some business logic MapStruct wouldn't know how to guess).
 
 ### Tune the classes' public APIs
 If you find yourself writing arcane helper methods, ask yourself if adding a simple setter or
