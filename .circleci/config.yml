@@ -512,6 +512,10 @@ jobs:
       - run:
           name: Await MySQL startup
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - run:
+          name: Run Local Migrations
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-migrations
       #- run:
           #name: Update Docker hosts file
           #command: echo "127.0.0.1 localhost" | sudo tee -a /etc/hosts
@@ -519,7 +523,8 @@ jobs:
       - run:
           name: Launch local API server
           working_directory: ~/workbench/api
-          command: ./project.rb dev-up
+          # tail -f is important here, it keeps this process running indefinitely
+          command: ./project.rb start-local-api && tail -f build/dev-appserver-out/dev_appserver.out
           background: true
       - run:
           name: Wait for local API server to be started
