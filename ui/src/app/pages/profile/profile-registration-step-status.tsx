@@ -86,6 +86,7 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
               </React.Fragment>
             ) : (
               <React.Fragment>
+                {/*This div exists to ensure spacing is consistent. We want to put the button at the bottom of the flex box*/}
                 <div/>
                 <Button
                   type='purplePrimary'
