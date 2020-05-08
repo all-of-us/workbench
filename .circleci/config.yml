@@ -485,16 +485,73 @@ jobs:
       - manage_api_cache:
           save: true
 
+  # Deploy UI and API local server and run Puppeteer 2e2 tests
+  e2e-local:
+    resource_class: medium+
+    docker:
+        - image: allofustest/workbench:buildimage-0.0.16
+        - image: buildkite/puppeteer:v3.0.1
+        - image: mysql:5.7
+          environment:
+            - MYSQL_ROOT_PASSWORD=ubuntu
+            - MYSQL_USER=ubuntu
+            - MYSQL_PASSWORD=ubuntu
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx2g
+      TERM: dumb
+      MYSQL_ROOT_PASSWORD: ubuntu
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+      WORKBENCH_ENV: local
+      CI: true
+      NODE_ENV: development
+    working_directory: ~/workbench
+    parallelism: 1
+    steps:
+      - git_checkout
+      - api_cache:
+          restore: true
+      - activate_service_account_creds
+      - run:
+          name: Await MySQL startup
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - run:
+          name: Run Local Migrations
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-all-migrations
+      #- run:
+          #name: Update Docker hosts file
+          #command: echo "127.0.0.1 localhost" | sudo tee -a /etc/hosts
+          # sudo -- sh -c "echo  \ \ >> /etc/hosts";sudo -- sh -c "echo 127.0.0.1  localhost >> /etc/hosts"
+      - run:
+          name: Launch local API server
+          working_directory: ~/workbench/api
+          command: ./project.rb dev-up # start-local-api
+          background: true
+      - run:
+          name: Wait for local API server to be started
+          command: |
+            dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
+      - ui_dependencies
+      - run:
+          name: Launch local UI server
+          working_directory: ~/workbench/ui
+          # Start local UI server and running in the background
+          command: yarn dev-up --configuration=local
+          background: true
+      - run:
+          name: Wait for local UI server to be started
+          command: |
+            dockerize -wait tcp://localhost:4200 -timeout 4m
+      # Run Puppeteer end-to-end UI tests against local server
+      - e2e_dependencies
+      - run_e2e_test
+
 workflows:
   build-test-deploy:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
-      - api-local-test
-      - api-build-test
-      - ui-build-test
-      - api-bigquery-test
-      - api-integration-test
+      - e2e-local
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           filters: *filter_only_master_branch
