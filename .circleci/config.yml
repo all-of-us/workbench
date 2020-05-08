@@ -196,7 +196,7 @@ commands:
           name: Run puppeteer e2e tests
           working_directory: ~/workbench/e2e
           # parallelism used to run e2e tests
-          command: yarn test:ci $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
+          command: yarn test:ci
       - store_artifacts:
           path: e2e/logs
           destination: logs
