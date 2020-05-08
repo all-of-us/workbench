@@ -17,7 +17,7 @@ deploy their own instance of the Researcher Workbench solely from the code here.
 [UI Style Guide](ui/docs/style-guide.md)
 
 ### Best Practices Guides
-[MapStruct](api/docs/mapstruct.md)
+MapStruct [Best Practices](api/docs/mapstruct.md) and [Tutorial](api/docs/tutorials/mapstruct-tutorial.md)
 
 ## Setup for Development
 

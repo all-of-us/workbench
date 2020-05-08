@@ -18,14 +18,14 @@ quite readable.
 
 Third, and most important, is that once you've defined a mapper, maintenance is very easy. New fields
 will simply be mapped for you (assuming they exist on both the source and the target type). If there's
-a new target field that doesn't have a sourcce, youll gget a compile-time warning reminding you. (It's
+a new target field that doesn't have a source, you'll get a compile-time warning reminding you. (It's
 important to stay on top of those). 
 
 ## Tips & Strategies
 
 ### Stub it so it builds, and go one property at a time
 For big target classes, put in some temporary `ignore` statements or other hacks just to get it
-to the point that it generates the implemmentation class and actually compiles without errors. Then
+to the point that it generates the implementation class and actually compiles without errors. Then
 proceed one property at a time until all the warnings are gone.
  
 ### Proofread the generated code
@@ -56,36 +56,54 @@ model classes are generated, we frequently have to have external helper methods 
 the mapper class or a utility class.
 
 ## Handling missing target properties
-### Avoid `ignore = true` unless absolutely necessary
-It's annoying to see warnings about missing target properties, and for good reason. The quick way to
+### Using `ignore = true` for target properties
+#### Caveats
+There are times when properties on the target type can't be determined by the source type(s). By
+defaultThe, MapStruct emits a warning in this sitation. The quickest way to
 stifle these is to use the `ignore` parameter, which tells MapStruct to elide the setter code for
 that target property.
 ```java
 @Mapping(target = "billingAccountName", ignore = true)
 ```
 
-While there are some places this is necessary, it should really be a last resort, for a couple of
-reasons.
+While there are some places this is desirable behavior (see below), this should be carefully
+considered, for a couple of reasons.
 
 First, we plan to use mappers to replace existing chunks of code in a clean way. We don't want to
-have to docment that mapping function X leaves the created object in state Y with respect to fields
+have to document that mapping function X leaves the created object in state Y with respect to fields
 P, Q, and R. Many of our objects are relatively complex, and it's not obvious when looking at a call
 to `fooMapper.toModel()` that the output model is incomplete in some way(s).
 
-Second, if a target property is difficuult to satisfy, this is a signal that either our class design
-could be better, or we've left out a prereqisite.
+Second, if a target property is difficult to satisfy, this is a signal that either our class design
+could be better, or we've left out a prerequisite.
 
 One strategy for avoiding unmatched target property is to add parameters to the method specifying
 them. Then simply specify defaults for those at the call site as appropriate.
 
-If the type of the target property has a reasonable defalt (such as zero), and `null` isn't a valid
+If the type of the target property has a reasonable default (such as zero), and `null` isn't a valid
 state for it, then using `NullValuePropertyMappingStrategy.SET_TO_DEFAULT` is an option.
 
+#### Use Cases for `ignore = true`
+The following sitations are some places where ignoring the target property in a mapping annotation
+may be appropriate:
+* the property will be mapped in an `@AfterMapping`-annotated method, and inclded in the generated
+code
+* the property is not intended to be written by any outside callers (for example, an automatically
+incremented database column property such as a primary key or `@Transient` entity property)
+* read-only fields on an API model class, assuming the target of the mapper method represents
+a model input to a CREATE method. For mapping to the response's version of a created object, these
+fields should be populated (and thse not ignored). So if an `OctopusModel` passed into a 
+`createOctopus` API only has one leg as `required` and seven legs `readOnly`, we may need separate
+methods `OctoppusModel toCreateOctopusRequestModel(Tentalcle t);` and a
+`OctoppusModel toHydratedOctopusRequest(Tentalcle t1, Tentacle T2, ..., Tentacle T8);`
+* The target type's default constructor initializes the property to non-trivial value. (For trivial
+defaults, the `NullValuePropertyMappingStrategy.DEFAULT` annotation may be used).
 ## Handling Default Values
+
 ### Handling database defalts
 If the target class is a Hibernate model, and one or more fields have defaults
 defined in the database schema, we do not want to overwrite that field with `null`
-or any defauld value listed in the mapper's annotations. To get around this, we need
+or any default value listed in the mapper's annotations. To get around this, we need
 to set the `nullValuePropertyMappingStrategy` to `NullValuePropertyMappingStrategy.IGNORE`.
 This prevents the MapStruct implementation from writing to the target property if the source is null.
 ```java
@@ -95,7 +113,7 @@ This prevents the MapStruct implementation from writing to the target property i
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 ```
 Note that in this case I'm adding an annotation for a field that MapStruct was previously happy
-to map implicitly to override its defalt behavior.
+to map implicitly to override its default behavior.
 
 ### Specifying a non-default default
 It's possible to set a default value in the `@Mapping` by
@@ -114,7 +132,7 @@ the read-only `etag` column in the `workspace` table:
 
 ### Mapping to a subset of target properties
 If you need to map from an object with sub-objects to a target type that's flat, there are two
-stratgegies. The first is to use dot indexing in the `@Mapping` annotation, for example
+strategies. The first is to use dot indexing in the `@Mapping` annotation, for example
 `@Mapping(source = "employee.contact.address", target = "address")`. This works well, but the
 generated code will look sloppy if you have to do this many times (e.g. for ResearchPurpose).
 If you want to have the address member on the source accessed only once in the mapping (e.g. if it
@@ -139,20 +157,18 @@ methods, such as `DbStorageEnums` can be used to good effect.
 ### Using the `@AfterMapping` annotation
 Sometimes it's desirable to perform some fixup or post-mapping operations. While this should not be
 common, it's a handy tool to have around. In the case of target types that are generated from
-`swagger-codegen`, often the default constructor is lacking. For example it does not initialize
+`swagger-codegen`, often the default constructor is lacking. For example, it does not initialize
 array members to empty arrays but leaves them as null. We can fix this with an appropriate
 after mapping method that initializes those fields if they're not already.
 
-### Using DAOs
-If you specify `componentModel = "spring"` in the top-level `@Mapper` annotation, you can inject
-Spring beans and services. If you go this route, be sure to document and test all side effects. I'm
-not sure what the convention should be on whether a target Hibernate entity should be saved inside
-the mapping method or not.
-
-## False positive matches
+## Unexpected behavior
 Although the rules used in the codegen are reliable, they may not be intuitive when you're dealing
 with large classes with many similar fields of the same types. In particular for this project,
 be very careful with various combinations of `Workspace`, `DbWorkspace`, and `FirecloudWorkspace`. 
-- Timestamp vs SqlTimestamp. SqlTimestamp is slightly special, and many of the generated time conversions are not _quite_ what we
+- *Timestamp vs SqlTimestamp*. SqlTimestamp is slightly special, and many of the generated time
+conversions are not _quite_ what we
 want. For example, we spun our own Sql Timestamps to String mapper
-- Application-specific order dependence
+- *Semantic Coupling* If the designer of a class somehow tacitly assumes that property A will be set
+before property B is set, and there are side effect(s) to setting these properties (for example
+with an observer or ORM magic), then MapStruct will likely violate that expected order. The solution
+is to carefully document and test this kind of class, or to elimiate this kind of coupling altogether.
