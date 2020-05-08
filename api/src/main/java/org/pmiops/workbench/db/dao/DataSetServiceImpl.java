@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,9 +73,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}` "
-          + "WHERE PERSON_ID in (${cohortQuery})";
-  private static final String PREVIEW_SURVEY_QUERY =
-      "question_concept_id in unnest(${questionConceptIds})";
+          + "WHERE ${domainConceptIds}";
+  private static final String PREVIEW_COHORT_QUERY = " AND PERSON_ID IN (${cohortQuery})";
   private static final ImmutableSet<PrePackagedConceptSetEnum>
       CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
           ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
@@ -248,57 +248,55 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest request) {
     final Domain domain = request.getDomain();
     final List<String> values = request.getValues();
+    Map<String, QueryParameterValue> mergedQueryParameterValues = new HashMap<>();
 
     final List<String> domainValues =
         bigQueryService.getTableFieldsFromDomain(domain).stream()
             .map(field -> field.getName().toLowerCase())
             .collect(Collectors.toList());
 
-    final List<String> relevantValues =
+    final List<String> filteredDomainColumns =
         values.stream().distinct().filter(domainValues::contains).collect(Collectors.toList());
-
-    final ImmutableList<DbConceptSet> initialSelectedConceptSets =
-        ImmutableList.copyOf(
-            this.conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()));
-    final List<Long> conceptIds =
-        initialSelectedConceptSets.stream()
-            .flatMap(cs -> cs.getConceptIds().stream())
-            .collect(Collectors.toList());
-
-    final ImmutableList<QueryAndParameters> queryMapEntries =
-        this.cohortDao.findAllByCohortIdIn(request.getCohortIds()).stream()
-            .map(this::getCohortQueryStringAndCollectNamedParameters)
-            .collect(ImmutableList.toImmutableList());
-
-    final String unionedCohortQueries =
-        queryMapEntries.stream()
-            .map(QueryAndParameters::getQuery)
-            .collect(Collectors.joining(" UNION DISTINCT "));
-
-    // now merge all the individual maps from each configuration
-    Map<String, QueryParameterValue> mergedQueryParameterValues =
-        queryMapEntries.stream()
-            .map(QueryAndParameters::getNamedParameterValues)
-            .flatMap(m -> m.entrySet().stream())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     String previewQuery =
         PREVIEW_QUERY
-            .replace("${columns}", String.join(", ", relevantValues))
+            .replace("${columns}", String.join(", ", filteredDomainColumns))
             .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain))
-            .replace("${cohortQuery}", unionedCohortQueries);
+            .replace("${domainConceptIds}", BigQueryDataSetTableInfo.getConceptIdIn(domain));
 
-    if (!conceptIds.isEmpty()) {
+    if (!request.getConceptSetIds().isEmpty()) {
+      final List<Long> conceptIds =
+          conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
+              .flatMap(cs -> cs.getConceptIds().stream())
+              .collect(Collectors.toList());
       mergedQueryParameterValues.put(
           "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-      previewQuery = previewQuery + BigQueryDataSetTableInfo.getConceptIdIn(domain);
     }
     if (PrePackagedConceptSetEnum.SURVEY.equals(request.getPrePackagedConceptSet())) {
       List<Long> questionConceptIds = conceptBigQueryService.getSurveyQuestionConceptIds();
       mergedQueryParameterValues.put(
           "conceptIds",
           QueryParameterValue.array(questionConceptIds.toArray(new Long[0]), Long.class));
-      previewQuery = previewQuery + BigQueryDataSetTableInfo.getConceptIdIn(domain);
+    }
+
+    if (!request.getIncludesAllParticipants()) {
+      final ImmutableList<QueryAndParameters> queryMapEntries =
+          cohortDao.findAllByCohortIdIn(request.getCohortIds()).stream()
+              .map(this::getCohortQueryStringAndCollectNamedParameters)
+              .collect(ImmutableList.toImmutableList());
+
+      final String unionedCohortQuery =
+          queryMapEntries.stream()
+              .map(QueryAndParameters::getQuery)
+              .collect(Collectors.joining(" UNION DISTINCT "));
+      previewQuery += PREVIEW_COHORT_QUERY.replace("${cohortQuery}", unionedCohortQuery);
+
+      // now merge all the individual maps from each configuration
+      mergedQueryParameterValues.putAll(
+          queryMapEntries.stream()
+              .map(QueryAndParameters::getNamedParameterValues)
+              .flatMap(m -> m.entrySet().stream())
+              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     return buildQueryJobConfiguration(mergedQueryParameterValues, previewQuery);
