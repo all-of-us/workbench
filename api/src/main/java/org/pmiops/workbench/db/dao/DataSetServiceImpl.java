@@ -73,6 +73,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}` "
           + "WHERE PERSON_ID in (${cohortQuery})";
+  private static final String PREVIEW_SURVEY_QUERY =
+      "question_concept_id in unnest(${questionConceptIds})";
   private static final ImmutableSet<PrePackagedConceptSetEnum>
       CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
           ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
@@ -289,6 +291,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (!conceptIds.isEmpty()) {
       mergedQueryParameterValues.put(
           "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+      previewQuery = previewQuery + BigQueryDataSetTableInfo.getConceptIdIn(domain);
+    }
+    if (PrePackagedConceptSetEnum.SURVEY.equals(request.getPrePackagedConceptSet())) {
+      List<Long> questionConceptIds = conceptBigQueryService.getSurveyQuestionConceptIds();
+      mergedQueryParameterValues.put(
+          "conceptIds",
+          QueryParameterValue.array(questionConceptIds.toArray(new Long[0]), Long.class));
       previewQuery = previewQuery + BigQueryDataSetTableInfo.getConceptIdIn(domain);
     }
 

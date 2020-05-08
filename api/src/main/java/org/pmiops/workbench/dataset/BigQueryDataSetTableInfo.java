@@ -19,7 +19,7 @@ public enum BigQueryDataSetTableInfo {
       Domain.MEASUREMENT,
       "ds_measurement",
       " and (measurement_concept_id in unnest(@conceptIds) or measurement_source_concept_id in unnest(@conceptIds))"),
-  SURVEY(Domain.SURVEY, "ds_survey", "and question_concept_id in unnest(@conceptIds)"),
+  SURVEY(Domain.SURVEY, "ds_survey", " and question_concept_id in unnest(@conceptIds)"),
   PERSON(Domain.PERSON, "ds_person", null),
   OBSERVATION(
       Domain.OBSERVATION,
