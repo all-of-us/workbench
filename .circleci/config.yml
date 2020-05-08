@@ -517,7 +517,7 @@ jobs:
       - run:
           name: Run Local Migrations
           working_directory: ~/workbench/api
-          command: ./project.rb run-local-all-migrations
+          command: ./project.rb run-local-migrations
       #- run:
           #name: Update Docker hosts file
           #command: echo "127.0.0.1 localhost" | sudo tee -a /etc/hosts
@@ -525,7 +525,7 @@ jobs:
       - run:
           name: Launch local API server
           working_directory: ~/workbench/api
-          command: ./project.rb dev-up # start-local-api
+          command: ./project.rb start-local-api
           background: true
       - run:
           name: Wait for local API server to be started
