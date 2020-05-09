@@ -2022,42 +2022,20 @@ def connect_to_cloud_db(cmd_name, *args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-    "--db-user [user]",
-    ->(opts, v) { opts.db_user = v },
-    "Optional database user to connect as, defaults to 'dev-readonly'. " +
-    "To perform mutations use 'workbench'. Avoid using 'root' unless " +
-    "absolutely necessary.")
+    "--root",
+    ->(opts, _) { opts.root = true },
+    "Connect as root")
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-
-  if op.opts.db_user.nil?
-    op.opts.db_user = "dev-readonly"
-  end
-
   env = read_db_vars(gcc)
-  user_to_password = {
-    "dev-readonly" => env["DEV_READONLY_DB_PASSWORD"],
-    "workbench" => env["WORKBENCH_DB_PASSWORD"],
-    "root" => env["MYSQL_ROOT_PASSWORD"]
-  }
-  unless user_to_password.has_key? op.opts.db_user
-    Common.new.error(
-      "invalid --db-user provided, wanted one of #{user_to_password.keys}, got '#{op.opts.db_user}'")
-    exit 1
-  end
-  db_password = user_to_password[op.opts.db_user]
-
   CloudSqlProxyContext.new(gcc.project).run do
-    if op.opts.db_user == "dev-readonly"
-      common.status ""
-      common.status "Database session will be read-only; use --db-user to change this"
-      common.status ""
-    end
+    password = op.opts.root ? env["MYSQL_ROOT_PASSWORD"] : env["WORKBENCH_DB_PASSWORD"]
+    user = op.opts.root ? "root" : env["WORKBENCH_DB_USER"]
     common.run_inline %W{
-      mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user}
-      --database=#{env["DB_NAME"]} --password=#{db_password}},
-      db_password
+      mysql --host=127.0.0.1 --port=3307 --user=#{user}
+      --database=#{env["DB_NAME"]} --password=#{password}},
+      password
   end
 end
 
