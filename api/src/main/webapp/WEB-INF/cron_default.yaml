@@ -4,24 +4,44 @@ cron:
   schedule: every 3 hours
   timezone: UTC
   target: api
-- description: 'Daily sync of compliance training status (via Moodle API)'
+- description: |
+    Daily sync of compliance training status (via Moodle API). This is just a backup to the primary
+    flow. This would only ever catch the following scenarios:
+    1. The user's compliance training expires. The time scale on this expiration is O(years),
+    so syncing nightly is entirely acceptable.
+
+    2. The user completes compliance and doesn't return to the dashboard. We'd progress them in the
+    background. This won't make much of a difference and would have the same effect as if they had
+    navigated back to the dashboard.
+
+    3. Somehow the user manages to "uncomplete" training in Moodle. I'm not sure this is possible,
+    but if so, it's certainly an edge case where nightly would be acceptale latency
   url: /v1/cron/bulkSyncComplianceTrainingStatus
   schedule: every 24 hours
   timezone: UTC
   target: api
-- description: 'Daily sync of eRA Commons linkage status (via FireCloud API)'
+- description: >
+    Daily sync of eRA Commons linkage status (via FireCloud API).  I expect this cron to never
+    detect anything. This is effectively checking for whether any changes happened in the
+    background between the Terra account and its linkage to eRA commons. During onboarding,
+    this won't matter since it's checked live from the dashboard. After onboarding, I don't even
+    know whether it's possible to "unlink", and if a user did this, whether that even matters for
+    our registration policy. Certainly it's good to check, but none of this is time sensitive.
+    The current 24h interval is fine.
   url: /v1/cron/bulkSyncEraCommonsStatus
   schedule: every 24 hours
   timezone: UTC
   target: api
-- description: 'Daily sync of 2FA set up status (via Google Directory Service)'
+- description: >
+    Update our cache of users' two-factor authentication settings on their GSuite accounts via
+    Google Directory Service.
   url: /v1/cron/bulkSyncTwoFactorAuthStatus
   schedule: every 24 hours
   timezone: UTC
   target: api
 - description: 'Daily audit of gcp resources that users have access to'
   url: /v1/cron/bulkAuditProjectAccess
-  schedule: every 24 hours
+  schedule: every 1 hours
   timezone: UTC
   target: api
 - description: 'If the AoU Billing Project buffer is not full, refill with one or more projects.'
@@ -41,24 +61,31 @@ cron:
   target: api
 - description: 'Find and alert users that have exceeded their free tier billing usage'
   url: /v1/cron/checkFreeTierBillingUsage
-  schedule: every 3 hours
+  schedule: every 30 minutes
   timezone: UTC
   target: api
-- description: 'Find billing projects associated with deleted workspaces and transfer ownership to Garbage Collection Service Accounts'
+- description: >
+    Find billing projects associated with deleted workspaces and transfer ownership to
+    designated "Garbage Collection" Service Accounts. This process works around the lack of API
+    support for deleting these billing projects directly.
   url: /v1/cron/billingProjectGarbageCollection
-  schedule: every 24 hours
+  schedule: every 1 hours
   timezone: UTC
   target: api
-- description: 'Sample all gauge metrics for OpenCensus Monitoring and record them'
+- description: >
+    Sample all gauge metrics for OpenCensus Monitoring and record them. The one-minute interval is
+    the highest granularity for Stackdriver Monitoring and the lowest interval for an AppEngine
+    cron job.
   url: /v1/cron/monitoring/updateGaugeMetrics
   schedule: every 1 minutes
   timezone: UTC
   target: api
-- description: 'Export user and workspace data to RDR'
+- description: >
+    Export user and workspace data to RDR.
+    RDR export is hard-coded to 9pm CT, to align with VUMC expectations that the daily export is run at a time
+    that is (1) after the close of normal business working hours, and (2) early enough in the evening that the
+    entire export (and downstream data flows) can complete before start of the next business day.
   url: /v1/cron/exportToRdr
-  # RDR export is hard-coded to 9pm CT, to align with VUMC expectations that the daily export is run at a time
-  # that is (1) after the close of normal business working hours, and (2) early enough in the evening that the
-  # entire export (and downstream data flows) can complete before start of the next business day.
   schedule: every day 21:00
   timezone: America/Chicago
   target: api
