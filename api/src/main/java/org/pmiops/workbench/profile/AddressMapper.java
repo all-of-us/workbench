@@ -4,8 +4,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapStructConfig.class)
 public interface AddressMapper {
   Address dbAddressToAddress(DbAddress dbAddress);
 
