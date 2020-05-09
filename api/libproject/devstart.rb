@@ -2079,11 +2079,10 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     common.status "\n" + "*" * 80
     common.status "Listing available journal files: "
 
-    # "root" is required for binlog access.
-    password = env["MYSQL_ROOT_PASSWORD"]
+    password = env["DEV_READONLY_DB_PASSWORD"]
     run_with_redirects(
       "echo 'SHOW BINARY LOGS;' | " +
-      "mysql --host=127.0.0.1 --port=3307 --user=root " +
+      "mysql --host=127.0.0.1 --port=3307 --user=dev-readonly " +
       "--database=#{env['DB_NAME']} --password=#{password}", password)
     common.status "*" * 80
 
@@ -2097,7 +2096,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     # Work out of /tmp for easy local file redirection. We don't want binlogs
     # winding up back in Workbench source control accidentally.
     run_with_redirects(
-      "export MYSQL_HOME=$(with-mysql-login.sh root #{password}); " +
+      "export MYSQL_HOME=$(with-mysql-login.sh dev-readonly #{password}); " +
       "cd /tmp; /bin/bash", password)
   end
 end
