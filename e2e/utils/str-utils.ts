@@ -34,3 +34,8 @@ export const extractPageName = async (page: Page): Promise<string> => {
   const splitValue = fp.zipObject(['name', 'domain'], title.split(' | '));
   return fp.snakeCase(splitValue.name);
 }
+
+export const contains = async (splitString: string, findString: string, separator: string | RegExp = ' ') => {
+  const splitValue = splitString.toString().split(separator);
+  return splitValue.includes(findString);
+}

@@ -36,7 +36,7 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async getCreateNewWorkspaceLink(): Promise<ElementHandle> {
-    return findIcon(this.page, {text: LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
+    return findIcon({pageInstance: this.page}, {text: LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
   }
 
   /**

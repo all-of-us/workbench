@@ -111,7 +111,7 @@ export default class CreateAccountPage extends BasePage {
       await textbox.type(field.value);
       await textbox.tabKey();
       if (field.label === 'New Username') {
-        await ClrIconLink.forLabel(this.page, {text: field.label}, 'success-standard');
+        await ClrIconLink.forLabel({pageInstance: this.page}, {text: field.label}, 'success-standard');
         newUserName = field.value; // store new username for return
       }
     }
@@ -131,13 +131,13 @@ export default class CreateAccountPage extends BasePage {
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.EDUCATION_LEVEL, 2);
+    const dropdown = new SelectMenu(this.page, {label: LABEL_ALIAS.EDUCATION_LEVEL, nodeLevel: 2});
     await dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.YEAR_OF_BIRTH, 2);
+    const dropdown = new SelectMenu(this.page, {label: LABEL_ALIAS.YEAR_OF_BIRTH, nodeLevel: 2});
     await dropdown.select(year);
   }
 
@@ -145,13 +145,13 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 1: Fill out institution affiliation details
   async fillOutInstitution() {
-    const institutionSelect = new SelectMenu(this.page, 'Select your institution', 2);
+    const institutionSelect = new SelectMenu(this.page, {label: 'Select your institution', nodeLevel: 2});
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
     const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
     await emailAddressTextbox.type(config.broadInstitutionEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
-    await ClrIconLink.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
-    const roleSelect = new SelectMenu(this.page, 'describes your role', 2);
+    await ClrIconLink.forLabel({pageInstance: this.page}, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
+    const roleSelect = new SelectMenu(this.page, {label: 'describes your role', nodeLevel: 2});
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
 

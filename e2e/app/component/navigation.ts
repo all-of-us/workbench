@@ -84,7 +84,7 @@ export default class Navigation {
     const isOpen = await Navigation.sideNavIsOpen(page);
     if (!isOpen!) {
         // click bars icon to open dropdown
-      const barsIcon = await findIcon(page, {}, 'bars');
+      const barsIcon = await findIcon({pageInstance: page}, {}, 'bars');
       await barsIcon.click();
     }
   }
@@ -92,7 +92,7 @@ export default class Navigation {
   // Determine the open state by looking for a visible Home icon
   private static async sideNavIsOpen(page: Page): Promise<boolean> {
     try {
-      await findIcon(page, {text: 'Home'}, 'home', {visible: true, timeout: 1000});
+      await findIcon({pageInstance: page}, {text: 'Home'}, 'home', {visible: true, timeout: 1000});
       return true;
     } catch (err) {
       return false;

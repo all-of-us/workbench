@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import {signIn} from 'utils/app-utils';
+import {CalculationType, CriteriaType} from '../../app/component/criteria-modal';
 import WorkspaceCard from '../../app/component/workspace-card';
 import {WorkspaceAccessLevel} from '../../app/page-identifiers';
 import WorkspaceDataPage from '../../app/page/workspace-data-page';
@@ -12,7 +13,7 @@ describe('Workspace DataSets tests', () => {
     await signIn(page);
   });
 
-  test('User can create a dataset in a workspace', async () => {
+  test('User can create BMI dataset', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
@@ -25,8 +26,8 @@ describe('Workspace DataSets tests', () => {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
 
-
-
+    const criteriaModal = await dataPage.selectCriteriaMenu('Physical Measurements');
+    await criteriaModal.selectCalculatetableCriteria(CriteriaType.BMI, CalculationType.GREATER_EQUAL_TO, 30);
   });
 
 });

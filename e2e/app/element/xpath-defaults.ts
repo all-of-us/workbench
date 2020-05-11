@@ -29,7 +29,7 @@ export function labelXpath(opts: TextOptions) {
 export function buttonXpath(opts: TextOptions) {
   const role = `@role='button'`;
   const txt = textXpathHelper(opts);
-  return `(//button[${txt}] | //*[${txt} and ${role}])`;
+  return `(.//button[${txt}] | .//*[${txt} and ${role}])`;
 }
 
 export function inputXpath(opts: TextOptions) {

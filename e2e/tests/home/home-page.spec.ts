@@ -70,7 +70,7 @@ describe('Home page ui tests', () => {
   });
 
   test('Check Create New Workspace link on Home page', async () => {
-    const plusIcon = await ClrIconLink.forLabel(page, {normalizeSpace: HOME_PAGE_LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
+    const plusIcon = await ClrIconLink.forLabel({pageInstance: page}, {normalizeSpace: HOME_PAGE_LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
     expect(plusIcon).toBeTruthy();
     const classname = await plusIcon.getProperty('className');
     expect(classname).toBe('is-solid');

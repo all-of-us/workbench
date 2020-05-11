@@ -281,7 +281,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     try {
       await this.waitUntilTitleMatch(PAGE.TITLE);
       await this.getWorkspaceNameTextbox();
-      await new SelectMenu(this.page, LABEL_ALIAS.SELECT_BILLING).getSelectedValue();
+      await new SelectMenu(this.page, {label: LABEL_ALIAS.SELECT_BILLING}).getSelectedValue();
       await this.getCreateWorkspaceButton();
       return true;
     } catch (e) {
@@ -434,7 +434,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     const dialogText = await dialog.getContent();
     await Promise.all([
       dialog.clickButton(ButtonLabel.Confirm),
-      dialog.waitUntilDialogIsClosed(),
+      dialog.waitUntilDisappear(),
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
     ]);
     await this.waitUntilNoSpinner();

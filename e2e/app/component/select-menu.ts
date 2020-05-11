@@ -1,12 +1,18 @@
 import {Page} from 'puppeteer';
 import BaseElement from 'app/element/base-element';
+import menu from './menu';
 
-export default class SelectMenu {
+export default class SelectMenu extends menu {
 
-  constructor(private readonly page: Page, private readonly label?: string, private readonly nodeLevel?: number) {
-    this.page = page;
-    this.label = label || undefined;
-    this.nodeLevel = nodeLevel || 1;
+  constructor(page: Page, options: {label?: string, nodeLevel?: number} = {}, selector?: {xpath: string}) {
+    super(page, selector);
+    options.nodeLevel = options.nodeLevel || 1;
+    if (options.label === undefined) {
+      this.selector = {xpath: '//*[contains(@class, "p-dropdown")]'};
+    } else {
+      this.selector = {xpath: `//*[contains(normalize-space(text()), "${options.label}")]` +
+           `/ancestor::node()[${options.nodeLevel}]//*[contains(@class, "p-dropdown")]`};
+    }
   }
 
   /**
@@ -18,7 +24,7 @@ export default class SelectMenu {
 
     const clickText = async () => {
       await this.open(2);
-      const selector = this.dropdownXpath() + `//li[contains(normalize-space(text()), "${textValue}")]`;
+      const selector = this.selector.xpath + `//li[contains(normalize-space(text()), "${textValue}")]`;
       const selectValue = await this.page.waitForXPath(selector, {visible: true});
       const baseElement = new BaseElement(this.page, selectValue);
       const textContent = await baseElement.getTextContent(); // get full text
@@ -49,7 +55,7 @@ export default class SelectMenu {
    * Returns selected value in Select.
    */
   async getSelectedValue(): Promise<unknown> {
-    const selector = this.dropdownXpath() + '/label';
+    const selector = this.selector.xpath + '/label';
     const displayedValue = await this.page.waitForXPath(selector, { visible: true });
     const innerText = await displayedValue.getProperty('innerText');
     return await innerText.jsonValue();
@@ -76,7 +82,7 @@ export default class SelectMenu {
   }
 
   private async toggleOpenClose(): Promise<void> {
-    const selector = this.dropdownXpath() + '/*[@class="p-dropdown-trigger"]';
+    const selector = this.selector.xpath + '/*[@class="p-dropdown-trigger"]';
     const dropdownTrigger = await this.page.waitForXPath(selector, { visible: true });
     await dropdownTrigger.hover();
     await dropdownTrigger.click();
@@ -84,7 +90,7 @@ export default class SelectMenu {
   }
 
   private async isOpen() {
-    const selector = this.dropdownXpath() +
+    const selector = this.selector.xpath +
        '/*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown-panel ")]';
     try {
       const panel = await this.page.waitForXPath(selector);
@@ -97,17 +103,8 @@ export default class SelectMenu {
     }
   }
 
-  private dropdownXpath(): string {
-    if (this.label === undefined) {
-      return '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]';
-    }
-    return `//*[contains(normalize-space(text()), "${this.label}")]` +
-       `/ancestor::node()[${this.nodeLevel}]//*[contains(concat(" ", normalize-space(@class), " ")," p-dropdown ")]`;
-  }
-
   private async waitUntilDropdownClosed() {
-    const xpath = this.dropdownXpath() +
-       '/*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]';
+    const xpath = this.selector.xpath + '/*[contains(@class), "p-input-overlay-visible")]';
     await this.page.waitForXPath(xpath, {hidden: true}).catch((err) => {
       console.error('Select dropdown is not closed.');
       throw err;

@@ -113,6 +113,9 @@ export default class WorkspaceCard {
     const allWorkspaceCards = await WorkspaceCard.getAllCards(this.page);
     for (const card of allWorkspaceCards) {
       const accessLevel = await card.getWorkspaceAccessLevel();
+      if (accessLevel === '') {
+        throw new Error('Workspace Access Level cannot be an empty string.');
+      }
       if (accessLevel === level) {
         matchWorkspaceArray.push(card);
       }

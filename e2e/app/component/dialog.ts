@@ -1,24 +1,26 @@
-import {ElementHandle, Page} from 'puppeteer';
-
-export enum ButtonLabel {
-  Confirm = 'Confirm',
-  KeepEditing = 'Keep Editing',
-}
+import Container from './container';
 
 const SELECTOR = {
   dialogRoot: '.ReactModal__Content[role="dialog"]',
   button: '[role="button"]'
 }
 
-export default class Dialog {
-  private dialogElement: ElementHandle;
+export enum ButtonLabel {
+  Confirm = 'Confirm',
+  KeepEditing = 'Keep Editing',
+  Cancel = 'Cancel',
+}
 
-  constructor(private readonly page: Page) {
 
+export default class Dialog extends Container {
+
+  constructor(page, selector?) {
+    selector = selector || {xpath: '.ReactModal__Content[role="dialog"]'};
+    super(page, selector);
   }
 
   async getContent(): Promise<string> {
-    await this.findDialog();
+    await this.findElement();
     const modalText = await this.page.evaluate((selector) => {
       const modalElement = document.querySelector(selector);
       return modalElement.innerText;
@@ -38,16 +40,6 @@ export default class Dialog {
       }
     }
     throw new Error(`Failed to find button with label ${buttonLabel}`);
-  }
-
-  async waitUntilDialogIsClosed() {
-    await this.page.waitForSelector(SELECTOR.dialogRoot, {visible: false, timeout: 60000});
-  }
-
-  private async findDialog() {
-    if (this.dialogElement === undefined) {
-      this.dialogElement = await this.page.waitForSelector(SELECTOR.dialogRoot, {visible: true});
-    }
   }
 
   private getButtonSelector() {
