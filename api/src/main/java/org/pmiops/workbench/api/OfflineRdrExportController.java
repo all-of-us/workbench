@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,14 +64,14 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
       try {
         groupIdsAndPushTask(rdrExportService.findAllUserIdsToExport(), EXPORT_RESEARCHER_PATH);
       } catch (Exception ex) {
-        log.severe(
-            String.format("Error while exporting researcher data to RDR: %s", ex.getMessage()));
+        throw new ServerErrorException(
+            String.format("Error creating RDR export Cloud Tasks for users: %s", ex.getMessage()));
       }
       try {
         groupIdsAndPushTask(rdrExportService.findAllWorkspacesIdsToExport(), EXPORT_USER_PATH);
       } catch (Exception ex) {
-        log.severe(
-            String.format("Error while exporting workspace data to RDR: %s", ex.getMessage()));
+        throw new ServerErrorException(
+            String.format("Error creating RDR export Cloud Tasks for workspaces: %s", ex.getMessage()));
       }
     }
     return ResponseEntity.noContent().build();
@@ -83,7 +84,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
    * @param idList : Lis of Ids
    * @param taskUri: The destination URL the task will be calling with group of 10 ids
    */
-  private void groupIdsAndPushTask(List<Long> idList, String taskUri) {
+  private void groupIdsAndPushTask(List<Long> idList, String taskUri) throws IOException {
     if (idList.size() == 0) return;
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     final AtomicInteger counter = new AtomicInteger();
@@ -107,7 +108,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
     }
   }
 
-  private void createAndPushTask(List<Long> ids, String queuePath, String taskUri) {
+  private void createAndPushTask(List<Long> ids, String queuePath, String taskUri) throws IOException {
     List<String> idsAsString = ids.stream().map(id -> id.toString()).collect(Collectors.toList());
     Gson gson = new Gson();
     String daysJson = gson.toJson(ids);
@@ -127,8 +128,10 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
     } catch (IOException ex) {
       log.severe(
           String.format(
-              "Error while creating task to push to queue for IDS %s and path %s",
+              "Error while creating task to push to queue for IDS %s and path %s. " +
+                  "Re-throwing error",
               idsAsString, taskUri));
+      throw ex;
     }
   }
 }
