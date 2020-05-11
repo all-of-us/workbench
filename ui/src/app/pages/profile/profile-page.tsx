@@ -649,14 +649,14 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               Cancel
             </Button>
             <TooltipTrigger
-                side='top'
-                content={!!errors && this.saveProfileErrorMessage}>
+              side='top'
+              content={!!errors && this.saveProfileErrorMessage}>
               <Button
-                  data-test-id='save_profile'
-                  type='purplePrimary'
-                  style={{marginLeft: 40}}
-                  onClick={() => this.saveProfile(currentProfile)}
-                  disabled={!!errors || fp.isEqual(profile, currentProfile)}
+                data-test-id='save_profile'
+                type='purplePrimary'
+                style={{marginLeft: 40}}
+                onClick={() => this.saveProfile(currentProfile)}
+                disabled={!!errors || fp.isEqual(profile, currentProfile)}
               >
                 Save Profile
               </Button>
