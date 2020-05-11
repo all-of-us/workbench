@@ -94,7 +94,6 @@ public class DataSetController implements DataSetApiDelegate {
   private Provider<DbUser> userProvider;
   private final WorkspaceService workspaceService;
 
-  private static int NO_OF_PREVIEW_ROWS = 20;
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
 

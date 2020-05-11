@@ -1,5 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
@@ -72,12 +74,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
 
   private static final String PREVIEW_QUERY =
-      "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}` "
-          + "WHERE ${domainConceptIds}";
-  private static final String PREVIEW_COHORT_QUERY = " AND PERSON_ID IN (${cohortQuery})";
+      "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}`";
+  private static final String LIMIT_20 = " LIMIT 20";
+
   private static final ImmutableSet<PrePackagedConceptSetEnum>
       CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
-          ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
+          ImmutableSet.of(SURVEY, PrePackagedConceptSetEnum.BOTH);
 
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final int DATA_SET_VERSION = 1;
@@ -258,25 +260,23 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final List<String> filteredDomainColumns =
         values.stream().distinct().filter(domainValues::contains).collect(Collectors.toList());
 
-    String previewQuery =
-        PREVIEW_QUERY
-            .replace("${columns}", String.join(", ", filteredDomainColumns))
-            .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain))
-            .replace("${domainConceptIds}", BigQueryDataSetTableInfo.getConceptIdIn(domain));
+    final StringBuilder queryBuilder =
+        new StringBuilder(
+            PREVIEW_QUERY
+                .replace("${columns}", String.join(", ", filteredDomainColumns))
+                .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
 
-    if (!request.getConceptSetIds().isEmpty()) {
-      final List<Long> conceptIds =
-          conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
-              .flatMap(cs -> cs.getConceptIds().stream())
-              .collect(Collectors.toList());
+    final List<Long> conceptIds =
+        SURVEY.equals(request.getPrePackagedConceptSet())
+            ? conceptBigQueryService.getSurveyQuestionConceptIds()
+            : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
+                .flatMap(cs -> cs.getConceptIds().stream())
+                .collect(Collectors.toList());
+
+    if (!domain.equals(Domain.PERSON)) {
       mergedQueryParameterValues.put(
           "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-    }
-    if (PrePackagedConceptSetEnum.SURVEY.equals(request.getPrePackagedConceptSet())) {
-      List<Long> questionConceptIds = conceptBigQueryService.getSurveyQuestionConceptIds();
-      mergedQueryParameterValues.put(
-          "conceptIds",
-          QueryParameterValue.array(questionConceptIds.toArray(new Long[0]), Long.class));
+      queryBuilder.append(" WHERE ").append(BigQueryDataSetTableInfo.getConceptIdIn(domain));
     }
 
     if (!request.getIncludesAllParticipants()) {
@@ -289,7 +289,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           queryMapEntries.stream()
               .map(QueryAndParameters::getQuery)
               .collect(Collectors.joining(" UNION DISTINCT "));
-      previewQuery += PREVIEW_COHORT_QUERY.replace("${cohortQuery}", unionedCohortQuery);
+      queryBuilder.append(
+          !domain.equals(Domain.PERSON)
+              ? " AND PERSON_ID in (" + unionedCohortQuery + ")"
+              : " WHERE PERSON_ID in (" + unionedCohortQuery + ")");
 
       // now merge all the individual maps from each configuration
       mergedQueryParameterValues.putAll(
@@ -298,8 +301,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               .flatMap(m -> m.entrySet().stream())
               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
+    queryBuilder.append(LIMIT_20);
 
-    return buildQueryJobConfiguration(mergedQueryParameterValues, previewQuery);
+    return buildQueryJobConfiguration(mergedQueryParameterValues, queryBuilder.toString());
   }
 
   @Override
