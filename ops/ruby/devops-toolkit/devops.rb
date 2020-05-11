@@ -40,11 +40,12 @@ end
 # TODO(jaycarlton) take in log level as an argument
 def setup_logger
   logger = Logger.new(STDOUT)
+  logger.level = Logger::INFO
+  logger.datetime_format = '%Y-%m-%d %H:%M:%S'
   logger.formatter = proc do |severity, datetime, _progname, msg|
     "#{datetime} #{severity}: #{msg}\n"
   end
-  logger.datetime_format = '%Y-%m-%d %H:%M:%S'
-  logger.level = Logger::WARN
+
   logger
 end
 

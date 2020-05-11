@@ -66,9 +66,11 @@ class MonitoringAssets
 
   def backup_config
     visit_envs do |env_bundle|
-      make_env_output_dir(env_bundle[:current_env].short_name)
+      # make_env_output_dir(env_bundle[:current_env].short_name)
 
       backup_alert_policies(env_bundle)
+
+      # backup_monitored_resources(env_bundle)
     end
   end
 
@@ -76,16 +78,26 @@ class MonitoringAssets
 
   def backup_alert_policies(env_bundle)
     policies = env_bundle[:alerts_client].list_alert_policies(env_bundle[:path])
-    logger.info("found #{policies.count} alerting policies")
+    logger.info("found #{policies.count} alerting policies in #{env_bundle[:current_env].short_name}")
 
     policies.each do |policy|
-      path = make_output_path(env_bundle[:current_env].short_name, 'policies')
-      logger.info("Writing #{policy.display_name} to #{path}")
-      contents = JSON.pretty_generate(policy.to_json)
-      IO.write(path, contents)
-      # File.open(path, 'w') do |f|
-      #   f.write(contents)
-      # end
+      # path = make_output_path(env_bundle[:current_env].short_name, 'policies')
+      path = make_output_path(policy)
+      file_name = DateTime.now.to_s + '.json'
+      full_path = File.join(path, file_name)
+      logger.info("Writing #{policy.display_name} to #{full_path}")
+      IO.write(full_path, policy.to_json)
+    end
+  end
+
+  def backup_monitored_resources(env_bundle)
+    resources = env_bundle[:metric_client].list_monitored_resource_descriptors(env_bundle[:path])
+    logger.info("found #{resources.count} monitored resources policies in #{env_bundle[:current_env].short_name}")
+
+    resources.each do |resource|
+      path = make_output_path(env_bundle[:current_env].short_name, 'monitored_resources')
+      logger.info("Writing #{resource.display_name} to #{path}")
+      IO.write(path, resource.to_json)
     end
   end
 
@@ -102,16 +114,22 @@ class MonitoringAssets
     end
   end
 
-  def make_output_path(env_short_name, category)
-    env_output_dir = File.join(output_dir, env_short_name)
-    File.join(env_output_dir, "#{category}.json")
-  end
+  # def make_output_path(env_short_name, category)
+  #   env_output_dir = File.join(output_dir, env_short_name)
+  #   File.join(env_output_dir, "#{category}.json")
+  # end
 
-  def make_env_output_dir(env_short_name)
-    env_output_dir = File.join(output_dir, env_short_name)
-    Dir.mkdir(env_output_dir) unless Dir.exist?(env_output_dir)
-    env_output_dir
+  # take a name like projects/all-of-us-rw-prod/alertPolicies/6212216586218347852 and make a dir out of it
+  #
+  def make_output_path(asset)
+    FileUtils.mkdir_p(File.join(output_dir, asset.name))
   end
+  #
+  # def make_env_output_dir(env_short_name)
+  #   env_output_dir = File.join(output_dir, env_short_name)
+  #   Dir.mkdir(env_output_dir) unless Dir.exist?(env_output_dir)
+  #   env_output_dir
+  # end
 
 end
 
