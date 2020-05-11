@@ -6,9 +6,10 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     uses = {CommonMappers.class, DbStorageEnums.class})
 public interface CohortReviewMapper {
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")

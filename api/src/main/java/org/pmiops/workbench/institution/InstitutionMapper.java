@@ -14,8 +14,9 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapStructConfig.class)
 public interface InstitutionMapper {
   @Mapping(target = "institutionId", ignore = true)
   DbInstitution modelToDb(Institution modelObject);
