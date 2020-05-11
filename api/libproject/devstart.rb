@@ -2221,6 +2221,19 @@ def create_workbench_db()
   )
 end
 
+def create_or_update_workbench_db(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
+    create_workbench_db
+  end
+end
+
+Common.register_command({
+  :invocation => "create-or-update-workbench-db",
+  :description => "Creates or updates the Workbench database and users",
+  :fn => ->(*args) { create_or_update_workbench_db("create-or-update-workbench-db", args) }
+})
+
 def migrate_database(dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
