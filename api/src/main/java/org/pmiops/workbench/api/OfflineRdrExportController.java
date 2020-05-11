@@ -19,12 +19,17 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rdr.RdrExportService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * This offline process is responsible to daily sync up with RDR by creating/pushing multiple task
- * with eligible user Ids and workspace Ids to cloud task queue
+ * This offline process is responsible to daily sync up with RDR by creating/pushing multiple Cloud
+ * Task tasks with eligible user Ids and workspace Ids to cloud task queue.
+ *
+ * None of the actual RDR communication occurs from within this cron job handler, so this cron
+ * may succeed even though the actual export tasks to RDR are failing. See
+ * CloudTaskRdrExportController for the handlers which do the actual RDR export work.
  *
  * @author nsaxena
  */
