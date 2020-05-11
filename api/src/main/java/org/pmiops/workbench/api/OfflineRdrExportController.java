@@ -19,7 +19,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rdr.RdrExportService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * This offline process is responsible to daily sync up with RDR by creating/pushing multiple Cloud
  * Task tasks with eligible user Ids and workspace Ids to cloud task queue.
  *
- * None of the actual RDR communication occurs from within this cron job handler, so this cron
+ * <p>None of the actual RDR communication occurs from within this cron job handler, so this cron
  * may succeed even though the actual export tasks to RDR are failing. See
  * CloudTaskRdrExportController for the handlers which do the actual RDR export work.
  *
@@ -76,7 +75,8 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
         groupIdsAndPushTask(rdrExportService.findAllWorkspacesIdsToExport(), EXPORT_USER_PATH);
       } catch (Exception ex) {
         throw new ServerErrorException(
-            String.format("Error creating RDR export Cloud Tasks for workspaces: %s", ex.getMessage()));
+            String.format(
+                "Error creating RDR export Cloud Tasks for workspaces: %s", ex.getMessage()));
       }
     }
     return ResponseEntity.noContent().build();
@@ -113,7 +113,8 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
     }
   }
 
-  private void createAndPushTask(List<Long> ids, String queuePath, String taskUri) throws IOException {
+  private void createAndPushTask(List<Long> ids, String queuePath, String taskUri)
+      throws IOException {
     List<String> idsAsString = ids.stream().map(id -> id.toString()).collect(Collectors.toList());
     Gson gson = new Gson();
     String daysJson = gson.toJson(ids);
@@ -133,8 +134,8 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
     } catch (IOException ex) {
       log.severe(
           String.format(
-              "Error while creating task to push to queue for IDS %s and path %s. " +
-                  "Re-throwing error",
+              "Error while creating task to push to queue for IDS %s and path %s. "
+                  + "Re-throwing error",
               idsAsString, taskUri));
       throw ex;
     }
