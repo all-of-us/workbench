@@ -2230,7 +2230,13 @@ end
 
 Common.register_command({
   :invocation => "create-or-update-workbench-db",
-  :description => "Creates or updates the Workbench database and users",
+  :description => "Creates or updates the Workbench database and users.\n" \
+                  "This can be used in the event that new users or permissions " \
+                  "are added to create_db.sql, as this is not currently rerun " \
+                  "during deployment. This process is separate from Liquibase " \
+                  "migrations as these changes may require root, be necessary " \
+                  "to bootstrap Liquibase, or require sensitive variables such " \
+                  "as passwords which are unavailable to Liquibase.",
   :fn => ->(*args) { create_or_update_workbench_db("create-or-update-workbench-db", args) }
 })
 
