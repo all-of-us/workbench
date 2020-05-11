@@ -71,18 +71,21 @@ const styles = reactStyles({
   },
 });
 
-function redirectToGoogleSecurity(): void {
-  AnalyticsTracker.Registration.TwoFactorAuth();
-  let url = 'https://myaccount.google.com/u/2/signinoptions/two-step-verification/enroll';
-  const {profile} = userProfileStore.getValue();
-  // The profile should always be available at this point, but avoid making an
-  // implicit hard dependency on that, since the authuser'less URL is still useful.
-  if (profile.username) {
-    // Attach the authuser, in case users are using Google multilogin - their
-    // AoU researcher account is unlikely to be their primary Google login.
-    url += `?authuser=${profile.username}`;
+export function getTwoFactorSetupUrl(): string {
+  const accountChooserBase = 'https://accounts.google.com/AccountChooser';
+  const url = new URL(accountChooserBase);
+  // If available, set the 'Email' param to give Google a hint that we want to access the
+  // target URL as this specific G Suite user. This helps guide users when multi-login is in use.
+  if (userProfileStore.getValue()) {
+    url.searchParams.set('Email', userProfileStore.getValue().profile.username);
   }
-  window.open(url, '_blank');
+  url.searchParams.set('continue', 'https://myaccount.google.com/signinoptions/two-step-verification/enroll');
+  return url.toString();
+}
+
+function redirectToTwoFactorSetup(): void {
+  AnalyticsTracker.Registration.TwoFactorAuth();
+  window.open(getTwoFactorSetupUrl(), '_blank');
 }
 
 function redirectToNiH(): void {
@@ -131,7 +134,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionTimestamp: (profile: Profile) => {
       return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
     },
-    onClick: redirectToGoogleSecurity
+    onClick: redirectToTwoFactorSetup
   }, {
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
@@ -414,7 +417,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
               <Button onClick = {() => this.setState({twoFactorAuthModalOpen: false})}
                       type='secondary' style={styles.twoFactorAuthModalCancelButton}>Cancel</Button>
               <Button onClick = {() => {
-                redirectToGoogleSecurity();
+                redirectToTwoFactorSetup();
                 this.setState((state) => ({
                   accessTaskKeyToButtonAsRefresh: state.accessTaskKeyToButtonAsRefresh.set('twoFactorAuth', true),
                   twoFactorAuthModalOpen: false
