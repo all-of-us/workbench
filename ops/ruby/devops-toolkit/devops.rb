@@ -37,12 +37,14 @@ def parse_options
   options
 end
 
+# TODO(jaycarlton) take in log level as an argument
 def setup_logger
   logger = Logger.new(STDOUT)
   logger.formatter = proc do |severity, datetime, _progname, msg|
     "#{datetime} #{severity}: #{msg}\n"
   end
   logger.datetime_format = '%Y-%m-%d %H:%M:%S'
+  logger.level = Logger::WARN
   logger
 end
 

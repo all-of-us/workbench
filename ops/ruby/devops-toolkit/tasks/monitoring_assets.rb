@@ -66,6 +66,8 @@ class MonitoringAssets
 
   def backup_config
     visit_envs do |env_bundle|
+      make_env_output_dir(env_bundle[:current_env].short_name)
+
       backup_alert_policies(env_bundle)
     end
   end
@@ -77,12 +79,17 @@ class MonitoringAssets
     logger.info("found #{policies.count} alerting policies")
 
     policies.each do |policy|
-      path = make_output_path('policies', env_bundle[:current_env].short_name)
+      path = make_output_path(env_bundle[:current_env].short_name, 'policies')
       logger.info("Writing #{policy.display_name} to #{path}")
-      File.write(path, JSON.pretty_generate(policy.to_json))
+      contents = JSON.pretty_generate(policy.to_json)
+      IO.write(path, contents)
+      # File.open(path, 'w') do |f|
+      #   f.write(contents)
+      # end
     end
   end
 
+  # TODO(jaycarlton): make this reusable outside this class
   # Thin wrapper around the visitor so we don't have to pass the env around
   def visit_envs
     visitor.visit do |env|
@@ -95,11 +102,16 @@ class MonitoringAssets
     end
   end
 
-
   def make_output_path(env_short_name, category)
     env_output_dir = File.join(output_dir, env_short_name)
-    Dir.mkdir(env_output_dir) unless Dir.exist?(env_output_dir)
     File.join(env_output_dir, "#{category}.json")
   end
+
+  def make_env_output_dir(env_short_name)
+    env_output_dir = File.join(output_dir, env_short_name)
+    Dir.mkdir(env_output_dir) unless Dir.exist?(env_output_dir)
+    env_output_dir
+  end
+
 end
 
