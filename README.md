@@ -1,11 +1,23 @@
 # Workbench
+CircleCI Test Status [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
 
-[![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
+## Introduction
+The [All of Us Research Program](https://allofus.nih.gov/) Researcher Workbench is a platform for researchers to work with program
+data in a secure and convenient way. It provides users with an environment for running Jupyter notebooks
+in R or Python that can access data in the program's Curated Data Repository. For information on research
+opportunities see the [official website](https://allofus.nih.gov/get-involved/opportunities-researchers).
 
-[Documentation on API Structure](https://github.com/all-of-us/workbench/blob/master/api/doc/code-structure.md)
+While the code in this repository is available according to the terms of our  [licence](LICENSE.txt), not all features
+are available for external use. In particular, it's not crrenlty possible for third parties to build and
+deploy their own instance of the Researcher Workbench solely from the code here.
 
-[UI Style Guide](https://github.com/all-of-us/workbench/blob/master/ui/docs/style-guide.md)
+## Development Guides
+[Documentation on API Structure](api/docs/code-structure.md)
 
+[UI Style Guide](ui/docs/style-guide.md)
+
+### Best Practices Guides
+MapStruct [Best Practices](api/docs/mapstruct.md) and [Tutorial](api/docs/tutorials/mapstruct-tutorial.md)
 
 ## Setup for Development
 
