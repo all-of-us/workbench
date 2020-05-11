@@ -86,6 +86,18 @@ public class InstitutionController implements InstitutionApiDelegate {
                     getInstitutionImpl(shortName), email)));
   }
 
+  /**
+   * Note: this API is publicly-accessible since it is called during account creation.
+   *
+   * @return Returns whether the email is a valid institutional member.
+   * @deprecated in favor of the newer POST checkEmail() endpoint
+   */
+  @Override
+  public ResponseEntity<CheckEmailResponse> deprecatedCheckEmail(
+      final String shortName, final String email) {
+    return checkEmail(shortName, email);
+  }
+
   @Override
   @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Institution> updateInstitution(
