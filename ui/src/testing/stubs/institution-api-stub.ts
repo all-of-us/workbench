@@ -1,5 +1,5 @@
 import {
-  CheckEmailResponse,
+  CheckEmailResponse, ContactEmail,
   DuaType,
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
@@ -93,7 +93,8 @@ export class InstitutionApiStub extends InstitutionApi {
     });
   }
 
-  async checkEmail(shortName: string, email: string, options?: any): Promise<CheckEmailResponse> {
+  async checkEmail(shortName: string, contactEmail: ContactEmail, options?: any): Promise<CheckEmailResponse> {
+    const email = contactEmail.value;
     const domain = email.substring(email.lastIndexOf('@') + 1);
 
     const institution = this.institutions.find(x => x.shortName === shortName);

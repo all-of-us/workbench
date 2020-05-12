@@ -6,6 +6,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CheckEmailResponse;
+import org.pmiops.workbench.model.ContactEmail;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
 import org.pmiops.workbench.model.GetPublicInstitutionDetailsResponse;
 import org.pmiops.workbench.model.Institution;
@@ -78,12 +79,13 @@ public class InstitutionController implements InstitutionApiDelegate {
    * @return Returns whether the email is a valid institutional member.
    */
   @Override
-  public ResponseEntity<CheckEmailResponse> checkEmail(final String shortName, final String email) {
+  public ResponseEntity<CheckEmailResponse> checkEmail(
+      final String shortName, final ContactEmail email) {
     return ResponseEntity.ok(
         new CheckEmailResponse()
             .isValidMember(
                 institutionService.validateInstitutionalEmail(
-                    getInstitutionImpl(shortName), email)));
+                    getInstitutionImpl(shortName), email.getValue())));
   }
 
   /**
@@ -95,7 +97,11 @@ public class InstitutionController implements InstitutionApiDelegate {
   @Override
   public ResponseEntity<CheckEmailResponse> deprecatedCheckEmail(
       final String shortName, final String email) {
-    return checkEmail(shortName, email);
+    return ResponseEntity.ok(
+        new CheckEmailResponse()
+            .isValidMember(
+                institutionService.validateInstitutionalEmail(
+                    getInstitutionImpl(shortName), email)));
   }
 
   @Override

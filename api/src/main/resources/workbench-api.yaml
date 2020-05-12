@@ -2361,7 +2361,14 @@ paths:
         description: Institutional contact email address to check.
         required: true
         schema:
-          type: string
+          type: object
+          required:
+            - value
+          properties:
+            value:
+              type: string
+              description: Institutional contact email address to check.
+
       responses:
         200:
           description: Whether the email is a valid member of the institution.
