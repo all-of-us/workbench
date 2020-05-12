@@ -67,13 +67,12 @@ class MonitoringAssets
 
   def backup_config
     visit_envs do |env_bundle|
+      backup_alert_policies(env_bundle)
+      backup_all_metrics(env_bundle)
+      backup_group_members(env_bundle)
+      backup_monitored_resources(env_bundle)
       backup_notification_channels(env_bundle)
-
-      # backup_group_members(env_bundle)
-      # backup_alert_policies(env_bundle)
-      # backup_monitored_resources(env_bundle)
-      # backup_all_metrics(env_bundle)
-      # backup_notification_channels(env_bundle)
+      backup_notification_channels(env_bundle)
     end
   end
 
