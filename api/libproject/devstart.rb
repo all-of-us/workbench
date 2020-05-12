@@ -130,7 +130,7 @@ def ensure_docker(cmd_name, args=nil)
   args = (args or [])
   unless Workbench.in_docker?
     ensure_docker_sync()
-    docker_run(%W{./project.rb #{cmd_name}} + args)
+    exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
   end
 end
 
@@ -1259,7 +1259,7 @@ Common.register_command({
   :fn => ->(*args) { run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-def write_db_creds_file(project, cdr_db_name, root_password, workbench_password)
+def write_db_creds_file(project, cdr_db_name, root_password, workbench_password, readonly_password)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -1277,6 +1277,8 @@ def write_db_creds_file(project, cdr_db_name, root_password, workbench_password)
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
+      db_creds_file.puts "DEV_READONLY_DB_USER=dev-readonly"
+      db_creds_file.puts "DEV_READONLY_DB_PASSWORD=#{readonly_password}"
       db_creds_file.close
 
       copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
@@ -2490,12 +2492,14 @@ def create_project_resources(gcc)
 end
 
 def setup_project_data(gcc, cdr_db_name)
-  root_password, workbench_password = random_password(), random_password()
+  root_password = random_password()
+  workbench_password = random_password()
+  readonly_password = random_password()
 
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password)
+  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password, readonly_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root --host % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
