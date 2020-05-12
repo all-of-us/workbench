@@ -83,7 +83,7 @@ class MonitoringAssets
     policies.each do |policy|
       # path = make_output_path(env_bundle[:current_env].short_name, 'policies')
       path = make_output_path(policy)
-      file_name = DateTime.now.to_s + '.json'
+      file_name = DateTime.now.strftime("%FT%T").gsub(':', '-') + '.json'
       full_path = File.join(path, file_name)
       logger.info("Writing #{policy.display_name} to #{full_path}")
       IO.write(full_path, policy.to_json)
