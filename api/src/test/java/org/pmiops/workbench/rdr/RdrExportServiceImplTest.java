@@ -42,6 +42,7 @@ import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceCreator;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -71,7 +72,7 @@ public class RdrExportServiceImplTest {
 
   private DbUser dbUserWithEmail;
   private DbUser dbUserWithoutEmail;
-  private DbWorkspace mockWorkspace, mockDeletedWorkspace;
+  private DbWorkspace mockWorkspace, mockDeletedWorkspace, mockCreatorWorkspace;
 
   @TestConfiguration
   @Import({RdrExportServiceImpl.class})
@@ -117,8 +118,13 @@ public class RdrExportServiceImplTest {
 
     mockDeletedWorkspace =
         buildDbWorkspace(2, "workspace_del", "workspaceNs", WorkspaceActiveStatus.DELETED);
-
+    mockDeletedWorkspace.setCreator(dbUserWithEmail);
     when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(2)).thenReturn(mockDeletedWorkspace);
+
+    mockCreatorWorkspace =
+        buildDbWorkspace(3, "mock_workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE);
+    mockCreatorWorkspace.setCreator(dbUserWithoutEmail);
+    when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(3)).thenReturn(mockCreatorWorkspace);
 
     DbVerifiedInstitutionalAffiliation mockVerifiedInstitutionalAffiliation =
         new DbVerifiedInstitutionalAffiliation();
@@ -215,6 +221,25 @@ public class RdrExportServiceImplTest {
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
 
+  @Test
+  public void exportWorkspace_CreatorInformation() throws ApiException {
+    List<Long> workspaceID = new ArrayList<>();
+    workspaceID.add(1l);
+    rdrExportService.exportWorkspaces(workspaceID);
+    verify(rdrExportDao, times(1)).save(anyList());
+
+    RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+
+    workspaceID = new ArrayList<>();
+    workspaceID.add(3l);
+    rdrExportService.exportWorkspaces(workspaceID);
+    rdrWorkspace = toDefaultRdrWorkspace(mockCreatorWorkspace);
+    rdrWorkspace.setCreator(
+        new RdrWorkspaceCreator().userId(2l).familyName("email").givenName("icannothas"));
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+  }
+
   /**
    * For deleted workspace RDR should send the status as INACTIVE
    *
@@ -241,7 +266,8 @@ public class RdrExportServiceImplTest {
     RdrWorkspace rdrWorkspace = new RdrWorkspace();
     rdrWorkspace.setWorkspaceId((int) dbWorkspace.getWorkspaceId());
     rdrWorkspace.setName(dbWorkspace.getName());
-
+    rdrWorkspace.setCreator(
+        new RdrWorkspaceCreator().userId(1l).familyName("email").givenName("icanhas"));
     rdrWorkspace.setCreationTime(dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
     rdrWorkspace.setModifiedTime(
         dbWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));

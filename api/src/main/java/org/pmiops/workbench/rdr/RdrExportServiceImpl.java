@@ -33,6 +33,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceCreator;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
 import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
@@ -281,7 +282,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setCreationTime(dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
     rdrWorkspace.setModifiedTime(
         dbWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
-
+    rdrWorkspace.setCreator(toRdrWorkspaceCreator(dbWorkspace.getCreator()));
     RdrWorkspace.StatusEnum workspaceRDRStatus =
         dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE
             ? RdrWorkspace.StatusEnum.ACTIVE
@@ -445,6 +446,22 @@ public class RdrExportServiceImpl implements RdrExportService {
                 })
             .collect(Collectors.toList());
     rdrExportDao.save(exportList);
+  }
+
+  /**
+   * Creates RdrWorkspaceCreator object that contains workspace creator information like id, given
+   * name and lastName
+   *
+   * @param creatorUser
+   * @return RdrWorkspaceCreator object
+   */
+  RdrWorkspaceCreator toRdrWorkspaceCreator(DbUser creatorUser) {
+    RdrWorkspaceCreator workspaceCreator =
+        new RdrWorkspaceCreator()
+            .familyName(creatorUser.getFamilyName())
+            .givenName(creatorUser.getGivenName())
+            .userId(creatorUser.getUserId());
+    return workspaceCreator;
   }
 
   /**
