@@ -170,8 +170,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     }
 
     try {
-      const result = await institutionApi().checkEmail(institutionShortName, {value: contactEmail},
-        {signal: this.aborter.signal});
+      const result = await institutionApi().checkEmail(institutionShortName, {value: contactEmail}, {signal: this.aborter.signal});
       this.setState({checkEmailResponse: result});
     } catch (e) {
       if (isAbortError(e)) {

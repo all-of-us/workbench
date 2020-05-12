@@ -1,5 +1,6 @@
 import {
-  CheckEmailResponse, ContactEmail,
+  CheckEmailResponse,
+  ContactEmail,
   DuaType,
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
