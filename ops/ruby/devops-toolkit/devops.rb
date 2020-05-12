@@ -29,6 +29,8 @@ def parse_options
     parser.on('-p', '--output-dir [OUTPUT-DIR]', 'Output directory')
     parser.on('-i', '--input-tools-file [INPUT-TOOLS-FILE]', String, 'Input YAML file for tools')
     parser.on('-o', '--output-file [OUTPUT-FILE]', String, 'Output file for task.')
+    parser.on('-f', '--output-format [OUTPUT-FORMAT]', String, 'Output format for task. Currently YAML and JSON are supported.')
+
   end.parse!({into: options})
 
   # Now raise an exception if we have not found an argument required by all taks
@@ -59,7 +61,8 @@ def run_task(options)
   when 'backup-config'
     raise OptionParser::MissingArgument.new('envs-file') if options[:'envs-file'].to_s.empty?
     raise OptionParser::MissingArgument.new('output-dir') if options[:'output-dir'].to_s.empty?
-    MonitoringAssets.new(File.expand_path(options[:'envs-file']), File.expand_path(options[:'output-dir']), options[:logger]).backup_config
+    MonitoringAssets.new(File.expand_path(options[:'envs-file']), File.expand_path(options[:'output-dir']),
+                         options[:logger], options[:'output-format'].to_s.downcase.to_sym).backup_config
   when 'delete-all-service-account-keys'
     # Delete all user-generated SA keys for given service account. Should only be necessary
     # to clean up after debug sessions that killed the process before it had time to delete the
