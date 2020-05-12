@@ -81,6 +81,7 @@ class MonitoringAssets
         backup_custom_metrics
         backup_user_logs_based_metrics
       end
+      backup_dashboards
       backup_group_members
       backup_monitored_resources
       backup_notification_channels
@@ -100,6 +101,10 @@ class MonitoringAssets
     backup_assets(custom_metrics)
   end
 
+  def backup_dashboards
+    dashboards = @dashboard_client.list_dashboards(@current_env.formatted_project_number)
+    backup_assets(dashboards)
+  end
   def backup_user_logs_based_metrics
     user_logs_based_metrics = @metric_client.list_metric_descriptors(@project_path, {filter: USER_LOGS_BASED_METRIC_FILTER})
     backup_assets(user_logs_based_metrics)
@@ -168,12 +173,13 @@ class MonitoringAssets
   # becomes easier
   def visit_envs
     visitor.visit do |env|
-      @current_env = env
-      @metric_client = Google::Cloud::Monitoring::Metric.new
-      @project_path = Google::Cloud::Monitoring::V3::MetricServiceClient.project_path(@current_env.project_id)
       @alert_client = Google::Cloud::Monitoring::V3::AlertPolicyServiceClient.new
+      @current_env = env
+      @dashboard_client = Google::Cloud::Monitoring::Dashboard::V1::DashboardsServiceClient.new
       @group_client = Google::Cloud::Monitoring::V3::GroupServiceClient.new
+      @metric_client = Google::Cloud::Monitoring::Metric.new
       @notification_channel_client = Google::Cloud::Monitoring::V3::NotificationChannelServiceClient.new
+      @project_path = Google::Cloud::Monitoring::V3::MetricServiceClient.project_path(@current_env.project_id)
       yield env
     end
 
