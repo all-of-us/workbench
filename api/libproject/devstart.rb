@@ -2031,7 +2031,7 @@ def connect_to_cloud_db(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  if op.opts.db_user.nil?
+  if op.opts.db_user.nil? || op.opts.db_user.empty?
     op.opts.db_user = "dev-readonly"
   end
 
@@ -2041,7 +2041,7 @@ def connect_to_cloud_db(cmd_name, *args)
     "workbench" => env["WORKBENCH_DB_PASSWORD"],
     "root" => env["MYSQL_ROOT_PASSWORD"]
   }
-  unless user_to_password.has_key? op.opts.db_user
+  unless user_to_password.has_key?(op.opts.db_user)
     Common.new.error(
       "invalid --db-user provided, wanted one of #{user_to_password.keys}, got '#{op.opts.db_user}'")
     exit 1
