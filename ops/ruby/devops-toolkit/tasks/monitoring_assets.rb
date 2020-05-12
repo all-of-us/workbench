@@ -1,5 +1,6 @@
 require "google/cloud/monitoring"
 require 'logger'
+require 'jq'
 
 require_relative "./lib/service_account_manager"
 require_relative './lib/gcp_environment_visitor'
@@ -112,7 +113,8 @@ class MonitoringAssets
   def backup_asset(asset)
     full_path = File.join(make_output_path(asset), make_file_name)
     logger.info("Writing #{asset.display_name} to #{full_path}")
-    IO.write(full_path, asset.to_json)
+    json = JSON.pretty_generate(asset.to_h)
+    IO.write(full_path, json)
   end
 
   def make_file_name
