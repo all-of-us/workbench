@@ -14,7 +14,7 @@ class CloudSqlProxyContext < ServiceAccountContext
         })
       end
       begin
-        sleep 1 # TODO(dmohs): Detect running better.
+        sleep 2 # TODO(dmohs): Detect running better.
         yield
       ensure
         Process.kill "HUP", @ps
