@@ -1,5 +1,4 @@
 require "google/cloud/monitoring"
-require "google/cloud/trace"
 require 'logger'
 require 'json'
 
@@ -9,7 +8,6 @@ require_relative './lib/gcp_environment_visitor'
 CUSTOM_METRIC_FILTER = "metric.type = starts_with(\"custom.googleapis.com/\")"
 LOGS_BASED_METRIC_FILTER = "metric.type = starts_with(\"logging.googleapis.com/\")"
 USER_LOGS_BASED_METRIC_FILTER = "metric.type = starts_with(\"logging.googleapis.com/user/\")"
-TRACE_LIST_INTERVAL_SECONDS = 1800
 FILE_SUFFIXES = {:yaml => '.yaml', :json => '.json'}
 
 class MonitoringAssets
@@ -58,7 +56,7 @@ class MonitoringAssets
       total_logs_based_metrics = metric_client.list_metric_descriptors(@project_path, {filter: LOGS_BASED_METRIC_FILTER})
       logger.info("found  #{total_logs_based_metrics.count} total logs-based metrics")
 
-      policies = env_bundle[:alert_client].list_alert_policies(env_bundle[:current_env].formatted_project_name)
+      policies = @alert_client.list_alert_policies(@project_path)
       logger.info("found #{policies.count} alerting policies")
       counts['policies'] = policies.count
 
@@ -66,7 +64,7 @@ class MonitoringAssets
         logger.info("\t#{policy.display_name}, #{policy.name}, #{policy.conditions.count} conditions")
       end
 
-      logger.info("Total counts for #{env_bundle[:current_env].short_name}: #{counts}")
+      logger.info("Total counts for #{@current_env.short_name}: #{counts}")
     end
   end
 
