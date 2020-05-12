@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -68,6 +69,7 @@ import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.profile.AddressMapper;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
@@ -149,27 +151,34 @@ public class ProfileController implements ProfileApiDelegate {
             @Override
             public DbDemographicSurvey apply(DemographicSurvey demographicSurvey) {
               DbDemographicSurvey result = new DbDemographicSurvey();
-              if (demographicSurvey.getRace() != null)
+              if (demographicSurvey.getRace() != null) {
                 result.setRaceEnum(demographicSurvey.getRace());
-              if (demographicSurvey.getEthnicity() != null)
+              }
+              if (demographicSurvey.getEthnicity() != null) {
                 result.setEthnicityEnum(demographicSurvey.getEthnicity());
-              if (demographicSurvey.getDisability() != null)
+              }
+              if (demographicSurvey.getDisability() != null) {
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
-              if (demographicSurvey.getEducation() != null)
+              }
+              if (demographicSurvey.getEducation() != null) {
                 result.setEducationEnum(demographicSurvey.getEducation());
+              }
               result.setIdentifiesAsLgbtq(demographicSurvey.getIdentifiesAsLgbtq());
               result.setLgbtqIdentity(demographicSurvey.getLgbtqIdentity());
-              if (demographicSurvey.getDisability() != null)
+              if (demographicSurvey.getDisability() != null) {
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              }
               if (demographicSurvey.getGenderIdentityList() != null) {
                 result.setGenderIdentityEnumList(demographicSurvey.getGenderIdentityList());
               }
-              if (demographicSurvey.getSexAtBirth() != null)
+              if (demographicSurvey.getSexAtBirth() != null) {
                 result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
-              if (demographicSurvey.getYearOfBirth() != null)
+              }
+              if (demographicSurvey.getYearOfBirth() != null) {
                 result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
+              }
               return result;
             }
           };
@@ -309,14 +318,12 @@ public class ProfileController implements ProfileApiDelegate {
       // See RW-1488.
       throw new BadRequestException("Changing username is not supported");
     }
-    if (updatedProfile.getVerifiedInstitutionalAffiliation() != null
-        && !updatedProfile
-            .getVerifiedInstitutionalAffiliation()
-            .getInstitutionDisplayName()
-            .equals(
-                prevProfile.getVerifiedInstitutionalAffiliation().getInstitutionDisplayName())) {
-      // See RW-1488.
-      throw new BadRequestException("Changing institution is not currently supported");
+    final VerifiedInstitutionalAffiliation updatedAffil =
+        updatedProfile.getVerifiedInstitutionalAffiliation();
+    final VerifiedInstitutionalAffiliation prevAffil =
+        prevProfile.getVerifiedInstitutionalAffiliation();
+    if (!Objects.equals(updatedAffil, prevAffil)) {
+      throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
   }
 
@@ -504,6 +511,7 @@ public class ProfileController implements ProfileApiDelegate {
    *
    * @return Profile updated with training completion time
    */
+  @Override
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
       if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
@@ -707,10 +715,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     updateInstitutionalAffiliations(updatedProfile, user);
 
-    userService.updateUserWithConflictHandling(
-        user,
-        verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-            updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService));
+    userService.updateUserWithConflictHandling(user);
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
