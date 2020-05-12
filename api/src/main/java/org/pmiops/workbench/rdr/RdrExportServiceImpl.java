@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -288,7 +289,8 @@ public class RdrExportServiceImpl implements RdrExportService {
             : RdrWorkspace.StatusEnum.INACTIVE;
 
     rdrWorkspace.setStatus(workspaceRDRStatus);
-    setExcludeFromPublicDirectory(dbWorkspace.getCreator(), rdrWorkspace);
+    rdrWorkspace.setExcludeFromPublicDirectory(
+        isExcludeFromPublicDirectory(dbWorkspace.getCreator()));
 
     rdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
     rdrWorkspace.setDiseaseFocusedResearchName(dbWorkspace.getDiseaseOfFocus());
@@ -448,21 +450,20 @@ public class RdrExportServiceImpl implements RdrExportService {
   }
 
   /**
-   * Set excludeFromPublicDirectory to true if the workspace creator is an operational user i.e has
-   * Institution as All of Us Program operational Use
+   * Should return true if the creator does not have verified institution or if the user is an
+   * Operational User (verified institution is AouOps)
    *
    * @param creatorUser
-   * @param rdrWorkspace
+   * @return
    */
-  void setExcludeFromPublicDirectory(DbUser creatorUser, RdrWorkspace rdrWorkspace) {
-    rdrWorkspace.setExcludeFromPublicDirectory(false);
-    verifiedInstitutionalAffiliationDao
-        .findFirstByUser(creatorUser)
-        .ifPresent(
-            verifiedInstitutionalAffiliation -> {
-              rdrWorkspace.setExcludeFromPublicDirectory(
-                  institutionService.validateOperationalUser(
-                      verifiedInstitutionalAffiliation.getInstitution()));
-            });
+  boolean isExcludeFromPublicDirectory(DbUser creatorUser) {
+    Optional<DbVerifiedInstitutionalAffiliation> dbVerifiedInstitutionalAffiliation =
+        verifiedInstitutionalAffiliationDao.findFirstByUser(creatorUser);
+    if (!dbVerifiedInstitutionalAffiliation.isPresent()) {
+      return true;
+    }
+
+    return institutionService.validateOperationalUser(
+        dbVerifiedInstitutionalAffiliation.get().getInstitution());
   }
 }

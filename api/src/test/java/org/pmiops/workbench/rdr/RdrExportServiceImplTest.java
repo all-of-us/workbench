@@ -71,6 +71,7 @@ public class RdrExportServiceImplTest {
 
   private DbUser dbUserWithEmail;
   private DbUser dbUserWithoutEmail;
+  private DbUser dbUserWithoutVerifiedInstitution;
   private DbWorkspace mockWorkspace, mockDeletedWorkspace;
 
   @TestConfiguration
@@ -109,6 +110,16 @@ public class RdrExportServiceImplTest {
 
     when(mockUserDao.findUserByUserId(2L)).thenReturn(dbUserWithoutEmail);
 
+    dbUserWithoutVerifiedInstitution = new DbUser();
+    dbUserWithoutVerifiedInstitution.setUserId(2L);
+    dbUserWithoutVerifiedInstitution.setCreationTime(NOW_TIMESTAMP);
+    dbUserWithoutVerifiedInstitution.setLastModifiedTime(NOW_TIMESTAMP);
+    dbUserWithoutVerifiedInstitution.setGivenName("icannothaveInstitution");
+    dbUserWithoutVerifiedInstitution.setFamilyName("email");
+    dbUserWithoutVerifiedInstitution.setDegreesEnum(Collections.singletonList(Degree.NONE));
+
+    when(mockUserDao.findUserByUserId(3L)).thenReturn(dbUserWithoutVerifiedInstitution);
+
     when(rdrExportDao.findByEntityTypeAndEntityId(anyShort(), anyLong())).thenReturn(null);
     mockWorkspace =
         buildDbWorkspace(1, "workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE);
@@ -117,6 +128,7 @@ public class RdrExportServiceImplTest {
 
     mockDeletedWorkspace =
         buildDbWorkspace(2, "workspace_del", "workspaceNs", WorkspaceActiveStatus.DELETED);
+    mockDeletedWorkspace.setCreator(dbUserWithEmail);
 
     when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(2)).thenReturn(mockDeletedWorkspace);
 
@@ -233,6 +245,28 @@ public class RdrExportServiceImplTest {
 
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockDeletedWorkspace);
     rdrWorkspace.setStatus(RdrWorkspace.StatusEnum.INACTIVE);
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+  }
+
+  /**
+   * Rdr should send excludeFromDirectory as true if workspace creator does not have verified
+   * institution
+   *
+   * @throws ApiException
+   */
+  @Test
+  public void exportWorkspace_CreatorWithVerifiedInstitution() throws ApiException {
+    mockWorkspace.setCreator(dbUserWithoutVerifiedInstitution);
+    List<Long> workspaceID = new ArrayList<>();
+    workspaceID.add(1l);
+    rdrExportService.exportWorkspaces(workspaceID);
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(
+            mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
+    verify(rdrExportDao, times(1)).save(anyList());
+
+    RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
+    rdrWorkspace.setExcludeFromPublicDirectory(true);
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
 
