@@ -3563,7 +3563,7 @@ definitions:
       defaultFreeCreditsDollarLimit:
         type: number
         format: double
-        description: The default dollar amount of free credits alloted to each user
+        description: The default dollar amount of free credits allotted to each user
       enableBillingLockout:
         type: boolean
         default: false
@@ -3584,7 +3584,7 @@ definitions:
       enableV3DataUserCodeOfConduct:
         type: boolean
         default: false
-        description: Whether to enable version 2 of the Data User Code of Conduct
+        description: Whether to enable version 3 of the Data User Code of Conduct
       enableEventDateModifier:
         type: boolean
         default: false
