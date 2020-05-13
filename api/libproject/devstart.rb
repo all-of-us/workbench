@@ -2216,7 +2216,7 @@ Common.register_command({
 def create_workbench_db()
   run_with_redirects(
     "cat db/create_db.sql | envsubst | " \
-    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+    "mysql -v -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
     ENV["MYSQL_ROOT_PASSWORD"]
   )
 end
