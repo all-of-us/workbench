@@ -22,7 +22,6 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, CohortsService, DomainType} from 'generated';
 import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
-import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
@@ -59,7 +58,6 @@ describe('CohortSearchComponent', () => {
         ClarityModule,
         FormsModule,
         NgxPopperModule,
-        NouisliderModule,
         ReactiveFormsModule
       ],
       providers: [

@@ -4,7 +4,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {CohortCommonModule} from 'app/cohort-common/module';
-import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
@@ -48,7 +47,6 @@ const routes: Routes = [{
     // 3rd Party
     ClarityModule,
     NgxPopperModule,
-    NouisliderModule,
     // Ours
     CohortCommonModule,
   ],

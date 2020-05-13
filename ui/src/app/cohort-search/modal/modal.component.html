@@ -58,11 +58,12 @@
           </div>
           <div class="content left" *ngIf="open">
             <ng-container [ngSwitch]="wizard.domain">
-              <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"
+              <crit-demographics *ngSwitchCase="domainType[domainType.PERSON]"
+                [count]="wizard.count"
+                [criteriaType]="wizard.type"
                 [select]="addSelection"
                 [selectedIds]="selectedIds"
-                [selections]="selections"
-                [wizard]="wizard"></crit-list-demographics>
+                [selections]="selections"></crit-demographics>
               <ng-container *ngSwitchDefault>
                 <div *ngIf="loadingSubtree" class="spinner spinner-lg spin-in-overlay">
                   Loading...
