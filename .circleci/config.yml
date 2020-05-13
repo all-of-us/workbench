@@ -114,7 +114,7 @@ commands:
           name: Halt job and succeed early if no code changes on master branch
 
   ensure_branch_has_changes:
-    description: "Ensure branch has changes to code in specified directory"
+    description: Ensure branch has changes to code in << parameters.dir_name >> directory
     parameters:
       dir_name:
         type: enum
@@ -239,7 +239,7 @@ commands:
           command: ./project.rb start-local-api && tail -f build/dev-appserver-out/dev_appserver.out
           background: true
       - run:
-          name: Wait for local API server to be started
+          name: Wait for local API server to start
           command: |
             dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
 
@@ -254,7 +254,7 @@ commands:
           command: yarn dev-up --configuration=local
           background: true
       - run:
-          name: Wait for local UI server to be started
+          name: Wait for local UI server to start
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
 
 
