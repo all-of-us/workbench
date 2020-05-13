@@ -2022,20 +2022,42 @@ def connect_to_cloud_db(cmd_name, *args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-    "--root",
-    ->(opts, _) { opts.root = true },
-    "Connect as root")
+    "--db-user [user]",
+    ->(opts, v) { opts.db_user = v },
+    "Optional database user to connect as, defaults to 'dev-readonly'. " +
+    "To perform mutations use 'workbench'. Avoid using 'root' unless " +
+    "absolutely necessary.")
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
+
+  if op.opts.db_user.nil? || op.opts.db_user.empty?
+    op.opts.db_user = "dev-readonly"
+  end
+
   env = read_db_vars(gcc)
+  user_to_password = {
+    "dev-readonly" => env["DEV_READONLY_DB_PASSWORD"],
+    "workbench" => env["WORKBENCH_DB_PASSWORD"],
+    "root" => env["MYSQL_ROOT_PASSWORD"]
+  }
+  unless user_to_password.has_key?(op.opts.db_user)
+    Common.new.error(
+      "invalid --db-user provided, wanted one of #{user_to_password.keys}, got '#{op.opts.db_user}'")
+    exit 1
+  end
+  db_password = user_to_password[op.opts.db_user]
+
   CloudSqlProxyContext.new(gcc.project).run do
-    password = op.opts.root ? env["MYSQL_ROOT_PASSWORD"] : env["WORKBENCH_DB_PASSWORD"]
-    user = op.opts.root ? "root" : env["WORKBENCH_DB_USER"]
+    if op.opts.db_user == "dev-readonly"
+      common.status ""
+      common.status "Database session will be read-only; use --db-user to change this"
+      common.status ""
+    end
     common.run_inline %W{
-      mysql --host=127.0.0.1 --port=3307 --user=#{user}
-      --database=#{env["DB_NAME"]} --password=#{password}},
-      password
+      mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user}
+      --database=#{env["DB_NAME"]} --password=#{db_password}},
+      db_password
   end
 end
 
@@ -2057,11 +2079,10 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     common.status "\n" + "*" * 80
     common.status "Listing available journal files: "
 
-    # "root" is required for binlog access.
-    password = env["MYSQL_ROOT_PASSWORD"]
+    password = env["DEV_READONLY_DB_PASSWORD"]
     run_with_redirects(
       "echo 'SHOW BINARY LOGS;' | " +
-      "mysql --host=127.0.0.1 --port=3307 --user=root " +
+      "mysql --host=127.0.0.1 --port=3307 --user=dev-readonly " +
       "--database=#{env['DB_NAME']} --password=#{password}", password)
     common.status "*" * 80
 
@@ -2075,7 +2096,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     # Work out of /tmp for easy local file redirection. We don't want binlogs
     # winding up back in Workbench source control accidentally.
     run_with_redirects(
-      "export MYSQL_HOME=$(with-mysql-login.sh root #{password}); " +
+      "export MYSQL_HOME=$(with-mysql-login.sh dev-readonly #{password}); " +
       "cd /tmp; /bin/bash", password)
   end
 end
