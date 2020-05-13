@@ -243,6 +243,7 @@ commands:
           command: |
             dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
 
+
   start_local_ui:
     description: "Start local UI server"
     steps:
@@ -417,6 +418,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout_init_git
+      - ensure_branch_has_changes:
+          dir_name: "ui"
       - run:
           name: Download Swagger CLI
           working_directory: ~/workbench
@@ -527,6 +530,7 @@ jobs:
     environment:
       <<: *e2e_env
       WORKBENCH_ENV: dev
+    working_directory: ~/workbench
     parallelism: 3
     steps:
       - checkout_init_git
@@ -547,6 +551,7 @@ jobs:
       <<: *java_env
       <<: *e2e_env
       WORKBENCH_ENV: local
+    working_directory: ~/workbench
     parallelism: 1
     steps:
       - checkout_init_git
