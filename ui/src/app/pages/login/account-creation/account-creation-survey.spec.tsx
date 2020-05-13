@@ -13,7 +13,7 @@ import {waitOneTickAndUpdate} from "testing/react-test-helpers";
 let props: AccountCreationSurveyProps;
 let mockCreateAccount: SpyInstance;
 
-const defaultConfig = {gsuiteDomain: 'researchallofus.org', enableNewAccountCreation: true};
+const defaultConfig = {gsuiteDomain: 'researchallofus.org'};
 
 function getSubmitButton(wrapper: ReactWrapper): ReactWrapper {
   return wrapper.find('[data-test-id="submit-button"]');

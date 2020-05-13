@@ -6,9 +6,10 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     uses = {CommonMappers.class, UserDao.class})
 public interface CohortMapper {
 

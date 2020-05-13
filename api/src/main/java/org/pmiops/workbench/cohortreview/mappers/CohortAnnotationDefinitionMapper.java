@@ -11,9 +11,10 @@ import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     uses = {CommonMappers.class})
 public interface CohortAnnotationDefinitionMapper {
 

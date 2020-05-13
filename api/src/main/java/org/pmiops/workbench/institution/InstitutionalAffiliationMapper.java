@@ -6,8 +6,9 @@ import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.NonAcademicAffiliation;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapStructConfig.class)
 public interface InstitutionalAffiliationMapper {
   @Mapping(target = "nonAcademicAffiliation", source = "nonAcademicAffiliationEnum")
   InstitutionalAffiliation dbInstitutionalAffiliationToInstitutionalAffiliation(

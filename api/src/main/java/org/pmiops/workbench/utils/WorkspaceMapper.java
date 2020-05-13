@@ -28,9 +28,10 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     uses = {
       CommonMappers.class,

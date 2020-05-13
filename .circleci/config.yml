@@ -14,7 +14,7 @@ parameters:
 anchors:
   defaults: &defaults
     docker:
-      - image: allofustest/workbench:buildimage-0.0.16
+      - image: allofustest/workbench:buildimage-0.0.17
     working_directory: ~/workbench
 
   java_defaults: &java_defaults
@@ -243,7 +243,7 @@ jobs:
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
     docker:
-      - image: allofustest/workbench:buildimage-0.0.16
+      - image: allofustest/workbench:buildimage-0.0.17
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
