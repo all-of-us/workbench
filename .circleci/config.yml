@@ -569,36 +569,14 @@ jobs:
 workflows:
   build-test-deploy:
     jobs:
-      # Always run basic test/lint/compilation (open PRs, master merge).
-      # Note: by default tags are not picked up.
-      - api-local-test
-      - api-build-test
-      - ui-build-test
-      - api-bigquery-test
-      - api-integration-test
-      # Run deployment to "test" on master merges.
-      - api-deploy-to-test:
-          filters: *filter_only_master_branch
-          requires:
-            - api-build-test
-      - ui-deploy-to-test:
-          filters: *filter_only_master_branch
-          requires:
-            - ui-build-test
-      # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
-      - puppeteer-e2e-test:
-          filters: *filter_only_master_branch
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
       - puppeteer-e2e-local:
           filters: *filter_pull_request_branch
-          requires:
-            - api-local-test
-            - api-build-test
-            - ui-build-test
-            - api-bigquery-test
-            - api-integration-test
+          #requires:
+            #- api-local-test
+            #- api-build-test
+            #- ui-build-test
+            #- api-bigquery-test
+            #- api-integration-test
 
   deploy-staging:
     jobs:
