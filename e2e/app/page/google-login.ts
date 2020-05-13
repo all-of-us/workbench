@@ -133,19 +133,32 @@ export default class GoogleLoginPage extends BasePage {
     }
 
     try {
-      await this.waitUntilTitleMatch('Homepage');
-    } catch (e) {
       // Handle "Enter Recovery Email" prompt if found exists
-      const recoverEmail = await this.page.$x('//input[@type="email" and @aria-label="Enter recovery email address"]');
-      if (recoverEmail.length > 0) {
-        await recoverEmail[0].type(config.contactEmail);
-        await Promise.all([
-          this.page.waitForNavigation(),
-          this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
-        ]);
-      }
+      const recoverEmail = await this.page
+        .waitForXPath('//input[@type="email" and @aria-label="Enter recovery email address"]', {visible: true, timeout: 5000});
+      await recoverEmail[0].type(config.contactEmail);
+      await Promise.all([
+        this.page.waitForNavigation(),
+        this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
+      ]);
+    } catch (e) {
+      // Do nothing if "Enter Recovery Email" field is not found.
     }
 
+    try {
+      // Handle Self-Bypass if found
+      await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 5000});
+      const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
+      await Promise.all([
+        this.page.waitForNavigation(),
+        selfBypass.click(),
+        this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']})
+      ]);
+    } catch (e) {
+      // Do nothing if Self-Bypass is not found.
+    }
+
+    await this.waitUntilTitleMatch('Homepage');
   }
 
   async loginAs(email, paswd) {
