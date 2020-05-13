@@ -16,6 +16,12 @@ import * as React from 'react';
 
 
 const styles = reactStyles({
+  pageHeader: {
+    fontSize: '18px',
+    lineHeight: '22px',
+    marginBottom: '1rem',
+    marginTop: '0.5rem'
+  },
   header: {
     fontSize: '14px',
     fontWeight: 600,
@@ -100,15 +106,17 @@ export class AdminInstitution extends React.Component<{}, State> {
     const {institutions} = this.state;
     return <div>
       <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
-        <SemiBoldHeader style={{fontSize: '18px',  lineHeight: '22px', marginBottom: '1rem', marginTop: '0.5rem'}}>
+        <SemiBoldHeader style={styles.pageHeader}>
           <label>Institution admin table</label>
               <Button type='secondaryLight'
-                      style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}} data-test-id='add-instiution'>
+                      style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
+                      data-test-id='add-institution'>
                 <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
               </Button>
         </SemiBoldHeader>
         <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
-                   paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
+                   paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks
+                   NextPageLink LastPageLink  RowsPerPageDropdown'
                    currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'
                    rows={5} scrollable={true} frozenWidth='7rem'>
           <Column field='displayName' header='Institution Name'
@@ -119,9 +127,9 @@ export class AdminInstitution extends React.Component<{}, State> {
           <Column field='duaTypeEnum' header='Agreement Type' body={this.renderDuaType}
                   bodyStyle={styles.text} headerStyle={styles.header}/>
           <Column field='emailDomains' header='Accepted Domain List' body={this.renderEmailDomain}
-                  bodyStyle={styles.text} headerStyle={{...styles.header}}/>
+                  bodyStyle={styles.text} headerStyle={styles.header}/>
           <Column field='emailAddresses' header='Accepted Email List' body={this.renderEmailAddress}
-                  bodyStyle={styles.text} headerStyle={{...styles.header}}/>
+                  bodyStyle={styles.text} headerStyle={styles.header}/>
           <Column field='userInstructions' header='User Instruction' bodyStyle={styles.text}
                   headerStyle={{...styles.header, width: '5rem'}}/>
         </DataTable>
