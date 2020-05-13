@@ -22,7 +22,7 @@ export const environment: Environment = {
   inactivityWarningBeforeSeconds: 5 * 60,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
-  enableProfileCapsFeatures: false,
+  enableProfileCapsFeatures: true,
   enableNewConceptTabs: false,
   enableFooter: false
 };
