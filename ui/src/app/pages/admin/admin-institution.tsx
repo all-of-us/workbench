@@ -77,13 +77,20 @@ export class AdminInstitution extends React.Component<{}, State> {
   }
 
   renderOrganizationType(row, col) {
-    return row['organizationTypeEnum'] === OrganizationType.ACADEMICRESEARCHINSTITUTION ? 'Academic Research Instiution' : 'Institution';
+    switch ( row['organizationTypeEnum']) {
+      case OrganizationType.ACADEMICRESEARCHINSTITUTION: return 'Academic Research Institution';
+      case OrganizationType.HEALTHCENTERNONPROFIT: return 'Health Center Non-Profit';
+      case OrganizationType.EDUCATIONALINSTITUTION: return 'Educational Institution';
+      case OrganizationType.INDUSTRY: return 'Industry';
+      default: return 'Other';
+    }
   }
 
   renderDuaType(row, col) {
     return row['duaTypeEnum'] === DuaType.RESTRICTED ? 'Individual' : 'Master';
   }
 
+  // If email domain is more than 4 show top 4 and replace others with ...
   renderEmailDomain(row, col) {
     const emailDomain = fp.take(4, row['emailDomains']).join('\n') ;
     if (row['emailDomains'] && row['emailDomains'].length > 4) {
@@ -92,6 +99,7 @@ export class AdminInstitution extends React.Component<{}, State> {
     return emailDomain;
   }
 
+  // If email address is more than 4 show top 4 and replace others with ...
   renderEmailAddress(row, col) {
     const emailAddresses = fp.take(4, row['emailAddresses']).join('\n') ;
     if (row['emailAddresses'] && row['emailAddresses'].length > 4) {
@@ -101,7 +109,7 @@ export class AdminInstitution extends React.Component<{}, State> {
   }
 
   render() {
-    const {institutions, loadingInstitutions} = this.state;
+    const {institutions, institutionLoadError, loadingInstitutions} = this.state;
     return <div>
       <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
         <SemiBoldHeader style={styles.pageHeader}>
@@ -112,6 +120,8 @@ export class AdminInstitution extends React.Component<{}, State> {
                 <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
               </Button>
         </SemiBoldHeader>
+        {institutionLoadError && <div style={{color: colors.danger}}>
+          Error while loading Institution please try again later</div>}
         <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
                    rows={5} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}>
           <Column field='displayName' header='Institution Name'
