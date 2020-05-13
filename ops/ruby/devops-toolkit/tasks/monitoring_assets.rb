@@ -149,16 +149,36 @@ class MonitoringAssets
 
   # Serialize the Stackdriver object instance to a persistent format such as YAML or JSON
   def serialize(asset)
-    hash = asset.to_h
     case @output_format
     when :yaml
-      return hash.to_yaml
+      return to_pretty_yaml(asset)
     when :json
-      return JSON.pretty_generate(hash)
+      return to_pretty_json(asset)
     else
       @logger.WARN("Unrecognized output format '#{@output_format}'")
       return asset.to_s
     end
+  end
+
+  # In order to generate JSON correctly (e.g. with camelCase and only the fields Stackdriver actually
+  # wants to expose), we need to call the asset's internal to_json() override. This gives correct
+  # JSON (per the REST API) suitable for reuse. We then parse that JSON and re-render it prettily.
+  def to_pretty_json(asset)
+    reparsed_hash = to_hash(asset)
+    JSON.pretty_generate(reparsed_hash)
+  end
+
+  # Use the asset's internal to_json() to give conventional fields for the appropriate APIs
+  # and make a hash from that.
+  def to_hash(asset)
+    inline_json = asset.to_json
+    JSON.parse(inline_json)
+  end
+
+  # Build a YAML representation of the asset, based on its internally-defined JSON representation
+  # and not simply the default hash's default yaml.
+  def to_pretty_yaml(asset)
+    to_hash(asset).to_yaml
   end
 
   # Generate a file name based on the current 24-hour time. This will
@@ -173,11 +193,15 @@ class MonitoringAssets
   # becomes easier
   def visit_envs
     visitor.visit do |env|
-      @alert_client = Google::Cloud::Monitoring::V3::AlertPolicyServiceClient.new
       @current_env = env
-      @dashboard_client = Google::Cloud::Monitoring::Dashboard::V1::DashboardsServiceClient.new
-      @group_client = Google::Cloud::Monitoring::V3::GroupServiceClient.new
+
+      # Stackdriver clients. Note that somehow the initialization order matters here. I suspect it
+      # has to do with library-wide state getting pulled into the constrctors.
       @metric_client = Google::Cloud::Monitoring::Metric.new
+      @project_path = Google::Cloud::Monitoring::V3::MetricServiceClient.project_path(@current_env.project_id)
+      @alert_client = Google::Cloud::Monitoring::V3::AlertPolicyServiceClient.new
+      @group_client = Google::Cloud::Monitoring::V3::GroupServiceClient.new
+      @dashboard_client = Google::Cloud::Monitoring::Dashboard::V1::DashboardsServiceClient.new
       @notification_channel_client = Google::Cloud::Monitoring::V3::NotificationChannelServiceClient.new
       @project_path = Google::Cloud::Monitoring::V3::MetricServiceClient.project_path(@current_env.project_id)
       yield env
