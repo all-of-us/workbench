@@ -2214,6 +2214,8 @@ Common.register_command({
 })
 
 def create_or_update_workbench_db()
+  # This method assumes that a cloud SQL proxy is active, and that appropriate
+  # env variables are exported to correspond to the target environment.
   run_with_redirects(
     "cat db/create_db.sql | envsubst | " \
     "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
@@ -2224,6 +2226,7 @@ end
 def create_or_update_workbench_db_cmd(cmd_name, args)
   ensure_docker cmd_name, args
   with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
+    # with_cloud_proxy_and_db_env loads env vars into scope which parameterize this call
     create_or_update_workbench_db
   end
 end
