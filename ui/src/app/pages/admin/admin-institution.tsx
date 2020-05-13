@@ -103,7 +103,7 @@ export class AdminInstitution extends React.Component<{}, State> {
   }
 
   render() {
-    const {institutions} = this.state;
+    const {institutions, loadingInstitutions} = this.state;
     return <div>
       <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
         <SemiBoldHeader style={styles.pageHeader}>
@@ -115,7 +115,7 @@ export class AdminInstitution extends React.Component<{}, State> {
               </Button>
         </SemiBoldHeader>
         <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
-                   rows={5} scrollable={true} frozenWidth='7rem'>
+                   rows={5} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}>
           <Column field='displayName' header='Institution Name'
                   bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
           <Column field='organizationTypeEnum' header='Institution Type'
