@@ -2,6 +2,7 @@ package org.pmiops.workbench.institution;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
+
+  private static final Logger log = Logger.getLogger(InstitutionServiceImpl.class.getName());
 
   private final InstitutionDao institutionDao;
   private final InstitutionUserInstructionsDao institutionUserInstructionsDao;
@@ -132,7 +135,16 @@ public class InstitutionServiceImpl implements InstitutionService {
     try {
       // TODO RW-4489: UserService should handle initial email validation
       new InternetAddress(contactEmail).validate();
-    } catch (AddressException | NullPointerException e) {
+    } catch (AddressException e) {
+      log.info(
+          String.format(
+              "Contact email '%s' validation threw an AddressException: %s",
+              contactEmail, e.getMessage()));
+      return false;
+    } catch (NullPointerException e) {
+      log.info(
+          String.format(
+              "Contact email '%s' validation threw a NullPointerException", contactEmail));
       return false;
     }
 
@@ -140,13 +152,26 @@ public class InstitutionServiceImpl implements InstitutionService {
     // Confirm if the email address is in the allowed email list
     if (institution.getDuaTypeEnum() != null
         && institution.getDuaTypeEnum().equals(DuaType.RESTRICTED)) {
-      return institution.getEmailAddresses().contains(contactEmail);
+      final boolean validated = institution.getEmailAddresses().contains(contactEmail);
+      log.info(
+          String.format(
+              "Contact email '%s' validated against RESTRICTED-DUA institution '%s': address %s",
+              contactEmail, institution.getShortName(), validated ? "MATCHED" : "DID NOT MATCH"));
+      return validated;
     }
 
     // If Agreement Type is NULL assume DUA Agreement is MASTER
     // If Institution agreement type is master confirm if the contact email has valid/allowed domain
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
-    return institution.getEmailDomains().contains(contactEmailDomain);
+    final boolean validated = institution.getEmailDomains().contains(contactEmailDomain);
+    log.info(
+        String.format(
+            "Contact email '%s' validated against MASTER-DUA institution '%s': domain %s %s",
+            contactEmail,
+            institution.getShortName(),
+            contactEmailDomain,
+            validated ? "MATCHED" : "DID NOT MATCH"));
+    return validated;
   }
 
   @Override
