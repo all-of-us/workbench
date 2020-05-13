@@ -2361,13 +2361,7 @@ paths:
         description: Institutional contact email address to check.
         required: true
         schema:
-          type: object
-          required:
-            - value
-          properties:
-            value:
-              type: string
-              description: Institutional contact email address to check.
+          "$ref": "#/definitions/CheckEmailRequest"
 
       responses:
         200:
@@ -5210,6 +5204,13 @@ definitions:
         default: false
     example:
       isTaken: false
+
+  CheckEmailRequest:
+    type: object
+    properties:
+      contactEmail:
+        description: The Institutional contact email address to check.
+        type: string
 
   CheckEmailResponse:
     type: object
