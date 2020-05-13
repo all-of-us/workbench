@@ -172,8 +172,8 @@ interface State {
 export class Demographics extends React.Component<Props, State> {
   ageWrapper: HTMLDivElement;
   slider: {
-    get: Function;
-    set: Function;
+    get: () => Array<string>;
+    set: (values: Array<number>) => void;
   };
 
   constructor(props: Props) {
@@ -244,7 +244,7 @@ export class Demographics extends React.Component<Props, State> {
       const {attributes} = selections[0];
       const {name, operands} = attributes[0];
       this.slider.set([+operands[0], +operands[1]]);
-      this.setState({count, maxAge: operands[1], minAge: operands[0]});
+      this.setState({count: count || null, maxAge: operands[1], minAge: operands[0]});
       if (serverConfigStore.getValue().enableCBAgeTypeOptions) {
         this.setState({ageType: name});
       }
@@ -257,7 +257,7 @@ export class Demographics extends React.Component<Props, State> {
       if (!ageCountStore.getValue()[cdrVersionId]) {
         // Get total age count for this cdr version if it doesn't exist in the store yet
         this.calculateAge(true);
-      } else if (this.setTotalAge) {
+      } else if (this.setTotalAge && !selections.length) {
         this.setState({count:  ageCountStore.getValue()[cdrVersionId]});
       }
     }
