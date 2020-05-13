@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -114,6 +115,27 @@ public class InstitutionServiceTest {
     service.deleteInstitution(testInst.getShortName());
     assertThat(service.getInstitutions()).containsExactly(otherInst);
   }
+
+  // Institution with entry in userInstruction table should populate the institution model
+  // parameter userInstructions
+  @Test
+  public void test_getInstitutionsWithInstruction() {
+    final String instructions = "Do some magic!";
+    final InstitutionUserInstructions inst =
+        new InstitutionUserInstructions()
+            .institutionShortName(roundTrippedTestInst.getShortName())
+            .instructions(instructions);
+    service.setInstitutionUserInstructions(inst);
+    List<Institution> institutionList = service.getInstitutions();
+    assertThat(institutionList.get(0).getUserInstructions()).contains(instructions);
+  }
+
+  @Test
+  public void test_getInstitutionsWithoutInstruction() {
+    List<Institution> institutionList = service.getInstitutions();
+    assertThat(institutionList.get(0).getUserInstructions()).isNull();
+  }
+
 
   @Test
   public void test_getInstitution() {
