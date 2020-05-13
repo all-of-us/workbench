@@ -69,7 +69,6 @@ export class InstitutionApiStub extends InstitutionApi {
   getInstitutions(shortName: string): Promise<GetInstitutionsResponse> {
     return new Promise((resolve, reject) => {
       const institution = {institutions: this.institutions};
-
       resolve(institution);
     });
   }

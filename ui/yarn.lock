@@ -7540,10 +7540,10 @@ primeicons@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/primeicons/-/primeicons-1.0.0.tgz#90061f168ef6227f21f0a7db8204ffa85cd27aec"
 
-primereact@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/primereact/-/primereact-4.2.0.tgz#0fc62ab404e9e90957eadf9b5851c9d290c3e7a5"
-  integrity sha512-/DZyUztlodGeYoLyJBRayhD5ktN1/JahvkaBz/Pwx9KydFIMY+H0FNGPl37SkMxjObsFFIMHh/nwUEYZoLNTLw==
+primereact@^3.1.1:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/primereact/-/primereact-3.4.0.tgz#cbc0534abd4917355975d0213b612df49f44d880"
+  integrity sha512-XsLkInlYsFSK5/FRAM0JMyJEc+9lyI6feKJLNbQIwpker6mk587T3uwfZd8RYhmUGpj/jKEnZ+3V9tl+PKniAg==
 
 private@^0.1.8:
   version "0.1.8"

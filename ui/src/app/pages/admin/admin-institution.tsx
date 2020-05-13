@@ -115,9 +115,6 @@ export class AdminInstitution extends React.Component<{}, State> {
               </Button>
         </SemiBoldHeader>
         <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
-                   paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks
-                   NextPageLink LastPageLink  RowsPerPageDropdown'
-                   currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'
                    rows={5} scrollable={true} frozenWidth='7rem'>
           <Column field='displayName' header='Institution Name'
                   bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
