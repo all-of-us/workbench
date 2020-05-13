@@ -7,6 +7,15 @@ parameters:
   circleci_service_account:
     type: string
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
+  workbench_image:
+    type: string
+    default: "allofustest/workbench:buildimage-0.0.17"
+  mysql_image:
+    type: string
+    default: "circleci/mysql:5.7"
+  browser_image:
+    type: string
+    default: "circleci/node:12.16.2-browsers"
 
 # -------------------------
 #   ANCHORS
@@ -14,22 +23,30 @@ parameters:
 anchors:
   defaults: &defaults
     docker:
-      - image: allofustest/workbench:buildimage-0.0.17
+      - image: << pipeline.parameters.workbench_image >>
     working_directory: ~/workbench
 
-  java_defaults: &java_defaults
-    <<: *defaults
-    environment:
-      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-      # https://circleci.com/blog/how-to-handle-java-oom-errors/
-      #
-      # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
-      # so we bumped this down further to 2G.
-      JAVA_TOOL_OPTIONS: -Xmx2g
-      # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-      TERM: dumb
+  java_env: &java_env
+    # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+    # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+    # https://circleci.com/blog/how-to-handle-java-oom-errors/
+    #
+    # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
+    # so we bumped this down further to 2G.
+    JAVA_TOOL_OPTIONS: -Xmx2g
+    # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    TERM: dumb
+    MYSQL_ROOT_PASSWORD: ubuntu
+
+  mysql_env: &mysql_env
+    MYSQL_ROOT_PASSWORD: ubuntu
+    MYSQL_USER: ubuntu
+    MYSQL_PASSWORD: ubuntu
+
+  e2e_env: &e2e_env
+    CI: true
+    NODE_ENV: development
 
   # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
   # Job runs for master branch only
@@ -203,6 +220,43 @@ commands:
       - store_test_results:
           path: ~/workbench/e2e/logs
 
+  start_local_api:
+    description: "Start local API server"
+    steps:
+      - run:
+          # MySQL sometimes refuses connections by the time we attempt to apply
+          # data migrations. Watch the port for 2m for startup.
+          name: Await MySQL startup
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - run:
+          name: Run Local Migrations
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-migrations
+      - run:
+          name: Launch local API server
+          working_directory: ~/workbench/api
+          # tail -f is important here, it keeps this process running indefinitely
+          command: ./project.rb start-local-api && tail -f build/dev-appserver-out/dev_appserver.out
+          background: true
+      - run:
+          name: Wait for local API server to be started
+          command: |
+            dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
+
+  start_local_ui:
+    description: "Start local UI server"
+    steps:
+      - run:
+          name: Launch local UI server
+          working_directory: ~/workbench/ui
+          # Start local UI server and running in the background
+          command: yarn dev-up --configuration=local
+          background: true
+      - run:
+          name: Wait for local UI server to be started
+          command: dockerize -wait tcp://localhost:4200 -timeout 4m
+
+
 # -------------------------
 #        JOBS
 # -------------------------
@@ -211,7 +265,9 @@ jobs:
     # We're hitting OOM failures as of 1 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
-    <<: *java_defaults
+    <<: *defaults
+      environment:
+        <<: *java_env
     steps:
       - checkout_init_git
       - ensure_branch_has_changes:
@@ -243,42 +299,30 @@ jobs:
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
     docker:
-      - image: allofustest/workbench:buildimage-0.0.17
-      - image: mysql:5.7
+      - image: << pipeline.parameters.workbench_image >>
+      - image: << pipeline.parameters.mysql_image >>
         environment:
-          - MYSQL_ROOT_PASSWORD=ubuntu
-          - MYSQL_USER=ubuntu
-          - MYSQL_PASSWORD=ubuntu
+          <<: *mysql_env
     working_directory: ~/workbench
     environment:
-      JAVA_TOOL_OPTIONS: -Xmx2g
-      TERM: dumb
-      MYSQL_ROOT_PASSWORD: ubuntu
-      # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+      <<: *java_env
     steps:
       - checkout_init_git
       - manage_api_cache:
           restore: true
       - activate_service_account_credential
+      - start_local_api
       - run:
-          # MySQL sometimes refuses connections by the time we attempt to apply
-          # data migrations. Watch the port for 2m for startup.
-          name: Await MySQL start up
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
-      - run:
-          name: Run local migrations
+          name: Local API tests on running local server
           working_directory: ~/workbench/api
-          command: ./project.rb run-local-migrations
-      - run:
-          name: Local API tests on running server
-          working_directory: ~/workbench/api
-          command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
+          command: ./project.rb run-local-api-tests && ./project.rb stop-local-api
       - manage_api_cache:
           save: true
 
   api-deploy-to-test:
-    <<: *java_defaults
+    <<: *defaults
+      environment:
+        <<: *java_env
     steps:
       - checkout_init_git
       # Note: most of the time spent here appears to be in Gradle / App Engine
@@ -303,7 +347,9 @@ jobs:
           save: true
 
   api-deps-check:
-    <<: *java_defaults
+    <<: *defaults
+      environment:
+        <<: *java_env
     steps:
       - checkout_init_git
       - run:
@@ -312,7 +358,9 @@ jobs:
           command: ./project.rb gradle dependencyCheckAnalyze --info
 
   api-integration-test:
-    <<: *java_defaults
+    <<: *defaults
+      environment:
+        <<: *java_env
     steps:
       - checkout_init_git
       - ensure_branch_has_changes:
@@ -330,7 +378,9 @@ jobs:
           save: true
 
   api-nightly-integration-test:
-    <<: *java_defaults
+    <<: *defaults
+      environment:
+        <<: *java_env
     steps:
       - checkout_init_git
       - manage_api_cache:
@@ -346,7 +396,9 @@ jobs:
           save: true
 
   api-bigquery-test:
-    <<: *java_defaults
+    <<: *defaults
+      environment:
+        <<: *java_env
     steps:
       - checkout_init_git
       - ensure_branch_has_changes:
@@ -399,23 +451,6 @@ jobs:
           paths:
             - ui
 
-  # Run Puppeteer e2e UI tests on Workbench deployed "test" environment.
-  puppeteer-e2e-test:
-    <<: *defaults
-    docker:
-      - image: circleci/node:12.16.2-browsers
-    environment:
-      WORKBENCH_ENV: dev
-      CI: true
-      NODE_ENV: development
-    working_directory: ~/workbench
-    parallelism: 3
-    steps:
-      - checkout_init_git
-      - halt_job_noncode_changes
-      - install_e2e_dependencies
-      - run_e2e_test
-
   ui-deploy-to-test:
     <<: *defaults
     steps:
@@ -462,7 +497,6 @@ jobs:
       - manage_api_cache:
           save: true
 
-
   deploy-perf:
     <<: *defaults
     steps:
@@ -484,6 +518,48 @@ jobs:
               --promote
       - manage_api_cache:
           save: true
+
+  # Run Puppeteer e2e UI tests on deployed "test" environment.
+  puppeteer-e2e-test:
+    <<: *defaults
+    docker:
+      - image: << pipeline.parameters.browser_image >>
+    environment:
+      <<: *e2e_env
+      WORKBENCH_ENV: dev
+    parallelism: 3
+    steps:
+      - checkout_init_git
+      - halt_job_noncode_changes
+      - install_e2e_dependencies
+      - run_e2e_test
+
+  # Deploy UI and API local server then run Puppeteer e2e tests on deployed "local" environment.
+  puppeteer-e2e-local:
+    resource_class: medium+
+    docker:
+      - image: << pipeline.parameters.workbench_image >>
+      - image: << pipeline.parameters.browser_image >>
+      - image: << pipeline.parameters.mysql_image >>
+        environment:
+          <<: *mysql_env
+    environment:
+      <<: *java_env
+      <<: *e2e_env
+      WORKBENCH_ENV: local
+    parallelism: 1
+    steps:
+      - checkout_init_git
+      - halt_job_noncode_changes
+      - install_ui_dependencies
+      - install_e2e_dependencies
+      - manage_api_cache:
+          restore: true
+      - activate_service_account_credential
+      - start_local_api
+      - start_local_ui
+      # Run Puppeteer end-to-end UI tests against local server
+      - run_e2e_test
 
 workflows:
   build-test-deploy:
@@ -510,6 +586,14 @@ workflows:
           requires:
             - api-deploy-to-test
             - ui-deploy-to-test
+      - puppeteer-e2e-local:
+          filters: *filter_pull_request_branch
+          requires:
+            - api-local-test
+            - api-build-test
+            - ui-build-test
+            - api-bigquery-test
+            - api-integration-test
 
   deploy-staging:
     jobs:
