@@ -136,7 +136,6 @@ public class InstitutionServiceTest {
     assertThat(institutionList.get(0).getUserInstructions()).isNull();
   }
 
-
   @Test
   public void test_getInstitution() {
     assertThat(service.getInstitution(testInst.getShortName())).hasValue(roundTrippedTestInst);
