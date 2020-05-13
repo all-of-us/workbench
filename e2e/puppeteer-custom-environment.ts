@@ -42,7 +42,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     }
   }
 
-  async savePageToFile(fileName): Promise<boolean> {
+  async savePageToFile(fileName) {
     const logDir = 'logs/html';
     await fs.ensureDir(logDir);
     const htmlFile = `${logDir}/${fileName}`;
