@@ -112,18 +112,15 @@ public class RdrExportServiceImplTest {
 
     when(rdrExportDao.findByEntityTypeAndEntityId(anyShort(), anyLong())).thenReturn(null);
     mockWorkspace =
-        buildDbWorkspace(1, "workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE);
-    mockWorkspace.setCreator(dbUserWithEmail);
+        buildDbWorkspace(1, "workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE, dbUserWithEmail);
     when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(1)).thenReturn(mockWorkspace);
 
     mockDeletedWorkspace =
-        buildDbWorkspace(2, "workspace_del", "workspaceNs", WorkspaceActiveStatus.DELETED);
-    mockDeletedWorkspace.setCreator(dbUserWithEmail);
+        buildDbWorkspace(2, "workspace_del", "workspaceNs", WorkspaceActiveStatus.DELETED, dbUserWithEmail);
     when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(2)).thenReturn(mockDeletedWorkspace);
 
     mockCreatorWorkspace =
-        buildDbWorkspace(3, "mock_workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE);
-    mockCreatorWorkspace.setCreator(dbUserWithoutEmail);
+        buildDbWorkspace(3, "mock_workspace_name", "workspaceNS", WorkspaceActiveStatus.ACTIVE, dbUserWithoutEmail);
     when(mockWorkspaceDao.findDbWorkspaceByWorkspaceId(3)).thenReturn(mockCreatorWorkspace);
 
     DbVerifiedInstitutionalAffiliation mockVerifiedInstitutionalAffiliation =
@@ -137,7 +134,7 @@ public class RdrExportServiceImplTest {
   }
 
   private DbWorkspace buildDbWorkspace(
-      long dbId, String name, String namespace, WorkspaceActiveStatus activeStatus) {
+      long dbId, String name, String namespace, WorkspaceActiveStatus activeStatus, DbUser creator) {
     DbWorkspace workspace = new DbWorkspace();
     Timestamp nowTimestamp = Timestamp.from(NOW);
     workspace.setLastModifiedTime(nowTimestamp);
@@ -152,6 +149,7 @@ public class RdrExportServiceImplTest {
     workspace.setReasonForAllOfUs("Reason for AllOf Us");
     workspace.setEthics(false);
     workspace.setReviewRequested(true);
+    workspace.setCreator(creator);
     return workspace;
   }
 
@@ -223,20 +221,22 @@ public class RdrExportServiceImplTest {
 
   @Test
   public void exportWorkspace_CreatorInformation() throws ApiException {
-    List<Long> workspaceID = new ArrayList<>();
-    workspaceID.add(1l);
-    rdrExportService.exportWorkspaces(workspaceID);
-    verify(rdrExportDao, times(1)).save(anyList());
+    List<Long> workspaceIdList = new ArrayList<>();
+    workspaceIdList.add(1l);
+    rdrExportService.exportWorkspaces(workspaceIdList);
 
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
 
-    workspaceID = new ArrayList<>();
-    workspaceID.add(3l);
-    rdrExportService.exportWorkspaces(workspaceID);
+    workspaceIdList = new ArrayList<>();
+    workspaceIdList.add(3l);
+    rdrExportService.exportWorkspaces(workspaceIdList);
     rdrWorkspace = toDefaultRdrWorkspace(mockCreatorWorkspace);
     rdrWorkspace.setCreator(
-        new RdrWorkspaceCreator().userId(2l).familyName("email").givenName("icannothas"));
+        new RdrWorkspaceCreator()
+            .userId(2l)
+            .familyName("email")
+            .givenName("icannothas"));
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
 
