@@ -10,8 +10,9 @@ import {extractPageName, makeDateTimeStr} from './str-utils';
 export async function savePageToFile(page: Page, fileName?: string): Promise<boolean> {
   const logDir = 'logs/html';
   await ensureDir(logDir);
+  const timestamp = new Date().toISOString();
   const name = fileName || await extractPageName(page);
-  const htmlFile = `${logDir}/${name}.html`;
+  const htmlFile = `${logDir}/${name}_${timestamp}.html`;
   const htmlContent = await page.content();
   return new Promise((resolve, reject) => {
     writeFile(htmlFile, htmlContent, 'utf8', error => {
@@ -33,8 +34,9 @@ export async function savePageToFile(page: Page, fileName?: string): Promise<boo
 export async function takeScreenshot(page: Page, fileName?: string): Promise<void> {
   const screenshotDir = 'logs/screenshot';
   await ensureDir(screenshotDir);
+  const timestamp = new Date().toISOString();
   const fName = fileName || await makeDateTimeStr(await extractPageName(page));
-  const screenshotFile = `${screenshotDir}/${fName}.png`;
+  const screenshotFile = `${screenshotDir}/${fName}_${timestamp}.png`;
   await page.screenshot({path: screenshotFile, fullPage: true});
   console.log('Saved screenshot ' + screenshotFile);
 }

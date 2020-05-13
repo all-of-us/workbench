@@ -149,7 +149,7 @@ export default class GoogleLoginPage extends BasePage {
       await this.waitUntilTitleMatch('Homepage');
       console.log('on home page');
       // Handle Self-Bypass if found
-      await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 5000});
+      await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 10000});
       console.log('self-bypass button found');
       const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
       await selfBypass.click();
