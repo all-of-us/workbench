@@ -152,11 +152,9 @@ export default class GoogleLoginPage extends BasePage {
       await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 5000});
       console.log('self-bypass button found');
       const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
-      await Promise.all([
-        this.page.waitForNavigation(),
-        selfBypass.click(),
-        this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']})
-      ]);
+      await selfBypass.click();
+      console.log('clicked');
+      await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
     } catch (e) {
       // Do nothing if Self-Bypass is not found.
       console.log('self-bypass button not found');
