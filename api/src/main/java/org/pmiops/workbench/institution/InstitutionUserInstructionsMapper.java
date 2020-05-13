@@ -9,8 +9,9 @@ import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapStructConfig.class)
 public interface InstitutionUserInstructionsMapper {
   @Mapping(target = "institutionUserInstructionsId", ignore = true)
   @Mapping(target = "institutionId", ignore = true) // set by setFields()

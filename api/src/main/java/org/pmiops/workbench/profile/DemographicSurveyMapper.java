@@ -6,9 +6,10 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DemographicSurveyEnum;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     uses = {CommonMappers.class, DemographicSurveyEnum.class})
 public interface DemographicSurveyMapper {
   @Mapping(target = "disability", source = "disabilityEnum")
