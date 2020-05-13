@@ -4,7 +4,7 @@ import GoogleLoginPage from 'app/page/google-login';
 import {config} from 'resources/workbench-config';
 
 
-describe('User registration tests:', () => {
+describe.skip('User registration tests:', () => {
 
   test('Loading Terms of Use and Privacy statement page', async () => {
     const loginPage = new GoogleLoginPage(page);
