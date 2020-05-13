@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,23 +13,26 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapStructConfig.class)
 public interface InstitutionMapper {
   @Mapping(target = "institutionId", ignore = true)
   DbInstitution modelToDb(Institution modelObject);
 
   Institution dbToModel(DbInstitution dbObject);
 
-  default List<String> toModelDomains(@NotNull Set<DbInstitutionEmailDomain> dbDomains) {
-    return dbDomains.stream()
+  default List<String> toModelDomains(Set<DbInstitutionEmailDomain> dbDomains) {
+    return Optional.ofNullable(dbDomains).orElse(Collections.emptySet()).stream()
         .map(DbInstitutionEmailDomain::getEmailDomain)
+        .sorted()
         .collect(Collectors.toList());
   }
 
-  default List<String> toModelAddresses(@NotNull Set<DbInstitutionEmailAddress> dbAddresses) {
-    return dbAddresses.stream()
+  default List<String> toModelAddresses(Set<DbInstitutionEmailAddress> dbAddresses) {
+    return Optional.ofNullable(dbAddresses).orElse(Collections.emptySet()).stream()
         .map(DbInstitutionEmailAddress::getEmailAddress)
+        .sorted()
         .collect(Collectors.toList());
   }
 

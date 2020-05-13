@@ -756,6 +756,55 @@ public class ProfileControllerTest extends BaseControllerTest {
     createUser();
   }
 
+  @Test(expected = BadRequestException.class)
+  public void updateVerifiedInstitutionalAffiliation_changeForbidden() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
+    createUser();
+
+    final Profile profile = profileController.getMe().getBody();
+
+    final VerifiedInstitutionalAffiliation newAffil =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("NotTheBroad")
+            .institutionDisplayName("The Narrow Institute?")
+            .institutionalRoleEnum(InstitutionalRole.PRE_DOCTORAL);
+
+    profile.setVerifiedInstitutionalAffiliation(newAffil);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateVerifiedInstitutionalAffiliation_addForbidden() {
+    // necessary to create a user without one
+    config.featureFlags.requireInstitutionalVerification = false;
+    createUser();
+
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final Profile profile = profileController.getMe().getBody();
+    final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
+    profile.setVerifiedInstitutionalAffiliation(toAdd);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateVerifiedInstitutionalAffiliation_removeForbidden() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
+    createUser();
+
+    final Profile profile = profileController.getMe().getBody();
+    profile.setVerifiedInstitutionalAffiliation(null);
+    profileController.updateProfile(profile);
+  }
+
   @Test
   public void updateContactEmail_forbidden() {
     createUser();

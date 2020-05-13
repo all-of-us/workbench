@@ -3,9 +3,11 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/navigation';
-import {RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
+import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {userProfileStore} from 'app/utils/navigation';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
@@ -15,8 +17,13 @@ describe('RegistrationDashboard', () => {
     (<RegistrationDashboard {...props}/>);
   };
 
-  beforeEach(() => {
+  beforeEach(async() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
+    userProfileStore.next({
+      profile: await profileApi().getMe(),
+      reload: jest.fn(),
+      updateCache: jest.fn()
+    });
     serverConfigStore.next({
       enableBetaAccess: true,
       enableDataUseAgreement: true,
@@ -123,6 +130,12 @@ describe('RegistrationDashboard', () => {
     serverConfigStore.next({...serverConfigStore.getValue(), unsafeAllowSelfBypass: true});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(1);
+  });
+
+  it('should generate expected 2FA redirect URL', () => {
+    expect(getTwoFactorSetupUrl()).toMatch(/https:\/\/accounts\.google\.com\/AccountChooser/);
+    expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('tester@fake-research-aou.org'));
+    expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('https://myaccount.google.com/signinoptions/'));
   });
 
 });
