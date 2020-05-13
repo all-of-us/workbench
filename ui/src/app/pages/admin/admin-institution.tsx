@@ -90,7 +90,7 @@ export class AdminInstitution extends React.Component<{}, State> {
     return row['duaTypeEnum'] === DuaType.RESTRICTED ? 'Individual' : 'Master';
   }
 
-  // If email domain is more than 4 show top 4 and replace others with ...
+  // If email domain list has more than 4 entries show top 4 and replace others with ...
   renderEmailDomain(row, col) {
     const emailDomain = fp.take(4, row['emailDomains']).join('\n') ;
     if (row['emailDomains'] && row['emailDomains'].length > 4) {
@@ -99,7 +99,7 @@ export class AdminInstitution extends React.Component<{}, State> {
     return emailDomain;
   }
 
-  // If email address is more than 4 show top 4 and replace others with ...
+  // If email address list has more than 4 entries show top 4 and replace others with ...
   renderEmailAddress(row, col) {
     const emailAddresses = fp.take(4, row['emailAddresses']).join('\n') ;
     if (row['emailAddresses'] && row['emailAddresses'].length > 4) {
