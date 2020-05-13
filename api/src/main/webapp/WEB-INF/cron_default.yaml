@@ -6,35 +6,22 @@ cron:
   target: api
 - description: |
     Daily sync of compliance training status (via Moodle API). This is just a backup to the primary
-    flow. This would only ever catch the following scenarios:
-    1. The user's compliance training expires. The time scale on this expiration is O(years),
-    so syncing nightly is entirely acceptable.
-
-    2. The user completes compliance and doesn't return to the dashboard. We'd progress them in the
-    background. This won't make much of a difference and would have the same effect as if they had
-    navigated back to the dashboard.
-
-    3. Somehow the user manages to "uncomplete" training in Moodle. I'm not sure this is possible,
-    but if so, it's certainly an edge case where nightly would be acceptale latency
+    flow. It should catch expired compliance training, fixup compliance status independent of user
+    navigation, and update on removal of Moodle course completion for some reason.
   url: /v1/cron/bulkSyncComplianceTrainingStatus
   schedule: every 24 hours
   timezone: UTC
   target: api
 - description: >
-    Daily sync of eRA Commons linkage status (via FireCloud API).  I expect this cron to never
-    detect anything. This is effectively checking for whether any changes happened in the
-    background between the Terra account and its linkage to eRA commons. During onboarding,
-    this won't matter since it's checked live from the dashboard. After onboarding, I don't even
-    know whether it's possible to "unlink", and if a user did this, whether that even matters for
-    our registration policy. Certainly it's good to check, but none of this is time sensitive.
-    The current 24h interval is fine.
+    Daily sync of eRA Commons linkage status (via FireCloud API). Records changes in the log,
+    but currently does not drive any downstream processes.
   url: /v1/cron/bulkSyncEraCommonsStatus
   schedule: every 24 hours
   timezone: UTC
   target: api
 - description: >
-    Update our cache of users' two-factor authentication settings on their GSuite accounts via
-    Google Directory Service.
+    Update our database cache of users' two-factor authentication settings on their GSuite accounts
+    via Google Directory Service.
   url: /v1/cron/bulkSyncTwoFactorAuthStatus
   schedule: every 24 hours
   timezone: UTC
@@ -66,8 +53,11 @@ cron:
   target: api
 - description: >
     Find billing projects associated with deleted workspaces and transfer ownership to
-    designated "Garbage Collection" Service Accounts. This process works around the lack of API
-    support for deleting these billing projects directly.
+    designated "Garbage Collection" Service Accounts. This legacy process works around the lack of
+    API support for deleting these billing projects directly.
+
+    The Terra delete Account API is now available, and this cron job is deprecated. To be removed
+    as part of RW-3627.
   url: /v1/cron/billingProjectGarbageCollection
   schedule: every 1 hours
   timezone: UTC
