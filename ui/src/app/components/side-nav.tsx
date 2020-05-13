@@ -351,6 +351,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
             active={this.props.workspaceAdminActive}
         />
       }
+      {
+        profile.authorities.includes(Authority.INSTITUTIONADMIN) && this.state.showAdminOptions && <SideNavItem
+            content={'Institution Admin'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href={'admin/institution'}
+            active={this.props.workspaceAdminActive}
+        />
+      }
     </div>;
   }
 }

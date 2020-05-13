@@ -20,6 +20,8 @@ public interface InstitutionMapper {
   @Mapping(target = "institutionId", ignore = true)
   DbInstitution modelToDb(Institution modelObject);
 
+  // userInstructions will be populated by InstitutionUserInstructionsMapper
+  @Mapping(target = "userInstructions", ignore = true)
   Institution dbToModel(DbInstitution dbObject);
 
   default List<String> toModelDomains(Set<DbInstitutionEmailDomain> dbDomains) {

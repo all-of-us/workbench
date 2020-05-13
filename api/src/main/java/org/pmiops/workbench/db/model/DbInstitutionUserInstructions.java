@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -13,7 +15,7 @@ import javax.persistence.Table;
 public class DbInstitutionUserInstructions {
 
   private long institutionUserInstructionsId;
-  private long institutionId;
+  private DbInstitution institution;
   private String userInstructions;
 
   public DbInstitutionUserInstructions() {}
@@ -31,13 +33,14 @@ public class DbInstitutionUserInstructions {
     return this;
   }
 
-  @Column(name = "institution_id", nullable = false)
-  public long getInstitutionId() {
-    return institutionId;
+  @OneToOne
+  @JoinColumn(name = "institution_id")
+  public DbInstitution getInstitution() {
+    return institution;
   }
 
-  public DbInstitutionUserInstructions setInstitutionId(long institutionId) {
-    this.institutionId = institutionId;
+  public DbInstitutionUserInstructions setInstitution(DbInstitution institution) {
+    this.institution = institution;
     return this;
   }
 
@@ -64,12 +67,12 @@ public class DbInstitutionUserInstructions {
 
     DbInstitutionUserInstructions that = (DbInstitutionUserInstructions) o;
 
-    return Objects.equals(institutionId, that.institutionId)
+    return Objects.equals(institution.getInstitutionId(), institution.getInstitutionId())
         && Objects.equals(userInstructions, that.userInstructions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(institutionId, userInstructions);
+    return Objects.hash(institution.getInstitutionId(), userInstructions);
   }
 }

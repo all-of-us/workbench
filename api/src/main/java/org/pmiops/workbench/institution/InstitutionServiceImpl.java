@@ -55,6 +55,12 @@ public class InstitutionServiceImpl implements InstitutionService {
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
         .map(institutionMapper::dbToModel)
+        .map(
+            institution -> {
+              getInstitutionUserInstructions(institution.getShortName())
+                  .ifPresent(user -> institution.setUserInstructions(user));
+              return institution;
+            })
         .collect(Collectors.toList());
   }
 
@@ -152,7 +158,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public Optional<String> getInstitutionUserInstructions(final String shortName) {
     return institutionUserInstructionsDao
-        .getByInstitutionId(getDbInstitutionOrThrow(shortName).getInstitutionId())
+        .getByInstitution(getDbInstitutionOrThrow(shortName))
         .map(DbInstitutionUserInstructions::getUserInstructions);
   }
 
@@ -166,7 +172,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     // so the call to save() replaces it
 
     institutionUserInstructionsDao
-        .getByInstitutionId(dbInstructions.getInstitutionId())
+        .getByInstitution(dbInstructions.getInstitution())
         .ifPresent(
             existingDbEntry ->
                 dbInstructions.setInstitutionUserInstructionsId(
@@ -179,7 +185,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Transactional // TODO: understand why this is necessary
   public boolean deleteInstitutionUserInstructions(final String shortName) {
     final DbInstitution institution = getDbInstitutionOrThrow(shortName);
-    return institutionUserInstructionsDao.deleteByInstitutionId(institution.getInstitutionId()) > 0;
+    return institutionUserInstructionsDao.deleteByInstitution(institution) > 0;
   }
 
   @Override
