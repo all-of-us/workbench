@@ -1,4 +1,5 @@
 import {
+  CheckEmailRequest,
   CheckEmailResponse,
   DuaType,
   GetInstitutionsResponse,
@@ -93,8 +94,9 @@ export class InstitutionApiStub extends InstitutionApi {
     });
   }
 
-  async checkEmail(shortName: string, email: string, options?: any): Promise<CheckEmailResponse> {
-    const domain = email.substring(email.lastIndexOf('@') + 1);
+  async checkEmail(shortName: string, request: CheckEmailRequest, options?: any): Promise<CheckEmailResponse> {
+    const {contactEmail} = request;
+    const domain = contactEmail.substring(contactEmail.lastIndexOf('@') + 1);
 
     const institution = this.institutions.find(x => x.shortName === shortName);
     if (!institution) {
@@ -104,7 +106,7 @@ export class InstitutionApiStub extends InstitutionApi {
     const response: CheckEmailResponse = {
       isValidMember: false
     };
-    if (institution.emailAddresses && institution.emailAddresses.includes(email)) {
+    if (institution.emailAddresses && institution.emailAddresses.includes(contactEmail)) {
       response.isValidMember = true;
     } else if (institution.emailDomains && institution.emailDomains.includes(domain)) {
       response.isValidMember = true;
