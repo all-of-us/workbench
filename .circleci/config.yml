@@ -265,8 +265,8 @@ jobs:
     # We're hitting OOM failures as of 1 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     <<: *defaults
-      environment:
-        <<: *java_env
+    environment:
+      <<: *java_env
     resource_class: medium+
     steps:
       - checkout_init_git
@@ -321,8 +321,8 @@ jobs:
 
   api-deploy-to-test:
     <<: *defaults
-      environment:
-        <<: *java_env
+    environment:
+      <<: *java_env
     steps:
       - checkout_init_git
       # Note: most of the time spent here appears to be in Gradle / App Engine
@@ -348,8 +348,8 @@ jobs:
 
   api-deps-check:
     <<: *defaults
-      environment:
-        <<: *java_env
+    environment:
+      <<: *java_env
     steps:
       - checkout_init_git
       - run:
@@ -359,8 +359,8 @@ jobs:
 
   api-integration-test:
     <<: *defaults
-      environment:
-        <<: *java_env
+    environment:
+      <<: *java_env
     steps:
       - checkout_init_git
       - ensure_branch_has_changes:
@@ -379,8 +379,8 @@ jobs:
 
   api-nightly-integration-test:
     <<: *defaults
-      environment:
-        <<: *java_env
+    environment:
+      <<: *java_env
     steps:
       - checkout_init_git
       - manage_api_cache:
@@ -397,8 +397,8 @@ jobs:
 
   api-bigquery-test:
     <<: *defaults
-      environment:
-        <<: *java_env
+    environment:
+      <<: *java_env
     steps:
       - checkout_init_git
       - ensure_branch_has_changes:
