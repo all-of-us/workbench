@@ -90,7 +90,6 @@ export class AdminInstitution extends React.Component<{}, State> {
       return emailDomain + '...';
     }
     return emailDomain;
-
   }
 
   renderEmailAddress(row, col) {
@@ -99,7 +98,6 @@ export class AdminInstitution extends React.Component<{}, State> {
       return emailAddresses + '...';
     }
     return emailAddresses;
-
   }
 
   render() {
