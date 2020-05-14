@@ -127,18 +127,22 @@ export default class GoogleLoginPage extends BasePage {
       await this.enterPassword(pwd);
       await this.submit();
 
-      // Sometimes, user is prompted with Google access app permission page.
-      const allowAccessButton = await this.page.waitForSelector('#submit_approve_access', {timeout: 2000});
-      await takeScreenshot(this.page, 'FoundAllowButton');
-      const naviPromise = this.page.waitForNavigation({timeout: 20000});
-      await allowAccessButton.click();
       try {
-        await naviPromise;
+        // Sometimes, user is prompted with Google access app permission page.
+        const allowAccessButton = await this.page.waitForSelector('#submit_approve_access', {timeout: 2000});
+        await takeScreenshot(this.page, 'FoundAllowButton');
+        const naviPromise = this.page.waitForNavigation({timeout: 20000});
+        await allowAccessButton.click();
+        try {
+          await naviPromise;
+        } catch (e) {
+          // try to recover from page navigation timeout error
+          await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
+          console.log('reload after navigation timed out');
+          await this.page.waitFor(2000);
+        }
       } catch (e) {
-        // try to recover from page navigation timeout error
-        await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
-        console.log('reload after navigation timed out');
-        await this.page.waitFor(2000);
+        // Do nothing
       }
 
       await takeScreenshot(this.page, 'LoginFunction');

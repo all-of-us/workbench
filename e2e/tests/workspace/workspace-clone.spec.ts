@@ -12,7 +12,7 @@ describe('Clone workspace', () => {
   });
 
   // Assume there is at least one workspace preexist
-  describe.skip('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
+  describe('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
       const workspacesPage = new WorkspacesPage(page);
@@ -84,10 +84,14 @@ describe('Clone workspace', () => {
       // strips out dash from workspace name
       expect(workspaceDataUrl).toContain(cloneWorkspaceName.replace(/-/g, ''));
 
+      // starting a new incognito page
       await page.deleteCookie(...await page.cookies());
       await jestPuppeteer.resetBrowser();
+      await page.waitFor(2000);
       const newBrowser = await browser.createIncognitoBrowserContext();
       const newPage = await newBrowser.newPage();
+      const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
+      await newPage.setUserAgent(userAgent);
 
       await signIn(newPage);
 
