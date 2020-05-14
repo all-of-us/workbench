@@ -599,7 +599,7 @@ jobs:
       - install_ui_dependencies
       - start_local_ui:
           connect_local_api: true
-      install_e2e_dependencies
+      - install_e2e_dependencies
       - run_e2e_test
 
 workflows:
