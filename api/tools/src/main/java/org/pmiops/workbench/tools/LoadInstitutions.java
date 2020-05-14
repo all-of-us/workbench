@@ -3,7 +3,6 @@ package org.pmiops.workbench.tools;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
@@ -59,22 +58,18 @@ public class LoadInstitutions {
         Institution[] institutions = mapper.readValue(reader, Institution[].class);
 
         for (Institution institution : institutions) {
-          Optional<Institution> institutionMaybe =
+          Optional<Institution> fetchedInstitutionMaybe =
               institutionService.getInstitution(institution.getShortName());
-          if (institutionMaybe.isPresent()) {
-            log.info("Skipping... Entry already exists for " + institution.getShortName());
-            Institution fetchedInstitution = institutionMaybe.get();
-            fetchedInstitution.getEmailDomains().sort(Comparator.naturalOrder());
-            institution.getEmailDomains().sort(Comparator.naturalOrder());
-            fetchedInstitution.getEmailAddresses().sort(Comparator.naturalOrder());
-            institution.getEmailAddresses().sort(Comparator.naturalOrder());
-            if (!institutionMaybe.get().equals(institution)) {
-              log.warning(
-                  "Database and import file have different definitions for "
-                      + institution.getShortName());
-              log.warning("Database: " + institutionMaybe.get().toString());
-              log.warning("Import File: " + institution.toString());
+          if (fetchedInstitutionMaybe.isPresent()) {
+            if (fetchedInstitutionMaybe.get().equals(institution)) {
+              log.info("Skipping... Entry already exists for " + institution.getShortName());
+            } else {
+              if (!dryRun) {
+                institutionService.updateInstitution(institution.getShortName(), institution);
+              }
+              dryLog(dryRun, "Updated " + institution.toString());
             }
+
             continue;
           }
 
