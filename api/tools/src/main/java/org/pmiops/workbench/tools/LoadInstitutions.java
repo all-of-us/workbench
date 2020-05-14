@@ -9,24 +9,17 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.InstitutionUserInstructionsMapperImpl;
-import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@Import({
-  InstitutionServiceImpl.class,
-  InstitutionMapperImpl.class,
-  InstitutionUserInstructionsMapperImpl.class,
-  PublicInstitutionDetailsMapperImpl.class,
-})
+@EnableTransactionManagement
+@ComponentScan(value = "org.pmiops.workbench.institution")
 public class LoadInstitutions {
 
   private static final Logger log = Logger.getLogger(LoadInstitutions.class.getName());
