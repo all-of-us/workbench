@@ -34,27 +34,27 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
 
   private handleIframeLoaded() {
     const iframeDocument = this.iframeRef.current.contentDocument;
-    const {body} = iframeDocument;
+    const { body } = iframeDocument;
     const endOfPage = iframeDocument.createElement('div');
     body.appendChild(endOfPage);
 
     const observer = new IntersectionObserver(
-      ([{isIntersecting}]) => {
+      ([{ isIntersecting }]) => {
         isIntersecting && !this.state.hasReadEntirePdf && this.props.onLastPageRender();
-        isIntersecting && this.setState({hasReadEntirePdf: true});
+        isIntersecting && this.setState({ hasReadEntirePdf: true });
       },
-      {root: iframeDocument, threshold: 1.0}
+      { root: null, threshold: 1.0 }
     );
     observer.observe(endOfPage);
-    this.setState({loading: false});
+    this.setState({ loading: false });
   }
 
   render() {
-    const {loading} = this.state;
-    const {filePath, containerStyles} = this.props;
+    const { loading } = this.state;
+    const { filePath, containerStyles } = this.props;
 
-    return <div style={{flex: '1 1 0', position: 'relative', ...containerStyles}}>
-      {loading && <SpinnerOverlay/>}
+    return <div style={{ flex: '1 1 0', position: 'relative', ...containerStyles }}>
+      { loading && <SpinnerOverlay/> }
       <iframe
         style={{
           border: 'none',
@@ -66,7 +66,7 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
           width: '100%'}}
           src = {filePath}
           ref = {this.iframeRef}
-          onLoad={() => this.handleIframeLoaded()}>
+          onLoad={() => this.handleIframeLoaded() }>
       </iframe>
     </div>;
   }
