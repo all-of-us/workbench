@@ -202,6 +202,7 @@ commands:
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
     steps:
+      - install_e2e_dependencies
       - run:
           name: Update Puppeteer test environment variables
           command: |
@@ -226,6 +227,8 @@ commands:
   start_local_api:
     description: "Start local API server"
     steps:
+      - manage_api_cache:
+          restore: true
       - run:
           # MySQL sometimes refuses connections by the time we attempt to apply
           # data migrations. Watch the port for 2m for startup.
@@ -326,8 +329,6 @@ jobs:
       <<: *java_env
     steps:
       - checkout_init_git
-      - manage_api_cache:
-          restore: true
       - activate_service_account_credential
       - start_local_api
       - run:
@@ -552,7 +553,6 @@ jobs:
     steps:
       - checkout_init_git
       - halt_job_noncode_changes
-      - install_e2e_dependencies
       - run_e2e_test
 
   # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
@@ -569,7 +569,6 @@ jobs:
     steps:
       - checkout_init_git
       - halt_job_noncode_changes
-      - install_e2e_dependencies
       - install_ui_dependencies
       - start_local_ui
       - run_e2e_test
@@ -592,19 +591,17 @@ jobs:
     steps:
       - checkout_init_git
       - halt_job_noncode_changes
-      - manage_api_cache:
-          restore: true
       - activate_service_account_credential
       - start_local_api
       - install_ui_dependencies
       - start_local_ui:
           connect_local_api: true
-      - install_e2e_dependencies
       - run_e2e_test
 
 workflows:
   build-test-deploy:
     jobs:
+      #- puppeteer-e2e-test
       - puppeteer-e2e-local-ui:
           filters: *filter_pull_request_branch
       #- puppeteer-e2e-local:

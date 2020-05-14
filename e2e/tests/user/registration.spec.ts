@@ -2,7 +2,7 @@ import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
 
 
-describe.skip('User registration tests:', () => {
+describe('User registration tests:', () => {
 
   test('Can register new user', async () => {
     // Load the landing page for login.
