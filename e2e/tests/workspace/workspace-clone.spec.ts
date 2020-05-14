@@ -12,7 +12,7 @@ describe('Clone workspace', () => {
   });
 
   // Assume there is at least one workspace preexist
-  describe('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
+  describe.skip('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
       const workspacesPage = new WorkspacesPage(page);
@@ -84,12 +84,17 @@ describe('Clone workspace', () => {
       // strips out dash from workspace name
       expect(workspaceDataUrl).toContain(cloneWorkspaceName.replace(/-/g, ''));
 
+      await page.deleteCookie(...await page.cookies());
       await jestPuppeteer.resetBrowser();
-      const newPage = await browser.newPage();
+      const newBrowser = await browser.createIncognitoBrowserContext();
+      const newPage = await newBrowser.newPage();
+
       await signIn(newPage);
 
       const response = await newPage.goto(workspaceDataUrl, {waitUntil: ['domcontentloaded','networkidle0']});
       expect(await response.status()).toEqual(200);
+
+      await newPage.close();
     });
   });
 
