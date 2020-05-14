@@ -606,10 +606,10 @@ jobs:
 workflows:
   build-test-deploy:
     jobs:
-      - puppeteer-e2e-local-ui:
-          filters: *filter_pull_request_branch
-      #- puppeteer-e2e-local:
+      #- puppeteer-e2e-local-ui:
           #filters: *filter_pull_request_branch
+      - puppeteer-e2e-local:
+          filters: *filter_pull_request_branch
           #requires:
             #- api-local-test
             #- api-build-test
