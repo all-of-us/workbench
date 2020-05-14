@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {PdfViewer} from 'app/components/pdf-viewer';
+import {HtmlViewer} from 'app/components/html-viewer';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-v2';
@@ -128,11 +128,10 @@ export const DataUserCodeOfConduct = withUserProfile()(
         return <FlexColumn style={styles.dataUserCodeOfConductPage}>
           {
             page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
-              <div style={{marginTop: '2rem', marginBottom: '1rem'}}>
-                <PdfViewer
-                    pdfPath={'assets/documents/data-user-code-of-conduct-v3.pdf'}
-                />
-              </div>
+              <HtmlViewer
+                  containerStyles={{margin: '2rem 0 1rem'}}
+                  filePath={'assets/documents/data-user-code-of-conduct.html'}
+              />
               <FlexRow style={styles.dataUserCodeOfConductFooter}>
                 Please read the above document in its entirety before proceeding to sign the Data User Code of Conduct.
                 <Button
