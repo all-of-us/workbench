@@ -157,19 +157,19 @@ commands:
       - restore_cache:
           name: "restore e2e cache"
           keys:
-            - v1as-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - v1as-e2e-cache-master
-            - v1as-e2e-cache-
+            - v1ab-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v1ab-e2e-cache-master
+            - v1ab-e2e-cache-
       - run:
           name: "workbench/e2e: yarn install dependencies"
           working_directory: ~/workbench/e2e
-          command: yarn install --frozen-lockfile --non-interactive
+          command: yarn install --non-interactive
       - save_cache:
           name: "save e2e cache"
           paths:
             - ~/.cache/yarn
             - e2e/node_modules
-          key: v1as-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v1ab-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
     description: "workbench/api: save or restore gradle cache"
@@ -579,10 +579,10 @@ jobs:
     resource_class: large
     docker:
       - image: << pipeline.parameters.workbench_image >>
-      - image: << pipeline.parameters.browser_image >>
       - image: << pipeline.parameters.mysql_image >>
         environment:
           <<: *mysql_env
+      - image: << pipeline.parameters.browser_image >>
     environment:
       <<: *java_env
       <<: *e2e_env
@@ -592,15 +592,14 @@ jobs:
     steps:
       - checkout_init_git
       - halt_job_noncode_changes
-      - install_ui_dependencies
-      - install_e2e_dependencies
       - manage_api_cache:
           restore: true
       - activate_service_account_credential
       - start_local_api
+      - install_ui_dependencies
       - start_local_ui:
           connect_local_api: true
-      # Run Puppeteer end-to-end UI tests against local server
+      install_e2e_dependencies
       - run_e2e_test
 
 workflows:
