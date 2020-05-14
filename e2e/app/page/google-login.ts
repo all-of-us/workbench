@@ -145,26 +145,6 @@ export default class GoogleLoginPage extends BasePage {
       // Do nothing if "Enter Recovery Email" field is not found.
     }
 
-    try {
-      await this.waitUntilTitleMatch('Homepage');
-      console.log('on home page');
-      await takeScreenshot(this.page, 'HomePage');
-      // Handle Self-Bypass if found
-      await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 10000});
-      console.log('self-bypass button found');
-      const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
-      await takeScreenshot(this.page, 'BeforeClickButton');
-      await selfBypass.click();
-      console.log('clicked');
-      await takeScreenshot(this.page, 'AfterClickedButton');
-      await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
-    } catch (e) {
-      // Do nothing if Self-Bypass is not found.
-      console.log('self-bypass button not found');
-      await takeScreenshot(this.page, 'ButtonNotFound');
-    }
-    console.log('outside');
-    await takeScreenshot(this.page, 'Outside');
   }
 
   async loginAs(email, paswd) {

@@ -3,6 +3,7 @@ import {PageUrl} from 'app/page-identifiers';
 import Link from 'app/element/link';
 import {findIcon} from 'app/element/xpath-finder';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import {takeScreenshot} from '../../utils/save-file-utils';
 
 export const PAGE = {
   TITLE: 'Homepage',
@@ -21,6 +22,25 @@ export default class HomePage extends AuthenticatedPage {
     super(page);
   }
 
+  async bypass() {
+    try {
+      await takeScreenshot(this.page, 'HomePageIsLoaded');
+      // Handle Self-Bypass if found
+      await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 10000});
+      console.log('self-bypass button found');
+      const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
+      await takeScreenshot(this.page, 'BeforeClickButton');
+      await selfBypass.click();
+      await takeScreenshot(this.page, 'AfterClickedButton');
+      await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
+    } catch (e) {
+      // Do nothing if Self-Bypass is not found.
+      await takeScreenshot(this.page, 'SelfBypassButtonNotFound');
+    }
+    console.log('outside');
+    await takeScreenshot(this.page, 'Outside');
+  }
+
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
@@ -29,6 +49,7 @@ export default class HomePage extends AuthenticatedPage {
         Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
         this.waitUntilNoSpinner(),
       ]);
+      await this.bypass();
       return true;
     } catch (e) {
       return false;
