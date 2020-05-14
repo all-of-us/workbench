@@ -2,8 +2,10 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +14,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.OrganizationType;
 
@@ -26,8 +27,8 @@ public class DbInstitution {
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
   private Short duaTypeEnum;
-  @NotNull private Set<DbInstitutionEmailDomain> emailDomains = Sets.newHashSet();
-  @NotNull private Set<DbInstitutionEmailAddress> emailAddresses = Sets.newHashSet();
+  private Set<DbInstitutionEmailDomain> emailDomains = Sets.newHashSet();
+  private Set<DbInstitutionEmailAddress> emailAddresses = Sets.newHashSet();
 
   public DbInstitution() {}
 
@@ -73,16 +74,6 @@ public class DbInstitution {
     return this;
   }
 
-  @Column(name = "dua_type_enum")
-  public DuaType getDuaTypeEnum() {
-    return DbStorageEnums.institutionDUATypeFromStorage(duaTypeEnum);
-  }
-
-  public DbInstitution setDuaTypeEnum(DuaType institutionDuaType) {
-    this.duaTypeEnum = DbStorageEnums.institutionDUATypeToStorage(institutionDuaType);
-    return this;
-  }
-
   @Column(name = "organization_type_other_text")
   public String getOrganizationTypeOtherText() {
     return organizationTypeOtherText;
@@ -93,8 +84,17 @@ public class DbInstitution {
     return this;
   }
 
+  @Column(name = "dua_type_enum")
+  public DuaType getDuaTypeEnum() {
+    return DbStorageEnums.institutionDUATypeFromStorage(duaTypeEnum);
+  }
+
+  public DbInstitution setDuaTypeEnum(DuaType institutionDuaType) {
+    this.duaTypeEnum = DbStorageEnums.institutionDUATypeToStorage(institutionDuaType);
+    return this;
+  }
+
   @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
-  @NotNull
   public Set<DbInstitutionEmailDomain> getEmailDomains() {
     return emailDomains;
   }
@@ -110,21 +110,28 @@ public class DbInstitution {
    *
    * @param emailDomains the new collection of domains for this Institution
    */
-  public DbInstitution setEmailDomains(
-      @NotNull final Collection<DbInstitutionEmailDomain> emailDomains) {
+  public DbInstitution setEmailDomains(final Collection<DbInstitutionEmailDomain> emailDomains) {
     final Set<DbInstitutionEmailDomain> attachedDomains =
-        emailDomains.stream()
+        Optional.ofNullable(emailDomains)
+            .map(Collection::stream)
+            .orElse(Stream.empty())
             .map(domain -> domain.setInstitution(this))
             .collect(Collectors.toSet());
-    // modifies this set so that its value is the intersection of the two sets
-    this.emailDomains.retainAll(attachedDomains);
+
+    // not sure how this happens, but... Spring
+    if (this.emailDomains == null) {
+      this.emailDomains = Sets.newHashSet();
+    } else {
+      // modifies this set so that its value is the intersection of the two sets
+      this.emailDomains.retainAll(attachedDomains);
+    }
+
     this.emailDomains.addAll(Sets.difference(attachedDomains, this.emailDomains));
 
     return this;
   }
 
   @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
-  @NotNull
   public Set<DbInstitutionEmailAddress> getEmailAddresses() {
     return emailAddresses;
   }
@@ -141,15 +148,57 @@ public class DbInstitution {
    * @param emailAddresses the new collection of addresses for this Institution
    */
   public DbInstitution setEmailAddresses(
-      @NotNull final Collection<DbInstitutionEmailAddress> emailAddresses) {
+      final Collection<DbInstitutionEmailAddress> emailAddresses) {
+
+    System.out.println("setEmailAddresses");
+    System.out.println("emailAddresses.size()");
+    System.out.println(emailAddresses.size());
+    System.out.println("emailAddresses");
+    System.out.println(emailAddresses);
+    System.out.println("I have successfully output emailAddresses");
+
     final Set<DbInstitutionEmailAddress> attachedAddresses =
-        emailAddresses.stream()
+        Optional.ofNullable(emailAddresses)
+            .map(Collection::stream)
+            .orElse(Stream.empty())
             .map(address -> address.setInstitution(this))
             .collect(Collectors.toSet());
-    // modifies this set so that its value is the intersection of the two sets
-    this.emailAddresses.retainAll(attachedAddresses);
+
+    // not sure how this happens, but... Spring
+    if (this.emailAddresses == null) {
+      this.emailAddresses = Sets.newHashSet();
+    } else {
+      // modifies this set so that its value is the intersection of the two sets
+      this.emailAddresses.retainAll(attachedAddresses);
+    }
+
     this.emailAddresses.addAll(Sets.difference(attachedAddresses, this.emailAddresses));
 
     return this;
+  }
+
+  @Override
+  public String toString() {
+    return "DbInstitution{"
+        + "institutionId="
+        + institutionId
+        + ", shortName='"
+        + shortName
+        + '\''
+        + ", displayName='"
+        + displayName
+        + '\''
+        + ", organizationTypeEnum="
+        + organizationTypeEnum
+        + ", organizationTypeOtherText='"
+        + organizationTypeOtherText
+        + '\''
+        + ", duaTypeEnum="
+        + duaTypeEnum
+        + ", emailDomains="
+        + emailDomains
+        + ", emailAddresses="
+        + emailAddresses
+        + '}';
   }
 }

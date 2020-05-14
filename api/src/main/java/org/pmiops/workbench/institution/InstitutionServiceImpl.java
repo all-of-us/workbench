@@ -108,15 +108,29 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
+    final DbInstitution updateSource = institutionMapper.modelToDb(institutionToUpdate);
     return getDbInstitution(shortName)
-        .map(DbInstitution::getInstitutionId)
         .map(
-            dbId -> {
-              // create new DB object, but mark it with the original's ID to indicate that this is
-              // an update
-              final DbInstitution dbObjectToUpdate =
-                  institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId);
-              return institutionMapper.dbToModel(institutionDao.save(dbObjectToUpdate));
+            dbInstitution -> {
+              System.out.println("dbInstitution pre set");
+
+              // TODO mapper!
+              dbInstitution
+                  .setShortName(updateSource.getShortName())
+                  .setDisplayName(updateSource.getDisplayName())
+                  .setOrganizationTypeEnum(updateSource.getOrganizationTypeEnum())
+                  .setOrganizationTypeOtherText(updateSource.getOrganizationTypeOtherText())
+                  .setDuaTypeEnum(updateSource.getDuaTypeEnum())
+                  .setEmailDomains(updateSource.getEmailDomains())
+                  .setEmailAddresses(updateSource.getEmailAddresses());
+
+              System.out.println("dbInstitution post set, pre save");
+
+              dbInstitution = institutionDao.save(dbInstitution);
+
+              System.out.println("dbInstitution post save");
+
+              return institutionMapper.dbToModel(dbInstitution);
             });
   }
 

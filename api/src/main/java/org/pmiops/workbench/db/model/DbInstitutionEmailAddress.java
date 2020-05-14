@@ -75,4 +75,15 @@ public class DbInstitutionEmailAddress {
   public int hashCode() {
     return Objects.hash(institution, emailAddress);
   }
+
+  @Override
+  public String toString() {
+    return "DbInstitutionEmailAddress{"
+        + "institutionEmailAddressId="
+        + institutionEmailAddressId
+        + ", emailAddress='"
+        + emailAddress
+        + '\''
+        + '}';
+  }
 }

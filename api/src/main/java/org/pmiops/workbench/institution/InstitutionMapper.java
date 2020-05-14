@@ -46,6 +46,10 @@ public interface InstitutionMapper {
 
   default Set<DbInstitutionEmailAddress> toDbAddressesWithoutInstitution(
       @Nullable Collection<String> modelAddresses) {
+    System.out.println("toDbDomainsWithoutInstitution");
+    System.out.println("modelAddresses");
+    System.out.println(modelAddresses);
+
     return Optional.ofNullable(modelAddresses).orElse(Collections.emptySet()).stream()
         .map(address -> new DbInstitutionEmailAddress().setEmailAddress(address))
         .collect(Collectors.toSet());

@@ -65,7 +65,13 @@ public class LoadInstitutions {
               log.info("Skipping... Entry already exists for " + institution.getShortName());
             } else {
               if (!dryRun) {
-                  institutionService.updateInstitution(institution.getShortName(), institution);
+                System.out.println("institution");
+                System.out.println(institution);
+
+                System.out.println("fetchedInstitutionMaybe.get()");
+                System.out.println(fetchedInstitutionMaybe.get());
+
+                institutionService.updateInstitution(institution.getShortName(), institution);
               }
               dryLog(dryRun, "Updated " + institution.toString());
             }
