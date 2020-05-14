@@ -1,7 +1,7 @@
 module.exports = {
   "verbose": true,
   "preset": "jest-puppeteer",
-  "testTimeout": 360000,
+  "testTimeout": 600000,
   "testRunner": "jest-circus/runner",
   "testEnvironment": "<rootDir>/puppeteer-custom-environment.ts",
   "setupFilesAfterEnv": [
