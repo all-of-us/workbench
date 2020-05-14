@@ -157,9 +157,9 @@ commands:
       - restore_cache:
           name: "restore e2e cache"
           keys:
-            - v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - v1-e2e-cache-master
-            - v1-e2e-cache-
+            - v1as-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v1as-e2e-cache-master
+            - v1as-e2e-cache-
       - run:
           name: "workbench/e2e: yarn install dependencies"
           working_directory: ~/workbench/e2e
@@ -169,7 +169,7 @@ commands:
           paths:
             - ~/.cache/yarn
             - e2e/node_modules
-          key: v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v1as-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
     description: "workbench/api: save or restore gradle cache"
