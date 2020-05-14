@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {AdminUser} from './admin-user';
+import {AdminUser} from './admin-users';
 import {AuthDomainApi, Profile, ProfileApi} from 'generated/fetch';
 import {serverConfigStore} from 'app/utils/navigation';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';

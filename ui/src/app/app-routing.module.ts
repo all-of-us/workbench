@@ -12,6 +12,7 @@ import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminInstitutionComponent} from './pages/admin/admin-institution';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
+import {AdminUsersComponent} from './pages/admin/admin-users';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
@@ -297,34 +298,44 @@ const routes: Routes = [
           }]
       },
       {
-        path: 'admin/review-workspace',
-        component: AdminReviewWorkspaceComponent,
-        data: {title: 'Review Workspaces'}
-      }, {
-        path: 'admin/user',
-        component: AdminUserComponent,
-        data: {title: 'User Admin Table'}
-      }, {
-        path: 'admin/institution',
-        component: AdminInstitutionComponent,
-        data: { title: 'Institution Admin'},
-      }, {
-        path: 'admin/banner',
-        component: AdminBannerComponent,
-        data: {title: 'Create Banner'}
-      }, {
-        path: 'admin/workspaces',
-        component: AdminWorkspaceSearchComponent,
-        data: { title: 'Workspace Admin'},
-      }, {
-        path: 'admin/workspaces/:workspaceNamespace',
-        component: AdminWorkspaceComponent,
-        data: { title: 'Workspace Admin'}
-      }, {
+        path: 'admin',
+        children: [{
+            path: 'review-workspace',
+            component: AdminReviewWorkspaceComponent,
+            data: {title: 'Review Workspaces'}
+          },
+          {
+            path: 'user',
+            component: AdminUsersComponent,
+            data: {title: 'User Admin Table'}
+          },
+          {
+            path: 'user/:userId',
+            component: AdminUserComponent,
+            data: {title: 'User Admin'}
+          },
+          {
+            path: 'banner',
+            component: AdminBannerComponent,
+            data: {title: 'Create Banner'}
+          },
+          {
+            path: 'workspaces',
+            component: AdminWorkspaceSearchComponent,
+            data: { title: 'Workspace Admin'},
+          },
+          {
+            path: 'workspaces/:workspaceNamespace',
+            component: AdminWorkspaceComponent,
+            data: { title: 'Workspace Admin'}
+        }]
+      },
+      {
         path: 'profile',
         component: ProfilePageComponent,
         data: {title: 'Profile'}
-      }, {
+      },
+      {
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
