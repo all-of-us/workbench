@@ -9,6 +9,7 @@ CUSTOM_METRIC_FILTER = "metric.type = starts_with(\"custom.googleapis.com/\")"
 LOGS_BASED_METRIC_FILTER = "metric.type = starts_with(\"logging.googleapis.com/\")"
 USER_LOGS_BASED_METRIC_FILTER = "metric.type = starts_with(\"logging.googleapis.com/user/\")"
 FILE_SUFFIXES = {:yaml => '.yaml', :json => '.json'}
+DASHBOARD_NAME_PATTERN = /^projects\/(?<project_number>\d+)\/dashboards\/(?<dashboard_number>\d+)$/
 
 class MonitoringAssets
   def initialize(envs_path, output_dir='.', logger = Logger.new(STDOUT), output_format = :yaml)
@@ -71,7 +72,8 @@ class MonitoringAssets
   DO_BACKUP_ALL = false # TODO(jaycarlton): make this an option
 
   # For every environment in the envs_file, fetch all items of interest from the appropriate
-  # Stackdriver APIs. (Note that in future we may wish to broaden this to other )
+  # Stackdriver APIs. (Note that in future we may wish to broaden this to other APIs, though in the
+  # case of the Trace API we'd need new permissions on the service acccount.)
   def backup_config
     visit_envs do |env_bundle|
       backup_alert_policies
@@ -84,7 +86,6 @@ class MonitoringAssets
       backup_dashboards
       backup_group_members
       backup_monitored_resources
-      backup_notification_channels
       backup_notification_channels
     end
   end
@@ -105,6 +106,7 @@ class MonitoringAssets
     dashboards = @dashboard_client.list_dashboards(@current_env.formatted_project_number)
     backup_assets(dashboards)
   end
+
   def backup_user_logs_based_metrics
     user_logs_based_metrics = @metric_client.list_metric_descriptors(@project_path, {filter: USER_LOGS_BASED_METRIC_FILTER})
     backup_assets(user_logs_based_metrics)
@@ -203,7 +205,6 @@ class MonitoringAssets
       @group_client = Google::Cloud::Monitoring::V3::GroupServiceClient.new
       @dashboard_client = Google::Cloud::Monitoring::Dashboard::V1::DashboardsServiceClient.new
       @notification_channel_client = Google::Cloud::Monitoring::V3::NotificationChannelServiceClient.new
-      @project_path = Google::Cloud::Monitoring::V3::MetricServiceClient.project_path(@current_env.project_id)
       yield env
     end
 
@@ -220,8 +221,30 @@ class MonitoringAssets
   # Build an otput directory hierarchy from the asset's name. This generally looks like
   # "projects/$project_name/$asset_type/$asset_descriptor". In the case of metric descriptors
   # there's also an intermediate level for the metric prefix, such as custom.googleapis.com
+  #
+  # Dashboards are named in a manner inconsistent with the other artifact types in that they use a
+  # project number instead of project ID:
+  # projects/123456789/dashboards/987654321
+  #
+  def fixup_dashboard_name(name)
+    match_data = name.match(DASHBOARD_NAME_PATTERN)
+    if match_data && match_data.captures.size > 0
+      project_number = match_data[:project_number]
+      dashboard_number = match_data[:dashboard_number]
+      # double check the project
+      if project_number == @current_env.project_number
+        "projects/#{@current_env.project_id}dashboards/#{dashboard_number}"
+      else
+        name
+      end
+    else
+      name
+    end
+  end
+
   def make_output_path(asset)
-    FileUtils.mkdir_p(File.join(output_dir, asset.name))
+    name = fixup_dashboard_name(asset.name)
+    FileUtils.mkdir_p(File.join(output_dir, name))
   end
 end
 
