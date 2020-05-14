@@ -540,7 +540,7 @@ jobs:
 
   # Deploy UI and API local server then run Puppeteer e2e tests on deployed "local" environment.
   puppeteer-e2e-local:
-    resource_class: medium+
+    resource_class: large
     docker:
       - image: << pipeline.parameters.workbench_image >>
       - image: << pipeline.parameters.browser_image >>
