@@ -22,6 +22,7 @@ export default class HomePage extends AuthenticatedPage {
     super(page);
   }
 
+  // move to test-utils.ts
   async selfBypassWhenRequired() {
     const selfBypassXpath = '//*[@data-test-id="self-bypass"]';
     await Promise.race([
@@ -34,7 +35,7 @@ export default class HomePage extends AuthenticatedPage {
       return;
     }
 
-    // Handle Self-Bypass
+    // Click Self-Bypass button to continue
     console.log('self-bypass button found');
     const selfBypass = await this.page.waitForXPath(`${selfBypassXpath}//div[@role="button"]`);
     await selfBypass.click();
@@ -58,7 +59,7 @@ export default class HomePage extends AuthenticatedPage {
     try {
       await Promise.all([
         this.waitUntilTitleMatch(PAGE.TITLE),
-        this.waitUntilNoSpinner(240000),
+        this.waitUntilNoSpinner(120000),
       ]);
       if (process.env.WORKBENCH_ENV === 'local') {
         console.log('WORKBENCH_ENV = ' + process.env.WORKBENCH_ENV);
