@@ -600,17 +600,15 @@ jobs:
       - start_local_ui:
           connect_local_api: true
       - install_e2e_dependencies
-      - run:
-          command: sudo sysctl -w kernel.unprivileged_userns_clone=1
       - run_e2e_test
 
 workflows:
   build-test-deploy:
     jobs:
-      #- puppeteer-e2e-local-ui:
-          #filters: *filter_pull_request_branch
-      - puppeteer-e2e-local:
+      - puppeteer-e2e-local-ui:
           filters: *filter_pull_request_branch
+      #- puppeteer-e2e-local:
+          #filters: *filter_pull_request_branch
           #requires:
             #- api-local-test
             #- api-build-test
