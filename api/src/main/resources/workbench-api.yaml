@@ -5456,7 +5456,7 @@ definitions:
         items:
           type: string
       userInstructions:
-        description: Institution-specific instructions for users to perform after registration
+        description: Institution-specific instructions for users to be sent in email
         type: string
   PublicInstitutionDetails:
     type: object

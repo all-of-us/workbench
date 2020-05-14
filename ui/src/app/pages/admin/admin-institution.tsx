@@ -82,6 +82,7 @@ export class AdminInstitution extends React.Component<{}, State> {
       case OrganizationType.HEALTHCENTERNONPROFIT: return 'Health Center Non-Profit';
       case OrganizationType.EDUCATIONALINSTITUTION: return 'Educational Institution';
       case OrganizationType.INDUSTRY: return 'Industry';
+      case OrganizationType.OTHER: return 'Other - ' + row['organizationTypeOtherText'];
       default: return 'Other';
     }
   }
@@ -121,9 +122,11 @@ export class AdminInstitution extends React.Component<{}, State> {
               </Button>
         </SemiBoldHeader>
         {institutionLoadError && <div style={{color: colors.danger}}>
-          Error while loading Institution please try again later</div>}
+          Error while loading Institution. Please try again later</div>}
         <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
-                   rows={5} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}>
+                   rows={10} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}
+                   paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
+                   currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
           <Column field='displayName' header='Institution Name'
                   bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
           <Column field='organizationTypeEnum' header='Institution Type'
@@ -135,7 +138,7 @@ export class AdminInstitution extends React.Component<{}, State> {
                   bodyStyle={styles.text} headerStyle={styles.header}/>
           <Column field='emailAddresses' header='Accepted Email List' body={this.renderEmailAddress}
                   bodyStyle={styles.text} headerStyle={styles.header}/>
-          <Column field='userInstructions' header='User Instruction' bodyStyle={styles.text}
+          <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
                   headerStyle={{...styles.header, width: '5rem'}}/>
         </DataTable>
       </FadeBox>

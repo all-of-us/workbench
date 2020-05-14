@@ -54,12 +54,15 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(institutionMapper::dbToModel)
         .map(
             institution -> {
-              getInstitutionUserInstructions(institution.getShortName())
-                  .ifPresent(user -> institution.setUserInstructions(user));
-              return institution;
+              Optional<DbInstitutionUserInstructions> userInstructionsOptional =
+                  institutionUserInstructionsDao.getByInstitution(institution);
+              if (userInstructionsOptional.isPresent()) {
+                return institutionMapper.dbToModel(institution, userInstructionsOptional.get());
+              } else {
+                return institutionMapper.dbToModel(institution);
+              }
             })
         .collect(Collectors.toList());
   }

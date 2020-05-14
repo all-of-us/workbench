@@ -12,6 +12,7 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
+import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -23,6 +24,8 @@ public interface InstitutionMapper {
   // userInstructions will be populated by InstitutionUserInstructionsMapper
   @Mapping(target = "userInstructions", ignore = true)
   Institution dbToModel(DbInstitution dbObject);
+
+  Institution dbToModel(DbInstitution dbObject, DbInstitutionUserInstructions userInstructions);
 
   default List<String> toModelDomains(Set<DbInstitutionEmailDomain> dbDomains) {
     return Optional.ofNullable(dbDomains).orElse(Collections.emptySet()).stream()
