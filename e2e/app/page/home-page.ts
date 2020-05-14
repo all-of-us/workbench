@@ -46,7 +46,7 @@ export default class HomePage extends AuthenticatedPage {
     try {
       await Promise.all([
         this.waitUntilTitleMatch(PAGE.TITLE),
-        this.waitUntilNoSpinner(120000),
+        this.waitUntilNoSpinner(180000),
       ]);
       if (process.env.WORKBENCH_ENV === 'local') {
         await this.selfBypass();
