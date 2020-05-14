@@ -33,6 +33,7 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
   }
 
   private handleIframeLoaded() {
+    const { onLastPageRender = () => false } = this.props;
     const iframeDocument = this.iframeRef.current.contentDocument;
     const { body } = iframeDocument;
     const endOfPage = iframeDocument.createElement('div');
@@ -41,7 +42,7 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
     const observer = new IntersectionObserver(
       ([{ isIntersecting }]) => {
         if (isIntersecting && !this.state.hasReadEntireDoc) {
-          this.props.onLastPageRender();
+          onLastPageRender();
           this.setState({ hasReadEntireDoc: true });
         }
       },
