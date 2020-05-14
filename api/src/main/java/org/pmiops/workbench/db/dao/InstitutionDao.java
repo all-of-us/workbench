@@ -6,4 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface InstitutionDao extends CrudRepository<DbInstitution, Long> {
   Optional<DbInstitution> findOneByShortName(final String shortName);
+
+  Optional<DbInstitution> findOneByDisplayName(final String displayName);
 }

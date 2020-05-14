@@ -43,8 +43,8 @@ public class InstitutionDaoTest {
     institutionWithEmailPatterns =
         institutionDao.save(
             new DbInstitution()
-                .setShortName("Broad1")
-                .setDisplayName("The Broad Institute")
+                .setShortName("NIH")
+                .setDisplayName("The National Institutes of Health")
                 .setEmailAddresses(emailAddresses)
                 .setEmailDomains(emailDomains));
   }
@@ -112,8 +112,17 @@ public class InstitutionDaoTest {
   public void test_findOneByShortName() {
     assertThat(institutionDao.findOneByShortName("Broad"))
         .hasValue(institutionWithoutEmailPatterns);
-    assertThat(institutionDao.findOneByShortName("Broad1")).hasValue(institutionWithEmailPatterns);
+    assertThat(institutionDao.findOneByShortName("NIH")).hasValue(institutionWithEmailPatterns);
     assertThat(institutionDao.findOneByShortName("Verily")).isEmpty();
+  }
+
+  @Test
+  public void test_findOneByDisplayName() {
+    assertThat(institutionDao.findOneByDisplayName("The Broad Institute"))
+        .hasValue(institutionWithoutEmailPatterns);
+    assertThat(institutionDao.findOneByDisplayName("The National Institutes of Health"))
+        .hasValue(institutionWithEmailPatterns);
+    assertThat(institutionDao.findOneByDisplayName("Verily, LLC")).isEmpty();
   }
 
   @Test
@@ -196,9 +205,16 @@ public class InstitutionDaoTest {
   }
 
   @Test(expected = DataIntegrityViolationException.class)
-  public void test_idRequired() {
+  public void test_shortNameRequired() {
     final DbInstitution testInst = new DbInstitution();
     testInst.setDisplayName("so long");
+    institutionDao.save(testInst);
+  }
+
+  @Test(expected = DataIntegrityViolationException.class)
+  public void test_displayNameRequired() {
+    final DbInstitution testInst = new DbInstitution();
+    testInst.setShortName("VUMC");
     institutionDao.save(testInst);
   }
 
@@ -214,9 +230,13 @@ public class InstitutionDaoTest {
   }
 
   @Test(expected = DataIntegrityViolationException.class)
-  public void test_displayNameRequired() {
-    final DbInstitution testInst = new DbInstitution();
-    testInst.setShortName("VUMC");
-    institutionDao.save(testInst);
+  public void test_uniqueDisplayNameRequired() {
+    final DbInstitution snowflake1 =
+            new DbInstitution().setShortName("Inst1").setDisplayName("Not Unique");
+    institutionDao.save(snowflake1);
+
+    final DbInstitution snowflake2 =
+            new DbInstitution().setShortName("Inst2").setDisplayName("Not Unique");
+    institutionDao.save(snowflake2);
   }
 }
