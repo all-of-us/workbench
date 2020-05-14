@@ -90,8 +90,8 @@ export default abstract class AuthenticatedPage extends BasePage {
         }, {timeout: customTimeout}, selectr2);
       }
     } catch (err) {
+      console.log('wait timeout error: ' + err);
       await takeScreenshot(this.page, 'TimedOutWaitForSpinnerStop');
-      throw err;
     } finally {
       const finishTime = performance.now();
       console.log(`diff = ${finishTime - startTime}`);
