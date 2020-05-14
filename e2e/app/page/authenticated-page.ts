@@ -70,7 +70,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until spinner stops spinning, usually it indicate page is ready.
    * </pre>
    */
-  async waitUntilNoSpinner() {
+  async waitUntilNoSpinner(customTimeout: number = 60000) {
     // wait maximum 1 second for either spinner to show up
     const selectr1 = '.spinner, svg';
     const spinner = await this.page.waitFor((selector) => {
@@ -86,7 +86,7 @@ export default abstract class AuthenticatedPage extends BasePage {
         await this.page.waitFor((selector) => {
           const selectorLength = document.querySelectorAll(selector).length;
           return selectorLength === 0;
-        }, {timeout: 90000}, selectr2);
+        }, {timeout: customTimeout}, selectr2);
       }
     } catch (err) {
       await takeScreenshot(this.page, 'TimedOutWaitForSpinnerStop');

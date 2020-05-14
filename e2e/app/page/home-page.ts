@@ -45,7 +45,7 @@ export default class HomePage extends AuthenticatedPage {
     try {
       await Promise.all([
         this.waitUntilTitleMatch(PAGE.TITLE),
-        this.waitUntilNoSpinner(),
+        this.waitUntilNoSpinner(120000),
       ]);
       await this.bypass();
       await Promise.all([
