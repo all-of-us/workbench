@@ -94,6 +94,7 @@ export default abstract class AuthenticatedPage extends BasePage {
       throw err;
     } finally {
       const finishTime = performance.now();
+      console.log(`diff = ${finishTime - startTime}`);
       const diff = Math.floor(((finishTime - startTime) / 1000) % 60);
 
       console.warn(`WARNING: waitUntilNoSpinner took ${diff} seconds.`);
