@@ -2,8 +2,10 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -113,7 +115,9 @@ public class DbInstitution {
   public DbInstitution setEmailDomains(
       @NotNull final Collection<DbInstitutionEmailDomain> emailDomains) {
     final Set<DbInstitutionEmailDomain> attachedDomains =
-        emailDomains.stream()
+        Optional.ofNullable(emailDomains)
+            .map(Collection::stream)
+            .orElse(Stream.empty())
             .map(domain -> domain.setInstitution(this))
             .collect(Collectors.toSet());
     // modifies this set so that its value is the intersection of the two sets
@@ -143,7 +147,9 @@ public class DbInstitution {
   public DbInstitution setEmailAddresses(
       @NotNull final Collection<DbInstitutionEmailAddress> emailAddresses) {
     final Set<DbInstitutionEmailAddress> attachedAddresses =
-        emailAddresses.stream()
+        Optional.ofNullable(emailAddresses)
+            .map(Collection::stream)
+            .orElse(Stream.empty())
             .map(address -> address.setInstitution(this))
             .collect(Collectors.toSet());
     // modifies this set so that its value is the intersection of the two sets
