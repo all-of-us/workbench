@@ -62,7 +62,6 @@ export default class HomePage extends AuthenticatedPage {
         this.waitUntilNoSpinner(120000),
       ]);
       if (process.env.WORKBENCH_ENV === 'local') {
-        console.log('WORKBENCH_ENV = ' + process.env.WORKBENCH_ENV);
         await this.selfBypassWhenRequired();
       }
       await Promise.all([

@@ -124,6 +124,7 @@ export default class GoogleLoginPage extends BasePage {
         console.warn('Login user email: value is empty!!!')
       }
       await this.enterEmail(user);
+      await this.page.waitFor(1000);
       await this.enterPassword(pwd);
       await this.submit();
 
@@ -149,8 +150,8 @@ export default class GoogleLoginPage extends BasePage {
       await savePageToFile(this.page, 'LoginFunction');
 
     } catch (err) {
-      await takeScreenshot(this.page, 'FailedLoginPage');
-      await savePageToFile(this.page, 'FailedLoginPage');
+      await takeScreenshot(this.page, 'GoogleLoginFailed');
+      await savePageToFile(this.page, 'GoogleLoginFailed');
       throw err;
     }
 
