@@ -23,23 +23,24 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async selfBypass() {
-    try {
       // Handle Self-Bypass if found
-      await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 10000});
-      console.log('self-bypass button found');
-      const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
-      await takeScreenshot(this.page, 'BeforeClickButton');
-      await selfBypass.click();
-      await this.page.waitFor(2000);
-      await takeScreenshot(this.page, 'AfterClickedButton');
-      await this.waitUntilNoSpinner(180000);
-      await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
-      await this.waitUntilNoSpinner(120000);
-    } catch (e) {
-      // Do nothing if Self-Bypass is not found.
-      await takeScreenshot(this.page, 'SelfBypassButtonNotFound');
+    await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 10000});
+    console.log('self-bypass button found');
+    const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
+    await takeScreenshot(this.page, 'BeforeClickButton');
+    await selfBypass.click();
+
+    try {
+      await this.waitUntilNoSpinner();
+    } catch (timeouterr) {
+      await Promise.all([
+        this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']}),
+        this.waitUntilNoSpinner(120000),
+        Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
+      ]);
     }
-    await takeScreenshot(this.page, 'Outside');
+
+    await takeScreenshot(this.page, 'selfBypassCallExit');
   }
 
   async isLoaded(): Promise<boolean> {

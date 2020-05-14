@@ -88,8 +88,8 @@ export default abstract class AuthenticatedPage extends BasePage {
         }, {timeout: customTimeout}, selectr2);
       }
     } catch (err) {
-      console.log('wait timeout error: ' + err);
       await takeScreenshot(this.page, 'TimedOutWaitForSpinnerStop');
+      throw new Error(err);
     }
     // final 1 second wait for page render to finish
     if (jValue) {
