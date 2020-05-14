@@ -1,20 +1,26 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,8 +104,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private WorkspaceService workspaceService;
 
   private DbCdrVersion dbCdrVersion;
-  private DbCohort dbCohort;
+  private DbCohort dbCohort1;
+  private DbCohort dbCohort2;
   private DbConceptSet dbConditionConceptSet;
+  private DbConceptSet dbProcedureConceptSet;
   private DbWorkspace dbWorkspace;
 
   @TestConfiguration
@@ -135,11 +143,13 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   public List<String> getTableNames() {
     return ImmutableList.of(
         "condition_occurrence",
+        "procedure_occurrence",
         "concept",
         "cb_search_person",
         "cb_search_all_events",
         "cb_criteria",
         "ds_linking",
+        "ds_survey",
         "person");
   }
 
@@ -151,22 +161,23 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Before
   public void setUp() {
     controller =
-        new DataSetController(
-            bigQueryService,
-            CLOCK,
-            cdrVersionDao,
-            cohortDao,
-            conceptService,
-            conceptSetDao,
-            dataDictionaryEntryDao,
-            dataSetDao,
-            dataSetMapper,
-            dataSetService,
-            fireCloudService,
-            notebooksService,
-            userProvider,
-            workspaceService,
-            conceptSetMapper);
+        spy(
+            new DataSetController(
+                bigQueryService,
+                CLOCK,
+                cdrVersionDao,
+                cohortDao,
+                conceptService,
+                conceptSetDao,
+                dataDictionaryEntryDao,
+                dataSetDao,
+                dataSetMapper,
+                dataSetService,
+                fireCloudService,
+                notebooksService,
+                userProvider,
+                workspaceService,
+                conceptSetMapper));
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
@@ -195,46 +206,173 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 .addConceptIds(new HashSet<>(Collections.singletonList(1L)))
                 .addWorkspaceId(dbWorkspace.getWorkspaceId())
                 .build());
+    dbProcedureConceptSet =
+        conceptSetDao.save(
+            DbConceptSet.builder()
+                .addDomain(DbStorageEnums.domainToStorage(Domain.PROCEDURE))
+                .addConceptIds(new HashSet<>(Collections.singletonList(1L)))
+                .addWorkspaceId(dbWorkspace.getWorkspaceId())
+                .build());
 
-    dbCohort = new DbCohort();
-    dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    dbCohort.setCriteria(new Gson().toJson(SearchRequests.icd9CodeWithModifiers()));
-    dbCohort = cohortDao.save(dbCohort);
+    dbCohort1 = new DbCohort();
+    dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    dbCohort1.setCriteria(new Gson().toJson(SearchRequests.icd9CodeWithModifiers()));
+    dbCohort1 = cohortDao.save(dbCohort1);
+
+    dbCohort2 = new DbCohort();
+    dbCohort2.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    dbCohort2.setCriteria(new Gson().toJson(SearchRequests.icd9Codes()));
+    dbCohort2 = cohortDao.save(dbCohort2);
+
+    when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
   }
 
   @After
   public void tearDown() {
+    cohortDao.delete(dbCohort1.getCohortId());
+    cohortDao.delete(dbCohort2.getCohortId());
     conceptSetDao.delete(dbConditionConceptSet.getConceptSetId());
+    conceptSetDao.delete(dbProcedureConceptSet.getConceptSetId());
     workspaceDao.delete(dbWorkspace.getWorkspaceId());
     cdrVersionDao.delete(dbCdrVersion.getCdrVersionId());
   }
 
   @Test
-  public void testGenerateCode() {
+  public void testGenerateCodePython() {
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(dbConditionConceptSet, false, PrePackagedConceptSetEnum.NONE))
+                createDataSetRequest(
+                    Arrays.asList(dbConditionConceptSet),
+                    Arrays.asList(dbCohort1),
+                    Arrays.asList(Domain.CONDITION),
+                    false,
+                    PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
-    String query =
-        code.replace(
-                "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"",
-                testWorkbenchConfig.bigquery.projectId
-                    + "."
-                    + testWorkbenchConfig.bigquery.dataSetId)
-            .split("\"\"\"")[1];
+    assertThat(code)
+        .contains(
+            "import pandas\n"
+                + "import os\n"
+                + "\n"
+                + "# This query represents dataset \"null\" for domain \"condition\"\n"
+                + "dataset_00000000_condition_sql =");
 
-    // Testing that generateCode produces a valid BigQuery query since it rewrites the named
-    // parameters produced by CohortBuilder.
+    String query = extractPythonQuery(code, 1);
+
     try {
-      bigQueryService.executeQuery(
-          QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      TableResult result =
+          bigQueryService.executeQuery(
+              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      assertThat(result.getTotalRows()).isEqualTo(1L);
     } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getMessage());
+      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
+    }
+  }
+
+  @Test
+  public void testGenerateCodeR() {
+    String code =
+        controller
+            .generateCode(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                KernelTypeEnum.R.toString(),
+                createDataSetRequest(
+                    Arrays.asList(dbConditionConceptSet),
+                    Arrays.asList(dbCohort1),
+                    Arrays.asList(Domain.CONDITION),
+                    false,
+                    PrePackagedConceptSetEnum.NONE))
+            .getBody()
+            .getCode();
+
+    assertThat(code)
+        .contains(
+            "library(bigrquery)\n"
+                + "\n# This query represents dataset \"null\" for domain \"condition\"\n"
+                + "dataset_00000000_condition_sql <- paste(\"");
+    String query = extractRQuery(code);
+
+    try {
+      TableResult result =
+          bigQueryService.executeQuery(
+              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      assertThat(result.getTotalRows()).isEqualTo(1L);
+    } catch (Exception e) {
+      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
+    }
+  }
+
+  @Test
+  public void testGenerateCodeTwoConceptSets() {
+    String code =
+        controller
+            .generateCode(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                KernelTypeEnum.PYTHON.toString(),
+                createDataSetRequest(
+                    Arrays.asList(dbConditionConceptSet, dbProcedureConceptSet),
+                    Arrays.asList(dbCohort1),
+                    Arrays.asList(Domain.CONDITION, Domain.PROCEDURE),
+                    false,
+                    PrePackagedConceptSetEnum.NONE))
+            .getBody()
+            .getCode();
+
+    String query = extractPythonQuery(code, 1);
+
+    try {
+      TableResult result =
+          bigQueryService.executeQuery(
+              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      assertThat(result.getTotalRows()).isEqualTo(1L);
+    } catch (Exception e) {
+      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
+    }
+
+    query = extractPythonQuery(code, 3);
+
+    try {
+      TableResult result =
+          bigQueryService.executeQuery(
+              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      assertThat(result.getTotalRows()).isEqualTo(1L);
+    } catch (Exception e) {
+      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
+    }
+  }
+
+  @Test
+  public void testGenerateCodeTwoCohorts() {
+    String code =
+        controller
+            .generateCode(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                KernelTypeEnum.PYTHON.toString(),
+                createDataSetRequest(
+                    Arrays.asList(dbConditionConceptSet),
+                    Arrays.asList(dbCohort1, dbCohort2),
+                    Arrays.asList(Domain.CONDITION),
+                    false,
+                    PrePackagedConceptSetEnum.NONE))
+            .getBody()
+            .getCode();
+
+    String query = extractPythonQuery(code, 1);
+
+    try {
+      TableResult result =
+          bigQueryService.executeQuery(
+              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      assertThat(result.getTotalRows()).isEqualTo(1L);
+    } catch (Exception e) {
+      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
     }
   }
 
@@ -246,76 +384,121 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(dbConditionConceptSet, true, PrePackagedConceptSetEnum.NONE))
+                createDataSetRequest(
+                    Arrays.asList(dbConditionConceptSet),
+                    new ArrayList<>(),
+                    Arrays.asList(Domain.CONDITION),
+                    true,
+                    PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
-    String query =
-        code.replace(
-                "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"",
-                testWorkbenchConfig.bigquery.projectId
-                    + "."
-                    + testWorkbenchConfig.bigquery.dataSetId)
-            .split("\"\"\"")[1];
+    String query = extractPythonQuery(code, 1);
 
-    // Testing that generateCode produces a valid BigQuery query since it rewrites the named
-    // parameters produced by CohortBuilder.
     try {
-      bigQueryService.executeQuery(
-          QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      TableResult result =
+          bigQueryService.executeQuery(
+              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      assertThat(result.getTotalRows()).isEqualTo(1L);
     } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getMessage());
+      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
     }
   }
 
   @Test
-  public void testGenerateCodePrepackagedCohort() {
+  public void testGenerateCodePrepackagedCohortDemographics() {
     String code =
         controller
             .generateCode(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
-                createDataSetRequest(null, false, PrePackagedConceptSetEnum.DEMOGRAPHICS))
+                createDataSetRequest(
+                    new ArrayList<>(),
+                    Arrays.asList(dbCohort1),
+                    Arrays.asList(Domain.PERSON),
+                    false,
+                    PrePackagedConceptSetEnum.DEMOGRAPHICS))
             .getBody()
             .getCode();
-    String query =
-        code.replace(
-                "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"",
-                testWorkbenchConfig.bigquery.projectId
-                    + "."
-                    + testWorkbenchConfig.bigquery.dataSetId)
-            .split("\"\"\"")[1];
+    String query = extractPythonQuery(code, 1);
 
-    // Testing that generateCode produces a valid BigQuery query since it rewrites the named
-    // parameters produced by CohortBuilder.
     try {
-      bigQueryService.executeQuery(
-          QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      TableResult result =
+          bigQueryService.executeQuery(
+              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      assertThat(result.getTotalRows()).isEqualTo(1L);
     } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getMessage());
+      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
+    }
+  }
+
+  @Test
+  public void testGenerateCodePrepackagedCohortSurveys() {
+    String code =
+        controller
+            .generateCode(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                KernelTypeEnum.PYTHON.toString(),
+                createDataSetRequest(
+                    new ArrayList<>(),
+                    Arrays.asList(dbCohort1),
+                    Arrays.asList(Domain.SURVEY),
+                    false,
+                    PrePackagedConceptSetEnum.SURVEY))
+            .getBody()
+            .getCode();
+    String query = extractPythonQuery(code, 1);
+
+    try {
+      TableResult result =
+          bigQueryService.executeQuery(
+              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
+      assertThat(result.getTotalRows()).isEqualTo(1L);
+    } catch (Exception e) {
+      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
     }
   }
 
   private DataSetRequest createDataSetRequest(
-      DbConceptSet dbConceptSet,
+      List<DbConceptSet> dbConceptSets,
+      List<DbCohort> dbCohorts,
+      List<Domain> domains,
       boolean allParticipants,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum) {
-    Domain domain = dbConceptSet == null ? null : dbConceptSet.getDomainEnum();
-    if (PrePackagedConceptSetEnum.DEMOGRAPHICS.equals(prePackagedConceptSetEnum)) {
-      domain = Domain.PERSON;
-    }
-    if (PrePackagedConceptSetEnum.SURVEY.equals(prePackagedConceptSetEnum)) {
-      domain = Domain.SURVEY;
-    }
-    DomainValuePair domainValuePair = new DomainValuePair().domain(domain).value("person_id");
     return new DataSetRequest()
         .conceptSetIds(
-            PrePackagedConceptSetEnum.NONE.equals(prePackagedConceptSetEnum)
-                ? Collections.singletonList(dbConceptSet.getConceptSetId())
-                : new ArrayList<>())
-        .addCohortIdsItem(dbCohort.getCohortId())
+            dbConceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList()))
+        .cohortIds(dbCohorts.stream().map(DbCohort::getCohortId).collect(Collectors.toList()))
         .includesAllParticipants(allParticipants)
         .prePackagedConceptSet(prePackagedConceptSetEnum)
-        .addDomainValuePairsItem(domainValuePair);
+        .domainValuePairs(
+            domains.stream()
+                .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                .collect(Collectors.toList()));
+  }
+
+  @NotNull
+  private String extractPythonQuery(String code, int index) {
+    code =
+        code.replace(
+            "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\"",
+            testWorkbenchConfig.bigquery.projectId + "." + testWorkbenchConfig.bigquery.dataSetId);
+    return code.split("\"\"\"")[index];
+  }
+
+  @NotNull
+  private String extractRQuery(String code) {
+    String query = code.split("\"")[5];
+    query =
+        query.replace(
+            "`condition_occurrence`",
+            String.format(
+                "`%s`",
+                testWorkbenchConfig.bigquery.projectId
+                    + "."
+                    + testWorkbenchConfig.bigquery.dataSetId
+                    + ".condition_occurrence"));
+    return query;
   }
 }

@@ -151,12 +151,12 @@ public class SearchRequests {
         ICD9_GROUP_CODE,
         new Modifier()
             .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.EQUAL)
+            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
             .operands(Arrays.asList("22")),
         new Modifier()
             .name(ModifierType.ENCOUNTERS)
             .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-            .operands(Arrays.asList("2")),
+            .operands(Arrays.asList("1")),
         new Modifier()
             .name(ModifierType.NUM_OF_OCCURRENCES)
             .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
