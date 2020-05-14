@@ -249,6 +249,7 @@ definitions:
       - familyName
     properties:
       userId:
+        description: Database ID from Table User for creator
         type: integer
         format: int64
       givenName:

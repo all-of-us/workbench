@@ -18,17 +18,21 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
 public interface RdrMapper {
-  @Mapping(target = "modifiedTime", source = "lastModifiedTime")
-  @Mapping(target = "intendToStudy", source = "intendedStudy")
-  @Mapping(target = "diseaseFocusedResearchName", source = "diseaseOfFocus")
-  @Mapping(target = "ethicalLegalSocialImplications", source = "ethics")
-  @Mapping(target = "scientificApproaches", source = "scientificApproach")
-  @Mapping(target = "findingsFromStudy", source = "anticipatedFindings")
-  @Mapping(target = "status", source = "workspaceActiveStatusEnum")
-  @Mapping(target = "workspaceUsers", ignore = true)
+  @Mapping(source = "anticipatedFindings", target = "findingsFromStudy")
+  @Mapping(source = "ethics", target = "ethicalLegalSocialImplications")
+  // excludeFromPublicDirectory requires checking workspace creator institution information
+  // This will be handle in ServiceImpl Class
   @Mapping(target = "excludeFromPublicDirectory", ignore = true)
-  @Mapping(target = "focusOnUnderrepresentedPopulations", source = "specificPopulationsEnum")
-  @Mapping(target = "workspaceDemographic", source = "specificPopulationsEnum")
+  @Mapping(source = "intendedStudy", target = "intendToStudy")
+  @Mapping(source = "diseaseOfFocus", target = "diseaseFocusedResearchName")
+  @Mapping(source = "lastModifiedTime", target = "modifiedTime")
+  @Mapping(source = "scientificApproach", target = "scientificApproaches")
+  @Mapping(source = "specificPopulationsEnum", target = "focusOnUnderrepresentedPopulations")
+  @Mapping(source = "specificPopulationsEnum", target = "workspaceDemographic")
+  @Mapping(source = "workspaceActiveStatusEnum", target = "status")
+  // Workspace User will be populated by a call to FireCloud
+  // This will be handle in ServiceImpl Class
+  @Mapping(target = "workspaceUsers", ignore = true)
   RdrWorkspace toRdrModel(DbWorkspace employeeDbEntity);
 
   ZoneOffset offset = OffsetDateTime.now().getOffset();
