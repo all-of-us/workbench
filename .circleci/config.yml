@@ -565,7 +565,7 @@ jobs:
       WORKBENCH_ENV: local
     resource_class: medium+
     working_directory: ~/workbench
-    parallelism: 3
+    parallelism: 1
     steps:
       - checkout_init_git
       - halt_job_noncode_changes
