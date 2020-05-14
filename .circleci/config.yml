@@ -561,7 +561,7 @@ jobs:
       - image: << pipeline.parameters.browser_image >>
     environment:
       <<: *e2e_env
-      WORKBENCH_ENV: dev
+      WORKBENCH_ENV: local
     resource_class: medium+
     working_directory: ~/workbench
     parallelism: 3

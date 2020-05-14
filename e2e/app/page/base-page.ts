@@ -162,13 +162,13 @@ export default abstract class BasePage {
    * @param cssSelector
    * @param expectedText
    */
-  async waitForText(cssSelector: string, expectedText: string) {
+  async waitForText(cssSelector: string, expectedText: string, maxTime: number = 30000) {
     await this.page.waitForFunction( (css, expText) => {
       const t = document.querySelector(css);
       if (t !== undefined) {
         return t.innerText === expText;
       }
-    }, {}, cssSelector, expectedText);
+    }, {timeout: maxTime}, cssSelector, expectedText);
 
     await this.page.waitForSelector(cssSelector, { visible: true });
   }

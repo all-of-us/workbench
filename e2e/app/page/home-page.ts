@@ -22,24 +22,35 @@ export default class HomePage extends AuthenticatedPage {
     super(page);
   }
 
-  async selfBypass() {
-      // Handle Self-Bypass if found
-    await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 10000});
-    console.log('self-bypass button found');
-    const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
-    await takeScreenshot(this.page, 'BeforeClickButton');
-    await selfBypass.click();
+  async selfBypassWhenRequired() {
+    const selfBypassXpath = '//*[@data-test-id="self-bypass"]';
+    await Promise.race([
+      this.page.waitForXPath(selfBypassXpath, {visible: true, timeout: 60000}),
+      Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES, {visible: true, timeout: 60000}),
+    ]);
+    // check to see if it is the Self-Bypass link
+    const bypassLink = await this.page.$x(selfBypassXpath);
+    if (bypassLink.length === 0) {
+      return;
+    }
 
+    // Handle Self-Bypass
+    console.log('self-bypass button found');
+    const selfBypass = await this.page.waitForXPath(`${selfBypassXpath}//div[@role="button"]`);
+    await selfBypass.click();
     try {
       await this.waitUntilNoSpinner();
     } catch (timeouterr) {
-      await Promise.all([
-        this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']}),
-        this.waitUntilNoSpinner(120000),
-        Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
-      ]);
+      // wait more if 60 seconds wait time wasn't enough.
+      await this.waitUntilNoSpinner(120000);
     }
-
+    await this.waitForText('[data-test-id="self-bypass"]', 'Bypass action is complete. Reload the page to continue.', 60000);
+    console.log('waitForText');
+    await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
+    console.log('reload');
+    await this.waitUntilNoSpinner();
+    console.log('waitForNoSpinner');
+    await Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES);
     await takeScreenshot(this.page, 'selfBypassCallExit');
   }
 
@@ -50,7 +61,8 @@ export default class HomePage extends AuthenticatedPage {
         this.waitUntilNoSpinner(240000),
       ]);
       if (process.env.WORKBENCH_ENV === 'local') {
-        await this.selfBypass();
+        console.log('WORKBENCH_ENV = ' + process.env.WORKBENCH_ENV);
+        await this.selfBypassWhenRequired();
       }
       await Promise.all([
         Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
