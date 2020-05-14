@@ -130,8 +130,9 @@ export default class GoogleLoginPage extends BasePage {
       // Sometimes, user is prompted with Google access app permission page.
       try {
         const allowAccessButton = await this.page.waitForSelector('#submit_approve_access', {timeout: 2000});
+        await takeScreenshot(this.page, 'FoundAllowButton');
         return Promise.all([
-          this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+          this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
           allowAccessButton.click(),
         ]);
       } catch (error) {

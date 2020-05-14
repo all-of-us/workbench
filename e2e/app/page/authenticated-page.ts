@@ -77,7 +77,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     }, {timeout: 1000}, selectr1);
     const jValue = await spinner.jsonValue();
 
-    console.log('timeout = ' + customTimeout);
     // wait maximum 90 seconds for spinner disappear if spinner existed
     const selectr2 = 'svg[style*="spin"], .spinner:empty';
     try {
