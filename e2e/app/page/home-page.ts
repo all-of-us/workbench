@@ -46,10 +46,10 @@ export default class HomePage extends AuthenticatedPage {
       await Promise.all([
         this.waitUntilTitleMatch(PAGE.TITLE),
         this.waitForTextExists(PAGE.HEADER),
-        Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
         this.waitUntilNoSpinner(),
       ]);
       await this.bypass();
+      await Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES);
       return true;
     } catch (e) {
       return false;
