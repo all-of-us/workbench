@@ -40,8 +40,10 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
 
     const observer = new IntersectionObserver(
       ([{ isIntersecting }]) => {
-        isIntersecting && !this.state.hasReadEntireDoc && this.props.onLastPageRender();
-        isIntersecting && this.setState({ hasReadEntireDoc: true });
+        if (isIntersecting && !this.state.hasReadEntireDoc) {
+          this.props.onLastPageRender();
+          this.setState({ hasReadEntireDoc: true });
+        }
       },
       { root: null, threshold: 1.0 }
     );
