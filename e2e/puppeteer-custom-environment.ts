@@ -4,7 +4,7 @@ require('jest-circus');
 
 
 // jest-circus retryTimes
-const retryTimes = process.env.RETRY_ATTEMPTS || 1;
+const retryTimes = 0;
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   async setup() {

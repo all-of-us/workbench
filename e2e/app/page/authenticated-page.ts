@@ -1,7 +1,6 @@
 import {Page} from 'puppeteer';
 import {PageUrl} from 'app/page-identifiers';
 import BasePage from 'app/page/base-page';
-import {performance} from 'perf_hooks';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 const SELECTOR = {
@@ -81,7 +80,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     console.log('timeout = ' + customTimeout);
     // wait maximum 90 seconds for spinner disappear if spinner existed
     const selectr2 = 'svg[style*="spin"], .spinner:empty';
-    const startTime = performance.now();
     try {
       if (jValue) {
         await this.page.waitFor((selector) => {
@@ -92,12 +90,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     } catch (err) {
       console.log('wait timeout error: ' + err);
       await takeScreenshot(this.page, 'TimedOutWaitForSpinnerStop');
-    } finally {
-      const finishTime = performance.now();
-      console.log(`diff = ${finishTime - startTime}`);
-      const diff = Math.floor(((finishTime - startTime) / 1000) % 60);
-
-      console.warn(`WARNING: waitUntilNoSpinner took ${diff} seconds.`);
     }
     // final 1 second wait for page render to finish
     if (jValue) {
