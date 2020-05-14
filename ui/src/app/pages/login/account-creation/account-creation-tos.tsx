@@ -1,7 +1,7 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
+import {HtmlViewer} from 'app/components/html-viewer';
 import {CheckBox} from 'app/components/inputs';
-import {PdfViewer} from 'app/components/pdf-viewer';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
@@ -36,7 +36,7 @@ export interface AccountCreationTosProps {
   // Callback which will be called by this component when the user clicks "Next".
   onComplete: () => void;
   // Path to the Terms of Service PDF file to be displayed.
-  pdfPath: string;
+  filePath: string;
   // Coming from Institution page
   afterPrev: boolean;
 }
@@ -71,10 +71,10 @@ export class AccountCreationTos extends React.Component<
 
     return <FlexColumn data-test-id='account-creation-tos'
                        style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
-      <PdfViewer
+      <HtmlViewer
           containerStyles={{backgroundColor: colors.white}}
           onLastPageRender={() => this.setState({hasReadEntireTos: true})}
-          pdfPath={this.props.pdfPath}
+          filePath={this.props.filePath}
       />
       <FlexRow
         style={{display: 'inline-flex', padding: '1rem', maxWidth: '1000px', margin: 'auto'}}>
