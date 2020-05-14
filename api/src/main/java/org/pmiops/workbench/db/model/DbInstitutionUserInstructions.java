@@ -67,7 +67,7 @@ public class DbInstitutionUserInstructions {
 
     DbInstitutionUserInstructions that = (DbInstitutionUserInstructions) o;
 
-    return Objects.equals(institution.getInstitutionId(), institution.getInstitutionId())
+    return Objects.equals(institution.getInstitutionId(), that.institution.getInstitutionId())
         && Objects.equals(userInstructions, that.userInstructions);
   }
 
