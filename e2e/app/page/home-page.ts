@@ -22,22 +22,23 @@ export default class HomePage extends AuthenticatedPage {
     super(page);
   }
 
-  async bypass() {
+  async selfBypass() {
     try {
-      await takeScreenshot(this.page, 'HomePageIsLoaded');
       // Handle Self-Bypass if found
       await this.page.waitForXPath('//*[@data-test-id="self-bypass"]', {visible: true, timeout: 10000});
       console.log('self-bypass button found');
       const selfBypass = await this.page.waitForXPath('//*[@data-test-id="self-bypass"]//div[@role="button"]');
       await takeScreenshot(this.page, 'BeforeClickButton');
       await selfBypass.click();
+      await this.page.waitFor(2000);
       await takeScreenshot(this.page, 'AfterClickedButton');
+      await this.waitUntilNoSpinner(120000);
       await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
+      await this.waitUntilNoSpinner(120000);
     } catch (e) {
       // Do nothing if Self-Bypass is not found.
       await takeScreenshot(this.page, 'SelfBypassButtonNotFound');
     }
-    console.log('outside');
     await takeScreenshot(this.page, 'Outside');
   }
 
@@ -47,11 +48,14 @@ export default class HomePage extends AuthenticatedPage {
         this.waitUntilTitleMatch(PAGE.TITLE),
         this.waitUntilNoSpinner(120000),
       ]);
-      await this.bypass();
+      if (process.env.WORKBENCH_ENV === 'local') {
+        await this.selfBypass();
+      }
       await Promise.all([
         Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
         this.waitForTextExists(PAGE.HEADER)
       ]);
+      await takeScreenshot(this.page, 'HomePageIsLoaded');
       return true;
     } catch (e) {
       return false;
