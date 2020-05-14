@@ -135,7 +135,7 @@ export default class GoogleLoginPage extends BasePage {
           this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
           allowAccessButton.click(),
         ]);
-      } catch (error) {
+      } catch (e) {
         // Do nothing if above page not found
       }
 
