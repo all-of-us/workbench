@@ -32,7 +32,7 @@ export default class HomePage extends AuthenticatedPage {
       await selfBypass.click();
       await this.page.waitFor(2000);
       await takeScreenshot(this.page, 'AfterClickedButton');
-      await this.waitUntilNoSpinner(120000);
+      await this.waitUntilNoSpinner(180000);
       await this.page.reload({waitUntil: ['networkidle0', 'domcontentloaded']});
       await this.waitUntilNoSpinner(120000);
     } catch (e) {
