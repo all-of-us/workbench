@@ -19,6 +19,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @Import({
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Import;
   InstitutionUserInstructionsMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
 })
+@EnableTransactionManagement
 public class LoadInstitutions {
 
   private static final Logger log = Logger.getLogger(LoadInstitutions.class.getName());

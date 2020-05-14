@@ -106,6 +106,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
+  @Transactional
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
     return getDbInstitution(shortName)
