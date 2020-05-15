@@ -79,11 +79,11 @@ export default abstract class BasePage {
    * Wait until document title to match a regular expression.
    * @param {string} text
    */
-  async waitUntilTitleMatch(title: string) {
+  async waitUntilTitleMatch(title: string, maxTime: number = 30000) {
     return await this.page.waitForFunction((t) => {
       const actualTitle = document.title;
       return actualTitle.includes(t);
-    }, {}, title)
+    }, {timeout: maxTime}, title)
   }
 
   /**

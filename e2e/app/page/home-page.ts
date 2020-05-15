@@ -3,7 +3,6 @@ import {PageUrl} from 'app/page-identifiers';
 import Link from 'app/element/link';
 import {findIcon} from 'app/element/xpath-finder';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import {takeScreenshot} from '../../utils/save-file-utils';
 
 export const PAGE = {
   TITLE: 'Homepage',
@@ -37,7 +36,7 @@ export default class HomePage extends AuthenticatedPage {
 
     // Click Self-Bypass button to continue
     console.log('self-bypass button found');
-    const selfBypass = await this.page.waitForXPath(`${selfBypassXpath}//div[@role="button"]`);
+    const selfBypass = await this.page.waitForXPath(`${selfBypassXpath}//div[@role="button"]`, {visible: true});
     await selfBypass.click();
     try {
       await this.waitUntilNoSpinner();
@@ -51,15 +50,13 @@ export default class HomePage extends AuthenticatedPage {
     console.log('reload');
     await this.waitUntilNoSpinner();
     console.log('waitForNoSpinner');
-    await Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES);
-    await takeScreenshot(this.page, 'selfBypassCallExit');
   }
 
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitUntilTitleMatch(PAGE.TITLE),
-        this.waitUntilNoSpinner(120000),
+        this.waitUntilTitleMatch(PAGE.TITLE, 60000),
+        this.waitUntilNoSpinner(60000),
       ]);
       if (process.env.WORKBENCH_ENV === 'local') {
         await this.selfBypassWhenRequired();
@@ -68,7 +65,7 @@ export default class HomePage extends AuthenticatedPage {
         Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
         this.waitForTextExists(PAGE.HEADER)
       ]);
-      await takeScreenshot(this.page, 'HomePageIsLoaded');
+      console.log('Home page loaded.');
       return true;
     } catch (e) {
       return false;

@@ -36,9 +36,10 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async waitForLoad(): Promise<this> {
     if (!await this.isLoaded()) {
-      await savePageToFile(this.page, 'PageIsNotLoaded');
-      await takeScreenshot(this.page, 'PageIsNotLoaded');
-      throw new Error('Page isLoaded() failed.');
+      const title = await this.page.title();
+      await savePageToFile(this.page);
+      await takeScreenshot(this.page);
+      throw new Error(`${title}: page not loaded correctly.`);
     }
     await this.waitUntilNoSpinner();
     return this;

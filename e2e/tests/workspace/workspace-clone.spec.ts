@@ -5,7 +5,7 @@ import DataPage from 'app/page/data-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import * as fp from 'lodash/fp';
 
-describe('Clone workspace', () => {
+describe.skip('Clone workspace', () => {
 
   beforeEach(async () => {
     await signIn(page);
