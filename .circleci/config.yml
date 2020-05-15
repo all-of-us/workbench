@@ -157,18 +157,19 @@ commands:
       - restore_cache:
           name: "restore e2e cache"
           keys:
-            - v1ac-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - v1ac-e2e-cache-master
-            - v1ac-e2e-cache-
+            - v1ad-e2e-dependency-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v1ad-e2e-dependency-cache-master
+            - v1ad-e2e-dependency-cache-
       - run:
           name: "workbench/e2e: yarn install dependencies"
           working_directory: ~/workbench/e2e
-          command: yarn install --non-interactive
+          command: yarn install --frozen-lockfile --non-interactive
       - save_cache:
           name: "save e2e cache"
           paths:
-            - e2e/node_modules
-          key: v1ac-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - ~/.cache/yarn
+            #- e2e/node_modules
+          key: v1ad-e2e-dependency-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
     description: "workbench/api: save or restore gradle cache"
