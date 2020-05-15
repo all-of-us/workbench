@@ -36,7 +36,11 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
     const { onLastPageRender = () => false } = this.props;
     const iframeDocument = this.iframeRef.current.contentDocument;
     const { body } = iframeDocument;
+    const openLinksInNewTab = iframeDocument.createElement('base');
     const endOfPage = iframeDocument.createElement('div');
+
+    openLinksInNewTab.setAttribute('target', '_blank');
+    body.prepend(openLinksInNewTab);
     body.appendChild(endOfPage);
 
     const observer = new IntersectionObserver(
