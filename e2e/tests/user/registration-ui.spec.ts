@@ -55,7 +55,7 @@ describe('User registration tests:', () => {
   });
 
 
-  test('Loading User information page', async () => {
+  test.skip('Loading User information page', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
 
