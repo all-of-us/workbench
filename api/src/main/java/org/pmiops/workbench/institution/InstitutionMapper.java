@@ -24,7 +24,7 @@ public interface InstitutionMapper {
   @Mapping(target = "institutionId", ignore = true)
   DbInstitution modelToDb(Institution modelObject);
 
-  // userInstructions will be populated by InstitutionUserInstructionsMapper
+  // userInstructions will be populated by setUserInstruction afterMapping
   @Mapping(target = "userInstructions", ignore = true)
   Institution dbToModel(DbInstitution dbObject, @Context InstitutionService institutionService);
 
