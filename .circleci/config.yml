@@ -157,9 +157,9 @@ commands:
       - restore_cache:
           name: "restore e2e cache"
           keys:
-            - v1ab-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - v1ab-e2e-cache-master
-            - v1ab-e2e-cache-
+            - v1ac-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v1ac-e2e-cache-master
+            - v1ac-e2e-cache-
       - run:
           name: "workbench/e2e: yarn install dependencies"
           working_directory: ~/workbench/e2e
@@ -167,9 +167,8 @@ commands:
       - save_cache:
           name: "save e2e cache"
           paths:
-            - ~/.cache/yarn
             - e2e/node_modules
-          key: v1ab-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v1ac-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
     description: "workbench/api: save or restore gradle cache"
@@ -601,9 +600,9 @@ jobs:
 workflows:
   build-test-deploy:
     jobs:
-      #- puppeteer-e2e-test
-      - puppeteer-e2e-local-ui:
-          filters: *filter_pull_request_branch
+      - puppeteer-e2e-test
+      #- puppeteer-e2e-local-ui:
+          #filters: *filter_pull_request_branch
       #- puppeteer-e2e-local:
           #filters: *filter_pull_request_branch
           #requires:
