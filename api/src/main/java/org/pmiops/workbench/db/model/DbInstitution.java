@@ -112,8 +112,7 @@ public class DbInstitution {
    *
    * @param emailDomains the new collection of domains for this Institution
    */
-  public DbInstitution setEmailDomains(
-      @NotNull final Collection<DbInstitutionEmailDomain> emailDomains) {
+  public DbInstitution setEmailDomains(final Collection<DbInstitutionEmailDomain> emailDomains) {
     final Set<DbInstitutionEmailDomain> attachedDomains =
         Optional.ofNullable(emailDomains)
             .map(Collection::stream)
@@ -145,7 +144,7 @@ public class DbInstitution {
    * @param emailAddresses the new collection of addresses for this Institution
    */
   public DbInstitution setEmailAddresses(
-      @NotNull final Collection<DbInstitutionEmailAddress> emailAddresses) {
+      final Collection<DbInstitutionEmailAddress> emailAddresses) {
     final Set<DbInstitutionEmailAddress> attachedAddresses =
         Optional.ofNullable(emailAddresses)
             .map(Collection::stream)
