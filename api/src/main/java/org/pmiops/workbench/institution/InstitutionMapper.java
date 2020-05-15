@@ -61,9 +61,6 @@ public interface InstitutionMapper {
       @MappingTarget Institution target, @Context InstitutionService institutionService) {
     institutionService
         .getInstitutionUserInstructions(target.getShortName())
-        .ifPresent(
-            userInstructions -> {
-              target.setUserInstructions(userInstructions);
-            });
+        .ifPresent(target::setUserInstructions);
   }
 }
