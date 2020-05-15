@@ -107,7 +107,8 @@ it('should reset role value & options when institution is selected', async() => 
 
   // Simulate choosing an institution from the dropdown.
   const institutionDropdown = getInstitutionDropdown(wrapper);
-  institutionDropdown.props.onChange({originalEvent: undefined, value: 'Broad'});
+  institutionDropdown.props.onChange(
+      {originalEvent: undefined, value: 'Broad', target: {name: '', id: '', value: 'Broad'}});
   await waitOneTickAndUpdate(wrapper);
 
   const roleDropdown = getRoleDropdown(wrapper);
@@ -115,11 +116,16 @@ it('should reset role value & options when institution is selected', async() => 
   expect(roleDropdown.props.options).toContain(academicSpecificRoleOption);
 
   // Simulate selecting a role value for Broad.
-  roleDropdown.props.onChange({originalEvent: undefined, value: academicSpecificRoleOption.value});
+  roleDropdown.props.onChange(
+    {
+      originalEvent: undefined, value: academicSpecificRoleOption.value,
+      target: {name: '', id: '', value: academicSpecificRoleOption.value}
+    });
   expect(roleDropdown.props.value).toEqual(academicSpecificRoleOption.value);
 
   // Simulate switching to Verily.
-  institutionDropdown.props.onChange({originalEvent: undefined, value: 'Verily'});
+  institutionDropdown.props.onChange(
+    {originalEvent: undefined, value: 'Verily', target: {name: '', id: '', value: 'Verily'}});
 
   // Role value should be cleared when institution changes.
   expect(roleDropdown.props.value).toBeNull();
@@ -143,7 +149,8 @@ it('should validate email affiliation when inst and email address are specified'
   await waitOneTickAndUpdate(wrapper);
 
   // Choose 'Broad' and enter an email address.
-  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Broad'});
+  getInstitutionDropdown(wrapper).props.onChange(
+      {originalEvent: undefined, value: 'Broad', target: {name: '', id: '', value: 'Broad'}});
   getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@asdf.com'}});
 
   // Email address is entered, but the input hasn't been blurred. The form should know that a
@@ -170,7 +177,8 @@ it('should validate email affiliation when inst and email domain are specified',
   await waitOneTickAndUpdate(wrapper);
 
   // Choose 'VUMC' and enter an email address.
-  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+  getInstitutionDropdown(wrapper).props.onChange(
+      {originalEvent: undefined, value: 'VUMC', target: {name: '', id: '', value: 'VUMC'}});
   getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@asdf.com'}});
 
   // Email address is entered, but the input hasn't been blurred. The form should know that a
@@ -197,7 +205,8 @@ it('should display validation icon only after email verification', async() => {
   await waitOneTickAndUpdate(wrapper);
 
   // Choose 'VUMC' and enter an email address.
-  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+  getInstitutionDropdown(wrapper).props.onChange(
+      {originalEvent: undefined, value: 'VUMC', target: {name: '', id: '', value: 'VUMC'}});
   getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@wrongDomain.com'}});
 
   // Email address is entered, but the input hasn't been blurred. The form should know that a
@@ -219,19 +228,29 @@ it('should clear email validation when institution is changed', async() => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
-  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+  getInstitutionDropdown(wrapper).props.onChange(
+      {originalEvent: undefined, value: 'VUMC', target: {name: '', id: '', value: 'VUMC'}});
   getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@vumc.org'}});
   // Blur the email input field and wait for the API request to complete.
   getEmailInput(wrapper).simulate('blur');
   await waitOneTickAndUpdate(wrapper);
-  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.EARLYCAREER});
+  getRoleDropdown(wrapper).props.onChange(
+    {
+      originalEvent: undefined, value: InstitutionalRole.EARLYCAREER,
+      target: {name: '', id: '', value: InstitutionalRole.EARLYCAREER}
+    });
 
   // At this point, the form should be ready to submit.
   expect(getInstance(wrapper).validate()).toBeUndefined();
 
   // ... Mimic changing the institution & role, but leaving email as-is.
-  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Verily'});
-  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.PREDOCTORAL});
+  getInstitutionDropdown(wrapper).props.onChange(
+      {originalEvent: undefined, value: 'Verily', target: {name: '', id: '', value: 'Verily'}});
+  getRoleDropdown(wrapper).props.onChange(
+    {
+      originalEvent: undefined, value: InstitutionalRole.PREDOCTORAL,
+      target: {name: '', id: '', value: InstitutionalRole.PREDOCTORAL}
+    });
 
   // The form should be blocked now due to lack of email verification.
   expect(getInstance(wrapper).validate()['checkEmailResponse']).toBeTruthy();
@@ -250,8 +269,11 @@ it('should trigger email check when email is filled in before choosing instituti
   // no institution being chosen. But for consistency w/ other tests, it's included.
   await waitOneTickAndUpdate(wrapper);
 
-  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'Broad'});
-  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.EARLYCAREER});
+  getInstitutionDropdown(wrapper).props.onChange(
+      {originalEvent: undefined, value: 'Broad', target: {name: '', id: '', value: 'Broad'}});
+  getRoleDropdown(wrapper).props.onChange(
+      {originalEvent: undefined, value: InstitutionalRole.EARLYCAREER,
+        target: {name: '', id: '', value: InstitutionalRole.EARLYCAREER}});
   await waitOneTickAndUpdate(wrapper);
 
   // At this point, the form should be ready to submit.
@@ -268,10 +290,10 @@ it('should call callback with correct form data', async() => {
   await waitOneTickAndUpdate(wrapper);
 
   // Fill in all fields with reasonable data.
-  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC'});
+  getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC', target: {name: '', id: '', value: 'VUMC'}});
   getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@vumc.org'}});
   getEmailInput(wrapper).simulate('blur');
-  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.UNDERGRADUATE});
+  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.UNDERGRADUATE, target: {name: '', id: '', value: InstitutionalRole.UNDERGRADUATE}});
   // Await one tick for the APi response to update state and allow form submission.
   await waitOneTickAndUpdate(wrapper);
 
