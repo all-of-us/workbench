@@ -65,7 +65,6 @@ export default class HomePage extends AuthenticatedPage {
         Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
         this.waitForTextExists(PAGE.HEADER)
       ]);
-      console.log('Home page loaded.');
       return true;
     } catch (e) {
       return false;

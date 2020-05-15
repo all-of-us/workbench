@@ -146,9 +146,6 @@ export default class GoogleLoginPage extends BasePage {
         // Do nothing
       }
 
-      await takeScreenshot(this.page, 'LoginFunction');
-      await savePageToFile(this.page, 'LoginFunction');
-
     } catch (err) {
       await takeScreenshot(this.page, 'GoogleLoginFailed');
       await savePageToFile(this.page, 'GoogleLoginFailed');
