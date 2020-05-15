@@ -15,7 +15,7 @@ parameters:
     default: "circleci/mysql:5.7"
   browser_image:
     type: string
-    default: "circleci/node:12-browsers"
+    default: "circleci/node:12.16.2-browsers"
 
 # -------------------------
 #   ANCHORS
@@ -575,9 +575,8 @@ jobs:
   # Deploy UI and API local server then run Puppeteer e2e tests on deployed "local" environment.
   puppeteer-e2e-local:
     resource_class: medium+
-    <<: *defaults
     docker:
-      #- image: << pipeline.parameters.workbench_image >>
+      - image: << pipeline.parameters.workbench_image >>
       - image: << pipeline.parameters.mysql_image >>
         environment:
           <<: *mysql_env
