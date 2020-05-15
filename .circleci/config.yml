@@ -584,7 +584,7 @@ jobs:
       - image: << pipeline.parameters.mysql_image >>
         environment:
           <<: *mysql_env
-      - image: << pipeline.parameters.browser_image >>
+      #- image: << pipeline.parameters.browser_image >>
     environment:
       <<: *java_env
       <<: *e2e_env
