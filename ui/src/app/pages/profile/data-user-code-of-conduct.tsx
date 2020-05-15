@@ -68,6 +68,7 @@ interface State {
   initialPublic: string;
   page: DataUserCodeOfConductPage;
   submitting: boolean;
+  proceedDisabled: boolean;
 }
 
 export const DataUserCodeOfConduct = withUserProfile()(
@@ -82,7 +83,8 @@ export const DataUserCodeOfConduct = withUserProfile()(
         initialMonitoring: '',
         initialPublic: '',
         page: DataUserCodeOfConductPage.CONTENT,
-        submitting: false
+        submitting: false,
+        proceedDisabled: true
       };
     }
 
@@ -97,7 +99,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
 
     render() {
       const {profileState: {profile}} = this.props;
-      const {initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic, page, submitting} = this.state;
+      const {proceedDisabled, initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic, page, submitting} = this.state;
       const errorsV2 = validate({initialNameV2, initialWorkV2, initialSanctionsV2}, {
         initialNameV2: {
           presence: {allowEmpty: false},
@@ -131,6 +133,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
               <HtmlViewer
                   containerStyles={{margin: '2rem 0 1rem'}}
                   filePath={'assets/documents/data-user-code-of-conduct.html'}
+                  onLastPageRender={() => this.setState({proceedDisabled: false})}
               />
               <FlexRow style={styles.dataUserCodeOfConductFooter}>
                 Please read the above document in its entirety before proceeding to sign the Data User Code of Conduct.
@@ -143,6 +146,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 </Button>
                 <Button
                     data-test-id={'ducc-next-button'}
+                    disabled={proceedDisabled}
                     onClick={() => this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
                 >
                   Proceed
