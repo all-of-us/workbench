@@ -89,6 +89,9 @@ definitions:
         type: integer
       name:
         type: string
+      creator:
+        description: Information about the creator of the workspace
+        $ref: "#/definitions/RdrWorkspaceCreator"
       creationTime:
         type: string
         format: date-time
@@ -236,6 +239,23 @@ definitions:
         enum:
           - ACTIVE
           - INACTIVE
+
+  RdrWorkspaceCreator:
+    type: object
+    description: Details for workspace creator
+    required:
+      - userId
+      - givenName
+      - familyName
+    properties:
+      userId:
+        description: Database ID from Table User for creator
+        type: integer
+        format: int64
+      givenName:
+        type: string
+      familyName:
+        type: string
 
   RdrResearcher:
     type: object
