@@ -106,7 +106,6 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  @Transactional
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
     final DbInstitution updateSource = institutionMapper.modelToDb(institutionToUpdate);

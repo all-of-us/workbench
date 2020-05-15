@@ -9,6 +9,7 @@ import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -39,8 +40,16 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  */
 @Configuration
 @EnableAutoConfiguration
-@Import({RetryConfig.class, CommonConfig.class, CloudStorageServiceImpl.class})
-@EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
+@Import({
+  RetryConfig.class,
+  CommonConfig.class,
+  CloudStorageServiceImpl.class,
+  WorkbenchDbConfig.class
+})
+@EnableJpaRepositories(
+    entityManagerFactoryRef = "entityManagerFactory",
+    transactionManagerRef = "transactionManager",
+    basePackages = {"org.pmiops.workbench.db"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class CommandLineToolConfig {
 

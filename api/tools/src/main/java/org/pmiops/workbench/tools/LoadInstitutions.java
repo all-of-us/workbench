@@ -5,20 +5,25 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.persistence.EntityManagerFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.context.annotation.Import;
+import org.springframework.orm.jpa.EntityManagerHolder;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Configuration
-@EnableTransactionManagement
+@Import(CommandLineToolConfig.class)
 @ComponentScan(value = "org.pmiops.workbench.institution")
 public class LoadInstitutions {
 
@@ -40,10 +45,17 @@ public class LoadInstitutions {
   private static Options options = new Options().addOption(importFilename).addOption(dryRunOpt);
 
   @Bean
-  public CommandLineRunner run(InstitutionService institutionService) {
+  public CommandLineRunner run(
+      InstitutionService institutionService,
+      @Qualifier("entityManagerFactory") EntityManagerFactory emf) {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
       boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
+
+      // This is mirrors what is done on the API server via "open-session-in-view":
+      // https://github.com/spring-projects/spring-framework/blob/master/spring-orm/src/main/java/org/springframework/orm/jpa/support/OpenEntityManagerInViewInterceptor.java#L88-L90
+      EntityManagerHolder emHolder = new EntityManagerHolder(emf.createEntityManager());
+      TransactionSynchronizationManager.bindResource(emf, emHolder);
 
       try (BufferedReader reader =
           new BufferedReader(new FileReader(opts.getOptionValue(importFilename.getLongOpt())))) {
@@ -78,6 +90,7 @@ public class LoadInstitutions {
           dryLog(dryRun, "Saved " + institution.toString());
         }
       }
+      TransactionSynchronizationManager.unbindResource(emf);
     };
   }
 
@@ -90,6 +103,6 @@ public class LoadInstitutions {
   }
 
   public static void main(String[] args) {
-    CommandLineToolConfig.runCommandLine(LoadInstitutions.class, args);
+    new SpringApplicationBuilder(LoadInstitutions.class).web(false).run(args);
   }
 }
