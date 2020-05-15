@@ -571,7 +571,7 @@ jobs:
     working_directory: ~/workbench
     parallelism: 1
     steps:
-      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - checkout_init_git
       - halt_job_noncode_changes
       - start_local_ui
