@@ -5489,6 +5489,9 @@ definitions:
           this Institution
         items:
           type: string
+      userInstructions:
+        description: Institution-specific instructions for users to be sent in email
+        type: string
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers

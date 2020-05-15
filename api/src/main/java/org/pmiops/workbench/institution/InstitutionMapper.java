@@ -7,8 +7,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
@@ -20,7 +23,9 @@ public interface InstitutionMapper {
   @Mapping(target = "institutionId", ignore = true)
   DbInstitution modelToDb(Institution modelObject);
 
-  Institution dbToModel(DbInstitution dbObject);
+  // userInstructions will be populated by setUserInstruction afterMapping
+  @Mapping(target = "userInstructions", ignore = true)
+  Institution dbToModel(DbInstitution dbObject, @Context InstitutionService institutionService);
 
   default List<String> toModelDomains(Set<DbInstitutionEmailDomain> dbDomains) {
     return Optional.ofNullable(dbDomains).orElse(Collections.emptySet()).stream()
@@ -49,5 +54,13 @@ public interface InstitutionMapper {
     return Optional.ofNullable(modelAddresses).orElse(Collections.emptySet()).stream()
         .map(address -> new DbInstitutionEmailAddress().setEmailAddress(address))
         .collect(Collectors.toSet());
+  }
+
+  @AfterMapping
+  default void setUserInstruction(
+      @MappingTarget Institution target, @Context InstitutionService institutionService) {
+    institutionService
+        .getInstitutionUserInstructions(target.getShortName())
+        .ifPresent(target::setUserInstructions);
   }
 }
