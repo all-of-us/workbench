@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  puppeteer_orb: threetreeslight/puppeteer@0.1.2
+
 # -------------------------
 #   PARAMETERS
 # -------------------------
@@ -595,6 +598,7 @@ jobs:
       - start_local_api
       - start_local_ui:
           connect_local_api: true
+      - puppeteer_orb/install
       - run_e2e_test
 
 workflows:
