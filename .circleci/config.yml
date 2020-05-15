@@ -171,7 +171,7 @@ commands:
           name: "save e2e cache"
           paths:
             - ~/.cache/yarn
-            #- e2e/node_modules
+            - e2e/node_modules
           key: v1ad-e2e-dependency-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
@@ -592,7 +592,7 @@ jobs:
     working_directory: ~/workbench
     parallelism: 1
     steps:
-      - browser-tools/install-chrome
+      - browser-tools/install-browser-tools
       - checkout_init_git
       - halt_job_noncode_changes
       - activate_service_account_credential
