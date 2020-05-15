@@ -105,8 +105,11 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
   }
 
-  @Override
+  // The @Transactional annotation below is a hack to make the command line tool LoadInstitutions
+  // work similarly to our API endpoints.  It's necessary because our command line tools don't set
+  // up the proper transactional or session context.  See RW-4968
   @Transactional
+  @Override
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
     return getDbInstitution(shortName)
