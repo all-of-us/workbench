@@ -15,6 +15,7 @@ export interface Props {
 
 interface State {
   hasReadEntireDoc: boolean;
+  iframeFailed: boolean;
   loading: boolean;
 }
 
@@ -26,6 +27,7 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
 
     this.state = {
       hasReadEntireDoc: false,
+      iframeFailed: false,
       loading: true
     };
 
@@ -33,35 +35,42 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
   }
 
   private handleIframeLoaded() {
-    const { onLastPageRender = () => false } = this.props;
-    const iframeDocument = this.iframeRef.current.contentDocument;
-    const { body } = iframeDocument;
-    const openLinksInNewTab = iframeDocument.createElement('base');
-    const endOfPage = iframeDocument.createElement('div');
+    try {
+      const { onLastPageRender = () => false } = this.props;
+      const iframeDocument = this.iframeRef.current.contentDocument;
+      const { body } = iframeDocument;
+      const openLinksInNewTab = iframeDocument.createElement('base');
+      const endOfPage = iframeDocument.createElement('div');
 
-    openLinksInNewTab.setAttribute('target', '_blank');
-    body.prepend(openLinksInNewTab);
-    body.appendChild(endOfPage);
+      openLinksInNewTab.setAttribute('target', '_blank');
+      body.prepend(openLinksInNewTab);
+      body.appendChild(endOfPage);
 
-    const observer = new IntersectionObserver(
-      ([{ isIntersecting }]) => {
-        if (isIntersecting && !this.state.hasReadEntireDoc) {
-          onLastPageRender();
-          this.setState({ hasReadEntireDoc: true });
-        }
-      },
-      { root: null, threshold: 1.0 }
-    );
-    observer.observe(endOfPage);
-    this.setState({ loading: false });
+      const observer = new IntersectionObserver(
+        ([{ isIntersecting }]) => {
+          if (isIntersecting && !this.state.hasReadEntireDoc) {
+            onLastPageRender();
+            this.setState({ hasReadEntireDoc: true });
+          }
+        },
+        { root: null, threshold: 1.0 }
+      );
+      observer.observe(endOfPage);
+    } catch (e) {
+      this.setState({iframeFailed: true});
+    } finally {
+      this.setState({ loading: false });
+    }
   }
 
   render() {
-    const { loading } = this.state;
+    const { loading, iframeFailed } = this.state;
     const { filePath, containerStyles } = this.props;
 
     return <div style={{ flex: '1 1 0', position: 'relative', ...containerStyles }}>
       { loading && <SpinnerOverlay/> }
+      {iframeFailed ?
+      'Content failed to load - please try refreshing the page' :
       <iframe
         style={{
           border: 'none',
@@ -74,7 +83,7 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
           src = {filePath}
           ref = {this.iframeRef}
           onLoad={() => this.handleIframeLoaded() }>
-      </iframe>
+      </iframe>}
     </div>;
   }
 });
