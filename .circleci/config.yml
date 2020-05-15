@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  browser-tools: circleci/browser-tools@1.0.0
+
 # -------------------------
 #   PARAMETERS
 # -------------------------
@@ -589,6 +592,7 @@ jobs:
     working_directory: ~/workbench
     parallelism: 1
     steps:
+      - browser-tools/install-chrome
       - checkout_init_git
       - halt_job_noncode_changes
       - activate_service_account_credential
