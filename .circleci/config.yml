@@ -562,8 +562,8 @@ jobs:
   # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
   puppeteer-e2e-local-ui:
     <<: *defaults
-    docker:
-      - image: << pipeline.parameters.browser_image >>
+    #docker:
+      #- image: << pipeline.parameters.browser_image >>
     environment:
       <<: *e2e_env
       WORKBENCH_ENV: local
@@ -571,6 +571,7 @@ jobs:
     working_directory: ~/workbench
     parallelism: 1
     steps:
+      - browser-tools/install-chrome
       - checkout_init_git
       - halt_job_noncode_changes
       - start_local_ui
@@ -605,10 +606,10 @@ workflows:
   build-test-deploy:
     jobs:
       #- puppeteer-e2e-test
-      #- puppeteer-e2e-local-ui:
-          #filters: *filter_pull_request_branch
-      - puppeteer-e2e-local:
+      - puppeteer-e2e-local-ui:
           filters: *filter_pull_request_branch
+      #- puppeteer-e2e-local:
+          #filters: *filter_pull_request_branch
           #requires:
             #- api-local-test
             #- api-build-test
