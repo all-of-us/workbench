@@ -139,7 +139,7 @@ export const toolTipText = {
     performing analyses on your cohorts. </div>,
   cdrSelect: <div>The Curated Data Repository (CDR) is where research data from the <AouTitle/> is
     stored. The CDR is periodically updated as new data becomes available for
-    use. You can select which version of the CDR you wish to query in this Workspace.</div>,
+    use. You can select which version of the CDR you wish to query in this workspace.</div>,
   researchPurpose: <div>You are required to describe your research purpose, or the reason why you
     are conducting this study. This information, along with your name, will be posted on the
     publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
