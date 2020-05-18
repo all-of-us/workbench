@@ -41,7 +41,7 @@ describe('AdminReviewWorkspace', () => {
   it('should display workspaces for review', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="workspaceName"]').at(1).text())
+    expect(wrapper.find('[data-test-id="workspaceName"]').first().text())
       .toBe(workspaceStubs[0].name);
   });
 
@@ -49,7 +49,7 @@ describe('AdminReviewWorkspace', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const numWorkspaces = wrapper.find('[data-test-id="workspaceName"]').length;
-    wrapper.find('[data-test-id="actionButtons"]').at(1)
+    wrapper.find('[data-test-id="actionButtons"]').first()
       .find('[data-test-id="approve"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="workspaceName"]').length)

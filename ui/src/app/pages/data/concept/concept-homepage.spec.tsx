@@ -124,14 +124,14 @@ describe('ConceptHomepage', () => {
 
     // Test that it switches to the table view
     expect(wrapper.find('[data-test-id="conceptTable"]').length).toBeGreaterThan(0);
-    const firstDomainRowName = wrapper.find('[data-test-id="conceptName"]').at(1).text();
+    const firstDomainRowName = wrapper.find('[data-test-id="conceptName"]').first().text();
     await waitOneTickAndUpdate(wrapper);
 
     // Test that it changes the table when a new domain is selected
     const unselectedDomainName = DomainStubVariables.STUB_DOMAINS[1].name;
     wrapper.find('[data-test-id="domain-header-' + unselectedDomainName + '"]')
       .first().simulate('click');
-    expect( wrapper.find('[data-test-id="conceptName"]').at(1).text())
+    expect( wrapper.find('[data-test-id="conceptName"]').first().text())
       .not.toBe(firstDomainRowName);
 
   });
@@ -162,9 +162,9 @@ describe('ConceptHomepage', () => {
         expectedRequest
       );
     });
-    // check number of rows in table plus header row
+    // check number of rows in table
     expect(wrapper.find('[data-test-id="conceptName"]').length)
-      .toBe(conceptsCountInDomain(selectedDomain, false) + 1);
+      .toBe(conceptsCountInDomain(selectedDomain, false));
   });
 
   it('should display the selected concepts on header', async() => {
