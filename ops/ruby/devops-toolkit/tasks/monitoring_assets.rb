@@ -85,7 +85,6 @@ class MonitoringAssets
       end
       backup_dashboards
       backup_group_members
-      backup_monitored_resources
       backup_notification_channels
     end
   end
@@ -110,11 +109,6 @@ class MonitoringAssets
   def backup_user_logs_based_metrics
     user_logs_based_metrics = @metric_client.list_metric_descriptors(@project_path, {filter: USER_LOGS_BASED_METRIC_FILTER})
     backup_assets(user_logs_based_metrics)
-  end
-
-  def backup_monitored_resources
-    resources = @metric_client.list_monitored_resource_descriptors(@project_path)
-    backup_assets(resources)
   end
 
   # Grab all the metrics, including very many defined by Google and partners. This method is here
