@@ -99,7 +99,8 @@ export const DataUserCodeOfConduct = withUserProfile()(
 
     render() {
       const {profileState: {profile}} = this.props;
-      const {proceedDisabled, initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic, page, submitting} = this.state;
+      const {proceedDisabled, initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic,
+        page, submitting} = this.state;
       const errorsV2 = validate({initialNameV2, initialWorkV2, initialSanctionsV2}, {
         initialNameV2: {
           presence: {allowEmpty: false},
