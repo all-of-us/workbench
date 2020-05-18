@@ -232,11 +232,11 @@ public class InstitutionDaoTest {
   @Test(expected = DataIntegrityViolationException.class)
   public void test_uniqueDisplayNameRequired() {
     final DbInstitution snowflake1 =
-            new DbInstitution().setShortName("Inst1").setDisplayName("Not Unique");
+        new DbInstitution().setShortName("Inst1").setDisplayName("Not Unique");
     institutionDao.save(snowflake1);
 
     final DbInstitution snowflake2 =
-            new DbInstitution().setShortName("Inst2").setDisplayName("Not Unique");
+        new DbInstitution().setShortName("Inst2").setDisplayName("Not Unique");
     institutionDao.save(snowflake2);
   }
 }
