@@ -59,6 +59,20 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    * Updates moodle information for all users in the database.
    *
    * <p>This API method is called by a cron job and is not part of our normal user-facing surface.
+   *
+   *
+   * This would only ever catch the following scenarios:
+   * 1. The user's compliance training expires. The time scale on this expiration is O(years),
+   * so syncing nightly is entirely acceptable.
+   *
+   * 2. The user completes compliance and doesn't return to the dashboard. We'd progress them in the
+   * background. This won't make much of a difference and would have the same effect as if they had
+   * navigated back to the dashboard.
+   *
+   * 3. Somehow the user manages to "uncomplete" training in Moodle. There is no direct process for
+   * this today, but if it happened, it's certainly an edge case where nightly would be acceptable
+   * latency
+   *
    */
   @Override
   public ResponseEntity<Void> bulkSyncComplianceTrainingStatus() {
