@@ -2234,13 +2234,35 @@ Common.register_command({
   :fn => ->(*args) { deploy_api("deploy-api", args) }
 })
 
-def create_workbench_db()
+def create_or_update_workbench_db()
+  # This method assumes that a cloud SQL proxy is active, and that appropriate
+  # env variables are exported to correspond to the target environment.
   run_with_redirects(
     "cat db/create_db.sql | envsubst | " \
     "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
     ENV["MYSQL_ROOT_PASSWORD"]
   )
 end
+
+def create_or_update_workbench_db_cmd(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
+    # with_cloud_proxy_and_db_env loads env vars into scope which parameterize this call
+    create_or_update_workbench_db
+  end
+end
+
+Common.register_command({
+  :invocation => "create-or-update-workbench-db",
+  :description => "Creates or updates the Workbench database and users.\n" \
+                  "This can be used in the event that new users or permissions " \
+                  "are added to create_db.sql, as this is not currently rerun " \
+                  "during deployment. This process is separate from Liquibase " \
+                  "migrations as these changes may require root, be necessary " \
+                  "to bootstrap Liquibase, or require sensitive variables such " \
+                  "as passwords which are unavailable to Liquibase.",
+  :fn => ->(*args) { create_or_update_workbench_db_cmd("create-or-update-workbench-db", args) }
+})
 
 def migrate_database(dry_run = false)
   common = Common.new
@@ -2542,7 +2564,7 @@ def setup_project_data(gcc, cdr_db_name)
 
 
     common.status "Setting up databases and users..."
-    create_workbench_db
+    create_or_update_workbench_db
 
     common.status "Running schema migrations..."
     migrate_database
