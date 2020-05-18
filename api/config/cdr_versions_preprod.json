@@ -1,7 +1,7 @@
 [
   {
     "cdrVersionId": 1,
-    "isDefault": true,
+    "isDefault": false,
     "name": "All of Us Dataset v3",
     "dataAccessLevel": 1,
     "bigqueryProject": "fc-aou-cdr-preprod",
@@ -13,7 +13,7 @@
   },
   {
     "cdrVersionId": 2,
-    "isDefault": false,
+    "isDefault": true,
     "name": "All of Us Dataset v4",
     "dataAccessLevel": 1,
     "bigqueryProject": "fc-aou-cdr-preprod",
