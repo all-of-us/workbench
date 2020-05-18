@@ -1,6 +1,25 @@
-import {ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import {ElementHandle, Page, WaitForSelectorOptions, Frame} from 'puppeteer';
 import TextOptions from './text-options';
 import * as xpathDefaults from './xpath-defaults';
+
+const waitForFn = async ({ fn, interval = 2000, timeout = 10000 }) => {
+  const readyState = new Promise<{success?: Frame, intervalId: NodeJS.Timeout}>(resolve => {
+    const start = Date.now()
+    const currentInterval = setInterval(() => {
+      const succeeded = fn()
+      if (success) {
+        resolve({ success: succeeded, intervalId: currentInterval })
+      } 
+      if (Date.now() - start > timeout) {
+        resolve({ intervalId: currentInterval })
+      }
+    }, interval)
+  })
+
+  const { success, intervalId } = await readyState
+  clearInterval(intervalId)
+  return success
+}
 
 /**
  * Find a LINK or BUTTON element with a specified label.
@@ -125,4 +144,13 @@ export async function findImage(page: Page, label: string, waitOptions?: WaitFor
     waitOptions = {visible: true};
   }
   return page.waitForXPath(selector, waitOptions);
+}
+
+export async function findIframe(page: Page, label: string): Promise<Frame> {
+  const iframeNode = await page.waitForXPath(`//body[@id='body']//*[contains(@aria-label, '${label}')]//iframe`)
+  const srcHandle = await iframeNode.getProperty('src')
+  const src = await srcHandle.jsonValue()
+  const hasFrame = (): Frame => page.frames().find(frame => frame.url() === src)
+
+  return hasFrame() || await waitForFn({ fn: hasFrame })
 }

@@ -7,6 +7,7 @@ export interface Props {
   containerStyles?: React.CSSProperties;
   onLastPageRender: () => void;
   filePath: string;
+  ariaLabel: string;
   windowSize: {
     width: number,
     height: number
@@ -66,9 +67,9 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
 
   render() {
     const { loading, iframeFailed } = this.state;
-    const { filePath, containerStyles } = this.props;
+    const { filePath, containerStyles, ariaLabel } = this.props;
 
-    return <div style={{ flex: '1 1 0', position: 'relative', ...containerStyles }}>
+    return <div aria-label={ariaLabel} style={{ flex: '1 1 0', position: 'relative', ...containerStyles }}>
       { loading && <SpinnerOverlay/> }
       {iframeFailed ?
       'Content failed to load - please try refreshing the page' :

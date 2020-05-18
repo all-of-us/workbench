@@ -4,7 +4,7 @@ import {shallow} from 'enzyme';
 import * as React from 'react';
 
 
-it('should load PDF pages', async() => {
+it('should load html pages', async() => {
   let reachedLastPage = false;
 
   const props = {

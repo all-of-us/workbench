@@ -35,7 +35,7 @@ const styles = reactStyles({
 export interface AccountCreationTosProps {
   // Callback which will be called by this component when the user clicks "Next".
   onComplete: () => void;
-  // Path to the Terms of Service PDF file to be displayed.
+  // Path to the Terms of Service file to be displayed.
   filePath: string;
   // Coming from Institution page
   afterPrev: boolean;
@@ -45,10 +45,6 @@ interface AccountCreationTosState {
   hasReadEntireTos: boolean;
   hasAckedPrivacyStatement: boolean;
   hasAckedTermsOfService: boolean;
-  // Whether the PDF document is currently being loaded. A spinner will show while true.
-  loadingPdf: boolean;
-  // Once the PDF has been loaded, this value contains the number of pages in the PDF document.
-  numPages: number;
 }
 
 export class AccountCreationTos extends React.Component<
@@ -60,9 +56,7 @@ export class AccountCreationTos extends React.Component<
     this.state = {
       hasReadEntireTos: props.afterPrev,
       hasAckedPrivacyStatement: props.afterPrev,
-      hasAckedTermsOfService: props.afterPrev,
-      loadingPdf: true,
-      numPages: 0,
+      hasAckedTermsOfService: props.afterPrev
     };
   }
 
@@ -72,6 +66,7 @@ export class AccountCreationTos extends React.Component<
     return <FlexColumn data-test-id='account-creation-tos'
                        style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
       <HtmlViewer
+          ariaLabel='terms of service agreement'
           containerStyles={{backgroundColor: colors.white}}
           onLastPageRender={() => this.setState({hasReadEntireTos: true})}
           filePath={this.props.filePath}

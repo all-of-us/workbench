@@ -131,6 +131,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
           {
             page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
               <HtmlViewer
+                  ariaLabel='data user code of conduct agreement'
                   containerStyles={{margin: '2rem 0 1rem'}}
                   filePath={'assets/documents/data-user-code-of-conduct.html'}
                   onLastPageRender={() => this.setState({proceedDisabled: false})}

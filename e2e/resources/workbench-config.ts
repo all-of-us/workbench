@@ -1,7 +1,7 @@
 require('dotenv').config();
 import * as fp from 'lodash/fp';
 
-const env = process.env.WORKBENCH_ENV || 'dev';
+const env = 'local'; // process.env.WORKBENCH_ENV || 'local';
 
 const userCredential = {
   contactEmail: 'hermione.owner@quality.firecloud.org',
