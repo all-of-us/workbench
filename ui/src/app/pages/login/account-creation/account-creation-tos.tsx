@@ -85,7 +85,7 @@ export class AccountCreationTos extends React.Component<
             </div>
             <div style={{fontWeight: 400}}>
                 By clicking below, or continuing with the registration process or accessing the
-                Workbench, You agree to these Terms and make the following certifications:
+                Researcher Workbench, you agree to these terms and make the following certifications:
             </div>
           </div>
           <div style={{marginBottom: '.25rem'}}>

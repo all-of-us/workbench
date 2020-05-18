@@ -88,7 +88,7 @@ const libraryTabs = {
   DEMO_PROJECTS: {
     title: 'Demonstration Projects',
     description: <div>Workspaces included here are meant to demonstrate end-to-end analyses that can be performed
-      using <AoU/> Data. The current set of Research Example Analyses were developed as part of <AoU/> Demonstration
+      using <AoU/> Data. The current set of research example analyses were developed as part of <AoU/> Demonstration
       Projects. They are aimed at demonstrating the quality, utility, and diversity of <AoU/> data by replicating
       previously published studies. You can open the workspaces to view them or “duplicate” the workspaces to edit
       and execute them.</div>,

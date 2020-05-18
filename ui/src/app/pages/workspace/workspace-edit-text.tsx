@@ -11,8 +11,8 @@ import * as React from 'react';
 
 
 export const toolTipTextDemographic = 'For example, by stratifying results based on race/ethnicity, age, ' +
-    'sex, gender identity, sexual orientation, geography disability status, access to care, ' +
-    'education level or income\n';
+    'sex, gender identity, sexual orientation, geography, disability status, access to care, ' +
+    'education level, or income\n';
 
 export const toolTipTextDataUseAgreement = <div>These steps include, but are not limited to:
   <ul>
@@ -40,15 +40,15 @@ export const toolTipTextStigmatization = <div>
 export const ResearchPurposeDescription =
     <div style={{display: 'inline'}}>The <AouTitle/> requires each data user of the <AoU/> data to
       provide a meaningful description of the intended purpose of data use for
-      each workspace they create. To provide transparency to <AoU/> Program participants, your
+      each workspace they create. To provide transparency to <AouTitle/> participants, &nbsp;your
       answers below will be made available publicly in the <a target='_blank'
       href='https://www.researchallofus.org/research-projects-directory/'>Research Hub
       Directory </a> on our public website. <b>Your responses will not be used to make decisions about data access.</b>
       <hr/>
-      <i>Note that you are required to create separate Workspaces for each project
-        for which you access <AoU/> data, hence the responses below are expected
+      <i>Note that you are required to create separate workspaces for each project
+        for which you access </i> All of Us <i>data, hence the responses below are expected
         to be specific to the project for which you are creating this particular
-        Workspace.</i>
+        workspace.</i>
     </div>;
 
 export interface ResearchPurposeItem {
@@ -71,7 +71,7 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     longDescription: <div>The primary purpose of the use of <i>All of Us</i> data is to develop
       and/or validate specific methods/tools for analyzing or interpreting data (e.g. statistical
       methods for describing data trends, developing more powerful methods to detect
-      gene-environment or other types of interactions in genome-wide association studies).</div>
+      gene-environment, or other types of interactions in genome-wide association studies).</div>
   }, {
     shortName: 'controlSet',
     shortDescription: 'Research Control',
@@ -81,7 +81,7 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
   }, {
     shortName: 'ancestry',
     shortDescription: 'Genetic Research',
-    longDescription: <div>Research concerning genetics (i.e. the study of genes, genetic variations
+    longDescription: <div>Research concerning genetics (i.e. the study of genes, genetic variations,
       and heredity) in the context of diseases or ancestry.</div>
   }, {
     shortName: 'socialBehavioral',
@@ -92,11 +92,11 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
     shortName: 'populationHealth',
     shortDescription: 'Population Health/Public Health Research',
     longDescription: <div>The primary purpose of using <i>All of Us</i> data is to investigate
-      health behaviors, outcomes, access and disparities in populations.</div>
+      health behaviors, outcomes, access, and disparities in populations.</div>
   }, {
     shortName: 'ethics',
     shortDescription: 'Ethical, Legal, and Social Implications (ELSI) Research',
-    longDescription: <div>This research focuses on ethical, legal and social implications (ELSI)
+    longDescription: <div>This research focuses on ethical, legal, and social implications (ELSI)
       of, or related to design, conduct, and translation of research.</div>
   }, {
     shortName: 'drugDevelopment',
@@ -126,7 +126,7 @@ export const PrimaryPurposeItems: Array<ResearchPurposeItem> = [ {
   shortName: 'otherPurpose',
   shortDescription: 'Other Purpose',
   uniqueId: 'other-purpose',
-  longDescription: <div>If your Purpose of Use is different from the options listed above, please
+  longDescription: <div>If your purpose of use is different from the options listed above, please
     select "Other Purpose" and provide details regarding your purpose of data use here
     (500 character limit).</div>
 }];
@@ -137,8 +137,8 @@ export const toolTipText = {
     You can share this Workspace with other users, allowing them to view or edit your work. Your
     Workspace is where you will go to build concept sets and cohorts and launch Notebooks for
     performing analyses on your cohorts. </div>,
-  cdrSelect: <div>The Curated Data Repository (CDR) is where research data from the <i>All of Us</i>
-    Research Program is stored. The CDR is periodically updated as new data becomes available for
+  cdrSelect: <div>The Curated Data Repository (CDR) is where research data from the <AouTitle/> is
+    stored. The CDR is periodically updated as new data becomes available for
     use. You can select which version of the CDR you wish to query in this Workspace.</div>,
   researchPurpose: <div>You are required to describe your research purpose, or the reason why you
     are conducting this study. This information, along with your name, will be posted on the
@@ -160,72 +160,72 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
     header: <div> Please provide a summary of your research purpose by responding to the
       questions below.</div>,
     description: <div>Your responses should cover the major components of a research summary:
-      hypothesis, methods and anticipated findings. Therefore, please
+      hypothesis, methods, and anticipated findings. Therefore, please
       provide sufficiently detailed responses in plain language (without jargon), using as few
       technical terms as possible. </div>
   }, {
     header: 'What are the specific scientific question(s) you intend to study, and why is the ' +
-    'question important (i.e. relevant to science or public health)? \n',
+    'question important (i.e. relevance to science or public health)? \n',
     description: <div>If you are exploring the data at this stage to formalize a specific
       research question, please describe the reason for exploring the data, and the scientific
       question you hope to be able to answer using the data. <br/>
-      (Free text; 1000 Character limit)</div>
+      (Free text; 1000 character limit)</div>
   }, {
     header: 'What are the scientific approaches you plan to use for your study? Describe the ' +
-    'datasets, research methods and tools you will use to answer your scientific question(s). \n',
-    description: <div>Free text; 1000 Character limit</div>
+    'datasets, research methods, and tools you will use to answer your scientific question(s). \n',
+    description: <div>Free text; 1000 character limit</div>
   }, {
     header: 'What are the anticipated findings from the study? How would your findings ' +
     'contribute to the body of scientific knowledge in the field?',
-    description: <div>Free text; 1000 Character limit
+    description: <div>Free text; 1000 character limit
     </div>
   }, {
-    header: <div>The <i>All of Us </i> Research Program encourages researchers to disseminate their
+    header: <div>The <AoU/> Research Program encourages researchers to disseminate their
       research findings to both scientific and lay/community audiences, to maximize the value of the
       resource and to recognize the contributions of participant partners. Please tell us how you
       plan to disseminate your research findings. Choose as many options below as applicable, and
       specify details in the text box, if available. </div>,
     description: ''
   }, {
-    header: <div>The <i>All of Us</i> Research Program would like to understand how (or if)  your
-      research outcome may fit into the <i>All of Us</i> Research Program Scientific Framework.
+    header: <div>The <AoU/> Research Program would like to understand how (or if)  your
+      research outcome may fit into the <AoU/> Research Program Scientific Framework.
       Please select all of the statements below that describe the outcomes you anticipate from your
       research.</div>,
     description: ''
   }, {
     header: 'Population of interest',
-    description: <div>A primary aim of <i>All of Us</i> is to engage communities that have been
+    description: <div>A primary aim of <AoU/> is to engage communities that have been
       historically underrepresented in biomedical research. The next set of questions is designed
       to help us assess how well we are serving underrepresented communities—and to protect against
-      potentially stigmatizing research findings, to which these groups are more vulnerable.
-
-      <i>All of Us</i> supports well-designed and responsible research that addresses questions relevant to
+      potentially stigmatizing research findings, to which these groups are more
+      vulnerable. <AoU/> supports well-designed and responsible research that addresses questions relevant to
       underrepresented communities, as well as research that compares different groups and
       populations. At the same time, we recognize that research with underrepresented populations
-      can unintentionally result in harms, including the exacerbation of stigma. We encourage
+      can unintentionally result in harm, including the exacerbation of stigma. We encourage
       researchers to consider whether their research design, methods, and analyses could
       potentially cause harm to individuals, groups, and communities.</div>
   }, {
     header: 'Request for Review of Research Purpose Description',
-    description: <div>Any research that focuses on certain population characteristics or
+    description: <span>
+      <div>Any research that focuses on certain population characteristics or</div>
       <TooltipTrigger content={toolTipTextDemographic}>
         <div style={{color: colors.secondary}}> uses demographic variables </div>
       </TooltipTrigger>
-      in analyses can result, often unintentionally, in findings that may be misinterpreted or
+      <div>in analyses can result, often unintentionally, in findings that may be misinterpreted or
       misused by others to foster stigma. While it may not be possible to completely prevent misuse
       of research for stigmatizing purposes, data users can take important steps to minimize the
-      risk of this happening–
+        risk of this happening–</div>
       <TooltipTrigger content={toolTipTextDataUseAgreement}>
         <div>taking this step is a condition of your Data Use Agreement.</div>
       </TooltipTrigger>
-      If you are concerned that your research could inadvertently stigmatize participants
+      <div>If you are concerned that your research could inadvertently stigmatize participants
       or communities, or if you are unsure, let us know. We encourage you to request a review of
       your research purpose statement by the <i> All of Us</i> Resource Access Board (RAB) as a
       precaution. The RAB will provide feedback and, if needed, guidance for modifying your
       research purpose or scope.To learn more, please refer to the <i> All of Us </i>
       Stigmatizing Research Policy.If you request a review, you can expect to receive an initial
       response within five business days. During the RAB’s review, you may begin working in your
-      workspace.</div>
+        workspace.</div></span>
   }
 ];
 
@@ -248,8 +248,8 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
     'African; Middle Eastern or North African (MENA); Native Hawaiian or Other Pacific ' +
     'Islander (NHPI); Hispanic, Latino, or Spanish (H/L/S); Multi-Ancestry (2+ Races)',
     subCategory: [{label: 'Asian', shortName: SpecificPopulationEnum.RACEASIAN},
-      {label: 'Black, African or African American', shortName: SpecificPopulationEnum.RACEAA},
-      {label: 'Hispanic, Latino or Spanish', shortName: SpecificPopulationEnum.RACEHISPANIC},
+      {label: 'Black, African, or African American', shortName: SpecificPopulationEnum.RACEAA},
+      {label: 'Hispanic, Latino, or Spanish', shortName: SpecificPopulationEnum.RACEHISPANIC},
       {
         label: 'American Indian or Alaska Native (AIAN)',
         shortName: SpecificPopulationEnum.RACEAIAN
@@ -303,7 +303,7 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
     ubrDescription: 'Gay; Lesbian; Bisexual; Queer; Other Sexual Orientation Choices',
     subCategory: [
       {
-        label: 'Participants who identify as asexual, bisexual, gay or lesbian or something else ' +
+        label: 'Participants who identify as asexual, bisexual, gay or lesbian, or something else ' +
         'other than straight ',
         shortName: SpecificPopulationEnum.SEXUALORIENTATION
       }]
@@ -371,7 +371,7 @@ export const disseminateFindings = [
   },
   {
     label: 'Presentation at community forums or advisory groups (such as town halls, advocacy group ' +
-    'meetings or community advisory boards)',
+    'meetings, or community advisory boards)',
     shortName: DisseminateResearchEnum.PRESENTATIONADVISORYGROUPS
   },
   {

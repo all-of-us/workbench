@@ -46,7 +46,7 @@ export const RecentWorkspaces = withUserProfile()
       {this.state.loading && <SpinnerOverlay dark={true} />}
       {this.state.recentWorkspaces.length === 0 && !this.state.loading ?
         <div style={{color: colors.primary, margin: '.5em 2em'}}>
-          <h2 style={{fontWeight: 600, lineHeight: 1.5}}>Create your first Workspace</h2>
+          <h2 style={{fontWeight: 600, lineHeight: 1.5}}>Create your first workspace</h2>
           <div>As you create your workspaces, this area will store your most recent workspaces.</div>
           <div>To see all workspaces created, click on <b>See all Workspaces</b> to the right.</div>
         </div> :
