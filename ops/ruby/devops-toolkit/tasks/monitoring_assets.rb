@@ -229,11 +229,11 @@ class MonitoringAssets
   def fixup_dashboard_name(name)
     match_data = name.match(DASHBOARD_NAME_PATTERN)
     if match_data && match_data.captures.size > 0
-      project_number = match_data[:project_number]
-      dashboard_number = match_data[:dashboard_number]
+      project_number = match_data[:project_number].to_i
+      dashboard_number = match_data[:dashboard_number].to_i
       # double check the project
       if project_number == @current_env.project_number
-        "projects/#{@current_env.project_id}dashboards/#{dashboard_number}"
+        "projects/#{@current_env.project_id}/dashboards/#{dashboard_number}"
       else
         name
       end
