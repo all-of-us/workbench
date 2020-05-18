@@ -26,7 +26,8 @@ public abstract class User {
   abstract DbVerifiedInstitutionalAffiliation toAffiliation(
       final DbUser dbUser, final InstitutionDao institutionDao);
 
-  static Stream<String[]> readFile(final String filename, final int columnLength) throws IOException {
+  static Stream<String[]> readFile(final String filename, final int columnLength)
+      throws IOException {
     try (final CSVReader reader = new CSVReader(new FileReader(filename))) {
       // consume and sanity-check header line
       final String[] headerLine = reader.readNext();

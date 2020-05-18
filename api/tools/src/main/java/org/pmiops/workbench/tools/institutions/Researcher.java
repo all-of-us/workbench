@@ -14,13 +14,14 @@ import org.pmiops.workbench.model.InstitutionalRole;
  * Structure researcher user data according to the format of the source CSV:
  *
  * <p>First Name, Last Name, Institutional Email, WB User Name, Role, Institution, "Institutional
- * DUA Signed?"
+ * DUA Signed?", "REDCap Complete?"
  */
 class Researcher extends User {
   final String institutionDisplayName;
   final String duaSigned;
+  final String redCapComplete;
 
-  private static final int columnLength = 7;
+  private static final int columnLength = 8;
   private static final String affirmative = "Yes";
 
   // this mapping is only stored in the UI so we copy it here
@@ -60,7 +61,8 @@ class Researcher extends User {
     this.userName = userLine[3].trim();
     this.operationalRole = userLine[4].trim();
     this.institutionDisplayName = userLine[5].trim();
-    this.duaSigned = userLine[5].trim();
+    this.duaSigned = userLine[6].trim();
+    this.redCapComplete = userLine[7].trim();
   }
 
   static Stream<User> parseInput(final String filename) throws IOException {
@@ -72,7 +74,13 @@ class Researcher extends User {
     if (!duaSigned.equals(affirmative)) {
       throw new RuntimeException(
           String.format(
-              "User's Institution %s not marked as '%s' in the input CSV", userName, affirmative));
+              "The Institutional DUA Signature for user '%s' was not marked as '%s' in the input CSV", userName, affirmative));
+    }
+    if (!redCapComplete.equals(affirmative)) {
+      throw new RuntimeException(
+          String.format(
+              "The REDCap completion status for user '%s' was not marked as '%s' in the input CSV",
+              userName, redCapComplete));
     }
   }
 
