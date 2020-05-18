@@ -2,8 +2,9 @@ package org.pmiops.workbench.tools.institutions;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -65,8 +66,10 @@ class Researcher extends User {
     this.redCapComplete = userLine[7].trim();
   }
 
-  static Stream<User> parseInput(final String filename) throws IOException {
-    return User.readFile(filename, columnLength).map(Researcher::new);
+  static List<User> parseInput(final String filename) throws IOException {
+    return User.readFile(filename, columnLength).stream()
+        .map(Researcher::new)
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -74,7 +77,8 @@ class Researcher extends User {
     if (!duaSigned.equals(affirmative)) {
       throw new RuntimeException(
           String.format(
-              "The Institutional DUA Signature for user '%s' was not marked as '%s' in the input CSV", userName, affirmative));
+              "The Institutional DUA Signature for user '%s' was not marked as '%s' in the input CSV",
+              userName, affirmative));
     }
     if (!redCapComplete.equals(affirmative)) {
       throw new RuntimeException(

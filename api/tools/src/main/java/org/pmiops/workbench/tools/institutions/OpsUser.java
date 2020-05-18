@@ -1,8 +1,9 @@
 package org.pmiops.workbench.tools.institutions;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -21,7 +22,7 @@ class OpsUser extends User {
   private static final String institutionShortName = "AouOps";
   private static final String actionForInclusion = "To Remain";
 
-  private static Optional<DbInstitution> aouOpsInst;
+  private static Optional<DbInstitution> aouOpsInst = Optional.empty();
 
   private static DbInstitution getOrInitInst(final InstitutionDao institutionDao) {
     if (!aouOpsInst.isPresent()) {
@@ -43,8 +44,10 @@ class OpsUser extends User {
     this.action = userLine[5].trim();
   }
 
-  static Stream<User> parseInput(final String filename) throws IOException {
-    return User.readFile(filename, columnLength).map(OpsUser::new);
+  static List<User> parseInput(final String filename) throws IOException {
+    return User.readFile(filename, columnLength).stream()
+        .map(OpsUser::new)
+        .collect(Collectors.toList());
   }
 
   @Override

@@ -1,8 +1,8 @@
 package org.pmiops.workbench.tools.institutions;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -68,28 +68,15 @@ public class PopulateUserAffiliations {
       final String userTypes = opts.getOptionValue(userType.getLongOpt());
 
       // process whole file before taking any action
-      final Stream<User> users = parseUsers(filename, userTypes);
+      final List<User> users = parseUsers(filename, userTypes);
 
-      users
-          .map(user -> user.prepareAffiliation(userDao, institutionDao, affiliationDao))
-          .forEach(
-              affiliation -> {
-                if (!dryRun) {
-                  affiliationDao.save(affiliation);
-                }
-
-                dryLog(
-                    dryRun,
-                    String.format(
-                        "Saved Affiliation for '%s' with Institution '%s'",
-                        affiliation.getUser().getUsername(),
-                        affiliation.getInstitution().getDisplayName()));
-              });
+      for (final User user : users) {
+        user.populateAffiliation(dryRun, userDao, institutionDao, affiliationDao);
+      }
     };
   }
 
-  private Stream<User> parseUsers(final String filename, final String userTypes)
-      throws IOException {
+  private List<User> parseUsers(final String filename, final String userTypes) throws IOException {
     if (userTypes.equals("OPS")) {
       return OpsUser.parseInput(filename);
     } else if (userTypes.equals("RESEARCHERS")) {
@@ -98,14 +85,6 @@ public class PopulateUserAffiliations {
       throw new RuntimeException(
           "Cannot populate affiliations: only valid user types are 'OPS' and 'RESEARCHERS'");
     }
-  }
-
-  private static void dryLog(boolean dryRun, String msg) {
-    String prefix = "";
-    if (dryRun) {
-      prefix = "[DRY RUN] Would have... ";
-    }
-    log.info(prefix + msg);
   }
 
   public static void main(String[] args) {
