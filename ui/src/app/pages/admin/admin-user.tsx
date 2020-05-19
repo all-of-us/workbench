@@ -4,7 +4,6 @@ import * as React from 'react';
 import {Component} from '@angular/core';
 
 import {FlexColumn, FlexRow} from 'app/components/flex';
-
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {SmallHeader} from 'app/components/headers';
@@ -13,8 +12,8 @@ import {TextInput, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDateWithoutHours, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-
 import {institutionApi} from 'app/services/swagger-fetch-clients';
+
 import {Profile} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 
@@ -79,6 +78,8 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onChange}
         initialValue={initialValue}
         disabled={disabled}
         onToggle={(checked) => onChange(checked)}
+        height={18}
+        width={33}
     />
   </FlexColumn>;
 };
@@ -168,6 +169,8 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                 data-test-id='account-access-toggle'
                 onToggle={(value) => value}
                 style={{marginLeft: 'auto', paddingBottom: '0px'}}
+                height={18}
+                width={33}
             />
           </FlexRow>
           <Button type='link' style={{marginLeft: 'auto'}}>

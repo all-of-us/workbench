@@ -82,7 +82,10 @@ export class AdminUserBypass extends React.Component<
                     initialValue={selectedModules.includes(AccessModule.BETAACCESS)}
                     data-test-id='beta-access-toggle'
                     onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.BETAACCESS])}); } } />
+                      fp.xor(selectedModules, [AccessModule.BETAACCESS])}); } }
+                    height={28}
+                    width={56}
+            />
             <TooltipTrigger content={'Grant beta access to a user.  This replaces verify/reject.'}>
               <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
             </TooltipTrigger>
@@ -92,22 +95,34 @@ export class AdminUserBypass extends React.Component<
                   initialValue={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
                   data-test-id='compliance-training-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); } }/>}
+                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); } }
+                  height={28}
+                  width={56}
+          />}
           {enableEraCommons && <Toggle name='eRA Commons Linking'
                   initialValue={selectedModules.includes(AccessModule.ERACOMMONS)}
                   data-test-id='era-commons-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); } } />}
+                    fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); } }
+                  height={28}
+                  width={56}
+          />}
           <Toggle name='Two Factor Auth'
                   initialValue={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
                   data-test-id='two-factor-auth-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}/>
+                    fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}
+                  height={28}
+                  width={56}
+          />
           {enableDataUseAgreement && <Toggle name='Data Use Agreement'
                   initialValue={selectedModules.includes(AccessModule.DATAUSEAGREEMENT)}
                   data-test-id='data-use-agreement-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}/>}
+                    fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}
+                  height={28}
+                  width={56}
+          />}
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
             <IconButton icon='times'
                         onClick={() => this.cancel()}
