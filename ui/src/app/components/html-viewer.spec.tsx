@@ -9,7 +9,7 @@ it('should load html pages', async() => {
 
   const props = {
     filePath: '/assets/documents/fake-html-page.html',
-    onLastPageRender: () => reachedLastPage = true
+    onLastPage: () => reachedLastPage = true
   };
 
   const wrapper = shallow(<HtmlViewer {...props} />).shallow();

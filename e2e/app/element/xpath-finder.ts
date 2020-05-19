@@ -2,23 +2,15 @@ import {ElementHandle, Page, WaitForSelectorOptions, Frame} from 'puppeteer';
 import TextOptions from './text-options';
 import * as xpathDefaults from './xpath-defaults';
 
-const waitForFn = async ({ fn, interval = 2000, timeout = 10000 }) => {
-  const readyState = new Promise<{success?: Frame, intervalId: NodeJS.Timeout}>(resolve => {
-    const start = Date.now()
-    const currentInterval = setInterval(() => {
-      const succeeded = fn()
-      if (success) {
-        resolve({ success: succeeded, intervalId: currentInterval })
-      } 
-      if (Date.now() - start > timeout) {
-        resolve({ intervalId: currentInterval })
-      }
-    }, interval)
-  })
-
-  const { success, intervalId } = await readyState
-  clearInterval(intervalId)
-  return success
+const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
+  const start = Date.now()
+  while (Date.now() < start + timeout) {
+    if (fn()) {
+      return true;
+    }
+    await new Promise(resolve => setTimeout(resolve, interval));
+  }
+  return false;
 }
 
 /**
@@ -152,5 +144,6 @@ export async function findIframe(page: Page, label: string): Promise<Frame> {
   const src = await srcHandle.jsonValue()
   const hasFrame = (): Frame => page.frames().find(frame => frame.url() === src)
 
-  return hasFrame() || await waitForFn({ fn: hasFrame })
+  await waitForFn(hasFrame)
+  return hasFrame()
 }

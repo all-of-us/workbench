@@ -1,17 +1,14 @@
 import {SpinnerOverlay} from 'app/components/spinners';
 import {withWindowSize} from 'app/utils';
 import * as React from 'react';
+import { WindowSizeProps } from '../utils';
 
 
-export interface Props {
+export interface Props extends WindowSizeProps {
   containerStyles?: React.CSSProperties;
-  onLastPageRender: () => void;
+  onLastPage: () => void;
   filePath: string;
   ariaLabel: string;
-  windowSize: {
-    width: number,
-    height: number
-  };
 }
 
 interface State {
@@ -36,9 +33,9 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
   }
 
   componentDidUpdate({}, {hasReadEntireDoc}) {
-    const { onLastPageRender = () => false } = this.props;
+    const { onLastPage = () => false } = this.props;
     if (!hasReadEntireDoc && this.state.hasReadEntireDoc) {
-      onLastPageRender();
+      onLastPage();
     }
   }
 
@@ -54,6 +51,8 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
       body.appendChild(endOfPage);
 
       const observer = new IntersectionObserver(
+        // The callback receives a list of entries - since we only have one intersection entry (threshold: 1.0)
+        // we can destructure the first item of the array and determine whether it is intersecting or not
         ([{ isIntersecting }]) => isIntersecting && !this.state.hasReadEntireDoc && this.setState({ hasReadEntireDoc: true }),
         { root: null, threshold: 1.0 }
       );

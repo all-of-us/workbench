@@ -68,7 +68,7 @@ export class AccountCreationTos extends React.Component<
       <HtmlViewer
           ariaLabel='terms of service agreement'
           containerStyles={{backgroundColor: colors.white}}
-          onLastPageRender={() => this.setState({hasReadEntireTos: true})}
+          onLastPage={() => this.setState({hasReadEntireTos: true})}
           filePath={this.props.filePath}
       />
       <FlexRow

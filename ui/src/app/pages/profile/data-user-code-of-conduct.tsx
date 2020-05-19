@@ -135,7 +135,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                   ariaLabel='data user code of conduct agreement'
                   containerStyles={{margin: '2rem 0 1rem'}}
                   filePath={'assets/documents/data-user-code-of-conduct.html'}
-                  onLastPageRender={() => this.setState({proceedDisabled: false})}
+                  onLastPage={() => this.setState({proceedDisabled: false})}
               />
               <FlexRow style={styles.dataUserCodeOfConductFooter}>
                 Please read the above document in its entirety before proceeding to sign the Data User Code of Conduct.
