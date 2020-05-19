@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import java.util.Objects;
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -80,6 +81,9 @@ public class DbVerifiedInstitutionalAffiliation {
     return this;
   }
 
+  // omit ID field from equality so equivalent objects match regardless
+  // of whether they are actually present in the DB
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -91,7 +95,10 @@ public class DbVerifiedInstitutionalAffiliation {
 
     DbVerifiedInstitutionalAffiliation that = (DbVerifiedInstitutionalAffiliation) o;
 
-    return Objects.equals(user, that.user)
+    // TODO: DbUser doesn't have a well-defined equals() so we use the username instead
+    return Objects.equals(
+            Optional.ofNullable(user).map(DbUser::getUsername),
+            Optional.ofNullable(that.user).map(DbUser::getUsername))
         && Objects.equals(institution, that.institution)
         && Objects.equals(institutionalRoleEnum, that.institutionalRoleEnum)
         && Objects.equals(institutionalRoleOtherText, that.institutionalRoleOtherText);
@@ -99,7 +106,8 @@ public class DbVerifiedInstitutionalAffiliation {
 
   @Override
   public int hashCode() {
-    return Objects.hash(user, institution, institutionalRoleEnum, institutionalRoleOtherText);
+    return Objects.hash(
+        user.getUsername(), institution, institutionalRoleEnum, institutionalRoleOtherText);
   }
 
   @Override

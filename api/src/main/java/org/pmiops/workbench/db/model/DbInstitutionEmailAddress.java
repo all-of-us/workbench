@@ -54,7 +54,8 @@ public class DbInstitutionEmailAddress {
     return this;
   }
 
-  // logical equality: data members without the ID field
+  // omit ID field from equality so equivalent objects match regardless
+  // of whether they are actually present in the DB
 
   @Override
   public boolean equals(Object o) {
@@ -67,12 +68,14 @@ public class DbInstitutionEmailAddress {
 
     DbInstitutionEmailAddress that = (DbInstitutionEmailAddress) o;
 
-    return Objects.equals(institution, that.institution)
-        && Objects.equals(emailAddress, that.emailAddress);
+    // calling institution.equals() would introduce a cycle here
+    return Objects.equals(emailAddress, that.emailAddress)
+        && DbInstitution.equalsWithoutEmails(institution, that.institution);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(institution, emailAddress);
+    // calling institution.hashCode() would introduce a cycle here
+    return Objects.hash(emailAddress, DbInstitution.hashCodeWithoutEmails(institution));
   }
 }

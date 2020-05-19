@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Optional;
@@ -156,5 +157,79 @@ public class DbInstitution {
     this.emailAddresses.addAll(Sets.difference(attachedAddresses, this.emailAddresses));
 
     return this;
+  }
+
+  // omit ID field from equality so equivalent objects match regardless
+  // of whether they are actually present in the DB
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbInstitution that = (DbInstitution) o;
+
+    return Objects.equal(shortName, that.shortName)
+        && Objects.equal(displayName, that.displayName)
+        && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
+        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
+        && Objects.equal(duaTypeEnum, that.duaTypeEnum)
+        && Objects.equal(emailDomains, that.emailDomains)
+        && Objects.equal(emailAddresses, that.emailAddresses);
+  }
+
+  // to prevent cycles in the emails' equals() methods
+  public boolean equalsWithoutEmails(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbInstitution that = (DbInstitution) o;
+
+    return Objects.equal(shortName, that.shortName)
+        && Objects.equal(displayName, that.displayName)
+        && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
+        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
+        && Objects.equal(duaTypeEnum, that.duaTypeEnum);
+  }
+
+  public static boolean equalsWithoutEmails(final DbInstitution a, final DbInstitution b) {
+    if (a == null) {
+      return (b == null);
+    } else {
+      return a.equalsWithoutEmails(b);
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(
+        shortName,
+        displayName,
+        organizationTypeEnum,
+        organizationTypeOtherText,
+        duaTypeEnum,
+        emailDomains,
+        emailAddresses);
+  }
+
+  // to prevent cycles in the emails' hashCode() methods
+  public int hashCodeWithoutEmails() {
+    return Objects.hashCode(
+        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, duaTypeEnum);
+  }
+
+  // to prevent cycles in the emails' hashCode() methods
+  public static Object hashCodeWithoutEmails(final DbInstitution institution) {
+    if (institution == null) {
+      return 0;
+    } else {
+      return institution.hashCodeWithoutEmails();
+    }
   }
 }
