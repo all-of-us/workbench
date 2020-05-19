@@ -542,9 +542,9 @@ jobs:
     working_directory: ~/workbench
     parallelism: 3
     steps:
-      - browser-tools/install-browser-tools
       - checkout_init_git
       - halt_job_noncode_changes
+      - browser-tools/install-browser-tools
       - run_e2e_test
 
   # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
