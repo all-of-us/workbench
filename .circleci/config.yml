@@ -558,17 +558,17 @@ jobs:
     parallelism: 1
     steps:
       - run:
-          name: Check if it is a pull request
+          name: Skip tests if it is not a pull request
           command: |
             echo "PR: $CI_PULL_REQUEST"
             echo "PR number: $CIRCLE_PR_NUMBER"
-            if [[ -z $CIRCLE_PULL_REQUEST ]] ; then
+            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} == "master" ] ; then
               echo "Not a PR, skipping Puppeteer tests"
               circleci-agent step halt
             fi
-      - browser-tools/install-browser-tools
       - checkout_init_git
       - halt_job_noncode_changes
+      - browser-tools/install-browser-tools
       - start_local_ui
       - run_e2e_test
 
@@ -588,9 +588,9 @@ jobs:
     working_directory: ~/workbench
     parallelism: 1
     steps:
-      - browser-tools/install-browser-tools
       - checkout_init_git
       - halt_job_noncode_changes
+      - browser-tools/install-browser-tools
       - activate_service_account_credential
       - start_local_api
       - start_local_ui:
