@@ -1,8 +1,6 @@
 import {SpinnerOverlay} from 'app/components/spinners';
 import {withWindowSize} from 'app/utils';
 import * as React from 'react';
-import { WindowSizeProps } from '../utils';
-
 
 export interface Props extends WindowSizeProps {
   containerStyles?: React.CSSProperties;
