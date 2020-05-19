@@ -782,7 +782,9 @@ Common.register_command({
 
 def make_bq_denormalized_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.cdr_date = Date.today.to_s
+  date = Time.new
+  date = date.year.to_s + "-" + date.month.to_s + "-" + date.day.to_s
+  op.opts.cdr_date = date.to_s
   op.opts.data_browser = false
   op.opts.dry_run = false
   op.add_option(
