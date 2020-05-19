@@ -77,12 +77,6 @@ anchors:
       # Workbench release tag format example: v5-3-rc1
       only: /^v[0-9]+-[0-9]+-rc[0-9]+$/
 
-  # Job runs for all branches EXCEPT all tag and master branches
-  filter_pull_request_branch: &filter_pull_request_branch
-    tags:
-      ignore: /.*/
-    branches:
-      ignore: master
 
 # -------------------------
 #   COMMANDS
@@ -587,7 +581,6 @@ jobs:
       - image: << pipeline.parameters.mysql_image >>
         environment:
           <<: *mysql_env
-      #- image: << pipeline.parameters.browser_image >>
     environment:
       <<: *java_env
       <<: *e2e_env
@@ -615,8 +608,7 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
-      - puppeteer-e2e-local-ui:
-          filters: *filter_pull_request_branch
+      - puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           filters: *filter_only_master_branch
