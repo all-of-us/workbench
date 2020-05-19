@@ -1188,10 +1188,8 @@ paths:
         to execute. Only executable via App Engine cronjob.'
       operationId: checkClusters
       responses:
-        200:
+        204:
           description: Clusters were checked and handled successfully.
-          schema:
-            "$ref": "#/definitions/CheckClustersResponse"
   "/v1/cron/bulkSyncComplianceTrainingStatus":
     get:
       security: []
@@ -5258,13 +5256,6 @@ definitions:
         format: int32
         description: 'Number of queries issues against the Curated data repository
           which are flagged as possible audit issues. See logs/alerts for details.'
-  CheckClustersResponse:
-    type: object
-    properties:
-      clusterDeletionCount:
-        type: integer
-        format: int32
-        description: 'Number of clusters deleted during the check.'
   User:
     type: object
     properties:
