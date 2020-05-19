@@ -37,8 +37,8 @@ const freeCreditLimitOptions = [
   {label: '$800', value: 800}
 ];
 
-const ReadonlyInputWithLabel = ({label, content, inputStyle = {}}) => {
-  return <FlexColumn style={{marginTop: '1rem'}}>
+const ReadonlyInputWithLabel = ({label, content, dataTestId, inputStyle = {}}) => {
+  return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
     <TextInput
         value={content}
@@ -53,8 +53,8 @@ const ReadonlyInputWithLabel = ({label, content, inputStyle = {}}) => {
   </FlexColumn>;
 };
 
-const DropdownWithLabel = ({label, options, initialValue, onChange, disabled, dropdownStyle = {}}) => {
-  return <FlexColumn style={{marginTop: '1rem'}}>
+const DropdownWithLabel = ({label, options, initialValue, onChange, disabled, dataTestId, dropdownStyle = {}}) => {
+  return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
     <Dropdown
         style={{
@@ -70,8 +70,8 @@ const DropdownWithLabel = ({label, options, initialValue, onChange, disabled, dr
   </FlexColumn>;
 };
 
-const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onChange}) => {
-  return <FlexColumn style={{width: '8rem', flex: '0 0 auto'}}>
+const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onChange, dataTestId}) => {
+  return <FlexColumn data-test-id={dataTestId} style={{width: '8rem', flex: '0 0 auto'}}>
     <label>{label}</label>
     <Toggle
         name={initialValue ? 'BYPASSED' : ''}
@@ -185,31 +185,38 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
             <ReadonlyInputWithLabel
                 label={'User name'}
                 content={profile.givenName + ' ' + profile.familyName}
+                dataTestId={'userFullName'}
             />
             <ReadonlyInputWithLabel
                 label={'Registration state'}
                 content={fp.capitalize(profile.dataAccessLevel.toString())}
+                dataTestId={'registrationState'}
             />
             <ReadonlyInputWithLabel
                 label={'Registration date'}
                 content={profile.firstRegistrationCompletionTime ? displayDateWithoutHours(profile.firstRegistrationCompletionTime) : ''}
+                dataTestId={'firstRegistrationCompletionTime'}
             />
             <ReadonlyInputWithLabel
                 label={'Username'}
                 content={profile.username}
+                dataTestId={'username'}
             />
             <ReadonlyInputWithLabel
                 label={'Contact email'}
                 content={profile.contactEmail}
+                dataTestId={'contactEmail'}
             />
             <ReadonlyInputWithLabel
                 label={'Free credits used'}
                 content={profile.freeTierUsage}
                 inputStyle={{width: '6.5rem'}}
+                dataTestId={'freeTierUsage'}
             />
             <ReadonlyInputWithLabel
                 label={'Beta access time requested'}
                 content={profile.betaAccessRequestTime ? displayDateWithoutHours(profile.betaAccessRequestTime) : ''}
+                dataTestId={'betaAccessRequestTime'}
             />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
@@ -220,6 +227,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                 initialValue={profile.freeTierDollarQuota}
                 dropdownStyle={{width: '3rem'}}
                 disabled={true}
+                dataTestId={'freeTierDollarQuota'}
             />
             <DropdownWithLabel
                 label={'Verified institution'}
@@ -231,6 +239,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                       : undefined
                 }
                 disabled={true}
+                dataTestId={'verifiedInstitution'}
             />
             <div style={{marginTop: '1rem', width: '15rem'}}>
               <label style={{fontWeight: 600}}>Bypass access to:</label>
@@ -240,12 +249,14 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                     initialValue={!!profile.twoFactorAuthBypassTime}
                     disabled={true}
                     onChange={(checked) => checked}
+                    dataTestId={'twoFactorAuthBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
                     label={'Compliance training'}
                     initialValue={!!profile.complianceTrainingBypassTime}
                     disabled={true}
                     onChange={(checked) => checked}
+                    dataTestId={'complianceTrainingBypassToggle'}
                 />
               </FlexRow>
               <FlexRow style={{marginTop: '1rem'}}>
@@ -254,12 +265,14 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                     initialValue={!!profile.eraCommonsBypassTime}
                     disabled={true}
                     onChange={(checked) => checked}
+                    dataTestId={'eraCommonsBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
                     label={'Data User Code of Conduct'}
                     initialValue={!!profile.dataUseAgreementBypassTime}
                     disabled={true}
                     onChange={(checked) => checked}
+                    dataTestId={'dataUseAgreementBypassToggle'}
                 />
               </FlexRow>
             </div>
