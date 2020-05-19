@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import * as xpathDefaults from './xpath-defaults';
+import {labelXpath} from './xpath-defaults';
 
 export default class Textarea extends BaseElement {
 
@@ -14,7 +14,7 @@ export default class Textarea extends BaseElement {
     if (textOptions.ancestorNodeLevel === undefined) {
       textOptions.ancestorNodeLevel = 2;
     }
-    const textareaXpath = `${xpathDefaults.labelXpath(textOptions, pageOptions.container)}/ancestor::node()[${textOptions.ancestorNodeLevel}]//textarea`;
+    const textareaXpath = `${labelXpath(textOptions, pageOptions.container)}/ancestor::node()[${textOptions.ancestorNodeLevel}]//textarea`;
     const textarea = new Textarea({puppeteerPage: pageOptions.puppeteerPage}, {xpath: textareaXpath});
     await textarea.findFirstElement(waitOptions);
     return textarea;

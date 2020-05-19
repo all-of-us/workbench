@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import * as xpathDefaults from './xpath-defaults';
+import {inputXpath} from './xpath-defaults';
 
 export default class RadioButton extends BaseElement {
    
@@ -15,7 +15,7 @@ export default class RadioButton extends BaseElement {
       textOptions.ancestorNodeLevel = 1;
     }
     textOptions.inputType = 'radio';
-    const radioButtonXpath = xpathDefaults.inputXpath(textOptions, pageOptions.container);
+    const radioButtonXpath = inputXpath(textOptions, pageOptions.container);
     const radioButton = new RadioButton({puppeteerPage: pageOptions.puppeteerPage}, {xpath: radioButtonXpath});
     await radioButton.findFirstElement(waitOptions);
     return radioButton;

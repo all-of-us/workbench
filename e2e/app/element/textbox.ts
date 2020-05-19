@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import * as xpathDefaults from './xpath-defaults';
+import {inputXpath} from './xpath-defaults';
 
 export default class Textbox extends BaseElement {
 
@@ -15,7 +15,7 @@ export default class Textbox extends BaseElement {
       textOptions.ancestorNodeLevel = 1;
     }
     textOptions.inputType = 'text';
-    const textboxXpath = xpathDefaults.inputXpath(textOptions, pageOptions.container);
+    const textboxXpath = inputXpath(textOptions, pageOptions.container);
     const textbox = new Textbox({puppeteerPage: pageOptions.puppeteerPage}, {xpath: textboxXpath});
     await textbox.findFirstElement(waitOptions);
     return textbox;

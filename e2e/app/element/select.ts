@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import * as xpathDefaults from './xpath-defaults';
+import {labelXpath} from './xpath-defaults';
 
 export default class Select extends BaseElement {
 
@@ -16,7 +16,7 @@ export default class Select extends BaseElement {
     if (textOptions.ancestorNodeLevel === undefined) {
       textOptions.ancestorNodeLevel = 2;
     }
-    const selectXpath = `${xpathDefaults.labelXpath(textOptions, pageOptions.container)}/ancestor::node()[${textOptions.ancestorNodeLevel}]//select`;
+    const selectXpath = `${labelXpath(textOptions, pageOptions.container)}/ancestor::node()[${textOptions.ancestorNodeLevel}]//select`;
     const select = new Select({puppeteerPage: pageOptions.puppeteerPage}, {xpath: selectXpath});
     await select.findFirstElement(waitOptions);
     return select;

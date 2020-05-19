@@ -1,7 +1,7 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
 import BaseElement from './base-element';
 import Container from './container';
-import * as xpathDefaults from './xpath-defaults';
+import {clickableXpath} from './xpath-defaults';
 
 export default class Link extends BaseElement {
    
@@ -10,7 +10,7 @@ export default class Link extends BaseElement {
      label: string,
      waitOptions?: WaitForSelectorOptions): Promise<Link> {
 
-    const linkXpath = xpathDefaults.clickableXpath(label, pageOptions.container);
+    const linkXpath = clickableXpath(label, pageOptions.container);
     const link = new Link({puppeteerPage: pageOptions.puppeteerPage}, {xpath: linkXpath});
     await link.findFirstElement(waitOptions);
     return link;

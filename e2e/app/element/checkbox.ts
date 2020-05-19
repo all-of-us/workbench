@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import * as xpathDefaults from './xpath-defaults';
+import {inputXpath} from './xpath-defaults';
 
 export default class Checkbox extends BaseElement {
    
@@ -15,7 +15,7 @@ export default class Checkbox extends BaseElement {
       textOptions.ancestorNodeLevel = 1;
     }
     textOptions.inputType = 'checkbox';
-    const checkboxXpath = xpathDefaults.inputXpath(textOptions, pageOptions.container);
+    const checkboxXpath = inputXpath(textOptions, pageOptions.container);
     const checkbox = new Checkbox({puppeteerPage: pageOptions.puppeteerPage}, {xpath: checkboxXpath});
     await checkbox.findFirstElement(waitOptions);
     return checkbox;

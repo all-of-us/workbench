@@ -1,5 +1,16 @@
 import {Page} from 'puppeteer';
 
+export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
+  const start = Date.now()
+  while (Date.now() < start + timeout) {
+    if (fn()) {
+      return true;
+    }
+    await new Promise(resolve => setTimeout(resolve, interval));
+  }
+  return false;
+}
+
 /**
  * Summary: Helper functions when directly dealing with XPath selectors.
  */

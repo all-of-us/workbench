@@ -2,7 +2,7 @@ import {Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import * as xpathDefaults from './xpath-defaults';
+import {buttonXpath} from './xpath-defaults';
 
 export default class Button extends BaseElement {
 
@@ -11,8 +11,8 @@ export default class Button extends BaseElement {
      textOptions: TextOptions,
      waitOptions?: WaitForSelectorOptions): Promise<Button> {
 
-    const buttonXpath = xpathDefaults.buttonXpath(textOptions, pageOptions.container);
-    const button = new Button({puppeteerPage: pageOptions.puppeteerPage}, {xpath: buttonXpath});
+    const xpath = buttonXpath(textOptions, pageOptions.container);
+    const button = new Button({puppeteerPage: pageOptions.puppeteerPage}, {xpath});
     await button.findFirstElement(waitOptions);
     return button;
   }

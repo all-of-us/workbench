@@ -17,9 +17,7 @@ describe('User registration tests:', () => {
 
     const createAccountPage = new CreateAccountPage(page);
     // Step 1: Checking Accepting Terms of Service.
-    const pdfPage =  await createAccountPage.getPDFPage();
-    // expecting pdf document
-    expect(await pdfPage.jsonValue()).toBe(true);
+    expect(await createAccountPage.agreementLoaded()).toBe(true);
 
     // Before user read all pdf pages, checkboxes are unchecked and disabled
     const privacyStatementCheckbox = await createAccountPage.getPrivacyStatementCheckbox();
@@ -36,7 +34,7 @@ describe('User registration tests:', () => {
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
     // scroll to last pdf file will enables checkboxes
-    await createAccountPage.scrollToLastPDFPage();
+    await createAccountPage.readAgreement();
     expect(await privacyStatementCheckbox.isDisabled()).toBe(false);
     expect(await termsOfUseCheckbox.isDisabled()).toBe(false);
 
@@ -66,7 +64,7 @@ describe('User registration tests:', () => {
 
     const createAccountPage = new CreateAccountPage(page);
     // Step 1 of 3: Accepting Terms of Service.
-    await createAccountPage.scrollToLastPDFPage();
+    await createAccountPage.readAgreement();
 
     // check checkboxes
     await (await createAccountPage.getPrivacyStatementCheckbox()).check();

@@ -1,4 +1,4 @@
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import {Frame, Page} from 'puppeteer';
 import {defaultFieldValues} from 'resources/data/user-registration-data';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
@@ -9,6 +9,7 @@ import Textbox from 'app/element/textbox';
 import BasePage from 'app/page/base-page';
 import {config} from 'resources/workbench-config';
 import {waitForPageContainsText} from 'utils/wait-utils';
+import IFrame from 'app/component/iframe';
 const faker = require('faker/locale/en_US');
 
 export const INSTITUTION_VALUE = {
@@ -70,21 +71,17 @@ export default class CreateAccountPage extends BasePage {
     return await Button.forLabel({puppeteerPage: this.puppeteerPage}, {text: 'Next'});
   }
 
-  async getPDFPage(): Promise<JSHandle> {
-    const selector = '.pdf-page[data-page-number]';
-    await this.puppeteerPage.waitForSelector(selector, {visible: true});
-    const pdfPage =  await this.puppeteerPage.waitForFunction((locator) => {
-      return document.querySelectorAll(locator).length > 1
-    }, {}, selector);
-    return pdfPage;
+  async agreementLoaded(): Promise<boolean> {
+    const iframe = await IFrame.find(this.puppeteerPage, 'terms of service agreement')
+    const bodyHandle = await iframe.$('body')
+    return await iframe.evaluate(body => body.scrollHeight > 0, bodyHandle)
   }
 
-  async scrollToLastPDFPage(): Promise<ElementHandle> {
-    await this.getPDFPage();
-    const selector = '.react-pdf__Document :last-child.react-pdf__Page.pdf-page[data-page-number]';
-    const pdfPage = await this.puppeteerPage.waitForSelector(selector, {visible: true});
-    await this.puppeteerPage.evaluate(el => el.scrollIntoView(), pdfPage);
-    return pdfPage;
+  async readAgreement(): Promise<Frame> {
+    const iframe = await IFrame.find(this.puppeteerPage, 'terms of service agreement')
+    const bodyHandle = await iframe.$('body')
+    await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle)
+    return iframe;
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
@@ -167,7 +164,7 @@ export default class CreateAccountPage extends BasePage {
     await this.getTermsOfUseCheckbox();
     await this.getNextButton();
 
-    await this.scrollToLastPDFPage();
+    await this.readAgreement();
 
     // check by click on label works
     await (await this.getPrivacyStatementCheckbox()).check();
