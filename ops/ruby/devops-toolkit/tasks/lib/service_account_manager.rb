@@ -27,10 +27,10 @@ class ServiceAccountManager
   CREDENTIALS_ENV_VAR = "GOOGLE_APPLICATION_CREDENTIALS"
 
   def run()
-    @logger.info("service_account = #{@service_account}")
+    @logger.debug("service_account = #{@service_account}")
     credentials_path = create_credentials_file
 
-    @logger.info("Setting environment variable GOOGLE_APPLICATION_CREDENTIALS to #{credentials_path}")
+    @logger.debug("Setting environment variable GOOGLE_APPLICATION_CREDENTIALS to #{credentials_path}")
     ENV[CREDENTIALS_ENV_VAR] = credentials_path
 
     begin
@@ -51,7 +51,7 @@ class ServiceAccountManager
   def create_credentials_file
     credentials_path = make_credentials_path
 
-    @logger.info("Making a new service account private key for #{@service_account} at #{credentials_path}")
+    @logger.debug("Making a new service account private key for #{@service_account} at #{credentials_path}")
     run_process %W[gcloud iam service-accounts keys create #{credentials_path}
         --iam-account=#{@service_account} --project=#{@project}]
     unless File.exists? credentials_path
@@ -61,12 +61,12 @@ class ServiceAccountManager
   end
 
   def cleanup_key(credentials_path)
-    @logger.info("Deleting private key file")
+    @logger.debug("Deleting private key file")
     tmp_private_key = `grep private_key_id #{credentials_path} | cut -d\\\" -f4`.strip
-    @logger.info("Deleting SA key for #{tmp_private_key}")
+    @logger.debug("Deleting SA key for #{tmp_private_key}")
     run_process %W[gcloud iam service-accounts keys delete #{tmp_private_key} -q
          --iam-account=#{service_account} --project=#{@project}]
-    @logger.info("Deleting private key file and directory #{credentials_path}")
+    @logger.debug("Deleting private key file and directory #{credentials_path}")
     FileUtils.remove_dir(File.dirname(credentials_path))
   end
 
