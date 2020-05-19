@@ -93,7 +93,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
       const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.getValue());
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
-        navigate(['']);
+        navigate(['/']);
       });
     }
 
