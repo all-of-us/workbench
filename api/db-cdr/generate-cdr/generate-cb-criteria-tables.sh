@@ -17,21 +17,23 @@ export DRY_RUN=$4           # dry run
 
 if [ "$DRY_RUN" == true ]
 then
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.cb_search_all_events")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_criteria")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_criteria_ancestor")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_ancestor")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_relationship")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_synonym")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.death")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_relationship")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_ancestor")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_synonym")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_criteria")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_criteria_ancestor")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_clinical_terms_nc")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.relationship")
+  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
   exit 0
 fi
 
@@ -41,47 +43,6 @@ test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 ################################################
 # CREATE TABLES
 ################################################
-# table that holds temp data to get ancestor information for parent counts
-echo "CREATE TABLES - prep_concept_ancestor_temp"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
-(
-    ancestor_concept_id     INT64,
-    domain_id               STRING,
-    type                    STRING,
-    is_standard             INT64,
-    concept_id_1            INT64,
-    concept_id_2            INT64,
-    concept_id_3            INT64,
-    concept_id_4            INT64,
-    concept_id_5            INT64,
-    concept_id_6            INT64,
-    concept_id_7            INT64,
-    concept_id_8            INT64,
-    concept_id_9            INT64,
-    concept_id_10           INT64,
-    concept_id_11           INT64,
-    concept_id_12           INT64,
-    concept_id_13           INT64,
-    concept_id_14           INT64,
-    concept_id_15           INT64,
-    concept_id_16           INT64,
-    concept_id_17           INT64,
-    concept_id_18           INT64,
-    concept_id_19           INT64,
-    concept_id_20           INT64
-)"
-
-# table that holds ancestor information for parent counts
-echo "CREATE TABLES - prep_concept_ancestor"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
-(
-    ancestor_concept_id     INT64,
-    descendant_concept_id   INT64,
-    is_standard             INT64
-)"
-
 echo "CREATE TABLES - cb_criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
@@ -137,9 +98,50 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     concept_id_2 INT64
 )"
 
-echo "CREATE TABLES - atc_rel_in_data"
+# table that holds temp data to get ancestor information for parent counts
+echo "CREATE TABLES - prep_concept_ancestor_temp"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+(
+    ancestor_concept_id     INT64,
+    domain_id               STRING,
+    type                    STRING,
+    is_standard             INT64,
+    concept_id_1            INT64,
+    concept_id_2            INT64,
+    concept_id_3            INT64,
+    concept_id_4            INT64,
+    concept_id_5            INT64,
+    concept_id_6            INT64,
+    concept_id_7            INT64,
+    concept_id_8            INT64,
+    concept_id_9            INT64,
+    concept_id_10           INT64,
+    concept_id_11           INT64,
+    concept_id_12           INT64,
+    concept_id_13           INT64,
+    concept_id_14           INT64,
+    concept_id_15           INT64,
+    concept_id_16           INT64,
+    concept_id_17           INT64,
+    concept_id_18           INT64,
+    concept_id_19           INT64,
+    concept_id_20           INT64
+)"
+
+# table that holds ancestor information for parent counts
+echo "CREATE TABLES - prep_concept_ancestor"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+(
+    ancestor_concept_id     INT64,
+    descendant_concept_id   INT64,
+    is_standard             INT64
+)"
+
+echo "CREATE TABLES - prep_atc_rel_in_data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
 (
     p_concept_id    INT64,
     p_concept_code  STRING,
@@ -151,9 +153,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-echo "CREATE TABLES - loinc_rel_in_data"
+echo "CREATE TABLES - prep_loinc_rel_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
 (
     p_concept_id    INT64,
     p_concept_code  STRING,
@@ -165,9 +167,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-echo "CREATE TABLES - snomed_rel_cm_in_data"
+echo "CREATE TABLES - prep_snomed_rel_cm_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
 (
     p_concept_id    INT64,
     p_concept_code  STRING,
@@ -179,9 +181,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-echo "CREATE TABLES - snomed_rel_cm_src_in_data"
+echo "CREATE TABLES - prep_snomed_rel_cm_src_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\`
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
 (
     p_concept_id    INT64,
     p_concept_code  STRING,
@@ -193,9 +195,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-echo "CREATE TABLES - snomed_rel_meas_in_data"
+echo "CREATE TABLES - prep_snomed_rel_meas_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
 (
     p_concept_id    INT64,
     p_concept_code  STRING,
@@ -207,9 +209,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-echo "CREATE TABLES - snomed_rel_pcs_in_data"
+echo "CREATE TABLES - prep_snomed_rel_pcs_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
 (
     p_concept_id    INT64,
     p_concept_code  STRING,
@@ -221,9 +223,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-echo "CREATE TABLES - snomed_rel_pcs_src_in_data"
+echo "CREATE TABLES - prep_snomed_rel_pcs_src_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\`
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
 (
     p_concept_id    INT64,
     p_concept_code  STRING,
@@ -1002,66 +1004,171 @@ WHERE x.domain_id = 'SURVEY'
 echo "DEMO - Age parent"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (id,parent_id,domain_id,is_standard,type,name,is_group,is_selectable,has_attribute,has_hierarchy)
-select (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS ID,
-    0,'PERSON',1,'AGE','Age',1,0,0,0"
+    (
+        id
+        ,parent_id
+        ,domain_id
+        ,is_standard
+        ,type
+        ,name
+        ,is_group
+        ,is_selectable
+        ,has_attribute
+        ,has_hierarchy
+    )
+SELECT
+    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    ,0
+    ,'PERSON'
+    ,1
+    ,'AGE'
+    ,'Age'
+    ,1
+    ,0
+    ,0
+    ,0"
 
 echo "DEMO - Age Children"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (id,parent_id,domain_id,is_standard,type,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
-select row_num + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS ID,
-    (SELECT ID FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'AGE' and parent_id = 0) as parent_id,
-    'PERSON',1,'AGE', CAST(row_num AS STRING) as name, CAST(row_num as STRING) as value,
-    case when b.cnt is null then 0 else b.cnt end as est_count,
-    0,1,0,0
-from
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
-        select ROW_NUMBER() OVER(ORDER BY person_id) as row_num
-        from \`$BQ_PROJECT.$BQ_DATASET.person\`
-        order by person_id limit 120
+        id
+        ,parent_id
+        ,domain_id
+        ,is_standard
+        ,type
+        ,name
+        ,value
+        ,est_count
+        ,is_group
+        ,is_selectable
+        ,has_attribute
+        ,has_hierarchy
+    )
+SELECT
+    row_num + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
+    ,(SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'AGE' and parent_id = 0) as parent_id
+    ,'PERSON'
+    ,1
+    ,'AGE'
+    ,CAST(row_num AS STRING) as name,
+    CAST(row_num as STRING) as value
+    ,CASE WHEN b.cnt IS NULL THEN 0 ELSE b.cnt END AS est_count
+    ,0
+    ,1
+    ,0
+    ,0
+FROM
+    (
+        SELECT ROW_NUMBER() OVER(ORDER BY person_id) as row_num
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+        ORDER BY person_id
+        LIMIT 120
     ) a
-left join
+LEFT JOIN
     (
-        select CAST(FLOOR(DATE_DIFF(CURRENT_DATE(), DATE(birth_datetime), MONTH)/12) as INT64) as age, count(*) as cnt
-        from \`$BQ_PROJECT.$BQ_DATASET.person\`
-        where person_id not in
+        SELECT
+            CAST(FLOOR(DATE_DIFF(CURRENT_DATE(), DATE(birth_datetime), MONTH)/12) as INT64) as age
+            ,COUNT(*) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+        WHERE person_id NOT IN
             (
-                select person_id
-                from \`$BQ_PROJECT.$BQ_DATASET.death\`
+                SELECT person_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.death\`
             )
-        group by 1
+        GROUP BY 1
     ) b on a.row_num = b.age
-order by 1"
+ORDER BY 1"
 
 echo "DEMO - Deceased"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (id,parent_id,domain_id,is_standard,type,name,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
-select (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS ID,
-    0,'PERSON',1,'DECEASED','Deceased',
-    (select count(distinct person_id) from \`$BQ_PROJECT.$BQ_DATASET.death\`),
-    0,1,0,0"
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+        id
+        ,parent_id
+        ,domain_id
+        ,is_standard
+        ,type
+        ,name
+        ,est_count
+        ,is_group
+        ,is_selectable
+        ,has_attribute
+        ,has_hierarchy
+    )
+SELECT
+    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    ,0
+    ,'PERSON'
+    ,1
+    ,'DECEASED'
+    ,'Deceased'
+    ,(SELECT COUNT(DISTINCT person_id) FROM \`$BQ_PROJECT.$BQ_DATASET.death\`)
+    ,0
+    ,1
+    ,0
+    ,0"
 
 echo "DEMO - Gender parent"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (id,parent_id,domain_id,is_standard,type,name,is_group,is_selectable,has_attribute,has_hierarchy)
-select (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS ID,
-    0,'PERSON',1,'GENDER','Gender',1,0,0,0"
+    (
+        id
+        ,parent_id
+        ,domain_id
+        ,is_standard
+        ,type
+        ,name
+        ,is_group
+        ,is_selectable
+        ,has_attribute
+        ,has_hierarchy
+    )
+SELECT
+    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    ,0
+    ,'PERSON'
+    ,1
+    ,'GENDER'
+    ,'Gender'
+    ,1
+    ,0
+    ,0
+    ,0"
 
 echo "DEMO - Gender children"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (id,parent_id,domain_id,is_standard,type,concept_id,name,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
-SELECT ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id,
-    (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'GENDER' and parent_id = 0) as parent_id,
-    'PERSON',1,'GENDER',concept_id,
-    CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name,
-    a.cnt,0,1,0,0
+    (
+        id
+        ,parent_id
+        ,domain_id
+        ,is_standard
+        ,type
+        ,concept_id
+        ,name
+        ,est_count
+        ,is_group
+        ,is_selectable
+        ,has_attribute
+        ,has_hierarchy
+    )
+SELECT
+    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    ,(SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'GENDER' and parent_id = 0) as parent_id
+    ,'PERSON'
+    ,1
+    ,'GENDER'
+    ,concept_id
+    ,CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+    ,a.cnt
+    ,0
+    ,1
+    ,0
+    ,0
 FROM
     (
-        SELECT gender_concept_id, count(distinct person_id) cnt
+        SELECT gender_concept_id, COUNT(DISTINCT person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
         GROUP BY 1
     ) a
@@ -1095,7 +1202,7 @@ echo "DEMO - Race parent"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,name,is_group,is_selectable,has_attribute,has_hierarchy)
-select (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS ID,
+SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id,
     0,'PERSON',1,'RACE','Race',1,0,0,0"
 
 echo "DEMO - Race children"
@@ -1171,7 +1278,7 @@ where b.domain_id = 'Visit'
 # ----- SOURCE SNOMED -----
 echo "CONDITIONS - SOURCE SNOMED - temp table level 0"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select *
 from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm_src\` a
@@ -1190,19 +1297,19 @@ for i in {1..6};
 do
     echo "CONDITIONS - SOURCE SNOMED - temp table level $i"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\`
+    "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
         (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
     select *
     from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm_src\` a
     where concept_id in
         (
             select P_CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
         )
         and concept_id not in
             (
                 select CONCEPT_ID
-                from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\`
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
             )"
 done
 
@@ -1225,7 +1332,7 @@ select row_number() over (order by p.id, c.concept_name)+(select max(id) from \`
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'CONDITION'
     and p.type = 'SNOMED'
     and p.is_standard = 0
@@ -1237,7 +1344,7 @@ where p.domain_id = 'CONDITION'
     and c.concept_id in
         (
             select p_concept_id
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
         )"
 
 # currently, there are only 16 levels, but we run it 18 times to be safe (if changed, change number of joins in next query)
@@ -1254,12 +1361,12 @@ do
         CONCAT(p.path, '.',
             CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
     from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-    join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\` c on p.code = c.p_concept_code
+    join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\` c on p.code = c.p_concept_code
     left join
         (
             select distinct a.concept_code
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\` a
-            left join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\` b on a.concept_id = b.p_concept_id
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\` a
+            left join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\` b on a.concept_id = b.p_concept_id
             where b.concept_id is null
         ) l on c.concept_code = l.concept_code
     where p.domain_id = 'CONDITION'
@@ -1511,7 +1618,7 @@ WHERE x.concept_id = y.concept_id
 # ----- STANDARD SNOMED -----
 echo "CONDITIONS - STANDARD SNOMED - temp table level 0"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select *
 from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm\` a
@@ -1531,19 +1638,19 @@ for i in {1..6};
 do
     echo "CONDITIONS - STANDARD SNOMED - temp table level $i"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`
+    "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
         (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
     select *
     from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm\` a
     where concept_id in
         (
             select P_CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
         )
       and concept_id not in
         (
             select CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
         )"
 done
 
@@ -1566,7 +1673,7 @@ select row_number() over (order by p.id, c.concept_name)+(select max(id) from \`
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'CONDITION'
     and p.type = 'SNOMED'
     and p.is_standard = 1
@@ -1578,7 +1685,7 @@ where p.domain_id = 'CONDITION'
     and c.concept_id in
         (
             select p_concept_id
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
         )"
 
 # currently, there are only 17 levels, but we run it 18 times to be safe. If this changes, change the next query
@@ -1595,12 +1702,12 @@ do
         CONCAT(p.path, '.',
             CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
     from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-    join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\` c on p.code = c.p_concept_code
+    join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\` c on p.code = c.p_concept_code
     left join
         (
             select distinct a.CONCEPT_CODE
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\` a
-            left join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\` b on a.concept_id = b.p_concept_id
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\` a
+            left join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\` b on a.concept_id = b.p_concept_id
             where b.concept_id is null
         ) l on c.concept_code = l.concept_code
     where p.domain_id = 'CONDITION'
@@ -1927,7 +2034,7 @@ from
 #----- LOINC LABS -----
 echo "MEASUREMENTS - labs - load temp table 0"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, concept_id, concept_code, concept_name)
 select *
 from \`$BQ_PROJECT.$BQ_DATASET.v_loinc_rel\` a
@@ -1947,19 +2054,19 @@ for i in {1..5};
 do
     echo "MEASUREMENTS - labs - load temp table $i"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "insert into \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`
+    "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
         (p_concept_id, p_concept_code, p_concept_name, concept_id, concept_code, concept_name)
     select *
     from \`$BQ_PROJECT.$BQ_DATASET.v_loinc_rel\` a
     where concept_id in
         (
             select P_CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
         )
         and concept_id not in
             (
                 select CONCEPT_ID
-                from \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
             )"
 done
 
@@ -1972,14 +2079,14 @@ select row_number() over (order by t.ID, b.CONCEPT_NAME)+(select max(id) from \`
     CONCAT( t.path, '.',
         CAST(row_number() over (order by t.ID, b.CONCEPT_NAME)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING) )
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` t
-join \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\` b on t.code = b.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` b on t.code = b.p_concept_code
 where (t.id) not in (select PARENT_ID from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)
     and t.type = 'LOINC'
     and t.subtype = 'LAB'
     and b.concept_id in
         (
             select p_concept_id
-            from \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
         )"
 
 # for each loop, add all items (children/parents) directly under the items that were previously added
@@ -2000,12 +2107,12 @@ do
         CONCAT(t.path, '.',
             CAST(row_number() over (order by t.ID, b.CONCEPT_NAME)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
     from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` t
-    join \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\` b on t.code = b.p_concept_code
+    join \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` b on t.code = b.p_concept_code
     left join
         (
             select distinct a.CONCEPT_CODE
-            from \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\` a
-            left join \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\` b on a.CONCEPT_ID = b.P_CONCEPT_ID
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` a
+            left join \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` b on a.CONCEPT_ID = b.P_CONCEPT_ID
             where b.CONCEPT_ID is null
         ) l on b.CONCEPT_CODE = l.CONCEPT_CODE
     left join
@@ -2130,7 +2237,7 @@ where x.id = y.id"
 #----- SNOMED -----
 echo "MEASUREMENTS - SNOMED - temp table level 0"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select *
 from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_meas\` a
@@ -2151,19 +2258,19 @@ for i in {1..4};
 do
     echo "MEASUREMENTS - SNOMED - temp table level $i"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`
+    "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
         (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
     select *
     from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_meas\` a
     where concept_id in
         (
             select P_CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
         )
         and concept_id not in
             (
                 select CONCEPT_ID
-                from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
             )"
 done
 
@@ -2206,7 +2313,7 @@ select row_number() over (order by p.id, c.concept_name)+(select max(id) from \`
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'MEASUREMENT'
     and p.type = 'SNOMED'
     and p.id not in
@@ -2217,7 +2324,7 @@ where p.domain_id = 'MEASUREMENT'
     and c.concept_id in
         (
             select p_concept_id
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
         )"
 
 # for each loop, add all items (children/parents) directly under the items that were previously added
@@ -2236,12 +2343,12 @@ do
         CONCAT(p.path, '.',
             CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
     from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-    join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\` c on p.code = c.p_concept_code
+    join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\` c on p.code = c.p_concept_code
     left join
         (
             select distinct a.concept_code
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\` a
-            left join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\` b on a.concept_id = b.p_concept_id
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\` a
+            left join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\` b on a.concept_id = b.p_concept_id
             where b.concept_id is null
         ) l on c.concept_code = l.concept_code
     where p.domain_id = 'MEASUREMENT'
@@ -2315,7 +2422,7 @@ from
 # ATC4 - ATC5 --> RXNORM/RXNORM Extension precise ingedient --> RXNORM ingredient
 echo "DRUGS - temp table - ATC4 to RXNORM"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 SELECT distinct e.p_concept_id, e.p_concept_code, e.p_concept_name, e.p_DOMAIN_ID,
     d.CONCEPT_ID, d.CONCEPT_CODE, d.CONCEPT_NAME, d.DOMAIN_ID
@@ -2378,7 +2485,7 @@ left join
 
 echo "DRUGS - temp table - ATC3 to ATC4"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,
     c1.DOMAIN_ID as p_DOMAIN_ID, c2.CONCEPT_ID, c2.CONCEPT_CODE, c2.CONCEPT_NAME, c2.DOMAIN_ID
@@ -2391,17 +2498,17 @@ where RELATIONSHIP_ID = 'Subsumes'
     and c2.concept_id in
         (
             select P_CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
         )
     and c2.concept_id not in
         (
             select CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
         )"
 
 echo "DRUGS - temp table - ATC2 TO ATC3"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,
     c1.DOMAIN_ID as p_DOMAIN_ID, c2.CONCEPT_ID, c2.CONCEPT_CODE, c2.CONCEPT_NAME, c2.DOMAIN_ID
@@ -2414,17 +2521,17 @@ where RELATIONSHIP_ID = 'Subsumes'
     and c2.concept_id in
         (
             select P_CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
         )
     and c2.concept_id not in
         (
             select CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
         )"
 
 echo "DRUGS - temp table - ATC1 TO ATC2"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,
     c1.DOMAIN_ID as p_DOMAIN_ID, c2.CONCEPT_ID, c2.CONCEPT_CODE, c2.CONCEPT_NAME, c2.DOMAIN_ID
@@ -2437,12 +2544,12 @@ where RELATIONSHIP_ID = 'Subsumes'
     and c2.concept_id in
         (
             select P_CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
         )
     and c2.concept_id not in
         (
             select CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
         )"
 
 echo "DRUGS - add roots"
@@ -2476,7 +2583,7 @@ select row_number() over (order by p.id, c.concept_code)+(select max(id) from \`
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, c.concept_code)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'DRUG'
     and p.type = 'ATC'
     and p.id not in
@@ -2497,7 +2604,7 @@ select row_number() over (order by p.id, c.concept_code)+(select max(id) from \`
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, c.concept_code)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'DRUG'
     and p.type = 'ATC'
     and p.id not in
@@ -2518,7 +2625,7 @@ select row_number() over (order by p.id, c.concept_code)+(select max(id) from \`
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, c.concept_code)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'DRUG'
     and p.type = 'ATC'
     and p.id not in
@@ -2539,7 +2646,7 @@ select row_number() over (order by p.id, UPPER(c.concept_name))+(select max(id) 
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, UPPER(c.concept_name))+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'DRUG'
     and p.type = 'ATC'
     and p.id not in
@@ -2739,7 +2846,7 @@ where x.id = y.id"
 #----- STANDARD SNOMED -----
 echo "PROCEDURES - STANDARD SNOMED - temp table level 0"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select *
 from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_pcs\` a
@@ -2759,7 +2866,7 @@ for i in {1..9};
 do
     echo "PROCEDURES - STANDARD SNOMED - temp table level $i"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`
+    "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
         (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
     select *
     from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_pcs\` a
@@ -2767,12 +2874,12 @@ do
         concept_id in
             (
                 select P_CONCEPT_ID
-                from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
             )
         and concept_id not in
             (
                 select CONCEPT_ID
-                from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
             )"
 done
 
@@ -2795,7 +2902,7 @@ select row_number() over (order by p.id, c.concept_name)+(select max(id) from \`
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'PROCEDURE'
     and p.type = 'SNOMED'
     and p.is_standard = 1
@@ -2807,7 +2914,7 @@ where p.domain_id = 'PROCEDURE'
     and c.concept_id in
         (
             select p_concept_id
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
         )"
 
 # currently, there are only 11 levels, but we run it 12 times to be safe, If this count changes, change the query below
@@ -2824,12 +2931,12 @@ do
         CONCAT(p.path, '.',
             CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
     from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-    join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\` c on p.code = c.p_concept_code
+    join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\` c on p.code = c.p_concept_code
     left join
         (
             select distinct a.CONCEPT_CODE
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\` a
-            left join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\` b on a.concept_id = b.p_concept_id
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\` a
+            left join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\` b on a.concept_id = b.p_concept_id
             where b.concept_id is null
         ) l on c.concept_code = l.concept_code
     where p.domain_id = 'PROCEDURE'
@@ -3026,7 +3133,7 @@ where x.concept_id = y.concept_id
 # ----- SOURCE SNOMED -----
 echo "PROCEDURES - SOURCE SNOMED - temp table level 0"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\`
+"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select *
 from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_pcs_src\` a
@@ -3045,19 +3152,19 @@ for i in {1..9};
 do
     echo "PROCEDURES - SOURCE SNOMED - temp table level $i"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "insert into \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\`
+    "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
         (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
     select *
     from \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_pcs_src\` a
     where concept_id in
         (
             select P_CONCEPT_ID
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
         )
         and concept_id not in
             (
                 select CONCEPT_ID
-                from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\`
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
             )"
 done
 
@@ -3080,7 +3187,7 @@ select row_number() over (order by p.id, c.concept_name)+(select max(id) from \`
     CONCAT(p.path, '.',
         CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\` c on p.code = c.p_concept_code
+join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\` c on p.code = c.p_concept_code
 where p.domain_id = 'PROCEDURE'
     and p.type = 'SNOMED'
     and p.is_standard = 0
@@ -3092,7 +3199,7 @@ where p.domain_id = 'PROCEDURE'
     and c.concept_id in
         (
             select p_concept_id
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\`
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
         )"
 
 # currently, there are only 11 levels, but we run it 12 times to be safe (if changed, change number of joins in next query)
@@ -3109,12 +3216,12 @@ do
         CONCAT(p.path, '.',
             CAST(row_number() over (order by p.id, c.concept_name)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
     from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
-    join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\` c on p.code = c.p_concept_code
+    join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\` c on p.code = c.p_concept_code
     left join
         (
             select distinct a.concept_code
-            from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\` a
-            left join \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_src_in_data\` b on a.concept_id = b.p_concept_id
+            from \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\` a
+            left join \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\` b on a.concept_id = b.p_concept_id
             where b.concept_id is null
         ) l on c.concept_code = l.concept_code
     where p.domain_id = 'PROCEDURE'
@@ -3750,63 +3857,3 @@ from
         group by domain_id, is_standard, type, subtype, concept_id, name
     ) y
 where x.id = y.id"
-
-
-################################################
-# DATABASE CLEAN UP - drop tables/views
-################################################
-#echo "DROP - prep_criteria"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`"
-#
-#echo "DROP - prep_criteria_ancestor"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\`"
-#
-#echo "DROP - prep_clinical_terms_nc"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.prep_clinical_terms_nc\`"
-#
-#echo "DROP - atc_rel_in_data"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`"
-#
-#echo "DROP - loinc_rel_in_data"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`"
-#
-#echo "DROP - snomed_rel_cm_in_data"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`"
-#
-#echo "DROP - snomed_rel_cm_src_in_data"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_src_in_data\`"
-#
-#echo "DROP - snomed_rel_pcs_in_data"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`"
-#
-#echo "DROP - snomed_rel_meas_in_data"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`"
-#
-#echo "DROP - v_loinc_rel"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_loinc_rel\`"
-#
-#echo "DROP - v_snomed_rel_cm"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm\`"
-#
-#echo "DROP - v_snomed_rel_cm_src"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm_src\`"
-#
-#echo "DROP - v_snomed_rel_pcs"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_pcs\`"
-#
-#echo "DROP - v_snomed_rel_meas"
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_meas\`"
