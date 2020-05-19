@@ -147,8 +147,7 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     if (errors > 0) {
       throw new ServerErrorException(String.format("%d cluster deletion calls failed", errors));
     }
-    return ResponseEntity.ok(
-        new CheckClustersResponse().clusterDeletionCount(activeDeletes + unusedDeletes - errors));
+    return ResponseEntity.noContent().build();
   }
 
   private static String formatDuration(Duration d) {

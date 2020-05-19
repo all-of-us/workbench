@@ -16,6 +16,6 @@ public class OfflineMonitoringController implements OfflineMonitoringApiDelegate
   @Override
   public ResponseEntity<Void> updateGaugeMetrics() {
     gaugeRecorderService.record();
-    return null;
+    return ResponseEntity.noContent().build();
   }
 }
