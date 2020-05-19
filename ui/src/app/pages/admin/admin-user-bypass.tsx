@@ -79,7 +79,7 @@ export class AdminUserBypass extends React.Component<
         content={<FlexColumn style={{padding: '1rem'}}>
           {enableBetaAccess && <FlexRow style={{justifyContent: 'space-between'}}>
             <Toggle name='Beta Access'
-                    enabled={selectedModules.includes(AccessModule.BETAACCESS)}
+                    initialValue={selectedModules.includes(AccessModule.BETAACCESS)}
                     data-test-id='beta-access-toggle'
                     onToggle={() => {this.setState({selectedModules:
                       fp.xor(selectedModules, [AccessModule.BETAACCESS])}); } } />
@@ -89,22 +89,22 @@ export class AdminUserBypass extends React.Component<
           </FlexRow>}
           {enableBetaAccess && <hr style={{width: '100%', marginBottom: '0.5rem'}}/>}
           {enableComplianceTraining && <Toggle name='Compliance Training'
-                  enabled={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
+                  initialValue={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
                   data-test-id='compliance-training-toggle'
                   onToggle={() => {this.setState({selectedModules:
                       fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); } }/>}
           {enableEraCommons && <Toggle name='eRA Commons Linking'
-                  enabled={selectedModules.includes(AccessModule.ERACOMMONS)}
+                  initialValue={selectedModules.includes(AccessModule.ERACOMMONS)}
                   data-test-id='era-commons-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); } } />}
           <Toggle name='Two Factor Auth'
-                  enabled={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
+                  initialValue={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
                   data-test-id='two-factor-auth-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}/>
           {enableDataUseAgreement && <Toggle name='Data Use Agreement'
-                  enabled={selectedModules.includes(AccessModule.DATAUSEAGREEMENT)}
+                  initialValue={selectedModules.includes(AccessModule.DATAUSEAGREEMENT)}
                   data-test-id='data-use-agreement-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}/>}

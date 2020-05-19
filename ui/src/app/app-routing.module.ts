@@ -300,10 +300,10 @@ const routes: Routes = [
       {
         path: 'admin',
         children: [{
-            path: 'review-workspace',
-            component: AdminReviewWorkspaceComponent,
-            data: {title: 'Review Workspaces'}
-          },
+          path: 'review-workspace',
+          component: AdminReviewWorkspaceComponent,
+          data: {title: 'Review Workspaces'}
+        },
           {
             path: 'user',
             component: AdminUsersComponent,
@@ -328,7 +328,7 @@ const routes: Routes = [
             path: 'workspaces/:workspaceNamespace',
             component: AdminWorkspaceComponent,
             data: { title: 'Workspace Admin'}
-        }]
+          }]
       },
       {
         path: 'profile',
