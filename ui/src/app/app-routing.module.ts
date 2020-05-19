@@ -17,6 +17,8 @@ import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-searc
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {CookiePolicyComponent} from './pages/cookie-policy';
+import {SessionExpiredComponent} from './pages/session-expired';
+import {SignInAgainComponent} from './pages/sign-in-again';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -53,6 +55,14 @@ const routes: Routes = [
     path: 'cookie-policy',
     component: CookiePolicyComponent,
     data: {title: 'Cookie Policy'}
+  }, {
+    path: 'session-expired',
+    component: SessionExpiredComponent,
+    data: {title: 'Session expired'}
+  }, {
+    path: 'sign-in-again',
+    component: SignInAgainComponent,
+    data: {title: 'Sign in again'}
   }, {
     path: 'user-disabled',
     component: UserDisabledComponent,
