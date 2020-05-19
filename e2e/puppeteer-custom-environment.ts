@@ -1,10 +1,10 @@
 const PuppeteerEnvironment = require('jest-environment-puppeteer');
 const fs = require('fs-extra');
 require('jest-circus');
-
+const fp = require('lodash/fp');
 
 // jest-circus retryTimes
-const retryTimes = process.env.RETRY_ATTEMPTS || 1;
+const retryTimes = 1;
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   async setup() {
@@ -21,22 +21,44 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   async handleTestEvent(event, state) {
     switch (event.name) {
     case 'test_fn_failure':
-      console.log('test failed: \t', event.test.name);
       if (state.currentlyRunningTest.invocations > retryTimes) {
-        const testName = state.currentlyRunningTest.name.replace(/\s/g, ''); // remove whitespaces
+        console.error(`Failed test:  "${event.test.name}"`);
+        const testName = fp.startCase(state.currentlyRunningTest.name).replace(/[^A-Z0-9]+/ig, '');
         const screenshotDir = 'logs/screenshot';
         await fs.ensureDir(screenshotDir);
           // move create-filename to helper.ts
         const timestamp = new Date().getTime();
-        const fileName = `${testName}_${timestamp}.png`
+        const fileName = `${testName}_${timestamp}.png`;
+
         const screenshotFile = `${screenshotDir}/${fileName}`;
         await this.global.page.screenshot({path: screenshotFile, fullPage: true});
-        console.error(`Test "${event.test.name}" failed. Saved screenshot ${screenshotFile}.`);
+        console.error(`Saved screenshot ${screenshotFile}`);
+
+        const htmlFileName = `${testName}_${timestamp}.html`;
+        await this.savePageToFile(htmlFileName);
       }
       break;
     default:
       break;
     }
+  }
+
+  async savePageToFile(fileName) {
+    const logDir = 'logs/html';
+    await fs.ensureDir(logDir);
+    const htmlFile = `${logDir}/${fileName}`;
+    const htmlContent = await this.global.page.content();
+    return new Promise((resolve, reject) => {
+      fs.writeFile(htmlFile, htmlContent, 'utf8', error => {
+        if (error) {
+          console.error(`Failed to save html file. ` + error);
+          reject(false);
+        } else {
+          console.log('Saved html file ' + htmlFile);
+          resolve(true);
+        }
+      })
+    });
   }
 
 }

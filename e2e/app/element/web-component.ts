@@ -1,7 +1,6 @@
 import {Page} from 'puppeteer';
 import Button from './button';
 import Checkbox from './checkbox';
-import Label from './label';
 import Link from './link';
 import RadioButton from './radiobutton';
 import Select from './select';
@@ -17,40 +16,35 @@ import Textbox from './textbox';
 export default class WebComponent {
 
   constructor(private readonly page: Page, private readonly labelTextOptions: TextOptions) {
-    this.page = page;
-    this.labelTextOptions = labelTextOptions;
+
   }
 
   async asCheckBox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, this.labelTextOptions);
+    return await Checkbox.forLabel({puppeteerPage: this.page}, this.labelTextOptions);
   }
 
   async asTextBox(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, this.labelTextOptions);
+    return await Textbox.forLabel({puppeteerPage: this.page}, this.labelTextOptions);
   }
 
   async asTextArea(): Promise<Textarea> {
-    return await Textarea.forLabel(this.page, this.labelTextOptions);
+    return await Textarea.forLabel({puppeteerPage: this.page}, this.labelTextOptions);
   }
 
   async asRadioButton(): Promise<RadioButton> {
-    return await RadioButton.forLabel(this.page, this.labelTextOptions);
+    return await RadioButton.forLabel({puppeteerPage: this.page}, this.labelTextOptions);
   }
 
   async asButton(): Promise<Button> {
-    return await Button.forLabel(this.page, this.labelTextOptions);
-  }
-
-  async asLabel(): Promise<Label> {
-    return await Label.forLabel(this.page, this.labelTextOptions);
+    return await Button.forLabel({puppeteerPage: this.page}, this.labelTextOptions);
   }
 
   async asSelect(): Promise<Select> {
-    return await Select.forLabel(this.page, this.labelTextOptions);
+    return await Select.forLabel({puppeteerPage: this.page}, this.labelTextOptions);
   }
 
   async asLink(): Promise<Link> {
-    return await Link.forLabel(this.page, this.labelTextOptions.text);
+    return await Link.forLabel({puppeteerPage: this.page}, this.labelTextOptions.text);
   }
 
 }

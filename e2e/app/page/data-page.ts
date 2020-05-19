@@ -2,6 +2,8 @@ import {Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {WorkspaceAction, PageTab} from 'app/page-identifiers';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle} from 'utils/wait-utils';
 
 
 export const TAB_SELECTOR = {
@@ -25,18 +27,19 @@ export default class DataPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitUntilTitleMatch(PAGE.TITLE),
-        this.page.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true}),
-        this.waitUntilNoSpinner(),
+        waitForDocumentTitle(this.puppeteerPage, PAGE.TITLE),
+        this.puppeteerPage.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true}),
+        waitWhileLoading(this.puppeteerPage),
       ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`DataPage isLoaded() encountered ${err}`);
       return false;
     }
   }
 
   async selectWorkspaceAction(action: WorkspaceAction) {
-    const ellipsisMenu = new EllipsisMenu(this.page, './/*[@data-test-id="workspace-menu-button"]');
+    const ellipsisMenu = new EllipsisMenu(this.puppeteerPage, './/*[@data-test-id="workspace-menu-button"]');
     await ellipsisMenu.selectAction(action);
   }
 
@@ -46,8 +49,8 @@ export default class DataPage extends AuthenticatedPage {
    */
   async selectTab(tabName: PageTab): Promise<void> {
     const selector = '//*[@aria-selected and @role="button"]';
-    await this.page.waitForXPath(selector, {visible: true});
-    const tabs = await this.page.$x(selector);
+    await this.puppeteerPage.waitForXPath(selector, {visible: true});
+    const tabs = await this.puppeteerPage.$x(selector);
     for (const tab of tabs) {
       const contentProp = await tab.getProperty('textContent');
       if (await contentProp.jsonValue() === tabName) {

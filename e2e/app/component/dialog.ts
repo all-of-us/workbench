@@ -1,57 +1,43 @@
 import {ElementHandle, Page} from 'puppeteer';
+import Container from 'app/element/container';
+import {buttonXpath} from 'app/element/xpath-defaults';
 
 export enum ButtonLabel {
   Confirm = 'Confirm',
   KeepEditing = 'Keep Editing',
 }
 
-const SELECTOR = {
-  dialogRoot: '.ReactModal__Content[role="dialog"]',
-  button: '[role="button"]'
-}
 
-export default class Dialog {
+export default class Dialog extends Container {
+
   private dialogElement: ElementHandle;
 
-  constructor(private readonly page: Page) {
-
+  constructor(private readonly puppeteerPage: Page, selector: {xpath?: string, testId?: string}) {
+    super(selector);
   }
 
   async getContent(): Promise<string> {
     await this.findDialog();
-    const modalText = await this.page.evaluate((selector) => {
-      const modalElement = document.querySelector(selector);
-      return modalElement.innerText;
-    }, SELECTOR.dialogRoot);
-    console.log('dialog: ' + modalText);
-    return modalText;
+    const modalText = await (await this.dialogElement.getProperty('innerText')).jsonValue();
+    console.debug('dialog: \n' + modalText);
+    return modalText.toString();
   }
 
   async clickButton(buttonLabel: ButtonLabel): Promise<void> {
-    const selector = this.getButtonSelector();
-    await this.page.waitForSelector(selector, {visible: true});
-    const buttons = await this.page.$$(selector);
-    for (const button of buttons) {
-      const propValue = await button.getProperty('textContent');
-      if (await propValue.jsonValue() === buttonLabel) {
-        return await button.click();
-      }
-    }
-    throw new Error(`Failed to find button with label ${buttonLabel}`);
+    const selector = buttonXpath({text: buttonLabel}, this);
+    const button = await this.puppeteerPage.waitForXPath(selector, {visible: true});
+    return button.click();
   }
 
-  async waitUntilDialogIsClosed() {
-    await this.page.waitForSelector(SELECTOR.dialogRoot, {visible: false, timeout: 60000});
+  async waitUntilDialogIsClosed(): Promise<void> {
+    await this.puppeteerPage.waitForXPath(this.xpath, {visible: false});
   }
 
-  private async findDialog() {
+  private async findDialog(): Promise<void> {
     if (this.dialogElement === undefined) {
-      this.dialogElement = await this.page.waitForSelector(SELECTOR.dialogRoot, {visible: true});
+      this.dialogElement = await this.puppeteerPage.waitForXPath(this.xpath, {visible: true});
     }
   }
 
-  private getButtonSelector() {
-    return `${SELECTOR.dialogRoot} ${SELECTOR.button}`;
-  }
 
 }

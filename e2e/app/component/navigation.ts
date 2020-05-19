@@ -1,6 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {clrIconXpath} from 'app/element/xpath-defaults';
-import {findIcon} from 'app/element/xpath-finder';
+import IconLink from 'app/element/icon-link';
 
 export enum NavLink {
   HOME = 'Home',
@@ -84,7 +84,7 @@ export default class Navigation {
     const isOpen = await Navigation.sideNavIsOpen(page);
     if (!isOpen!) {
         // click bars icon to open dropdown
-      const barsIcon = await findIcon(page, {}, 'bars');
+      const barsIcon = await IconLink.forLabel({puppeteerPage: page}, {}, 'bars');
       await barsIcon.click();
     }
   }
@@ -92,8 +92,8 @@ export default class Navigation {
   // Determine the open state by looking for a visible Home icon
   private static async sideNavIsOpen(page: Page): Promise<boolean> {
     try {
-      await findIcon(page, {text: 'Home'}, 'home', {visible: true, timeout: 1000});
-      return true;
+      const icon = await IconLink.forLabel({puppeteerPage: page}, {text: 'Home'}, 'home', {visible: true, timeout: 1000});
+      return await icon.findFirstElement() !== null;
     } catch (err) {
       return false;
     }

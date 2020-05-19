@@ -1,61 +1,70 @@
+import Container from './container';
 import TextOptions from './text-options';
 
-function textXpathHelper(opts: TextOptions) {
+function textXpathHelper(opts: TextOptions): string {
   let findText;
   if (opts.text) {
+    // matching text exactly
     findText = opts.text;
-    return `text()='${findText}' or @aria-label='${findText}' or @placeholder='${findText}'`;
-  } else if (opts.textContains) {
-    findText = opts.textContains;
-    return `contains(text(), '${findText}') or contains(@aria-label, '${findText}') or contains(@placeholder, '${findText}')`;
+    return `text()="${findText}" or @aria-label="${findText}" or @placeholder="${findText}"`;
+  } else if (opts.contains) {
+    findText = opts.contains;
+    return `contains(text(), "${findText}") or contains(@aria-label, "${findText}") or contains(@placeholder, "${findText}")`;
   } else if (opts.normalizeSpace) {
+    // text displayed with hidden line breaks
     findText = opts.normalizeSpace;
-    return `contains(normalize-space(), '${findText}')`;
+    return `contains(normalize-space(), "${findText}")`;
   }
 }
 
 /**
  * Label. It can be partial or full string.
- * @param label
+ * @param {TextOptions} opts
  */
-export function labelXpath(opts: TextOptions) {
-  return `(//label | //*)[${textXpathHelper(opts)}]`;
+export function labelXpath(opts: TextOptions, container?: Container): string {
+  const containerXpath = (container === undefined) ? '' : container.getXpath();
+  return `(${containerXpath}//label | ${containerXpath}//*)[${textXpathHelper(opts)}]`;
 }
 
 /**
- * any [@role=button] element with specified label.
- * @param label
+ * Find an Button matching label.
+ * @param {TextOptions} opts
+ * @param {Container} container
  */
-export function buttonXpath(opts: TextOptions) {
-  const role = `@role='button'`;
-  const txt = textXpathHelper(opts);
-  return `(//button[${txt}] | //*[${txt} and ${role}])`;
+export function buttonXpath(opts: TextOptions, container?: Container): string {
+  const buttonName = opts.text || opts.contains || opts.normalizeSpace;
+  const containerXpath = (container === undefined) ? '' : container.getXpath();
+  return `(${containerXpath}//button | ${containerXpath}//*[@role="button"])[contains(normalize-space(), "${buttonName}") 
+    or contains(normalize-space(@placeholder), "${buttonName}")]`;
 }
 
-export function inputXpath(opts: TextOptions) {
-  const numSlashes = opts.inputType === 'checkbox' ? '/' : '//';
+export function inputXpath(opts: TextOptions, container?: Container): string {
   const nodeLevel = `ancestor::node()[${opts.ancestorNodeLevel}]`;
-  if (opts.inputType !== undefined) {
-    return `${labelXpath(opts)}/${nodeLevel}${numSlashes}input[@type='${opts.inputType}']`;
+  if (opts.inputType === undefined) {
+    // xpath that finds all input elements
+    return `${labelXpath(opts, container)}/${nodeLevel}//input`;
   }
-  // return all input nodes
-  return `${labelXpath(opts)}/${nodeLevel}//input`;
+  if (opts.inputType === 'checkbox') {
+    return `${labelXpath(opts, container)}/${nodeLevel}/input[@type="${opts.inputType}"]`;
+  }
+  return `${labelXpath(opts, container)}/${nodeLevel}//input[@type="${opts.inputType}"]`;
 }
 
 /**
  * a IMAGE element with specified label.
  * @param label
  */
-export function imageXpath(label: string) {
-  return `//*[normalize-space(text())='${label}']//*[@role='img']`
+export function imageXpath(label: string): string {
+  return `//*[normalize-space(text())="${label}"]//*[@role="img"]`
 }
 
 /**
  * Clickable element with label. It can be a link or button.
  * @param label
  */
-export function clickableXpath(label: string) {
-  return `(//a | //span | //*[@role='button'])[normalize-space(text())='${label}' or contains(@aria-label,'${label}')]`;
+export function clickableXpath(label: string, container?: Container): string {
+  const containerXpath = (container === undefined) ? '' : container.getXpath();
+  return `(${containerXpath}//a | ${containerXpath}//span | ${containerXpath}//*[@role="button"])[normalize-space(text())="${label}" or contains(@aria-label,"${label}")]`;
 }
 
 /**
@@ -63,13 +72,14 @@ export function clickableXpath(label: string) {
  * @param label:
  * @param shapeValue:
  */
-export function clrIconXpath(opts: TextOptions, shapeValue: string) {
+export function clrIconXpath(opts: TextOptions, shapeValue: string, container?: Container): string {
+  const containerXpath = (container === undefined) ? '' : container.getXpath();
   if (Object.keys(opts).length === 0) {
-    return `//clr-icon[@shape='${shapeValue}'][*[@role='img']]`; // anywhere on page
+    return `${containerXpath}//clr-icon[@shape="${shapeValue}"][*[@role="img"]]`; // does not care about text label
   }
-  // next to a label
+  // near a text label
   const nodeLevel = opts.ancestorNodeLevel || 1;
-  return `//*[${textXpathHelper(opts)}]/ancestor::node()[${nodeLevel}]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
+  return `${containerXpath}//*[${textXpathHelper(opts)}]/ancestor::node()[${nodeLevel}]//clr-icon[@shape="${shapeValue}"][*[@role="img"]]`;
 }
 
 export function iframeXpath(label: string) {

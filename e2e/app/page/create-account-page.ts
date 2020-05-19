@@ -1,15 +1,14 @@
-import {Page, Frame} from 'puppeteer';
+import {ElementHandle, JSHandle, Page} from 'puppeteer';
 import {defaultFieldValues} from 'resources/data/user-registration-data';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
-import ClrIconLink from 'app/element/clr-icon-link';
+import IconLink from 'app/element/icon-link';
 import SelectMenu from 'app/component/select-menu';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import BasePage from 'app/page/base-page';
 import {config} from 'resources/workbench-config';
-import {findIframe} from 'app/element/xpath-finder';
-
+import {waitForPageContainsText} from 'utils/wait-utils';
 const faker = require('faker/locale/en_US');
 
 export const INSTITUTION_VALUE = {
@@ -52,66 +51,71 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await this.waitForTextExists('Sign In');
-    return true;
-  }
-
-  async getInvitationKeyInput(): Promise<Textbox> {
-    const textbox = new Textbox(this.page);
-    await textbox.withCss('#invitationKey');
-    return textbox;
+    try {
+      await Promise.all([
+        waitForPageContainsText(this.puppeteerPage, 'Sign In'),
+      ]);
+      return true;
+    } catch (err) {
+      console.log(`CreateAccountPage isLoaded() encountered ${err}`);
+      return false;
+    }
   }
 
   async getSubmitButton(): Promise<Button> {
-    return await Button.forLabel(this.page, {text: 'Submit'});
+    return await Button.forLabel({puppeteerPage: this.puppeteerPage}, {text: 'Submit'});
   }
 
   async getNextButton(): Promise<Button> {
-    return await Button.forLabel(this.page, {text: 'Next'});
+    return await Button.forLabel({puppeteerPage: this.puppeteerPage}, {text: 'Next'});
   }
 
-  async agreementLoaded(): Promise<boolean> {
-    const iframe = await findIframe(this.page, 'terms of service agreement')
-    const bodyHandle = await iframe.$('body')
-    return await iframe.evaluate(body => body.scrollHeight > 0, bodyHandle)
+  async getPDFPage(): Promise<JSHandle> {
+    const selector = '.pdf-page[data-page-number]';
+    await this.puppeteerPage.waitForSelector(selector, {visible: true});
+    const pdfPage =  await this.puppeteerPage.waitForFunction((locator) => {
+      return document.querySelectorAll(locator).length > 1
+    }, {}, selector);
+    return pdfPage;
   }
 
-  async readAgreement(): Promise<Frame> {
-    const iframe = await findIframe(this.page, 'terms of service agreement')
-    const bodyHandle = await iframe.$('body')
-    await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle)
-    return iframe;  
+  async scrollToLastPDFPage(): Promise<ElementHandle> {
+    await this.getPDFPage();
+    const selector = '.react-pdf__Document :last-child.react-pdf__Page.pdf-page[data-page-number]';
+    const pdfPage = await this.puppeteerPage.waitForSelector(selector, {visible: true});
+    await this.puppeteerPage.evaluate(el => el.scrollIntoView(), pdfPage);
+    return pdfPage;
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_PRIVACY_STATEMENT});
+    return await Checkbox.forLabel({puppeteerPage: this.puppeteerPage}, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_PRIVACY_STATEMENT});
   }
 
   async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_TERMS_OF_USE});
+    return await Checkbox.forLabel({puppeteerPage: this.puppeteerPage}, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_TERMS_OF_USE});
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {text: LABEL_ALIAS.INSTITUTION_NAME});
+    return await Textbox.forLabel({puppeteerPage: this.puppeteerPage}, {text: LABEL_ALIAS.INSTITUTION_NAME});
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return await Textarea.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.RESEARCH_BACKGROUND});
+    return await Textarea.forLabel({puppeteerPage: this.puppeteerPage}, {normalizeSpace: LABEL_ALIAS.RESEARCH_BACKGROUND});
   }
 
   async getUsernameDomain(): Promise<unknown> {
-    const elem = await this.page.waitForXPath('//*[./input[@id="username"]]/i');
+    const elem = await this.puppeteerPage.waitForXPath('//*[./input[@id="username"]]/i');
     return await (await elem.getProperty('innerText')).jsonValue();
   }
 
   async fillInFormFields(fields: { label: string; value: string; }[]): Promise<string> {
     let newUserName;
     for (const field of fields) {
-      const textbox = await Textbox.forLabel(this.page, {text: field.label});
+      const textbox = await Textbox.forLabel({puppeteerPage: this.puppeteerPage}, {text: field.label});
       await textbox.type(field.value);
       await textbox.tabKey();
       if (field.label === 'New Username') {
-        await ClrIconLink.forLabel(this.page, {text: field.label}, 'success-standard');
+        await IconLink.forLabel({puppeteerPage: this.puppeteerPage}, {text: field.label}, 'success-standard');
         newUserName = field.value; // store new username for return
       }
     }
@@ -120,24 +124,24 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string) {
-    const dropdown = new SelectMenu(this.page);
+    const dropdown = new SelectMenu({puppeteerPage: this.puppeteerPage});
     await dropdown.select(selectTextValue);
   }
 
   async getInstitutionValue() {
-    const dropdown = new SelectMenu(this.page);
+    const dropdown = new SelectMenu({puppeteerPage: this.puppeteerPage});
     return await dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.EDUCATION_LEVEL, 2);
+    const dropdown = new SelectMenu({puppeteerPage: this.puppeteerPage}, {label: LABEL_ALIAS.EDUCATION_LEVEL, nodeLevel: 2});
     await dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.YEAR_OF_BIRTH, 2);
+    const dropdown = new SelectMenu({puppeteerPage: this.puppeteerPage}, {label: LABEL_ALIAS.YEAR_OF_BIRTH, nodeLevel: 2});
     await dropdown.select(year);
   }
 
@@ -145,22 +149,16 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 1: Fill out institution affiliation details
   async fillOutInstitution() {
-    const institutionSelect = new SelectMenu(this.page, 'Select your institution', 2);
+    const institutionSelect = new SelectMenu({puppeteerPage: this.puppeteerPage}, {label: 'Select your institution', nodeLevel: 2});
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
-    const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddressTextbox.type(config.broadInstitutionEmail);
+    const emailAddressTextbox = await Textbox.forLabel({puppeteerPage: this.puppeteerPage},
+       {contains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
+    await emailAddressTextbox.type(config.broadInstitutionContactEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
-    await ClrIconLink.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
-    const roleSelect = new SelectMenu(this.page, 'describes your role', 2);
+    await IconLink.forLabel({puppeteerPage: this.puppeteerPage},
+       {contains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
+    const roleSelect = new SelectMenu({puppeteerPage: this.puppeteerPage}, {label: 'describes your role', nodeLevel: 2});
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
-  }
-
-  // Step 2: Fill out Invitation key
-  async fillOutInvitationKey(invitationKey: string) {
-    await this.getInvitationKeyInput()
-    .then(invitationKeyInput => invitationKeyInput.type(invitationKey))
-    .then(() => this.getNextButton())
-    .then(submitButton => submitButton.click());
   }
 
   // Step 3: Accepting Terms of Use and Privacy statement.
@@ -169,7 +167,7 @@ export default class CreateAccountPage extends BasePage {
     await this.getTermsOfUseCheckbox();
     await this.getNextButton();
 
-    await this.readAgreement();
+    await this.scrollToLastPDFPage();
 
     // check by click on label works
     await (await this.getPrivacyStatementCheckbox()).check();
@@ -185,12 +183,11 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 4: Fill out demographic survey information with default values
   async fillOutDemographicSurvey() {
-    const demograpicsSurveyPageHeader = 'Optional Demographics Survey';
-    await this.waitForTextExists(demograpicsSurveyPageHeader);
+    await waitForPageContainsText(this.puppeteerPage, 'Optional Demographics Survey');
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox"]';
-    await this.page.waitForXPath(targetXpath, { visible: true });
-    const checkboxes = await this.page.$x(targetXpath);
+    await this.puppeteerPage.waitForXPath(targetXpath, { visible: true });
+    const checkboxes = await this.puppeteerPage.$x(targetXpath);
     for (const ck of checkboxes) {
       await ck.click();
     }

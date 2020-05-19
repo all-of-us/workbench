@@ -1,27 +1,20 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
+import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import {findButton} from './xpath-finder';
+import * as xpathDefaults from './xpath-defaults';
 
 export default class Button extends BaseElement {
 
   static async forLabel(
-     page: Page,
+     pageOptions: {puppeteerPage: Page, container?: Container},
      textOptions: TextOptions,
-     waitOptions: WaitForSelectorOptions = { visible: true },
-     throwErr = true): Promise<Button> {
+     waitOptions?: WaitForSelectorOptions): Promise<Button> {
 
-    let element: Button;
-    try {
-      const buttonElement = await findButton(page, textOptions, waitOptions);
-      element = new Button(page, buttonElement);
-    } catch (e) {
-      if (throwErr) {
-        console.error(`FAILED finding Button: "${JSON.stringify(textOptions)}".`);
-        throw e;
-      }
-    }
-    return element;
+    const buttonXpath = xpathDefaults.buttonXpath(textOptions, pageOptions.container);
+    const button = new Button({puppeteerPage: pageOptions.puppeteerPage}, {xpath: buttonXpath});
+    await button.findFirstElement(waitOptions);
+    return button;
   }
 
   /**
@@ -32,14 +25,14 @@ export default class Button extends BaseElement {
   async waitUntilEnabled(selector?: string): Promise<void> {
     // works with either a xpath selector or a Element
     if (selector === undefined) {
-      await this.page.waitForFunction((e) => {
+      await this.puppeteerPage.waitForFunction((e) => {
         const style = window.getComputedStyle(e);
         return style.getPropertyValue('cursor') === 'pointer';
       }, {}, this.element);
       return;
     }
 
-    await this.page.waitForFunction(xpathSelector => {
+    await this.puppeteerPage.waitForFunction(xpathSelector => {
       const elemt = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       const style = window.getComputedStyle(elemt as Element);
       const propValue = style.getPropertyValue('cursor');

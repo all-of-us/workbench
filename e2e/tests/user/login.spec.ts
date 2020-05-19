@@ -1,5 +1,6 @@
 import GoogleLoginPage, {SELECTOR} from 'app/page/google-login';
 import {config} from 'resources/workbench-config';
+import {waitForPageContainsText} from 'utils/wait-utils';
 
 
 describe('Login tests:', () => {
@@ -27,7 +28,7 @@ describe('Login tests:', () => {
     const button = await page.waitForXPath(SELECTOR.NextButton, {visible: true});
     await button.click();
 
-    const err = await loginPage.waitForTextExists('Wrong password. Try again');
+    const err = await waitForPageContainsText(page, 'Wrong password. Try again');
     expect(err).toBeTruthy();
   });
 

@@ -1,29 +1,25 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
+import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import {findSelect} from './xpath-finder';
+import * as xpathDefaults from './xpath-defaults';
 
 export default class Select extends BaseElement {
 
   private selectedOption;
    
   static async forLabel(
-     page: Page,
+     pageOptions: {puppeteerPage: Page, container?: Container},
      textOptions: TextOptions,
-     waitOptions: WaitForSelectorOptions = {visible: true},
-     throwErr = true): Promise<Select> {
+     waitOptions?: WaitForSelectorOptions): Promise<Select> {
 
-    let elem: Select;
-    try {
-      const selectElement = await findSelect(page, textOptions, waitOptions);
-      elem = new Select(page, selectElement);
-    } catch (e) {
-      if (throwErr) {
-        console.error(`FAILED finding Select: "${JSON.stringify(textOptions)}".`);
-        throw e;
-      }
+    if (textOptions.ancestorNodeLevel === undefined) {
+      textOptions.ancestorNodeLevel = 2;
     }
-    return elem;
+    const selectXpath = `${xpathDefaults.labelXpath(textOptions, pageOptions.container)}/ancestor::node()[${textOptions.ancestorNodeLevel}]//select`;
+    const select = new Select({puppeteerPage: pageOptions.puppeteerPage}, {xpath: selectXpath});
+    await select.findFirstElement(waitOptions);
+    return select;
   }
 
   async selectOption(optionValue: string): Promise<string> {

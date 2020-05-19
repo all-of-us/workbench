@@ -27,7 +27,7 @@ export default class WorkspaceCard {
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
    */
-  static async getAllCards(page: Page): Promise<WorkspaceCard[]> {
+  static async findAllCards(page: Page): Promise<WorkspaceCard[]> {
     await page.waitForXPath(SELECTOR.cardRootXpath, {visible: true, timeout: 0});
     const cards = await page.$x(SELECTOR.cardRootXpath);
     // transform to WorkspaceCard object
@@ -35,8 +35,8 @@ export default class WorkspaceCard {
     return resourceCards;
   }
 
-  static async getAnyCard(page: Page): Promise<WorkspaceCard> {
-    const cards = await this.getAllCards(page);
+  static async findAnyCard(page: Page): Promise<WorkspaceCard> {
+    const cards = await this.findAllCards(page);
     if (cards.length === 0) {
       throw new Error('FAILED to find any Workspace card on page.');
     }
@@ -46,7 +46,7 @@ export default class WorkspaceCard {
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
     const selector = `.//*[${SELECTOR.cardNameId} and normalize-space(text())="${workspaceName}"]`;
-    const allCards = await this.getAllCards(page);
+    const allCards = await this.findAllCards(page);
     for (const card of allCards) {
       const handle = card.asElementHandle();
       const children = await handle.$x(selector);
@@ -110,7 +110,7 @@ export default class WorkspaceCard {
 
   async getWorkspaceMatchAccessLevel(level: WorkspaceAccessLevel = WorkspaceAccessLevel.OWNER): Promise<WorkspaceCard[]> {
     const matchWorkspaceArray: WorkspaceCard[] = [];
-    const allWorkspaceCards = await WorkspaceCard.getAllCards(this.page);
+    const allWorkspaceCards = await WorkspaceCard.findAllCards(this.page);
     for (const card of allWorkspaceCards) {
       const accessLevel = await card.getWorkspaceAccessLevel();
       if (accessLevel === level) {

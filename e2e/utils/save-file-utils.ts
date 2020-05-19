@@ -11,7 +11,8 @@ export async function savePageToFile(page: Page, fileName?: string): Promise<boo
   const logDir = 'logs/html';
   await ensureDir(logDir);
   const name = fileName || await extractPageName(page);
-  const htmlFile = `${logDir}/${name}.html`;
+  const nameWithTime = makeDateTimeStr(name);
+  const htmlFile = `${logDir}/${nameWithTime}.html`;
   const htmlContent = await page.content();
   return new Promise((resolve, reject) => {
     writeFile(htmlFile, htmlContent, 'utf8', error => {
@@ -33,8 +34,9 @@ export async function savePageToFile(page: Page, fileName?: string): Promise<boo
 export async function takeScreenshot(page: Page, fileName?: string): Promise<void> {
   const screenshotDir = 'logs/screenshot';
   await ensureDir(screenshotDir);
-  const fName = fileName || await makeDateTimeStr(await extractPageName(page));
-  const screenshotFile = `${screenshotDir}/${fName}.png`;
+  const name = fileName || await extractPageName(page);
+  const nameWithTime = makeDateTimeStr(name);
+  const screenshotFile = `${screenshotDir}/${nameWithTime}.png`;
   await page.screenshot({path: screenshotFile, fullPage: true});
   console.log('Saved screenshot ' + screenshotFile);
 }

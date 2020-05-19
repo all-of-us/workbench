@@ -4,7 +4,8 @@ import {PageUrl} from 'app/page-identifiers';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
-
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle, waitForPageContainsText} from 'utils/wait-utils';
 const faker = require('faker/locale/en_US');
 
 export const PAGE = {
@@ -32,13 +33,14 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitUntilTitleMatch(PAGE.TITLE),
-        this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
-        this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}),  // Texts above Filter By Select
-        this.waitUntilNoSpinner(),
+        waitForDocumentTitle(this.puppeteerPage, PAGE.TITLE),
+        this.puppeteerPage.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
+        this.puppeteerPage.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}),  // Texts above Filter By Select
+        waitWhileLoading(this.puppeteerPage),
       ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`WorkspacesPage isLoaded() encountered ${err}`);
       return false;
     }
   }
@@ -62,9 +64,9 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   * 4: return
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    const link = await Button.forLabel(page, FIELD.createNewWorkspaceButton.textOption );
-    await this.clickAndWait(link);
-    const workspaceEdit = new WorkspaceEditPage(this.page);
+    const link = await Button.forLabel({puppeteerPage: this.puppeteerPage}, FIELD.createNewWorkspaceButton.textOption );
+    await link.clickAndWait();
+    const workspaceEdit = new WorkspaceEditPage(this.puppeteerPage);
     await workspaceEdit.waitForLoad();
     return workspaceEdit;
   }
@@ -76,7 +78,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
-    await editPage.waitForTextExists('Use All of Us free credits');
+    await waitForPageContainsText(this.puppeteerPage, 'Use All of Us free credits');
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).tabKey();
@@ -111,8 +113,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await increaseWellness.asCheckBox()).check();
 
     // 5. Population of interest: use default values. Using default value
-    const noRadiobutton = await RadioButton.forLabel(
-       this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noUnderrepresentedPopulationRadiobutton.textOption);
+    const noRadiobutton = await RadioButton.forLabel({puppeteerPage: this.puppeteerPage},
+       EDIT_FIELD.POPULATION_OF_INTEREST.noUnderrepresentedPopulationRadiobutton.textOption);
     await noRadiobutton.select();
 
     // 6. Request for Review of Research Purpose Description. Using default value

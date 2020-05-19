@@ -1,27 +1,24 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
+import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import {findCheckbox} from './xpath-finder';
+import * as xpathDefaults from './xpath-defaults';
 
 export default class Checkbox extends BaseElement {
    
   static async forLabel(
-     page: Page,
+     pageOptions: {puppeteerPage: Page, container?: Container},
      textOptions: TextOptions,
-     waitOptions: WaitForSelectorOptions = {visible: true},
-     throwErr = true): Promise<Checkbox> {
+     waitOptions?: WaitForSelectorOptions): Promise<Checkbox> {
 
-    let element: Checkbox;
-    try {
-      const checkboxElement = await findCheckbox(page, textOptions, waitOptions);
-      element = new Checkbox(page, checkboxElement);
-    } catch (e) {
-      if (throwErr) {
-        console.error(`FAILED finding Checkbox: "${JSON.stringify(textOptions)}".`);
-        throw e;
-      }
+    if (textOptions.ancestorNodeLevel === undefined) {
+      textOptions.ancestorNodeLevel = 1;
     }
-    return element;
+    textOptions.inputType = 'checkbox';
+    const checkboxXpath = xpathDefaults.inputXpath(textOptions, pageOptions.container);
+    const checkbox = new Checkbox({puppeteerPage: pageOptions.puppeteerPage}, {xpath: checkboxXpath});
+    await checkbox.findFirstElement(waitOptions);
+    return checkbox;
   }
 
   /**
@@ -40,7 +37,7 @@ export default class Checkbox extends BaseElement {
     if (!is) {
       await this.focus();
       await this.clickWithEval();
-      await this.page.waitFor(500);
+      await this.puppeteerPage.waitFor(500);
     }
     // check and retry ??
   }
@@ -53,7 +50,7 @@ export default class Checkbox extends BaseElement {
     if (is) {
       await this.focus();
       await this.clickWithEval();
-      await this.page.waitFor(500);
+      await this.puppeteerPage.waitFor(500);
     }
   }
 

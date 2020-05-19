@@ -1,8 +1,10 @@
-import {ElementHandle, Page} from 'puppeteer';
+import {Page} from 'puppeteer';
 import {PageUrl} from 'app/page-identifiers';
 import Link from 'app/element/link';
-import {findIcon} from 'app/element/xpath-finder';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import IconLink from 'app/element/icon-link';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle} from 'utils/wait-utils';
 
 export const PAGE = {
   TITLE: 'Homepage',
@@ -24,19 +26,18 @@ export default class HomePage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitUntilTitleMatch(PAGE.TITLE),
-        this.waitForTextExists(PAGE.HEADER),
-        Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
-        this.waitUntilNoSpinner(),
+        waitForDocumentTitle(this.puppeteerPage, PAGE.TITLE, 60000),
+        waitWhileLoading(this.puppeteerPage, 60000)
       ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`HomePage isLoaded() encountered ${err}`);
       return false;
     }
   }
 
-  async getCreateNewWorkspaceLink(): Promise<ElementHandle> {
-    return findIcon(this.page, {text: LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
+  async getCreateNewWorkspaceLink(): Promise<IconLink> {
+    return IconLink.forLabel({puppeteerPage: this.puppeteerPage}, {text: LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
   }
 
   /**
@@ -47,4 +48,7 @@ export default class HomePage extends AuthenticatedPage {
     return this;
   }
 
+  async getSeeAllWorkspacesLink(): Promise<Link> {
+    return Link.forLabel({puppeteerPage: this.puppeteerPage}, LABEL_ALIAS.SEE_ALL_WORKSPACES);
+  }
 }

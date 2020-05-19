@@ -1,6 +1,8 @@
 import {Page} from 'puppeteer';
 import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForPageContainsText, waitForUrl} from 'utils/wait-utils';
 
 
 export const PAGE = {
@@ -30,21 +32,23 @@ export default class ProfilePage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitForTextExists(PAGE.TITLE),
-        this.waitUntilNoSpinner(),
+        waitForUrl(this.puppeteerPage, '/profile'),
+        waitForPageContainsText(this.puppeteerPage, PAGE.TITLE),
+        waitWhileLoading(this.puppeteerPage)
       ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`ProfilePage isLoaded() encountered ${err}`);
       return false;
     }
   }
 
   async getFirstName(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {text: LABEL_ALIAS.FIRST_NAME});
+    return await Textbox.forLabel({puppeteerPage: this.puppeteerPage}, {text: LABEL_ALIAS.FIRST_NAME});
   }
 
   async getLastName(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {text: LABEL_ALIAS.LAST_NAME});
+    return await Textbox.forLabel({puppeteerPage: this.puppeteerPage}, {text: LABEL_ALIAS.LAST_NAME});
   }
 
 }

@@ -7,7 +7,8 @@ import Textbox from 'app/element/textbox';
 import WebComponent from 'app/element/web-component';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import Dialog, {ButtonLabel} from 'app/component/dialog';
-
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle} from 'utils/wait-utils';
 const faker = require('faker/locale/en_US');
 
 export const PAGE = {
@@ -86,11 +87,11 @@ export const FIELD = {
   },
   dataSetSelect: {
     type: 'select',
-    textOption: {text: LABEL_ALIAS.SYNTHETIC_DATASET}
+    textOption: {text: LABEL_ALIAS.SYNTHETIC_DATASET, ancestorNodeLevel: 2}
   },
   billingAccountSelect: {
     type: 'select',
-    textOption: {text: LABEL_ALIAS.SELECT_BILLING}
+    textOption: {text: LABEL_ALIAS.SELECT_BILLING, ancestorNodeLevel: 2}
   },
   shareWithCollaboratorsCheckbox: {
     type: 'checkbox',
@@ -151,45 +152,45 @@ export const FIELD = {
   RESEARCH_PURPOSE_SUMMARY: {  // fields in question #2
     scientificQuestionsIntentToStudyTextarea: {
       type: 'textarea',
-      textOption: {textContains: LABEL_ALIAS.INTENT_TO_STUDY, ancestorNodeLevel: 3}
+      textOption: {contains: LABEL_ALIAS.INTENT_TO_STUDY, ancestorNodeLevel: 3}
     },
     scientificApproachesToUseTextarea: {
       type: 'textarea',
-      textOption: {textContains: LABEL_ALIAS.SCIENTIFIC_APPROACHES, ancestorNodeLevel: 3}
+      textOption: {contains: LABEL_ALIAS.SCIENTIFIC_APPROACHES, ancestorNodeLevel: 3}
     },
     anticipatedFindingsFromStudyTextarea: {
       type: 'textarea',
-      textOption: {textContains: LABEL_ALIAS.ANTICIPATED_FINDINGS, ancestorNodeLevel: 3}
+      textOption: {contains: LABEL_ALIAS.ANTICIPATED_FINDINGS, ancestorNodeLevel: 3}
     }
   },
   DISSEMINATE_RESEARCH_FINDINGS: {  // fields in question #3
     publicationInScientificJournalsCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.PUBLICATION_IN_JOURNALS, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.PUBLICATION_IN_JOURNALS, ancestorNodeLevel: 2}
     },
     socialMediaCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SOCIAL_MEDIA, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.SOCIAL_MEDIA, ancestorNodeLevel: 2}
     },
     presentationAtScientificConferencesCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.PRESENTATION_AT_CONFERENCES, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.PRESENTATION_AT_CONFERENCES, ancestorNodeLevel: 2}
     },
     presentationAtCommunityForumsCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.PRESENTATION_AT_COMMUNITY_FORUMS, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.PRESENTATION_AT_COMMUNITY_FORUMS, ancestorNodeLevel: 2}
     },
     pressReleaseCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.PRESS_RELEASE, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.PRESS_RELEASE, ancestorNodeLevel: 2}
     },
     publicationInCommunityJournalsCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.PUBLICATION_IN_COMMUNITY_JOURNALS, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.PUBLICATION_IN_COMMUNITY_JOURNALS, ancestorNodeLevel: 2}
     },
     publicationInPersonalBlogCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.PUBLICATION_IN_PERSONAL_BLOG, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.PUBLICATION_IN_PERSONAL_BLOG, ancestorNodeLevel: 2}
     },
     otherCheckbox: {
       type: 'checkbox',
@@ -200,71 +201,71 @@ export const FIELD = {
   DESCRIBE_ANTICIPATED_OUTCOMES: {  // fields in question #4
     seeksIncreaseWellnessCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.INCREASE_WELLNESS, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.INCREASE_WELLNESS, ancestorNodeLevel: 2}
     },
     seeksToReduceHealthDisparitiesCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_REDUCE_HEALTH_DISPARITIES, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.SEEKS_TO_REDUCE_HEALTH_DISPARITIES, ancestorNodeLevel: 2}
     },
     seeksToDevelopRiskAssessmentCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_DEVELOP_RISK_ASSESSMENT, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.SEEKS_TO_DEVELOP_RISK_ASSESSMENT, ancestorNodeLevel: 2}
     },
     seeksToProvideEarlierDiagnosisCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_PROVIDE_EARLIER_ACCURATE_DIAGNOSIS, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.SEEKS_TO_PROVIDE_EARLIER_ACCURATE_DIAGNOSIS, ancestorNodeLevel: 2}
     },
     seeksToReduceBurdenCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEEKS_TO_REDUCE_BURDEN, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.SEEKS_TO_REDUCE_BURDEN, ancestorNodeLevel: 2}
     }
   },
   POPULATION_OF_INTEREST: {  // fields in question #5
     yesOnUnderrepresentedPopulationRadiobutton: {
       type: 'radiobutton',
-      textOption: {textContains: LABEL_ALIAS.YES_FOCUS_ON_UNDERREPRESENTED_POPULATION}
+      textOption: {contains: LABEL_ALIAS.YES_FOCUS_ON_UNDERREPRESENTED_POPULATION}
     },
     noUnderrepresentedPopulationRadiobutton: {
       type: 'radiobutton',
-      textOption: {textContains: LABEL_ALIAS.NO_FOCUS_ON_UNDERREPRESENTED_POPULATION}
+      textOption: {contains: LABEL_ALIAS.NO_FOCUS_ON_UNDERREPRESENTED_POPULATION}
     },
     raceMultiAncestryCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.RACE_MULTI_ANCESTRY, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.RACE_MULTI_ANCESTRY, ancestorNodeLevel: 2}
     },
     ageGroupsAdolescentsCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.AGE_GROUPS_ADOLESCENTS, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.AGE_GROUPS_ADOLESCENTS, ancestorNodeLevel: 2}
     },
     sexAtBirthCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.SEX_AT_BIRTH, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.SEX_AT_BIRTH, ancestorNodeLevel: 2}
     },
     genderIdentityCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.GENDER_IDENTITY, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.GENDER_IDENTITY, ancestorNodeLevel: 2}
     },
     geographyRuralCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.GEOGRAPHY_RURAL, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.GEOGRAPHY_RURAL, ancestorNodeLevel: 2}
     },
     educationLevelHighSchoolCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.EDUCATION_LEVEL_HIGHSCHOOL, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.EDUCATION_LEVEL_HIGHSCHOOL, ancestorNodeLevel: 2}
     },
     disabilityStatusWithDisabilityCheckbox: {
       type: 'checkbox',
-      textOption: {textContains: LABEL_ALIAS.DISABILITY_STATUS_WITH_DISABILITY, ancestorNodeLevel: 2}
+      textOption: {contains: LABEL_ALIAS.DISABILITY_STATUS_WITH_DISABILITY, ancestorNodeLevel: 2}
     }
   },
   REQUEST_FOR_REVIEW: {  // fields in question #6
     yesRequestReviewRadiobutton: {
       type: 'radiobutton',
-      textOption: {textContains: LABEL_ALIAS.YES_REQUEST_REVIEW}
+      textOption: {contains: LABEL_ALIAS.YES_REQUEST_REVIEW}
     },
     noRequestReviewRadiobutton: {
       type: 'radiobutton',
-      textOption: {textContains: LABEL_ALIAS.NO_REQUEST_REVIEW}
+      textOption: {contains: LABEL_ALIAS.NO_REQUEST_REVIEW}
     }
   }
 
@@ -279,75 +280,81 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitUntilTitleMatch(PAGE.TITLE);
-      await this.getWorkspaceNameTextbox();
-      await new SelectMenu(this.page, LABEL_ALIAS.SELECT_BILLING).getSelectedValue();
-      await this.getCreateWorkspaceButton();
+      await Promise.all([
+        waitForDocumentTitle(this.puppeteerPage, PAGE.TITLE),
+        this.getWorkspaceNameTextbox(),
+        new SelectMenu({puppeteerPage: this.puppeteerPage}, {label: LABEL_ALIAS.SELECT_BILLING}).getSelectedValue(),
+        this.getCreateWorkspaceButton(),
+        waitWhileLoading(this.puppeteerPage)
+      ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`WorkspaceEditPage isLoaded() encountered ${err}`);
       return false;
     }
   }
 
   async getCreateWorkspaceButton(): Promise<Button> {
-    return Button.forLabel(this.page, FIELD.createWorkspaceButton.textOption);
+    return Button.forLabel({puppeteerPage: this.puppeteerPage}, FIELD.createWorkspaceButton.textOption);
   }
 
   async getDuplicateWorkspaceButton(): Promise<Button> {
     // Cannot use Button.forLabel because it finds two elements on Duplicate workspace page.
     // Don't change. use this xpath to find the button "DUPLICATE WORKSPACE".
-    const elemt = await this.page.waitForXPath(`//*[text()="Duplicate Workspace" and @role="button"]`);
-    return new Button(this.page, elemt);
+    const elemt = await this.puppeteerPage.waitForXPath(`//*[text()="Duplicate Workspace" and @role="button"]`, {visible: true});
+    const dupWorkspaceButton = new Button({puppeteerPage: this.puppeteerPage});
+    dupWorkspaceButton.setElementHandle(elemt);
+    return dupWorkspaceButton;
   }
 
   async getCancelButton(): Promise<Button> {
-    return Button.forLabel(this.page, FIELD.cancelWorkspaceButton.textOption);
+    return Button.forLabel({puppeteerPage: this.puppeteerPage}, FIELD.cancelWorkspaceButton.textOption);
   }
 
   async getWorkspaceNameTextbox(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, FIELD.workspaceNameTextbox.textOption);
+    return Textbox.forLabel({puppeteerPage: this.puppeteerPage}, FIELD.workspaceNameTextbox.textOption);
   }
 
   question1_researchPurpose(): WebComponent {
-    return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.researchPurposeCheckbox.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.PRIMARY_PURPOSE.researchPurposeCheckbox.textOption);
   }
 
   question1_educationalPurpose(): WebComponent {
-    return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.educationPurposeCheckbox.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.PRIMARY_PURPOSE.educationPurposeCheckbox.textOption);
   }
 
   question1_forProfitPurpose(): WebComponent {
-    return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.forProfitPurposeCheckbox.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.PRIMARY_PURPOSE.forProfitPurposeCheckbox.textOption);
   }
 
   question1_otherPurpose(): WebComponent {
-    return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.otherPurposeCheckbox.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.PRIMARY_PURPOSE.otherPurposeCheckbox.textOption);
   }
 
   question1_diseaseFocusedResearch(): WebComponent {
-    return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.diseaseFocusedResearchCheckbox.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.PRIMARY_PURPOSE.diseaseFocusedResearchCheckbox.textOption);
   }
 
   question2_scientificQuestionsIntendToStudy(): WebComponent {
-    return new WebComponent(this.page, FIELD.RESEARCH_PURPOSE_SUMMARY.scientificQuestionsIntentToStudyTextarea.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.RESEARCH_PURPOSE_SUMMARY.scientificQuestionsIntentToStudyTextarea.textOption);
   }
 
   question2_scientificApproaches(): WebComponent {
-    return new WebComponent(this.page, FIELD.RESEARCH_PURPOSE_SUMMARY.scientificApproachesToUseTextarea.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.RESEARCH_PURPOSE_SUMMARY.scientificApproachesToUseTextarea.textOption);
   }
 
   question2_anticipatedFindings(): WebComponent {
-    return new WebComponent(this.page, FIELD.RESEARCH_PURPOSE_SUMMARY.anticipatedFindingsFromStudyTextarea.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.RESEARCH_PURPOSE_SUMMARY.anticipatedFindingsFromStudyTextarea.textOption);
   }
 
   // Question 3. one of many checkboxes
   publicationInJournal(): WebComponent {
-    return new WebComponent(this.page, FIELD.DISSEMINATE_RESEARCH_FINDINGS.publicationInScientificJournalsCheckbox.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.DISSEMINATE_RESEARCH_FINDINGS.publicationInScientificJournalsCheckbox.textOption);
   }
 
   // Question 4. one of many checkboxes
   increaseWellnessResilience(): WebComponent {
-    return new WebComponent(this.page, FIELD.DESCRIBE_ANTICIPATED_OUTCOMES.seeksIncreaseWellnessCheckbox.textOption);
+    return new WebComponent(this.puppeteerPage, FIELD.DESCRIBE_ANTICIPATED_OUTCOMES.seeksIncreaseWellnessCheckbox.textOption);
   }
 
   /**
@@ -355,7 +362,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
    * @param {string} optionValue: 1 for "Synthetic DataSet 1". 2 for "Synthetic DataSet 2".
    */
   async selectDataSet(optionValue: string = '2') {
-    const dataSetSelect = await Select.forLabel(this.page, FIELD.dataSetSelect.textOption);
+    const dataSetSelect = await Select.forLabel({puppeteerPage: this.puppeteerPage}, FIELD.dataSetSelect.textOption);
     await dataSetSelect.selectOption(optionValue);
   }
 
@@ -364,7 +371,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
    * @param {string} billingAccount
    */
   async selectBillingAccount(billingAccount: string = 'Use All of Us free credits') {
-    const billingAccountSelect = await Select.forLabel(this.page, FIELD.billingAccountSelect.textOption);
+    const billingAccountSelect = await Select.forLabel({puppeteerPage: this.puppeteerPage}, FIELD.billingAccountSelect.textOption);
     await billingAccountSelect.selectOption(billingAccount);
   }
 
@@ -415,9 +422,9 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   async requestForReviewRadiobutton(selected: boolean) {
     let radioComponent;
     if (selected) {
-      radioComponent = new WebComponent(this.page, FIELD.REQUEST_FOR_REVIEW.yesRequestReviewRadiobutton.textOption);
+      radioComponent = new WebComponent(this.puppeteerPage, FIELD.REQUEST_FOR_REVIEW.yesRequestReviewRadiobutton.textOption);
     } else {
-      radioComponent = new WebComponent(this.page, FIELD.REQUEST_FOR_REVIEW.noRequestReviewRadiobutton.textOption);
+      radioComponent = new WebComponent(this.puppeteerPage, FIELD.REQUEST_FOR_REVIEW.noRequestReviewRadiobutton.textOption);
     }
     await (await radioComponent.asRadioButton()).select();
   }
@@ -430,19 +437,19 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
     await button.click();
 
     // confirm create in pop-up dialog
-    const dialog = new Dialog(this.page);
+    const dialog = new Dialog(this.puppeteerPage, {xpath: '//*[contains(@class,"ReactModal__Content") and @role="dialog"]'});
     const dialogText = await dialog.getContent();
     await Promise.all([
       dialog.clickButton(ButtonLabel.Confirm),
       dialog.waitUntilDialogIsClosed(),
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
+      this.puppeteerPage.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
     ]);
-    await this.waitUntilNoSpinner();
+    await waitWhileLoading(this.puppeteerPage);
     return dialogText;
   }
 
   async clickShareWithCollaboratorsCheckbox() {
-    const elemt = await Checkbox.forLabel(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
+    const elemt = await Checkbox.forLabel({puppeteerPage: this.puppeteerPage}, FIELD.shareWithCollaboratorsCheckbox.textOption);
     await elemt.check();
   }
 

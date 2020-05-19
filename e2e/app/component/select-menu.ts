@@ -1,12 +1,19 @@
 import {Page} from 'puppeteer';
 import BaseElement from 'app/element/base-element';
+import Container from 'app/element/container';
 
 export default class SelectMenu {
 
-  constructor(private readonly page: Page, private readonly label?: string, private readonly nodeLevel?: number) {
-    this.page = page;
-    this.label = label || undefined;
-    this.nodeLevel = nodeLevel || 1;
+  private readonly puppeteerPage: Page;
+  private readonly containerXpath: string;
+  private readonly labelName: string;
+  private readonly ancestorNodeLevel: number;
+
+  constructor(pageOptions: {puppeteerPage: Page, container?: Container}, labelOptions: { label?: string, nodeLevel?: number} = {}) {
+    this.puppeteerPage = pageOptions.puppeteerPage;
+    this.containerXpath = (pageOptions.container === undefined) ? '' : pageOptions.container.getXpath();
+    this.labelName = labelOptions.label || undefined;
+    this.ancestorNodeLevel = labelOptions.nodeLevel || 1;
   }
 
   /**
@@ -15,12 +22,11 @@ export default class SelectMenu {
    * @param {number} maxAttempts Default try count is 2.
    */
   async select(textValue: string, maxAttempts: number = 2): Promise<void> {
-
     const clickText = async () => {
       await this.open(2);
       const selector = this.dropdownXpath() + `//li[contains(normalize-space(text()), "${textValue}")]`;
-      const selectValue = await this.page.waitForXPath(selector, {visible: true});
-      const baseElement = new BaseElement(this.page, selectValue);
+      const selectValue = await this.puppeteerPage.waitForXPath(selector, {visible: true});
+      const baseElement = BaseElement.asBaseElement(this.puppeteerPage, selectValue);
       const textContent = await baseElement.getTextContent(); // get full text
       await selectValue.click();
       // need to make sure dropdown is disappeared, so it cannot interfere with clicking on elements below.
@@ -39,7 +45,7 @@ export default class SelectMenu {
       if (maxAttempts <= 0) {
         return null;
       }
-      return await this.page.waitFor(2000).then(clickAndCheck); // two seconds pause and retry
+      return await this.puppeteerPage.waitFor(2000).then(clickAndCheck); // two seconds pause and retry
     };
 
     await clickAndCheck();
@@ -50,7 +56,7 @@ export default class SelectMenu {
    */
   async getSelectedValue(): Promise<unknown> {
     const selector = this.dropdownXpath() + '/label';
-    const displayedValue = await this.page.waitForXPath(selector, { visible: true });
+    const displayedValue = await this.puppeteerPage.waitForXPath(selector, { visible: true });
     const innerText = await displayedValue.getProperty('innerText');
     return await innerText.jsonValue();
   }
@@ -70,14 +76,14 @@ export default class SelectMenu {
         return;
       }
       maxAttempts--;
-      await this.page.waitFor(1000).then(click); // one second pause before try again
+      await this.puppeteerPage.waitFor(1000).then(click); // one second pause before try again
     };
     return click();
   }
 
   private async toggleOpenClose(): Promise<void> {
     const selector = this.dropdownXpath() + '/*[@class="p-dropdown-trigger"]';
-    const dropdownTrigger = await this.page.waitForXPath(selector, { visible: true });
+    const dropdownTrigger = await this.puppeteerPage.waitForXPath(selector, { visible: true });
     await dropdownTrigger.hover();
     await dropdownTrigger.click();
     await dropdownTrigger.dispose();
@@ -87,7 +93,7 @@ export default class SelectMenu {
     const selector = this.dropdownXpath() +
        '/*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown-panel ")]';
     try {
-      const panel = await this.page.waitForXPath(selector);
+      const panel = await this.puppeteerPage.waitForXPath(selector);
       const classNameString = await (await panel.getProperty('className')).jsonValue();
       const splits = classNameString.toString().split(' ');
       await panel.dispose();
@@ -98,17 +104,18 @@ export default class SelectMenu {
   }
 
   private dropdownXpath(): string {
-    if (this.label === undefined) {
-      return '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]';
+    const containsString = '//*[contains(concat(" ", normalize-space(@class), " ")," p-dropdown ")]';
+    if (this.labelName === undefined) {
+      return `${this.containerXpath}${containsString}`;
     }
-    return `//*[contains(normalize-space(text()), "${this.label}")]` +
-       `/ancestor::node()[${this.nodeLevel}]//*[contains(concat(" ", normalize-space(@class), " ")," p-dropdown ")]`;
+    return `${this.containerXpath}//*[contains(normalize-space(text()), "${this.labelName}")]` +
+       `/ancestor::node()[${this.ancestorNodeLevel}]${containsString}`;
   }
 
   private async waitUntilDropdownClosed() {
     const xpath = this.dropdownXpath() +
        '/*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]';
-    await this.page.waitForXPath(xpath, {hidden: true}).catch((err) => {
+    await this.puppeteerPage.waitForXPath(xpath, {hidden: true}).catch((err) => {
       console.error('Select dropdown is not closed.');
       throw err;
     })

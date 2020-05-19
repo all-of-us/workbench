@@ -1,32 +1,23 @@
 import {Page} from 'puppeteer';
 
-
+// Experienmental method
 export async function waitUntilNetworkIdle(page: Page) {
   const networkidle0 = async () => {
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    return page.waitFor(500);
+    return page.waitFor(1000);
   };
    // recurring requests that could prevent the networkidle0 condition from ever being satisfied.
   const networkidle2 = async () => {
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    return page.waitFor(1000);
+  };
+  const domloaded = async () => {
+    await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
     return page.waitFor(2000);
   };
   return Promise.race([
     networkidle0(),
     networkidle2(),
+    domloaded(),
   ]);
-}
-
-export async function handleRecaptcha(page: Page) {
-  const css = '[id="recaptcha-anchor"][role="checkbox"]';
-  await page.frames().find(async (frame) => {
-    for(const childFrame of frame.childFrames()) {
-      const recaptcha = await childFrame.$$(css);
-      if (recaptcha.length > 0) {
-        await recaptcha[0].click();
-        return;
-      }
-    }
-
-  });
 }

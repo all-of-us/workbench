@@ -1,4 +1,5 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import Container from './container';
 
 /**
  * BaseElement represents a web element in the DOM.
@@ -7,69 +8,62 @@ import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppete
 export default class BaseElement {
 
   static asBaseElement(page: Page, elem: ElementHandle): BaseElement {
-    return new BaseElement(page, elem);
+    const baseElement = new BaseElement({puppeteerPage: page});
+    baseElement.setElementHandle(elem);
+    return baseElement;
   }
 
-  protected readonly page: Page;
-  protected css: string;
-  protected xpath: string;
   protected element: ElementHandle;
+  protected readonly xpath;
+  protected readonly puppeteerPage: Page;
+  protected readonly parent: Container;
 
-  constructor(aPage: Page, aElement?: ElementHandle) {
-    this.page = aPage;
-    this.element = aElement || undefined;
-  }
-
-  /**
-   * Find element with wait.
-   * @param cssSelector
-   * @param waitOptions
-   */
-  async withCss(cssSelector: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-    this.css = cssSelector;
-    this.element = await this.page.waitForSelector(this.css, waitOptions);
-    return this.element;
-  }
-
-  /**
-   * Find element with wait.
-   * @param xpathSelector
-   * @param waitOptions
-   */
-  async withXpath(xpathSelector: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-    this.xpath = xpathSelector;
-    this.element = await this.page.waitForXPath(this.xpath, waitOptions);
-    return this.element;
-  }
-
-   /**
-    * Find first element without wait for.
-    */
-  async findByCss(cssSelector: string,): Promise<ElementHandle | null> {
-    this.css = cssSelector;
-    this.element = await this.page.$(this.css);
-    return this.element;
-  }
-
-   /**
-    * Find first element without wait for.
-    */
-  async findByXpath(xpathSelector: string): Promise<ElementHandle | null> {
-    this.xpath = xpathSelector;
-    const found = await this.page.$x(this.xpath);
-    if (found.length > 0) {
-      this.element = found[0];
-    } else {
-      this.element = null;
+  constructor(pageOptions: {puppeteerPage: Page, container?: Container}, selector: {xpath?: string, testId?: string} = {}) {
+    this.puppeteerPage = pageOptions.puppeteerPage;
+    this.parent = pageOptions.container || undefined;
+    if (selector.testId !== undefined) {
+      this.xpath = `//*[@data-test-id="${selector.testId}"]`;
+    } else if (selector.xpath !== undefined) {
+      this.xpath = (this.parent === undefined) ? selector.xpath : this.parent.getXpath() + selector.xpath;
     }
-    return this.element;
   }
 
-  async retryFindElement(): Promise<ElementHandle | null> {
-    if (this.xpath != null) {
-      return this.findByXpath(this.xpath);
-    } else if (this.css != null) {
-      return this.findByCss(this.css);
+  setElementHandle(handle: ElementHandle) {
+    this.element = handle;
+  }
+
+  /**
+   * Find first element matching xpath selector.
+   * If there is no element matching xpath selector, null is returned.
+   * @param waitOptions
+   */
+  async findFirstElement(waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle | null> {
+    if (this.element !== undefined) {
+      return this.element;
+    }
+    let retElement = null;
+    try {
+      retElement = await this.puppeteerPage.waitForXPath(this.xpath, waitOptions);
+    } catch (e) {
+      // Ignore TimeOut exception thrown from waitForXpath when element is not found.
+    }
+    return this.element = retElement;
+  }
+
+  /**
+   * Find all elements matching xpath selector.
+   */
+  async findAllElements(): Promise<ElementHandle[] | null> {
+    return this.puppeteerPage.$x(this.xpath);
+  }
+
+  async findDescendantElements(descendantXpath: string, appendSelector: boolean = false): Promise<ElementHandle[] | null> {
+    if (appendSelector) {
+      if (this.xpath !== undefined && descendantXpath !== undefined) {
+        return this.puppeteerPage.$x(`${this.xpath}${descendantXpath}`);
+      }
+    } else {
+      return this.element.$x(descendantXpath);
     }
     return null;
   }
@@ -100,7 +94,7 @@ export default class BaseElement {
       throw new Error('The element is undefined.');
     }
     const elem = this.element.asElement();
-    const attributeValue = await this.page.evaluate(
+    const attributeValue = await this.puppeteerPage.evaluate(
        (link, attr) => link.getAttribute(attr), elem, attributeName);
     return attributeValue;
   }
@@ -115,7 +109,7 @@ export default class BaseElement {
       throw new Error('The element is undefined.');
     }
     const value = await this.getAttribute(attributeName);
-    return value !== null;
+    return value != null;
   }
 
   /**
@@ -131,19 +125,17 @@ export default class BaseElement {
    * <pre>
    *  Check if the element is visible
    * </pre>
-   * @param {Page} page
-   * @param {ElementHandle} element
    */
   async isVisible(): Promise<boolean> {
     const boxModel = await this.element.boxModel();
-    return boxModel !== null;
+    return boxModel != null;
   }
 
   /**
    * Check both boxModel and style for visibility.
    */
   async isDisplayed() {
-    const isVisibleHandle = await this.page.evaluateHandle((e) =>
+    const isVisibleHandle = await this.puppeteerPage.evaluateHandle((e) =>
     {
       const style = window.getComputedStyle(e);
       return (style && style.display !== 'none' &&
@@ -159,6 +151,16 @@ export default class BaseElement {
 
   async click(options?: ClickOptions): Promise<void> {
     return this.element.asElement().click(options);
+  }
+
+  /**
+   * Click on element then wait for page navigation to finish.
+   */
+  async clickAndWait() {
+    return Promise.all([
+      this.puppeteerPage.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+      this.click(),
+    ]);
   }
 
   async type(text: string, options?: { delay: number }): Promise<void> {
@@ -247,14 +249,12 @@ export default class BaseElement {
   }
 
   async dispose(): Promise<void> {
-    this.xpath = undefined;
-    this.css = undefined;
     return this.element.dispose();
   }
 
   // try this method when click() is not working
   async clickWithEval() {
-    return this.page.evaluate( elem => elem.click(), this.element );
+    return this.puppeteerPage.evaluate(elem => elem.click(), this.element );
   }
 
   /**
@@ -262,7 +262,7 @@ export default class BaseElement {
    * @param text
    */
   async paste(text: string) {
-    await this.page.evaluate((elem, textValue) => {
+    await this.puppeteerPage.evaluate((elem, textValue) => {
       // Refer to https://stackoverflow.com/a/46012210/440432
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
       nativeInputValueSetter.call(elem, textValue);

@@ -1,27 +1,24 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
+import Container from './container';
 import TextOptions from './text-options';
 import BaseElement from './base-element';
-import {findTextbox} from './xpath-finder';
+import * as xpathDefaults from './xpath-defaults';
 
 export default class Textbox extends BaseElement {
 
   static async forLabel(
-     page: Page,
+     pageOptions: {puppeteerPage: Page, container?: Container},
      textOptions: TextOptions,
-     waitOptions: WaitForSelectorOptions = {visible: true},
-     throwErr = true): Promise<Textbox> {
+     waitOptions?: WaitForSelectorOptions): Promise<Textbox> {
 
-    let element: Textbox;
-    try {
-      const textboxElement = await findTextbox(page, textOptions, waitOptions);
-      element = new Textbox(page, textboxElement);
-    } catch (e) {
-      if (throwErr) {
-        console.error(`FAILED finding Textbox: "${JSON.stringify(textOptions)}".`);
-        throw e;
-      }
+    if (textOptions.ancestorNodeLevel === undefined) {
+      textOptions.ancestorNodeLevel = 1;
     }
-    return element;
+    textOptions.inputType = 'text';
+    const textboxXpath = xpathDefaults.inputXpath(textOptions, pageOptions.container);
+    const textbox = new Textbox({puppeteerPage: pageOptions.puppeteerPage}, {xpath: textboxXpath});
+    await textbox.findFirstElement(waitOptions);
+    return textbox;
   }
 
 }
