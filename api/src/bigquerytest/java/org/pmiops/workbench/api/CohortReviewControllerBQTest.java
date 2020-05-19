@@ -87,33 +87,32 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, CohortReviewController.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
   @Import({
-    WorkspaceServiceImpl.class,
-    CohortMapperImpl.class,
-    CohortReviewMapperImpl.class,
-    CohortReviewServiceImpl.class,
-    CohortReviewController.class,
-    ConceptSetMapperImpl.class,
-    DataSetMapperImpl.class,
-    BigQueryTestService.class,
-    ReviewQueryBuilder.class,
-    CohortCloningService.class,
-    CohortQueryBuilder.class,
-    SearchGroupItemQueryBuilder.class,
-    WorkspaceMapperImpl.class,
-    CommonMappers.class
+      WorkspaceServiceImpl.class,
+      CohortMapperImpl.class,
+      CohortReviewMapperImpl.class,
+      CohortReviewServiceImpl.class,
+      ConceptSetMapperImpl.class,
+      DataSetMapperImpl.class,
+      BigQueryTestService.class,
+      ReviewQueryBuilder.class,
+      CohortCloningService.class,
+      CohortQueryBuilder.class,
+      SearchGroupItemQueryBuilder.class,
+      WorkspaceMapperImpl.class,
+      CommonMappers.class
   })
   @MockBean({
-    FireCloudService.class,
-    UserRecentResourceService.class,
-    CohortFactory.class,
-    ConceptSetService.class,
-    DataSetService.class,
-    FreeTierBillingService.class
+      FireCloudService.class,
+      UserRecentResourceService.class,
+      CohortFactory.class,
+      ConceptSetService.class,
+      DataSetService.class,
+      FreeTierBillingService.class
   })
   static class Configuration {
 
@@ -137,23 +136,32 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private DbCdrVersion cdrVersion;
   private DbWorkspace workspace;
 
-  @Autowired private CohortReviewController controller;
+  @Autowired
+  private CohortReviewController controller;
 
-  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired
+  private TestWorkbenchConfig testWorkbenchConfig;
 
-  @Autowired private CohortDao cohortDao;
+  @Autowired
+  private CohortDao cohortDao;
 
-  @Autowired private CohortReviewDao cohortReviewDao;
+  @Autowired
+  private CohortReviewDao cohortReviewDao;
 
-  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired
+  private WorkspaceDao workspaceDao;
 
-  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired
+  private CdrVersionDao cdrVersionDao;
 
-  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
+  @Autowired
+  private ParticipantCohortStatusDao participantCohortStatusDao;
 
-  @Autowired private FireCloudService mockFireCloudService;
+  @Autowired
+  private FireCloudService mockFireCloudService;
 
-  @Autowired private UserDao userDao;
+  @Autowired
+  private UserDao userDao;
 
   private DbCohort cohortWithoutEHRData;
   private DbCohort cohortWithEHRData;
