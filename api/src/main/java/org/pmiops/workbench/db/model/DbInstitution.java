@@ -55,7 +55,7 @@ public class DbInstitution {
     return this;
   }
 
-  @Column(name = "display_name", nullable = false)
+  @Column(name = "display_name", nullable = false, unique = true)
   public String getDisplayName() {
     return displayName;
   }
