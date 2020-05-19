@@ -65,7 +65,7 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
    * <p>As an App Engine cron endpoint, the runtime of this method may not exceed 10 minutes.
    */
   @Override
-  public ResponseEntity<CheckClustersResponse> checkClusters() {
+  public ResponseEntity<void> checkClusters() {
     Instant now = clock.instant();
     WorkbenchConfig config = configProvider.get();
     Duration maxAge = Duration.ofDays(config.firecloud.clusterMaxAgeDays);
