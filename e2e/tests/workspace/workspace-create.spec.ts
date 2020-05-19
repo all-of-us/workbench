@@ -24,7 +24,7 @@ describe('Creating new workspaces', () => {
     // Pick out few sentenses to verify
     expect(dialogTextContent).toContain('Primary purpose of your project (Question 1)');
     expect(dialogTextContent).toContain('Summary of research purpose (Question 2)');
-    expect(dialogTextContent).toContain('Will be displayed publicly to inform All of Us research participants.');
+    expect(dialogTextContent).toContain('Will be displayed publicly to inform All of Us Research participants.');
     expect(dialogTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
