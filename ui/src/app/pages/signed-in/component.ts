@@ -94,6 +94,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         this.signOut();
       }
     });
+    this.subscriptions.push(this.signOutNavigateSub);
 
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.minimizeChrome = minimizeChrome;

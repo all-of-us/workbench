@@ -2,8 +2,8 @@ import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {StyledAnchorTag} from 'app/components/buttons';
-import {PublicLayout} from 'app/components/public-layout';
 import {Header} from 'app/components/headers';
+import {PublicLayout} from 'app/components/public-layout';
 import {
   ReactWrapperBase
 } from 'app/utils';
@@ -18,9 +18,9 @@ export const UserDisabled = class extends React.Component<{}, {}> {
         Contact <StyledAnchorTag href={'mailto:' + supportUrl}>{supportUrl}</StyledAnchorTag> for
         more information.
       </p>
-    </PublicLayout>
+    </PublicLayout>;
   }
-}
+};
 
 @Component({
   template: '<div #root></div>'

@@ -10,10 +10,10 @@ export class SessionExpired extends React.Component<{}, {}> {
     return <PublicLayout>
       <Header >Session expired</Header>
       <p>You were automatically signed out of your session due to inactivity.</p>
-      <p>Please <StyledAnchorTag href="/login">sign in again</StyledAnchorTag>.</p>
-    </PublicLayout>
+      <p>Please <StyledAnchorTag href='/login'>sign in again</StyledAnchorTag>.</p>
+    </PublicLayout>;
   }
-};
+}
 
 @Component({
   template: '<div #root></div>'
