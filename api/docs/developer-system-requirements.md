@@ -16,7 +16,7 @@ We currently only support MacOS and Linux for development and testing.
     * For use with Stackdriver alert policies and certain other new features you may
     need to install `alpha` or `beta` channels via 
     ```text
-    gcloud components install alplha
+    gcloud components install alpha
     ```
     
 
@@ -29,52 +29,5 @@ For local development, also install:
     * `sudo gem install docker-sync`
     * If you'd prefer to install as non-root, you can [follow instructions for user-level install](https://docker-sync.readthedocs.io/en/latest/getting-started/installation.html).
 
-## git-lfs
-
-### Setup
-
-Download the git-lfs tool.
-If you are on a mac, run:
-```Shell
-  brew install git-lfs
-```
-
-Enable git lfs in the top level directory.
-```Shell
-  git lfs install
-```
-
-## git-secrets
-
-### Setup
-
-Download the git-secrets tool.
-If you are on a mac, run:
-```Shell
-  brew install git-secrets
-```
-If you are on Linux, run:
-```Shell
-rm -rf git-secrets
-git clone https://github.com/awslabs/git-secrets.git
-cd git-secrets
-sudo make install && sudo chmod o+rx /usr/local/bin/git-secrets
-cd ..
-rm -rf git-secrets
-```
-### Running
-
-git-secrets by default runs every time you make a commit. But if you
-want to manually scan:
-#### The Repository
-```Shell
-git secrets --scan
-```
-#### A File(s)
-```Shell
-git secrets --scan /path/to/file (/other/path/to/file *)
-```
-#### A Directory (recursively)
-```Shell
-git secrets --scan -r /path/to/directory
-```
+### Initialization
+Next, follow the steps in [Developer System Initialization](developer-system-initialization.md).

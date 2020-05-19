@@ -1,4 +1,7 @@
 # Developer System Initialization
+This is a guide to some first-time activities to run after installing the
+software in [System Requirements](developer-system-requirements.md).
+
 ## Gcloud Setup
 After you've installed `gcloud`, login using your `pmi-ops` account:
 
@@ -7,7 +10,7 @@ gcloud auth login
 ```
 Earlier editions of this document recommended choosing a default project, but this is
 no longer considered a best practice. Since we have many nearly identical and similarly-named
-projects, you shold instead pass `--project=all-of-us-workbench-test`
+GCP projects, you should instead pass `--project=all-of-us-workbench-test`
 to every `gcloud` command. The reasoning is that by using default projects via
 `gclod config set project` you introduce the ability to operate on the wrong project
 silently.
@@ -28,10 +31,61 @@ git submodule update --init --recursive
 
 Then set up [git secrets](#git-secrets) and [git lfs](#git-lfs) and fire up the [development servers](#running-the-dev-servers).
 
+## git-lfs
+
+### Setup
+
+Download the git-lfs tool.
+If you are on a mac, run:
+```Shell
+  brew install git-lfs
+```
+
+Enable git lfs in the top level directory.
+```Shell
+  git lfs install
+```
+
+## git-secrets
+
+### Setup
+
+Download the git-secrets tool.
+If you are on a mac, run:
+```Shell
+  brew install git-secrets
+```
+If you are on Linux, run:
+```Shell
+rm -rf git-secrets
+git clone https://github.com/awslabs/git-secrets.git
+cd git-secrets
+sudo make install && sudo chmod o+rx /usr/local/bin/git-secrets
+cd ..
+rm -rf git-secrets
+```
+### Running
+
+git-secrets by default runs every time you make a commit. But if you
+want to manually scan:
+#### The Repository
+```Shell
+git secrets --scan
+```
+#### A File(s)
+```Shell
+git secrets --scan /path/to/file (/other/path/to/file *)
+```
+#### A Directory (recursively)
+```Shell
+git secrets --scan -r /path/to/directory
+```
 
 ## Initial Smoke Test
 Before doing any development, you must run the following from `/api`:
 ```Shell
 ./gradlew compileGeneratedJava appengineRun
 ```
-This will generate compiled Java and MapStruct files that are necessary for the app to compile. On Macs, this command will never complete - when it has gotten to 97% it will hang forever. It can safely be `ctrl+c`'d at that point.
+This will generate compiled Java and MapStruct files that are necessary
+for the app to compile. On Macs, this command will never progress beyond 96%.
+After verifying that it builds and runs, it can safely be killed with `ctrl+c`.
