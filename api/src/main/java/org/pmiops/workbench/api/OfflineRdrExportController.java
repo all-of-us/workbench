@@ -68,15 +68,12 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
       try {
         groupIdsAndPushTask(rdrExportService.findAllUserIdsToExport(), EXPORT_RESEARCHER_PATH);
       } catch (Exception ex) {
-        throw new ServerErrorException(
-            String.format("Error creating RDR export Cloud Tasks for users: %s", ex.getMessage()));
+        throw new ServerErrorException("Error creating RDR export Cloud Tasks for users", ex);
       }
       try {
         groupIdsAndPushTask(rdrExportService.findAllWorkspacesIdsToExport(), EXPORT_USER_PATH);
       } catch (Exception ex) {
-        throw new ServerErrorException(
-            String.format(
-                "Error creating RDR export Cloud Tasks for workspaces: %s", ex.getMessage()));
+        throw new ServerErrorException("Error creating RDR export Cloud Tasks for workspaces", ex);
       }
     }
     return ResponseEntity.noContent().build();
@@ -127,10 +124,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
               .setHttpMethod(HttpMethod.POST)
               .putHeaders("Content-type", "application/json")
               .build();
-
-      Task taskBuilder = Task.newBuilder().setAppEngineHttpRequest(req).build();
-      Task task = client.createTask(queuePath, taskBuilder);
-
+      client.createTask(queuePath, Task.newBuilder().setAppEngineHttpRequest(req).build());
     } catch (IOException ex) {
       log.severe(
           String.format(
