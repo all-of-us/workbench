@@ -18,6 +18,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
  * DUA Signed?", "REDCap Complete?"
  */
 class Researcher extends User {
+  final InstitutionalRole institutionalRole;
   final String institutionDisplayName;
   final String duaSigned;
   final String redCapComplete;
@@ -60,10 +61,56 @@ class Researcher extends User {
     this.lastName = userLine[1].trim();
     this.contactEmail = userLine[2].trim();
     this.userName = userLine[3].trim();
-    this.operationalRole = userLine[4].trim();
-    this.institutionDisplayName = userLine[5].trim();
+    this.institutionalRole = parseInstitutionalRole(userLine[4].trim());
+    this.institutionDisplayName = parseInstitutionDisplayName(userLine[5].trim());
     this.duaSigned = userLine[6].trim();
     this.redCapComplete = userLine[7].trim();
+  }
+
+  private InstitutionalRole parseInstitutionalRole(final String rawRole) {
+    final InstitutionalRole parsedRole = roleMap.get(rawRole);
+    if (parsedRole != null) {
+      return parsedRole;
+    }
+
+    // the roles in this input file have a high number of not-quite-matches
+    // special-case those where the intent is clear
+
+    if (rawRole.startsWith("Senior Researcher")) {
+      return InstitutionalRole.SENIOR_RESEARCHER;
+    }
+
+    if (rawRole.startsWith("Mid-Career")) {
+      return InstitutionalRole.MID_CAREER;
+    }
+
+    if (rawRole.startsWith("Early Career")) {
+      return InstitutionalRole.EARLY_CAREER;
+    }
+
+    if (rawRole.startsWith("Project Personnel")) {
+      return InstitutionalRole.PROJECT_PERSONNEL;
+    }
+
+    if (rawRole.startsWith("Research Fellow")) {
+      return InstitutionalRole.FELLOW;
+    }
+
+    if (rawRole.startsWith("Graduate Trainee")) {
+      return InstitutionalRole.TRAINEE;
+    }
+
+    throw new RuntimeException(
+        String.format("Role '%s' for user '%s' not found in the role map", rawRole, contactEmail));
+  }
+
+  private String parseInstitutionDisplayName(final String rawName) {
+    // special-case this input value because the intent is clear
+    if (rawName.equals("Scripps Research Institute")) {
+      return "Scripps Research";
+    }
+
+    return rawName;
   }
 
   static List<User> parseInput(final String filename) throws IOException {
@@ -91,6 +138,7 @@ class Researcher extends User {
   @Override
   DbVerifiedInstitutionalAffiliation toAffiliation(
       final DbUser dbUser, final InstitutionDao institutionDao) {
+
     final DbInstitution dbInstitution =
         institutionDao
             .findOneByDisplayName(institutionDisplayName)
@@ -100,16 +148,9 @@ class Researcher extends User {
                         String.format(
                             "Could not find '%s' Institution in the DB", institutionDisplayName)));
 
-    final InstitutionalRole parsedRole = roleMap.get(operationalRole);
-    if (parsedRole == null) {
-      throw new RuntimeException(
-          String.format(
-              "Role '%s' for user '%s' not found in the role map", operationalRole, contactEmail));
-    }
-
     return new DbVerifiedInstitutionalAffiliation()
         .setInstitution(dbInstitution)
         .setUser(dbUser)
-        .setInstitutionalRoleEnum(parsedRole);
+        .setInstitutionalRoleEnum(institutionalRole);
   }
 }

@@ -16,6 +16,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
  * <p>First Name,Last Name,Email,"Workbench Email",Institution,Role,Action
  */
 class OpsUser extends User {
+  final String operationalRole;
   final String action;
 
   private static final int columnLength = 6;

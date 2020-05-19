@@ -21,7 +21,6 @@ public abstract class User {
   String lastName;
   String contactEmail;
   String userName;
-  String operationalRole;
 
   abstract void preCheck();
 
