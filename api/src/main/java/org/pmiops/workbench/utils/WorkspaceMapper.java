@@ -26,10 +26,9 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     uses = {
       CohortMapper.class,
@@ -38,7 +37,8 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
       ConceptSetMapper.class,
       DataSetMapper.class,
       DbStorageEnums.class,
-      FirecloudMapper.class
+      FirecloudMapper.class,
+      DbStorageEnums.class
     })
 public interface WorkspaceMapper {
 

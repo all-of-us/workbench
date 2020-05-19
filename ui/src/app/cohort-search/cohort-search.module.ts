@@ -4,7 +4,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {CohortCommonModule} from 'app/cohort-common/module';
-import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
@@ -17,7 +16,7 @@ import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
-import {SelectionInfoComponent} from './selection-info/selection-info.component';
+import {SelectionListComponent} from './selection-list/selection-list.component';
 import {CriteriaTreeComponent} from './tree/tree.component';
 
 import {BreadcrumbType} from 'app/utils/navigation';
@@ -34,7 +33,7 @@ const routes: Routes = [{
   data: {
     title: 'Build Cohort Criteria',
     breadcrumb: BreadcrumbType.CohortAdd,
-    helpContent: 'cohortBuilder'
+    helpContentKey: 'cohortBuilder'
   },
 }];
 
@@ -48,7 +47,6 @@ const routes: Routes = [{
     // 3rd Party
     ClarityModule,
     NgxPopperModule,
-    NouisliderModule,
     // Ours
     CohortCommonModule,
   ],
@@ -63,7 +61,7 @@ const routes: Routes = [{
     OverviewComponent,
     SearchGroupListComponent,
     ListSearchComponent,
-    SelectionInfoComponent,
+    SelectionListComponent,
     SafeHtmlPipe,
   ],
   providers: [TitleCasePipe]

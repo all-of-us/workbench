@@ -31,16 +31,23 @@ describe('HelpSidebar', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should update content when helpContent prop changes', () => {
-    props = {helpContent: 'data', sidebarOpen: true};
+  it('should update content when helpContentKey prop changes', () => {
+    props = {helpContentKey: 'data', sidebarOpen: true};
     const wrapper = component();
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.data[0].title);
-    wrapper.setProps({helpContent: 'cohortBuilder'});
+    wrapper.setProps({helpContentKey: 'cohortBuilder'});
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.cohortBuilder[0].title);
   });
 
+  it('should show a different icon and title when helpContentKey is notebookStorage', () => {
+    props = {helpContentKey: 'notebookStorage', sidebarOpen: true};
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
+    expect(wrapper.find('[data-test-id="help-sidebar-icon-0"]').get(0).props.icon.iconName).toBe('folder-open');
+  });
+
   it('should update marginRight style when sidebarOpen prop changes', () => {
-    props = {helpContent: 'data', sidebarOpen: true};
+    props = {helpContentKey: 'data', sidebarOpen: true};
     const wrapper = component();
     expect(wrapper.find('[data-test-id="sidebar-content"]').prop('style').marginRight).toBe(0);
     wrapper.setProps({sidebarOpen: false});

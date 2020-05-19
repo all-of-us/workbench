@@ -13,7 +13,7 @@ import {EmptyResponse} from 'generated/fetch/api';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
-    username: 'testers',
+    username: 'tester@fake-research-aou.org',
     contactEmail: 'tester@mactesterson.edu><script>alert("hello");</script>',
     dataAccessLevel: DataAccessLevel.Registered,
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',

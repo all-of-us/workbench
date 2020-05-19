@@ -70,7 +70,7 @@ enum Tabs {
 }
 
 const descriptions = {
-  datasets: `A dataset is a table containing data about a Cohort that can
+  datasets: `A dataset is a table containing data about a cohort that can
   be exported for analysis. `,
   cohorts: `A cohort is a group of participants based on specific criteria.`,
 };

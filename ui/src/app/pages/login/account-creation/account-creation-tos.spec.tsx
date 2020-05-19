@@ -1,6 +1,6 @@
+import {AccountCreationTos, AccountCreationTosProps} from 'app/pages/login/account-creation/account-creation-tos';
 import {mount, ReactWrapper, shallow, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
-import {AccountCreationTos, AccountCreationTosProps} from 'app/pages/login/account-creation/account-creation-tos';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 const getPrivacyCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
@@ -20,7 +20,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   props = {
     onComplete: onCompleteSpy,
-    pdfPath: '/assets/documents/fake-document-path.pdf',
+    filePath: '/assets/documents/fake-document-path.html',
     afterPrev: false
   };
 });

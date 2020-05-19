@@ -117,6 +117,7 @@ export const TextArea = ({style = {}, onChange, ...props}) => {
 };
 
 interface TextAreaWithLengthValidationMessageProps {
+  heightOverride?: {};
   id: string;
   initialText: string;
   maxCharacters: number;
@@ -180,7 +181,7 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
 
     return <React.Fragment>
       <TextArea
-          style={{...styles.textBoxWithLengthValidationTextBoxStyle, ...this.props.textBoxStyleOverrides}}
+          style={{...styles.textBoxWithLengthValidationTextBoxStyle, ...this.props.textBoxStyleOverrides, ...this.props.heightOverride}}
           id={id}
           value={text}
           onBlur={() => this.updateShowTooShortWarning()}

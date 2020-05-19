@@ -14,7 +14,7 @@ parameters:
 anchors:
   defaults: &defaults
     docker:
-      - image: allofustest/workbench:buildimage-0.0.16
+      - image: allofustest/workbench:buildimage-0.0.17
     working_directory: ~/workbench
 
   java_defaults: &java_defaults
@@ -243,7 +243,7 @@ jobs:
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
     docker:
-      - image: allofustest/workbench:buildimage-0.0.16
+      - image: allofustest/workbench:buildimage-0.0.17
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
@@ -346,6 +346,9 @@ jobs:
           save: true
 
   api-bigquery-test:
+    # We're hitting OOM failures as of 13 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
+    # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
+    resource_class: medium+
     <<: *java_defaults
     steps:
       - checkout_init_git

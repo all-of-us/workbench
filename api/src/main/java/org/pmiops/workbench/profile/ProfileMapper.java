@@ -8,9 +8,10 @@ import org.pmiops.workbench.institution.InstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     uses = {
       AddressMapper.class,
       CommonMappers.class,

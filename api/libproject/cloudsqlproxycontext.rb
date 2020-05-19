@@ -1,4 +1,5 @@
 require_relative "../../aou-utils/serviceaccounts"
+require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
 
 class CloudSqlProxyContext < ServiceAccountContext
@@ -14,7 +15,7 @@ class CloudSqlProxyContext < ServiceAccountContext
         })
       end
       begin
-        sleep 1 # TODO(dmohs): Detect running better.
+        Common.new.run_inline(%W{wait-for-it 0.0.0.0:3307 -t 120})
         yield
       ensure
         Process.kill "HUP", @ps

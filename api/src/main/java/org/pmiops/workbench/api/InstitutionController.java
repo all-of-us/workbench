@@ -5,6 +5,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.CheckEmailRequest;
 import org.pmiops.workbench.model.CheckEmailResponse;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
 import org.pmiops.workbench.model.GetPublicInstitutionDetailsResponse;
@@ -78,7 +79,24 @@ public class InstitutionController implements InstitutionApiDelegate {
    * @return Returns whether the email is a valid institutional member.
    */
   @Override
-  public ResponseEntity<CheckEmailResponse> checkEmail(final String shortName, final String email) {
+  public ResponseEntity<CheckEmailResponse> checkEmail(
+      final String shortName, final CheckEmailRequest request) {
+    return ResponseEntity.ok(
+        new CheckEmailResponse()
+            .isValidMember(
+                institutionService.validateInstitutionalEmail(
+                    getInstitutionImpl(shortName), request.getContactEmail())));
+  }
+
+  /**
+   * Note: this API is publicly-accessible since it is called during account creation.
+   *
+   * @return Returns whether the email is a valid institutional member.
+   * @deprecated in favor of the newer POST checkEmail() endpoint
+   */
+  @Override
+  public ResponseEntity<CheckEmailResponse> deprecatedCheckEmail(
+      final String shortName, final String email) {
     return ResponseEntity.ok(
         new CheckEmailResponse()
             .isValidMember(

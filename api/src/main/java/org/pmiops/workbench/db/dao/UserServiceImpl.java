@@ -47,7 +47,6 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -412,29 +411,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * dbExistingVerifiedInstitutionalAffiliation and update it with Institution role and other text
    *
    * @param dbUser
-   * @param dbVerifiedAffiliation
    * @return
    */
   @Override
-  public DbUser updateUserWithConflictHandling(
-      DbUser dbUser, DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
+  public DbUser updateUserWithConflictHandling(DbUser dbUser) {
     try {
       dbUser = userDao.save(dbUser);
-      boolean requireInstitutionalVerification =
-          configProvider.get().featureFlags.requireInstitutionalVerification;
-      if (requireInstitutionalVerification) {
-        DbVerifiedInstitutionalAffiliation dbExistingVerifiedInstitutionalAffiliation =
-            verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).get();
-        dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(
-            dbVerifiedAffiliation.getInstitutionalRoleEnum());
-        if (dbVerifiedAffiliation.getInstitutionalRoleEnum().equals(InstitutionalRole.OTHER)) {
-          dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText(
-              dbVerifiedAffiliation.getInstitutionalRoleOtherText());
-        } else {
-          dbExistingVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText("");
-        }
-        this.verifiedInstitutionalAffiliationDao.save(dbExistingVerifiedInstitutionalAffiliation);
-      }
     } catch (ObjectOptimisticLockingFailureException e) {
       log.log(Level.WARNING, "version conflict for user update", e);
       throw new ConflictException("Failed due to concurrent modification");

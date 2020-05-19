@@ -70,6 +70,14 @@ bundle install
 ## Tasks
 A variety of tasks (sub-commands) are available via the required `-t` option. Here  are their
 brief descriptions:
+- `backup-config`: Generate JSON or YAML files for each Stackdriver asset (other GCP assets TBD),
+in a directory structure corresponding to the formal name e.g
+`projects/projectName/things/thingName/2319411720463250523/2020-05-12T18-12-43.json`. Scans all
+passed-in projects in sequence.
+    - usage: `./devops.rb --task=backup-config
+                          --envs-file=~/scratch/projects.json
+                          --output-dir=~/scratch/config_dump
+                          --output-format=JSON`
 - `delete-all-service-account-keys`: Delete all the keys for the servie accounts and environments
 supplied. This action will interfere with any other users of this service account, so use with care.
 Main use case is cleaning up after debugging sessions where the process with a breakpoint is killed

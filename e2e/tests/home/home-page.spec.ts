@@ -47,8 +47,8 @@ describe('Home page ui tests', () => {
     }
   });
 
-   // Click See All Workspaces link => Opens Your Workspaces page
-  test('Click on See All Workspace link', async () => {
+   // Click See All workspaces link => Opens Your Workspaces page
+  test('Click on See All workspace link', async () => {
     const seeAllWorkspacesLink = await Link.forLabel(page, HOME_PAGE_LABEL_ALIAS.SEE_ALL_WORKSPACES);
     await seeAllWorkspacesLink.click();
     const workspaces = new WorkspacesPage(page);

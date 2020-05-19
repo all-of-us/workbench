@@ -8,13 +8,12 @@ import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.com
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {wizardStore} from 'app/cohort-search/search-state.service';
-import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
+import {SelectionListComponent} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTreeComponent} from 'app/cohort-search/tree/tree.component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType} from 'generated';
 import {CohortBuilderApi} from 'generated/fetch';
-import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
@@ -33,7 +32,7 @@ describe('ModalComponent', () => {
         ModalComponent,
         ModifierPageComponent,
         ListSearchComponent,
-        SelectionInfoComponent,
+        SelectionListComponent,
         SafeHtmlPipe,
         ValidatorErrorsComponent,
       ],
@@ -41,7 +40,6 @@ describe('ModalComponent', () => {
         ClarityModule,
         FormsModule,
         NgxPopperModule,
-        NouisliderModule,
         ReactiveFormsModule,
       ],
     })

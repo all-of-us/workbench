@@ -5,16 +5,19 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.appengine.repackaged.com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,33 +28,36 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class InstitutionMapperTest {
   @Autowired InstitutionMapper mapper;
+  @MockBean InstitutionService service;
 
-  private List<String> modelDomains;
-  private List<String> modelAddresses;
+  private List<String> sortedModelDomains;
+  private List<String> sortedModelAddresses;
   private Set<DbInstitutionEmailDomain> dbDomains;
   private Set<DbInstitutionEmailAddress> dbAddresses;
 
   @Before
   public void setup() {
-    modelDomains = Lists.newArrayList("broad.org", "broadinst.org");
-    modelAddresses = Lists.newArrayList("joel@other-univ.org");
+    sortedModelDomains = Lists.newArrayList("broad.org", "verily.com");
+    sortedModelAddresses = Lists.newArrayList("alice@nih.gov", "joel@other-inst.org");
 
     // note: these do NOT have their institutions set
     // so they will match the withoutInstitution tests
 
     dbDomains =
         Sets.newHashSet(
-            new DbInstitutionEmailDomain().setEmailDomain("broad.org"),
-            new DbInstitutionEmailDomain().setEmailDomain("broadinst.org"));
+            new DbInstitutionEmailDomain().setEmailDomain("verily.com"),
+            new DbInstitutionEmailDomain().setEmailDomain("broad.org"));
 
     dbAddresses =
-        Sets.newHashSet(new DbInstitutionEmailAddress().setEmailAddress("joel@other-univ.org"));
+        Sets.newHashSet(
+            new DbInstitutionEmailAddress().setEmailAddress("joel@other-inst.org"),
+            new DbInstitutionEmailAddress().setEmailAddress("alice@nih.gov"));
   }
 
   @Test
   public void test_toModelDomains() {
     final List<String> testModelDomains = mapper.toModelDomains(dbDomains);
-    assertThat(testModelDomains).containsExactlyElementsIn(modelDomains);
+    assertThat(testModelDomains).isEqualTo(sortedModelDomains);
 
     // round trip
     assertThat(mapper.toDbDomainsWithoutInstitution(testModelDomains)).isEqualTo(dbDomains);
@@ -60,11 +66,11 @@ public class InstitutionMapperTest {
   @Test
   public void test_toDbDomainsWithoutInstitution() {
     final Set<DbInstitutionEmailDomain> testDbDomains =
-        mapper.toDbDomainsWithoutInstitution(modelDomains);
+        mapper.toDbDomainsWithoutInstitution(sortedModelDomains);
     assertThat(testDbDomains).containsExactlyElementsIn(dbDomains);
 
     // round trip
-    assertThat(mapper.toModelDomains(testDbDomains)).isEqualTo(modelDomains);
+    assertThat(mapper.toModelDomains(testDbDomains)).isEqualTo(sortedModelDomains);
   }
 
   @Test
@@ -75,7 +81,7 @@ public class InstitutionMapperTest {
   @Test
   public void test_toModelAddresses() {
     final List<String> testModelAddresses = mapper.toModelAddresses(dbAddresses);
-    assertThat(testModelAddresses).containsExactlyElementsIn(modelAddresses);
+    assertThat(testModelAddresses).isEqualTo(sortedModelAddresses);
 
     // round trip
     assertThat(mapper.toDbAddressesWithoutInstitution(testModelAddresses)).isEqualTo(dbAddresses);
@@ -84,11 +90,11 @@ public class InstitutionMapperTest {
   @Test
   public void test_toDbAddressesWithoutInstitution() {
     final Set<DbInstitutionEmailAddress> testDbAddresses =
-        mapper.toDbAddressesWithoutInstitution(modelAddresses);
+        mapper.toDbAddressesWithoutInstitution(sortedModelAddresses);
     assertThat(testDbAddresses).containsExactlyElementsIn(dbAddresses);
 
     // round trip
-    assertThat(mapper.toModelAddresses(testDbAddresses)).isEqualTo(modelAddresses);
+    assertThat(mapper.toModelAddresses(testDbAddresses)).isEqualTo(sortedModelAddresses);
   }
 
   @Test
@@ -102,8 +108,8 @@ public class InstitutionMapperTest {
         new Institution()
             .shortName("Test")
             .displayName("Test State University")
-            .emailDomains(modelDomains)
-            .emailAddresses(modelAddresses);
+            .emailDomains(sortedModelDomains)
+            .emailAddresses(sortedModelAddresses);
 
     final DbInstitution dbInst = mapper.modelToDb(inst);
 
@@ -116,12 +122,12 @@ public class InstitutionMapperTest {
 
     // likewise for addresses
 
-    final Institution roundTrip = mapper.dbToModel(dbInst);
+    final Institution roundTrip = mapper.dbToModel(dbInst, service);
 
     assertThat(roundTrip.getShortName()).isEqualTo(inst.getShortName());
     assertThat(roundTrip.getDisplayName()).isEqualTo(inst.getDisplayName());
-    assertThat(roundTrip.getEmailDomains()).containsExactlyElementsIn(inst.getEmailDomains());
-    assertThat(roundTrip.getEmailAddresses()).containsExactlyElementsIn(inst.getEmailAddresses());
+    assertThat(roundTrip.getEmailDomains()).isEqualTo(inst.getEmailDomains());
+    assertThat(roundTrip.getEmailAddresses()).isEqualTo(inst.getEmailAddresses());
   }
 
   @Test
@@ -133,12 +139,44 @@ public class InstitutionMapperTest {
             .setEmailDomains(dbDomains)
             .setEmailAddresses(dbAddresses);
 
-    final Institution inst = mapper.dbToModel(dbInst);
+    final Institution inst = mapper.dbToModel(dbInst, service);
 
     assertThat(inst.getShortName()).isEqualTo(dbInst.getShortName());
     assertThat(inst.getDisplayName()).isEqualTo(dbInst.getDisplayName());
-    assertThat(inst.getEmailDomains()).containsExactlyElementsIn(modelDomains);
-    assertThat(inst.getEmailAddresses()).containsExactlyElementsIn(modelAddresses);
+    assertThat(inst.getEmailDomains()).isEqualTo(sortedModelDomains);
+    assertThat(inst.getEmailAddresses()).isEqualTo(sortedModelAddresses);
+
+    final DbInstitution roundTrip = mapper.modelToDb(inst);
+
+    assertThat(roundTrip.getShortName()).isEqualTo(dbInst.getShortName());
+    assertThat(roundTrip.getDisplayName()).isEqualTo(dbInst.getDisplayName());
+
+    // cannot assert that roundTrip.getEmailDomains() matches dbInst.getEmailDomains()
+    // because the dbInst DbInstitutionEmailDomains are associated with dbInst
+    // and the roundTrip DbInstitutionEmailDomains are associated with roundTrip
+
+    // likewise for addresses
+  }
+
+  @Test
+  public void test_dbToModelWithUserInstructions() {
+    final DbInstitution dbInst =
+        new DbInstitution()
+            .setShortName("Test")
+            .setDisplayName("Test State University")
+            .setEmailDomains(dbDomains)
+            .setEmailAddresses(dbAddresses);
+
+    Mockito.when(service.getInstitutionUserInstructions("Test"))
+        .thenReturn(Optional.of("UserInstruction"));
+
+    final Institution inst = mapper.dbToModel(dbInst, service);
+
+    assertThat(inst.getShortName()).isEqualTo(dbInst.getShortName());
+    assertThat(inst.getDisplayName()).isEqualTo(dbInst.getDisplayName());
+    assertThat(inst.getEmailDomains()).isEqualTo(sortedModelDomains);
+    assertThat(inst.getEmailAddresses()).isEqualTo(sortedModelAddresses);
+    assertThat(inst.getUserInstructions()).isEqualTo("UserInstruction");
 
     final DbInstitution roundTrip = mapper.modelToDb(inst);
 

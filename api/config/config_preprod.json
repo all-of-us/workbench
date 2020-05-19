@@ -1,0 +1,114 @@
+{
+  "firecloud": {
+    "baseUrl": "https:\/\/api.firecloud.org",
+    "clusterMaxAgeDays": 14,
+    "clusterIdleMaxAgeDays": 7,
+    "clusterDefaultMachineType": "n1-highmem-4",
+    "clusterDefaultDiskSizeGb": 50,
+    "debugEndpoints": false,
+    "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
+    "registeredDomainName": "all-of-us-registered-preprod",
+    "registeredDomainGroup": "all-of-us-registered-preprod@firecloud.org",
+    "xAppIdValue": "preprod-AoU-RW",
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod",
+    "timeoutInSeconds": 60,
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:0.0.1",
+    "welderDockerImage": "broadinstitute/welder-server:e6562d0"
+  },
+  "billing": {
+    "accountId": "00293C-5DEA2D-6887E7",
+    "projectNamePrefix": "aou-rw-preprod-",
+    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
+    "retryCount": 4,
+    "bufferCapacity": 20,
+    "bufferRefillProjectsPerTask": 1,
+    "defaultFreeCreditsDollarLimit": 300.0,
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
+    "garbageCollectionUserCapacity": 1000,
+    "garbageCollectionUsers": [
+      "aou-rw-gc-preprod-1@all-of-us-rw-preprod.iam.gserviceaccount.com"
+    ]
+  },
+  "auth": {
+    "serviceAccountApiUsers": [
+      "all-of-us-rw-preprod@appspot.gserviceaccount.com"
+    ]
+  },
+  "cdr": {
+    "debugQueries": false
+  },
+  "googleCloudStorageService": {
+    "clusterResourcesBucketName": "all-of-us-rw-preprod-cluster-resources",
+    "credentialsBucketName": "all-of-us-rw-preprod-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
+  },
+  "googleDirectoryService": {
+    "gSuiteDomain": "preprod.researchallofus.org"
+  },
+  "server": {
+    "apiBaseUrl": "https:\/\/api.preprod-workbench.researchallofus.org",
+    "uiBaseUrl": "https:\/\/preprod-workbench.researchallofus.org",
+    "publicApiKeyForErrorReports": "AIzaSyA5Q0xqZdyaHUIUjZFqpim26wQFO0JqIRw",
+    "projectId": "all-of-us-rw-preprod",
+    "shortName": "preprod",
+    "oauthClientId": "589109405884-bmoj9ra8849rqeepuamk8jpu102iq363.apps.googleusercontent.com",
+    "traceAllRequests": false,
+    "appEngineLocationId": "us-central"
+  },
+  "admin": {
+    "adminIdVerification": "support@researchallofus.org",
+    "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"
+  },
+  "mandrill": {
+    "fromEmail": "donotreply@researchallofus.org",
+    "sendRetries": 3
+  },
+  "zendesk": {
+    "host": "https:\/\/aousupporthelp.zendesk.com"
+  },
+  "elasticsearch": {
+    "baseUrl": "",
+    "enableBasicAuth": true,
+    "enableElasticsearchBackend": false
+  },
+  "moodle": {
+    "host": "aou.nnlm.gov",
+    "enableMoodleBackend": true,
+    "credentialsKeyV1": "moodle-key.txt",
+    "credentialsKeyV2": "moodle-key-v2.txt"
+  },
+  "access": {
+    "enableComplianceTraining": false,
+    "enableEraCommons": true,
+    "enableDataUseAgreement": true,
+    "enableBetaAccess": false,
+    "unsafeAllowSelfBypass": false,
+    "requireInvitationKey": false
+  },
+  "featureFlags": {
+    "unsafeAllowDeleteUser": false,
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": true,
+    "enableRdrExport": true,
+    "enableBillingLockout": true,
+    "enableBillingUpgrade": false,
+    "enableSumoLogicEventHandling": true,
+    "useKeylessDelegatedCredentials": true,
+    "sendFreeTierAlertEmails": true,
+    "enableMoodleV2Api": true,
+    "requireInstitutionalVerification": true,
+    "enableCBAgeTypeOptions": false,
+    "enableV3DataUserCodeOfConduct": true,
+    "enableEventDateModifier": false
+  },
+  "actionAudit": {
+    "logName":"workbench-action-audit-preprod"
+  },
+  "captcha": {
+    "enableCaptcha": true,
+    "useTestCaptcha": false
+  }
+}

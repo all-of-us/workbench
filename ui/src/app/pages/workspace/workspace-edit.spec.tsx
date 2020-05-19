@@ -73,7 +73,7 @@ describe('WorkspaceEdit', () => {
     currentWorkspaceStore.next(undefined);
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Create a new Workspace');
+    expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Create a new workspace');
 
     // Ensure the 'drug development' checkbox is not checked when creating.
     expect(wrapper.find('[data-test-id="researchPurpose-checkbox"]').first().prop('checked'))

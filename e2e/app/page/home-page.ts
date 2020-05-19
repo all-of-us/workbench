@@ -10,7 +10,7 @@ export const PAGE = {
 };
 
 export const LABEL_ALIAS = {
-  SEE_ALL_WORKSPACES: 'See all Workspaces',
+  SEE_ALL_WORKSPACES: 'See all workspaces',
   CREATE_NEW_WORKSPACE: 'Workspaces',
 };
 

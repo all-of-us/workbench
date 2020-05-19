@@ -26,22 +26,28 @@ def parse_options
     parser.on('-s', '--source-uri [SOURCE-URI]', String, 'URI or fully qualified name for source asset')
     parser.on('-u', '--source-env [SOURCE-ENV]', String, 'Short name for source Environment (lowercase), for example "staging".')
     parser.on('-d', '--dry-run', 'Execute a dry run of the task')
+    parser.on('-p', '--output-dir [OUTPUT-DIR]', 'Output directory')
     parser.on('-i', '--input-tools-file [INPUT-TOOLS-FILE]', String, 'Input YAML file for tools')
     parser.on('-o', '--output-file [OUTPUT-FILE]', String, 'Output file for task.')
+    parser.on('-f', '--output-format [OUTPUT-FORMAT]', String, 'Output format for task. Currently YAML and JSON are supported.')
+
   end.parse!({into: options})
 
-  #Now raise an exception if we have not found a required arg
+  # Now raise an exception if we have not found an argument required by all taks
   raise OptionParser::MissingArgument.new('task') if options[:task].nil?
 
   options
 end
 
+# TODO(jaycarlton) take in log level as an argument
 def setup_logger
   logger = Logger.new(STDOUT)
+  logger.level = Logger::INFO
+  logger.datetime_format = '%Y-%m-%d %H:%M:%S'
   logger.formatter = proc do |severity, datetime, _progname, msg|
     "#{datetime} #{severity}: #{msg}\n"
   end
-  logger.datetime_format = '%Y-%m-%d %H:%M:%S'
+
   logger
 end
 
@@ -52,6 +58,11 @@ def run_task(options)
   options[:logger] = setup_logger
   # New tasks must be included here.
   case options[:task]
+  when 'backup-config'
+    raise OptionParser::MissingArgument.new('envs-file') if options[:'envs-file'].to_s.empty?
+    raise OptionParser::MissingArgument.new('output-dir') if options[:'output-dir'].to_s.empty?
+    MonitoringAssets.new(File.expand_path(options[:'envs-file']), File.expand_path(options[:'output-dir']),
+                         options[:logger], options[:'output-format'].to_s.downcase.to_sym).backup_config
   when 'delete-all-service-account-keys'
     # Delete all user-generated SA keys for given service account. Should only be necessary
     # to clean up after debug sessions that killed the process before it had time to delete the
@@ -65,6 +76,7 @@ def run_task(options)
   when 'list-dev-tools'
     DeveloperEnvironment.new(options).list
   when 'inventory'
+    raise OptionParser::MissingArgument.new('envs-file') if options[:'envs-file'].to_s.empty?
     MonitoringAssets.new(options[:'envs-file'], options[:logger]).inventory
   when 'replicate-dashboard'
     Dashboards.new(options).replicate

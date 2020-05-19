@@ -14,7 +14,7 @@ import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {SearchGroupListComponent} from 'app/cohort-search/search-group-list/search-group-list.component';
 import {wizardStore} from 'app/cohort-search/search-state.service';
-import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
+import {SelectionListComponent} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTreeComponent} from 'app/cohort-search/tree/tree.component';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
 import {HelpSidebarComponent} from 'app/components/help-sidebar';
@@ -22,7 +22,6 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, CohortsService, DomainType} from 'generated';
 import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
-import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
@@ -51,7 +50,7 @@ describe('CohortSearchComponent', () => {
         OverviewComponent,
         SearchGroupListComponent,
         ListSearchComponent,
-        SelectionInfoComponent,
+        SelectionListComponent,
         SafeHtmlPipe,
         ValidatorErrorsComponent,
       ],
@@ -59,7 +58,6 @@ describe('CohortSearchComponent', () => {
         ClarityModule,
         FormsModule,
         NgxPopperModule,
-        NouisliderModule,
         ReactiveFormsModule
       ],
       providers: [

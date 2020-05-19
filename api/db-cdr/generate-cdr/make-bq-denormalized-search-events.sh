@@ -165,7 +165,6 @@ FROM
             m.value_as_number as diastolic
         FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
         WHERE m.measurement_source_concept_id = 903115
-        GROUP BY m.person_id, m.measurement_datetime, diastolic
     ) as meas
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
@@ -186,7 +185,6 @@ FROM
             m.value_as_number as systolic
         FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
         WHERE m.measurement_source_concept_id = 903118
-        GROUP BY m.person_id, m.measurement_datetime, systolic
     ) as meas
 WHERE meas.person_id = sad.person_id
     and meas.measurement_datetime = sad.entry_datetime
