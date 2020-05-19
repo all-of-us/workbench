@@ -71,3 +71,7 @@ export function clrIconXpath(opts: TextOptions, shapeValue: string) {
   const nodeLevel = opts.ancestorNodeLevel || 1;
   return `//*[${textXpathHelper(opts)}]/ancestor::node()[${nodeLevel}]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
 }
+
+export function iframeXpath(label: string) {
+  return `//body[@id='body']//*[contains(@aria-label, '${label}')]//iframe`
+}

@@ -1,4 +1,4 @@
-import {ElementHandle, JSHandle, Page} from 'puppeteer';
+import {Page, Frame} from 'puppeteer';
 import {defaultFieldValues} from 'resources/data/user-registration-data';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
@@ -8,6 +8,7 @@ import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import BasePage from 'app/page/base-page';
 import {config} from 'resources/workbench-config';
+import {findIframe} from 'app/element/xpath-finder';
 
 const faker = require('faker/locale/en_US');
 
@@ -69,18 +70,17 @@ export default class CreateAccountPage extends BasePage {
     return await Button.forLabel(this.page, {text: 'Next'});
   }
 
-  async getPdfPage(): Promise<JSHandle> {
-    const pdfPage =  await this.page.waitForFunction(() => {
-      return document.querySelectorAll('.pdf-page[data-page-number]').length > 1
-    });
-    return pdfPage;
+  async agreementLoaded(): Promise<boolean> {
+    const iframe = await findIframe(this.page, 'terms of service agreement')
+    const bodyHandle = await iframe.$('body')
+    return await iframe.evaluate(body => body.scrollHeight > 0, bodyHandle)
   }
 
-  async scrollToLastPdfPage(): Promise<ElementHandle> {
-    const selector = '.react-pdf__Document :last-child.react-pdf__Page.pdf-page';
-    const pdfPage = await this.page.waitForSelector(selector, {visible: true});
-    await this.page.evaluate(el => el.scrollIntoView(), pdfPage);
-    return pdfPage;
+  async readAgreement(): Promise<Frame> {
+    const iframe = await findIframe(this.page, 'terms of service agreement')
+    const bodyHandle = await iframe.$('body')
+    await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle)
+    return iframe;  
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
@@ -169,7 +169,7 @@ export default class CreateAccountPage extends BasePage {
     await this.getTermsOfUseCheckbox();
     await this.getNextButton();
 
-    await this.scrollToLastPdfPage();
+    await this.readAgreement();
 
     // check by click on label works
     await (await this.getPrivacyStatementCheckbox()).check();
