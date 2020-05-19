@@ -8,6 +8,7 @@ import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -140,7 +141,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Workbench account to your eRA Commons account. There is no exchange of personal data in this step.',
+    description: 'Connect your Researcher Workbench account to your eRA Commons account. There is no exchange of personal data in this step.',
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
@@ -152,7 +153,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionPropsKey: 'trainingCompleted',
     title: <span><i>All of Us</i> Responsible Conduct of Research Training</span>,
     description: <div>Complete ethics training courses to understand the privacy safeguards and the
-      compliance requirements for using the <i>All of Us</i> Dataset.</div>,
+      compliance requirements for using the <AoU/> dataset.</div>,
     buttonText: 'Complete training',
     featureFlag: serverConfigStore.getValue().enableComplianceTraining,
     completedText: 'Completed',
@@ -164,7 +165,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'dataUserCodeOfConduct',
     completionPropsKey: 'dataUserCodeOfConductCompleted',
     title: 'Data User Code of Conduct',
-    description: <span>Sign the data user code of conduct consenting to the <i>All of Us</i> data use policy.</span>,
+    description: <span>Sign the Data User Code of Conduct consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',

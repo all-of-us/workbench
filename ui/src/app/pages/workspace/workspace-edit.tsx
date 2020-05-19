@@ -5,12 +5,12 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
+import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
-
-import {BulletAlignedUnorderedList} from 'app/components/lists';
+import {AoU, AouTitle} from 'app/components/text-wrappers';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -443,7 +443,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     renderBillingDescription() {
       return <div>
-        The <i>All of Us</i> Program provides $300 in free credits per user. Please refer to
+        The <AouTitle/> provides $300 in free credits per user. Please refer to
         <StyledAnchorTag href={'https://aousupporthelp.zendesk.com/hc/en-us/sections' +
         '/360008099991-Questions-About-Billing'} target='_blank'> &nbsp;this article
         </StyledAnchorTag> to learn more about the free credit
@@ -586,7 +586,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     renderHeader() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create:
-          return 'Create a new Workspace';
+          return 'Create a new workspace';
         case WorkspaceEditMode.Edit:
           return 'Edit workspace \"' + this.state.workspace.name + '\"';
         case WorkspaceEditMode.Duplicate:
@@ -949,7 +949,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
         }
         {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
-          <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
+          <WorkspaceEditSection header={<div><AoU/> billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
               Select account
@@ -1104,7 +1104,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
           <div style={{...styles.text, marginLeft: '1.2rem'}}>
-            <strong>If "Yes": </strong> please indicate your underrepresented population(s) of
+            <strong>If "Yes,"</strong>&nbsp;please indicate your underrepresented population(s) of
             interest:
             <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
               <FlexColumn>
@@ -1173,7 +1173,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </TooltipTrigger>
             &nbsp;If you are concerned that your research could inadvertently stigmatize
             participants or communities, or if you are unsure, let us know. We encourage you to
-            request a review of your research purpose statement by the All of Us Resource Access
+            request a review of your research purpose statement by the <AoU/> Resource Access
             Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
             modifying your research purpose or scope. To learn more, please refer to the&nbsp;
             <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
@@ -1329,7 +1329,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 <a style={{color: colors.accent}}
                   href='https://www.researchallofus.org/research-projects-directory/'
                   target='_blank'> displayed publicly </a>
-                 to inform <i>All of Us</i> Research participants. Therefore, please verify that you have provided sufficiently detailed
+                 to inform <AoU/> research participants. Therefore, please verify that you have provided sufficiently detailed
                  responses in plain language.
               </div>
               <div>You can also make changes to your answers after you create your workspace.</div>

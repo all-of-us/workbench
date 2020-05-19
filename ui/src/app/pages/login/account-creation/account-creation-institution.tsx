@@ -358,7 +358,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           <div style={styles.institutionalDuaTextBox}>
             For access to the <i>All of Us</i> Research Program data, your institution needs to have signed a Data Use Agreement
             with the program. The institutions listed below have an Institutional Data Use Agreement with the program that
-            enables us to provide their researchers with access to the Workbench.
+            enables us to provide their researchers with access to the Researcher Workbench.
           </div>
           <div style={{...styles.text, fontSize: 12, marginTop: '0.5rem'}}>
             All fields are required unless indicated as optional
