@@ -11,11 +11,9 @@ import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(
-    uses = {DbStorageEnums.class, MapStructConfig.class})
+@Mapper(uses = {DbStorageEnums.class, MapStructConfig.class})
 public interface CohortAnnotationDefinitionMapper {
 
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")

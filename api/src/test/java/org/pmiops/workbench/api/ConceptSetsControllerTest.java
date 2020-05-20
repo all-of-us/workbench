@@ -250,7 +250,7 @@ public class ConceptSetsControllerTest {
     ComplianceService.class,
     ConceptBigQueryService.class,
     DataSetService.class,
-    DirectoryService.class
+    DirectoryService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
     NotebooksService.class,
