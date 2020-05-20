@@ -45,7 +45,7 @@ interface InstitutionEditState {
 }
 
 let title = 'Add new Institution';
-let initialInstitution;
+let institutionToEdit;
 
 export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, InstitutionEditState> {
   constructor(props) {
@@ -71,12 +71,12 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   async componentDidMount() {
     // If institution short Name is passed in the URL get the institution details
     if (this.props.urlParams.institutionId) {
-      initialInstitution = await institutionApi().getInstitution(this.props.urlParams.institutionId);
-      title = initialInstitution.displayName;
+      institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);
+      title = institutionToEdit.displayName;
       this.setState({
         isAddInstitution: false,
-        institution: initialInstitution,
-        showOtherInstitution: initialInstitution.organizationTypeEnum === OrganizationType.OTHER
+        institution: institutionToEdit,
+        showOtherInstitution: institutionToEdit.organizationTypeEnum === OrganizationType.OTHER
       });
     } else {
       title = 'Add new Institution';
@@ -108,18 +108,19 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   // Confirm each email is a valid email using validate.js
   validateEmailAddresses() {
     const invalidEmailAddress = [];
-    this.state.institution.emailAddresses = this.state.institution.emailAddresses.filter(
-      emailDomain => {
-        return emailDomain !== '' || !!emailDomain;
+    const {emailAddresses} = this.state.institution;
+    this.state.institution.emailAddresses = emailAddresses.filter(
+      emailAddress => {
+        return emailAddress !== '' || !!emailAddress;
       });
 
-    this.state.institution.emailAddresses.map(emailAddress => {
+    emailAddresses.map(emailAddress => {
       const errors = validate({
-        emailAddress
+        emailAddresses
       }, {
-        emailAddress: {email: true}
+        emailAddresses: {email: true}
       });
-      if (errors && errors.emailAddress && errors.emailAddress.length > 0) {
+      if (errors && errors.emailAddresses && errors.emailAddresses.length > 0) {
         invalidEmailAddress.push(emailAddress);
       }
     });
@@ -135,7 +136,8 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   // Confirm each email domain matches with regex
   validateEmailDomain() {
     const invalidEmailDomain = [];
-    this.state.institution.emailDomains =  this.state.institution.emailDomains.filter(emailDomain => emailDomain);
+    const {emailDomains} = this.state.institution;
+    this.state.institution.emailDomains =  emailDomains.filter(emailDomain => emailDomain);
     this.state.institution.emailDomains.map(emailDomain => {
       const errors = validate({
         emailDomain
@@ -159,28 +161,28 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     this.setState(fp.set(['institution', attribute], emailDomainList));
   }
 
+  // Check if the fields have not been edited
+  fieldsNotEdited() {
+    return (this.state.isAddInstitution && !this.fieldsNotEditedAddInstitution)
+        || (institutionToEdit && this.fieldsNotEditedEditInstitution);
+  }
+
   get fieldsNotEditedAddInstitution() {
     const {institution} = this.state;
     return institution.displayName || institution.organizationTypeOtherText ||
-      institution.organizationTypeEnum || institution.duaTypeEnum || institution.emailAddresses || institution.emailDomains;
+        institution.organizationTypeEnum || institution.duaTypeEnum || institution.emailAddresses || institution.emailDomains;
   }
 
   get fieldsNotEditedEditInstitution() {
     const {institution} = this.state;
-    return institution.displayName === initialInstitution.displayName &&
-        institution.organizationTypeEnum === initialInstitution.organizationTypeEnum &&
-        institution.duaTypeEnum === initialInstitution.duaTypeEnum &&
-        institution.emailAddresses === initialInstitution.emailAddresses &&
-        institution.emailDomains === initialInstitution.emailDomains &&
-        institution.userInstructions === initialInstitution.userInstructions &&
-        institution.organizationTypeOtherText === initialInstitution.organizationTypeOtherText;
+    return institution.displayName === institutionToEdit.displayName &&
+        institution.organizationTypeEnum === institutionToEdit.organizationTypeEnum &&
+        institution.duaTypeEnum === institutionToEdit.duaTypeEnum &&
+        institution.emailAddresses === institutionToEdit.emailAddresses &&
+        institution.emailDomains === institutionToEdit.emailDomains &&
+        institution.userInstructions === institutionToEdit.userInstructions &&
+        institution.organizationTypeOtherText === institutionToEdit.organizationTypeOtherText;
   }
-  // Check if the fields have not been edited
-  fieldsNotEdited() {
-    return (this.state.isAddInstitution && !this.fieldsNotEditedAddInstitution)
-        || (initialInstitution && this.fieldsNotEditedEditInstitution);
-  }
-
   // Confirm there is not empty required fields
   noEmptyFields() {
     const {institution} = this.state;
@@ -190,13 +192,17 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
           institution.emailDomains !== undefined : institution.emailAddresses !== undefined;
     }
     return !emailValid || !institution.displayName || !institution.organizationTypeEnum ||
-      !institution.duaTypeEnum || (institution.organizationTypeEnum === OrganizationType.OTHER && !institution.organizationTypeOtherText);
+      !institution.duaTypeEnum ||
+        (institution.organizationTypeEnum === OrganizationType.OTHER &&
+            !institution.organizationTypeOtherText);
   }
 
   // Disable save button if
   // a) No fields were edited or if there are any errors
+  // b) email address/Domain are not valid
   disableSave(errors) {
-    return this.noEmptyFields() || (errors && errors.displayName) || this.fieldsNotEdited() || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
+    return this.noEmptyFields() || (errors && errors.displayName) || this.fieldsNotEdited()
+      || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }
 
   async saveInstitution() {
