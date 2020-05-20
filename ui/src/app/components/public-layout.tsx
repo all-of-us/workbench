@@ -11,7 +11,11 @@ const styles = reactStyles({
 
 export const PUBLIC_HEADER_IMAGE = '/assets/images/all-of-us-logo.svg';
 
-export const PublicLayout = (props) => {
+/**
+ * A layout component suitable for display public-facing content, such as static
+ * content and error pages.
+ */
+export const PublicLayout = ({contentStyle = {}, children}) => {
   return <React.Fragment>
     <div style={{width: '100%', height: '3.5rem',
       borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`}}>
@@ -20,8 +24,8 @@ export const PublicLayout = (props) => {
           src={PUBLIC_HEADER_IMAGE}/>
       </a>
     </div>
-    <div style={styles.content}>
-      {props.children}
+    <div style={{...styles.content, ...contentStyle}}>
+      {children}
     </div>
   </React.Fragment>;
 };

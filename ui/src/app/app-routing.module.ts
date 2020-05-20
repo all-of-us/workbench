@@ -58,11 +58,11 @@ const routes: Routes = [
   }, {
     path: 'session-expired',
     component: SessionExpiredComponent,
-    data: {title: 'Session expired'}
+    data: {title: 'You have been signed out'}
   }, {
     path: 'sign-in-again',
     component: SignInAgainComponent,
-    data: {title: 'Sign in again'}
+    data: {title: 'You have been signed out'}
   }, {
     path: 'user-disabled',
     component: UserDisabledComponent,
