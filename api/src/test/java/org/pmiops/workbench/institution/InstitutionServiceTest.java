@@ -17,16 +17,17 @@ import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -43,33 +44,45 @@ public class InstitutionServiceTest {
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final Institution testInst =
-      new Institution().shortName("test").displayName("this is a test");
+      new Institution()
+          .displayName("this is a test")
+          .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
 
   // the mapper converts nulls to empty sets
   private final Institution roundTrippedTestInst =
       new Institution()
-          .shortName(testInst.getShortName())
           .displayName(testInst.getDisplayName())
+          .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+          .duaTypeEnum(DuaType.MASTER)
           .emailDomains(Collections.emptyList())
-          .emailAddresses(Collections.emptyList());
+          .emailAddresses(Collections.emptyList())
+          .userInstructions("");
 
   @Before
   public void setUp() {
     // will be retrieved as roundTrippedTestInst
-    service.createInstitution(testInst);
+    Institution createdInstitution = service.createInstitution(testInst);
+    testInst.setShortName(createdInstitution.getShortName());
+    roundTrippedTestInst.setShortName(createdInstitution.getShortName());
   }
 
   @Test
   public void test_createAnotherInstitution() {
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst);
 
-    final Institution anotherInst =
+    Institution anotherInst =
         new Institution()
-            .shortName("otherInst")
             .displayName("The Institution of testing")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailDomains(Collections.emptyList())
-            .emailAddresses(Collections.emptyList());
-    assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
+            .emailAddresses(Collections.emptyList())
+            .userInstructions("");
+    Institution createdInstitution = service.createInstitution(anotherInst);
+    // Short Name will have random integers attach to first three characters of display Name hence
+    // checking for contains
+    assertThat(createdInstitution.getShortName()).contains(anotherInst.getShortName());
+    anotherInst.setShortName(createdInstitution.getShortName());
+    assertThat(createdInstitution).isEqualTo(anotherInst);
 
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
   }
@@ -84,7 +97,8 @@ public class InstitutionServiceTest {
   public void test_deleteAndRecreateInstitution() {
     service.deleteInstitution(testInst.getShortName());
     assertThat(service.getInstitutions()).isEmpty();
-    service.createInstitution(testInst);
+    String shortName = service.createInstitution(testInst).getShortName();
+    roundTrippedTestInst.setShortName(shortName);
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst);
   }
 
@@ -105,10 +119,11 @@ public class InstitutionServiceTest {
 
     final Institution otherInst =
         new Institution()
-            .shortName("otherInst")
             .displayName("The Institution of testing")
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
             .emailDomains(Collections.emptyList())
-            .emailAddresses(Collections.emptyList());
+            .emailAddresses(Collections.emptyList())
+            .userInstructions("User Instruction for otherInst");
     service.createInstitution(otherInst);
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, otherInst);
 
@@ -121,11 +136,8 @@ public class InstitutionServiceTest {
   @Test
   public void test_getInstitutionsWithInstruction() {
     final String instructions = "Do some magic!";
-    final InstitutionUserInstructions inst =
-        new InstitutionUserInstructions()
-            .institutionShortName(roundTrippedTestInst.getShortName())
-            .instructions(instructions);
-    service.setInstitutionUserInstructions(inst);
+    roundTrippedTestInst.setUserInstructions(instructions);
+    service.updateInstitution(roundTrippedTestInst.getShortName(), roundTrippedTestInst);
     List<Institution> institutionList = service.getInstitutions();
     assertThat(institutionList.get(0).getUserInstructions()).contains(instructions);
   }
@@ -133,39 +145,31 @@ public class InstitutionServiceTest {
   @Test
   public void test_getInstitutionsWithoutInstruction() {
     List<Institution> institutionList = service.getInstitutions();
-    assertThat(institutionList.get(0).getUserInstructions()).isNull();
+    assertThat(institutionList.get(0).getUserInstructions()).isEmpty();
   }
 
   @Test
   public void test_getInstitution() {
+    roundTrippedTestInst.setShortName(testInst.getShortName());
     assertThat(service.getInstitution(testInst.getShortName())).hasValue(roundTrippedTestInst);
     assertThat(service.getInstitution("otherInst")).isEmpty();
 
     final Institution otherInst =
         new Institution()
-            .shortName("otherInst")
             .displayName("The Institution of testing")
+            .duaTypeEnum(DuaType.MASTER)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailAddresses(Collections.emptyList())
-            .emailDomains(Collections.emptyList());
-    service.createInstitution(otherInst);
-    assertThat(service.getInstitution("otherInst")).hasValue(otherInst);
-  }
-
-  @Test
-  public void test_updateInstitution_shortName() {
-    final String oldShortName = testInst.getShortName();
-    final String newShortName = "NewShortName";
-    final Institution newInst = roundTrippedTestInst.shortName(newShortName);
-    assertThat(service.updateInstitution(oldShortName, newInst)).hasValue(newInst);
-
-    assertThat(service.getInstitution(oldShortName)).isEmpty();
-    assertThat(service.getInstitution(newShortName)).hasValue(newInst);
+            .emailDomains(Collections.emptyList())
+            .userInstructions("");
+    Institution createdIn = service.createInstitution(otherInst);
+    assertThat(service.getInstitution(createdIn.getShortName())).hasValue(otherInst);
   }
 
   @Test
   public void test_updateInstitution_displayName() {
-    final Institution newInst = roundTrippedTestInst.displayName("a different display name");
-
+    Institution newInst = roundTrippedTestInst.displayName("a different display name");
+    newInst.setShortName(testInst.getShortName());
     assertThat(service.updateInstitution(testInst.getShortName(), newInst)).hasValue(newInst);
     assertThat(service.getInstitution(testInst.getShortName())).hasValue(newInst);
     assertThat(service.getInstitution(testInst.getShortName()).get().getDisplayName())
@@ -176,8 +180,8 @@ public class InstitutionServiceTest {
   public void test_updateInstitution_emails() {
     final Institution instWithEmails =
         new Institution()
-            .shortName("hasEmails")
             .displayName("another test")
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
             .emailDomains(ImmutableList.of("broad.org", "google.com"))
             .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com"));
     final Institution instWithEmailsRoundTrip = service.createInstitution(instWithEmails);
@@ -209,8 +213,8 @@ public class InstitutionServiceTest {
   public void test_uniqueEmailPatterns() {
     final Institution instWithDupes =
         new Institution()
-            .shortName("test2")
             .displayName("another test")
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
             .emailDomains(ImmutableList.of("broad.org", "broad.org", "google.com"))
             .emailAddresses(
                 ImmutableList.of("joel@broad.org", "joel@broad.org", "joel@google.com"));
@@ -234,15 +238,15 @@ public class InstitutionServiceTest {
   public void test_nonUniqueEmailPatterns() {
     final Institution instWithEmails =
         new Institution()
-            .shortName("hasEmails")
             .displayName("another test")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailDomains(ImmutableList.of("broad.org", "google.com"))
             .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com"));
 
     final Institution similarInst =
         new Institution()
-            .shortName("otherInst")
             .displayName("The University of Elsewhere")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .emailDomains(instWithEmails.getEmailDomains())
             .emailAddresses(instWithEmails.getEmailAddresses());
 
@@ -258,17 +262,10 @@ public class InstitutionServiceTest {
         .containsExactlyElementsIn(similarInstViaDb.getEmailAddresses());
   }
 
-  @Test
+  @Test(expected = BadRequestException.class)
   public void test_InstitutionNotFound() {
     assertThat(service.getInstitution("missing")).isEmpty();
     assertThat(service.updateInstitution("missing", new Institution())).isEmpty();
-  }
-
-  @Test(expected = DataIntegrityViolationException.class)
-  public void test_nonUniqueIds() {
-    service.createInstitution(
-        new Institution().shortName("test").displayName("We are all individuals"));
-    service.createInstitution(new Institution().shortName("test").displayName("I'm not"));
   }
 
   @Test
@@ -277,8 +274,8 @@ public class InstitutionServiceTest {
         service
             .createInstitution(
                 new Institution()
-                    .shortName("Broad")
                     .displayName("The Broad Institute")
+                    .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
                     .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
                     .emailAddresses(
                         Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")))
@@ -294,8 +291,8 @@ public class InstitutionServiceTest {
         service
             .createInstitution(
                 new Institution()
-                    .shortName("Broad")
                     .displayName("The Broad Institute")
+                    .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
                     .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
                     .emailAddresses(
                         Lists.newArrayList("external-researcher@sanger.uk", "science@aol.com")))
@@ -309,7 +306,9 @@ public class InstitutionServiceTest {
   public void test_emailValidation_null() {
     final Institution inst =
         service.createInstitution(
-            new Institution().shortName("Broad").displayName("The Broad Institute"));
+            new Institution()
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
 
     final DbUser user = userDao.save(new DbUser());
     assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
@@ -320,7 +319,9 @@ public class InstitutionServiceTest {
     final Institution inst =
         service
             .createInstitution(
-                new Institution().shortName("Broad").displayName("The Broad Institute"))
+                new Institution()
+                    .displayName("The Broad Institute")
+                    .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION))
             .emailDomains(Lists.newArrayList("broad.org", "mit.edu"))
             .emailAddresses(Lists.newArrayList("email@domain.org"))
             .duaTypeEnum(DuaType.MASTER);
@@ -333,7 +334,6 @@ public class InstitutionServiceTest {
     final Institution inst =
         service.createInstitution(
             new Institution()
-                .shortName("Broad")
                 .displayName("The Broad Institute")
                 .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org")));
 
@@ -346,8 +346,8 @@ public class InstitutionServiceTest {
     final Institution inst =
         service.createInstitution(
             new Institution()
-                .shortName("Broad")
                 .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.INDUSTRY)
                 .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org"))
                 .emailAddresses(Lists.newArrayList("testing@broad,org"))
                 .duaTypeEnum(DuaType.RESTRICTED));
@@ -361,8 +361,8 @@ public class InstitutionServiceTest {
     final Institution inst =
         service.createInstitution(
             new Institution()
-                .shortName("Broad")
                 .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
                 .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org"))
                 .emailAddresses(Lists.newArrayList("testing@broad,org")));
 
@@ -375,8 +375,8 @@ public class InstitutionServiceTest {
     final Institution inst =
         service.createInstitution(
             new Institution()
-                .shortName("Broad")
                 .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
                 .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org"))
                 .emailAddresses(Lists.newArrayList("testing@broad,org")));
 
@@ -385,41 +385,12 @@ public class InstitutionServiceTest {
   }
 
   @Test
-  public void test_emailValidation_changedShortName() {
-    final String oldShortName = "Broad";
-    final String newShortName = "TheBroad";
-
-    final Institution inst =
-        service.createInstitution(
-            new Institution()
-                .shortName(oldShortName)
-                .displayName("The Broad Institute")
-                .emailDomains(Lists.newArrayList("broad.org", "lab.broad.org")));
-
-    final DbUser user = createUser("user@broad.org");
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
-
-    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isTrue();
-
-    final Institution renamed = inst.shortName(newShortName);
-    service.updateInstitution(oldShortName, renamed);
-
-    final DbVerifiedInstitutionalAffiliation updatedAffiliation =
-        verifiedInstitutionalAffiliationDao.findFirstByUser(user).get();
-
-    assertThat(updatedAffiliation.getInstitution().getShortName()).isEqualTo(newShortName);
-    assertThat(service.validateAffiliation(updatedAffiliation, user.getContactEmail())).isTrue();
-  }
-
-  @Test
   public void getInstitutionUserInstructions_empty() {
     assertThat(service.getInstitutionUserInstructions(testInst.getShortName())).isEmpty();
   }
 
-  @Test(expected = NotFoundException.class)
   public void getInstitutionUserInstructions_instNotFound() {
-    service.getInstitutionUserInstructions("not found");
+    assertThat(service.getInstitutionUserInstructions("not found")).isEmpty();
   }
 
   @Test
@@ -507,6 +478,13 @@ public class InstitutionServiceTest {
   public void validate_OperationalUser_nullInstitution() {
     DbInstitution institution = null;
     assertThat(service.validateOperationalUser(institution)).isFalse();
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCreateInstitution_EmptyOrganizationEnum() {
+    Institution mockInstitution =
+        new Institution().displayName("Institution test").duaTypeEnum(DuaType.MASTER);
+    service.createInstitution(mockInstitution);
   }
 
   // Institutions' email domains and addresses are Lists but have no inherent order,

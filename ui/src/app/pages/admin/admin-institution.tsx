@@ -7,6 +7,7 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase} from 'app/utils';
 import {reactStyles} from 'app/utils';
+import {navigateByUrl} from 'app/utils/navigation';
 import {Institution} from 'generated/fetch';
 import {DuaType, OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -76,6 +77,13 @@ export class AdminInstitution extends React.Component<{}, State> {
     }
   }
 
+  renderInstitutionName(row, col) {
+    const inst = fp.find((institution) =>
+        institution.displayName === row['displayName'], col.value);
+    const link = 'admin/institution/edit/' + inst.shortName;
+    return <a href={link}> {row['displayName']}</a>;
+  }
+
   renderOrganizationType(row, col) {
     switch ( row['organizationTypeEnum']) {
       case OrganizationType.ACADEMICRESEARCHINSTITUTION: return 'Academic Research Institution';
@@ -117,6 +125,7 @@ export class AdminInstitution extends React.Component<{}, State> {
           <label>Institution admin table</label>
               <Button type='secondaryLight'
                       style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
+                      onClick={() => navigateByUrl('admin/institution/add')}
                       data-test-id='add-institution'>
                 <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
               </Button>
@@ -127,7 +136,7 @@ export class AdminInstitution extends React.Component<{}, State> {
                    rows={10} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}
                    paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
                    currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
-          <Column field='displayName' header='Institution Name'
+          <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
                   bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
           <Column field='organizationTypeEnum' header='Institution Type'
                   body={this.renderOrganizationType} bodyStyle={styles.text}

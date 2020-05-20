@@ -38,6 +38,7 @@ import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/com
 import {environment} from 'environments/environment';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {DisabledGuard} from './guards/disabled-guard.service';
+import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
@@ -297,6 +298,14 @@ const routes: Routes = [
       }, {
         path: 'admin/institution',
         component: AdminInstitutionComponent,
+        data: { title: 'Institution Admin'},
+      }, {
+        path: 'admin/institution/add',
+        component: AdminInstitutionEditComponent,
+        data: { title: 'Institution Admin'},
+      }, {
+        path: 'admin/institution/edit/:institutionId',
+        component: AdminInstitutionEditComponent,
         data: { title: 'Institution Admin'},
       }, {
         path: 'admin/banner',

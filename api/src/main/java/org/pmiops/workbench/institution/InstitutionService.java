@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
@@ -18,6 +19,8 @@ public interface InstitutionService {
 
   // throws NotFoundException if the DbInstitution is not found
   DbInstitution getDbInstitutionOrThrow(final String shortName);
+
+  Optional<DbInstitutionUserInstructions> getDbInstitutionUserInstructions(final String shortName);
 
   Institution createInstitution(final Institution institutionToCreate);
 

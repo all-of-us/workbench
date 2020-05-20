@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,7 +34,9 @@ public class DbInstitutionUserInstructions {
     return this;
   }
 
-  @OneToOne
+  // Use CascadeType Detach to prevent Institution from deletion if researcher just wants to
+  // deletes user instruction from existing Institution
+  @OneToOne(cascade = CascadeType.DETACH)
   @JoinColumn(name = "institution_id")
   public DbInstitution getInstitution() {
     return institution;

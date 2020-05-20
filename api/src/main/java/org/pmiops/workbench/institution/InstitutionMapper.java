@@ -12,20 +12,24 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.owasp.html.HtmlPolicyBuilder;
+import org.owasp.html.PolicyFactory;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
+import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
 public interface InstitutionMapper {
   @Mapping(target = "institutionId", ignore = true)
-  DbInstitution modelToDb(Institution modelObject);
+  @Mapping(target = "userInstructions", ignore = true)
+  DbInstitution modelToDb(Institution modelObject, @Context InstitutionService institutionService);
 
   // userInstructions will be populated by setUserInstruction afterMapping
-  @Mapping(target = "userInstructions", ignore = true)
-  Institution dbToModel(DbInstitution dbObject, @Context InstitutionService institutionService);
+  @Mapping(target = "userInstructions", source = "userInstructions.userInstructions")
+  Institution dbToModel(DbInstitution dbObject);
 
   default List<String> toModelDomains(Set<DbInstitutionEmailDomain> dbDomains) {
     return Optional.ofNullable(dbDomains).orElse(Collections.emptySet()).stream()
@@ -57,10 +61,20 @@ public interface InstitutionMapper {
   }
 
   @AfterMapping
-  default void setUserInstruction(
-      @MappingTarget Institution target, @Context InstitutionService institutionService) {
-    institutionService
-        .getInstitutionUserInstructions(target.getShortName())
-        .ifPresent(target::setUserInstructions);
+  default void setFields(
+      @MappingTarget DbInstitution target,
+      Institution modelObject,
+      @Context InstitutionService institutionService) {
+
+    final PolicyFactory removeAllTags = new HtmlPolicyBuilder().toFactory();
+    final String sanitizedInstructions =
+        removeAllTags.sanitize(modelObject.getUserInstructions()).trim();
+
+    DbInstitutionUserInstructions dbInstitutionUserInstructions =
+        institutionService
+            .getDbInstitutionUserInstructions(modelObject.getShortName())
+            .orElse(new DbInstitutionUserInstructions())
+            .setUserInstructions(sanitizedInstructions);
+    target.setUserInstructions(dbInstitutionUserInstructions);
   }
 }

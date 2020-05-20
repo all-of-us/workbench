@@ -10,5 +10,9 @@ public interface InstitutionUserInstructionsDao
 
   Optional<DbInstitutionUserInstructions> getByInstitution(final DbInstitution institution);
 
+  Optional<DbInstitutionUserInstructions> getByInstitution_ShortName(final String shortName);
+
   long deleteByInstitution(final DbInstitution institution);
+
+  long deleteDbInstitutionUserInstructionsByInstitution_ShortName(final String shortName);
 }

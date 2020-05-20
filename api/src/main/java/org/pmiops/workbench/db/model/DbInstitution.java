@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.model.DuaType;
@@ -25,6 +26,7 @@ public class DbInstitution {
   private long institutionId; // primary opaque key for DB use only
   private String shortName; // unique key exposed to API
   private String displayName;
+  private DbInstitutionUserInstructions userInstructions;
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
   private Short duaTypeEnum;
@@ -156,5 +158,14 @@ public class DbInstitution {
     this.emailAddresses.addAll(Sets.difference(attachedAddresses, this.emailAddresses));
 
     return this;
+  }
+
+  @OneToOne(mappedBy = "institution", cascade = CascadeType.ALL)
+  public DbInstitutionUserInstructions getUserInstructions() {
+    return userInstructions;
+  }
+
+  public void setUserInstructions(DbInstitutionUserInstructions userInstructions) {
+    this.userInstructions = userInstructions;
   }
 }

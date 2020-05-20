@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
+import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -111,7 +112,7 @@ public class InstitutionMapperTest {
             .emailDomains(sortedModelDomains)
             .emailAddresses(sortedModelAddresses);
 
-    final DbInstitution dbInst = mapper.modelToDb(inst);
+    final DbInstitution dbInst = mapper.modelToDb(inst, service);
 
     assertThat(dbInst.getShortName()).isEqualTo(inst.getShortName());
     assertThat(dbInst.getDisplayName()).isEqualTo(inst.getDisplayName());
@@ -122,7 +123,7 @@ public class InstitutionMapperTest {
 
     // likewise for addresses
 
-    final Institution roundTrip = mapper.dbToModel(dbInst, service);
+    final Institution roundTrip = mapper.dbToModel(dbInst);
 
     assertThat(roundTrip.getShortName()).isEqualTo(inst.getShortName());
     assertThat(roundTrip.getDisplayName()).isEqualTo(inst.getDisplayName());
@@ -139,14 +140,14 @@ public class InstitutionMapperTest {
             .setEmailDomains(dbDomains)
             .setEmailAddresses(dbAddresses);
 
-    final Institution inst = mapper.dbToModel(dbInst, service);
+    final Institution inst = mapper.dbToModel(dbInst);
 
     assertThat(inst.getShortName()).isEqualTo(dbInst.getShortName());
     assertThat(inst.getDisplayName()).isEqualTo(dbInst.getDisplayName());
     assertThat(inst.getEmailDomains()).isEqualTo(sortedModelDomains);
     assertThat(inst.getEmailAddresses()).isEqualTo(sortedModelAddresses);
 
-    final DbInstitution roundTrip = mapper.modelToDb(inst);
+    final DbInstitution roundTrip = mapper.modelToDb(inst, service);
 
     assertThat(roundTrip.getShortName()).isEqualTo(dbInst.getShortName());
     assertThat(roundTrip.getDisplayName()).isEqualTo(dbInst.getDisplayName());
@@ -160,17 +161,22 @@ public class InstitutionMapperTest {
 
   @Test
   public void test_dbToModelWithUserInstructions() {
-    final DbInstitution dbInst =
+
+    final DbInstitutionUserInstructions userInstructions =
+        new DbInstitutionUserInstructions().setUserInstructions("UserInstruction");
+
+    DbInstitution dbInst =
         new DbInstitution()
             .setShortName("Test")
             .setDisplayName("Test State University")
             .setEmailDomains(dbDomains)
             .setEmailAddresses(dbAddresses);
+    dbInst.setUserInstructions(userInstructions);
 
-    Mockito.when(service.getInstitutionUserInstructions("Test"))
-        .thenReturn(Optional.of("UserInstruction"));
+    Mockito.when(service.getDbInstitutionUserInstructions("Test"))
+        .thenReturn(Optional.of(userInstructions));
 
-    final Institution inst = mapper.dbToModel(dbInst, service);
+    final Institution inst = mapper.dbToModel(dbInst);
 
     assertThat(inst.getShortName()).isEqualTo(dbInst.getShortName());
     assertThat(inst.getDisplayName()).isEqualTo(dbInst.getDisplayName());
@@ -178,7 +184,7 @@ public class InstitutionMapperTest {
     assertThat(inst.getEmailAddresses()).isEqualTo(sortedModelAddresses);
     assertThat(inst.getUserInstructions()).isEqualTo("UserInstruction");
 
-    final DbInstitution roundTrip = mapper.modelToDb(inst);
+    final DbInstitution roundTrip = mapper.modelToDb(inst, service);
 
     assertThat(roundTrip.getShortName()).isEqualTo(dbInst.getShortName());
     assertThat(roundTrip.getDisplayName()).isEqualTo(dbInst.getDisplayName());
