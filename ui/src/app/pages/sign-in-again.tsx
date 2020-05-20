@@ -4,7 +4,7 @@ import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, reactStyles} from 'app/utils';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
 
 const styles = reactStyles({

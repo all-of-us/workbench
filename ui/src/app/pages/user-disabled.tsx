@@ -2,8 +2,8 @@ import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {StyledAnchorTag} from 'app/components/buttons';
-import {PublicLayout} from 'app/components/public-layout';
 import {BoldHeader} from 'app/components/headers';
+import {PublicLayout} from 'app/components/public-layout';
 import colors from 'app/styles/colors';
 import {
   ReactWrapperBase
