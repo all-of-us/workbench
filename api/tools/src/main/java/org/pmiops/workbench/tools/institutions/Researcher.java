@@ -102,7 +102,7 @@ class Researcher extends User {
     }
 
     throw new RuntimeException(
-        String.format("Role '%s' for user '%s' not found in the role map", rawRole, contactEmail));
+        String.format("Role '%s' for user '%s' could not be matched", rawRole, contactEmail));
   }
 
   private String parseInstitutionDisplayName(final String rawName) {
