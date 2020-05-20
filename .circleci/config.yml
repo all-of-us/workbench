@@ -101,20 +101,20 @@ commands:
           command: git submodule update --init --recursive
 
   halt_job_noncode_changes:
-    description: "Skip job if no code changes on master branch"
+    description: "Halt job and succeed early if no code changes on non-master branch"
     steps:
       - run:
           command: |
             if [ ${CIRCLE_BRANCH} != "" ] &&
               [ ${CIRCLE_BRANCH} != "master" ] &&
               ! git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvE '(.md$)|(.pdf$)'; then
-                echo "No code changes in non-master branch. halting job."
+                echo "No code changes on non-master branch. halting job."
                 circleci step halt
             fi
-          name: Halt job and succeed early if no code changes on master branch
+          name: Halt job and succeed early if no code changes on non-master branch
 
   ensure_branch_has_changes:
-    description: Ensure branch has changes to code in << parameters.dir_name >> directory
+    description: Halt job and succeed early if no code changes in << parameters.dir_name >> directory on non-master branch
     parameters:
       dir_name:
         type: enum
@@ -125,10 +125,10 @@ commands:
             if [ ${CIRCLE_BRANCH} != "" ] &&
               [ ${CIRCLE_BRANCH} != "master" ] &&
               [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep << parameters.dir_name >>/ | wc -l | xargs) == 0 ]; then
-                echo "No relevant changes in << parameters.dir_name >> directory in non-master branch. Skipping."
+                echo "No relevant changes in << parameters.dir_name >> directory on non-master branch. halting job."
                 circleci step halt
             fi
-          name: Ensure branch has changes to code in << parameters.dir_name >> directory
+          name: Halt job and succeed early if no code changes in << parameters.dir_name >> directory on non-master branch
 
   install_ui_dependencies:
     description: "workbench/ui: yarn install, save and restore cache"
@@ -157,9 +157,9 @@ commands:
       - restore_cache:
           name: "restore e2e cache"
           keys:
-            - v1-e2e-dependency-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - v1-e2e-dependency-cache-master
-            - v1-e2e-dependency-cache-
+            - v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v1-e2e-cache-master
+            - v1-e2e-cache-
       - run:
           name: "workbench/e2e: yarn install dependencies"
           working_directory: ~/workbench/e2e
@@ -169,7 +169,7 @@ commands:
           paths:
             - ~/.cache/yarn
             - e2e/node_modules
-          key: v1-e2e-dependency-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   manage_api_cache:
     description: "workbench/api: save or restore gradle cache"
@@ -570,32 +570,6 @@ jobs:
       - browser-tools/install-browser-tools
       - start_local_ui
       - run_e2e_test
-
-  # NOT READY!!
-  # Deploy UI and API local server then run Puppeteer e2e tests on deployed "local" environment.
-  puppeteer-e2e-local:
-    resource_class: medium+
-    docker:
-      - image: << pipeline.parameters.workbench_image >>
-      - image: << pipeline.parameters.mysql_image >>
-        environment:
-          <<: *mysql_env
-    environment:
-      <<: *java_env
-      <<: *e2e_env
-      WORKBENCH_ENV: local
-    working_directory: ~/workbench
-    parallelism: 1
-    steps:
-      - checkout_init_git
-      - halt_job_noncode_changes
-      - browser-tools/install-browser-tools
-      - activate_service_account_credential
-      - start_local_api
-      - start_local_ui:
-          connect_local_api: true
-      - run_e2e_test
-
 
 workflows:
   build-test-deploy:
