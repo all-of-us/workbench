@@ -40,7 +40,7 @@ public class PopulateUserAffiliations {
       return Researcher.parseInput(filename);
     } else {
       throw new RuntimeException(
-              "Cannot populate affiliations: only valid user types are 'OPS' and 'RESEARCHERS'");
+          "Cannot populate affiliations: only valid user types are 'OPS' and 'RESEARCHERS'");
     }
   }
 
