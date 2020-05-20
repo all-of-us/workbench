@@ -114,13 +114,13 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
         return emailAddress !== '' || !!emailAddress;
       });
 
-    emailAddresses.map(emailAddress => {
+    this.state.institution.emailAddresses.map(emailAddress => {
       const errors = validate({
-        emailAddresses
+        emailAddress
       }, {
-        emailAddresses: {email: true}
+        emailAddress: {email: true}
       });
-      if (errors && errors.emailAddresses && errors.emailAddresses.length > 0) {
+      if (errors && errors.emailAddress && errors.emailAddress.length > 0) {
         invalidEmailAddress.push(emailAddress);
       }
     });
@@ -219,19 +219,23 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
       }
     }
     if (this.props.urlParams.institutionId) {
-      await institutionApi().updateInstitution(this.props.urlParams.institutionId, institution).then(value => this.backNavigate())
-        .catch(reason => this.setState({showApiError: true}));
+      await institutionApi().updateInstitution(this.props.urlParams.institutionId, institution)
+        .then(value => this.backNavigate())
+        .catch(reason => this.handleError(reason));
     } else {
-      await institutionApi().createInstitution(institution).then(value => this.backNavigate()).catch(reason => {
-        let errorMsg = 'Error while saving Institution. Please try again later';
-        if (reason.status === 409) {
-          errorMsg  = 'Institution with display Name ' + this.state.institution.displayName + ' already exist';
-        }
-        this.setState({apiErrorMsg: errorMsg, showApiError: true});
-      });
+      await institutionApi().createInstitution(institution)
+          .then(value => this.backNavigate())
+          .catch(reason => this.handleError(reason));
     }
   }
 
+  handleError(rejectReason) {
+    let errorMsg = 'Error while saving Institution. Please try again later';
+    if (rejectReason.status === 409) {
+      errorMsg  = 'Institution with Name ' + this.state.institution.displayName + ' already exist';
+    }
+    this.setState({apiErrorMsg: errorMsg, showApiError: true});
+  }
   updateInstitutionRole(institutionRole) {
     this.setState({showOtherInstitution: institutionRole === OrganizationType.OTHER});
     this.setState(fp.set(['institution', 'organizationTypeEnum'], institutionRole));
@@ -367,12 +371,12 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
         {this.state.showBackButtonWarning && <Modal>
           <ModalTitle>Unsaved Data</ModalTitle>
           <ModalBody>
-            <div>You have some unsaved data Are you sure you want to continue?
+            <div style={{...styles.label, fontWeight: 100}}>You have some unsaved data Are you sure you want to continue?
             </div>
           </ModalBody>
           <ModalFooter>
             <Button onClick={() => this.setState({showBackButtonWarning: false})}
-                    type='secondary'>Close</Button>
+                    type='secondary' style={{marginRight: '2rem'}}>Close</Button>
             <Button onClick={() => this.backNavigate()}
                     type='primary'>Go Back Without saving</Button>
           </ModalFooter>
@@ -380,7 +384,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
         {this.state.showApiError && <Modal>
           <ModalTitle>Error While Saving Data</ModalTitle>
           <ModalBody>
-            <label style={styles.label}>{this.state.apiErrorMsg}</label>
+            <label style={{...styles.label, fontWeight: 100}}>{this.state.apiErrorMsg}</label>
           </ModalBody>
           <ModalFooter>
             <Button onClick={() => this.setState({showApiError: false})}

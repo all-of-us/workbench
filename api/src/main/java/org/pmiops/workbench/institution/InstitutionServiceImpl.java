@@ -194,11 +194,15 @@ public class InstitutionServiceImpl implements InstitutionService {
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
     validateInstitutionRequest(institutionToUpdate);
-    return getDbInstitution(shortName)
-        .map(this::deleteExistingEmailEntries)
-        .map(DbInstitution::getInstitutionId)
-        .map(dbId -> updateInstitution(institutionToUpdate, dbId))
-        .map(institutionMapper::dbToModel);
+    try {
+      return getDbInstitution(shortName)
+          .map(this::deleteExistingEmailEntries)
+          .map(DbInstitution::getInstitutionId)
+          .map(dbId -> updateInstitution(institutionToUpdate, dbId))
+          .map(institutionMapper::dbToModel);
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException("Institution with the same name already exists");
+    }
   }
 
   /**
