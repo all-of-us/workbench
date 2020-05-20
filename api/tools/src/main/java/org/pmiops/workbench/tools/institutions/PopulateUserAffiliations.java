@@ -32,6 +32,17 @@ import org.springframework.context.annotation.Bean;
 public class PopulateUserAffiliations {
 
   private static final Logger log = Logger.getLogger(PopulateUserAffiliations.class.getName());
+  
+  private List<User> parseUsers(final String filename, final String userTypes) throws IOException {
+    if (userTypes.equals("OPS")) {
+      return OpsUser.parseInput(filename);
+    } else if (userTypes.equals("RESEARCHERS")) {
+      return Researcher.parseInput(filename);
+    } else {
+      throw new RuntimeException(
+              "Cannot populate affiliations: only valid user types are 'OPS' and 'RESEARCHERS'");
+    }
+  }
 
   @Bean
   public CommandLineRunner run(
@@ -74,17 +85,6 @@ public class PopulateUserAffiliations {
         user.populateAffiliation(dryRun, userDao, institutionDao, affiliationDao);
       }
     };
-  }
-
-  private List<User> parseUsers(final String filename, final String userTypes) throws IOException {
-    if (userTypes.equals("OPS")) {
-      return OpsUser.parseInput(filename);
-    } else if (userTypes.equals("RESEARCHERS")) {
-      return Researcher.parseInput(filename);
-    } else {
-      throw new RuntimeException(
-          "Cannot populate affiliations: only valid user types are 'OPS' and 'RESEARCHERS'");
-    }
   }
 
   public static void main(String[] args) {
