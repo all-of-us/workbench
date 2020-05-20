@@ -23,6 +23,7 @@ public abstract class User {
   String contactEmail;
   String userName;
 
+  // check data prerequisites which don't involve DB comparisons
   abstract void preCheck();
 
   abstract DbVerifiedInstitutionalAffiliation toAffiliation(
@@ -60,8 +61,9 @@ public abstract class User {
       throw new RuntimeException(String.format("User %s was not found in the DB", userName));
     }
 
-    // some of these are acceptable mismatches, like "Dan" instead of "Daniel"
-    // warn only, don't stop
+    // many near-matches in the imput exist: warn only, don't stop
+    // example: "Dan" instead of "Daniel"
+    // example: ""Beth,"" instead of "Beth"
 
     checkField(dbUser.getGivenName(), firstName, "First Name");
     checkField(dbUser.getFamilyName(), lastName, "Last Name");
@@ -77,6 +79,7 @@ public abstract class User {
       final VerifiedInstitutionalAffiliationDao affiliationDao) {
 
     preCheck();
+
     final DbUser dbUser = dbCheck(userDao);
     final DbVerifiedInstitutionalAffiliation newAffiliation = toAffiliation(dbUser, institutionDao);
     final Optional<DbVerifiedInstitutionalAffiliation> existingAffil =
