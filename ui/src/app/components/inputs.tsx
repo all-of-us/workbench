@@ -418,7 +418,7 @@ export class DatePicker extends React.Component<
   }
 }
 
-export const Toggle = ({name, initialValue, disabled=false, onToggle, style={}, height, width, ...props}) => {
+export const Toggle = ({name, initialValue, disabled= false, onToggle, style= {}, height, width, ...props}) => {
   return <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center', paddingBottom: '.5rem', ...style}}>
     <Switch
         onChange={onToggle}

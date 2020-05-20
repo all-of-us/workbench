@@ -3,17 +3,18 @@ import * as React from 'react';
 
 import {Component} from '@angular/core';
 
-import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDateWithoutHours, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {institutionApi} from 'app/services/swagger-fetch-clients';
 
+import {navigate} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 
@@ -140,12 +141,18 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
     >
       <FlexColumn>
         <FlexRow style={{alignItems: 'center'}}>
-          <ClrIcon shape='arrow' size={37} style={{
-            backgroundColor: colorWithWhiteness(colors.accent, .85),
-            color: colors.accent,
-            borderRadius: '18px',
-            transform: 'rotate(270deg)'
-          }}/>
+          <a onClick={() => navigate(['admin', 'user'])}>
+            <ClrIcon
+              shape='arrow'
+              size={37}
+              style={{
+                backgroundColor: colorWithWhiteness(colors.accent, .85),
+                color: colors.accent,
+                borderRadius: '18px',
+                transform: 'rotate(270deg)'
+              }}
+            />
+          </a>
           <SmallHeader style={{marginTop: 0, marginLeft: '0.5rem'}}>
             User Profile Information
           </SmallHeader>
