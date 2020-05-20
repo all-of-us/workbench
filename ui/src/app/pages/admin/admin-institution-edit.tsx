@@ -224,8 +224,8 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
         .catch(reason => this.handleError(reason));
     } else {
       await institutionApi().createInstitution(institution)
-          .then(value => this.backNavigate())
-          .catch(reason => this.handleError(reason));
+        .then(value => this.backNavigate())
+        .catch(reason => this.handleError(reason));
     }
   }
 
