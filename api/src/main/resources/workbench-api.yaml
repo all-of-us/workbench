@@ -7339,31 +7339,59 @@ definitions:
       definition is stricter than the BigQuery schema.
     type: object
     properties:
-      timestamp:
-        description: Timestampe recorded at time of audit.
-        type: string
-        format: date-time
       actionId:
         description: Unique ID for this action. Used for grouping similar events under a
           single action, though in this representation we're returning a straight list of rows.
         type: string
         format: uuid
+      actionType:
+        description: >
+          Defines what action is taking place in this event. (There can be several ACTION_TYPEs
+          in a single Action assigned to different events. String representation of the ActionType
+          enum (not generated).
+        type: string
       agentId:
         description: >
           ID for the Agent (typically a User). If there's a SQL table for this agent type,
           this this is the PK for that table (e.g. user_id).
         type: integer
         format: int64
+      agentUsername:
+        description: >
+          Username of the user or administrator taking the action. This is the agent_email column
+          in BigQuery.
+        type: string
+        format: email
       agentType:
         description: >
           A member of the org.pmiops.workbench.actionaudit.AgentType enum (not generated). Since
           this is typed as a string in BigQuery (and not constrained to that type), we don't try
           to narrow the type in the admin API.
         type: string
-      agentUsername:
+      eventTime:
         description: >
-          This is the agentEmail column, corresponding to the user or administratortaking the action.
+          Timestamp recorded at time of the event. Called timestamp in the BigQuery table.
         type: string
-        format: email
-        x-aou-note: >
-          email is not strictly a Swagger format type, but since format is open, it can be helpful.
+        format: date-time
+      newValue:
+        description: Value of the target property (if any) after the event.
+        type: string
+      previousValue:
+        description: >
+          Value of the target property at the instant of this event beginning. prev_value in BigQuery.
+        type: string
+      targetId:
+        description: >
+          Database ID of the corresponding table for the target entity.
+        type: integer
+        format: int64
+      targetProperty:
+        description: >
+          Property on the target entity affected by this event. One of several internal enums such
+          as WorkspaceTargetProperty.
+        type: string
+      targetType:
+        description: >
+          Type of target. Described by the enum TargetType (which is not generated). Left as string
+          since BigQuery doesn't enforce the enum membership.
+        type: string
