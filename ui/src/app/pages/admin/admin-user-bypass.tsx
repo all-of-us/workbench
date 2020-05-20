@@ -79,7 +79,7 @@ export class AdminUserBypass extends React.Component<
         content={<FlexColumn style={{padding: '1rem'}}>
           {enableBetaAccess && <FlexRow style={{justifyContent: 'space-between'}}>
             <Toggle name='Beta Access'
-                    initialValue={selectedModules.includes(AccessModule.BETAACCESS)}
+                    isChecked={selectedModules.includes(AccessModule.BETAACCESS)}
                     data-test-id='beta-access-toggle'
                     onToggle={() => {this.setState({selectedModules:
                       fp.xor(selectedModules, [AccessModule.BETAACCESS])}); } }
@@ -92,7 +92,7 @@ export class AdminUserBypass extends React.Component<
           </FlexRow>}
           {enableBetaAccess && <hr style={{width: '100%', marginBottom: '0.5rem'}}/>}
           {enableComplianceTraining && <Toggle name='Compliance Training'
-                  initialValue={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
+                  isChecked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
                   data-test-id='compliance-training-toggle'
                   onToggle={() => {this.setState({selectedModules:
                       fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); } }
@@ -100,7 +100,7 @@ export class AdminUserBypass extends React.Component<
                   width={56}
           />}
           {enableEraCommons && <Toggle name='eRA Commons Linking'
-                  initialValue={selectedModules.includes(AccessModule.ERACOMMONS)}
+                  isChecked={selectedModules.includes(AccessModule.ERACOMMONS)}
                   data-test-id='era-commons-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); } }
@@ -108,7 +108,7 @@ export class AdminUserBypass extends React.Component<
                   width={56}
           />}
           <Toggle name='Two Factor Auth'
-                  initialValue={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
+                  isChecked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
                   data-test-id='two-factor-auth-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}
@@ -116,7 +116,7 @@ export class AdminUserBypass extends React.Component<
                   width={56}
           />
           {enableDataUseAgreement && <Toggle name='Data Use Agreement'
-                  initialValue={selectedModules.includes(AccessModule.DATAUSEAGREEMENT)}
+                  isChecked={selectedModules.includes(AccessModule.DATAUSEAGREEMENT)}
                   data-test-id='data-use-agreement-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}

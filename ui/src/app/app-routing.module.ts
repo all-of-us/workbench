@@ -305,12 +305,12 @@ const routes: Routes = [
           data: {title: 'Review Workspaces'}
         },
           {
-            path: 'user',
+            path: 'users',
             component: AdminUsersComponent,
             data: {title: 'User Admin Table'}
           },
           {
-            path: 'user/:userId',
+            path: 'users/:userId',
             component: AdminUserComponent,
             data: {title: 'User Admin'}
           },

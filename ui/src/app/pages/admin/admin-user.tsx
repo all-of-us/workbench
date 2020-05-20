@@ -141,7 +141,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
     >
       <FlexColumn>
         <FlexRow style={{alignItems: 'center'}}>
-          <a onClick={() => navigate(['admin', 'user'])}>
+          <a onClick={() => navigate(['admin', 'users'])}>
             <ClrIcon
               shape='arrow'
               size={37}
@@ -182,9 +182,6 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                 width={33}
             />
           </FlexRow>
-          <Button type='link' style={{marginLeft: 'auto'}}>
-            Cancel
-          </Button>
           <Button type='primary' disabled={this.state.saveDisabled}>
             Save
           </Button>

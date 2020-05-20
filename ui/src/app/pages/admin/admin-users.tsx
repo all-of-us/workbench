@@ -135,7 +135,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<
   convertProfilesToFields(profiles: Profile[]) {
     return profiles.map(p => ({
       ...p,
-      name: <a onClick={() => navigate(['admin', 'user', p.userId])}>{p.familyName + ', ' + p.givenName}</a>,
+      name: <a onClick={() => navigate(['admin', 'users', p.userId])}>{p.familyName + ', ' + p.givenName}</a>,
       betaAccessRequestTime: this.convertDate(p.betaAccessRequestTime),
       bypass: <AdminUserBypass profile={p}/>, disabled: p.disabled.toString(),
       userLockout: <LockoutButton disabled={this.state.reloadingProfile === p}
