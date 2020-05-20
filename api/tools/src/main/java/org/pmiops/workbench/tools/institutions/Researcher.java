@@ -18,6 +18,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
  * DUA Signed?", "REDCap Complete?"
  */
 class Researcher extends User {
+  // common fields from User: firstName, lastName, contactEmail, userName
   final InstitutionalRole institutionalRole;
   final String institutionDisplayName;
   final String duaSigned;

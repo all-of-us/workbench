@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Bean;
 public class PopulateUserAffiliations {
 
   private static final Logger log = Logger.getLogger(PopulateUserAffiliations.class.getName());
-  
+
   private List<User> parseUsers(final String filename, final String userTypes) throws IOException {
     if (userTypes.equals("OPS")) {
       return OpsUser.parseInput(filename);
