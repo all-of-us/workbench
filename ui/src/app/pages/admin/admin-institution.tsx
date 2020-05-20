@@ -78,9 +78,7 @@ export class AdminInstitution extends React.Component<{}, State> {
   }
 
   renderInstitutionName(row, col) {
-    const inst = fp.find((institution) =>
-        institution.displayName === row['displayName'], col.value);
-    const link = 'admin/institution/edit/' + inst.shortName;
+    const link = 'admin/institution/edit/' + row['shortName'];
     return <a href={link}> {row['displayName']}</a>;
   }
 
