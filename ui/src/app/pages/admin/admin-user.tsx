@@ -173,7 +173,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
             </label>
             <Toggle
                 name={profile.disabled ? 'Disabled' : 'Enabled'}
-                initialValue={!profile.disabled}
+                isChecked={!profile.disabled}
                 disabled={true}
                 data-test-id='account-access-toggle'
                 onToggle={() => this.setState({saveDisabled: false})}
