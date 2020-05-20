@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
-import {Button, StyledAnchorTag} from 'app/components/buttons';
+import {StyledAnchorTag} from 'app/components/buttons';
+import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import {SignInService} from 'app/services/sign-in.service';
@@ -23,6 +24,7 @@ const styles = reactStyles({
     marginTop: '2rem'
   }
 });
+
 const supportUrl = 'support@researchallofus.org';
 
 export const SignInAgain: React.FunctionComponent<{signIn: Function}> = ({signIn}) => {
@@ -31,9 +33,7 @@ export const SignInAgain: React.FunctionComponent<{signIn: Function}> = ({signIn
     <section style={styles.textSection}>
       You’ve been away for a while and we could not verify whether your session was still active.
     </section>
-    <Button type='primary' style={styles.button} onClick={signIn}>
-      Sign in again
-    </Button>
+    <GoogleSignInButton signIn={signIn} />
     <section style={styles.noteSection}>
       <strong>Note</strong>: You may have been redirected to this page immediately after attempting to sign in,
       if you did not explicitly sign out of your most recent session. If, after signing in

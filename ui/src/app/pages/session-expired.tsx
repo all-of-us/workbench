@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Button} from 'app/components/buttons';
+import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import {SignInService} from 'app/services/sign-in.service';
@@ -25,9 +25,7 @@ export const SessionExpired: React.FunctionComponent<{signIn: Function}> = ({sig
     <section style={styles.textSection}>
       You were automatically signed out of your session due to inactivity
     </section>
-    <Button type='primary' style={styles.button} onClick={signIn}>
-      Sign in again
-    </Button>
+    <GoogleSignInButton signIn={signIn} />
   </PublicLayout>;
 };
 
@@ -36,7 +34,7 @@ export const SessionExpired: React.FunctionComponent<{signIn: Function}> = ({sig
 })
 export class SessionExpiredComponent extends ReactWrapperBase {
   constructor(private signInService: SignInService) {
-    super(SessionExpired, []);
+    super(SessionExpired, ['signIn']);
     this.signIn = this.signIn.bind(this);
   }
 
