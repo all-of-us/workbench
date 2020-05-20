@@ -10,9 +10,15 @@ import {SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {institutionApi} from 'app/services/swagger-fetch-clients';
+import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {displayDateWithoutHours, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {
+  displayDateWithoutHours,
+  reactStyles,
+  ReactWrapperBase,
+  withUrlParams,
+  withUserProfile
+} from 'app/utils';
 
 import {navigate} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
@@ -42,7 +48,7 @@ const ReadonlyInputWithLabel = ({label, content, dataTestId, inputStyle = {}}) =
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
     <TextInput
-        value={content}
+        value={content || ''} // react yells at me if this is null
         disabled
         style={{
           backgroundColor: colorWithWhiteness(colors.primary, .95),
@@ -76,7 +82,7 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onChange,
     <label>{label}</label>
     <Toggle
         name={initialValue ? 'BYPASSED' : ''}
-        initialValue={initialValue}
+        isChecked={initialValue}
         disabled={disabled}
         onToggle={(checked) => onChange(checked)}
         height={18}
@@ -86,11 +92,9 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onChange,
 };
 
 interface Props {
-  // From withUserProfile
-  profileState: {
-    profile: Profile,
-    reload: Function,
-    updateCache: Function
+  // From withUrlParams
+  urlParams: {
+    userId: number
   };
 }
 
@@ -102,19 +106,22 @@ interface State {
 }
 
 
-const AdminUser = withUserProfile()(class extends React.Component<Props, State> {
+const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
 
+    console.log(this.props);
     this.state = {
       loading: false,
-      profile: this.props.profileState.profile,
+      profile: null,
       saveDisabled: true,
       verifiedInstitutionOptions: []
     };
   }
 
   async componentDidMount() {
+    const profileResponse = await profileApi().getUser(this.props.urlParams.userId);
+
     const institutionsResponse = await institutionApi().getInstitutions();
     const options = fp.map(
       institution => {
@@ -125,7 +132,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
       },
       institutionsResponse.institutions
     );
-    this.setState({verifiedInstitutionOptions: options});
+    this.setState({profile: profileResponse, verifiedInstitutionOptions: options});
   }
 
   render() {
@@ -139,7 +146,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
           color: colors.primary
         }}
     >
-      <FlexColumn>
+      {this.state.profile && <FlexColumn>
         <FlexRow style={{alignItems: 'center'}}>
           <a onClick={() => navigate(['admin', 'users'])}>
             <ClrIcon
@@ -157,7 +164,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
             User Profile Information
           </SmallHeader>
         </FlexRow>
-        <FlexRow style={{width: '100%', marginTop: '1rem', alignItems: 'center'}}>
+        <FlexRow style={{width: '100%', marginTop: '1rem', alignItems: 'center', justifyContent: 'space-between'}}>
           <FlexRow
               style={{
                 alignItems: 'center',
@@ -284,8 +291,8 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
             </div>
           </FlexColumn>
         </FlexRow>
-      </FlexColumn>
-      {this.state.loading && <SpinnerOverlay/>}
+      </FlexColumn>}
+      {this.state.loading || !this.state.profile && <SpinnerOverlay/>}
     </FadeBox>;
   }
 });

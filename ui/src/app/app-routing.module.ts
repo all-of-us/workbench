@@ -299,11 +299,12 @@ const routes: Routes = [
       },
       {
         path: 'admin',
-        children: [{
-          path: 'review-workspace',
-          component: AdminReviewWorkspaceComponent,
-          data: {title: 'Review Workspaces'}
-        },
+        children: [
+          {
+            path: 'review-workspace',
+            component: AdminReviewWorkspaceComponent,
+            data: {title: 'Review Workspaces'}
+          },
           {
             path: 'users',
             component: AdminUsersComponent,
@@ -313,6 +314,11 @@ const routes: Routes = [
             path: 'users/:userId',
             component: AdminUserComponent,
             data: {title: 'User Admin'}
+          },
+          {
+            path: 'user',
+            component: AdminUsersComponent,
+            data: {title: 'User Admin Table'}
           },
           {
             path: 'banner',
