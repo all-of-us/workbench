@@ -148,12 +148,18 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @Override
   public ResponseEntity<AuditLogEntriesResponse> getAuditLogEntries(
       String workspaceNamespace, Integer limit) {
-    final long workspaceDatabaseId = workspaceAdminService.getFirstWorkspaceByNamespace(workspaceNamespace)
-        .map(DbWorkspace::getWorkspaceId)
-        .orElseThrow(() -> new NotFoundException(
-            String.format("No workspace found with Firecloud namespace %s", workspaceNamespace)));
+    final long workspaceDatabaseId =
+        workspaceAdminService
+            .getFirstWorkspaceByNamespace(workspaceNamespace)
+            .map(DbWorkspace::getWorkspaceId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "No workspace found with Firecloud namespace %s", workspaceNamespace)));
 
     // We need to get the database ID for the query.
-    return ResponseEntity.ok(actionAuditQueryService.queryEventsForWorkspace(workspaceDatabaseId, limit));
+    return ResponseEntity.ok(
+        actionAuditQueryService.queryEventsForWorkspace(workspaceDatabaseId, limit));
   }
 }
