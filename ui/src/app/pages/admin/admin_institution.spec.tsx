@@ -7,14 +7,6 @@ import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitution} from './admin-institution';
-import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
-import {mount} from 'enzyme';
-import {InstitutionApi} from 'generated/fetch';
-import * as React from 'react';
-import {AdminInstitution} from './admin-institution';
-import defaultServerConfig from 'testing/default-server-config';
-import {serverConfigStore} from 'app/utils/navigation';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 
 describe('AdminInstitutionSpec', () => {
