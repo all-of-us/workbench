@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -96,7 +97,7 @@ public abstract class User {
       // will always execute since we checked it above
       existingAffil.ifPresent(
           existingAffiliation -> {
-            if (existingAffiliation.equals(newAffiliation)) {
+            if (equivalent(existingAffiliation, newAffiliation)) {
               log.info("No action taken.  Affiliation exists: " + existingAffiliation);
             } else {
               throw new RuntimeException(
@@ -107,6 +108,17 @@ public abstract class User {
             }
           });
     }
+  }
+
+  // Are these two DbVerifiedInstitutionalAffiliation objects equivalent?
+  // TODO: investigate why we can't use DbVerifiedInstitutionalAffiliation.equals() here.
+  // It's inappropriately reporting inequality in some cases where it should not
+  private boolean equivalent(
+      final DbVerifiedInstitutionalAffiliation a, final DbVerifiedInstitutionalAffiliation b) {
+    return Objects.equals(a.getUser().getUsername(), b.getUser().getUsername())
+        && Objects.equals(a.getInstitution().getShortName(), b.getInstitution().getShortName())
+        && Objects.equals(a.getInstitutionalRoleEnum(), b.getInstitutionalRoleEnum())
+        && Objects.equals(a.getInstitutionalRoleOtherText(), b.getInstitutionalRoleOtherText());
   }
 
   private static void dryLog(boolean dryRun, String msg) {
