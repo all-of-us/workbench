@@ -138,4 +138,10 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
+
+  @Override
+  public ResponseEntity<AuditLogEntriesResponse> getAuditLogEntries(String workspaceNamespace,
+      Integer limit) {
+    return null;
+  }
 }
