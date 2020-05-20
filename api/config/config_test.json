@@ -105,7 +105,9 @@
     "enableEventDateModifier": false
   },
   "actionAudit": {
-    "logName": "workbench-action-audit-test"
+    "logName": "workbench-action-audit-test",
+    "bigQueryDataset": "workbench_action_audit_test",
+    "bigQueryTable": "workbench_action_audit_test"
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",

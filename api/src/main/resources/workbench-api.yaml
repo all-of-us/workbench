@@ -7307,13 +7307,27 @@ definitions:
         type: string
   AuditLogEntriesResponse:
     type: object
+    description: >
+      Represents the results of a query into the audit dataset in BigQery without
+      filtering or transformation. This response type is a stopgap until we develop
+      high-level queries with a better semantic mapping to the concepts and rules
+      governing them, which is why a freeform queryMetadata field is tolerable for
+      now.
     required:
     - logEntries
+    - queryMetadata
     properties:
       logEntries:
         type: array
         items:
           "$ref": "#/definitions/AuditLogEntry"
+      queryMetadata:
+        description: >
+          Since the audit system uses SQL database IDs and the rest of hte API layer
+          does not, it's helpful to return additional properties in order to assist
+          the client in interpreting the results.
+        type: object
+        additionalProperties: true
   AuditLogEntry:
     description: >
       Representation of the BigQuery Audit Log entry, post-translation from Stackdriver logging.

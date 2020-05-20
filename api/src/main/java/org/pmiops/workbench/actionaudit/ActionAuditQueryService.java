@@ -1,5 +1,7 @@
 package org.pmiops.workbench.actionaudit;
 
-public interface ActionAuditQueryService {
+import org.pmiops.workbench.model.AuditLogEntriesResponse;
 
+public interface ActionAuditQueryService {
+  AuditLogEntriesResponse queryEventsForWorkspace(long workspaceDatabaseId, long limit);
 }

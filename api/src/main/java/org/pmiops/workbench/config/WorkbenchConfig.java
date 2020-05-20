@@ -249,6 +249,8 @@ public class WorkbenchConfig {
 
   public static class ActionAuditConfig {
     public String logName;
+    public String bigQueryDataset;
+    public String bigQueryTable;
   }
 
   public static class RdrExportConfig {

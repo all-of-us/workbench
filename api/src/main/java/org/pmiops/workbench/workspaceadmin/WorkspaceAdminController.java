@@ -9,9 +9,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.WorkspaceAdminApiDelegate;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -19,6 +21,7 @@ import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
+import org.pmiops.workbench.model.AuditLogEntriesResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ClusterStatus;
@@ -38,6 +41,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
+  private ActionAuditQueryService actionAuditQueryService;
   private final CloudMonitoringService cloudMonitoringService;
   private final FireCloudService fireCloudService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
@@ -47,12 +51,14 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Autowired
   public WorkspaceAdminController(
+      ActionAuditQueryService actionAuditQueryService,
       CloudMonitoringService cloudMonitoringService,
       FireCloudService fireCloudService,
       LeonardoNotebooksClient leonardoNotebooksClient,
       WorkspaceAdminService workspaceAdminService,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService) {
+    this.actionAuditQueryService = actionAuditQueryService;
     this.cloudMonitoringService = cloudMonitoringService;
     this.fireCloudService = fireCloudService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
@@ -140,8 +146,14 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  public ResponseEntity<AuditLogEntriesResponse> getAuditLogEntries(String workspaceNamespace,
-      Integer limit) {
-    return null;
+  public ResponseEntity<AuditLogEntriesResponse> getAuditLogEntries(
+      String workspaceNamespace, Integer limit) {
+    final long workspaceDatabaseId = workspaceAdminService.getFirstWorkspaceByNamespace(workspaceNamespace)
+        .map(DbWorkspace::getWorkspaceId)
+        .orElseThrow(() -> new NotFoundException(
+            String.format("No workspace found with Firecloud namespace %s", workspaceNamespace)));
+
+    // We need to get the database ID for the query.
+    return ResponseEntity.ok(actionAuditQueryService.queryEventsForWorkspace(workspaceDatabaseId, limit));
   }
 }
