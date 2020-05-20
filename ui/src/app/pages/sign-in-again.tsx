@@ -29,7 +29,7 @@ export const SignInAgain: React.FunctionComponent<{signIn: Function}> = ({signIn
   return <PublicLayout contentStyle={{width: '500px'}}>
     <BoldHeader>You have been signed out</BoldHeader>
     <section style={styles.textSection}>
-      You’ve been away for a while and we could not verify that your session was still active.
+      You’ve been away for a while and we could not verify whether your session was still active.
     </section>
     <Button type='primary' style={styles.button} onClick={signIn}>
       Sign in again
