@@ -96,6 +96,7 @@ interface Props {
 interface State {
   loading: boolean;
   profile: Profile;
+  saveDisabled: boolean;
   verifiedInstitutionOptions: Array<{label: string, value: {displayName: string, shortName: string}}>;
 }
 
@@ -107,6 +108,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
     this.state = {
       loading: false,
       profile: this.props.profileState.profile,
+      saveDisabled: true,
       verifiedInstitutionOptions: []
     };
   }
@@ -167,7 +169,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                 initialValue={!profile.disabled}
                 disabled={true}
                 data-test-id='account-access-toggle'
-                onToggle={(value) => value}
+                onToggle={() => this.setState({saveDisabled: false})}
                 style={{marginLeft: 'auto', paddingBottom: '0px'}}
                 height={18}
                 width={33}
@@ -176,7 +178,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
           <Button type='link' style={{marginLeft: 'auto'}}>
             Cancel
           </Button>
-          <Button type='primary'>
+          <Button type='primary' disabled={this.state.saveDisabled}>
             Save
           </Button>
         </FlexRow>
@@ -223,7 +225,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
             <DropdownWithLabel
                 label={'Free credit limit'}
                 options={freeCreditLimitOptions}
-                onChange={(value) => value}
+                onChange={() => this.setState({saveDisabled: false})}
                 initialValue={profile.freeTierDollarQuota}
                 dropdownStyle={{width: '3rem'}}
                 disabled={true}
@@ -232,7 +234,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
             <DropdownWithLabel
                 label={'Verified institution'}
                 options={this.state.verifiedInstitutionOptions}
-                onChange={(value) => value}
+                onChange={() => this.setState({saveDisabled: false})}
                 initialValue={
                   profile.verifiedInstitutionalAffiliation
                       ? profile.verifiedInstitutionalAffiliation.institutionShortName
@@ -248,14 +250,14 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                     label={'2-factor auth'}
                     initialValue={!!profile.twoFactorAuthBypassTime}
                     disabled={true}
-                    onChange={(checked) => checked}
+                    onChange={() => this.setState({saveDisabled: false})}
                     dataTestId={'twoFactorAuthBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
                     label={'Compliance training'}
                     initialValue={!!profile.complianceTrainingBypassTime}
                     disabled={true}
-                    onChange={(checked) => checked}
+                    onChange={() => this.setState({saveDisabled: false})}
                     dataTestId={'complianceTrainingBypassToggle'}
                 />
               </FlexRow>
@@ -271,7 +273,7 @@ const AdminUser = withUserProfile()(class extends React.Component<Props, State> 
                     label={'Data User Code of Conduct'}
                     initialValue={!!profile.dataUseAgreementBypassTime}
                     disabled={true}
-                    onChange={(checked) => checked}
+                    onChange={() => this.setState({saveDisabled: false})}
                     dataTestId={'dataUseAgreementBypassToggle'}
                 />
               </FlexRow>
