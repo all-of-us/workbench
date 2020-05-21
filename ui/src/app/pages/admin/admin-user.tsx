@@ -224,11 +224,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 inputStyle={{width: '6.5rem'}}
                 dataTestId={'freeTierUsage'}
             />
-            <ReadonlyInputWithLabel
-                label={'Beta access time requested'}
-                content={profile.betaAccessRequestTime ? displayDateWithoutHours(profile.betaAccessRequestTime) : ''}
-                dataTestId={'betaAccessRequestTime'}
-            />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
             <DropdownWithLabel
