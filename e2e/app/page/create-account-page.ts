@@ -36,7 +36,7 @@ export const EDUCATION_LEVEL_VALUE = {
 
 export const LABEL_ALIAS = {
   READ_UNDERSTAND_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement.',
-  READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms described above.',
+  READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms of Use described above.',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
   RESEARCH_BACKGROUND: 'Your research background, experience, and research interests',
