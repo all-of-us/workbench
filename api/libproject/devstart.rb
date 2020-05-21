@@ -1617,9 +1617,7 @@ def populate_user_affiliations(cmd_name, *args)
   end
 
   gradle_args = ([
-      ["--import-filename", op.opts.importFilename]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
-  gradle_args += ([
+      ["--import-filename", op.opts.importFilename],
       ["--user-type", op.opts.userType]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   if op.opts.dry_run
