@@ -25,6 +25,7 @@ import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
+import {AdminUsersComponent} from './pages/admin/admin-users';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
@@ -139,6 +140,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AdminWorkspaceSearchComponent,
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
+    AdminUsersComponent,
     AppComponent,
     BugReportComponent,
     CohortActionsComponent,
