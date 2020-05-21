@@ -311,7 +311,7 @@ const routes: Routes = [
             data: {title: 'User Admin Table'}
           },
           {
-            path: 'users/:userId',
+            path: 'users/:usernameWithoutGsuiteDomain',
             component: AdminUserComponent,
             data: {title: 'User Admin'}
           },

@@ -19,7 +19,7 @@ import {
   withUrlParams
 } from 'app/utils';
 
-import {navigate} from 'app/utils/navigation';
+import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 
@@ -93,7 +93,7 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle,
 interface Props {
   // From withUrlParams
   urlParams: {
-    userId: number
+    usernameWithoutGsuiteDomain: string
   };
 }
 
@@ -118,7 +118,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
-    const profileResponse = await profileApi().getUser(this.props.urlParams.userId);
+    const {gsuiteDomain} = serverConfigStore.getValue();
+    const profileResponse = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + "@" + gsuiteDomain);
 
     const institutionsResponse = await institutionApi().getInstitutions();
     const options = fp.map(
