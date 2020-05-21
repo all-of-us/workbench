@@ -16,7 +16,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
@@ -50,19 +50,23 @@ public class ActionAuditQueryServiceTest {
               Field.of("target_property", LegacySQLTypeName.STRING),
               Field.of("prev_value", LegacySQLTypeName.STRING),
               Field.of("new_value", LegacySQLTypeName.STRING)));
-  private static final long WORKSPACE_DATABASE_ID = 101L;
-  private static final String ACTION_ID_1 = "abfcb9ed-fa65-4e98-acb2-08b0d8b30000";
 
+  private static final long WORKSPACE_DATABASE_ID = 101L;
+  private static final long AGENT_ID = 202L;
+  private static final String ACTION_ID_1 = "abfcb9ed-fa65-4e98-acb2-08b0d8b30000";
+  private static final String USERNAME = "jay@unit-test-aou.org";
+  private static final DateTime EVENT_DATETIME = DateTime.parse("2010-06-30T01:20+02:00");
+  public static final long EVENT_TIME_SECONDS = EVENT_DATETIME.getMillis() / 1000;
   private static final List<FieldValueList> RESULT_ROWS =
       ImmutableList.of(
           FieldValues.buildFieldValueList(
               WORKSPACE_QUERY_SCHEMA.getFields(),
               Arrays.asList(
                   new Object[] {
-                    Long.toString(1587741767767000L),
+                    Long.toString(EVENT_TIME_SECONDS),
                     "USER",
-                    Long.toString(202L),
-                    "jay@unit-test-aou.org",
+                    Long.toString(AGENT_ID),
+                    USERNAME,
                     ACTION_ID_1,
                     "CREATE",
                     "WORKSPACE",
@@ -75,10 +79,10 @@ public class ActionAuditQueryServiceTest {
               WORKSPACE_QUERY_SCHEMA.getFields(),
               Arrays.asList(
                   new Object[] {
-                    Long.toString(1587741767767000L),
+                    Long.toString(EVENT_TIME_SECONDS),
                     "USER",
-                    Long.toString(202L),
-                    "jay@unit-test-aou.org",
+                    Long.toString(AGENT_ID),
+                    USERNAME,
                     ACTION_ID_1,
                     "DELETE",
                     "WORKSPACE",
@@ -93,6 +97,7 @@ public class ActionAuditQueryServiceTest {
       new TableResult(WORKSPACE_QUERY_SCHEMA, RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
   private static final TableResult EMPTY_RESULT = new EmptyTableResult();
   public static final long DEFAULT_LIMIT = 100L;
+  private static final long TIME_TOLERANCE_MILLIS = 500;
 
   @MockBean private BigQueryService mockBigQueryService;
   @Autowired private ActionAuditQueryService actionAuditQueryService;
@@ -136,6 +141,10 @@ public class ActionAuditQueryServiceTest {
     assertThat(row1.getActionId()).isEqualTo(ACTION_ID_1);
     assertThat(row1.getTargetType()).isEqualTo("WORKSPACE");
     assertThat(row1.getPreviousValue()).isNull();
+    assertThat(row1.getAgentId()).isEqualTo(AGENT_ID);
+    assertThat((double) row1.getEventTime().getMillis())
+        .isWithin(TIME_TOLERANCE_MILLIS)
+        .of(EVENT_DATETIME.getMillis());
 
     final AuditLogEntry row2 = response.getLogEntries().get(1);
     assertThat(row2.getActionId()).isEqualTo(ACTION_ID_1);
