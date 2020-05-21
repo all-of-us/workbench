@@ -110,7 +110,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     return new AuditLogEntry()
         .actionId(Optional.ofNullable(getString.apply("action_id")).map(UUID::fromString).orElse(null))
         .actionType(getString.apply("action_type"))
-        .agentId(getLong(row, "agent_id"))
+        .agentId(getLong.apply("agent_id"))
         .agentType(getString.apply("agent_type"))
         .agentUsername(getString.apply("agent_username"))
         .eventTime(new Instant(getTimestampMillis.apply("event_time")).toDateTime())
@@ -141,12 +141,12 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 //        .orElse(null);
 //  }
 
-  @Nullable
-  Long getLong(FieldValueList row, String fieldName) {
-    return getPopulatedFieldValue(row, fieldName)
-        .map(FieldValue::getLongValue)
-        .orElse(null);
-  }
+//  @Nullable
+//  Long getLong(FieldValueList row, String fieldName) {
+//    return getPopulatedFieldValue(row, fieldName)
+//        .map(FieldValue::getLongValue)
+//        .orElse(null);
+//  }
 
   @Nullable
   Long getTimestamp(FieldValueList row, String fieldName) {
