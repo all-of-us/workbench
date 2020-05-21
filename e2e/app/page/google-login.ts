@@ -138,7 +138,7 @@ export default class GoogleLoginPage extends BasePage {
       // Handle "Enter Recovery Email" prompt if found exists
       const recoverEmail = await this.page.$x('//input[@type="email" and @aria-label="Enter recovery email address"]');
       if (recoverEmail.length > 0) {
-        await recoverEmail[0].type(config.contactEmail);
+        await recoverEmail[0].type(config.institutionContactEmail);
         await Promise.all([
           this.page.waitForNavigation(),
           this.page.keyboard.press(String.fromCharCode(13)), // press Enter key

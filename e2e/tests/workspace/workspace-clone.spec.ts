@@ -21,6 +21,9 @@ describe('Clone workspace', () => {
       // choose one workspace on "Your Workspaces" page for clone from
       const workspaceCard = new WorkspaceCard(page);
       const retrievedWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
+      if (retrievedWorkspaces.length === 0) {
+        throw new Error('Failed to find one existing workspace. Cannot continue clone-workspace test.');
+      }
       const aWorkspaceCard: WorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
       await aWorkspaceCard.asElementHandle().hover();
       // click on Ellipsis "Duplicate"
@@ -57,6 +60,9 @@ describe('Clone workspace', () => {
        // choose one workspace on "Home" page for clone from
       const workspaceCard = new WorkspaceCard(page);
       const retrievedWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
+      if (retrievedWorkspaces.length === 0) {
+        throw new Error('Failed to find one existing workspace. Cannot continue clone-workspace test.');
+      }
       const aWorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
       await aWorkspaceCard.clickWorkspaceName();
 
@@ -84,12 +90,20 @@ describe('Clone workspace', () => {
       // strips out dash from workspace name
       expect(workspaceDataUrl).toContain(cloneWorkspaceName.replace(/-/g, ''));
 
+      // starting a new incognito page
+      await page.deleteCookie(...await page.cookies());
       await jestPuppeteer.resetBrowser();
-      const newPage = await browser.newPage();
+      await page.waitFor(2000);
+      const newBrowser = await browser.createIncognitoBrowserContext();
+      const newPage = await newBrowser.newPage();
+      const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
+      await newPage.setUserAgent(userAgent);
       await signIn(newPage);
 
       const response = await newPage.goto(workspaceDataUrl, {waitUntil: ['domcontentloaded','networkidle0']});
       expect(await response.status()).toEqual(200);
+
+      await newPage.close();
     });
   });
 

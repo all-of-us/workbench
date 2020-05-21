@@ -1,8 +1,8 @@
-import {ElementHandle, Page} from 'puppeteer';
+import {Page} from 'puppeteer';
 import {PageUrl} from 'app/page-identifiers';
 import Link from 'app/element/link';
-import {findIcon} from 'app/element/xpath-finder';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import ClrIconLink from 'app/element/clr-icon-link';
 
 export const PAGE = {
   TITLE: 'Homepage',
@@ -35,8 +35,8 @@ export default class HomePage extends AuthenticatedPage {
     }
   }
 
-  async getCreateNewWorkspaceLink(): Promise<ElementHandle> {
-    return findIcon(this.page, {text: LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
+  async getCreateNewWorkspaceLink(): Promise<ClrIconLink> {
+    return ClrIconLink.forLabel(this.page, {text: LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
   }
 
   /**
@@ -45,6 +45,10 @@ export default class HomePage extends AuthenticatedPage {
   async load(): Promise<this> {
     await this.loadPageUrl(PageUrl.HOME);
     return this;
+  }
+
+  async getSeeAllWorkspacesLink(): Promise<Link> {
+    return Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES);
   }
 
 }
