@@ -123,8 +123,10 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   async componentDidMount() {
     try {
-      await this.getUser();
-      await this.getInstitutions();
+      Promise.all([
+        this.getUser(),
+        this.getInstitutions()
+      ]);
     } finally {
       this.setState({loading: false});
     }
@@ -133,9 +135,9 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   async getUser() {
     const {gsuiteDomain} = serverConfigStore.getValue();
     try {
-      const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + "@" + gsuiteDomain);
-      this.setState({profile: profile})
-    } catch(error) {
+      const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
+      this.setState({profile: profile});
+    } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});
     }
   }
@@ -144,13 +146,13 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     try {
       const institutionsResponse = await institutionApi().getInstitutions();
       const options = fp.map(
-          institution => {
-            return {
-              'label': institution.displayName ? institution.displayName : institution.shortName,
-              'value': {displayName: institution.displayName, shortName: institution.shortName}
-            };
-          },
-          institutionsResponse.institutions
+        institution => {
+          return {
+            'label': institution.displayName ? institution.displayName : institution.shortName,
+            'value': {displayName: institution.displayName, shortName: institution.shortName}
+          };
+        },
+        institutionsResponse.institutions
       );
       this.setState({verifiedInstitutionOptions: options});
     } catch (error) {

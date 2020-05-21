@@ -9,7 +9,6 @@ import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {DataUserCodeOfConductComponent} from 'app/pages/profile/data-user-code-of-conduct';
 import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
-import {AdminInstitutionComponent} from './pages/admin/admin-institution';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminUsersComponent} from './pages/admin/admin-users';
