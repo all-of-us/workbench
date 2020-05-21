@@ -7342,8 +7342,9 @@ definitions:
       actionId:
         description: Unique ID for this action. Used for grouping similar events under a
           single action, though in this representation we're returning a straight list of rows.
+          This is technically a UUID, but this may change in the future (to a shorter random string),
+          so we only type it as a String.
         type: string
-        format: uuid
       actionType:
         description: >
           Defines what action is taking place in this event. (There can be several ACTION_TYPEs
@@ -7356,21 +7357,22 @@ definitions:
           this this is the PK for that table (e.g. user_id).
         type: integer
         format: int64
-      agentUsername:
-        description: >
-          Username of the user or administrator taking the action. This is the agent_email column
-          in BigQuery.
-        type: string
-        format: email
       agentType:
         description: >
           A member of the org.pmiops.workbench.actionaudit.AgentType enum (not generated). Since
           this is typed as a string in BigQuery (and not constrained to that type), we don't try
           to narrow the type in the admin API.
         type: string
+      agentUsername:
+        description: >
+          Username of the user or administrator taking the action. This is the agent_email column
+          in BigQuery.
+        type: string
+        format: email
       eventTime:
         description: >
-          Timestamp recorded at time of the event. Called timestamp in the BigQuery table.
+          Timestamp recorded at time of the event. Called timestamp in the BigQuery table. Even
+          though it says string, it's actually a integer over the wire.
         type: string
         format: date-time
       newValue:

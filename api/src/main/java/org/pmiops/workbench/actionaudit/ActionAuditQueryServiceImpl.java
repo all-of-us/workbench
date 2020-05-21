@@ -1,25 +1,19 @@
 package org.pmiops.workbench.actionaudit;
 
-import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nullable;
 import javax.inject.Provider;
-import org.joda.time.Instant;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
 import org.pmiops.workbench.model.AuditLogEntriesResponse;
 import org.pmiops.workbench.model.AuditLogEntry;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,8 +21,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   private BigQueryService bigQueryService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceService workspaceService;
-  public static final String WORKSPACE_EVENTS_QUERY_STRING_FORMAT =
+  private static final String WORKSPACE_EVENTS_QUERY_STRING_FORMAT =
       "SELECT\n"
           + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,\n"
           + "  jsonPayload.agent_type AS agent_type,\n"
@@ -48,12 +41,9 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "LIMIT %d";
 
   public ActionAuditQueryServiceImpl(
-      BigQueryService bigQueryService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceService workspaceService) {
+      BigQueryService bigQueryService, Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceService = workspaceService;
   }
 
   @Override
@@ -77,6 +67,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
+    // Transform all results on all pages.
     final List<AuditLogEntry> logEntries =
         StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
             .map(this::fieldValueListToAditLogEntry)
@@ -90,63 +81,18 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   }
 
   private AuditLogEntry fieldValueListToAditLogEntry(FieldValueList row) {
-    // Define helper methods to fetch the value if non-null for each needed type
-    @Nullable
-    final Function<String, String> getString =
-        (fieldName) ->
-            getPopulatedFieldValue(row, fieldName).map(FieldValue::getStringValue).orElse(null);
-
-    @Nullable
-    final Function<String, Long> getTimestampMillis =
-        (fieldName) ->
-            getPopulatedFieldValue(row, fieldName).map(FieldValue::getTimestampValue).orElse(null);
-
-    @Nullable
-    final Function<String, Long> getLong =
-        (fieldName) ->
-            getPopulatedFieldValue(row, fieldName).map(FieldValue::getLongValue).orElse(null);
-
-    return new AuditLogEntry()
-        .actionId(
-            Optional.ofNullable(getString.apply("action_id")).map(UUID::fromString).orElse(null))
-        .actionType(getString.apply("action_type"))
-        .agentId(getLong.apply("agent_id"))
-        .agentType(getString.apply("agent_type"))
-        .agentUsername(getString.apply("agent_username"))
-        .eventTime(new Instant(getTimestampMillis.apply("event_time")).toDateTime())
-        .newValue(getString.apply("new_value"))
-        .previousValue(getString.apply("prev_value"))
-        .targetId(getLong.apply("target_id"))
-        .targetProperty(getString.apply("target_property"))
-        .targetType(getString.apply("target_type"));
-  }
-
-  /** Return an Optional containing a FieldValue if isNull() is false, empty otherwise. */
-  Optional<FieldValue> getPopulatedFieldValue(FieldValueList row, String fieldName) {
-    final FieldValue value = row.get(fieldName);
-    if (value.isNull()) {
-      return Optional.empty();
-    } else {
-      return Optional.of(value);
-    }
-  }
-
-  //  @Nullable
-  //  String getString(FieldValueList row, String fieldName) {
-  //    return getPopulatedFieldValue(row, fieldName)
-  //        .map(FieldValue::getStringValue)
-  //        .orElse(null);
-  //  }
-
-  //  @Nullable
-  //  Long getLong(FieldValueList row, String fieldName) {
-  //    return getPopulatedFieldValue(row, fieldName)
-  //        .map(FieldValue::getLongValue)
-  //        .orElse(null);
-  //  }
-
-  @Nullable
-  Long getTimestamp(FieldValueList row, String fieldName) {
-    return getPopulatedFieldValue(row, fieldName).map(FieldValue::getTimestampValue).orElse(null);
+    final AuditLogEntry entry = new AuditLogEntry();
+    FieldValues.getString(row, "action_id").ifPresent(entry::setActionId);
+    FieldValues.getString(row, "action_type").ifPresent(entry::setActionType);
+    FieldValues.getLong(row, "agent_id").ifPresent(entry::setAgentId);
+    FieldValues.getString(row, "agent_type").ifPresent(entry::setAgentType);
+    FieldValues.getString(row, "agent_username").ifPresent(entry::setAgentUsername);
+    FieldValues.getDateTime(row, "event_time").ifPresent(entry::setEventTime);
+    FieldValues.getString(row, "new_value").ifPresent(entry::setNewValue);
+    FieldValues.getString(row, "prev_value").ifPresent(entry::setPreviousValue);
+    FieldValues.getLong(row, "target_id").ifPresent(entry::setTargetId);
+    FieldValues.getString(row, "target_property").ifPresent(entry::setTargetProperty);
+    FieldValues.getString(row, "target_type").ifPresent(entry::setTargetType);
+    return entry;
   }
 }
