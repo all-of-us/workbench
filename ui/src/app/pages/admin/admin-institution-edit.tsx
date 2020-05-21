@@ -183,8 +183,9 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
         institution.userInstructions === institutionToEdit.userInstructions &&
         institution.organizationTypeOtherText === institutionToEdit.organizationTypeOtherText;
   }
-  // Confirm there is not empty required fields
-  noEmptyFields() {
+
+
+  noEmptyRequiredFields() {
     const {institution} = this.state;
     let emailValid = true;
     if (institution.duaTypeEnum) {
@@ -200,8 +201,9 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   // Disable save button if
   // a) No fields were edited or if there are any errors
   // b) email address/Domain are not valid
+  // c) Requird fields are not empty
   disableSave(errors) {
-    return this.noEmptyFields() || (errors && errors.displayName) || this.fieldsNotEdited()
+    return this.noEmptyRequiredFields() || (errors && errors.displayName) || this.fieldsNotEdited()
       || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }
 
@@ -307,7 +309,9 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
                 {errors.emailDomain && <li>Email Domain cannot be empty</li>}
                    </BulletAlignedUnorderedList>
             } disable={isAddInstitution}>
-            <Button type='primary' disabled={this.disableSave(errors)} onClick={() => this.saveInstitution()}>{this.buttonText}</Button>
+              <Button type='primary' disabled={this.disableSave(errors)} onClick={() => this.saveInstitution()}>
+                {this.buttonText}
+              </Button>
             </TooltipTrigger>
           </div>
         </FlexRow>
