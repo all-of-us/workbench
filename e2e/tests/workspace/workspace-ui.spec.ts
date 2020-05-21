@@ -15,7 +15,7 @@ describe('Workspace ui tests', () => {
     // on Home page
     expect(await new HomePage(page).isLoaded()).toBe(true);
 
-    const cards = await WorkspaceCard.getAllCards(page);
+    const cards = await WorkspaceCard.findAllCards(page);
     let width;
     let height;
     for (const card of cards) {
@@ -39,8 +39,8 @@ describe('Workspace ui tests', () => {
     await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
-    await WorkspaceCard.getAllCards(page);
-    const card = await WorkspaceCard.getAnyCard(page);
+    await WorkspaceCard.findAllCards(page);
+    const card = await WorkspaceCard.findAnyCard(page);
 
     // check workspace name string is made of english characters
     const workspaceName = await card.getWorkspaceName();
