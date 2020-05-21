@@ -6,8 +6,6 @@ import {Header, SmallHeader} from 'app/components/headers';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-
-
 import * as React from 'react';
 
 export const styles = reactStyles({
