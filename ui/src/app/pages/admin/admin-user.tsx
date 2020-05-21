@@ -98,8 +98,10 @@ interface Props {
 }
 
 interface State {
+  institutionsLoadingError: string;
   loading: boolean;
   profile: Profile;
+  profileLoadingError: string;
   saveDisabled: boolean;
   verifiedInstitutionOptions: Array<{label: string, value: {displayName: string, shortName: string}}>;
 }
@@ -110,28 +112,50 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      loading: false,
+      institutionsLoadingError: '',
+      loading: true,
       profile: null,
+      profileLoadingError: '',
       saveDisabled: true,
       verifiedInstitutionOptions: []
     };
   }
 
   async componentDidMount() {
-    const {gsuiteDomain} = serverConfigStore.getValue();
-    const profileResponse = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + "@" + gsuiteDomain);
+    try {
+      await this.getUser();
+      await this.getInstitutions();
+    } finally {
+      this.setState({loading: false});
+    }
+  }
 
-    const institutionsResponse = await institutionApi().getInstitutions();
-    const options = fp.map(
-      institution => {
-        return {
-          'label': institution.displayName ? institution.displayName : institution.shortName,
-          'value': {displayName: institution.displayName, shortName: institution.shortName}
-        };
-      },
-      institutionsResponse.institutions
-    );
-    this.setState({profile: profileResponse, verifiedInstitutionOptions: options});
+  async getUser() {
+    const {gsuiteDomain} = serverConfigStore.getValue();
+    try {
+      const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + "@" + gsuiteDomain);
+      this.setState({profile: profile})
+    } catch(error) {
+      this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});
+    }
+  }
+
+  async getInstitutions() {
+    try {
+      const institutionsResponse = await institutionApi().getInstitutions();
+      const options = fp.map(
+          institution => {
+            return {
+              'label': institution.displayName ? institution.displayName : institution.shortName,
+              'value': {displayName: institution.displayName, shortName: institution.shortName}
+            };
+          },
+          institutionsResponse.institutions
+      );
+      this.setState({verifiedInstitutionOptions: options});
+    } catch (error) {
+      this.setState({institutionsLoadingError: 'Could not get list of verified institutions - please try again later'});
+    }
   }
 
   render() {
@@ -145,6 +169,8 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           color: colors.primary
         }}
     >
+      {this.state.institutionsLoadingError && <div>{this.state.institutionsLoadingError}</div>}
+      {this.state.profileLoadingError && <div>{this.state.profileLoadingError}</div>}
       {this.state.profile && <FlexColumn>
         <FlexRow style={{alignItems: 'center'}}>
           <a onClick={() => navigate(['admin', 'users'])}>
@@ -236,7 +262,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 disabled={true}
                 dataTestId={'freeTierDollarQuota'}
             />
-            <DropdownWithLabel
+            {this.state.verifiedInstitutionOptions && <DropdownWithLabel
                 label={'Verified institution'}
                 options={this.state.verifiedInstitutionOptions}
                 onChange={() => this.setState({saveDisabled: false})}
@@ -247,7 +273,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                 }
                 disabled={true}
                 dataTestId={'verifiedInstitution'}
-            />
+            />}
             <div style={{marginTop: '1rem', width: '15rem'}}>
               <label style={{fontWeight: 600}}>Bypass access to:</label>
               <FlexRow style={{marginTop: '.5rem'}}>
@@ -286,7 +312,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
           </FlexColumn>
         </FlexRow>
       </FlexColumn>}
-      {this.state.loading || !this.state.profile && <SpinnerOverlay/>}
+      {this.state.loading && <SpinnerOverlay/>}
     </FadeBox>;
   }
 });
