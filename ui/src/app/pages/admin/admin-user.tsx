@@ -76,14 +76,14 @@ const DropdownWithLabel = ({label, options, initialValue, onChange, disabled, da
   </FlexColumn>;
 };
 
-const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onChange, dataTestId}) => {
+const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle, dataTestId}) => {
   return <FlexColumn data-test-id={dataTestId} style={{width: '8rem', flex: '0 0 auto'}}>
     <label>{label}</label>
     <Toggle
         name={initialValue ? 'BYPASSED' : ''}
         checked={initialValue}
         disabled={disabled}
-        onToggle={(checked) => onChange(checked)}
+        onToggle={(checked) => onToggle(checked)}
         height={18}
         width={33}
     />
@@ -259,14 +259,14 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                     label={'2-factor auth'}
                     initialValue={!!profile.twoFactorAuthBypassTime}
                     disabled={true}
-                    onChange={() => this.setState({saveDisabled: false})}
+                    onToggle={() => this.setState({saveDisabled: false})}
                     dataTestId={'twoFactorAuthBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
                     label={'Compliance training'}
                     initialValue={!!profile.complianceTrainingBypassTime}
                     disabled={true}
-                    onChange={() => this.setState({saveDisabled: false})}
+                    onToggle={() => this.setState({saveDisabled: false})}
                     dataTestId={'complianceTrainingBypassToggle'}
                 />
               </FlexRow>
@@ -275,14 +275,14 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
                     label={'eRA Commons'}
                     initialValue={!!profile.eraCommonsBypassTime}
                     disabled={true}
-                    onChange={(checked) => checked}
+                    onToggle={(checked) => checked}
                     dataTestId={'eraCommonsBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
                     label={'Data User Code of Conduct'}
                     initialValue={!!profile.dataUseAgreementBypassTime}
                     disabled={true}
-                    onChange={() => this.setState({saveDisabled: false})}
+                    onToggle={() => this.setState({saveDisabled: false})}
                     dataTestId={'dataUseAgreementBypassToggle'}
                 />
               </FlexRow>
