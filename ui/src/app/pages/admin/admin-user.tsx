@@ -16,8 +16,7 @@ import {
   displayDateWithoutHours,
   reactStyles,
   ReactWrapperBase,
-  withUrlParams,
-  withUserProfile
+  withUrlParams
 } from 'app/utils';
 
 import {navigate} from 'app/utils/navigation';
@@ -82,7 +81,7 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onChange,
     <label>{label}</label>
     <Toggle
         name={initialValue ? 'BYPASSED' : ''}
-        isChecked={initialValue}
+        checked={initialValue}
         disabled={disabled}
         onToggle={(checked) => onChange(checked)}
         height={18}
@@ -110,7 +109,6 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
 
-    console.log(this.props);
     this.state = {
       loading: false,
       profile: null,
@@ -180,7 +178,7 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
             </label>
             <Toggle
                 name={profile.disabled ? 'Disabled' : 'Enabled'}
-                isChecked={!profile.disabled}
+                checked={!profile.disabled}
                 disabled={true}
                 data-test-id='account-access-toggle'
                 onToggle={() => this.setState({saveDisabled: false})}
