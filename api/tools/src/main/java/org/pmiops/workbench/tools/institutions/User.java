@@ -16,7 +16,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 
 public abstract class User {
-  private static final Logger log = Logger.getLogger(User.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(User.class.getName());
 
   String firstName;
   String lastName;
@@ -45,7 +45,7 @@ public abstract class User {
 
   private void checkField(String dbValue, String csvValue, String fieldName) {
     if (!dbValue.equals(csvValue)) {
-      log.warning(
+      LOGGER.warning(
           String.format(
               "CSV and DB values do not match for user '%s', field '%s'. CSV = %s, DB = %s",
               userName, fieldName, csvValue, dbValue));
@@ -101,7 +101,7 @@ public abstract class User {
       existingAffil.ifPresent(
           existingAffiliation -> {
             if (equivalent(existingAffiliation, newAffiliation)) {
-              log.info("No action taken.  Affiliation exists: " + existingAffiliation);
+              LOGGER.info("No action taken.  Affiliation exists: " + existingAffiliation);
             } else {
               throw new RuntimeException(
                   String.format(
@@ -129,6 +129,6 @@ public abstract class User {
     if (dryRun) {
       prefix = "[DRY RUN] Would have... ";
     }
-    log.info(prefix + msg);
+    LOGGER.info(prefix + msg);
   }
 }

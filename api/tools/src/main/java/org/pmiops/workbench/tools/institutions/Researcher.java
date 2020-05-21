@@ -24,8 +24,8 @@ class Researcher extends User {
   final String duaSigned;
   final String redCapComplete;
 
-  private static final int columnLength = 8;
-  private static final String affirmative = "Yes";
+  private static final int COLUMN_LENGTH = 8;
+  private static final String AFFIRMATIVE = "Yes";
 
   // this mapping is only stored in the UI so we copy it here
   // (see institutionalRoleOptions in account-creation-options.tsx)
@@ -115,20 +115,20 @@ class Researcher extends User {
   }
 
   static List<User> parseInput(final String filename) throws IOException {
-    return User.readFile(filename, columnLength).stream()
+    return User.readFile(filename, COLUMN_LENGTH).stream()
         .map(Researcher::new)
         .collect(Collectors.toList());
   }
 
   @Override
   void preCheck() {
-    if (!duaSigned.equals(affirmative)) {
+    if (!duaSigned.equals(AFFIRMATIVE)) {
       throw new RuntimeException(
           String.format(
               "The Institutional DUA Signature for user '%s' was not marked as '%s' in the input CSV",
-              userName, affirmative));
+              userName, AFFIRMATIVE));
     }
-    if (!redCapComplete.equals(affirmative)) {
+    if (!redCapComplete.equals(AFFIRMATIVE)) {
       throw new RuntimeException(
           String.format(
               "The REDCap completion status for user '%s' was not marked as '%s' in the input CSV",

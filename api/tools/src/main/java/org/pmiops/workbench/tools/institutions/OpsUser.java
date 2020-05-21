@@ -20,21 +20,22 @@ class OpsUser extends User {
   final String operationalRole;
   final String action;
 
-  private static final int columnLength = 6;
-  private static final String institutionShortName = "AouOps";
-  private static final String actionForInclusion = "To Remain";
+  private static final int COLUMN_LENGTH = 6;
+  private static final String INSTITUTION_SHORT_NAME = "AouOps";
+  private static final String ACTION_FOR_INCLUSION = "To Remain";
 
   private static Optional<DbInstitution> aouOpsInst = Optional.empty();
 
   private static DbInstitution getOrInitInst(final InstitutionDao institutionDao) {
     if (!aouOpsInst.isPresent()) {
-      aouOpsInst = institutionDao.findOneByShortName(institutionShortName);
+      aouOpsInst = institutionDao.findOneByShortName(INSTITUTION_SHORT_NAME);
     }
 
     return aouOpsInst.orElseThrow(
         () ->
             new RuntimeException(
-                String.format("Could not find '%s' Institution in the DB", institutionShortName)));
+                String.format(
+                    "Could not find '%s' Institution in the DB", INSTITUTION_SHORT_NAME)));
   }
 
   private OpsUser(final String[] userLine) {
@@ -47,17 +48,17 @@ class OpsUser extends User {
   }
 
   static List<User> parseInput(final String filename) throws IOException {
-    return User.readFile(filename, columnLength).stream()
+    return User.readFile(filename, COLUMN_LENGTH).stream()
         .map(OpsUser::new)
         .collect(Collectors.toList());
   }
 
   @Override
   void preCheck() {
-    if (!action.equals(actionForInclusion)) {
+    if (!action.equals(ACTION_FOR_INCLUSION)) {
       throw new RuntimeException(
           String.format(
-              "User %s not marked as '%s' in the input CSV", userName, actionForInclusion));
+              "User %s not marked as '%s' in the input CSV", userName, ACTION_FOR_INCLUSION));
     }
   }
 

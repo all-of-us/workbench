@@ -2,7 +2,6 @@ package org.pmiops.workbench.tools.institutions;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -30,8 +29,6 @@ import org.springframework.context.annotation.Bean;
  * </pre>
  */
 public class PopulateUserAffiliations {
-
-  private static final Logger log = Logger.getLogger(PopulateUserAffiliations.class.getName());
 
   private List<User> parseUsers(final String filename, final String userTypes) throws IOException {
     if (userTypes.equals("OPS")) {
