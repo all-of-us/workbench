@@ -28,6 +28,8 @@ import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-detai
 import {HomepageComponent} from './pages/homepage/homepage';
 import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
+import {SessionExpiredComponent} from './pages/session-expired';
+import {SignInAgainComponent} from './pages/sign-in-again';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
@@ -53,6 +55,14 @@ const routes: Routes = [
     path: 'cookie-policy',
     component: CookiePolicyComponent,
     data: {title: 'Cookie Policy'}
+  }, {
+    path: 'session-expired',
+    component: SessionExpiredComponent,
+    data: {title: 'You have been signed out'}
+  }, {
+    path: 'sign-in-again',
+    component: SignInAgainComponent,
+    data: {title: 'You have been signed out'}
   }, {
     path: 'user-disabled',
     component: UserDisabledComponent,

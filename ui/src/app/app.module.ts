@@ -44,6 +44,8 @@ import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignInComponent} from './pages/login/sign-in';
 import {DataUserCodeOfConductComponent} from './pages/profile/data-user-code-of-conduct';
 import {ProfilePageComponent} from './pages/profile/profile-page';
+import {SessionExpiredComponent} from './pages/session-expired';
+import {SignInAgainComponent} from './pages/sign-in-again';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
@@ -161,6 +163,8 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SignedInComponent,
     NavBarComponent,
+    SessionExpiredComponent,
+    SignInAgainComponent,
     SignInComponent,
     TablePage,
     TextModalComponent,
