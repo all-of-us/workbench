@@ -316,7 +316,7 @@ const routes: Routes = [
             data: {title: 'User Admin'}
           },
           {
-            path: 'user',
+            path: 'user', // included for backwards compatibility
             component: AdminUsersComponent,
             data: {title: 'User Admin Table'}
           },
