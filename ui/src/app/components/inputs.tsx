@@ -422,7 +422,7 @@ interface ToggleProps {
   name: string;
   checked: boolean;
   disabled?: boolean;
-  onToggle: () => void;
+  onToggle: (checked) => void;
   style?: React.CSSProperties;
   height?: number;
   width?: number;
