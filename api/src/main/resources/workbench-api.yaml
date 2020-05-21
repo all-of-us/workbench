@@ -933,7 +933,7 @@ paths:
           description: A list of workspaces
           schema:
             "$ref": "#/definitions/WorkspaceListResponse"
-  "/v1/admin/audit/workspace/{workspaceNamespace}":
+  "/v1/admin/audit/workspace":
     get:
       tags:
         - workspaceAdmin
