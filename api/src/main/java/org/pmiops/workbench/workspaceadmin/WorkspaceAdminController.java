@@ -158,7 +158,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
                         String.format(
                             "No workspace found with Firecloud namespace %s", workspaceNamespace)));
 
-    // We need to get the database ID for the query.
     return ResponseEntity.ok(
         actionAuditQueryService.queryEventsForWorkspace(workspaceDatabaseId, limit));
   }

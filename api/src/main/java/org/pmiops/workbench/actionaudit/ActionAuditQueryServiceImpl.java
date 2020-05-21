@@ -58,7 +58,6 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   @Override
   public AuditLogEntriesResponse queryEventsForWorkspace(long workspaceDatabaseId, long limit) {
-    // TODO(jaycarlton) - use config
     final ActionAuditConfig actionAuditConfig = workbenchConfigProvider.get().actionAudit;
     final String fullyQualifiedTableName =
         String.format(
@@ -90,25 +89,26 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     return new AuditLogEntriesResponse().logEntries(logEntries).queryMetadata(metadata);
   }
 
-  AuditLogEntry fieldValueListToAditLogEntry(FieldValueList row) {
+  private AuditLogEntry fieldValueListToAditLogEntry(FieldValueList row) {
     // Define helper methods to fetch the value if non-null for each needed type
     @Nullable
-    final Function<String, String> getString = (fieldName) -> getPopulatedFieldValue(row, fieldName)
-        .map(FieldValue::getStringValue)
-        .orElse(null);
+    final Function<String, String> getString =
+        (fieldName) ->
+            getPopulatedFieldValue(row, fieldName).map(FieldValue::getStringValue).orElse(null);
 
     @Nullable
-    final Function<String, Long> getTimestampMillis = (fieldName) -> getPopulatedFieldValue(row, fieldName)
-        .map(FieldValue::getTimestampValue)
-        .orElse(null);
+    final Function<String, Long> getTimestampMillis =
+        (fieldName) ->
+            getPopulatedFieldValue(row, fieldName).map(FieldValue::getTimestampValue).orElse(null);
 
     @Nullable
-    final Function<String, Long> getLong = (fieldName) -> getPopulatedFieldValue(row, fieldName)
-        .map(FieldValue::getLongValue)
-        .orElse(null);
+    final Function<String, Long> getLong =
+        (fieldName) ->
+            getPopulatedFieldValue(row, fieldName).map(FieldValue::getLongValue).orElse(null);
 
     return new AuditLogEntry()
-        .actionId(Optional.ofNullable(getString.apply("action_id")).map(UUID::fromString).orElse(null))
+        .actionId(
+            Optional.ofNullable(getString.apply("action_id")).map(UUID::fromString).orElse(null))
         .actionType(getString.apply("action_type"))
         .agentId(getLong.apply("agent_id"))
         .agentType(getString.apply("agent_type"))
@@ -121,10 +121,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
         .targetType(getString.apply("target_type"));
   }
 
-  /**
-   * Return an Optional containing a FieldValue if isNull() is false,
-   * empty otherwise.
-   */
+  /** Return an Optional containing a FieldValue if isNull() is false, empty otherwise. */
   Optional<FieldValue> getPopulatedFieldValue(FieldValueList row, String fieldName) {
     final FieldValue value = row.get(fieldName);
     if (value.isNull()) {
@@ -134,25 +131,22 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     }
   }
 
-//  @Nullable
-//  String getString(FieldValueList row, String fieldName) {
-//    return getPopulatedFieldValue(row, fieldName)
-//        .map(FieldValue::getStringValue)
-//        .orElse(null);
-//  }
+  //  @Nullable
+  //  String getString(FieldValueList row, String fieldName) {
+  //    return getPopulatedFieldValue(row, fieldName)
+  //        .map(FieldValue::getStringValue)
+  //        .orElse(null);
+  //  }
 
-//  @Nullable
-//  Long getLong(FieldValueList row, String fieldName) {
-//    return getPopulatedFieldValue(row, fieldName)
-//        .map(FieldValue::getLongValue)
-//        .orElse(null);
-//  }
+  //  @Nullable
+  //  Long getLong(FieldValueList row, String fieldName) {
+  //    return getPopulatedFieldValue(row, fieldName)
+  //        .map(FieldValue::getLongValue)
+  //        .orElse(null);
+  //  }
 
   @Nullable
   Long getTimestamp(FieldValueList row, String fieldName) {
-    return getPopulatedFieldValue(row, fieldName)
-        .map(FieldValue::getTimestampValue)
-        .orElse(null);
-
+    return getPopulatedFieldValue(row, fieldName).map(FieldValue::getTimestampValue).orElse(null);
   }
 }
