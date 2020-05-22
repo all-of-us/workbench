@@ -266,6 +266,8 @@ public class RdrExportServiceImpl implements RdrExportService {
                   new ResearcherVerifiedInstitutionalAffiliation()
                       .institutionShortName(
                           verifiedInstitutionalAffiliation.getInstitution().getShortName())
+                      .institutionDisplayName(
+                          verifiedInstitutionalAffiliation.getInstitution().getDisplayName())
                       .institutionalRole(role));
             });
     return researcher;
