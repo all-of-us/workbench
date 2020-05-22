@@ -258,6 +258,16 @@ export default class BaseElement {
   }
 
   /**
+   * Click on element then wait for page navigation to finish.
+   */
+  async clickAndWait() {
+    return Promise.all([
+      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+      this.click(),
+    ]);
+  }
+
+  /**
    * Paste texts instead type one char at a time.
    * @param text
    */

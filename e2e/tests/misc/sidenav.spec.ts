@@ -2,15 +2,15 @@ import Button from 'app/element/button';
 import HomePage from 'app/page/home-page';
 import ProfilePage from 'app/page/profile-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {waitForExists} from 'driver/xpath-util';
-import {signIn} from 'utils/app-utils';
+import {signIn} from 'utils/test-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
+import {waitForDocumentTitle} from '../../utils/waits-utils';
 
 export const HELP_DESK = {
   ASK_QUESTION: 'Ask a question about the Researcher Workbench',
   REPORT_DATA_PRIVACY_CONCERN: 'Report a data privacy concern',
   TELL_US_ABOUT_PUBLICATION: 'Tell us about an upcoming publication',
-  REQUEST_ADDITIONAL_BILLING_CREDITS: 'Request additional billing credits',
+  REQUEST_BILLING_CREDITS: 'Request additional billing credits',
 };
 
 
@@ -32,7 +32,7 @@ describe('Sidebar Navigation', () => {
     const fname = await (await profilePage.getFirstName()).getValue();
     const lname = await (await profilePage.getLastName()).getValue();
     await Navigation.openNavMenu(page);
-    const displayedUsername = await homePage.getUserName();
+    const displayedUsername = await homePage.getUsername();
     expect(displayedUsername).toBe(`${fname} ${lname}`);
 
     // Select Your Workspaces link
@@ -65,7 +65,7 @@ describe('Sidebar Navigation', () => {
     expect(await tellAboutPublicationButton.isVisible()).toBe(true);
     await tellAboutPublicationButton.dispose();
 
-    const requestBillingCreditsButton = await Button.forLabel(newIframe, {text: HELP_DESK.REQUEST_ADDITIONAL_BILLING_CREDITS});
+    const requestBillingCreditsButton = await Button.forLabel(newIframe, {text: HELP_DESK.REQUEST_BILLING_CREDITS});
     expect(await requestBillingCreditsButton.isVisible()).toBe(true);
     await requestBillingCreditsButton.dispose();
 
@@ -79,7 +79,7 @@ describe('Sidebar Navigation', () => {
   test('User can Sign Out', async () => {
     // Select Sign Out link
     await Navigation.navMenu(page, NavLink.SIGN_OUT);
-    await waitForExists(page, '//*[text()="Redirect Notice"]');
+    await waitForDocumentTitle(page, 'Redirect Notice');
     const href = await page.evaluate(() => location.href);
     expect(href).toEqual(expect.stringMatching(/(\/|%2F)login$/));
   });

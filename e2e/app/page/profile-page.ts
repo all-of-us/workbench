@@ -1,6 +1,8 @@
 import {Page} from 'puppeteer';
 import Textbox from 'app/element/textbox';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForText, waitForUrl} from 'utils/waits-utils';
 
 
 export const PAGE = {
@@ -30,11 +32,13 @@ export default class ProfilePage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitForTextExists(PAGE.TITLE),
-        this.waitUntilNoSpinner(),
+        waitForUrl(this.page, '/profile'),
+        waitForText(this.page, PAGE.TITLE),
+        waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`ProfilePage isLoaded() encountered ${err}`);
       return false;
     }
   }

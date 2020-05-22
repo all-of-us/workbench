@@ -7,7 +7,7 @@ beforeEach(async () => {
   await page.setUserAgent(userAgent);
   // Refer to https://github.com/puppeteer/puppeteer/blob/master/docs/api.md#pagesetdefaultnavigationtimeouttimeout
   await page.setDefaultNavigationTimeout(70000);
-  await page.setDefaultTimeout(10000);
+  await page.setDefaultTimeout(50000);
 });
 
 // Runs this afterEach() before test's afterEach().

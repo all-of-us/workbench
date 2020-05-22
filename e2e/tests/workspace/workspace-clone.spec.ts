@@ -1,5 +1,5 @@
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'utils/app-utils';
+import {signIn} from 'utils/test-utils';
 import {WorkspaceAccessLevel, WorkspaceAction} from 'app/page-identifiers';
 import DataPage from 'app/page/data-page';
 import WorkspaceCard from 'app/component/workspace-card';
