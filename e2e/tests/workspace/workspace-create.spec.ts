@@ -6,7 +6,7 @@ import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
 
-describe.skip('Creating new workspaces', () => {
+describe('Creating new workspaces', () => {
 
   beforeEach(async () => {
     await signIn(page);

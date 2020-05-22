@@ -4,8 +4,7 @@ import BasePage from 'app/page/base-page';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 const SELECTOR = {
-  signedInIndicator: 'body#body div',
-  logo: 'img[src="/assets/images/all-of-us-logo.svg"]'
+  signedInIndicator: 'app-signed-in',
 };
 
 
@@ -22,9 +21,9 @@ export default abstract class AuthenticatedPage extends BasePage {
   protected async isSignedIn(): Promise<boolean> {
     try {
       await this.page.waitForSelector(SELECTOR.signedInIndicator);
-      await this.page.waitForSelector(SELECTOR.logo, {visible: true});
       return true;
     } catch (err) {
+      console.log(`AuthenticatedPage isSignedIn() encountered ${err}`);
       return false;
     }
   }
