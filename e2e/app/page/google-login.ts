@@ -1,9 +1,9 @@
 import { ElementHandle, Page } from 'puppeteer';
-import {findButton} from 'app/element/xpath-finder';
-import BasePage from 'app/page/base-page';
-import HomePage from 'app/page/home-page';
 import {config} from 'resources/workbench-config';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
+import {waitForDocumentTitle} from 'utils/waits-utils';
+import BaseElement from 'app/element/base-element';
+import Button from 'app/element/button';
 
 
 export const SELECTOR = {
@@ -15,10 +15,9 @@ export const SELECTOR = {
 };
 
 
-export default class GoogleLoginPage extends BasePage {
+export default class GoogleLoginPage {
 
-  constructor(page: Page) {
-    super(page);
+  constructor(private readonly page: Page) {
   }
 
   /**
@@ -59,7 +58,7 @@ export default class GoogleLoginPage extends BasePage {
     const isLink = await this.page.evaluate((e1, e2) => e1 === e2, elemt1, link);
     if (isLink) {
       // click " Use another Account " link
-      await this.clickAndWait(link);
+      await (BaseElement.asBaseElement(this.page, link)).clickAndWait();
     }
 
     const emailInput = await this.email();
@@ -67,7 +66,7 @@ export default class GoogleLoginPage extends BasePage {
     await emailInput.type(userEmail);
 
     const nextButton = await this.page.waitForXPath(SELECTOR.NextButton);
-    await this.clickAndWait(nextButton);
+    await (BaseElement.asBaseElement(this.page, nextButton)).clickAndWait();
   }
 
   /**
@@ -85,7 +84,7 @@ export default class GoogleLoginPage extends BasePage {
    */
   async submit() : Promise<void> {
     const button = await this.page.waitForXPath(SELECTOR.submitButton, {visible: true});
-    await this.clickAndWait(button);
+    await (BaseElement.asBaseElement(this.page, button)).clickAndWait();
   }
 
   /**
@@ -93,13 +92,7 @@ export default class GoogleLoginPage extends BasePage {
    */
   async load(): Promise<void> {
     const url = config.uiBaseUrl + config.loginUrlPath;
-    try {
-      await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 0});
-    } catch (err) {
-      console.error('Google login page not found. ' + err);
-      await takeScreenshot(this.page, 'GoogleLoginPageNotFound');
-      throw err;
-    }
+    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 180000});
   }
 
   /**
@@ -118,50 +111,46 @@ export default class GoogleLoginPage extends BasePage {
         console.error('Google login button not found. ' + err);
         throw err;
       });
-      await this.clickAndWait(googleLoginButton);
+      await (BaseElement.asBaseElement(this.page, googleLoginButton)).clickAndWait();
 
       if (!user || user.trim().length === 0) {
         console.warn('Login user email: value is empty!!!')
       }
       await this.enterEmail(user);
+      await this.page.waitFor(1000); // to reduce probablity of getting Google login recaptcha
       await this.enterPassword(pwd);
       await this.submit();
     } catch (err) {
-      await takeScreenshot(this.page, 'FailedLoginPage');
-      await savePageToFile(this.page, 'FailedLoginPage');
-      throw err;
+      await takeScreenshot(this.page);
+      await savePageToFile(this.page);
+      throw new Error(err);
     }
 
-    try {
-      await this.waitUntilTitleMatch('Homepage');
-    } catch (e) {
-      // Handle "Enter Recovery Email" prompt if found exists
-      const recoverEmail = await this.page.$x('//input[@type="email" and @aria-label="Enter recovery email address"]');
-      if (recoverEmail.length > 0) {
-        await recoverEmail[0].type(config.institutionContactEmail);
-        await Promise.all([
-          this.page.waitForNavigation(),
-          this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
-        ]);
-      }
+    // Sometimes, user is prompted with "Enter Recovery Email" page. Handle the page if found.
+    const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
+    await Promise.race([
+      waitForDocumentTitle(this.page, 'Homepage', 30000),
+      this.page.waitForXPath(recoverEmailXpath, {visible: true, timeout: 30000})
+    ]);
+    const elementHandles = await this.page.$x(recoverEmailXpath);
+    if (elementHandles.length > 0) {
+      await elementHandles[0].type(config.broadInstitutionContactEmail);
+      await Promise.all([
+        this.page.waitForNavigation(),
+        this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
+      ]);
+      await waitForDocumentTitle(this.page, 'Homepage', 30000);
     }
 
   }
 
   async loginAs(email, paswd) {
-    return await this.login(email, paswd);
+    return this.login(email, paswd);
   }
 
-  async createAccountButton(): Promise<ElementHandle> {
-    return await findButton(this.page, {text: 'Create Account'}, {visible: true});
-  }
-
-  static async logIn(page: Page): Promise<HomePage> {
-    const loginPage = new GoogleLoginPage(page);
-    await loginPage.login();
-    const home = new HomePage(page);
-    await home.waitForLoad();
-    return home;
+  async clickCreateAccountButton(): Promise<void> {
+    const button = await Button.forLabel(this.page, {text: 'Create Account'});
+    await button.clickWithEval();
   }
 
 

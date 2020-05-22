@@ -2,7 +2,7 @@ import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'utils/app-utils';
+import {signIn} from 'utils/test-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 
 describe('Workspace ui tests', () => {
@@ -67,7 +67,7 @@ describe('Workspace ui tests', () => {
 
     // No Confirm to Cancel confirmation dialog
     const cancelButton = await editPage.getCancelButton();
-    await editPage.clickAndWait(cancelButton);
+    await cancelButton.clickAndWait();
 
     await workspaces.waitForLoad();
     expect(await workspaces.isLoaded()).toBe(true);

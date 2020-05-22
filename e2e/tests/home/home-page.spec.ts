@@ -3,7 +3,7 @@ import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'utils/app-utils';
+import {signIn} from 'utils/test-utils';
 
 
 describe('Home page ui tests', () => {

@@ -3,6 +3,8 @@ import {PageUrl} from 'app/page-identifiers';
 import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle} from 'utils/waits-utils';
 
 export const PAGE = {
   TITLE: 'Homepage',
@@ -24,13 +26,12 @@ export default class HomePage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitUntilTitleMatch(PAGE.TITLE),
-        this.waitForTextExists(PAGE.HEADER),
-        Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES),
-        this.waitUntilNoSpinner(),
+        waitForDocumentTitle(this.page, PAGE.TITLE, 60000),
+        waitWhileLoading(this.page, 60000),
       ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`HomePage isLoaded() encountered ${err}`);
       return false;
     }
   }

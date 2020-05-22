@@ -4,6 +4,8 @@ import {PageUrl} from 'app/page-identifiers';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle, waitForText} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -32,16 +34,18 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitUntilTitleMatch(PAGE.TITLE),
+        waitForDocumentTitle(this.page, PAGE.TITLE),
         this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
         this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true}),  // Texts above Filter By Select
-        this.waitUntilNoSpinner(),
+        waitWhileLoading(this.page),
       ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`WorkspacesPage isLoaded() encountered ${err}`);
       return false;
     }
   }
+
 
   /**
    * Load 'Your Workspaces' page and ensure page load is completed.
@@ -63,7 +67,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
     const link = await Button.forLabel(page, FIELD.createNewWorkspaceButton.textOption );
-    await this.clickAndWait(link);
+    await link.clickAndWait();
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
     return workspaceEdit;
@@ -76,7 +80,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
-    await editPage.waitForTextExists('Use All of Us free credits');
+    await waitForText(this.page, 'Use All of Us free credits');
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).tabKey();

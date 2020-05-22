@@ -1,5 +1,4 @@
 import {ElementHandle, Page, Response} from 'puppeteer';
-import BaseElement from 'app/element/base-element';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -43,141 +42,10 @@ export default abstract class BasePage {
   }
 
   /**
-   * Click on element then wait for page navigation.
-   * @param {ElementHandle | BaseElement} clickElement
-   */
-  async clickAndWait(clickElement: ElementHandle | BaseElement) {
-    return Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
-      clickElement.click(),
-    ]);
-  }
-
-  /**
-   * Wait until page URL to match a regular expression.
-   * @param {string} text - URL regular expression
-   */
-  async waitUntilUrlMatch(text: string) {
-    return await this.page.waitForFunction(txt => {
-      const href = window.location.href;
-      return href.includes(txt);
-    }, {}, text);
-  }
-
-  /**
-   * Wait until document title to be a particular string.
-   * @param {string} expectedTitle - The expected title of the document
-   */
-  async waitForTitle(title: string) {
-    return await this.page.waitForFunction(t => {
-      const actualTitle = document.title;
-      return actualTitle === t;
-    }, {}, title);
-  }
-
-  /**
-   * Wait until document title to match a regular expression.
-   * @param {string} text
-   */
-  async waitUntilTitleMatch(title: string) {
-    return await this.page.waitForFunction((t) => {
-      const actualTitle = document.title;
-      return actualTitle.includes(t);
-    }, {}, title)
-  }
-
-  /**
-   * Wait until the selector is visible.
-   * @param {string} cssSelector The CSS selector
-   */
-  async waitForVisible(cssSelector: string) {
-    return await this.page.waitForFunction(selector => {
-      const elem = document.querySelector(selector);
-      const isVisible = elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length;
-      return !!isVisible;
-    }, {}, cssSelector);
-  }
-
-  /**
-   * Wait while the selector is visible. Stops waiting when no longer has visible contents.
-   * @param {string} cssSelector The CSS selector
-   */
-  async waitForHidden(cssSelector: string) {
-    return await this.page.waitForFunction(selector => {
-      const elem = document.querySelector(selector);
-      const isVisible = elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length;
-      return !isVisible;
-    }, {}, cssSelector);
-  }
-
-  /**
-   * Wait for the elements count to be a particular value
-   * @param {string} cssSelector - The css selector for the element
-   * @param {number} expectedCount - The expected number of elements
-   */
-  async waitForNumberElements(cssSelector: string, expectedCount: number) {
-    return await this.page.waitForFunction((selector, count) => {
-      return document.querySelectorAll(selector).length === count;
-    }, {}, cssSelector, expectedCount);
-  }
-
-  /**
-   * Wait for the elements count to be greater than a particular value
-   * @param {string} cssSelector - The css selector for the element
-   * @param {number} greaterThanCount - The expected number of elements
-   */
-  async waitForNumberElementsIsBiggerThan(cssSelector: string, greaterThanCount: number) {
-    return await this.page.waitForFunction((selector, count) => {
-      return document.querySelectorAll(selector).length > count;
-    }, {}, cssSelector, greaterThanCount);
-  }
-
-  /**
-   * Look for visible texts on the page.
-   * @param {string} texts Partial texts to look for
-   */
-  async waitForTextExists(texts: string) {
-    return await this.page.waitForFunction(matchText => {
-      const bodyText = document.querySelector('body').innerText;
-      return bodyText.includes(matchText)
-    }, {}, texts);
-  }
-
-  /**
-   * Wait for the element found from the selector has a particular attribute value pair
-   * @param {string} cssSelector - The selector for the element on the page
-   * @param {string} attribute - The attribute name
-   * @param {string} value - The attribute value to match
-   */
-  async waitUntilContainsAttributeValue(cssSelector, attribute, value) {
-    return await this.page.waitForFunction((selector, attributeName, attributeValue) => {
-      const element = document.querySelector(selector);
-      return element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
-    }, {}, cssSelector, attribute, value);
-  }
-
-  /**
-   * Wait for exact text to match.
-   * @param page
-   * @param cssSelector
-   * @param expectedText
-   */
-  async waitForText(cssSelector: string, expectedText: string) {
-    await this.page.waitForFunction( (css, expText) => {
-      const t = document.querySelector(css);
-      if (t !== undefined) {
-        return t.innerText === expText;
-      }
-    }, {}, cssSelector, expectedText);
-
-    await this.page.waitForSelector(cssSelector, { visible: true });
-  }
-
-  /**
    * Find texts in DOM.
    * @param txt
    */
-  async findText(txt: string): Promise<boolean> {
+  async containsText(txt: string): Promise<boolean> {
     const indx = await (await this.page.content()).indexOf(txt);
     return indx !== -1;
   }

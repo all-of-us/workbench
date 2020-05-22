@@ -1,13 +1,12 @@
 import Link from 'app/element/link';
 import DataPage from 'app/page/data-page';
 import WorkspacesPage, {FIELD} from 'app/page/workspaces-page';
-import {signIn} from 'utils/app-utils';
+import {signIn, performActions} from 'utils/test-utils';
 import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
-import {performActions} from 'utils/test-utils';
 import {makeWorkspaceName} from 'utils/str-utils';
 
-describe('Creating new workspaces', () => {
+describe.skip('Creating new workspaces', () => {
 
   beforeEach(async () => {
     await signIn(page);
@@ -35,7 +34,7 @@ describe('Creating new workspaces', () => {
     await workspacesPage.load();
 
     const createNewWorkspaceButton  = await Button.forLabel(page, FIELD.createNewWorkspaceButton.textOption );
-    await workspacesPage.clickAndWait(createNewWorkspaceButton);
+    await createNewWorkspaceButton.clickAndWait();
 
     // fill out new workspace name
     const newWorkspaceName = await workspacesPage.fillOutWorkspaceName();
