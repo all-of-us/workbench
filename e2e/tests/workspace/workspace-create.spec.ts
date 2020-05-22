@@ -77,8 +77,8 @@ describe('Creating new workspaces', () => {
     const dataPage = new DataPage(page);
     await dataPage.waitForLoad();
 
-    const workspaceLink = new Link(page);
-    await workspaceLink.withXpath(`//a[text()='${workspaceName}']`, {visible: true});
+    const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
+    await workspaceLink.waitForXPath({visible: true});
     expect(await workspaceLink.isVisible()).toBe(true);
   }
 

@@ -19,7 +19,7 @@ describe('Workspace ui tests', () => {
     let width;
     let height;
     for (const card of cards) {
-      const cardElem = new BaseElement(page, card.asElementHandle());
+      const cardElem = BaseElement.asBaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.getSize();
       if (width === undefined) {

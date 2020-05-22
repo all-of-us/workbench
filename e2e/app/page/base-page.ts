@@ -37,7 +37,7 @@ export default abstract class BasePage {
    * @param {string} cssSelector
    * @returns {string} value - The text property value
    */
-  async getTextContent(cssSelector: string) {
+  async getTextContent(cssSelector: string): Promise<string> {
     return this.page.$eval(`${cssSelector}`, elem => elem.textContent.trim())
   }
 
@@ -58,12 +58,12 @@ export default abstract class BasePage {
    * @param {string} property - The property to look for
    * @returns {string} value - The property value
    */
-  async getProperty(element: ElementHandle, property: string) {
+  async getProperty(element: ElementHandle, property: string): Promise<string> {
     // Alternative: return element.getProperty(property).then((elem) => elem.jsonValue());
     const handle = await this.page.evaluateHandle((elem, prop) => {
       return elem[prop];
     }, element, property);
-    return await handle.jsonValue();
+    return (await handle.jsonValue()).toString();
   }
 
   /**
@@ -71,11 +71,11 @@ export default abstract class BasePage {
    * @param {ElementHandle} element
    * @param {string} attribute
    */
-  async getAttribute(element: ElementHandle, attribute: string) {
+  async getAttribute(element: ElementHandle, attribute: string): Promise<string> {
     const handle = await this.page.evaluateHandle((elem, attr) => {
       return elem.getAttribute(attr);
     }, element, attribute);
-    return await handle.jsonValue();
+    return (await handle.jsonValue()).toString();
   }
 
   /**
@@ -84,7 +84,7 @@ export default abstract class BasePage {
    * </pre>
    * @param {ElementHandle} element: The web element to check
    */
-  async exists(element: ElementHandle) {
+  async exists(element: ElementHandle): Promise<boolean> {
     return await this.page.evaluate(elem => {
       return elem !== null;
     }, element);

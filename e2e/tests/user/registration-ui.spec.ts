@@ -89,7 +89,7 @@ describe('User registration tests:', () => {
     // verify all input fields are visible and editable on this page
     const allInputs = await page.$$('input');
     for (const aInput of allInputs) {
-      const elem = new BaseElement(page, aInput);
+      const elem = BaseElement.asBaseElement(page, aInput);
       const isDisabled = await elem.isDisabled();
       expect(isDisabled).toBe(false);
       const value = await elem.getTextContent();

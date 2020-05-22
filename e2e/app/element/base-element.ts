@@ -1,77 +1,53 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import Container from 'app/container';
 
 /**
  * BaseElement represents a web element in the DOM.
  * It implements useful methods for querying and interacting with this element.
  */
-export default class BaseElement {
+export default class BaseElement extends Container {
 
-  static asBaseElement(page: Page, elem: ElementHandle): BaseElement {
-    return new BaseElement(page, elem);
+  static asBaseElement(page: Page, elementHandle: ElementHandle): BaseElement {
+    const baseElement = new BaseElement(page);
+    baseElement.setElementHandle(elementHandle);
+    return baseElement;
   }
 
-  protected readonly page: Page;
-  protected css: string;
-  protected xpath: string;
   protected element: ElementHandle;
 
-  constructor(aPage: Page, aElement?: ElementHandle) {
-    this.page = aPage;
-    this.element = aElement || undefined;
+  constructor(protected readonly page: Page, xpath?: string) {
+    super(page, xpath);
+  }
+
+  protected setElementHandle(elementHandle: ElementHandle) {
+    this.element = elementHandle;
   }
 
   /**
-   * Find element with wait.
-   * @param cssSelector
-   * @param waitOptions
+   * Find first element matching xpath selector.
+   * If there is no element matching xpath selector, null is returned.
+   * @param {WaitForSelectorOptions} waitOptions
    */
-  async withCss(cssSelector: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-    this.css = cssSelector;
-    this.element = await this.page.waitForSelector(this.css, waitOptions);
-    return this.element;
+  async waitForXPath(waitOptions?: WaitForSelectorOptions): Promise<this> {
+    if (this.element === undefined) {
+      this.element = await this.page.waitForXPath(this.xpath, waitOptions);
+    }
+    return this;
   }
 
   /**
-   * Find element with wait.
-   * @param xpathSelector
-   * @param waitOptions
+   * Find all elements matching xpath selector.
    */
-  async withXpath(xpathSelector: string, waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
-    this.xpath = xpathSelector;
-    this.element = await this.page.waitForXPath(this.xpath, waitOptions);
-    return this.element;
+  async findAllElements(): Promise<ElementHandle[]> {
+    return this.page.$x(this.xpath);
   }
 
-   /**
-    * Find first element without wait for.
-    */
-  async findByCss(cssSelector: string,): Promise<ElementHandle | null> {
-    this.css = cssSelector;
-    this.element = await this.page.$(this.css);
-    return this.element;
-  }
-
-   /**
-    * Find first element without wait for.
-    */
-  async findByXpath(xpathSelector: string): Promise<ElementHandle | null> {
-    this.xpath = xpathSelector;
-    const found = await this.page.$x(this.xpath);
-    if (found.length > 0) {
-      this.element = found[0];
-    } else {
-      this.element = null;
-    }
-    return this.element;
-  }
-
-  async retryFindElement(): Promise<ElementHandle | null> {
-    if (this.xpath != null) {
-      return this.findByXpath(this.xpath);
-    } else if (this.css != null) {
-      return this.findByCss(this.css);
-    }
-    return null;
+  /**
+   * Find descendant elements matching xpath selector.
+   * @param {string} descendantXpath Be sure to begin xpath with a dot. e.g. ".//div".
+   */
+  async findDescendant(descendantXpath: string): Promise<ElementHandle[]> {
+    return this.element.$x(descendantXpath);
   }
 
   /**
@@ -247,8 +223,6 @@ export default class BaseElement {
   }
 
   async dispose(): Promise<void> {
-    this.xpath = undefined;
-    this.css = undefined;
     return this.element.dispose();
   }
 
@@ -268,7 +242,7 @@ export default class BaseElement {
   }
 
   /**
-   * Paste texts instead type one char at a time.
+   * Paste texts instead type one char at a time. Very fast.
    * @param text
    */
   async paste(text: string) {
@@ -279,6 +253,14 @@ export default class BaseElement {
       const event = new Event('input', {bubbles: true});
       elem.dispatchEvent(event);
     }, this.element, text);
+  }
+
+  /**
+   * Returns ElementHandle.
+   */
+  async asElementHandle(): Promise<ElementHandle | null> {
+    await this.waitForXPath();
+    return this.element.asElement();
   }
 
 }

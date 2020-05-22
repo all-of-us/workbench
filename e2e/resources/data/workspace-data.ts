@@ -129,7 +129,7 @@ export const defaultAnswersAnticipatedOutcomesFromResearch = [
 // Question #5: Population of interest
 export const defaultAnswersPopulationOfInterest = [
   {
-    id: FIELD.POPULATION_OF_INTEREST.yesOnUnderrepresentedPopulationRadiobutton,
+    id: FIELD.POPULATION_OF_INTEREST.yesRadiobutton,
     selected: true
   },
   {

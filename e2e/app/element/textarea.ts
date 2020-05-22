@@ -1,27 +1,22 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
-import TextOptions from './text-options';
+import Container from 'app/container';
+import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {findTextarea} from './xpath-finder';
+import {xPathOptionToXpath} from './xpath-defaults';
 
 export default class Textarea extends BaseElement {
 
   static async forLabel(
      page: Page,
-     textOptions: TextOptions,
-     waitOptions: WaitForSelectorOptions = { visible: true },
-     throwErr = true): Promise<Textarea> {
+     xOpt: XPathOptions,
+     container?: Container,
+     waitOptions: WaitForSelectorOptions = { visible: true }): Promise<Textarea> {
 
-    let element: Textarea;
-    try {
-      const textareaElement = await findTextarea(page, textOptions, waitOptions);
-      element = new Textarea(page, textareaElement);
-    } catch (e) {
-      if (throwErr) {
-        console.error(`FAILED finding Textarea: "${JSON.stringify(textOptions)}".`);
-        throw e;
-      }
-    }
-    return element;
+    xOpt.type = ElementType.Textarea;
+    const textareaXpath = xPathOptionToXpath(xOpt, container);
+    const textarea = new Textarea(page, textareaXpath);
+    await textarea.waitForXPath(waitOptions);
+    return textarea;
   }
 
 }
