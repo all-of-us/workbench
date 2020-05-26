@@ -2,6 +2,7 @@ package org.pmiops.workbench.actionaudit;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -19,8 +20,26 @@ import org.springframework.stereotype.Service;
 @Service
 public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
-  private BigQueryService bigQueryService;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
+  enum Parameters {
+    LIMIT("limit"),
+    WORKSPACE_DB_ID("workspace_db_id");
+
+    private String name;
+
+    Parameters(String name) {
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+  }
+
+  private final BigQueryService bigQueryService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  private static final long MAX_QUERY_LIMIT = 1000L;
+  // The table name can't be in a QueryParameterValue, so we substitute it with String.format()
   private static final String WORKSPACE_EVENTS_QUERY_STRING_FORMAT =
       "SELECT\n"
           + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,\n"
@@ -35,10 +54,10 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "  jsonPayload.prev_value AS prev_value,\n"
           + "  jsonPayload.new_value AS new_value\n"
           + "FROM %s\n"
-          + "WHERE jsonPayload.target_id = %d AND\n"
+          + "WHERE jsonPayload.target_id = @workspace_db_id AND\n"
           + "  jsonPayload.target_type = 'WORKSPACE'\n"
           + "ORDER BY event_time, agent_id, action_id\n"
-          + "LIMIT %d";
+          + "LIMIT @limit";
 
   public ActionAuditQueryServiceImpl(
       BigQueryService bigQueryService, Provider<WorkbenchConfig> workbenchConfigProvider) {
@@ -57,13 +76,17 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
             actionAuditConfig.bigQueryTable);
 
     final String queryString =
-        String.format(
-            WORKSPACE_EVENTS_QUERY_STRING_FORMAT,
-            fullyQualifiedTableName,
-            workspaceDatabaseId,
-            limit);
+        String.format(WORKSPACE_EVENTS_QUERY_STRING_FORMAT, fullyQualifiedTableName);
     final QueryJobConfiguration queryJobConfiguration =
-        QueryJobConfiguration.newBuilder(queryString).setUseLegacySql(false).build();
+        QueryJobConfiguration.newBuilder(queryString)
+            .setUseLegacySql(false)
+            .setNamedParameters(
+                ImmutableMap.of(
+                    Parameters.WORKSPACE_DB_ID.getName(),
+                        QueryParameterValue.int64(workspaceDatabaseId),
+                    Parameters.LIMIT.getName(),
+                        QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT))))
+            .build();
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
