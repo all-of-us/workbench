@@ -95,6 +95,15 @@ public class DbVerifiedInstitutionalAffiliation {
 
     DbVerifiedInstitutionalAffiliation that = (DbVerifiedInstitutionalAffiliation) o;
 
+    System.out.println("user eq=" + Objects.equals(user.getUsername(), that.user.getUsername()));
+    System.out.println("institution eq=" + Objects.equals(institution, that.institution));
+    System.out.println(
+        "institutionalRoleEnum eq="
+            + Objects.equals(institutionalRoleEnum, that.institutionalRoleEnum));
+    System.out.println(
+        "institutionalRoleOtherText eq="
+            + Objects.equals(institutionalRoleOtherText, that.institutionalRoleOtherText));
+
     // TODO: DbUser doesn't have a well-defined equals() so we use the username instead
     return Objects.equals(
             Optional.ofNullable(user).map(DbUser::getUsername),

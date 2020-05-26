@@ -68,6 +68,17 @@ public class DbInstitutionEmailAddress {
 
     DbInstitutionEmailAddress that = (DbInstitutionEmailAddress) o;
 
+    System.out.println("emailAddress=" + emailAddress);
+    System.out.println("emailAddress eq=" + Objects.equals(emailAddress, that.emailAddress));
+    System.out.println(
+        "institutionShortName eq="
+            + Objects.equals(institution.getShortName(), that.institution.getShortName()));
+    System.out.println(
+        "institutionShortName eq2="
+            + ((institution != null)
+                && (that.institution != null)
+                && Objects.equals(institution.getShortName(), that.institution.getShortName())));
+
     // calling institution.equals() would introduce a cycle here
     return Objects.equals(emailAddress, that.emailAddress)
         && DbInstitution.equalsWithoutEmails(institution, that.institution);
@@ -77,5 +88,18 @@ public class DbInstitutionEmailAddress {
   public int hashCode() {
     // calling institution.hashCode() would introduce a cycle here
     return Objects.hash(emailAddress, DbInstitution.hashCodeWithoutEmails(institution));
+  }
+
+  @Override
+  public String toString() {
+    return "DbInstitutionEmailAddress{"
+        + "institutionEmailAddressId="
+        + institutionEmailAddressId
+        + ", institution="
+        + institution
+        + ", emailAddress='"
+        + emailAddress
+        + '\''
+        + '}';
   }
 }

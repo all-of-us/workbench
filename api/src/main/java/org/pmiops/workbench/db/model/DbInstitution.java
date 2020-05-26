@@ -172,6 +172,29 @@ public class DbInstitution {
     }
     DbInstitution that = (DbInstitution) o;
 
+    final boolean domainsEq = Objects.equal(emailDomains, that.emailDomains);
+    System.out.println("DBInst emailDomains eq=" + domainsEq);
+    if (!domainsEq) {
+      for (DbInstitutionEmailDomain domain : emailDomains) {
+        System.out.println("domain = " + domain);
+      }
+      for (DbInstitutionEmailDomain domain : that.emailDomains) {
+        System.out.println("that domain = " + domain);
+      }
+    }
+
+    final boolean addrsEq = Objects.equal(emailAddresses, that.emailAddresses);
+    System.out.println("DBInst emailAddresses eq=" + addrsEq);
+    if (!addrsEq) {
+      for (DbInstitutionEmailAddress addr : emailAddresses) {
+        System.out.println("addr = " + addr);
+      }
+
+      for (DbInstitutionEmailAddress addr : that.emailAddresses) {
+        System.out.println("that addr = " + addr);
+      }
+    }
+
     return Objects.equal(shortName, that.shortName)
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)

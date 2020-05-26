@@ -78,4 +78,17 @@ public class DbInstitutionEmailDomain {
     // calling institution.hashCode() would introduce a cycle here
     return Objects.hash(emailDomain, DbInstitution.hashCodeWithoutEmails(institution));
   }
+
+  @Override
+  public String toString() {
+    return "DbInstitutionEmailDomain{"
+        + "institutionEmailDomainId="
+        + institutionEmailDomainId
+        + ", institution="
+        + institution
+        + ", emailDomain='"
+        + emailDomain
+        + '\''
+        + '}';
+  }
 }
