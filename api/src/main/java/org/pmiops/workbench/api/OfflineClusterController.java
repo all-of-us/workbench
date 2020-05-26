@@ -10,7 +10,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.CheckClustersResponse;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
@@ -65,7 +64,7 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
    * <p>As an App Engine cron endpoint, the runtime of this method may not exceed 10 minutes.
    */
   @Override
-  public ResponseEntity<void> checkClusters() {
+  public ResponseEntity<Void> checkClusters() {
     Instant now = clock.instant();
     WorkbenchConfig config = configProvider.get();
     Duration maxAge = Duration.ofDays(config.firecloud.clusterMaxAgeDays);
