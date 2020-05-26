@@ -956,6 +956,11 @@ paths:
         - name: afterInclusive
           description: >
             Earliest time matched by the query (inclusive). Epoch millis.
+
+            Note that while Swagger allows a date-time formatted string query parameter,
+            it appears Spring doesn't handle that well today. I ran into this issue:
+            https://github.com/swagger-api/swagger-codegen/issues/4113 and decided a long
+            is good enough for now.
           in: query
           type: integer
           format: int64

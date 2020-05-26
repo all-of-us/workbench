@@ -49,4 +49,14 @@ public class FieldValuesTest {
         .isWithin(TOLERANCE)
         .of(DOUBLE_VALUE);
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGetLong_invalidFieldName() {
+    FieldValues.getLong(ROW_1, "wrong_name");
+  }
+
+  @Test(expected = ArrayIndexOutOfBoundsException.class)
+  public void testGetLong_invalidIndex() {
+    FieldValues.getLong(ROW_1, 999);
+  }
 }

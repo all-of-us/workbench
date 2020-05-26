@@ -95,9 +95,11 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
                     Parameters.LIMIT.getName(),
                         QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)),
                     Parameters.AFTER_INCLUSIVE.getName(),
-                        QueryParameterValue.timestamp(afterInclusive.getMillis() * MICROSECONDS_IN_MILLISECOND),
+                        QueryParameterValue.timestamp(
+                            afterInclusive.getMillis() * MICROSECONDS_IN_MILLISECOND),
                     Parameters.BEFORE_EXCLUSIVE.getName(),
-                        QueryParameterValue.timestamp(beforeExclusive.getMillis() * MICROSECONDS_IN_MILLISECOND)))
+                        QueryParameterValue.timestamp(
+                            beforeExclusive.getMillis() * MICROSECONDS_IN_MILLISECOND)))
             .build();
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
