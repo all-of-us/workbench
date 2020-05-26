@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
+  private static final int MICROSECONDS_IN_MILLISECOND = 1000;
+
   enum Parameters {
     LIMIT("limit"),
     WORKSPACE_DB_ID("workspace_db_id"),
@@ -59,8 +61,8 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "FROM %s\n"
           + "WHERE jsonPayload.target_id = @workspace_db_id AND\n"
           + "  jsonPayload.target_type = 'WORKSPACE' AND\n"
-          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) >= TIMESTAMP_MILLIS(@afterInclusive) AND"
-          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < TIMESTAMP_MILLIS(@beforeExclusive)"
+          + "  @after_inclusive <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
+          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before_exclusive\n"
           + "ORDER BY event_time, agent_id, action_id\n"
           + "LIMIT @limit";
 
@@ -93,14 +95,13 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
                     Parameters.LIMIT.getName(),
                         QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)),
                     Parameters.AFTER_INCLUSIVE.getName(),
-                        QueryParameterValue.timestamp(beforeExclusive.getMillis()),
+                        QueryParameterValue.timestamp(afterInclusive.getMillis() * MICROSECONDS_IN_MILLISECOND),
                     Parameters.BEFORE_EXCLUSIVE.getName(),
-                        QueryParameterValue.timestamp(beforeExclusive.getMillis())))
+                        QueryParameterValue.timestamp(beforeExclusive.getMillis() * MICROSECONDS_IN_MILLISECOND)))
             .build();
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
-    // Transform all results on all pages.
     final List<AuditLogEntry> logEntries =
         StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
             .map(this::fieldValueListToAditLogEntry)
