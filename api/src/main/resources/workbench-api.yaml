@@ -952,10 +952,13 @@ paths:
           required: false
           default: 100
           description: >
-            Maximum number of entries to return, sorted by timestampe descending.
+            Maximum number of entries to return, sorted by timestamp descending.
       responses:
         200:
-          description: A list of workspaces
+          description: >
+            List of rows matching the query result. queryMetadata contains
+            the workspaceDatabaaseId (for post-processing) as well as the query actually
+            executed (as a starting point for exploring manually in BigQuery).
           schema:
             "$ref": "#/definitions/AuditLogEntriesResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list":
