@@ -1,13 +1,12 @@
 import {Button} from 'app/components/buttons';
+import {StyledAnchorTag} from 'app/components/buttons';
 import {CookieBanner} from 'app/components/cookie-banner';
+import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {Header, SmallHeader} from 'app/components/headers';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-
 import * as React from 'react';
-
-const googleIcon = '/assets/icons/google-icon.png';
 
 export const styles = reactStyles({
   sign: {
@@ -18,19 +17,6 @@ export const styles = reactStyles({
     justifyContent: 'spaceAround',
     alignItems: 'flexStart',
     width: 'auto'
-  },
-  button: {
-    marginTop: '0.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    height: 'auto',
-    paddingLeft: '0',
-    fontSize: '18px',
-    fontStyle: 'normal',
-    textTransform: 'none',
-    borderRadius: '2px',
-    justifyContent: 'baseline',
-    width: '6.5rem'
   },
   createAccountButton: {
     fontSize: '12px',
@@ -65,14 +51,14 @@ export const LoginReactComponent: React.FunctionComponent<{
             Researcher Workbench account?
           </Header>
           <div>
-            <Button type='primary' style={styles.button} onClick={signIn}>
-              <img src={googleIcon}
-                     style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
-              <div>
-                Sign In
-              </div>
-            </Button>
+            <GoogleSignInButton signIn={signIn} />
           </div>
+          <StyledAnchorTag
+            target='_blank'
+            href='https://www.researchallofus.org/frequently-asked-questions/#login-help'
+            style={{marginTop: '0.625rem', lineHeight: '0.75rem'}}>
+              Trouble Signing In?
+          </StyledAnchorTag>
         </div>
         <div style={{paddingTop: '1.25rem'}}>
           <SmallHeader>

@@ -2,6 +2,7 @@ import BaseElement from 'app/element/base-element';
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
 import {config} from 'resources/workbench-config';
+import {waitForText} from 'utils/waits-utils';
 
 
 describe('User registration tests:', () => {
@@ -11,8 +12,7 @@ describe('User registration tests:', () => {
     await loginPage.load();
 
     // Click the create account button to start new-user-registration flow.
-    const createAccountButton = await loginPage.createAccountButton();
-    await createAccountButton.click();
+    await loginPage.clickCreateAccountButton();
 
     const createAccountPage = new CreateAccountPage(page);
     // Step 1: Checking Accepting Terms of Service.
@@ -58,8 +58,7 @@ describe('User registration tests:', () => {
     await loginPage.load();
 
     // Click the create account button to start new-user-registration flow.
-    const createAccountButton = await loginPage.createAccountButton();
-    await createAccountButton.click();
+    await loginPage.clickCreateAccountButton();
 
     const createAccountPage = new CreateAccountPage(page);
     // Step 1 of 3: Accepting Terms of Service.
@@ -82,7 +81,7 @@ describe('User registration tests:', () => {
     await nextButton.clickWithEval();
 
     // Step 3 of 3: Enter user information.
-    expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
+    expect(await waitForText(page, 'Create your account')).toBeTruthy();
 
     // verify username domain
     expect(await createAccountPage.getUsernameDomain()).toBe(config.userEmailDomain);

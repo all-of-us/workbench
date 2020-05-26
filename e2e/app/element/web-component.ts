@@ -1,7 +1,6 @@
 import {Page} from 'puppeteer';
 import Button from './button';
 import Checkbox from './checkbox';
-import Label from './label';
 import Link from './link';
 import RadioButton from './radiobutton';
 import Select from './select';
@@ -39,10 +38,6 @@ export default class WebComponent {
 
   async asButton(): Promise<Button> {
     return await Button.forLabel(this.page, this.labelTextOptions);
-  }
-
-  async asLabel(): Promise<Label> {
-    return await Label.forLabel(this.page, this.labelTextOptions);
   }
 
   async asSelect(): Promise<Select> {

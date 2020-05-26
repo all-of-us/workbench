@@ -1,6 +1,6 @@
 import HomePage from 'app/page/home-page';
 import ProfilePage from 'app/page/profile-page';
-import {signIn} from 'utils/app-utils';
+import {signIn} from 'utils/test-utils';
 import navigation, {NavLink} from 'app/component/navigation';
 
 describe('Profile', () => {

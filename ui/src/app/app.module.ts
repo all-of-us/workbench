@@ -25,6 +25,7 @@ import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
+import {AdminUsersComponent} from './pages/admin/admin-users';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
@@ -44,6 +45,8 @@ import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignInComponent} from './pages/login/sign-in';
 import {DataUserCodeOfConductComponent} from './pages/profile/data-user-code-of-conduct';
 import {ProfilePageComponent} from './pages/profile/profile-page';
+import {SessionExpiredComponent} from './pages/session-expired';
+import {SignInAgainComponent} from './pages/sign-in-again';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
@@ -137,6 +140,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AdminWorkspaceSearchComponent,
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
+    AdminUsersComponent,
     AppComponent,
     BugReportComponent,
     CohortActionsComponent,
@@ -161,6 +165,8 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SignedInComponent,
     NavBarComponent,
+    SessionExpiredComponent,
+    SignInAgainComponent,
     SignInComponent,
     TablePage,
     TextModalComponent,

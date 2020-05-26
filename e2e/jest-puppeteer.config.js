@@ -16,7 +16,6 @@ const NEW_CHROME_SWITCHES = [
   '--no-zygote',
   '--no-sandbox', // required for --no-zygote flag
   '--safebrowsing-disable-auto-update',
-  '--window-size=1920,1080',
 ];
 
 // Append to Puppeteer default chrome flags.

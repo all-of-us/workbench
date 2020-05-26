@@ -2,7 +2,7 @@ import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'utils/app-utils';
+import {signIn} from 'utils/test-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 
 describe('Workspace ui tests', () => {
@@ -15,7 +15,7 @@ describe('Workspace ui tests', () => {
     // on Home page
     expect(await new HomePage(page).isLoaded()).toBe(true);
 
-    const cards = await WorkspaceCard.getAllCards(page);
+    const cards = await WorkspaceCard.findAllCards(page);
     let width;
     let height;
     for (const card of cards) {
@@ -39,8 +39,8 @@ describe('Workspace ui tests', () => {
     await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
-    await WorkspaceCard.getAllCards(page);
-    const card = await WorkspaceCard.getAnyCard(page);
+    await WorkspaceCard.findAllCards(page);
+    const card = await WorkspaceCard.findAnyCard(page);
 
     // check workspace name string is made of english characters
     const workspaceName = await card.getWorkspaceName();
@@ -67,7 +67,7 @@ describe('Workspace ui tests', () => {
 
     // No Confirm to Cancel confirmation dialog
     const cancelButton = await editPage.getCancelButton();
-    await editPage.clickAndWait(cancelButton);
+    await cancelButton.clickAndWait();
 
     await workspaces.waitForLoad();
     expect(await workspaces.isLoaded()).toBe(true);

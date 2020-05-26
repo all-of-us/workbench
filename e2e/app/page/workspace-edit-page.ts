@@ -7,6 +7,8 @@ import Textbox from 'app/element/textbox';
 import WebComponent from 'app/element/web-component';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import Dialog, {ButtonLabel} from 'app/component/dialog';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -279,12 +281,16 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.waitUntilTitleMatch(PAGE.TITLE);
-      await this.getWorkspaceNameTextbox();
-      await new SelectMenu(this.page, LABEL_ALIAS.SELECT_BILLING).getSelectedValue();
-      await this.getCreateWorkspaceButton();
+      await Promise.all([
+        waitForDocumentTitle(this.page, PAGE.TITLE),
+        this.getWorkspaceNameTextbox(),
+        new SelectMenu(this.page, LABEL_ALIAS.SELECT_BILLING).getSelectedValue(),
+        this.getCreateWorkspaceButton(),
+        waitWhileLoading(this.page),
+      ]);
       return true;
-    } catch (e) {
+    } catch (err) {
+      console.log(`WorkspaceEditPage isLoaded() encountered ${err}`);
       return false;
     }
   }
@@ -437,7 +443,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
       dialog.waitUntilDialogIsClosed(),
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 60000}),
     ]);
-    await this.waitUntilNoSpinner();
+    waitWhileLoading(this.page);
     return dialogText;
   }
 

@@ -9,6 +9,8 @@ import Textbox from 'app/element/textbox';
 import BasePage from 'app/page/base-page';
 import {config} from 'resources/workbench-config';
 import {findIframe} from 'app/element/xpath-finder';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForText} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -36,7 +38,7 @@ export const EDUCATION_LEVEL_VALUE = {
 
 export const LABEL_ALIAS = {
   READ_UNDERSTAND_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement.',
-  READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms described above.',
+  READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms of Use described above.',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
   RESEARCH_BACKGROUND: 'Your research background, experience, and research interests',
@@ -52,14 +54,16 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await this.waitForTextExists('Sign In');
-    return true;
-  }
-
-  async getInvitationKeyInput(): Promise<Textbox> {
-    const textbox = new Textbox(this.page);
-    await textbox.withCss('#invitationKey');
-    return textbox;
+    try {
+      await Promise.all([
+        waitForText(this.page, 'Please read through the entire agreement to continue'),
+        this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', {visible: true}),
+      ])
+      return true;
+    } catch (err) {
+      console.log(`CreateAccountPage isLoaded() encountered ${err}`);
+      return false;
+    }
   }
 
   async getSubmitButton(): Promise<Button> {
@@ -71,15 +75,15 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async agreementLoaded(): Promise<boolean> {
-    const iframe = await findIframe(this.page, 'terms of service agreement')
-    const bodyHandle = await iframe.$('body')
-    return await iframe.evaluate(body => body.scrollHeight > 0, bodyHandle)
+    const iframe = await findIframe(this.page, 'terms of service agreement');
+    const bodyHandle = await iframe.$('body');
+    return await iframe.evaluate(body => body.scrollHeight > 0, bodyHandle);
   }
 
   async readAgreement(): Promise<Frame> {
-    const iframe = await findIframe(this.page, 'terms of service agreement')
-    const bodyHandle = await iframe.$('body')
-    await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle)
+    const iframe = await findIframe(this.page, 'terms of service agreement');
+    const bodyHandle = await iframe.$('body');
+    await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle);
     return iframe;  
   }
 
@@ -145,22 +149,18 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 1: Fill out institution affiliation details
   async fillOutInstitution() {
+    await Promise.all([
+      waitForText(this.page, 'complete Step 1 of 3', {css: 'body'}, 60000),
+      waitWhileLoading(this.page, 60000),
+    ]);
     const institutionSelect = new SelectMenu(this.page, 'Select your institution', 2);
     await institutionSelect.select(INSTITUTION_VALUE.BROAD);
     const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddressTextbox.type(config.broadInstitutionEmail);
+    await emailAddressTextbox.type(config.institutionContactEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
     await ClrIconLink.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
     const roleSelect = new SelectMenu(this.page, 'describes your role', 2);
     await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
-  }
-
-  // Step 2: Fill out Invitation key
-  async fillOutInvitationKey(invitationKey: string) {
-    await this.getInvitationKeyInput()
-    .then(invitationKeyInput => invitationKeyInput.type(invitationKey))
-    .then(() => this.getNextButton())
-    .then(submitButton => submitButton.click());
   }
 
   // Step 3: Accepting Terms of Use and Privacy statement.
@@ -185,8 +185,7 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 4: Fill out demographic survey information with default values
   async fillOutDemographicSurvey() {
-    const demograpicsSurveyPageHeader = 'Optional Demographics Survey';
-    await this.waitForTextExists(demograpicsSurveyPageHeader);
+    await waitForText(this.page, 'Optional Demographics Survey');
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox"]';
     await this.page.waitForXPath(targetXpath, { visible: true });
