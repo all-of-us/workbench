@@ -224,7 +224,6 @@ public class DbInstitution {
         shortName, displayName, organizationTypeEnum, organizationTypeOtherText, duaTypeEnum);
   }
 
-  // to prevent cycles in the emails' hashCode() methods
   public static Object hashCodeWithoutEmails(final DbInstitution institution) {
     if (institution == null) {
       return 0;

@@ -106,8 +106,8 @@ public class DbVerifiedInstitutionalAffiliation {
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        user.getUsername(), institution, institutionalRoleEnum, institutionalRoleOtherText);
+    final int userHash = (user == null) ? 0 : Objects.hashCode(user.getUsername());
+    return Objects.hash(userHash, institution, institutionalRoleEnum, institutionalRoleOtherText);
   }
 
   @Override
