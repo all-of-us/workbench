@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import org.joda.time.DateTime;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.WorkspaceAdminApiDelegate;
@@ -145,9 +147,21 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     }
   }
 
+  /**
+   * Get all audit log entries for this workspace
+   *
+   * @param workspaceNamespace Firecloud namespace for workspace
+   * @param limit upper limit (inclusive) for this query
+   * @param afterInclusiveMillis lowest timestamp matched (inclusive)
+   * @param beforeExclusiveMillisNullable latest timestamp matched (exclusive). The half-open
+   *     interval is convenient for pagination based on time intervals.
+   */
   @Override
   public ResponseEntity<AuditLogEntriesResponse> getAuditLogEntries(
-      String workspaceNamespace, Integer limit) {
+      String workspaceNamespace,
+      Integer limit,
+      Long afterInclusiveMillis,
+      @Nullable Long beforeExclusiveMillisNullable) {
     final long workspaceDatabaseId =
         workspaceAdminService
             .getFirstWorkspaceByNamespace(workspaceNamespace)
@@ -157,8 +171,13 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
                     new NotFoundException(
                         String.format(
                             "No workspace found with Firecloud namespace %s", workspaceNamespace)));
-
+    final DateTime afterInclusive = new DateTime(afterInclusiveMillis);
+    final DateTime beforeExclusive =
+        Optional.ofNullable(beforeExclusiveMillisNullable)
+            .map(DateTime::new)
+            .orElse(DateTime.now());
     return ResponseEntity.ok(
-        actionAuditQueryService.queryEventsForWorkspace(workspaceDatabaseId, limit));
+        actionAuditQueryService.queryEventsForWorkspace(
+            workspaceDatabaseId, limit, afterInclusive, beforeExclusive));
   }
 }

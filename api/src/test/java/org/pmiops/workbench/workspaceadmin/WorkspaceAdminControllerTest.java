@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.joda.time.DateTime;
@@ -76,6 +78,9 @@ public class WorkspaceAdminControllerTest {
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
   private static final int QUERY_LIMIT = 50;
   private static final String ACTION_ID = "b937413e-ff66-4e7b-a639-f7947730b2c0";
+  private static final Map<String, String> QUERY_METADATA =
+      ImmutableMap.of(
+          "workspaceDatabaseId", Long.toString(DB_WORKSPACE_ID), "query", "select foo from bar");
   private static final AuditLogEntriesResponse QUERY_RESPONSE =
       new AuditLogEntriesResponse()
           .logEntries(
@@ -92,8 +97,12 @@ public class WorkspaceAdminControllerTest {
                       .targetId(DB_WORKSPACE_ID)
                       .targetProperty("approved")
                       .targetType("WORKSPACE")))
-          .queryMetadata(ImmutableMap.of("workspaceDatabaseId", Long.toString(DB_WORKSPACE_ID)));
-  private static final AuditLogEntriesResponse EMPTY_QUERY_RESPONSE = new AuditLogEntriesResponse();
+          .queryMetadata(QUERY_METADATA);
+  private static final AuditLogEntriesResponse EMPTY_QUERY_RESPONSE =
+      new AuditLogEntriesResponse().queryMetadata(QUERY_METADATA);
+  private static final DateTime DEFAULT_AFTER_INCLUSIVE = DateTime.parse("2001-02-14T01:20+02:00");
+  private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-05-01T01:20+02:00");
+
   @MockBean private ActionAuditQueryService mockActionAuditQueryService;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private FireCloudService mockFirecloudService;
@@ -120,7 +129,7 @@ public class WorkspaceAdminControllerTest {
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
       workbenchConfig.featureFlags.enableBillingLockout = false;
       return workbenchConfig;
@@ -272,12 +281,16 @@ public class WorkspaceAdminControllerTest {
 
   @Test
   public void testGetAuditLogEntries() {
+    // Don't rely on exact DateTime match
     doReturn(QUERY_RESPONSE)
         .when(mockActionAuditQueryService)
-        .queryEventsForWorkspace(DB_WORKSPACE_ID, QUERY_LIMIT);
+        .queryEventsForWorkspace(anyLong(), anyLong(), any(DateTime.class), any(DateTime.class));
     final ResponseEntity<AuditLogEntriesResponse> response =
         workspaceAdminController.getAuditLogEntries(
-            WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE, QUERY_LIMIT);
+            WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE,
+            QUERY_LIMIT,
+            DEFAULT_AFTER_INCLUSIVE.getMillis(),
+            DEFAULT_BEFORE_EXCLUSIVE.getMillis());
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isEqualTo(QUERY_RESPONSE);
   }
@@ -286,10 +299,13 @@ public class WorkspaceAdminControllerTest {
   public void testGetAuditLogEntries_noResults() {
     doReturn(EMPTY_QUERY_RESPONSE)
         .when(mockActionAuditQueryService)
-        .queryEventsForWorkspace(DB_WORKSPACE_ID, QUERY_LIMIT);
+        .queryEventsForWorkspace(anyLong(), anyLong(), any(DateTime.class), any(DateTime.class));
     final ResponseEntity<AuditLogEntriesResponse> response =
         workspaceAdminController.getAuditLogEntries(
-            WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE, QUERY_LIMIT);
+            WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE,
+            QUERY_LIMIT,
+            DEFAULT_AFTER_INCLUSIVE.getMillis(),
+            DEFAULT_BEFORE_EXCLUSIVE.getMillis());
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isEqualTo(EMPTY_QUERY_RESPONSE);
   }

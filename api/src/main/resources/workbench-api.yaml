@@ -953,6 +953,22 @@ paths:
           default: 100
           description: >
             Maximum number of entries to return, sorted by timestamp descending.
+        - name: afterInclusive
+          description: >
+            Earliest time matched by the query (inclusive). Epoch millis.
+          in: query
+          type: integer
+          format: int64
+          required: false
+          default: 0
+        - name: beforeExclusive
+          description: >
+             Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds since Epoch
+             (though declared as a string). Defaults to current timestamp.
+          in: query
+          type: integer
+          format: int64
+          required: false
       responses:
         200:
           description: >

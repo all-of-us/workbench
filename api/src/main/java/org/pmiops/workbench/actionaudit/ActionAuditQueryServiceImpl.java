@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
+import org.joda.time.DateTime;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
@@ -22,7 +23,9 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   enum Parameters {
     LIMIT("limit"),
-    WORKSPACE_DB_ID("workspace_db_id");
+    WORKSPACE_DB_ID("workspace_db_id"),
+    AFTER_INCLUSIVE("after_inclusive"),
+    BEFORE_EXCLUSIVE("before_exclusive");
 
     private String name;
 
@@ -55,7 +58,9 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "  jsonPayload.new_value AS new_value\n"
           + "FROM %s\n"
           + "WHERE jsonPayload.target_id = @workspace_db_id AND\n"
-          + "  jsonPayload.target_type = 'WORKSPACE'\n"
+          + "  jsonPayload.target_type = 'WORKSPACE' AND\n"
+          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) >= TIMESTAMP_MILLIS(@afterInclusive) AND"
+          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < TIMESTAMP_MILLIS(@beforeExclusive)"
           + "ORDER BY event_time, agent_id, action_id\n"
           + "LIMIT @limit";
 
@@ -66,7 +71,8 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   }
 
   @Override
-  public AuditLogEntriesResponse queryEventsForWorkspace(long workspaceDatabaseId, long limit) {
+  public AuditLogEntriesResponse queryEventsForWorkspace(
+      long workspaceDatabaseId, long limit, DateTime afterInclusive, DateTime beforeExclusive) {
     final ActionAuditConfig actionAuditConfig = workbenchConfigProvider.get().actionAudit;
     final String fullyQualifiedTableName =
         String.format(
@@ -77,15 +83,19 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     final String queryString =
         String.format(WORKSPACE_EVENTS_QUERY_STRING_FORMAT, fullyQualifiedTableName);
+
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
-            .setUseLegacySql(false)
             .setNamedParameters(
                 ImmutableMap.of(
                     Parameters.WORKSPACE_DB_ID.getName(),
                         QueryParameterValue.int64(workspaceDatabaseId),
                     Parameters.LIMIT.getName(),
-                        QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT))))
+                        QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)),
+                    Parameters.AFTER_INCLUSIVE.getName(),
+                        QueryParameterValue.timestamp(beforeExclusive.getMillis()),
+                    Parameters.BEFORE_EXCLUSIVE.getName(),
+                        QueryParameterValue.timestamp(beforeExclusive.getMillis())))
             .build();
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
@@ -98,7 +108,8 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     final ImmutableMap<String, String> metadata =
         ImmutableMap.of(
-            "workspaceDatabaseId", Long.toString(workspaceDatabaseId), "query", queryString);
+            "workspaceDatabaseId", Long.toString(workspaceDatabaseId),
+            "query", queryJobConfiguration.getQuery());
 
     return new AuditLogEntriesResponse().logEntries(logEntries).queryMetadata(metadata);
   }

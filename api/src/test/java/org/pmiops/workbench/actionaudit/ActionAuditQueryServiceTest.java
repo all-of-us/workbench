@@ -96,7 +96,9 @@ public class ActionAuditQueryServiceTest {
   private static final TableResult TABLE_RESULT =
       new TableResult(WORKSPACE_QUERY_SCHEMA, RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
   private static final TableResult EMPTY_RESULT = new EmptyTableResult();
-  public static final long DEFAULT_LIMIT = 100L;
+  private static final long DEFAULT_LIMIT = 100L;
+  private static final DateTime DEFAULT_AFTER_INCLUSIVE = DateTime.parse("205-02-14T01:20+02:00");
+  private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-08-30T01:20+02:00");
   private static final long TIME_TOLERANCE_MILLIS = 500;
 
   @MockBean private BigQueryService mockBigQueryService;
@@ -119,7 +121,11 @@ public class ActionAuditQueryServiceTest {
   public void testEmptyTableResultGivesEmptyResponse() {
     doReturn(EMPTY_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
     final AuditLogEntriesResponse response =
-        actionAuditQueryService.queryEventsForWorkspace(WORKSPACE_DATABASE_ID, DEFAULT_LIMIT);
+        actionAuditQueryService.queryEventsForWorkspace(
+            WORKSPACE_DATABASE_ID,
+            DEFAULT_LIMIT,
+            DEFAULT_AFTER_INCLUSIVE,
+            DEFAULT_BEFORE_EXCLUSIVE);
     assertThat(response.getLogEntries()).isEmpty();
 
     @SuppressWarnings("unchecked")
@@ -134,7 +140,11 @@ public class ActionAuditQueryServiceTest {
     doReturn(TABLE_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
 
     final AuditLogEntriesResponse response =
-        actionAuditQueryService.queryEventsForWorkspace(WORKSPACE_DATABASE_ID, DEFAULT_LIMIT);
+        actionAuditQueryService.queryEventsForWorkspace(
+            WORKSPACE_DATABASE_ID,
+            DEFAULT_LIMIT,
+            DEFAULT_AFTER_INCLUSIVE,
+            DEFAULT_BEFORE_EXCLUSIVE);
     assertThat(response.getLogEntries()).hasSize(RESULT_ROWS.size());
 
     final AuditLogEntry row1 = response.getLogEntries().get(0);
