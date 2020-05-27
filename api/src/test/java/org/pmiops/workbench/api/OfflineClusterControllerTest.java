@@ -43,8 +43,7 @@ public class OfflineClusterControllerTest {
   private static final Duration IDLE_MAX_AGE = Duration.ofDays(7);
 
   @TestConfiguration
-  @Import({OfflineClusterController.class,
-      ClusterMapperImpl.class})
+  @Import({OfflineClusterController.class, ClusterMapperImpl.class})
   static class Configuration {
 
     @Bean
@@ -63,7 +62,8 @@ public class OfflineClusterControllerTest {
   }
 
   @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API)
-  @MockBean private ClusterApi mockClusterApi;
+  @MockBean
+  private ClusterApi mockClusterApi;
 
   @Autowired private ClusterMapper clusterMapper;
   @Autowired private OfflineClusterController controller;
@@ -92,9 +92,7 @@ public class OfflineClusterControllerTest {
   }
 
   private List<ListClusterResponse> toListClusterResponseList(List<Cluster> clusters) {
-    return clusters.stream()
-        .map(clusterMapper::toListClusterResponse)
-        .collect(Collectors.toList());
+    return clusters.stream().map(clusterMapper::toListClusterResponse).collect(Collectors.toList());
   }
 
   private void stubClusters(List<Cluster> clusters) throws Exception {
