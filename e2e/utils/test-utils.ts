@@ -1,12 +1,12 @@
-import {JSHandle, Page} from 'puppeteer';
 import Checkbox from 'app/element/checkbox';
+import Link from 'app/element/link';
 import RadioButton from 'app/element/radiobutton';
-import TextOptions from 'app/element/text-options';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import GoogleLoginPage from 'app/page/google-login';
 import HomePage, {LABEL_ALIAS} from 'app/page/home-page';
-import Link from 'app/element/link';
+import {XPathOptions, ElementType} from 'app/xpath-options';
+import {JSHandle, Page} from 'puppeteer';
 import {waitForText} from 'utils/waits-utils';
 
 export async function signIn(page: Page): Promise<void> {
@@ -45,14 +45,13 @@ export async function waitWhileLoading(page: Page, timeOut: number = 60000): Pro
       await page.waitFor((selector) => {
         return document.querySelectorAll(selector).length === 0;
       }, {timeout: timeOut}, spinAnimationSelector);
+      // 1 second to give page time finish rendering
+      await page.waitFor(1000);
     }
   } catch (err) {
     throw new Error(err);
   }
-  // final 1 second wait for page render to finish
-  if (jValue) {
-    await page.waitFor(1000);
-  }
+
 }
 
 export async function clickEvalXpath(page: Page, xpathSelector: string) {
@@ -102,7 +101,7 @@ export async function newUserRegistrationSelfBypass(page: Page) {
   const selfBypassXpath = '//*[@data-test-id="self-bypass"]';
   await Promise.race([
     page.waitForXPath(selfBypassXpath, {visible: true, timeout: 60000}),
-    Link.forLabel(page, LABEL_ALIAS.SEE_ALL_WORKSPACES, {visible: true, timeout: 60000}),
+    Link.forLabel(page, {name: LABEL_ALIAS.SEE_ALL_WORKSPACES}),
   ]);
 
   // check to see if it is the Self-Bypass link
@@ -131,7 +130,7 @@ export async function newUserRegistrationSelfBypass(page: Page) {
  */
 export async function performActions(
    page: Page,
-   fields: ({ id: {textOption?: TextOptions; affiliated?: string; type?: string}; value?: string; selected?: boolean })[]) {
+   fields: ({ id: {textOption: XPathOptions, affiliated?: ElementType}; value?: string; selected?: boolean })[]) {
   for (const field of fields) {
     await performAction(page, field.id, field.value, field.selected);
   }
@@ -139,17 +138,17 @@ export async function performActions(
 
 /**
  * Perform one UI action.
- *
- * @param { textOption?: TextOptions; affiliated?: string; type?: string } identifier
+ * @param {Page} page
+ * @param { textOption?: XpathOptions, affiliated?: InputType } identifier
  * @param { string } value Set textbox or textarea value if associated UI element is a Checkbox.
- * @param { boolean } Set to True for select Checkbox or Radiobutton. False to unselect.
+ * @param { boolean } selected to True for select Checkbox or Radiobutton. False to unselect.
  */
 export async function performAction(
    page: Page,
-   identifier: {textOption?: TextOptions; affiliated?: string; type?: string}, value?: string, selected?: boolean) {
+   identifier: {textOption: XPathOptions, affiliated?: ElementType}, value?: string, selected?: boolean) {
 
-  switch (identifier.type.toLowerCase()) {
-  case 'radiobutton':
+  switch (identifier.textOption.type.toLowerCase()) {
+  case 'radio':
     const radioELement = await RadioButton.forLabel(page, identifier.textOption);
     await radioELement.select();
     break;
@@ -158,10 +157,11 @@ export async function performAction(
     await checkboxElement.toggle(selected);
     if (value) {
         // For Checkbox and its required Textarea or Textbox. Set value in Textbox or Textarea if Checkbox is checked.
-      await performAction(page, { textOption: identifier.textOption, type: identifier.affiliated }, value);
+      identifier.textOption.type = identifier.affiliated;
+      await performAction(page, { textOption: identifier.textOption }, value);
     }
     break;
-  case 'textbox':
+  case 'text':
     const textboxElement = await Textbox.forLabel(page, identifier.textOption);
     await textboxElement.type(value, {delay: 0});
     await textboxElement.tabKey();

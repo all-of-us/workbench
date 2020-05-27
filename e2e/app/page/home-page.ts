@@ -37,7 +37,7 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async getCreateNewWorkspaceLink(): Promise<ClrIconLink> {
-    return ClrIconLink.forLabel(this.page, {text: LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
+    return ClrIconLink.forLabel(this.page, {name: LABEL_ALIAS.CREATE_NEW_WORKSPACE, iconShape: 'plus-circle'});
   }
 
   /**
@@ -49,7 +49,7 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async getSeeAllWorkspacesLink(): Promise<Link> {
-    return Link.forLabel(this.page, LABEL_ALIAS.SEE_ALL_WORKSPACES);
+    return Link.forLabel(this.page, {name: LABEL_ALIAS.SEE_ALL_WORKSPACES});
   }
 
 }

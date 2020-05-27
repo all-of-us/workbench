@@ -1,10 +1,10 @@
 import {Page} from 'puppeteer';
+import {XPathOptions} from 'app/xpath-options';
 import Button from './button';
 import Checkbox from './checkbox';
 import Link from './link';
 import RadioButton from './radiobutton';
 import Select from './select';
-import TextOptions from './text-options';
 import Textarea from './textarea';
 import Textbox from './textbox';
 
@@ -15,37 +15,36 @@ import Textbox from './textbox';
  */
 export default class WebComponent {
 
-  constructor(private readonly page: Page, private readonly labelTextOptions: TextOptions) {
-    this.page = page;
-    this.labelTextOptions = labelTextOptions;
+  constructor(private readonly page: Page, private readonly xpathOptions: XPathOptions) {
+
   }
 
   async asCheckBox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, this.labelTextOptions);
+    return await Checkbox.forLabel(this.page, this.xpathOptions);
   }
 
   async asTextBox(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, this.labelTextOptions);
+    return await Textbox.forLabel(this.page, this.xpathOptions);
   }
 
   async asTextArea(): Promise<Textarea> {
-    return await Textarea.forLabel(this.page, this.labelTextOptions);
+    return await Textarea.forLabel(this.page, this.xpathOptions);
   }
 
   async asRadioButton(): Promise<RadioButton> {
-    return await RadioButton.forLabel(this.page, this.labelTextOptions);
+    return await RadioButton.forLabel(this.page, this.xpathOptions);
   }
 
   async asButton(): Promise<Button> {
-    return await Button.forLabel(this.page, this.labelTextOptions);
+    return await Button.forLabel(this.page, this.xpathOptions);
   }
 
   async asSelect(): Promise<Select> {
-    return await Select.forLabel(this.page, this.labelTextOptions);
+    return await Select.forLabel(this.page, this.xpathOptions);
   }
 
   async asLink(): Promise<Link> {
-    return await Link.forLabel(this.page, this.labelTextOptions.text);
+    return await Link.forLabel(this.page, this.xpathOptions);
   }
 
 }
