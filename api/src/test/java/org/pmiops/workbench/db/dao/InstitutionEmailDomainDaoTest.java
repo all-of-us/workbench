@@ -32,7 +32,7 @@ public class InstitutionEmailDomainDaoTest {
 
   @Test
   public void test_getByInstitution_empty() {
-    assertThat(institutionEmailDomainDao.getByInstitutionId(testInst.getInstitutionId())).isEmpty();
+    assertThat(institutionEmailDomainDao.getByInstitution(testInst)).isEmpty();
     assertThat(institutionEmailDomainDao.count()).isEqualTo(0L);
   }
 
@@ -40,17 +40,12 @@ public class InstitutionEmailDomainDaoTest {
   public void test_getByInstitution_multiple() {
     final DbInstitutionEmailDomain one =
         institutionEmailDomainDao.save(
-            new DbInstitutionEmailDomain()
-                .setEmailDomain("domain.com")
-                .setInstitutionId(testInst.getInstitutionId()));
+            new DbInstitutionEmailDomain().setEmailDomain("domain.com").setInstitution(testInst));
     final DbInstitutionEmailDomain two =
         institutionEmailDomainDao.save(
-            new DbInstitutionEmailDomain()
-                .setEmailDomain("domain.net")
-                .setInstitutionId(testInst.getInstitutionId()));
+            new DbInstitutionEmailDomain().setEmailDomain("domain.net").setInstitution(testInst));
 
-    assertThat(institutionEmailDomainDao.getByInstitutionId(testInst.getInstitutionId()))
-        .containsExactly(one, two);
+    assertThat(institutionEmailDomainDao.getByInstitution(testInst)).containsExactly(one, two);
     assertThat(institutionEmailDomainDao.count()).isEqualTo(2L);
   }
 
@@ -58,73 +53,52 @@ public class InstitutionEmailDomainDaoTest {
   public void test_getByInstitution_multipleInsts() {
     final DbInstitutionEmailDomain one =
         institutionEmailDomainDao.save(
-            new DbInstitutionEmailDomain()
-                .setEmailDomain("domain.com")
-                .setInstitutionId(testInst.getInstitutionId()));
+            new DbInstitutionEmailDomain().setEmailDomain("domain.com").setInstitution(testInst));
 
     final DbInstitution otherInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
 
     final DbInstitutionEmailDomain two =
         institutionEmailDomainDao.save(
-            new DbInstitutionEmailDomain()
-                .setEmailDomain("domain.net")
-                .setInstitutionId(otherInst.getInstitutionId()));
+            new DbInstitutionEmailDomain().setEmailDomain("domain.net").setInstitution(otherInst));
 
-    assertThat(institutionEmailDomainDao.getByInstitutionId(testInst.getInstitutionId()))
-        .containsExactly(one);
-    assertThat(institutionEmailDomainDao.getByInstitutionId(otherInst.getInstitutionId()))
-        .containsExactly(two);
+    assertThat(institutionEmailDomainDao.getByInstitution(testInst)).containsExactly(one);
+    assertThat(institutionEmailDomainDao.getByInstitution(otherInst)).containsExactly(two);
     assertThat(institutionEmailDomainDao.count()).isEqualTo(2L);
   }
 
   @Test
   public void test_deleteByInstitution_empty() {
-    assertThat(institutionEmailDomainDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(0L);
+    assertThat(institutionEmailDomainDao.deleteByInstitution(testInst)).isEqualTo(0L);
   }
 
   @Test
   public void test_deleteByInstitution_multiple() {
     institutionEmailDomainDao.save(
-        new DbInstitutionEmailDomain()
-            .setEmailDomain("domain.com")
-            .setInstitutionId(testInst.getInstitutionId()));
+        new DbInstitutionEmailDomain().setEmailDomain("domain.com").setInstitution(testInst));
     institutionEmailDomainDao.save(
-        new DbInstitutionEmailDomain()
-            .setEmailDomain("domain.net")
-            .setInstitutionId(testInst.getInstitutionId()));
+        new DbInstitutionEmailDomain().setEmailDomain("domain.net").setInstitution(testInst));
 
-    assertThat(institutionEmailDomainDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(2L);
-    assertThat(institutionEmailDomainDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(0L);
+    assertThat(institutionEmailDomainDao.deleteByInstitution(testInst)).isEqualTo(2L);
+    assertThat(institutionEmailDomainDao.deleteByInstitution(testInst)).isEqualTo(0L);
     assertThat(institutionEmailDomainDao.count()).isEqualTo(0L);
   }
 
   @Test
   public void test_deleteByInstitution_multipleInsts() {
     institutionEmailDomainDao.save(
-        new DbInstitutionEmailDomain()
-            .setEmailDomain("domain.com")
-            .setInstitutionId(testInst.getInstitutionId()));
+        new DbInstitutionEmailDomain().setEmailDomain("domain.com").setInstitution(testInst));
 
     final DbInstitution otherInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
 
     institutionEmailDomainDao.save(
-        new DbInstitutionEmailDomain()
-            .setEmailDomain("domain.net")
-            .setInstitutionId(otherInst.getInstitutionId()));
+        new DbInstitutionEmailDomain().setEmailDomain("domain.net").setInstitution(otherInst));
 
-    assertThat(institutionEmailDomainDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(1L);
-    assertThat(institutionEmailDomainDao.deleteByInstitutionId(otherInst.getInstitutionId()))
-        .isEqualTo(1L);
-    assertThat(institutionEmailDomainDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(0L);
-    assertThat(institutionEmailDomainDao.deleteByInstitutionId(otherInst.getInstitutionId()))
-        .isEqualTo(0L);
+    assertThat(institutionEmailDomainDao.deleteByInstitution(testInst)).isEqualTo(1L);
+    assertThat(institutionEmailDomainDao.deleteByInstitution(otherInst)).isEqualTo(1L);
+    assertThat(institutionEmailDomainDao.deleteByInstitution(testInst)).isEqualTo(0L);
+    assertThat(institutionEmailDomainDao.deleteByInstitution(otherInst)).isEqualTo(0L);
     assertThat(institutionEmailDomainDao.count()).isEqualTo(0L);
   }
 }

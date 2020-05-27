@@ -1,11 +1,14 @@
 package org.pmiops.workbench.db.model;
 
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -13,7 +16,7 @@ import javax.persistence.Table;
 public class DbInstitutionEmailDomain {
 
   private long institutionEmailDomainId;
-  private long institutionId;
+  private DbInstitution institution;
   private String emailDomain;
 
   public DbInstitutionEmailDomain() {}
@@ -30,13 +33,14 @@ public class DbInstitutionEmailDomain {
     return this;
   }
 
-  @Column(name = "institution_id", nullable = false)
-  public long getInstitutionId() {
-    return institutionId;
+  @ManyToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "institution_id", nullable = false)
+  public DbInstitution getInstitution() {
+    return institution;
   }
 
-  public DbInstitutionEmailDomain setInstitutionId(long institutionId) {
-    this.institutionId = institutionId;
+  public DbInstitutionEmailDomain setInstitution(DbInstitution institution) {
+    this.institution = institution;
     return this;
   }
 
@@ -65,11 +69,11 @@ public class DbInstitutionEmailDomain {
     DbInstitutionEmailDomain that = (DbInstitutionEmailDomain) o;
 
     return Objects.equals(emailDomain, that.emailDomain)
-        && Objects.equals(institutionId, that.institutionId);
+        && Objects.equals(institution, that.institution);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(emailDomain, institutionId);
+    return Objects.hash(emailDomain, institution);
   }
 }

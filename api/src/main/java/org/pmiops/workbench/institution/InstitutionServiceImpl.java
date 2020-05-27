@@ -204,8 +204,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public List<String> getInstitutionEmailDomains(String institutionShortName) {
-    return institutionEmailDomainDao
-        .getByInstitutionId(getDbInstitutionOrThrow(institutionShortName).getInstitutionId())
+    return institutionEmailDomainDao.getByInstitution(getDbInstitutionOrThrow(institutionShortName))
         .stream()
         .map(DbInstitutionEmailDomain::getEmailDomain)
         .sorted()
@@ -216,8 +215,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public List<String> getInstitutionEmailAddresses(String institutionShortName) {
     return institutionEmailAddressDao
-        .getByInstitutionId(getDbInstitutionOrThrow(institutionShortName).getInstitutionId())
-        .stream()
+        .getByInstitution(getDbInstitutionOrThrow(institutionShortName)).stream()
         .map(DbInstitutionEmailAddress::getEmailAddress)
         .sorted()
         .distinct()
@@ -278,25 +276,21 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private void setInstitutionEmailDomains(Institution institution) {
     final DbInstitution dbInstitution = getDbInstitutionOrThrow(institution.getShortName());
-    institutionEmailDomainDao.deleteByInstitutionId(dbInstitution.getInstitutionId());
+    institutionEmailDomainDao.deleteByInstitution(dbInstitution);
 
     Optional.ofNullable(institution.getEmailDomains()).orElse(Collections.emptyList()).stream()
         .distinct()
-        .map(
-            domain ->
-                institutionEmailDomainMapper.modelToDb(domain, dbInstitution.getInstitutionId()))
+        .map(domain -> institutionEmailDomainMapper.modelToDb(domain, dbInstitution))
         .forEach(institutionEmailDomainDao::save);
   }
 
   private void setInstitutionEmailAddresses(Institution institution) {
     final DbInstitution dbInstitution = getDbInstitutionOrThrow(institution.getShortName());
-    institutionEmailAddressDao.deleteByInstitutionId(dbInstitution.getInstitutionId());
+    institutionEmailAddressDao.deleteByInstitution(dbInstitution);
 
     Optional.ofNullable(institution.getEmailAddresses()).orElse(Collections.emptyList()).stream()
         .distinct()
-        .map(
-            address ->
-                institutionEmailAddressMapper.modelToDb(address, dbInstitution.getInstitutionId()))
+        .map(address -> institutionEmailAddressMapper.modelToDb(address, dbInstitution))
         .forEach(institutionEmailAddressDao::save);
   }
 }

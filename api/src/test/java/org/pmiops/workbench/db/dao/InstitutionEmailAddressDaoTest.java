@@ -32,8 +32,7 @@ public class InstitutionEmailAddressDaoTest {
 
   @Test
   public void test_getByInstitution_empty() {
-    assertThat(institutionEmailAddressDao.getByInstitutionId(testInst.getInstitutionId()))
-        .isEmpty();
+    assertThat(institutionEmailAddressDao.getByInstitution(testInst)).isEmpty();
     assertThat(institutionEmailAddressDao.count()).isEqualTo(0L);
   }
 
@@ -43,15 +42,14 @@ public class InstitutionEmailAddressDaoTest {
         institutionEmailAddressDao.save(
             new DbInstitutionEmailAddress()
                 .setEmailAddress("researcher@vumc.org")
-                .setInstitutionId(testInst.getInstitutionId()));
+                .setInstitution(testInst));
     final DbInstitutionEmailAddress two =
         institutionEmailAddressDao.save(
             new DbInstitutionEmailAddress()
                 .setEmailAddress("researcher@nih.gov")
-                .setInstitutionId(testInst.getInstitutionId()));
+                .setInstitution(testInst));
 
-    assertThat(institutionEmailAddressDao.getByInstitutionId(testInst.getInstitutionId()))
-        .containsExactly(one, two);
+    assertThat(institutionEmailAddressDao.getByInstitution(testInst)).containsExactly(one, two);
     assertThat(institutionEmailAddressDao.count()).isEqualTo(2L);
   }
 
@@ -61,7 +59,7 @@ public class InstitutionEmailAddressDaoTest {
         institutionEmailAddressDao.save(
             new DbInstitutionEmailAddress()
                 .setEmailAddress("researcher@vumc.org")
-                .setInstitutionId(testInst.getInstitutionId()));
+                .setInstitution(testInst));
 
     final DbInstitution otherInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
@@ -70,19 +68,16 @@ public class InstitutionEmailAddressDaoTest {
         institutionEmailAddressDao.save(
             new DbInstitutionEmailAddress()
                 .setEmailAddress("researcher@nih.gov")
-                .setInstitutionId(otherInst.getInstitutionId()));
+                .setInstitution(otherInst));
 
-    assertThat(institutionEmailAddressDao.getByInstitutionId(testInst.getInstitutionId()))
-        .containsExactly(one);
-    assertThat(institutionEmailAddressDao.getByInstitutionId(otherInst.getInstitutionId()))
-        .containsExactly(two);
+    assertThat(institutionEmailAddressDao.getByInstitution(testInst)).containsExactly(one);
+    assertThat(institutionEmailAddressDao.getByInstitution(otherInst)).containsExactly(two);
     assertThat(institutionEmailAddressDao.count()).isEqualTo(2L);
   }
 
   @Test
   public void test_deleteByInstitution_empty() {
-    assertThat(institutionEmailAddressDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(0L);
+    assertThat(institutionEmailAddressDao.deleteByInstitution(testInst)).isEqualTo(0L);
   }
 
   @Test
@@ -90,16 +85,14 @@ public class InstitutionEmailAddressDaoTest {
     institutionEmailAddressDao.save(
         new DbInstitutionEmailAddress()
             .setEmailAddress("researcher@vumc.org")
-            .setInstitutionId(testInst.getInstitutionId()));
+            .setInstitution(testInst));
     institutionEmailAddressDao.save(
         new DbInstitutionEmailAddress()
             .setEmailAddress("researcher@nih.gov")
-            .setInstitutionId(testInst.getInstitutionId()));
+            .setInstitution(testInst));
 
-    assertThat(institutionEmailAddressDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(2L);
-    assertThat(institutionEmailAddressDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(0L);
+    assertThat(institutionEmailAddressDao.deleteByInstitution(testInst)).isEqualTo(2L);
+    assertThat(institutionEmailAddressDao.deleteByInstitution(testInst)).isEqualTo(0L);
     assertThat(institutionEmailAddressDao.count()).isEqualTo(0L);
   }
 
@@ -108,7 +101,7 @@ public class InstitutionEmailAddressDaoTest {
     institutionEmailAddressDao.save(
         new DbInstitutionEmailAddress()
             .setEmailAddress("researcher@vumc.org")
-            .setInstitutionId(testInst.getInstitutionId()));
+            .setInstitution(testInst));
 
     final DbInstitution otherInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
@@ -116,16 +109,12 @@ public class InstitutionEmailAddressDaoTest {
     institutionEmailAddressDao.save(
         new DbInstitutionEmailAddress()
             .setEmailAddress("researcher@nih.gov")
-            .setInstitutionId(otherInst.getInstitutionId()));
+            .setInstitution(otherInst));
 
-    assertThat(institutionEmailAddressDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(1L);
-    assertThat(institutionEmailAddressDao.deleteByInstitutionId(otherInst.getInstitutionId()))
-        .isEqualTo(1L);
-    assertThat(institutionEmailAddressDao.deleteByInstitutionId(testInst.getInstitutionId()))
-        .isEqualTo(0L);
-    assertThat(institutionEmailAddressDao.deleteByInstitutionId(otherInst.getInstitutionId()))
-        .isEqualTo(0L);
+    assertThat(institutionEmailAddressDao.deleteByInstitution(testInst)).isEqualTo(1L);
+    assertThat(institutionEmailAddressDao.deleteByInstitution(otherInst)).isEqualTo(1L);
+    assertThat(institutionEmailAddressDao.deleteByInstitution(testInst)).isEqualTo(0L);
+    assertThat(institutionEmailAddressDao.deleteByInstitution(otherInst)).isEqualTo(0L);
     assertThat(institutionEmailAddressDao.count()).isEqualTo(0L);
   }
 }
