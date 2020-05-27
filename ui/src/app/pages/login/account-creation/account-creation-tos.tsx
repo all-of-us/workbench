@@ -107,7 +107,7 @@ export class AccountCreationTos extends React.Component<
                         styles.disabledCheckboxLabel}
                       wrapperStyle={{marginBottom: '0.5rem'}}
                       label={<span>
-              I have read, understand, and agree to the Terms described above.</span>}
+              I have read, understand, and agree to the Terms of Use described above.</span>}
             /></div>
         </div>
         <FlexColumn style={{paddingLeft: '3rem', alignItems: 'center', justifyContent: 'center'}}>

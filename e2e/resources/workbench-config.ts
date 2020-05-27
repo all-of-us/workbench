@@ -4,11 +4,9 @@ import * as fp from 'lodash/fp';
 const env = process.env.WORKBENCH_ENV || 'dev';
 
 const userCredential = {
-  contactEmail: 'hermione.owner@quality.firecloud.org',
   userEmail: process.env.USER_NAME,
   userPassword: process.env.PASSWORD,
-  userInvitationkey: process.env.INVITATION_KEY,
-  broadInstitutionEmail: 'aou-dev-registration@broadinstitute.org',
+  institutionContactEmail: 'aou-dev-registration@broadinstitute.org',
 };
 
 const urlPath = {

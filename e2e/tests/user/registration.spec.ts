@@ -10,10 +10,10 @@ describe('User registration tests:', () => {
     await loginPage.load();
 
     // Click the create account button to start new-user-registration flow.
-    const createAccountButton = await loginPage.createAccountButton();
-    await createAccountButton.click();
+    await loginPage.clickCreateAccountButton();
 
     const createAccountPage = new CreateAccountPage(page);
+    await createAccountPage.isLoaded();
 
     // Step 1: Terms of Service.
     await createAccountPage.acceptTermsOfUseAgreement();

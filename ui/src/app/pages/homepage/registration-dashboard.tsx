@@ -402,7 +402,15 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
              data-test-id='success-message'>
           You successfully completed all the required steps to access the Researcher Workbench.
           <Button style={{marginLeft: '0.5rem'}}
-                  onClick={() => window.location.reload()}>Get Started</Button>
+                  onClick={() => {
+                    // Quirk / hack note: the goal here is to send the user to the homepage once they've completed
+                    // all access modules. Normally we would just navigate(['']) to do this. However, because
+                    // of the way this dashboard is rendered *within* the homepage component, a call to
+                    // navigate is not enough to trigger the normal homepage to load. As a workaround, we
+                    // explicitly clear the search query and redirect to the root path.
+                    window.location.pathname = '/';
+                    window.location.search = '';
+                  }}>Get Started</Button>
         </div>
       }
       {this.state.twoFactorAuthModalOpen && <Modal width={500}>

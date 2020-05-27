@@ -53,9 +53,6 @@ public interface ProfileMapper {
   @Mapping(target = "dataAccessLevelEnum", ignore = true) // derived property
   @Mapping(target = "degreesEnum", ignore = true) // derived property
   @Mapping(target = "emailVerificationStatusEnum", ignore = true) // derived property
-  @Mapping(
-      target = "firstRegistrationCompletionTime",
-      ignore = true) // used only in UserService.updateDataAccessLevel
   @Mapping(target = "freeTierCreditsLimitDaysOverride", ignore = true) // unused
   @Mapping(
       target = "freeTierCreditsLimitDollarsOverride",

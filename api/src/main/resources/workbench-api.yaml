@@ -1044,6 +1044,26 @@ paths:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/users/getUserByUsername":
+    get:
+      tags:
+        - profile
+      description: 'Returns a user''s profile for review. Requires ACCESS_CONTROL_ADMIN authority.'
+      parameters:
+        - in: query
+          name: username
+          type: string
+          required: true
+      operationId: getUserByUsername
+      responses:
+        200:
+          description: A user's profile
+          schema:
+            "$ref": "#/definitions/Profile"
+        403:
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/users/list":
     get:
       tags:
@@ -4992,6 +5012,11 @@ definitions:
         format: int64
         description: 'Timestamp when the user last acknowledged the terms of service.
           May be null if the user has never acknowledged the Terms of Service.'
+      firstRegistrationCompletionTime:
+        type: integer
+        format: int64
+        description: 'Timestamp when the user first changed from Unregistered to Registered
+          data access level. May be null if the user has never done so.'
   InstitutionalAffiliation:
     type: object
     properties:
