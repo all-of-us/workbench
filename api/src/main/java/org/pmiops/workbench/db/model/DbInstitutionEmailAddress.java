@@ -1,14 +1,11 @@
 package org.pmiops.workbench.db.model;
 
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -16,7 +13,7 @@ import javax.persistence.Table;
 public class DbInstitutionEmailAddress {
 
   private long institutionEmailAddressId;
-  private DbInstitution institution;
+  private long institutionId;
   private String emailAddress;
 
   public DbInstitutionEmailAddress() {}
@@ -33,14 +30,13 @@ public class DbInstitutionEmailAddress {
     return this;
   }
 
-  @ManyToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "institution_id", nullable = false)
-  public DbInstitution getInstitution() {
-    return institution;
+  @Column(name = "institution_id", nullable = false)
+  public long getInstitutionId() {
+    return institutionId;
   }
 
-  public DbInstitutionEmailAddress setInstitution(DbInstitution institution) {
-    this.institution = institution;
+  public DbInstitutionEmailAddress setInstitutionId(long institutionId) {
+    this.institutionId = institutionId;
     return this;
   }
 
@@ -67,12 +63,12 @@ public class DbInstitutionEmailAddress {
 
     DbInstitutionEmailAddress that = (DbInstitutionEmailAddress) o;
 
-    return Objects.equals(institution, that.institution)
-        && Objects.equals(emailAddress, that.emailAddress);
+    return Objects.equals(emailAddress, that.emailAddress)
+        && Objects.equals(institutionId, that.institutionId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(institution, emailAddress);
+    return Objects.hash(emailAddress, institutionId);
   }
 }

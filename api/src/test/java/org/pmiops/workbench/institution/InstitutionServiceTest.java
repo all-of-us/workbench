@@ -35,7 +35,9 @@ import org.springframework.test.context.junit4.SpringRunner;
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
-  InstitutionUserInstructionsMapperImpl.class
+  InstitutionUserInstructionsMapperImpl.class,
+  InstitutionEmailDomainMapperImpl.class,
+  InstitutionEmailAddressMapperImpl.class,
 })
 public class InstitutionServiceTest {
   @Autowired private InstitutionService service;
@@ -229,7 +231,7 @@ public class InstitutionServiceTest {
         .containsExactlyElementsIn(uniquifiedEmailAddresses);
   }
 
-  // we do not uniquify Email Addresses and Domains in the DB across institutions
+  // Email Addresses and Domains can be claimed by multiple institutions
   @Test
   public void test_nonUniqueEmailPatterns() {
     final Institution instWithEmails =

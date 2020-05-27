@@ -52,6 +52,14 @@ public interface InstitutionService {
    */
   boolean validateInstitutionalEmail(Institution institution, String contactEmail);
 
+  List<String> getInstitutionEmailDomains(String institutionShortName);
+
+  void setInstitutionEmailDomains(Institution institution);
+
+  List<String> getInstitutionEmailAddresses(String institutionShortName);
+
+  void setInstitutionEmailAddresses(Institution institution);
+
   /**
    * Retrieve the optional text block of user instructions to fill the instructions email sent after
    * a user in this institution creates an account. Throws NotFoundException if the Institution does

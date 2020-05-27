@@ -1,5 +1,6 @@
 package org.pmiops.workbench.institution;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -9,9 +10,13 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.InstitutionDao;
+import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
+import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
 import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
+import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -29,27 +34,40 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private static final Logger log = Logger.getLogger(InstitutionServiceImpl.class.getName());
 
+  private final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
+
   private final InstitutionDao institutionDao;
+  private final InstitutionEmailDomainDao institutionEmailDomainDao;
+  private final InstitutionEmailAddressDao institutionEmailAddressDao;
   private final InstitutionUserInstructionsDao institutionUserInstructionsDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final InstitutionMapper institutionMapper;
+  private final InstitutionEmailDomainMapper institutionEmailDomainMapper;
+  private final InstitutionEmailAddressMapper institutionEmailAddressMapper;
   private final InstitutionUserInstructionsMapper institutionUserInstructionsMapper;
   private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
-  private final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
   @Autowired
   InstitutionServiceImpl(
       InstitutionDao institutionDao,
+      InstitutionEmailDomainDao institutionEmailDomainDao,
+      InstitutionEmailAddressDao institutionEmailAddressDao,
       InstitutionUserInstructionsDao institutionUserInstructionsDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       InstitutionMapper institutionMapper,
+      InstitutionEmailDomainMapper institutionEmailDomainMapper,
+      InstitutionEmailAddressMapper institutionEmailAddressMapper,
       InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
       PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
     this.institutionDao = institutionDao;
+    this.institutionEmailDomainDao = institutionEmailDomainDao;
+    this.institutionEmailAddressDao = institutionEmailAddressDao;
     this.institutionUserInstructionsDao = institutionUserInstructionsDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.institutionMapper = institutionMapper;
+    this.institutionEmailDomainMapper = institutionEmailDomainMapper;
+    this.institutionEmailAddressMapper = institutionEmailAddressMapper;
     this.institutionUserInstructionsMapper = institutionUserInstructionsMapper;
     this.publicInstitutionDetailsMapper = publicInstitutionDetailsMapper;
   }
@@ -89,7 +107,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public Institution createInstitution(final Institution institutionToCreate) {
     return institutionMapper.dbToModel(
-        institutionDao.save(institutionMapper.modelToDb(institutionToCreate)), this);
+        institutionDao.save(institutionMapper.modelToDb(institutionToCreate, this)), this);
   }
 
   @Override
@@ -120,7 +138,7 @@ public class InstitutionServiceImpl implements InstitutionService {
               // create new DB object, but mark it with the original's ID to indicate that this is
               // an update
               final DbInstitution dbObjectToUpdate =
-                  institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId);
+                  institutionMapper.modelToDb(institutionToUpdate, this).setInstitutionId(dbId);
               return institutionMapper.dbToModel(institutionDao.save(dbObjectToUpdate), this);
             });
   }
@@ -177,6 +195,54 @@ public class InstitutionServiceImpl implements InstitutionService {
             contactEmailDomain,
             validated ? "MATCHED" : "DID NOT MATCH"));
     return validated;
+  }
+
+  @Override
+  public List<String> getInstitutionEmailDomains(String institutionShortName) {
+    return institutionEmailDomainDao
+        .getByInstitutionId(getDbInstitutionOrThrow(institutionShortName).getInstitutionId())
+        .stream()
+        .map(DbInstitutionEmailDomain::getEmailDomain)
+        .sorted()
+        .distinct()
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public void setInstitutionEmailDomains(Institution institution) {
+    final DbInstitution dbInstitution = getDbInstitutionOrThrow(institution.getShortName());
+    institutionEmailDomainDao.deleteByInstitutionId(dbInstitution.getInstitutionId());
+
+    Optional.ofNullable(institution.getEmailAddresses()).orElse(Collections.emptyList()).stream()
+        .distinct()
+        .map(
+            address ->
+                institutionEmailDomainMapper.modelToDb(address, dbInstitution.getInstitutionId()))
+        .forEach(institutionEmailDomainDao::save);
+  }
+
+  @Override
+  public List<String> getInstitutionEmailAddresses(String institutionShortName) {
+    return institutionEmailAddressDao
+        .getByInstitutionId(getDbInstitutionOrThrow(institutionShortName).getInstitutionId())
+        .stream()
+        .map(DbInstitutionEmailAddress::getEmailAddress)
+        .sorted()
+        .distinct()
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public void setInstitutionEmailAddresses(Institution institution) {
+    final DbInstitution dbInstitution = getDbInstitutionOrThrow(institution.getShortName());
+    institutionEmailAddressDao.deleteByInstitutionId(dbInstitution.getInstitutionId());
+
+    Optional.ofNullable(institution.getEmailAddresses()).orElse(Collections.emptyList()).stream()
+        .distinct()
+        .map(
+            address ->
+                institutionEmailAddressMapper.modelToDb(address, dbInstitution.getInstitutionId()))
+        .forEach(institutionEmailAddressDao::save);
   }
 
   @Override
