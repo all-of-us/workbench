@@ -20,11 +20,14 @@ public interface InstitutionUserInstructionsMapper {
   DbInstitutionUserInstructions modelToDb(
       InstitutionUserInstructions modelObject, @Context InstitutionService institutionService);
 
-  @AfterMapping
-  default void setFields(
-      @MappingTarget DbInstitutionUserInstructions target,
-      InstitutionUserInstructions modelObject,
-      @Context InstitutionService institutionService) {
+    // don't store empty or null instructions
+    // sanitize() converts null to empty string, so we can't rely on it for this check
+
+    final String instructions = modelObject.getInstructions();
+    if (Strings.isNullOrEmpty(instructions)) {
+      throw new BadRequestException(
+          "Cannot save InstitutionUserInstructions because the instructions payload is empty.");
+    }
 
     final DbInstitution institution =
         institutionService.getDbInstitutionOrThrow(modelObject.getInstitutionShortName());

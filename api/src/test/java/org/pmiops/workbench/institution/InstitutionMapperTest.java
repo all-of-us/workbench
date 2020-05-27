@@ -40,7 +40,7 @@ public class InstitutionMapperTest {
     final Institution inst =
         new Institution().shortName("Test").displayName("Test State University");
 
-    final DbInstitution dbInst = mapper.modelToDb(inst, service);
+    final DbInstitution dbInst = mapper.modelToDb(inst);
 
     assertThat(dbInst.getShortName()).isEqualTo(inst.getShortName());
     assertThat(dbInst.getDisplayName()).isEqualTo(inst.getDisplayName());
@@ -61,7 +61,7 @@ public class InstitutionMapperTest {
             .emailAddresses(sortedModelAddresses)
             .userInstructions("UserInstruction");
 
-    final DbInstitution dbInst = mapper.modelToDb(inst, service);
+    final DbInstitution dbInst = mapper.modelToDb(inst);
 
     assertThat(dbInst.getShortName()).isEqualTo(inst.getShortName());
     assertThat(dbInst.getDisplayName()).isEqualTo(inst.getDisplayName());
@@ -92,32 +92,7 @@ public class InstitutionMapperTest {
     assertThat(inst.getShortName()).isEqualTo(dbInst.getShortName());
     assertThat(inst.getDisplayName()).isEqualTo(dbInst.getDisplayName());
 
-    final DbInstitution roundTrip = mapper.modelToDb(inst, service);
-
-    assertThat(roundTrip.getShortName()).isEqualTo(dbInst.getShortName());
-    assertThat(roundTrip.getDisplayName()).isEqualTo(dbInst.getDisplayName());
-  }
-
-  @Test
-  public void test_dbToModelWithEmailsAndUserInstructions() {
-    final DbInstitution dbInst =
-        new DbInstitution().setShortName("Test").setDisplayName("Test State University");
-
-    when(service.getInstitutionEmailDomains(dbInst.getShortName())).thenReturn(sortedModelDomains);
-    when(service.getInstitutionEmailAddresses(dbInst.getShortName()))
-        .thenReturn(sortedModelAddresses);
-    when(service.getInstitutionUserInstructions(dbInst.getShortName()))
-        .thenReturn(Optional.of("UserInstruction"));
-
-    final Institution inst = mapper.dbToModel(dbInst, service);
-
-    assertThat(inst.getShortName()).isEqualTo(dbInst.getShortName());
-    assertThat(inst.getDisplayName()).isEqualTo(dbInst.getDisplayName());
-    assertThat(inst.getEmailDomains()).isEqualTo(sortedModelDomains);
-    assertThat(inst.getEmailAddresses()).isEqualTo(sortedModelAddresses);
-    assertThat(inst.getUserInstructions()).isEqualTo("UserInstruction");
-
-    final DbInstitution roundTrip = mapper.modelToDb(inst, service);
+    final DbInstitution roundTrip = mapper.modelToDb(inst);
 
     assertThat(roundTrip.getShortName()).isEqualTo(dbInst.getShortName());
     assertThat(roundTrip.getDisplayName()).isEqualTo(dbInst.getDisplayName());

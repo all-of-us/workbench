@@ -47,7 +47,7 @@ public class InstitutionServiceTest {
   private final Institution testInst =
       new Institution().shortName("test").displayName("this is a test");
 
-  // the mapper converts nulls to empty sets
+  // the mapper converts null emails to empty lists
   private final Institution roundTrippedTestInst =
       new Institution()
           .shortName(testInst.getShortName())
