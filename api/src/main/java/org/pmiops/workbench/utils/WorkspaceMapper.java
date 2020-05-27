@@ -135,9 +135,9 @@ public interface WorkspaceMapper {
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
-  @Mapping(target = "email", source = "user.username")
-  @Mapping(target = "role", source = "acl")
-  UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry acl);
+//  @Mapping(target = "email", source = "user.username")
+//  @Mapping(target = "role", source = "acl")
+//  UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry acl);
 
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
