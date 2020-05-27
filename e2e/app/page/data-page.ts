@@ -2,6 +2,8 @@ import {Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {WorkspaceAction, PageTab} from 'app/page-identifiers';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForDocumentTitle} from 'utils/waits-utils';
 
 
 export const TAB_SELECTOR = {
@@ -25,12 +27,13 @@ export default class DataPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        this.waitUntilTitleMatch(PAGE.TITLE),
+        await waitForDocumentTitle(this.page, PAGE.TITLE),
         this.page.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true}),
-        this.waitUntilNoSpinner(),
+        waitWhileLoading(this.page),
       ]);
       return true;
     } catch (e) {
+      console.log(`DataPage isLoaded() encountered ${e}`);
       return false;
     }
   }

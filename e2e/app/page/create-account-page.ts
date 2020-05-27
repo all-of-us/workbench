@@ -1,14 +1,17 @@
-import {Page, Frame} from 'puppeteer';
-import {defaultFieldValues} from 'resources/data/user-registration-data';
+import SelectMenu from 'app/component/select-menu';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
 import ClrIconLink from 'app/element/clr-icon-link';
-import SelectMenu from 'app/component/select-menu';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import BasePage from 'app/page/base-page';
-import {config} from 'resources/workbench-config';
 import {findIframe} from 'app/element/xpath-finder';
+import BasePage from 'app/page/base-page';
+import {ElementType} from 'app/xpath-options';
+import {Frame, Page} from 'puppeteer';
+import {defaultFieldValues} from 'resources/data/user-registration-data';
+import {config} from 'resources/workbench-config';
+import {waitWhileLoading} from 'utils/test-utils';
+import {waitForText} from 'utils/waits-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -35,14 +38,42 @@ export const EDUCATION_LEVEL_VALUE = {
 };
 
 export const LABEL_ALIAS = {
-  READ_UNDERSTAND_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement.',
-  READ_UNDERSTAND_TERMS_OF_USE: 'I have read, understand, and agree to the Terms described above.',
+  READ_PRIVACY_STATEMENT: 'I have read, understand, and agree to the All of Us Program Privacy Statement',
+  READ_TERMS_OF_USE: 'I have read, understand, and agree to the Terms of Use described above',
   INSTITUTION_NAME: 'Institution Name',
   ARE_YOU_AFFILIATED: 'Are you affiliated with an Academic Research Institution',
   RESEARCH_BACKGROUND: 'Your research background, experience, and research interests',
   EDUCATION_LEVEL: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YEAR_OF_BIRTH: 'Year of Birth',
   INSTITUTION_EMAIL: 'Your institutional email address',
+};
+
+export const FIELD = {
+  institutionEmailTextbox: {
+    textOption: {
+      containsText: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorLevel: 2
+    }
+  },
+  educationLevelSelect: {
+    textOption: {
+      type: ElementType.Dropdown, name: LABEL_ALIAS.EDUCATION_LEVEL, ancestorLevel: 2
+    }
+  },
+  birthYearSelect: {
+    textOption: {
+      type: ElementType.Dropdown, name: LABEL_ALIAS.YEAR_OF_BIRTH, ancestorLevel: 2
+    }
+  },
+  institutionSelect: {
+    textOption: {
+      type:ElementType.Dropdown, name:'Select your institution', ancestorLevel:2
+    }
+  },
+  describeRole: {
+    textOption: {
+      type: ElementType.Dropdown, containsText: 'describes your role', ancestorLevel: 2
+    }
+  }
 };
 
 export default class CreateAccountPage extends BasePage {
@@ -52,47 +83,49 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await this.waitForTextExists('Sign In');
-    return true;
-  }
-
-  async getInvitationKeyInput(): Promise<Textbox> {
-    const textbox = new Textbox(this.page);
-    await textbox.withCss('#invitationKey');
-    return textbox;
+    try {
+      await Promise.all([
+        waitForText(this.page, 'Please read through the entire agreement to continue'),
+        this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', {visible: true}),
+      ])
+      return true;
+    } catch (err) {
+      console.log(`CreateAccountPage isLoaded() encountered ${err}`);
+      return false;
+    }
   }
 
   async getSubmitButton(): Promise<Button> {
-    return await Button.forLabel(this.page, {text: 'Submit'});
+    return await Button.forLabel(this.page, {name: 'Submit'});
   }
 
   async getNextButton(): Promise<Button> {
-    return await Button.forLabel(this.page, {text: 'Next'});
+    return await Button.forLabel(this.page, {name: 'Next'});
   }
 
   async agreementLoaded(): Promise<boolean> {
-    const iframe = await findIframe(this.page, 'terms of service agreement')
-    const bodyHandle = await iframe.$('body')
-    return await iframe.evaluate(body => body.scrollHeight > 0, bodyHandle)
+    const iframe = await findIframe(this.page, 'terms of service agreement');
+    const bodyHandle = await iframe.$('body');
+    return await iframe.evaluate(body => body.scrollHeight > 0, bodyHandle);
   }
 
   async readAgreement(): Promise<Frame> {
-    const iframe = await findIframe(this.page, 'terms of service agreement')
-    const bodyHandle = await iframe.$('body')
-    await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle)
+    const iframe = await findIframe(this.page, 'terms of service agreement');
+    const bodyHandle = await iframe.$('body');
+    await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle);
     return iframe;  
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_PRIVACY_STATEMENT});
+    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_PRIVACY_STATEMENT});
   }
 
   async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_UNDERSTAND_TERMS_OF_USE});
+    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_TERMS_OF_USE});
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {text: LABEL_ALIAS.INSTITUTION_NAME});
+    return await Textbox.forLabel(this.page, {name: LABEL_ALIAS.INSTITUTION_NAME});
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
@@ -107,11 +140,11 @@ export default class CreateAccountPage extends BasePage {
   async fillInFormFields(fields: { label: string; value: string; }[]): Promise<string> {
     let newUserName;
     for (const field of fields) {
-      const textbox = await Textbox.forLabel(this.page, {text: field.label});
+      const textbox = await Textbox.forLabel(this.page, {name: field.label});
       await textbox.type(field.value);
       await textbox.tabKey();
       if (field.label === 'New Username') {
-        await ClrIconLink.forLabel(this.page, {text: field.label}, 'success-standard');
+        await ClrIconLink.forLabel(this.page, {name: field.label, iconShape: 'success-standard'});
         newUserName = field.value; // store new username for return
       }
     }
@@ -120,24 +153,24 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string) {
-    const dropdown = new SelectMenu(this.page);
+    const dropdown = await SelectMenu.forLabel(this.page, FIELD.institutionSelect.textOption);
     await dropdown.select(selectTextValue);
   }
 
   async getInstitutionValue() {
-    const dropdown = new SelectMenu(this.page);
+    const dropdown = await SelectMenu.forLabel(this.page, FIELD.institutionSelect.textOption);
     return await dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.EDUCATION_LEVEL, 2);
+    const dropdown = await SelectMenu.forLabel(this.page, FIELD.educationLevelSelect.textOption);
     await dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = new SelectMenu(this.page, LABEL_ALIAS.YEAR_OF_BIRTH, 2);
+    const dropdown = await SelectMenu.forLabel(this.page, FIELD.birthYearSelect.textOption);
     await dropdown.select(year);
   }
 
@@ -145,22 +178,20 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 1: Fill out institution affiliation details
   async fillOutInstitution() {
-    const institutionSelect = new SelectMenu(this.page, 'Select your institution', 2);
-    await institutionSelect.select(INSTITUTION_VALUE.BROAD);
-    const emailAddressTextbox = await Textbox.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2});
-    await emailAddressTextbox.type(config.broadInstitutionEmail);
-    await emailAddressTextbox.tabKey(); // tab out to start email validation
-    await ClrIconLink.forLabel(this.page, {textContains: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorNodeLevel: 2}, 'success-standard');
-    const roleSelect = new SelectMenu(this.page, 'describes your role', 2);
-    await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
-  }
+    await Promise.all([
+      waitForText(this.page, 'complete Step 1 of 3', {css: 'body'}, 60000),
+      waitWhileLoading(this.page, 60000),
+    ]);
 
-  // Step 2: Fill out Invitation key
-  async fillOutInvitationKey(invitationKey: string) {
-    await this.getInvitationKeyInput()
-    .then(invitationKeyInput => invitationKeyInput.type(invitationKey))
-    .then(() => this.getNextButton())
-    .then(submitButton => submitButton.click());
+    await this.selectInstitution(INSTITUTION_VALUE.BROAD);
+    console.log(await this.getInstitutionValue());
+    const emailAddressTextbox = await Textbox.forLabel(this.page, FIELD.institutionEmailTextbox.textOption);
+    await emailAddressTextbox.type(config.institutionContactEmail);
+    await emailAddressTextbox.tabKey(); // tab out to start email validation
+    await ClrIconLink.forLabel(this.page, {containsText: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorLevel: 2, iconShape: 'success-standard'});
+
+    const roleSelect = await SelectMenu.forLabel(this.page, FIELD.describeRole.textOption);
+    await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
 
   // Step 3: Accepting Terms of Use and Privacy statement.
@@ -185,8 +216,7 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 4: Fill out demographic survey information with default values
   async fillOutDemographicSurvey() {
-    const demograpicsSurveyPageHeader = 'Optional Demographics Survey';
-    await this.waitForTextExists(demograpicsSurveyPageHeader);
+    await waitForText(this.page, 'Optional Demographics Survey');
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox"]';
     await this.page.waitForXPath(targetXpath, { visible: true });

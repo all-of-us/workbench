@@ -5,7 +5,7 @@ export default class EllipsisMenu {
 
   readonly rootXpath = '//*[@id="popup-root"]';
 
-  constructor(private readonly page: (Page),
+  constructor(private readonly page: Page,
                private readonly xpath: string,
                private readonly parentNode?: ElementHandle) {}
 

@@ -32,5 +32,5 @@ export const extractPageName = async (page: Page): Promise<string> => {
   // extract page name from page title.
   // For example: "View Workspaces | [Test] All of Us Researcher Workbench" becomes "View Workspaces"
   const splitValue = fp.zipObject(['name', 'domain'], title.split(' | '));
-  return fp.snakeCase(splitValue.name);
+  return splitValue.name.replace(/\s/g, '');
 }

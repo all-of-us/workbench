@@ -333,11 +333,15 @@ definitions:
     type: object
     required:
       - institutionShortName
+      - institutionDisplayName
       - institutionalRole
     properties:
       institutionShortName:
         type: string
-        description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'VUMC'
+        description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'Broad'
+      institutionDisplayName:
+        type: string
+        description: The Display Name of the Institution where the user has a Verified Affiliation, such as 'Broad Institute'
       institutionalRole:
         type: string
         description: The user's Institutional Role at this Institution, as text

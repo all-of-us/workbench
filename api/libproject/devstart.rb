@@ -1578,7 +1578,7 @@ Common.register_command({
     :fn => ->(*args) {load_institutions(LOAD_INSTITUTIONS_CMD, *args)}
 })
 
-def populate_ops_user_affiliations(cmd_name, *args)
+def populate_user_affiliations(cmd_name, *args)
   common = Common.new
   ensure_docker(cmd_name, args)
 
@@ -1596,7 +1596,15 @@ def populate_ops_user_affiliations(cmd_name, *args)
       "--import-filename [import-filename]",
       String,
       ->(opts, v) { opts.importFilename = v},
-      "CSV File containing list of ops users to assign the ops institution")
+      "CSV File containing list of users to apply affiliations")
+
+  op.add_typed_option(
+      "--user-type [user-type]",
+      String,
+      ->(opts, v) { opts.userType = v},
+      "Which user type to populate: OPS or RESEARCHERS")
+
+  op.add_validator ->(opts) { raise ArgumentError unless (opts.importFilename and opts.userType)}
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -1609,7 +1617,8 @@ def populate_ops_user_affiliations(cmd_name, *args)
   end
 
   gradle_args = ([
-      ["--import-filename", op.opts.importFilename]
+      ["--import-filename", op.opts.importFilename],
+      ["--user-type", op.opts.userType]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   if op.opts.dry_run
     gradle_args += ["--dry-run"]
@@ -1619,17 +1628,17 @@ def populate_ops_user_affiliations(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle populateOpsUserAffiliations
+        gradle populateUserAffiliations
        -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
 
-POPULATE_OPS_USER_AFFILIATIONS_CMD = "populate-ops-user-affiliations"
+POPULATE_USER_AFFILIATIONS_CMD = "populate-user-affiliations"
 
 Common.register_command({
-    :invocation => POPULATE_OPS_USER_AFFILIATIONS_CMD,
-    :description => "Populate the institutional affiliations for the ops users in the specified CSV file.",
-    :fn => ->(*args) {populate_ops_user_affiliations(POPULATE_OPS_USER_AFFILIATIONS_CMD, *args)}
+    :invocation => POPULATE_USER_AFFILIATIONS_CMD,
+    :description => "Populate the institutional affiliations for the users in the specified CSV file.",
+    :fn => ->(*args) {populate_user_affiliations(POPULATE_USER_AFFILIATIONS_CMD, *args)}
 })
 
 def delete_workspaces(cmd_name, *args)

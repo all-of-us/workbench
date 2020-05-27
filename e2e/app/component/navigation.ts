@@ -1,6 +1,6 @@
+import {xPathOptionToXpath} from 'app/element/xpath-defaults';
 import {ElementHandle, Page} from 'puppeteer';
-import {clrIconXpath} from 'app/element/xpath-defaults';
-import {findIcon} from 'app/element/xpath-finder';
+import {ElementType} from 'app/xpath-options';
 
 export enum NavLink {
   HOME = 'Home',
@@ -34,7 +34,7 @@ export default class Navigation {
 
     const findMenuItem = async (): Promise<ElementHandle | null> => {
       await Navigation.openNavMenu(page);
-      const angleIconXpath = clrIconXpath({}, 'angle');
+      const angleIconXpath = xPathOptionToXpath({type: ElementType.Icon, iconShape: 'angle'});
       await page.waitForXPath(angleIconXpath, {timeout: 2000});
       const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${destinationApp}")]`;
          // Find link. If not found, determine if link should be found in a submenu: User or Admin
@@ -83,8 +83,9 @@ export default class Navigation {
   static async openNavMenu(page: Page): Promise<void> {
     const isOpen = await Navigation.sideNavIsOpen(page);
     if (!isOpen!) {
-        // click bars icon to open dropdown
-      const barsIcon = await findIcon(page, {}, 'bars');
+      // click bars icon to open dropdown
+      const selector = xPathOptionToXpath({type: ElementType.Icon, iconShape: 'bars'});
+      const barsIcon = await page.waitForXPath(selector, {visible: true});
       await barsIcon.click();
     }
   }
@@ -92,7 +93,8 @@ export default class Navigation {
   // Determine the open state by looking for a visible Home icon
   private static async sideNavIsOpen(page: Page): Promise<boolean> {
     try {
-      await findIcon(page, {text: 'Home'}, 'home', {visible: true, timeout: 1000});
+      const selector = xPathOptionToXpath({name: 'Home', type: ElementType.Icon, iconShape: 'home'});
+      await page.waitForXPath(selector, {visible: true, timeout: 2000});
       return true;
     } catch (err) {
       return false;

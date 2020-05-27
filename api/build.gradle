@@ -825,17 +825,17 @@ task loadDataDictionary(type: JavaExec) {
 // See project.rb command: load-institutions
 task loadInstitutions(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.LoadInstitutions"
+  main = "org.pmiops.workbench.tools.institutions.LoadInstitutions"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
   }
 }
 
-// See project.rb command: populate-ops-user-affiliations
-task populateOpsUserAffiliations(type: JavaExec) {
+// See project.rb command: populate-user-affiliations
+task populateUserAffiliations(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.PopulateOpsUserAffiliations"
+  main = "org.pmiops.workbench.tools.institutions.PopulateUserAffiliations"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
