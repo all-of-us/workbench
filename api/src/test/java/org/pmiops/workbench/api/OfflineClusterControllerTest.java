@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
@@ -31,6 +32,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -62,13 +64,14 @@ public class OfflineClusterControllerTest {
     @Bean
     public WorkbenchConfig workbenchConfig() {
       WorkbenchConfig config = new WorkbenchConfig();
-      config.firecloud = new WorkbenchConfig.FireCloudConfig();
+      config.firecloud = new FireCloudConfig();
       config.firecloud.clusterMaxAgeDays = (int) MAX_AGE.toDays();
       config.firecloud.clusterIdleMaxAgeDays = (int) IDLE_MAX_AGE.toDays();
       return config;
     }
   }
 
+  @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API)
   @Autowired ClusterApi clusterApi;
   @Autowired OfflineClusterController controller;
   private int projectIdIndex = 0;
@@ -120,7 +123,7 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersNoResults() throws Exception {
     stubClusters(ImmutableList.of());
-    assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
+    assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
   }
@@ -128,7 +131,7 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersActiveCluster() throws Exception {
     stubClusters(ImmutableList.of(clusterWithAge(Duration.ofHours(10))));
-    assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
+    assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
   }
@@ -136,9 +139,9 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersActiveTooOld() throws Exception {
     stubClusters(ImmutableList.of(clusterWithAge(MAX_AGE.plusMinutes(5))));
-    assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(1);
+    assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi, times(1)).deleteCluster(any(), any());
+    verify(clusterApi).deleteCluster(any(), any());
   }
 
   @Test
@@ -147,7 +150,7 @@ public class OfflineClusterControllerTest {
     stubClusters(
         ImmutableList.of(
             clusterWithAgeAndIdle(IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
-    assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
+    assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
   }
@@ -158,9 +161,9 @@ public class OfflineClusterControllerTest {
     stubClusters(
         ImmutableList.of(
             clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
-    assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(1);
+    assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi, times(1)).deleteCluster(any(), any());
+    verify(clusterApi).deleteCluster(any(), any());
   }
 
   @Test
@@ -169,7 +172,7 @@ public class OfflineClusterControllerTest {
     stubClusters(
         ImmutableList.of(
             clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
-    assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
+    assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
   }
@@ -178,7 +181,7 @@ public class OfflineClusterControllerTest {
   public void testCheckClustersOtherStatusFiltered() throws Exception {
     stubClusters(
         ImmutableList.of(clusterWithAge(MAX_AGE.plusDays(10)).status(ClusterStatus.DELETING)));
-    assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
+    assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
   }
