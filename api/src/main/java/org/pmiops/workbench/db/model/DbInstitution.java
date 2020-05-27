@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.common.base.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -82,5 +83,31 @@ public class DbInstitution {
   public DbInstitution setOrganizationTypeOtherText(String organizationTypeOtherText) {
     this.organizationTypeOtherText = organizationTypeOtherText;
     return this;
+  }
+
+  // omit ID field from equality so equivalent objects match regardless
+  // of whether they are actually present in the DB
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbInstitution that = (DbInstitution) o;
+
+    return Objects.equal(shortName, that.shortName)
+        && Objects.equal(displayName, that.displayName)
+        && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
+        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
+        && Objects.equal(duaTypeEnum, that.duaTypeEnum);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(
+        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, duaTypeEnum);
   }
 }

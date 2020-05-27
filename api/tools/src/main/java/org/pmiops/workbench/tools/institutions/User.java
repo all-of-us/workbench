@@ -100,7 +100,8 @@ public abstract class User {
       // will always execute since we checked it above
       existingAffil.ifPresent(
           existingAffiliation -> {
-            if (equivalent(existingAffiliation, newAffiliation)) {
+            //            if (equivalent(existingAffiliation, newAffiliation)) {
+            if (existingAffiliation.equals(newAffiliation)) {
               LOGGER.info("No action taken.  Affiliation exists: " + existingAffiliation);
             } else {
               throw new RuntimeException(

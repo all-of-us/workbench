@@ -183,7 +183,7 @@ public class InstitutionServiceTest {
             .emailDomains(ImmutableList.of("broad.org", "google.com"))
             .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com"));
     final Institution instWithEmailsRoundTrip = service.createInstitution(instWithEmails);
-    assertEqualInstitutions(instWithEmailsRoundTrip, instWithEmails);
+    assertThat(instWithEmailsRoundTrip).isEqualTo(instWithEmails);
 
     // keep one and change one of each
 
@@ -193,7 +193,7 @@ public class InstitutionServiceTest {
             .emailAddresses(ImmutableList.of("joel@broad.org", "joel@verily.com"));
     final Institution instWithNewEmailsRoundTrip =
         service.updateInstitution(instWithEmails.getShortName(), instWithNewEmails).get();
-    assertEqualInstitutions(instWithNewEmailsRoundTrip, instWithNewEmails);
+    assertThat(instWithNewEmailsRoundTrip).isEqualTo(instWithNewEmails);
 
     // clear both
     final Institution instWithoutEmails =
@@ -509,15 +509,6 @@ public class InstitutionServiceTest {
   public void validate_OperationalUser_nullInstitution() {
     DbInstitution institution = null;
     assertThat(service.validateOperationalUser(institution)).isFalse();
-  }
-
-  // Institutions' email domains and addresses are Lists but have no inherent order,
-  // so they can't be directly compared for equality
-  private void assertEqualInstitutions(Institution actual, final Institution expected) {
-    assertThat(actual.getShortName()).isEqualTo(expected.getShortName());
-    assertThat(actual.getDisplayName()).isEqualTo(expected.getDisplayName());
-    assertThat(actual.getEmailDomains()).containsExactlyElementsIn(expected.getEmailDomains());
-    assertThat(actual.getEmailAddresses()).containsExactlyElementsIn(expected.getEmailAddresses());
   }
 
   private DbUser createUser(String contactEmail) {
