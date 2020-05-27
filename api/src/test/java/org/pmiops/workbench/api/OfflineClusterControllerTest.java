@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,24 +24,18 @@ import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.ClusterMapper;
+import org.pmiops.workbench.utils.ClusterMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class OfflineClusterControllerTest {
   private static final Instant NOW = Instant.parse("1988-12-26T00:00:00Z");
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -50,11 +43,9 @@ public class OfflineClusterControllerTest {
   private static final Duration IDLE_MAX_AGE = Duration.ofDays(7);
 
   @TestConfiguration
-  @Import({OfflineClusterController.class})
+  @Import({OfflineClusterController.class,
+      ClusterMapperImpl.class})
   static class Configuration {
-    @MockBean
-    @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API)
-    private ClusterApi clusterApi;
 
     @Bean
     Clock clock() {
@@ -63,7 +54,7 @@ public class OfflineClusterControllerTest {
 
     @Bean
     public WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig config = new WorkbenchConfig();
+      WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
       config.firecloud = new FireCloudConfig();
       config.firecloud.clusterMaxAgeDays = (int) MAX_AGE.toDays();
       config.firecloud.clusterIdleMaxAgeDays = (int) IDLE_MAX_AGE.toDays();
@@ -72,8 +63,11 @@ public class OfflineClusterControllerTest {
   }
 
   @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API)
-  @Autowired ClusterApi clusterApi;
-  @Autowired OfflineClusterController controller;
+  @MockBean private ClusterApi mockClusterApi;
+
+  @Autowired private ClusterMapper clusterMapper;
+  @Autowired private OfflineClusterController controller;
+
   private int projectIdIndex = 0;
 
   @Before
@@ -99,23 +93,15 @@ public class OfflineClusterControllerTest {
 
   private List<ListClusterResponse> toListClusterResponseList(List<Cluster> clusters) {
     return clusters.stream()
-        .map(
-            c ->
-                // TODO: this is fragile.  will need a line for each field we want to test
-                new ListClusterResponse()
-                    .clusterName(c.getClusterName())
-                    .googleProject(c.getGoogleProject())
-                    .status(c.getStatus())
-                    .createdDate(c.getCreatedDate())
-                    .dateAccessed(c.getDateAccessed()))
+        .map(clusterMapper::toListClusterResponse)
         .collect(Collectors.toList());
   }
 
   private void stubClusters(List<Cluster> clusters) throws Exception {
-    when(clusterApi.listClusters(any(), any())).thenReturn(toListClusterResponseList(clusters));
+    when(mockClusterApi.listClusters(any(), any())).thenReturn(toListClusterResponseList(clusters));
 
     for (Cluster cluster : clusters) {
-      when(clusterApi.getCluster(cluster.getGoogleProject(), cluster.getClusterName()))
+      when(mockClusterApi.getCluster(cluster.getGoogleProject(), cluster.getClusterName()))
           .thenReturn(cluster);
     }
   }
@@ -125,7 +111,7 @@ public class OfflineClusterControllerTest {
     stubClusters(ImmutableList.of());
     assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi, never()).deleteCluster(any(), any());
+    verify(mockClusterApi, never()).deleteCluster(any(), any());
   }
 
   @Test
@@ -133,7 +119,7 @@ public class OfflineClusterControllerTest {
     stubClusters(ImmutableList.of(clusterWithAge(Duration.ofHours(10))));
     assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi, never()).deleteCluster(any(), any());
+    verify(mockClusterApi, never()).deleteCluster(any(), any());
   }
 
   @Test
@@ -141,7 +127,7 @@ public class OfflineClusterControllerTest {
     stubClusters(ImmutableList.of(clusterWithAge(MAX_AGE.plusMinutes(5))));
     assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi).deleteCluster(any(), any());
+    verify(mockClusterApi).deleteCluster(any(), any());
   }
 
   @Test
@@ -152,7 +138,7 @@ public class OfflineClusterControllerTest {
             clusterWithAgeAndIdle(IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
     assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi, never()).deleteCluster(any(), any());
+    verify(mockClusterApi, never()).deleteCluster(any(), any());
   }
 
   @Test
@@ -163,7 +149,7 @@ public class OfflineClusterControllerTest {
             clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
     assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi).deleteCluster(any(), any());
+    verify(mockClusterApi).deleteCluster(any(), any());
   }
 
   @Test
@@ -174,7 +160,7 @@ public class OfflineClusterControllerTest {
             clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
     assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi, never()).deleteCluster(any(), any());
+    verify(mockClusterApi, never()).deleteCluster(any(), any());
   }
 
   @Test
@@ -183,6 +169,6 @@ public class OfflineClusterControllerTest {
         ImmutableList.of(clusterWithAge(MAX_AGE.plusDays(10)).status(ClusterStatus.DELETING)));
     assertThat(controller.checkClusters().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(clusterApi, never()).deleteCluster(any(), any());
+    verify(mockClusterApi, never()).deleteCluster(any(), any());
   }
 }

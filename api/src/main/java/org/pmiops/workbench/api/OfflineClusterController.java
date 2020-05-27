@@ -65,15 +65,15 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
    */
   @Override
   public ResponseEntity<Void> checkClusters() {
-    Instant now = clock.instant();
-    WorkbenchConfig config = configProvider.get();
-    Duration maxAge = Duration.ofDays(config.firecloud.clusterMaxAgeDays);
-    Duration idleMaxAge = Duration.ofDays(config.firecloud.clusterIdleMaxAgeDays);
+    final Instant now = clock.instant();
+    final WorkbenchConfig config = configProvider.get();
+    final Duration maxAge = Duration.ofDays(config.firecloud.clusterMaxAgeDays);
+    final Duration idleMaxAge = Duration.ofDays(config.firecloud.clusterIdleMaxAgeDays);
 
-    ClusterApi clusterApi = clusterApiProvider.get();
-    List<ListClusterResponse> clusters;
+    final ClusterApi clusterApi = clusterApiProvider.get();
+    final List<ListClusterResponse> listClusterResponses;
     try {
-      clusters = clusterApi.listClusters(null, false);
+      listClusterResponses = clusterApi.listClusters(null, false);
     } catch (ApiException e) {
       throw ExceptionUtils.convertNotebookException(e);
     }
@@ -82,10 +82,10 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
-    for (ListClusterResponse listClusterResponse : clusters) {
-      String clusterId =
+    for (ListClusterResponse listClusterResponse : listClusterResponses) {
+      final String clusterId =
           listClusterResponse.getGoogleProject() + "/" + listClusterResponse.getClusterName();
-      Cluster c;
+      final Cluster c;
       try {
         // Refetch the cluster to ensure freshness as this iteration may take
         // some time.
@@ -107,14 +107,14 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
         continue;
       }
 
-      Instant lastUsed = Instant.parse(c.getDateAccessed());
-      boolean isIdle = Duration.between(lastUsed, now).toHours() > IDLE_AFTER_HOURS;
+      final Instant lastUsed = Instant.parse(c.getDateAccessed());
+      final boolean isIdle = Duration.between(lastUsed, now).toHours() > IDLE_AFTER_HOURS;
       if (isIdle) {
         idles++;
       }
 
-      Instant created = Instant.parse(c.getCreatedDate());
-      Duration age = Duration.between(created, now);
+      final Instant created = Instant.parse(c.getCreatedDate());
+      final Duration age = Duration.between(created, now);
       if (age.toMillis() > maxAge.toMillis()) {
         log.info(
             String.format(
@@ -142,7 +142,7 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
         String.format(
             "deleted %d old clusters and %d idle clusters (with %d errors) "
                 + "of %d total clusters (%d of which were idle)",
-            activeDeletes, unusedDeletes, errors, clusters.size(), idles));
+            activeDeletes, unusedDeletes, errors, listClusterResponses.size(), idles));
     if (errors > 0) {
       throw new ServerErrorException(String.format("%d cluster deletion calls failed", errors));
     }
