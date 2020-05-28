@@ -108,7 +108,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       final DbWorkspace dbWorkspace = workspaceMaybe.get();
 
       final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
-
+      // FIXME
       final List<WorkspaceUserAdminView> collaborators =
           workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName)
               .stream()
