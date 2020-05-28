@@ -31,3 +31,8 @@ export const ProtectedRoutes = ({path, guards, children}) => {
       component={() => <Redirect to={{pathname: redirectPath, state: {from: location} }}/>}/>
   : <Fragment>{children}</Fragment>;
 };
+
+export const Navigate = ({to}) => {
+  const location = useLocation();
+  return <Redirect to={{pathname: to, state: {from: location}}}/>;
+};
