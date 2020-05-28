@@ -27,6 +27,10 @@ export function makeWorkspaceName() {
   return `aoutest-${Math.floor(Math.random() * 1000)}-${Math.floor(Date.now() / 1000)}`;
 }
 
+export function makeRandomName() {
+  return `aoutest-${Math.floor(Math.random() * 100000)}`;
+}
+
 export const extractPageName = async (page: Page): Promise<string> => {
   const title = await page.title();
   // extract page name from page title.

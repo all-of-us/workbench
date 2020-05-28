@@ -75,6 +75,23 @@ export async function waitForPropertyEquality(
   }
 }
 
+export async function waitForNumericalString(page: Page, xpath: string): Promise<string> {
+  await page.waitForXPath(xpath, {visible: true});
+
+  const numbers =  await page.waitForFunction( xpathSelector => {
+    const node = document.evaluate(xpathSelector, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (node !== null) {
+      const txt = node.textContent.trim();
+      const re = new RegExp(/^\d{1,3}(,\d{3})*(\.\d+)?$/);
+      if (re.test(txt)) { // Match only numbers with comma
+        return txt;
+      }
+    }
+    return false;
+  }, {timeout: 30000}, xpath);
+
+  return (await numbers.jsonValue()).toString();
+}
 
 // ************************************************************************
 /**
