@@ -153,8 +153,8 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
    * @param workspaceNamespace Firecloud namespace for workspace
    * @param limit upper limit (inclusive) for this query
    * @param afterMillis lowest timestamp matched (inclusive)
-   * @param beforeMillisNullable latest timestamp matched (exclusive). The half-open
-   *     interval is convenient for pagination based on time intervals.
+   * @param beforeMillisNullable latest timestamp matched (exclusive). The half-open interval is
+   *     convenient for pagination based on time intervals.
    */
   @Override
   @AuthorityRequired({Authority.WORKSPACES_VIEW})
@@ -174,10 +174,8 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
                             "No workspace found with Firecloud namespace %s", workspaceNamespace)));
     final DateTime after = new DateTime(afterMillis);
     final DateTime before =
-        Optional.ofNullable(beforeMillisNullable)
-            .map(DateTime::new)
-            .orElse(DateTime.now());
-    return ResponseEntity.ok(actionAuditQueryService.queryEventsForWorkspace(
-        workspaceDatabaseId, limit, after, before));
+        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
+    return ResponseEntity.ok(
+        actionAuditQueryService.queryEventsForWorkspace(workspaceDatabaseId, limit, after, before));
   }
 }

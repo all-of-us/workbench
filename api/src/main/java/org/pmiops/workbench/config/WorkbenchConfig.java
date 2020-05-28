@@ -253,10 +253,12 @@ public class WorkbenchConfig {
     // BigQuery dataset, which is the destination of a Stackdriver sink linking the
     // log to BigQuery. Changing this field does not change the sink, but rather updates the
     // fully-qualified table name when querying the dataset.
-    // Currently this is named after the log, replacing hyphens with underscores, in every environment.
+    // Currently this is named after the log, replacing hyphens with underscores, in every
+    // environment.
     // However, it's not guaranteed to follow that pattern forever, so we leave the three names
     // independently variable.
-    // See https://broad.io/aou-new-environment for how to initialize the BigQuery dataset and Stackdriver
+    // See https://broad.io/aou-new-environment for how to initialize the BigQuery dataset and
+    // Stackdriver
     // sink.
     public String bigQueryDataset;
     // Table in the BigQuery dataset that receives log events. Currently named the same as the

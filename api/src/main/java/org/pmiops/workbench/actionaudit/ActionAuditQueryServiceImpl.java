@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import org.joda.time.DateTime;
@@ -77,8 +76,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   }
 
   @Override
-  public WorkspaceAuditLogQueryResponse
-  queryEventsForWorkspace(
+  public WorkspaceAuditLogQueryResponse queryEventsForWorkspace(
       long workspaceDatabaseId, long limit, DateTime afterInclusive, DateTime beforeExclusive) {
     final ActionAuditConfig actionAuditConfig = workbenchConfigProvider.get().actionAudit;
     final String fullyQualifiedTableName =
@@ -139,7 +137,8 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   private String getReplacedQueryText(QueryJobConfiguration queryJobConfiguration) {
     String result = queryJobConfiguration.getQuery();
 
-    for (Map.Entry<String, QueryParameterValue> entry : queryJobConfiguration.getNamedParameters().entrySet()) {
+    for (Map.Entry<String, QueryParameterValue> entry :
+        queryJobConfiguration.getNamedParameters().entrySet()) {
       String parameterName = "@" + entry.getKey();
       final QueryParameterValue parameterValue = entry.getValue();
       final String rawStringValue = Optional.ofNullable(parameterValue.getValue()).orElse("NULL");
