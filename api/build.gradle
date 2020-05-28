@@ -585,21 +585,11 @@ task integrationTest(type: Test) {
   description = 'Run integration test suite.'
   testClassesDirs = sourceSets.__integration__.output.classesDirs
   classpath = sourceSets.__integration__.runtimeClasspath
-  useJUnit {
-    excludeCategories 'org.pmiops.workbench.NightlyTests'
-  }
   // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
 
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
-}
-
-task nightlyIntegrationTest(type: Test) {
-  group = LifecycleBasePlugin.VERIFICATION_GROUP
-  testClassesDirs = sourceSets.__integration__.output.classesDirs
-  classpath = sourceSets.__integration__.runtimeClasspath
-  // Leave "nightly" tag, but run everything else as well.
 }
 
 task bigQueryTest(type: Test) {

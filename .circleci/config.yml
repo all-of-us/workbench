@@ -390,22 +390,6 @@ jobs:
       - manage_api_cache:
           save: true
 
-  api-nightly-integration-test:
-    <<: *java_defaults
-    steps:
-      - checkout_init_git
-      - manage_api_cache:
-          restore: true
-      - activate_service_account_credential
-      - run:
-          name: Run nightly integration tests
-          working_directory: ~/workbench/api
-          command: ./project.rb nightly-integration
-      - store_test_results:
-          path: ~/workbench/api/build/test-results/integrationTest/
-      - manage_api_cache:
-          save: true
-
   api-bigquery-test:
     # We're hitting OOM failures as of 13 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
