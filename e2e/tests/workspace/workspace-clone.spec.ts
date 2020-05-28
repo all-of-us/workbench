@@ -76,7 +76,7 @@ describe('Clone workspace', () => {
       // fill out Workspace Name
       await (await workspacesPage.getWorkspaceNameTextbox()).clear();
       const cloneWorkspaceName = await workspacesPage.fillOutWorkspaceName();
-         // select "Share workspace with same set of collaborators radiobutton
+      // select "Share workspace with same set of collaborators radiobutton
       await workspacesPage.clickShareWithCollaboratorsCheckbox();
 
       const finishButton = await workspacesPage.getDuplicateWorkspaceButton();

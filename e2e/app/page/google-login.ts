@@ -5,7 +5,6 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
 import Button from 'app/element/button';
 
-
 export const SELECTOR = {
   loginButton: '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
   emailInput: '//input[@type="email"]',
@@ -149,7 +148,7 @@ export default class GoogleLoginPage {
   }
 
   async clickCreateAccountButton(): Promise<void> {
-    const button = await Button.forLabel(this.page, {text: 'Create Account'});
+    const button = await Button.forLabel(this.page, {name: 'Create Account'});
     await button.clickWithEval();
   }
 

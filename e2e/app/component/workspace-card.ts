@@ -28,7 +28,7 @@ export default class WorkspaceCard {
    * @throws TimeoutError if fails to find Card.
    */
   static async findAllCards(page: Page): Promise<WorkspaceCard[]> {
-    await page.waitForXPath(SELECTOR.cardRootXpath, {visible: true, timeout: 0});
+    await page.waitForXPath(SELECTOR.cardRootXpath, {visible: true, timeout: 60000});
     const cards = await page.$x(SELECTOR.cardRootXpath);
     // transform to WorkspaceCard object
     const resourceCards = cards.map(card => new WorkspaceCard(page).asCard(card));
@@ -123,7 +123,7 @@ export default class WorkspaceCard {
   /**
    * Click Workspace Name in Workspace Card.
    */
-  async clickWorkspaceName() {
+  async clickWorkspaceName(): Promise<void> {
     const elemt = await this.page.waitForXPath(`.//*[${SELECTOR.cardNameId}]`, {visible: true});
     await Promise.all([
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 0}),
@@ -136,7 +136,7 @@ export default class WorkspaceCard {
     return this;
   }
 
-  private workspaceNameLinkSelector(workspaceName: string) {
+  private workspaceNameLinkSelector(workspaceName: string): string {
     return `//*[@role='button'][./*[${SELECTOR.cardNameId} and normalize-space(text())="${workspaceName}"]]`
   }
 
