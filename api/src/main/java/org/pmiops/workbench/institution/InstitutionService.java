@@ -59,7 +59,7 @@ public interface InstitutionService {
    * @param institutionShortName the short name (key) used to refer to this institution in the API
    * @return the list of email domains associated with this institution, if any
    */
-  List<String> getInstitutionEmailDomains(String institutionShortName);
+  List<String> getEmailDomains(String institutionShortName);
 
   /**
    * Retrieve an ordered list of the email addresses which this institution uses to match user
@@ -69,7 +69,7 @@ public interface InstitutionService {
    * @param institutionShortName the short name (key) used to refer to this institution in the API
    * @return the list of email addresses associated with this institution, if any
    */
-  List<String> getInstitutionEmailAddresses(String institutionShortName);
+  List<String> getEmailAddresses(String institutionShortName);
 
   /**
    * Retrieve the optional text block of user instructions to fill the instructions email sent after

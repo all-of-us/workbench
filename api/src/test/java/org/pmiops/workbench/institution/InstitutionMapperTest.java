@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.appengine.repackaged.com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -66,9 +67,9 @@ public class InstitutionMapperTest {
     assertThat(dbInst.getShortName()).isEqualTo(inst.getShortName());
     assertThat(dbInst.getDisplayName()).isEqualTo(inst.getDisplayName());
 
-    when(service.getInstitutionEmailDomains(inst.getShortName()))
+    when(service.getEmailDomains(inst.getShortName()))
         .thenReturn(inst.getEmailDomains());
-    when(service.getInstitutionEmailAddresses(inst.getShortName()))
+    when(service.getEmailAddresses(inst.getShortName()))
         .thenReturn(inst.getEmailAddresses());
     when(service.getInstitutionUserInstructions(inst.getShortName()))
         .thenReturn(Optional.of(inst.getUserInstructions()));
@@ -96,5 +97,37 @@ public class InstitutionMapperTest {
 
     assertThat(roundTrip.getShortName()).isEqualTo(dbInst.getShortName());
     assertThat(roundTrip.getDisplayName()).isEqualTo(dbInst.getDisplayName());
+  }
+
+  @Test
+  public void test_populateFromAuxTables() {
+    final Institution instToPopulate = new Institution().shortName("ShortName");
+
+    final String instructions = "Bake a batch of brownies";
+
+    when(service.getEmailDomains("ShortName")).thenReturn(sortedModelDomains);
+    when(service.getEmailAddresses("ShortName")).thenReturn(sortedModelAddresses);
+    when(service.getInstitutionUserInstructions("ShortName")).thenReturn(Optional.of(instructions));
+
+    mapper.populateFromAuxTables(instToPopulate, service);
+
+    assertThat(instToPopulate.getEmailDomains()).isEqualTo(sortedModelDomains);
+    assertThat(instToPopulate.getEmailAddresses()).isEqualTo(sortedModelAddresses);
+    assertThat(instToPopulate.getUserInstructions()).isEqualTo(instructions);
+  }
+
+  @Test
+  public void test_populateFromAuxTables_empty() {
+    final Institution instToPopulate = new Institution().shortName("ShortName");
+
+    when(service.getEmailDomains("ShortName")).thenReturn(Collections.emptyList());
+    when(service.getEmailAddresses("ShortName")).thenReturn(Collections.emptyList());
+    when(service.getInstitutionUserInstructions("ShortName")).thenReturn(Optional.empty());
+
+    mapper.populateFromAuxTables(instToPopulate, service);
+
+    assertThat(instToPopulate.getEmailDomains()).isEmpty();
+    assertThat(instToPopulate.getEmailAddresses()).isEmpty();
+    assertThat(instToPopulate.getUserInstructions()).isNull();
   }
 }

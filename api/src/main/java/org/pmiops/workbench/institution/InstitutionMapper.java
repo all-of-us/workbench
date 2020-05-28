@@ -23,9 +23,9 @@ public interface InstitutionMapper {
   @AfterMapping
   default void populateFromAuxTables(
       @MappingTarget Institution target, @Context InstitutionService institutionService) {
-    target.setEmailDomains(institutionService.getInstitutionEmailDomains(target.getShortName()));
+    target.setEmailDomains(institutionService.getEmailDomains(target.getShortName()));
     target.setEmailAddresses(
-        institutionService.getInstitutionEmailAddresses(target.getShortName()));
+        institutionService.getEmailAddresses(target.getShortName()));
     institutionService
         .getInstitutionUserInstructions(target.getShortName())
         .ifPresent(target::setUserInstructions);
