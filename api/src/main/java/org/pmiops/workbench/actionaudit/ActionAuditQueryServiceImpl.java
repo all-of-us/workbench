@@ -3,10 +3,14 @@ package org.pmiops.workbench.actionaudit;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import org.joda.time.DateTime;
@@ -133,10 +137,21 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   }
 
   private String getReplacedQueryText(QueryJobConfiguration queryJobConfiguration) {
-    final String result = queryJobConfiguration.getQuery();
-    queryJobConfiguration.getNamedParameters().forEach((parameterName, parameterValue) -> {
-      result.replace("@" + parameterName, parameterValue.toString());
-    });
+    String result = queryJobConfiguration.getQuery();
+
+    for (Map.Entry<String, QueryParameterValue> entry : queryJobConfiguration.getNamedParameters().entrySet()) {
+      String parameterName = "@" + entry.getKey();
+      final QueryParameterValue parameterValue = entry.getValue();
+      final String rawStringValue = Optional.ofNullable(parameterValue.getValue()).orElse("NULL");
+      final String replacement;
+      if (parameterValue.getType() == StandardSQLTypeName.TIMESTAMP) {
+        replacement = String.format("TIMESTAMP '%s'", rawStringValue);
+      } else {
+        replacement = rawStringValue;
+      }
+      result = result.replace(parameterName, replacement);
+    }
+    result = result.replace("\n", " ");
     return result;
   }
 }
