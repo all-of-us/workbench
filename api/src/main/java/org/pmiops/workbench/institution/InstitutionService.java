@@ -52,8 +52,23 @@ public interface InstitutionService {
    */
   boolean validateInstitutionalEmail(Institution institution, String contactEmail);
 
+  /**
+   * Retrieve an ordered list of the email domains which this institution uses to match user contact
+   * email, or an empty list if none. Throws NotFoundException if the Institution does not exist.
+   *
+   * @param institutionShortName the short name (key) used to refer to this institution in the API
+   * @return the list of email domains associated with this institution, if any
+   */
   List<String> getInstitutionEmailDomains(String institutionShortName);
 
+  /**
+   * Retrieve an ordered list of the email addresses which this institution uses to match user
+   * contact email, or an empty list if none. Throws NotFoundException if the Institution does not
+   * exist.
+   *
+   * @param institutionShortName the short name (key) used to refer to this institution in the API
+   * @return the list of email addresses associated with this institution, if any
+   */
   List<String> getInstitutionEmailAddresses(String institutionShortName);
 
   /**
