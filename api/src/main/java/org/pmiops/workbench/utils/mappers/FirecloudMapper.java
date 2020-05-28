@@ -19,7 +19,6 @@ public interface FirecloudMapper {
     return ClusterStatus.fromValue(leonardoClusterStatus.toString());
   }
 
-  // TODO(jaycarlton): consider making a dedicated FirecloudMapper. These types aren't very common.
   default WorkspaceAccessLevel fcAccessLevelToApiAccessLevel(FirecloudWorkspaceAccessEntry acl) {
     return WorkspaceAccessLevel.fromValue(acl.getAccessLevel());
   }

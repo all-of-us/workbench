@@ -9,8 +9,8 @@ import org.pmiops.workbench.model.UserRole;
 
 @Mapper(componentModel = "spring", uses = FirecloudMapper.class)
 public interface UserMapper {
-  @Mapping(target = "email", source = "user.username")
-  @Mapping(target = "role", source = "acl")
+  @Mapping(source = "acl", target = "role")
+  @Mapping(source = "user.username", target = "email")
   UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry acl);
 
   @Mapping(source = "contactEmail", target = "email")
