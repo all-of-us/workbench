@@ -3,12 +3,14 @@ package org.pmiops.workbench.profile;
 import java.util.Optional;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ public class ProfileService {
   private final FreeTierBillingService freeTierBillingService;
   private final ProfileMapper profileMapper;
   private final UserDao userDao;
+  private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
@@ -26,12 +29,14 @@ public class ProfileService {
       FreeTierBillingService freeTierBillingService,
       ProfileMapper profileMapper,
       UserDao userDao,
+      UserService userService,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.freeTierBillingService = freeTierBillingService;
     this.profileMapper = profileMapper;
     this.userDao = userDao;
+    this.userService = userService;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;

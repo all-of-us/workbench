@@ -318,13 +318,6 @@ public class ProfileController implements ProfileApiDelegate {
       // See RW-1488.
       throw new BadRequestException("Changing username is not supported");
     }
-    final VerifiedInstitutionalAffiliation updatedAffil =
-        updatedProfile.getVerifiedInstitutionalAffiliation();
-    final VerifiedInstitutionalAffiliation prevAffil =
-        prevProfile.getVerifiedInstitutionalAffiliation();
-    if (!Objects.equals(updatedAffil, prevAffil)) {
-      throw new BadRequestException("Cannot update Verified Institutional Affiliation");
-    }
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -721,6 +714,18 @@ public class ProfileController implements ProfileApiDelegate {
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
+  @Override
+  public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(Long userId,
+      VerifiedInstitutionalAffiliation verifiedInstitution) {
+      DbUser dbUser = userDao.findUserByUserId(userId);
+      Profile profile = profileService.getProfile(dbUser);
+
+      profile.setVerifiedInstitutionalAffiliation(verifiedInstitution);
+      this.updateProfile(profile);
+      return ResponseEntity.ok(new EmptyResponse());
   }
 
   private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
