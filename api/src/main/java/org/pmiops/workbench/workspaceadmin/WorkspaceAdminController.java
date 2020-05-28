@@ -26,7 +26,7 @@ import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
-import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -25,9 +25,6 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
-import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
     config = MapStructConfig.class,
