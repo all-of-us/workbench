@@ -199,8 +199,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.zendesk.client.v2.Zendesk;
-import org.zendesk.client.v2.model.Request;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -318,8 +316,7 @@ public class WorkspacesControllerTest {
     UserRecentResourceService.class,
     ConceptService.class,
     MonitoringService.class,
-    WorkspaceAuditor.class,
-    Zendesk.class
+    WorkspaceAuditor.class
   })
   static class Configuration {
 
@@ -376,7 +373,6 @@ public class WorkspacesControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
-  @Autowired Zendesk mockZendesk;
   @SpyBean @Autowired FreeTierBillingService freeTierBillingService;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
@@ -425,9 +421,6 @@ public class WorkspacesControllerTest {
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
-
-    when(mockZendesk.createRequest(any())).thenReturn(new Request());
-
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
   }
@@ -654,8 +647,6 @@ public class WorkspacesControllerTest {
                 .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
     assertThat(workspace2.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-
-    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
@@ -1250,8 +1241,6 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
-
-    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
