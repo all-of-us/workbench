@@ -102,10 +102,10 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public Institution createInstitution(final Institution institutionToCreate) {
-    final DbInstitution institutionWithoutAuxTables =
+    final DbInstitution dbInstitution =
         institutionDao.save(institutionMapper.modelToDb(institutionToCreate));
-    populateAuxTables(institutionToCreate);
-    return institutionMapper.dbToModel(institutionWithoutAuxTables, this);
+    populateAuxTables(institutionToCreate, dbInstitution);
+    return institutionMapper.dbToModel(dbInstitution, this);
   }
 
   @Override
