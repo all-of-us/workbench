@@ -626,7 +626,6 @@ workflows:
               only:
                 - master
     jobs:
-      - api-nightly-integration-test
       - api-bigquery-test
 
 experimental:
