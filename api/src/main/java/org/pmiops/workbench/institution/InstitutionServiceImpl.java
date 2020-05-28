@@ -140,7 +140,7 @@ public class InstitutionServiceImpl implements InstitutionService {
               final DbInstitution dbObjectToUpdate =
                   institutionDao.save(
                       institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId));
-              populateAuxTables(institutionToUpdate);
+              populateAuxTables(institutionToUpdate, dbObjectToUpdate);
               return institutionMapper.dbToModel(dbObjectToUpdate, this);
             });
   }
@@ -250,29 +250,30 @@ public class InstitutionServiceImpl implements InstitutionService {
         && institution.getShortName().equals(OPERATIONAL_USER_INSTITUTION_SHORT_NAME);
   }
 
-  private void populateAuxTables(final Institution institution) {
-    setInstitutionEmailDomains(institution);
-    setInstitutionEmailAddresses(institution);
+  private void populateAuxTables(
+      final Institution modelInstitution, final DbInstitution dbInstitution) {
+    setInstitutionEmailDomains(modelInstitution, dbInstitution);
+    setInstitutionEmailAddresses(modelInstitution, dbInstitution);
 
-    final String userInstructions = institution.getUserInstructions();
+    final String userInstructions = modelInstitution.getUserInstructions();
     if (!Strings.isNullOrEmpty(userInstructions)) {
       setInstitutionUserInstructions(
           new InstitutionUserInstructions()
-              .institutionShortName(institution.getShortName())
+              .institutionShortName(modelInstitution.getShortName())
               .instructions(userInstructions));
     }
   }
 
-  private void setInstitutionEmailDomains(final Institution modelInstitution) {
-    final DbInstitution dbInstitution = getDbInstitutionOrThrow(modelInstitution.getShortName());
+  private void setInstitutionEmailDomains(
+      final Institution modelInstitution, final DbInstitution dbInstitution) {
     institutionEmailDomainDao.deleteByInstitution(dbInstitution);
     institutionEmailDomainMapper
         .modelToDb(modelInstitution, dbInstitution)
         .forEach(institutionEmailDomainDao::save);
   }
 
-  private void setInstitutionEmailAddresses(final Institution modelInstitution) {
-    final DbInstitution dbInstitution = getDbInstitutionOrThrow(modelInstitution.getShortName());
+  private void setInstitutionEmailAddresses(
+      final Institution modelInstitution, final DbInstitution dbInstitution) {
     institutionEmailAddressDao.deleteByInstitution(dbInstitution);
     institutionEmailAddressMapper
         .modelToDb(modelInstitution, dbInstitution)
