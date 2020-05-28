@@ -17,7 +17,7 @@ import org.pmiops.workbench.model.InstitutionalRole;
  * <p>First Name, Last Name, Institutional Email, WB User Name, Role, Institution, "Institutional
  * DUA Signed?", "REDCap Complete?"
  */
-class Researcher extends User {
+class Researcher extends UserToAffiliate {
   // common fields from User: firstName, lastName, contactEmail, userName
   final InstitutionalRole institutionalRole;
   final String institutionDisplayName;
@@ -114,8 +114,8 @@ class Researcher extends User {
     return rawName;
   }
 
-  static List<User> parseInput(final String filename) throws IOException {
-    return User.readFile(filename, COLUMN_LENGTH).stream()
+  static List<UserToAffiliate> parseInput(final String filename) throws IOException {
+    return UserToAffiliate.readFile(filename, COLUMN_LENGTH).stream()
         .map(Researcher::new)
         .collect(Collectors.toList());
   }
