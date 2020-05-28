@@ -114,7 +114,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
                 + "  jsonPayload.new_value AS new_value\n"
                 + "FROM %s\n"
                 + "WHERE ((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'user') OR\n"
-                + "  jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'user'\n"
+                + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'user')) AND\n"
                 + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
                 + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
                 + "ORDER BY event_time, agent_id, action_id\n"
