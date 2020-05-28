@@ -3,7 +3,7 @@ package org.pmiops.workbench.institution;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.google.appengine.repackaged.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -67,10 +67,8 @@ public class InstitutionMapperTest {
     assertThat(dbInst.getShortName()).isEqualTo(inst.getShortName());
     assertThat(dbInst.getDisplayName()).isEqualTo(inst.getDisplayName());
 
-    when(service.getEmailDomains(inst.getShortName()))
-        .thenReturn(inst.getEmailDomains());
-    when(service.getEmailAddresses(inst.getShortName()))
-        .thenReturn(inst.getEmailAddresses());
+    when(service.getEmailDomains(inst.getShortName())).thenReturn(inst.getEmailDomains());
+    when(service.getEmailAddresses(inst.getShortName())).thenReturn(inst.getEmailAddresses());
     when(service.getInstitutionUserInstructions(inst.getShortName()))
         .thenReturn(Optional.of(inst.getUserInstructions()));
 

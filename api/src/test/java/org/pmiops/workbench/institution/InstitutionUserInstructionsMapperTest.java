@@ -1,0 +1,86 @@
+package org.pmiops.workbench.institution;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@Import(InstitutionUserInstructionsMapperImpl.class)
+@DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+public class InstitutionUserInstructionsMapperTest {
+  @Autowired InstitutionUserInstructionsMapper mapper;
+  @MockBean InstitutionService service;
+
+  @Test
+  public void test_modelToDb() {
+    final DbInstitution broad =
+        new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
+    when(service.getDbInstitutionOrThrow(broad.getShortName())).thenReturn(broad);
+
+    final InstitutionUserInstructions userInstructions =
+        new InstitutionUserInstructions()
+            .instructions("Wash your hands")
+            .institutionShortName(broad.getShortName());
+
+    final DbInstitutionUserInstructions dbUserInstructions =
+        mapper.modelToDb(userInstructions, service);
+
+    assertThat(dbUserInstructions.getUserInstructions()).isEqualTo("Wash your hands");
+    assertThat(dbUserInstructions.getInstitution()).isEqualTo(broad);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void test_modelToDb_missingInst() {
+    final DbInstitution broad =
+        new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
+    when(service.getDbInstitutionOrThrow(broad.getShortName())).thenReturn(broad);
+    when(service.getDbInstitutionOrThrow("other")).thenThrow(new NotFoundException());
+
+    final InstitutionUserInstructions userInstructions =
+        new InstitutionUserInstructions()
+            .instructions("Wash your hands")
+            .institutionShortName("other");
+
+    mapper.modelToDb(userInstructions, service);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void test_modelToDb_nullInstructions() {
+    final DbInstitution broad =
+        new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
+    when(service.getDbInstitutionOrThrow(broad.getShortName())).thenReturn(broad);
+
+    final InstitutionUserInstructions userInstructions =
+        new InstitutionUserInstructions().institutionShortName(broad.getShortName());
+
+    mapper.modelToDb(userInstructions, service);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void test_modelToDb_emptyInstructions() {
+    final DbInstitution broad =
+        new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
+    when(service.getDbInstitutionOrThrow(broad.getShortName())).thenReturn(broad);
+
+    final InstitutionUserInstructions userInstructions =
+        new InstitutionUserInstructions()
+            .instructions("")
+            .institutionShortName(broad.getShortName());
+
+    mapper.modelToDb(userInstructions, service);
+  }
+}

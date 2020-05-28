@@ -21,7 +21,7 @@ public interface InstitutionUserInstructionsMapper {
     final String instructions = modelObject.getInstructions();
     if (Strings.isNullOrEmpty(instructions)) {
       throw new BadRequestException(
-          "Cannot save InstitutionUserInstructions because the instructions payload is empty.");
+          "Cannot save InstitutionUserInstructions because the instructions are missing.");
     }
 
     final DbInstitution institution =
