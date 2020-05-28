@@ -1,6 +1,5 @@
 package org.pmiops.workbench.institution;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -16,8 +15,6 @@ import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
 import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
-import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
-import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -204,22 +201,14 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public List<String> getInstitutionEmailDomains(String institutionShortName) {
-    return institutionEmailDomainDao.getByInstitution(getDbInstitutionOrThrow(institutionShortName))
-        .stream()
-        .map(DbInstitutionEmailDomain::getEmailDomain)
-        .sorted()
-        .distinct()
-        .collect(Collectors.toList());
+    return institutionEmailDomainMapper.dbToModel(
+        institutionEmailDomainDao.getByInstitution(getDbInstitutionOrThrow(institutionShortName)));
   }
 
   @Override
   public List<String> getInstitutionEmailAddresses(String institutionShortName) {
-    return institutionEmailAddressDao
-        .getByInstitution(getDbInstitutionOrThrow(institutionShortName)).stream()
-        .map(DbInstitutionEmailAddress::getEmailAddress)
-        .sorted()
-        .distinct()
-        .collect(Collectors.toList());
+    return institutionEmailAddressMapper.dbToModel(
+        institutionEmailAddressDao.getByInstitution(getDbInstitutionOrThrow(institutionShortName)));
   }
 
   @Override
@@ -274,23 +263,19 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
   }
 
-  private void setInstitutionEmailDomains(Institution institution) {
-    final DbInstitution dbInstitution = getDbInstitutionOrThrow(institution.getShortName());
+  private void setInstitutionEmailDomains(final Institution modelInstitution) {
+    final DbInstitution dbInstitution = getDbInstitutionOrThrow(modelInstitution.getShortName());
     institutionEmailDomainDao.deleteByInstitution(dbInstitution);
-
-    Optional.ofNullable(institution.getEmailDomains()).orElse(Collections.emptyList()).stream()
-        .distinct()
-        .map(domain -> institutionEmailDomainMapper.modelToDb(domain, dbInstitution))
+    institutionEmailDomainMapper
+        .modelToDb(modelInstitution, dbInstitution)
         .forEach(institutionEmailDomainDao::save);
   }
 
-  private void setInstitutionEmailAddresses(Institution institution) {
-    final DbInstitution dbInstitution = getDbInstitutionOrThrow(institution.getShortName());
+  private void setInstitutionEmailAddresses(final Institution modelInstitution) {
+    final DbInstitution dbInstitution = getDbInstitutionOrThrow(modelInstitution.getShortName());
     institutionEmailAddressDao.deleteByInstitution(dbInstitution);
-
-    Optional.ofNullable(institution.getEmailAddresses()).orElse(Collections.emptyList()).stream()
-        .distinct()
-        .map(address -> institutionEmailAddressMapper.modelToDb(address, dbInstitution))
+    institutionEmailAddressMapper
+        .modelToDb(modelInstitution, dbInstitution)
         .forEach(institutionEmailAddressDao::save);
   }
 }

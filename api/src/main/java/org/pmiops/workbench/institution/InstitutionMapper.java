@@ -10,7 +10,6 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
-//    uses = {InstitutionEmailDomainMapper.class, InstitutionEmailDomainMapper.class})
 public interface InstitutionMapper {
   @Mapping(target = "institutionId", ignore = true)
   DbInstitution modelToDb(Institution modelObject);
