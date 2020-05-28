@@ -16,12 +16,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.netty.handler.logging.LogLevel;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +59,10 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
+import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -65,14 +70,18 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseL
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.WorkspaceDetailsHeavy;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -106,6 +115,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final FreeTierBillingService freeTierBillingService;
+  private Provider<WorkspacesApi> endUserWorkspacesApiProvider;
+  private ProfileMapper profileMapper;
 
   private FireCloudService fireCloudService;
   private Clock clock;
@@ -126,7 +137,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      FreeTierBillingService freeTierBillingService) {
+      FreeTierBillingService freeTierBillingService,
+      Provider<WorkspacesApi> endUserWorkspacesApiProvider,
+      ProfileMapper profileMapper) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
@@ -141,6 +154,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.freeTierBillingService = freeTierBillingService;
+    this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
+    this.profileMapper = profileMapper;
   }
 
   /**
@@ -798,5 +813,42 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .build())
         .collect(ImmutableList.toImmutableList());
+  }
+
+  @Override
+  public List<WorkspaceDetailsHeavy> getWorkspaceDetailsHeavy(String workspaceNamespace) {
+    final List<DbWorkspace> dbWorkspaces = workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace);
+
+    return dbWorkspaces.stream()
+        .map(this::getWorkspaceDetailsHeavy)
+        .collect(ImmutableList.toImmutableList());
+  }
+
+  private WorkspaceDetailsHeavy getWorkspaceDetailsHeavy(DbWorkspace dbWorkspace) {
+    final WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
+
+    final DbUser creator = dbWorkspace.getCreator();
+
+    final Map<String, FirecloudWorkspaceAccessEntry> usernameToAccessLevel;
+    try {
+      usernameToAccessLevel = FirecloudTransforms.extractAclResponse(
+          workspacesApi.getWorkspaceAcl(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()));
+    } catch (ApiException e) {
+      log.log(Level.WARNING, "Error getting FireCloud workspaces API", e);
+      throw new RuntimeException(e);
+    }
+
+    final List<User> collaborators = usernameToAccessLevel.keySet().stream()
+        .map(userDao::findUserByUsername)
+        .map(profileMapper::toApiUser)
+        .collect(Collectors.toList());
+
+    return new WorkspaceDetailsHeavy()
+        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
+        .creator(profileMapper.toApiUser(creator))
+        .collaborators(collaborators)
+        .clusters(Collections.emptyList());
+
   }
 }
