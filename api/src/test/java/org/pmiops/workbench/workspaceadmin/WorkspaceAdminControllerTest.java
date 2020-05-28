@@ -41,7 +41,6 @@ import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
-import org.pmiops.workbench.model.AuditLogEntriesResponse;
 import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ClusterStatus;
@@ -50,6 +49,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -81,8 +81,8 @@ public class WorkspaceAdminControllerTest {
   private static final Map<String, String> QUERY_METADATA =
       ImmutableMap.of(
           "workspaceDatabaseId", Long.toString(DB_WORKSPACE_ID), "query", "select foo from bar");
-  private static final AuditLogEntriesResponse QUERY_RESPONSE =
-      new AuditLogEntriesResponse()
+  private static final WorkspaceAuditLogQueryResponse QUERY_RESPONSE =
+      new WorkspaceAuditLogQueryResponse()
           .logEntries(
               ImmutableList.of(
                   new AuditLogEntry()
@@ -97,9 +97,12 @@ public class WorkspaceAdminControllerTest {
                       .targetId(DB_WORKSPACE_ID)
                       .targetProperty("approved")
                       .targetType("WORKSPACE")))
-          .queryMetadata(QUERY_METADATA);
-  private static final AuditLogEntriesResponse EMPTY_QUERY_RESPONSE =
-      new AuditLogEntriesResponse().queryMetadata(QUERY_METADATA);
+          .query("select foo from bar")
+          .workspaceDatabaseId(DB_WORKSPACE_ID);
+  private static final WorkspaceAuditLogQueryResponse EMPTY_QUERY_RESPONSE =
+      new WorkspaceAuditLogQueryResponse()
+          .query("select foo from bar")
+          .workspaceDatabaseId(DB_WORKSPACE_ID);
   private static final DateTime DEFAULT_AFTER_INCLUSIVE = DateTime.parse("2001-02-14T01:20+02:00");
   private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-05-01T01:20+02:00");
 
@@ -285,7 +288,7 @@ public class WorkspaceAdminControllerTest {
     doReturn(QUERY_RESPONSE)
         .when(mockActionAuditQueryService)
         .queryEventsForWorkspace(anyLong(), anyLong(), any(DateTime.class), any(DateTime.class));
-    final ResponseEntity<AuditLogEntriesResponse> response =
+    final ResponseEntity<WorkspaceAuditLogQueryResponse> response =
         workspaceAdminController.getAuditLogEntries(
             WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE,
             QUERY_LIMIT,
@@ -300,7 +303,7 @@ public class WorkspaceAdminControllerTest {
     doReturn(EMPTY_QUERY_RESPONSE)
         .when(mockActionAuditQueryService)
         .queryEventsForWorkspace(anyLong(), anyLong(), any(DateTime.class), any(DateTime.class));
-    final ResponseEntity<AuditLogEntriesResponse> response =
+    final ResponseEntity<WorkspaceAuditLogQueryResponse> response =
         workspaceAdminController.getAuditLogEntries(
             WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE,
             QUERY_LIMIT,

@@ -13,8 +13,8 @@ import org.joda.time.DateTime;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
-import org.pmiops.workbench.model.AuditLogEntriesResponse;
 import org.pmiops.workbench.model.AuditLogEntry;
+import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +73,8 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   }
 
   @Override
-  public AuditLogEntriesResponse queryEventsForWorkspace(
+  public WorkspaceAuditLogQueryResponse
+  queryEventsForWorkspace(
       long workspaceDatabaseId, long limit, DateTime afterInclusive, DateTime beforeExclusive) {
     final ActionAuditConfig actionAuditConfig = workbenchConfigProvider.get().actionAudit;
     final String fullyQualifiedTableName =
@@ -109,12 +110,10 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
             .map(this::fieldValueListToAditLogEntry)
             .collect(ImmutableList.toImmutableList());
 
-    final ImmutableMap<String, String> metadata =
-        ImmutableMap.of(
-            "workspaceDatabaseId", Long.toString(workspaceDatabaseId),
-            "query", queryJobConfiguration.getQuery());
-
-    return new AuditLogEntriesResponse().logEntries(logEntries).queryMetadata(metadata);
+    return new WorkspaceAuditLogQueryResponse()
+        .logEntries(logEntries)
+        .query(getReplacedQueryText(queryJobConfiguration))
+        .workspaceDatabaseId(workspaceDatabaseId);
   }
 
   private AuditLogEntry fieldValueListToAditLogEntry(FieldValueList row) {
@@ -131,5 +130,13 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     FieldValues.getString(row, "target_property").ifPresent(entry::setTargetProperty);
     FieldValues.getString(row, "target_type").ifPresent(entry::setTargetType);
     return entry;
+  }
+
+  private String getReplacedQueryText(QueryJobConfiguration queryJobConfiguration) {
+    final String result = queryJobConfiguration.getQuery();
+    queryJobConfiguration.getNamedParameters().forEach((parameterName, parameterValue) -> {
+      result.replace("@" + parameterName, parameterValue.toString());
+    });
+    return result;
   }
 }

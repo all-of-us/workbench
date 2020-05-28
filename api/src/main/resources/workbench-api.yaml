@@ -933,7 +933,7 @@ paths:
           description: A list of workspaces
           schema:
             "$ref": "#/definitions/WorkspaceListResponse"
-  "/v1/admin/audit/workspace":
+  "/v1/admin/workspaces/{workspaceNamespace}/audit":
     get:
       tags:
         - workspaceAdmin
@@ -941,7 +941,7 @@ paths:
       operationId: getAuditLogEntries
       parameters:
         - name: workspaceNamespace
-          in: query
+          in: path
           type: string
           required: true
           description: >
@@ -953,23 +953,22 @@ paths:
           default: 100
           description: >
             Maximum number of entries to return, sorted by timestamp descending.
-        - name: afterInclusive
+        - name: after
           description: >
             Earliest time matched by the query (inclusive). Epoch millis.
 
             Note that while Swagger allows a date-time formatted string query parameter,
-            it appears Spring doesn't handle that well today. I ran into this issue:
-            https://github.com/swagger-api/swagger-codegen/issues/4113 and decided a long
-            is good enough for now.
+            it appears Spring doesn't handle that well today. It gives the error message described
+            at https://github.com/swagger-api/swagger-codegen/issues/4113.
           in: query
           type: integer
           format: int64
           required: false
           default: 0
-        - name: beforeExclusive
+        - name: before
           description: >
-             Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds since Epoch
-             (though declared as a string). Defaults to current timestamp.
+             Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
+             since Epoch (though declared as a string). Defaults to current timestamp.
           in: query
           type: integer
           format: int64
@@ -981,7 +980,7 @@ paths:
             the workspaceDatabaaseId (for post-processing) as well as the query actually
             executed (as a starting point for exploring manually in BigQuery).
           schema:
-            "$ref": "#/definitions/AuditLogEntriesResponse"
+            "$ref": "#/definitions/WorkspaceAuditLogQueryResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list":
     get:
       summary: Get details of Python files from google Bucket directory notebook
@@ -7354,38 +7353,37 @@ definitions:
         format: int64
       conceptName:
         type: string
-  AuditLogEntriesResponse:
+  WorkspaceAuditLogQueryResponse:
     type: object
     description: >
       Represents the results of a query into the audit dataset in BigQery without
-      filtering or transformation. This response type is a stopgap until we develop
-      high-level queries with a better semantic mapping to the concepts and rules
-      governing them, which is why a freeform queryMetadata field is tolerable for
-      now.
+      filtering or transformation.
     required:
     - logEntries
-    - queryMetadata
+    - query
+    - workspaceDatabaseId
     properties:
       logEntries:
         type: array
         items:
           "$ref": "#/definitions/AuditLogEntry"
-      queryMetadata:
+      query:
+        description: Copy of the query used in BigQuery to assist in further exploration or
+          debugging.
+        type: string
+      workspaceDatabaseId:
         description: >
-          Since the audit system uses SQL database IDs and the rest of hte API layer
-          does not, it's helpful to return additional properties in order to assist
-          the client in interpreting the results.
-        type: object
-        additionalProperties: true
+          ID in the MySQL database and BigQuery Audit Database for the workspace queried.
+        type: integer
+        format: int64
   AuditLogEntry:
     description: >
       Representation of the BigQuery Audit Log entry, post-translation from Stackdriver logging.
-      All fields are treated as optional here, as there are no non-null constraints in the BigQery
+      All fields are treated as optional here, as there are no non-null constraints in the BigQuery
       dataset.
 
       It's possible that due to some error now or in the past that some columns might not match
-      their expected values, though we take pains to avoid that. Regardless, nothing in this type
-      definition is stricter than the BigQuery schema.
+      their expected values, nothing in this type definition is stricter than the BigQuery schema.
     type: object
     properties:
       actionId:

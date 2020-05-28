@@ -15,14 +15,13 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.AuditLogEntriesResponse;
 import org.pmiops.workbench.model.AuditLogEntry;
+import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.utils.FakeSinglePage;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,26 +119,23 @@ public class ActionAuditQueryServiceTest {
   @Test
   public void testEmptyTableResultGivesEmptyResponse() {
     doReturn(EMPTY_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
-    final AuditLogEntriesResponse response =
+    final WorkspaceAuditLogQueryResponse response =
         actionAuditQueryService.queryEventsForWorkspace(
             WORKSPACE_DATABASE_ID,
             DEFAULT_LIMIT,
             DEFAULT_AFTER_INCLUSIVE,
             DEFAULT_BEFORE_EXCLUSIVE);
-    assertThat(response.getLogEntries()).isEmpty();
 
-    @SuppressWarnings("unchecked")
-    final Map<String, String> metadataMap = (Map<String, String>) response.getQueryMetadata();
-    assertThat(metadataMap.get("workspaceDatabaseId"))
-        .isEqualTo(Long.toString(WORKSPACE_DATABASE_ID));
-    assertThat(metadataMap.get("query")).contains("SELECT");
+    assertThat(response.getLogEntries()).isEmpty();
+    assertThat(response.getWorkspaceDatabaseId()).isEqualTo(WORKSPACE_DATABASE_ID);
+    assertThat(response.getQuery()).contains("SELECT");
   }
 
   @Test
   public void testQueryEventsFromWorkspace_returnsRows() {
     doReturn(TABLE_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
 
-    final AuditLogEntriesResponse response =
+    final WorkspaceAuditLogQueryResponse response =
         actionAuditQueryService.queryEventsForWorkspace(
             WORKSPACE_DATABASE_ID,
             DEFAULT_LIMIT,

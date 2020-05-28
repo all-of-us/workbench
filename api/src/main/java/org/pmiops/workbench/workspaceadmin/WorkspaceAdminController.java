@@ -23,13 +23,13 @@ import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
-import org.pmiops.workbench.model.AuditLogEntriesResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -152,16 +152,17 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
    *
    * @param workspaceNamespace Firecloud namespace for workspace
    * @param limit upper limit (inclusive) for this query
-   * @param afterInclusiveMillis lowest timestamp matched (inclusive)
-   * @param beforeExclusiveMillisNullable latest timestamp matched (exclusive). The half-open
+   * @param afterMillis lowest timestamp matched (inclusive)
+   * @param beforeMillisNullable latest timestamp matched (exclusive). The half-open
    *     interval is convenient for pagination based on time intervals.
    */
   @Override
-  public ResponseEntity<AuditLogEntriesResponse> getAuditLogEntries(
+  @AuthorityRequired({Authority.WORKSPACES_VIEW})
+  public ResponseEntity<WorkspaceAuditLogQueryResponse> getAuditLogEntries(
       String workspaceNamespace,
       Integer limit,
-      Long afterInclusiveMillis,
-      @Nullable Long beforeExclusiveMillisNullable) {
+      Long afterMillis,
+      @Nullable Long beforeMillisNullable) {
     final long workspaceDatabaseId =
         workspaceAdminService
             .getFirstWorkspaceByNamespace(workspaceNamespace)
@@ -171,13 +172,12 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
                     new NotFoundException(
                         String.format(
                             "No workspace found with Firecloud namespace %s", workspaceNamespace)));
-    final DateTime afterInclusive = new DateTime(afterInclusiveMillis);
-    final DateTime beforeExclusive =
-        Optional.ofNullable(beforeExclusiveMillisNullable)
+    final DateTime after = new DateTime(afterMillis);
+    final DateTime before =
+        Optional.ofNullable(beforeMillisNullable)
             .map(DateTime::new)
             .orElse(DateTime.now());
-    return ResponseEntity.ok(
-        actionAuditQueryService.queryEventsForWorkspace(
-            workspaceDatabaseId, limit, afterInclusive, beforeExclusive));
+    return ResponseEntity.ok(actionAuditQueryService.queryEventsForWorkspace(
+        workspaceDatabaseId, limit, after, before));
   }
 }

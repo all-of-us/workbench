@@ -256,6 +256,8 @@ public class WorkbenchConfig {
     // Currently this is named after the log, replacing hyphens with underscores, in every environment.
     // However, it's not guaranteed to follow that pattern forever, so we leave the three names
     // independently variable.
+    // See https://broad.io/aou-new-environment for how to initialize the BigQuery dataset and Stackdriver
+    // sink.
     public String bigQueryDataset;
     // Table in the BigQuery dataset that receives log events. Currently named the same as the
     // dataset, but this could change in the future.
