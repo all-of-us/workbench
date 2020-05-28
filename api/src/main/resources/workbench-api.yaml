@@ -921,7 +921,6 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/EmptyResponse"
-
   "/v1/admin/workspaces/review":
     get:
       tags:
@@ -3882,7 +3881,6 @@ definitions:
     properties:
       email:
         type: string
-        description: Username of the user
       givenName:
         type: string
       familyName:
@@ -5632,18 +5630,10 @@ definitions:
     properties:
       workspace:
         "$ref": "#/definitions/Workspace"
-      workspaceDatabaseId:
-        description: >
-          ID used in the workspace table in the MySQL database. Useful
-          for DB queries and Action Audit searches in Stackdriver Logging and
-          BigQuery.
-        type: integer
-        format: int64
       collaborators:
         type: array
-        description: List of users who own or collaborate on this workspace.
         items:
-          "$ref": "#/definitions/WorkspaceUserAdminView"
+          "$ref": "#/definitions/UserRole"
       resources:
         "$ref": "#/definitions/AdminWorkspaceResources"
   AdminWorkspaceResources:
@@ -7306,27 +7296,3 @@ definitions:
         format: int64
       conceptName:
         type: string
-  WorkspaceUserAdminView:
-    type: object
-    required:
-      - userModel
-      - role
-      - userDatabaseId
-    properties:
-      userModel:
-        description: User API model
-        "$ref": '#/definitions/User'
-      role:
-        description: User access level on an associated workspace
-        "$ref": '#/definitions/WorkspaceAccessLevel'
-      userDatabaseId:
-        description: >
-          user_id value in the user table in the MySQL database. Useful
-          for DB queries and Action Audit searches in Stackdriver Logging and
-          BigQuery.
-        type: integer
-        format: int64
-      userAccountCreatedTime:
-        description: Datetime at creation of this user's accont
-        type: string
-        format: date-time
