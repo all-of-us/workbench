@@ -1043,6 +1043,54 @@ paths:
           description: No module exists with name submitted
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/users/{userId}/audit":
+    get:
+      tags:
+        - profile
+      description: 'Fetch audit logs involving this user as either a subject or object.'
+      operationId: getAuditLogEntries
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          required: true
+          description: >
+            Firecloud Namespace for the AoU workspace to be queried.
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 100
+          description: >
+            Maximum number of entries to return, sorted by timestamp descending.
+        - name: after
+          description: >
+            Earliest time matched by the query (inclusive). Epoch millis.
+
+            Note that while Swagger allows a date-time formatted string query parameter,
+            it appears Spring doesn't handle that well today. It gives the error message described
+            at https://github.com/swagger-api/swagger-codegen/issues/4113.
+          in: query
+          type: integer
+          format: int64
+          required: false
+          default: 0
+        - name: before
+          description: >
+            Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
+            since Epoch (though declared as a string). Defaults to current timestamp.
+          in: query
+          type: integer
+          format: int64
+          required: false
+      responses:
+        200:
+          description: >
+            List of rows matching the query result. queryMetadata contains
+            the workspaceDatabaaseId (for post-processing) as well as the query actually
+            executed (as a starting point for exploring manually in BigQuery).
+          schema:
+            "$ref": "#/definitions/UserAuditLogQueryResponse"
   "/v1/admin/users/{userId}/bypass-access-requirement":
     post:
       tags:
@@ -7365,6 +7413,29 @@ definitions:
       workspaceDatabaseId:
         description: >
           ID in the MySQL database and BigQuery Audit Database for the workspace queried.
+        type: integer
+        format: int64
+  UserAuditLogQueryResponse:
+    type: object
+    description: >
+      Represents the results of a query into the audit dataset in BigQery without
+      filtering or transformation.
+    required:
+      - logEntries
+      - query
+      - userDatabaseId
+    properties:
+      logEntries:
+        type: array
+        items:
+          "$ref": "#/definitions/AuditLogEntry"
+      query:
+        description: Copy of the query used in BigQuery to assist in further exploration or
+          debugging.
+        type: string
+      userDatabaseId:
+        description: >
+          ID in the MySQL database and BigQuery Audit Database for the user queried.
         type: integer
         format: int64
   AuditLogEntry:

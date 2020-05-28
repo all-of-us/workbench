@@ -17,6 +17,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
 import org.pmiops.workbench.model.AuditLogEntry;
+import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.stereotype.Service;
@@ -25,49 +26,10 @@ import org.springframework.stereotype.Service;
 public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   private static final int MICROSECONDS_IN_MILLISECOND = 1000;
-
-  enum Parameters {
-    LIMIT("limit"),
-    WORKSPACE_DB_ID("workspace_db_id"),
-    AFTER_INCLUSIVE("after_inclusive"),
-    BEFORE_EXCLUSIVE("before_exclusive");
-
-    private String name;
-
-    Parameters(String name) {
-      this.name = name;
-    }
-
-    public String getName() {
-      return name;
-    }
-  }
+  private static final long MAX_QUERY_LIMIT = 1000L;
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-
-  private static final long MAX_QUERY_LIMIT = 1000L;
-  // The table name can't be in a QueryParameterValue, so we substitute it with String.format()
-  private static final String WORKSPACE_EVENTS_QUERY_STRING_FORMAT =
-      "SELECT\n"
-          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,\n"
-          + "  jsonPayload.agent_type AS agent_type,\n"
-          + "  CAST(jsonPayload.agent_id AS INT64) AS agent_id,\n"
-          + "  jsonPayload.agent_email AS agent_username,\n"
-          + "  jsonPayload.action_id AS action_id,\n"
-          + "  jsonPayload.action_type AS action_type,\n"
-          + "  jsonPayload.target_type AS target_type,\n"
-          + "  CAST(jsonPayload.target_id AS INT64) AS target_id,\n"
-          + "  jsonPayload.target_property AS target_property,\n"
-          + "  jsonPayload.prev_value AS prev_value,\n"
-          + "  jsonPayload.new_value AS new_value\n"
-          + "FROM %s\n"
-          + "WHERE jsonPayload.target_id = @workspace_db_id AND\n"
-          + "  jsonPayload.target_type = 'WORKSPACE' AND\n"
-          + "  @after_inclusive <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
-          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before_exclusive\n"
-          + "ORDER BY event_time, agent_id, action_id\n"
-          + "LIMIT @limit";
 
   public ActionAuditQueryServiceImpl(
       BigQueryService bigQueryService, Provider<WorkbenchConfig> workbenchConfigProvider) {
@@ -77,32 +39,37 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   @Override
   public WorkspaceAuditLogQueryResponse queryEventsForWorkspace(
-      long workspaceDatabaseId, long limit, DateTime afterInclusive, DateTime beforeExclusive) {
-    final ActionAuditConfig actionAuditConfig = workbenchConfigProvider.get().actionAudit;
-    final String fullyQualifiedTableName =
-        String.format(
-            "`%s.%s.%s`",
-            workbenchConfigProvider.get().server.projectId,
-            actionAuditConfig.bigQueryDataset,
-            actionAuditConfig.bigQueryTable);
+      long workspaceDatabaseId, long limit, DateTime after, DateTime before) {
 
     final String queryString =
-        String.format(WORKSPACE_EVENTS_QUERY_STRING_FORMAT, fullyQualifiedTableName);
+        String.format(
+            "SELECT\n"
+                + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,\n"
+                + "  jsonPayload.agent_type AS agent_type,\n"
+                + "  CAST(jsonPayload.agent_id AS INT64) AS agent_id,\n"
+                + "  jsonPayload.agent_email AS agent_username,\n"
+                + "  jsonPayload.action_id AS action_id,\n"
+                + "  jsonPayload.action_type AS action_type,\n"
+                + "  jsonPayload.target_type AS target_type,\n"
+                + "  CAST(jsonPayload.target_id AS INT64) AS target_id,\n"
+                + "  jsonPayload.target_property AS target_property,\n"
+                + "  jsonPayload.prev_value AS prev_value,\n"
+                + "  jsonPayload.new_value AS new_value\n"
+                + "FROM %s\n"
+                + "WHERE jsonPayload.target_id = @workspace_db_id AND\n"
+                + "  jsonPayload.target_type = 'WORKSPACE' AND\n"
+                + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
+                + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
+                + "ORDER BY event_time, agent_id, action_id\n"
+                + "LIMIT @limit",
+            getTableName());
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
             .setNamedParameters(
-                ImmutableMap.of(
-                    Parameters.WORKSPACE_DB_ID.getName(),
-                        QueryParameterValue.int64(workspaceDatabaseId),
-                    Parameters.LIMIT.getName(),
-                        QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)),
-                    Parameters.AFTER_INCLUSIVE.getName(),
-                        QueryParameterValue.timestamp(
-                            afterInclusive.getMillis() * MICROSECONDS_IN_MILLISECOND),
-                    Parameters.BEFORE_EXCLUSIVE.getName(),
-                        QueryParameterValue.timestamp(
-                            beforeExclusive.getMillis() * MICROSECONDS_IN_MILLISECOND)))
+                getNamedParameterMapBuilder(limit, after, before)
+                    .put("workspace_db_id", QueryParameterValue.int64(workspaceDatabaseId))
+                    .build())
             .build();
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
@@ -116,6 +83,74 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
         .logEntries(logEntries)
         .query(getReplacedQueryText(queryJobConfiguration))
         .workspaceDatabaseId(workspaceDatabaseId);
+  }
+
+  private String getTableName() {
+    final ActionAuditConfig actionAuditConfig = workbenchConfigProvider.get().actionAudit;
+    return String.format(
+        "`%s.%s.%s`",
+        workbenchConfigProvider.get().server.projectId,
+        actionAuditConfig.bigQueryDataset,
+        actionAuditConfig.bigQueryTable);
+  }
+
+  @Override
+  public UserAuditLogQueryResponse queryEventsForUser(
+      long userDatabaseId, long limit, DateTime after, DateTime before) {
+
+    final String queryString =
+        String.format(
+            "SELECT\n"
+                + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,\n"
+                + "  jsonPayload.agent_type AS agent_type,\n"
+                + "  CAST(jsonPayload.agent_id AS INT64) AS agent_id,\n"
+                + "  jsonPayload.agent_email AS agent_username,\n"
+                + "  jsonPayload.action_id AS action_id,\n"
+                + "  jsonPayload.action_type AS action_type,\n"
+                + "  jsonPayload.target_type AS target_type,\n"
+                + "  CAST(jsonPayload.target_id AS INT64) AS target_id,\n"
+                + "  jsonPayload.target_property AS target_property,\n"
+                + "  jsonPayload.prev_value AS prev_value,\n"
+                + "  jsonPayload.new_value AS new_value\n"
+                + "FROM %s\n"
+                + "WHERE ((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'user') OR\n"
+                + "  jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'user'\n"
+                + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
+                + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
+                + "ORDER BY event_time, agent_id, action_id\n"
+                + "LIMIT @limit",
+            getTableName());
+
+    final QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(queryString)
+            .setNamedParameters(
+                getNamedParameterMapBuilder(limit, after, before)
+                    .put("user_db_id", QueryParameterValue.int64(userDatabaseId))
+                    .build())
+            .build();
+
+    final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
+
+    final List<AuditLogEntry> logEntries =
+        StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
+            .map(this::fieldValueListToAditLogEntry)
+            .collect(ImmutableList.toImmutableList());
+
+    return new UserAuditLogQueryResponse()
+        .logEntries(logEntries)
+        .query(getReplacedQueryText(queryJobConfiguration))
+        .userDatabaseId(userDatabaseId);
+  }
+
+  private ImmutableMap.Builder<String, QueryParameterValue> getNamedParameterMapBuilder(
+      long limit, DateTime after, DateTime before) {
+    return ImmutableMap.<String, QueryParameterValue>builder()
+        .put("limit", QueryParameterValue.int64(Math.max(limit, MAX_QUERY_LIMIT)))
+        .put(
+            "after", QueryParameterValue.timestamp(after.getMillis() * MICROSECONDS_IN_MILLISECOND))
+        .put(
+            "before",
+            QueryParameterValue.timestamp(before.getMillis() * MICROSECONDS_IN_MILLISECOND));
   }
 
   private AuditLogEntry fieldValueListToAditLogEntry(FieldValueList row) {
