@@ -2,7 +2,6 @@ package org.pmiops.workbench.institution;
 
 import com.google.common.base.Strings;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -13,7 +12,6 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
 public interface InstitutionUserInstructionsMapper {
-  @Mapping(target = "institutionUserInstructionsId", ignore = true)
   default DbInstitutionUserInstructions modelToDb(
       InstitutionUserInstructions modelObject, InstitutionService institutionService) {
 
