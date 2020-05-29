@@ -52,7 +52,7 @@ describe('User can create new Cohorts', () => {
 
     // Checking Total Count: should match Group 1 participants count.
     await waitForText(page, group1Count, {xpath: FieldSelector.TotalCount});
-    console.log('Total Count: ' + group1Count);
+    console.log('Total Count: ' + group1CountInt);
 
     // Rule: Adding additional groups should decrease Total Count
 

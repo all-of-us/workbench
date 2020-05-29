@@ -65,8 +65,8 @@ export default class CreateCriteriaModal extends Dialog {
     await numberField.type('30');
 
     await this.clickButton(ButtonLabel.Calculate);
-    const participlantResults = await this.getParticipantsResult();
-    console.debug(`${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participlantResults}`);
+    const participantResult = await this.getParticipantsResult();
+    console.debug(`${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
 
     // Find criteria in Selected Criteria Content Box.
     const removeSelectedCriteriaIconSelector = xPathOptionToXpath({type: ElementType.Icon, iconShape: 'times-circle'}, this);
@@ -81,7 +81,7 @@ export default class CreateCriteriaModal extends Dialog {
     await this.clickButton(ButtonLabel.Finish);
 
     // return participants count for comparing
-    return participlantResults;
+    return participantResult;
   }
 
   async getParticipantsResult(): Promise<string> {

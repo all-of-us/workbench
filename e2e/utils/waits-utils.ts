@@ -82,7 +82,7 @@ export async function waitForNumericalString(page: Page, xpath: string): Promise
     const node = document.evaluate(xpathSelector, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     if (node !== null) {
       const txt = node.textContent.trim();
-      const re = new RegExp(/^\d{1,3}(,\d{3})*(\.\d+)?$/);
+      const re = new RegExp(/^\d{1,3}(,?\d{3})*$/);
       if (re.test(txt)) { // Match only numbers with comma
         return txt;
       }
