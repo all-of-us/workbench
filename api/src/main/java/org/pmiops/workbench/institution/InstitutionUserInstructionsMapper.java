@@ -13,7 +13,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 @Mapper(config = MapStructConfig.class)
 public interface InstitutionUserInstructionsMapper {
   default DbInstitutionUserInstructions modelToDb(
-      InstitutionUserInstructions modelObject, InstitutionService institutionService) {
+      InstitutionUserInstructions modelObject, DbInstitution institution) {
 
     // don't store empty or null instructions
     // sanitize() converts null to empty string, so we can't rely on it for this check
@@ -24,8 +24,6 @@ public interface InstitutionUserInstructionsMapper {
           "Cannot save InstitutionUserInstructions because the instructions are missing.");
     }
 
-    final DbInstitution institution =
-        institutionService.getDbInstitutionOrThrow(modelObject.getInstitutionShortName());
     final PolicyFactory removeAllTags = new HtmlPolicyBuilder().toFactory();
     final String sanitizedInstructions = removeAllTags.sanitize(instructions).trim();
 

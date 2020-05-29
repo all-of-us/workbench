@@ -225,9 +225,10 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public void setInstitutionUserInstructions(final InstitutionUserInstructions userInstructions) {
+    final DbInstitution dbInstitution = getDbInstitutionOrThrow(userInstructions.getInstitutionShortName());
 
     final DbInstitutionUserInstructions dbInstructions =
-        institutionUserInstructionsMapper.modelToDb(userInstructions, this);
+        institutionUserInstructionsMapper.modelToDb(userInstructions, dbInstitution);
 
     // if a DbInstitutionUserInstructions entry already exists for this Institution, retrieve its ID
     // so the call to save() replaces it
