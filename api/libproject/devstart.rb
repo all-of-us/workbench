@@ -2163,7 +2163,7 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin, with_queue)
     # TODO: generate new key here
     get_gsuite_admin_key(gcc.project)
   end
-  Dir.chdir("cluster-resources") do
+  Dir.chdir("snippets-menu") do
     common.run_inline(%W{./build.rb build-snippets-menu})
   end
   common.run_inline %W{gradle :appengineStage}
