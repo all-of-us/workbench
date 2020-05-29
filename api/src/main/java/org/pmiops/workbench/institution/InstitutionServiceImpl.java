@@ -202,14 +202,18 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public List<String> getEmailDomains(String institutionShortName) {
-    return new ArrayList<>(institutionEmailDomainMapper.dbDomainsToStrings(
-        institutionEmailDomainDao.getByInstitution(getDbInstitutionOrThrow(institutionShortName))));
+    return new ArrayList<>(
+        institutionEmailDomainMapper.dbDomainsToStrings(
+            institutionEmailDomainDao.getByInstitution(
+                getDbInstitutionOrThrow(institutionShortName))));
   }
 
   @Override
   public List<String> getEmailAddresses(String institutionShortName) {
-    return new ArrayList<>(institutionEmailAddressMapper.dbAddressesToStrings(
-        institutionEmailAddressDao.getByInstitution(getDbInstitutionOrThrow(institutionShortName))));
+    return new ArrayList<>(
+        institutionEmailAddressMapper.dbAddressesToStrings(
+            institutionEmailAddressDao.getByInstitution(
+                getDbInstitutionOrThrow(institutionShortName))));
   }
 
   @Override

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
 import java.util.Objects;
-import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -95,10 +94,7 @@ public class DbVerifiedInstitutionalAffiliation {
 
     DbVerifiedInstitutionalAffiliation that = (DbVerifiedInstitutionalAffiliation) o;
 
-    // TODO: DbUser doesn't have a well-defined equals() so we use the username instead
-    return Objects.equals(
-            Optional.ofNullable(user).map(DbUser::getUsername),
-            Optional.ofNullable(that.user).map(DbUser::getUsername))
+    return Objects.equals(user, that.user)
         && Objects.equals(institution, that.institution)
         && Objects.equals(institutionalRoleEnum, that.institutionalRoleEnum)
         && Objects.equals(institutionalRoleOtherText, that.institutionalRoleOtherText);
@@ -106,8 +102,7 @@ public class DbVerifiedInstitutionalAffiliation {
 
   @Override
   public int hashCode() {
-    final int userHash = (user == null) ? 0 : Objects.hashCode(user.getUsername());
-    return Objects.hash(userHash, institution, institutionalRoleEnum, institutionalRoleOtherText);
+    return Objects.hash(user, institution, institutionalRoleEnum, institutionalRoleOtherText);
   }
 
   @Override

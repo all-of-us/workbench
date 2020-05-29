@@ -12,7 +12,9 @@ import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(config = MapStructConfig.class, nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
+@Mapper(
+    config = MapStructConfig.class,
+    nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface InstitutionEmailAddressMapper {
   default Set<DbInstitutionEmailAddress> modelToDb(
       final Institution modelInstitution, final DbInstitution dbInstitution) {

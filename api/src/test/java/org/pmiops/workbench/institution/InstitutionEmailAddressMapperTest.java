@@ -91,7 +91,8 @@ public class InstitutionEmailAddressMapperTest {
                 .setInstitution(dbInst));
 
     // sorted and de-duplicated
-    final SortedSet<String> expected = new TreeSet<>(Sets.newHashSet("eric@broad.org", "joel@broad.org"));
+    final SortedSet<String> expected =
+        new TreeSet<>(Sets.newHashSet("eric@broad.org", "joel@broad.org"));
 
     final SortedSet<String> modelAddresses = mapper.dbAddressesToStrings(dbAddresses);
     assertThat(modelAddresses).isEqualTo(expected);

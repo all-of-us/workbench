@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -326,7 +327,9 @@ public class DbUser {
 
   @Transient
   public List<Degree> getDegreesEnum() {
-    if (degrees == null) return null;
+    if (degrees == null) {
+      return null;
+    }
     return this.degrees.stream()
         .map(
             (degreeObject) -> {
@@ -719,5 +722,129 @@ public class DbUser {
 
   public void setAddress(DbAddress address) {
     this.address = address;
+  }
+
+  // omit ID field from equality so equivalent objects match regardless
+  // of whether they are actually present in the DB
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbUser dbUser = (DbUser) o;
+    return version == dbUser.version
+        && disabled == dbUser.disabled
+        && Objects.equal(creationNonce, dbUser.creationNonce)
+        && Objects.equal(username, dbUser.username)
+        && Objects.equal(contactEmail, dbUser.contactEmail)
+        && Objects.equal(dataAccessLevel, dbUser.dataAccessLevel)
+        && Objects.equal(givenName, dbUser.givenName)
+        && Objects.equal(familyName, dbUser.familyName)
+        && Objects.equal(phoneNumber, dbUser.phoneNumber)
+        && Objects.equal(professionalUrl, dbUser.professionalUrl)
+        && Objects.equal(currentPosition, dbUser.currentPosition)
+        && Objects.equal(organization, dbUser.organization)
+        && Objects.equal(
+            freeTierCreditsLimitDollarsOverride, dbUser.freeTierCreditsLimitDollarsOverride)
+        && Objects.equal(freeTierCreditsLimitDaysOverride, dbUser.freeTierCreditsLimitDaysOverride)
+        && Objects.equal(lastFreeTierCreditsTimeCheck, dbUser.lastFreeTierCreditsTimeCheck)
+        && Objects.equal(firstSignInTime, dbUser.firstSignInTime)
+        && Objects.equal(firstRegistrationCompletionTime, dbUser.firstRegistrationCompletionTime)
+        && Objects.equal(authorities, dbUser.authorities)
+        && Objects.equal(idVerificationIsValid, dbUser.idVerificationIsValid)
+        && Objects.equal(degrees, dbUser.degrees)
+        && Objects.equal(demographicSurveyCompletionTime, dbUser.demographicSurveyCompletionTime)
+        && Objects.equal(emailVerificationStatus, dbUser.emailVerificationStatus)
+        && Objects.equal(pageVisits, dbUser.pageVisits)
+        && Objects.equal(clusterConfigDefault, dbUser.clusterConfigDefault)
+        && Objects.equal(institutionalAffiliations, dbUser.institutionalAffiliations)
+        && Objects.equal(aboutYou, dbUser.aboutYou)
+        && Objects.equal(areaOfResearch, dbUser.areaOfResearch)
+        && Objects.equal(clusterCreateRetries, dbUser.clusterCreateRetries)
+        && Objects.equal(billingProjectRetries, dbUser.billingProjectRetries)
+        && Objects.equal(moodleId, dbUser.moodleId)
+        && Objects.equal(eraCommonsLinkedNihUsername, dbUser.eraCommonsLinkedNihUsername)
+        && Objects.equal(eraCommonsLinkExpireTime, dbUser.eraCommonsLinkExpireTime)
+        && Objects.equal(eraCommonsCompletionTime, dbUser.eraCommonsCompletionTime)
+        && Objects.equal(betaAccessRequestTime, dbUser.betaAccessRequestTime)
+        && Objects.equal(betaAccessBypassTime, dbUser.betaAccessBypassTime)
+        && Objects.equal(dataUseAgreementCompletionTime, dbUser.dataUseAgreementCompletionTime)
+        && Objects.equal(dataUseAgreementBypassTime, dbUser.dataUseAgreementBypassTime)
+        && Objects.equal(dataUseAgreementSignedVersion, dbUser.dataUseAgreementSignedVersion)
+        && Objects.equal(complianceTrainingCompletionTime, dbUser.complianceTrainingCompletionTime)
+        && Objects.equal(complianceTrainingBypassTime, dbUser.complianceTrainingBypassTime)
+        && Objects.equal(complianceTrainingExpirationTime, dbUser.complianceTrainingExpirationTime)
+        && Objects.equal(eraCommonsBypassTime, dbUser.eraCommonsBypassTime)
+        && Objects.equal(emailVerificationCompletionTime, dbUser.emailVerificationCompletionTime)
+        && Objects.equal(emailVerificationBypassTime, dbUser.emailVerificationBypassTime)
+        && Objects.equal(idVerificationCompletionTime, dbUser.idVerificationCompletionTime)
+        && Objects.equal(idVerificationBypassTime, dbUser.idVerificationBypassTime)
+        && Objects.equal(twoFactorAuthCompletionTime, dbUser.twoFactorAuthCompletionTime)
+        && Objects.equal(creationTime, dbUser.creationTime)
+        && Objects.equal(lastModifiedTime, dbUser.lastModifiedTime)
+        && Objects.equal(twoFactorAuthBypassTime, dbUser.twoFactorAuthBypassTime)
+        && Objects.equal(demographicSurvey, dbUser.demographicSurvey)
+        && Objects.equal(address, dbUser.address);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(
+        version,
+        creationNonce,
+        username,
+        contactEmail,
+        dataAccessLevel,
+        givenName,
+        familyName,
+        phoneNumber,
+        professionalUrl,
+        currentPosition,
+        organization,
+        freeTierCreditsLimitDollarsOverride,
+        freeTierCreditsLimitDaysOverride,
+        lastFreeTierCreditsTimeCheck,
+        firstSignInTime,
+        firstRegistrationCompletionTime,
+        authorities,
+        idVerificationIsValid,
+        degrees,
+        demographicSurveyCompletionTime,
+        disabled,
+        emailVerificationStatus,
+        pageVisits,
+        clusterConfigDefault,
+        institutionalAffiliations,
+        aboutYou,
+        areaOfResearch,
+        clusterCreateRetries,
+        billingProjectRetries,
+        moodleId,
+        eraCommonsLinkedNihUsername,
+        eraCommonsLinkExpireTime,
+        eraCommonsCompletionTime,
+        betaAccessRequestTime,
+        betaAccessBypassTime,
+        dataUseAgreementCompletionTime,
+        dataUseAgreementBypassTime,
+        dataUseAgreementSignedVersion,
+        complianceTrainingCompletionTime,
+        complianceTrainingBypassTime,
+        complianceTrainingExpirationTime,
+        eraCommonsBypassTime,
+        emailVerificationCompletionTime,
+        emailVerificationBypassTime,
+        idVerificationCompletionTime,
+        idVerificationBypassTime,
+        twoFactorAuthCompletionTime,
+        creationTime,
+        lastModifiedTime,
+        twoFactorAuthBypassTime,
+        demographicSurvey,
+        address);
   }
 }
