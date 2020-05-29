@@ -87,9 +87,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public Optional<Institution> getInstitution(final String shortName) {
-    return institutionDao
-        .findOneByShortName(shortName)
-        .map(this::toModel);
+    return institutionDao.findOneByShortName(shortName).map(this::toModel);
   }
 
   @Override
@@ -224,7 +222,8 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public void setInstitutionUserInstructions(final InstitutionUserInstructions userInstructions) {
-    final DbInstitution dbInstitution = getDbInstitutionOrThrow(userInstructions.getInstitutionShortName());
+    final DbInstitution dbInstitution =
+        getDbInstitutionOrThrow(userInstructions.getInstitutionShortName());
 
     final DbInstitutionUserInstructions dbInstructions =
         institutionUserInstructionsMapper.modelToDb(userInstructions, dbInstitution);

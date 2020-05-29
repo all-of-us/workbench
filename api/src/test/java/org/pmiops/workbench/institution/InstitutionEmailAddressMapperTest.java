@@ -74,7 +74,7 @@ public class InstitutionEmailAddressMapperTest {
   }
 
   @Test
-  public void test_dbToModel() {
+  public void test_dbAddressesToStrings() {
     final DbInstitution dbInst =
         new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
 
@@ -109,7 +109,7 @@ public class InstitutionEmailAddressMapperTest {
   }
 
   @Test
-  public void test_dbToModel_null() {
+  public void test_dbAddressesToStrings_null() {
     final Set<String> modelAddresses = mapper.dbAddressesToStrings(null);
     assertThat(modelAddresses).isNotNull();
     assertThat(modelAddresses).isEmpty();

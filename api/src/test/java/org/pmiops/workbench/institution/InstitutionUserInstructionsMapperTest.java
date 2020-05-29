@@ -31,7 +31,8 @@ public class InstitutionUserInstructionsMapperTest {
             .instructions("Wash your hands")
             .institutionShortName(broad.getShortName());
 
-    final DbInstitutionUserInstructions dbUserInstructions = mapper.modelToDb(userInstructions, broad);
+    final DbInstitutionUserInstructions dbUserInstructions =
+        mapper.modelToDb(userInstructions, broad);
 
     assertThat(dbUserInstructions.getUserInstructions()).isEqualTo("Wash your hands");
     assertThat(dbUserInstructions.getInstitution()).isEqualTo(broad);

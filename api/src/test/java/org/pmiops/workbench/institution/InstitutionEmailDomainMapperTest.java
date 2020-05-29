@@ -70,7 +70,7 @@ public class InstitutionEmailDomainMapperTest {
   }
 
   @Test
-  public void test_dbToModel() {
+  public void test_dbDomainsToStrings() {
     final DbInstitution dbInst =
         new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
 
@@ -98,7 +98,7 @@ public class InstitutionEmailDomainMapperTest {
   }
 
   @Test
-  public void test_dbToModel_null() {
+  public void test_dbDomainsToStrings_null() {
     final Set<String> modelDomains = mapper.dbDomainsToStrings(null);
     assertThat(modelDomains).isNotNull();
     assertThat(modelDomains).isEmpty();
