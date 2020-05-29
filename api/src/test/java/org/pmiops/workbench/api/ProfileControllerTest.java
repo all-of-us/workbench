@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
-import com.google.rpc.BadRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -781,7 +780,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         .getProfile()
         .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
 
-    //CONTACT_EMAIL is an @example.com
+    // CONTACT_EMAIL is an @example.com
     createUser();
   }
 

@@ -112,7 +112,8 @@ public class ProfileService {
         .equals(verifiedInstitutionalAffiliation.getInstitutionDisplayName())) {
       // No need to throw here, the shortname is the canonical identifier and we can squash the
       // displayname
-      verifiedInstitutionalAffiliation.setInstitutionDisplayName(institution.get().getDisplayName());
+      verifiedInstitutionalAffiliation.setInstitutionDisplayName(
+          institution.get().getDisplayName());
     }
     if (verifiedInstitutionalAffiliation.getInstitutionalRoleEnum() == null) {
       throw new BadRequestException("Institutional role cannot be empty");
