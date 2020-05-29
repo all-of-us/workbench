@@ -21,12 +21,11 @@ import org.pmiops.workbench.model.InstitutionalRole;
 class Researcher extends UserToAffiliate {
   // common fields from User: firstName, lastName, contactEmail, userName
   final InstitutionalRole institutionalRole;
+  final Optional<String> institutionalRoleOther;
   final String institutionDisplayName;
   final String duaSigned;
   final String redCapComplete;
-
-  final Optional<String> institutionalRoleOther;
-
+  
   private static final int COLUMN_LENGTH = 8;
   private static final String AFFIRMATIVE = "Yes";
 
