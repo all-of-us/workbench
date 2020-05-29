@@ -23,7 +23,6 @@ import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -83,30 +82,26 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   }
 
   @Override
-  public List<Project> getAllProjectsForUser(DbUser user) {
-    try {
-      return retryHandler.runAndThrowChecked(
-          (context) -> {
-            List<Project> projects = new ArrayList<>();
-            Optional<String> pageToken = Optional.empty();
-            do {
-              ListProjectsResponse resp =
-                  getCloudResourceManagerServiceWithImpersonation(user)
-                      .projects()
-                      .list()
-                      .setPageToken(pageToken.orElse(null))
-                      .execute();
-              projects.addAll(resp.getProjects());
+  public List<Project> getAllProjectsForUser(DbUser user) throws IOException {
+    return retryHandler.runAndThrowChecked(
+        (context) -> {
+          List<Project> projects = new ArrayList<>();
+          Optional<String> pageToken = Optional.empty();
+          do {
+            ListProjectsResponse resp =
+                getCloudResourceManagerServiceWithImpersonation(user)
+                    .projects()
+                    .list()
+                    .setPageToken(pageToken.orElse(null))
+                    .execute();
+            projects.addAll(resp.getProjects());
 
-              // The API does not specify null or empty string; treat both as empty to be safe.
-              pageToken =
-                  Optional.ofNullable(resp.getNextPageToken())
-                      .filter(Predicates.not(String::isEmpty));
-            } while (pageToken.isPresent());
-            return projects;
-          });
-    } catch (IOException e) {
-      throw ExceptionUtils.convertGoogleIOException(e);
-    }
+            // The API does not specify null or empty string; treat both as empty to be safe.
+            pageToken =
+                Optional.ofNullable(resp.getNextPageToken())
+                    .filter(Predicates.not(String::isEmpty));
+          } while (pageToken.isPresent());
+          return projects;
+        });
   }
 }
