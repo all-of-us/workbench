@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -23,6 +24,8 @@ class Researcher extends UserToAffiliate {
   final String institutionDisplayName;
   final String duaSigned;
   final String redCapComplete;
+
+  final Optional<String> institutionalRoleOther;
 
   private static final int COLUMN_LENGTH = 8;
   private static final String AFFIRMATIVE = "Yes";
@@ -63,6 +66,7 @@ class Researcher extends UserToAffiliate {
     this.contactEmail = userLine[2].trim();
     this.userName = userLine[3].trim();
     this.institutionalRole = parseInstitutionalRole(userLine[4].trim());
+    this.institutionalRoleOther = parseInstitutionalRoleOther(userLine[4].trim());
     this.institutionDisplayName = parseInstitutionDisplayName(userLine[5].trim());
     this.duaSigned = userLine[6].trim();
     this.redCapComplete = userLine[7].trim();
@@ -101,8 +105,24 @@ class Researcher extends UserToAffiliate {
       return InstitutionalRole.TRAINEE;
     }
 
+    // special case one particular user
+    // hopefully we will not need to add many such cases like this
+    if (rawRole.equals("Multispecialty Group Practice")) {
+      return InstitutionalRole.OTHER;
+    }
+
     throw new RuntimeException(
         String.format("Role '%s' for user '%s' could not be matched", rawRole, contactEmail));
+  }
+
+  private Optional<String> parseInstitutionalRoleOther(final String rawRole) {
+    // special case one particular user
+    // hopefully we will not need to add many such cases like this
+    if (rawRole.equals("Multispecialty Group Practice")) {
+      return Optional.of(rawRole);
+    }
+
+    return Optional.empty();
   }
 
   private String parseInstitutionDisplayName(final String rawName) {
@@ -149,9 +169,14 @@ class Researcher extends UserToAffiliate {
                         String.format(
                             "Could not find '%s' Institution in the DB", institutionDisplayName)));
 
-    return new DbVerifiedInstitutionalAffiliation()
-        .setInstitution(dbInstitution)
-        .setUser(dbUser)
-        .setInstitutionalRoleEnum(institutionalRole);
+    final DbVerifiedInstitutionalAffiliation affiliation =
+        new DbVerifiedInstitutionalAffiliation()
+            .setInstitution(dbInstitution)
+            .setUser(dbUser)
+            .setInstitutionalRoleEnum(institutionalRole);
+
+    institutionalRoleOther.ifPresent(affiliation::setInstitutionalRoleOtherText);
+
+    return affiliation;
   }
 }
