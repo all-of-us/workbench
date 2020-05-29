@@ -20,6 +20,7 @@ import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.utils.FieldValues;
+import org.pmiops.workbench.utils.mappers.AuditLogEntryMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,11 +29,15 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   private static final int MICROSECONDS_IN_MILLISECOND = 1000;
   private static final long MAX_QUERY_LIMIT = 1000L;
 
+  private AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   public ActionAuditQueryServiceImpl(
-      BigQueryService bigQueryService, Provider<WorkbenchConfig> workbenchConfigProvider) {
+      AuditLogEntryMapper auditLogEntryMapper,
+      BigQueryService bigQueryService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.auditLogEntryMapper = auditLogEntryMapper;
     this.bigQueryService = bigQueryService;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -82,7 +87,8 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     return new WorkspaceAuditLogQueryResponse()
         .logEntries(logEntries)
         .query(getReplacedQueryText(queryJobConfiguration))
-        .workspaceDatabaseId(workspaceDatabaseId);
+        .workspaceDatabaseId(workspaceDatabaseId)
+        .actions(auditLogEntryMapper.logEntriesToActions(logEntries));
   }
 
   private String getTableName() {

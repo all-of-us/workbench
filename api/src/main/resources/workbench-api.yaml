@@ -7402,6 +7402,11 @@ definitions:
     - query
     - workspaceDatabaseId
     properties:
+      actions:
+        description: Re-constructed objects for each composite action in the query results.
+        type: array
+        items:
+          "$ref": "#/definitions/AuditAction"
       logEntries:
         type: array
         items:
@@ -7505,4 +7510,73 @@ definitions:
         description: >
           Type of target. Described by the enum TargetType (which is not generated). Left as string
           since BigQuery doesn't enforce the enum membership.
+        type: string
+  AuditAction:
+    type: object
+    description: >
+      A user or system action in the audit system. May contain multiple agents, targets, and action
+      types.
+    properties:
+      actionId:
+        description: Unique ID for this action. Used for grouping similar events under a
+          single action, though in this representation we're returning a straight list of rows.
+          This is technically a UUID, but this may change in the future (to a shorter random string),
+          so we only type it as a String.
+        type: string
+      actionTime:
+        description: Time of the earliest event (row) for this action.
+        type: string
+        format: date-time
+      subActions:
+        type: array
+        items:
+          "$ref": "#/definitions/AuditSubAction"
+  AuditSubAction:
+    description: >
+      Composite header for an AuditAction's sub-actions. Useful as a map key, plus it contains
+      information about the agent, target, and action type (of which there can be multiplpe per
+      action.
+    type: object
+    properties:
+      header:
+        "$ref": "#/definitions/AuditSubActionHeader"
+      propertyChanges:
+        type: array
+        items:
+          "$ref": "#/definitions/AuditTargetPropertyChange"
+  AuditSubActionHeader:
+    type: object
+    properties:
+      actionType:
+        type: string
+      agent:
+        "$ref": "#/definitions/AuditAgent"
+      target:
+        "$ref": "#/definitions/AuditTarget"
+  AuditAgent:
+    type: object
+    properties:
+      agentId:
+        type: integer
+        format: int64
+      agentType:
+        type: string
+      agentUsername:
+        type: string
+  AuditTarget:
+    type: object
+    properties:
+      targetId:
+        type: integer
+        format: int64
+      targetType:
+        type: string
+  AuditTargetPropertyChange:
+    type: object
+    properties:
+      targetProperty:
+        type: string
+      previousValue:
+        type: string
+      newValue:
         type: string

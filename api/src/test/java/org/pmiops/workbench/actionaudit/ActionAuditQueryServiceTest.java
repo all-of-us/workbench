@@ -94,7 +94,8 @@ public class ActionAuditQueryServiceTest {
   private static final Page<FieldValueList> WORKSPACE_QUERY_RESULT_PAGE =
       new FakeSinglePage<>(WORKSPACE_RESULT_ROWS);
   private static final TableResult WORKSPACE_TABLE_RESULT =
-      new TableResult(WORKSPACE_QUERY_SCHEMA, WORKSPACE_RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
+      new TableResult(
+          WORKSPACE_QUERY_SCHEMA, WORKSPACE_RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
   private static final TableResult EMPTY_RESULT = new EmptyTableResult();
   private static final long DEFAULT_LIMIT = 100L;
   private static final DateTime DEFAULT_AFTER_INCLUSIVE = DateTime.parse("205-02-14T01:20+02:00");
@@ -135,7 +136,9 @@ public class ActionAuditQueryServiceTest {
 
   @Test
   public void testQueryEventsFromWorkspace_returnsRows() {
-    doReturn(WORKSPACE_TABLE_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
+    doReturn(WORKSPACE_TABLE_RESULT)
+        .when(mockBigQueryService)
+        .executeQuery(any(QueryJobConfiguration.class));
 
     final WorkspaceAuditLogQueryResponse response =
         actionAuditQueryService.queryEventsForWorkspace(
@@ -164,12 +167,9 @@ public class ActionAuditQueryServiceTest {
   public void testQueryUserEvents() {
     doReturn(EMPTY_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
 
-    final UserAuditLogQueryResponse response = actionAuditQueryService.queryEventsForUser(
-        USER_DB_ID,
-        DEFAULT_LIMIT,
-        DEFAULT_AFTER_INCLUSIVE,
-        DEFAULT_BEFORE_EXCLUSIVE
-    );
+    final UserAuditLogQueryResponse response =
+        actionAuditQueryService.queryEventsForUser(
+            USER_DB_ID, DEFAULT_LIMIT, DEFAULT_AFTER_INCLUSIVE, DEFAULT_BEFORE_EXCLUSIVE);
     assertThat(response.getLogEntries()).isEmpty();
     assertThat(response.getUserDatabaseId()).isEqualTo(USER_DB_ID);
     assertThat(response.getQuery()).contains("SELECT");
