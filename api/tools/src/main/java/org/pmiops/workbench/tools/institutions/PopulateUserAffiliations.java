@@ -30,7 +30,8 @@ import org.springframework.context.annotation.Bean;
  */
 public class PopulateUserAffiliations {
 
-  private List<UserToAffiliate> parseUsers(final String filename, final String userTypes) throws IOException {
+  private List<UserToAffiliate> parseUsers(final String filename, final String userTypes)
+      throws IOException {
     if (userTypes.equals("OPS")) {
       return OpsUser.parseInput(filename);
     } else if (userTypes.equals("RESEARCHERS")) {
