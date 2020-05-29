@@ -105,7 +105,9 @@
     "enableEventDateModifier": false
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-preprod"
+    "logName":"workbench-action-audit-preprod",
+    "bigQueryDataset": "workbench_action_audit_prepropd",
+    "bigQueryTable": "workbench_action_audit_prepropd"
   },
   "captcha": {
     "enableCaptcha": true,

@@ -105,7 +105,9 @@
     "enableEventDateModifier": false
   },
   "actionAudit": {
-    "logName": "workbench-action-audit-staging"
+    "logName": "workbench-action-audit-staging",
+    "bigQueryDataset": "workbench_action_audit_staging",
+    "bigQueryTable": "workbench_action_audit_staging"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-staging.appspot.com",

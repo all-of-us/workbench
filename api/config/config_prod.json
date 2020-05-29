@@ -105,7 +105,9 @@
     "enableEventDateModifier": false
   },
   "actionAudit": {
-    "logName": "workbench-action-audit-prod"
+    "logName": "workbench-action-audit-prod",
+    "bigQueryDataset": "workbench_action_audit_prod",
+    "bigQueryTable": "workbench_action_audit_prod"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-prod.appspot.com",

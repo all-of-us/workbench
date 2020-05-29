@@ -933,6 +933,54 @@ paths:
           description: A list of workspaces
           schema:
             "$ref": "#/definitions/WorkspaceListResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/audit":
+    get:
+      tags:
+        - workspaceAdmin
+      description: 'Fetch audit logs involving this workspace as either a subject or object.'
+      operationId: getAuditLogEntries
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          type: string
+          required: true
+          description: >
+            Firecloud Namespace for the AoU workspace to be queried.
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 100
+          description: >
+            Maximum number of entries to return, sorted by timestamp descending.
+        - name: after
+          description: >
+            Earliest time matched by the query (inclusive). Epoch millis.
+
+            Note that while Swagger allows a date-time formatted string query parameter,
+            it appears Spring doesn't handle that well today. It gives the error message described
+            at https://github.com/swagger-api/swagger-codegen/issues/4113.
+          in: query
+          type: integer
+          format: int64
+          required: false
+          default: 0
+        - name: before
+          description: >
+             Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
+             since Epoch (though declared as a string). Defaults to current timestamp.
+          in: query
+          type: integer
+          format: int64
+          required: false
+      responses:
+        200:
+          description: >
+            List of rows matching the query result. queryMetadata contains
+            the workspaceDatabaaseId (for post-processing) as well as the query actually
+            executed (as a starting point for exploring manually in BigQuery).
+          schema:
+            "$ref": "#/definitions/WorkspaceAuditLogQueryResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list":
     get:
       summary: Get details of Python files from google Bucket directory notebook
@@ -7295,4 +7343,95 @@ definitions:
         type: integer
         format: int64
       conceptName:
+        type: string
+  WorkspaceAuditLogQueryResponse:
+    type: object
+    description: >
+      Represents the results of a query into the audit dataset in BigQery without
+      filtering or transformation.
+    required:
+    - logEntries
+    - query
+    - workspaceDatabaseId
+    properties:
+      logEntries:
+        type: array
+        items:
+          "$ref": "#/definitions/AuditLogEntry"
+      query:
+        description: Copy of the query used in BigQuery to assist in further exploration or
+          debugging.
+        type: string
+      workspaceDatabaseId:
+        description: >
+          ID in the MySQL database and BigQuery Audit Database for the workspace queried.
+        type: integer
+        format: int64
+  AuditLogEntry:
+    description: >
+      Representation of the BigQuery Audit Log entry, post-translation from Stackdriver logging.
+      All fields are treated as optional here, as there are no non-null constraints in the BigQuery
+      dataset.
+
+      It's possible that due to some error now or in the past that some columns might not match
+      their expected values, nothing in this type definition is stricter than the BigQuery schema.
+    type: object
+    properties:
+      actionId:
+        description: Unique ID for this action. Used for grouping similar events under a
+          single action, though in this representation we're returning a straight list of rows.
+          This is technically a UUID, but this may change in the future (to a shorter random string),
+          so we only type it as a String.
+        type: string
+      actionType:
+        description: >
+          Defines what action is taking place in this event. (There can be several ACTION_TYPEs
+          in a single Action assigned to different events. String representation of the ActionType
+          enum (not generated).
+        type: string
+      agentId:
+        description: >
+          ID for the Agent (typically a User). If there's a SQL table for this agent type,
+          this this is the PK for that table (e.g. user_id).
+        type: integer
+        format: int64
+      agentType:
+        description: >
+          A member of the org.pmiops.workbench.actionaudit.AgentType enum (not generated). Since
+          this is typed as a string in BigQuery (and not constrained to that type), we don't try
+          to narrow the type in the admin API.
+        type: string
+      agentUsername:
+        description: >
+          Username of the user or administrator taking the action. This is the agent_email column
+          in BigQuery.
+        type: string
+        format: email
+      eventTime:
+        description: >
+          Timestamp recorded at time of the event. Called timestamp in the BigQuery table. Even
+          though it says string, it's actually a integer over the wire.
+        type: string
+        format: date-time
+      newValue:
+        description: Value of the target property (if any) after the event.
+        type: string
+      previousValue:
+        description: >
+          Value of the target property at the instant of this event beginning. prev_value in BigQuery.
+        type: string
+      targetId:
+        description: >
+          Database ID of the corresponding table for the target entity.
+        type: integer
+        format: int64
+      targetProperty:
+        description: >
+          Property on the target entity affected by this event. One of several internal enums such
+          as WorkspaceTargetProperty.
+        type: string
+      targetType:
+        description: >
+          Type of target. Described by the enum TargetType (which is not generated). Left as string
+          since BigQuery doesn't enforce the enum membership.
         type: string
