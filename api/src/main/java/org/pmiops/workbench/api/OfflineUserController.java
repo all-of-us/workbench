@@ -1,9 +1,12 @@
 package org.pmiops.workbench.api;
 
+import com.google.api.services.cloudresourcemanager.model.ResourceId;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -43,16 +46,6 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-  }
-
-  private boolean timestampsEqual(Timestamp a, Timestamp b) {
-    if (a != null) {
-      return a.equals(b);
-    } else if (b != null) {
-      return b.equals(a);
-    } else {
-      return a == b;
-    }
   }
 
   /**
@@ -95,7 +88,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
 
-        if (!timestampsEqual(newTime, oldTime)) {
+        if (!Objects.equals(newTime, oldTime)) {
           log.info(
               String.format(
                   "Compliance training completion changed for user %s. Old %s, new %s",
@@ -156,7 +149,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
-        if (!timestampsEqual(newTime, oldTime)) {
+        if (!Objects.equals(newTime, oldTime)) {
           log.info(
               String.format(
                   "eRA Commons completion changed for user %s. Old %s, new %s",
@@ -220,7 +213,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
-        if (!timestampsEqual(newTime, oldTime)) {
+        if (!Objects.equals(newTime, oldTime)) {
           log.info(
               String.format(
                   "Two-factor auth completion changed for user %s. Old %s, new %s",
@@ -266,8 +259,17 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
       List<String> unauthorizedLogs =
           cloudResourceManagerService.getAllProjectsForUser(user).stream()
-              .filter(project -> !(WHITELISTED_ORG_IDS.contains(project.getParent().getId())))
-              .map(project -> project.getName() + " in organization " + project.getParent().getId())
+              .filter(
+                  project ->
+                      project.getParent() == null
+                          || !(WHITELISTED_ORG_IDS.contains(project.getParent().getId())))
+              .map(
+                  project ->
+                      project.getName()
+                          + " in organization "
+                          + Optional.ofNullable(project.getParent())
+                              .map(ResourceId::getId)
+                              .orElse("[none]"))
               .collect(Collectors.toList());
       if (unauthorizedLogs.size() > 0) {
         log.log(
