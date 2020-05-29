@@ -2,7 +2,7 @@
 
 require 'fileutils'
 require_relative "../../aou-utils/workbench"
-require_relative "../../../aou-utils/utils/common"
+require_relative "../../aou-utils/utils/common"
 
 def build_snippets_menu()
   tmpl = File.read("aou-snippets-menu.js.template")

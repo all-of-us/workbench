@@ -5,20 +5,20 @@ with custom AoU-specific code snippets. The snippets live in
 https://github.com/all-of-us/workbench-snippets. AoU configures Leo clusters as
 follows to enable this:
 
-1. Enable the snippets_menu/main extension in ./initialize_notebook_cluster.sh
+1. Enable the snippets_menu/main extension in ../src/main/webapp/static/initialize_notebook_cluster.sh
 1. Deploy a Jupyter UI extension to configure the menu with AoU-specific snippets
 
 ## Updating Snippets
 
 As code snippets are updated in the source repository, we will want to
-periocially update the menus in the Workbench. For now, this process is fairly
+periodically update the menus in the Workbench. For now, this process is fairly
 manual and can be improved going forwards (see RW-2665):
 
 Prerequisite: Must have `jq` installed (for pretty printing).
 
 1. In a separate directory, clone the snippets repo and build the menu config:
     https://github.com/all-of-us/workbench-snippets/blob/master/CONTRIBUTING.md#auto-generation-of-jupyter-snippets-menu-configuration
-1. Run the following from the `workbench/api/cluster-resources` directory to pull in the updated JSON
+1. Run the following from the `workbench/api/snippets-menu` directory to pull in the updated JSON
 
     ```
     ./import_json_from_snippets_repo.sh <path to workbench-snippets repo>
@@ -36,7 +36,7 @@ collocated menu JSON files.
 
 ## Local testing
 
-See instructions for local extension testing above.
+See [instructions for local extension testing](../src/main/webapp/static/README.md).
 
 To test the menu contents JSON alone:
 
