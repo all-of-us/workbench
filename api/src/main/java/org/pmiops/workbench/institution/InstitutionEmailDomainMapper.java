@@ -1,17 +1,18 @@
 package org.pmiops.workbench.institution;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
+import org.mapstruct.NullValueMappingStrategy;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(config = MapStructConfig.class)
+@Mapper(config = MapStructConfig.class, nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface InstitutionEmailDomainMapper {
   default Set<DbInstitutionEmailDomain> modelToDb(
       final Institution modelInstitution, final DbInstitution dbInstitution) {
@@ -24,10 +25,9 @@ public interface InstitutionEmailDomainMapper {
         .collect(Collectors.toSet());
   }
 
-  default List<String> dbToModel(final Set<DbInstitutionEmailDomain> dbDomains) {
-    return Optional.ofNullable(dbDomains).orElse(Collections.emptySet()).stream()
-        .map(DbInstitutionEmailDomain::getEmailDomain)
-        .sorted()
-        .collect(Collectors.toList());
+  SortedSet<String> dbDomainsToStrings(final Set<DbInstitutionEmailDomain> dbDomains);
+
+  default String dbDomainToString(final DbInstitutionEmailDomain dbDomain) {
+    return dbDomain.getEmailDomain();
   }
 }

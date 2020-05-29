@@ -4,9 +4,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -30,8 +32,7 @@ public class InstitutionEmailAddressMapperTest {
     // contains an out-of-order duplicate
     final List<String> rawAddresses =
         Lists.newArrayList("alice@nih.gov", "joel@other-inst.org", "alice@nih.gov");
-    final List<String> sortedDistinctAddresses =
-        rawAddresses.stream().sorted().distinct().collect(Collectors.toList());
+    final SortedSet<String> sortedDistinctAddresses = new TreeSet<>(rawAddresses);
 
     final Institution modelInst =
         new Institution()
@@ -51,7 +52,7 @@ public class InstitutionEmailAddressMapperTest {
       assertThat(dbAddress.getInstitution()).isEqualTo(dbInst);
     }
 
-    final List<String> roundTripModelAddresses = mapper.dbToModel(dbAddresses);
+    final SortedSet<String> roundTripModelAddresses = mapper.dbAddressesToStrings(dbAddresses);
     assertThat(roundTripModelAddresses).isEqualTo(sortedDistinctAddresses);
   }
 
@@ -89,10 +90,10 @@ public class InstitutionEmailAddressMapperTest {
                 .setEmailAddress("joel@broad.org")
                 .setInstitution(dbInst));
 
-    // sorted and de-duplicated (the Set should not store the duplicate anyway)
-    final List<String> expected = Lists.newArrayList("eric@broad.org", "joel@broad.org");
+    // sorted and de-duplicated
+    final SortedSet<String> expected = new TreeSet<>(Sets.newHashSet("eric@broad.org", "joel@broad.org"));
 
-    final List<String> modelAddresses = mapper.dbToModel(dbAddresses);
+    final SortedSet<String> modelAddresses = mapper.dbAddressesToStrings(dbAddresses);
     assertThat(modelAddresses).isEqualTo(expected);
 
     // does not need to match dbInst: we only care about its emailAddresses
@@ -100,7 +101,7 @@ public class InstitutionEmailAddressMapperTest {
         new Institution()
             .shortName("Whatever")
             .displayName("Whatever Tech")
-            .emailAddresses(modelAddresses);
+            .emailAddresses(new ArrayList<>(modelAddresses));
 
     final Set<DbInstitutionEmailAddress> roundTripDbAddresses = mapper.modelToDb(modelInst, dbInst);
     assertThat(roundTripDbAddresses).isEqualTo(dbAddresses);
@@ -108,7 +109,7 @@ public class InstitutionEmailAddressMapperTest {
 
   @Test
   public void test_dbToModel_null() {
-    final List<String> modelAddresses = mapper.dbToModel(null);
+    final Set<String> modelAddresses = mapper.dbAddressesToStrings(null);
     assertThat(modelAddresses).isNotNull();
     assertThat(modelAddresses).isEmpty();
   }

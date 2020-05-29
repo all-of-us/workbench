@@ -4,9 +4,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -29,8 +31,7 @@ public class InstitutionEmailDomainMapperTest {
   public void test_modelToDb() {
     // contains an out-of-order duplicate
     final List<String> rawDomains = Lists.newArrayList("nih.gov", "other-inst.org", "nih.gov");
-    final List<String> sortedDistinctDomains =
-        rawDomains.stream().sorted().distinct().collect(Collectors.toList());
+    final SortedSet<String> sortedDistinctDomains = new TreeSet<>(rawDomains);
 
     final Institution modelInst =
         new Institution()
@@ -50,7 +51,7 @@ public class InstitutionEmailDomainMapperTest {
       assertThat(dbDomain.getInstitution()).isEqualTo(dbInst);
     }
 
-    final List<String> roundTripModelDomains = mapper.dbToModel(dbDomains);
+    final SortedSet<String> roundTripModelDomains = mapper.dbDomainsToStrings(dbDomains);
     assertThat(roundTripModelDomains).isEqualTo(sortedDistinctDomains);
   }
 
@@ -79,10 +80,10 @@ public class InstitutionEmailDomainMapperTest {
             new DbInstitutionEmailDomain().setEmailDomain("broad.org").setInstitution(dbInst),
             new DbInstitutionEmailDomain().setEmailDomain("vumc.org").setInstitution(dbInst));
 
-    // sorted and de-duplicated (the Set should not store the duplicate anyway)
-    final List<String> expected = Lists.newArrayList("broad.org", "vumc.org");
+    // sorted and de-duplicated
+    final SortedSet<String> expected = new TreeSet<>(Sets.newHashSet("broad.org", "vumc.org"));
 
-    final List<String> modelDomains = mapper.dbToModel(dbDomains);
+    final SortedSet<String> modelDomains = mapper.dbDomainsToStrings(dbDomains);
     assertThat(modelDomains).isEqualTo(expected);
 
     // does not need to match dbInst: we only care about its emailDomains
@@ -90,7 +91,7 @@ public class InstitutionEmailDomainMapperTest {
         new Institution()
             .shortName("Whatever")
             .displayName("Whatever Tech")
-            .emailDomains(modelDomains);
+            .emailDomains(new ArrayList<>(modelDomains));
 
     final Set<DbInstitutionEmailDomain> roundTripDbDomains = mapper.modelToDb(modelInst, dbInst);
     assertThat(roundTripDbDomains).isEqualTo(dbDomains);
@@ -98,7 +99,7 @@ public class InstitutionEmailDomainMapperTest {
 
   @Test
   public void test_dbToModel_null() {
-    final List<String> modelDomains = mapper.dbToModel(null);
+    final Set<String> modelDomains = mapper.dbDomainsToStrings(null);
     assertThat(modelDomains).isNotNull();
     assertThat(modelDomains).isEmpty();
   }
