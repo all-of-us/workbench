@@ -94,7 +94,7 @@ public class DbVerifiedInstitutionalAffiliation {
 
     DbVerifiedInstitutionalAffiliation that = (DbVerifiedInstitutionalAffiliation) o;
 
-    return Objects.equals(user, that.user)
+    return DbUser.equalUsernames(user, that.user)
         && Objects.equals(institution, that.institution)
         && Objects.equals(institutionalRoleEnum, that.institutionalRoleEnum)
         && Objects.equals(institutionalRoleOtherText, that.institutionalRoleOtherText);
@@ -102,7 +102,7 @@ public class DbVerifiedInstitutionalAffiliation {
 
   @Override
   public int hashCode() {
-    return Objects.hash(user, institution, institutionalRoleEnum, institutionalRoleOtherText);
+    return Objects.hash(DbUser.usernameHashCode(user), institution, institutionalRoleEnum, institutionalRoleOtherText);
   }
 
   @Override
