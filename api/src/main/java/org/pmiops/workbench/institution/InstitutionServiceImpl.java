@@ -264,6 +264,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
   }
 
+  // note that this replaces all email domains for this institution with the passed-in domains
   private void setInstitutionEmailDomains(
       final Institution modelInstitution, final DbInstitution dbInstitution) {
     institutionEmailDomainDao.deleteByInstitution(dbInstitution);
@@ -272,6 +273,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         .forEach(institutionEmailDomainDao::save);
   }
 
+  // note that this replaces all email addresses for this institution with the passed-in addresses
   private void setInstitutionEmailAddresses(
       final Institution modelInstitution, final DbInstitution dbInstitution) {
     institutionEmailAddressDao.deleteByInstitution(dbInstitution);
