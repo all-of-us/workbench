@@ -27,7 +27,7 @@ public class CloudResourceManagerServiceImplIntegrationTest extends BaseIntegrat
       "cloud-resource-manager-integration-test@fake-research-aou.org";
 
   @Test
-  public void testGetAllProjectsForUser() {
+  public void testGetAllProjectsForUser() throws Exception {
     DbUser testUser = new DbUser();
     testUser.setUsername(CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL);
     List<Project> projectList = service.getAllProjectsForUser(testUser);
