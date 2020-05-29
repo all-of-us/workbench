@@ -102,7 +102,11 @@ public class DbVerifiedInstitutionalAffiliation {
 
   @Override
   public int hashCode() {
-    return Objects.hash(DbUser.usernameHashCode(user), institution, institutionalRoleEnum, institutionalRoleOtherText);
+    return Objects.hash(
+        DbUser.usernameHashCode(user),
+        institution,
+        institutionalRoleEnum,
+        institutionalRoleOtherText);
   }
 
   @Override

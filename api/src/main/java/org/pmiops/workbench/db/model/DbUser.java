@@ -729,7 +729,9 @@ public class DbUser {
   // can be removed once we have a proper equals() / hashCode()
 
   public static boolean equalUsernames(DbUser a, DbUser b) {
-    return Objects.equals(Optional.ofNullable(a).map(DbUser::getUsername), Optional.ofNullable(b).map(DbUser::getUsername));
+    return Objects.equals(
+        Optional.ofNullable(a).map(DbUser::getUsername),
+        Optional.ofNullable(b).map(DbUser::getUsername));
   }
 
   public static int usernameHashCode(DbUser dbUser) {
