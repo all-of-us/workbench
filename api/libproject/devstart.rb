@@ -428,22 +428,6 @@ Common.register_command({
   :fn => ->(*args) { run_all_tests("test", args) }
 })
 
-
-def run_nightly_integration_tests(cmd_name, *args)
-  ensure_docker cmd_name, args
-  common = Common.new
-  ServiceAccountContext.new(TEST_PROJECT).run do
-    get_gsuite_admin_key(TEST_PROJECT)
-    common.run_inline %W{gradle nightlyIntegrationTest} + args
-  end
-end
-
-Common.register_command({
-  :invocation => "nightly-integration",
-  :description => "Runs nightly tests, including integration tests.",
-  :fn => ->(*args) { run_nightly_integration_tests("nightly-integration", *args) }
-})
-
 def run_integration_tests(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new

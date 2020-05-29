@@ -152,7 +152,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.zendesk.client.v2.Zendesk;
 
 // TODO(jaycarlton): many of the tests here are testing DataSetServiceImpl more than
 //   DataSetControllerImpl, so move those tests and setup stuff into DataSetServiceTest
@@ -235,7 +234,6 @@ public class DataSetControllerTest {
   @Autowired WorkspaceAuditor workspaceAuditor;
   @Autowired WorkspaceMapper workspaceMapper;
   @Autowired LogsBasedMetricService logsBasedMetricService;
-  @Autowired Provider<Zendesk> mockZendeskProvider;
   @MockBean MonitoringService mockMonitoringService;
 
   @TestConfiguration
@@ -277,7 +275,6 @@ public class DataSetControllerTest {
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    Zendesk.class,
     FreeTierBillingService.class
   })
   static class Configuration {
@@ -362,7 +359,6 @@ public class DataSetControllerTest {
             userProvider,
             fireCloudService,
             cloudStorageService,
-            mockZendeskProvider,
             freeTierBillingService,
             CLOCK,
             notebooksService,

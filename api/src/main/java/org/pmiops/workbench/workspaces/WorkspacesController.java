@@ -85,13 +85,9 @@ import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.WorkspaceMapper;
-import org.pmiops.workbench.zendesk.ZendeskRequests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.zendesk.client.v2.Zendesk;
-import org.zendesk.client.v2.ZendeskException;
-import org.zendesk.client.v2.model.Request;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
@@ -118,7 +114,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
-  private final Provider<Zendesk> zendeskProvider;
 
   @Autowired
   public WorkspacesController(
@@ -130,7 +125,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
-      Provider<Zendesk> zendeskProvider,
       FreeTierBillingService freeTierBillingService,
       Clock clock,
       NotebooksService notebooksService,
@@ -148,7 +142,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.cloudStorageService = cloudStorageService;
-    this.zendeskProvider = zendeskProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
@@ -209,33 +202,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private FirecloudWorkspace attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     return fireCloudService.createWorkspace(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
-  }
-
-  private void maybeFileZendeskReviewRequest(Workspace workspace) {
-    if (!workspace.getResearchPurpose().getReviewRequested()) {
-      return;
-    }
-
-    final Request zdReq;
-    try {
-      zdReq =
-          zendeskProvider
-              .get()
-              .createRequest(
-                  ZendeskRequests.workspaceToReviewRequest(userProvider.get(), workspace));
-    } catch (ZendeskException e) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Failed to file Zendesk review ticket for workspace %s/%s",
-              workspace.getNamespace(), workspace.getId()),
-          e);
-      return;
-    }
-    log.info(
-        String.format(
-            "filed Zendesk review request ticket with title %s, ID %s",
-            zdReq.getSubject(), zdReq.getId()));
   }
 
   @Override
@@ -316,7 +282,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
-    maybeFileZendeskReviewRequest(createdWorkspace);
     return createdWorkspace;
   }
 
@@ -416,9 +381,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
-      // Note: this utility does not set the "review requested" bit or time. This is currently
-      // immutable on a workspace, see RW-4132.
       workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
+      dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
+      if (researchPurpose.getReviewRequested()) {
+        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+        dbWorkspace.setTimeRequested(now);
+      }
     }
 
     if (workspace.getBillingAccountName() != null) {
@@ -584,7 +552,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
-    maybeFileZendeskReviewRequest(savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
