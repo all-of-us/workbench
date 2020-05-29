@@ -153,7 +153,7 @@ public class OfflineUserControllerTest {
   }
 
   @Test
-  public void testBulkProjectAudit() {
+  public void testBulkProjectAudit() throws Exception {
     List<Project> projectList = new ArrayList<>();
     doReturn(projectList).when(cloudResourceManagerService).getAllProjectsForUser(any());
     offlineUserController.bulkAuditProjectAccess();
