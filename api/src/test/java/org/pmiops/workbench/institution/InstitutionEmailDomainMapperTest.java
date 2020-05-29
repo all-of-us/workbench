@@ -44,7 +44,7 @@ public class InstitutionEmailDomainMapperTest {
 
     final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst);
 
-    assertThat(dbDomains.size()).isEqualTo(sortedDistinctDomains.size());
+    assertThat(dbDomains).hasSize(sortedDistinctDomains.size());
 
     for (final DbInstitutionEmailDomain dbDomain : dbDomains) {
       assertThat(sortedDistinctDomains).contains(dbDomain.getEmailDomain());

@@ -45,7 +45,7 @@ public class InstitutionEmailAddressMapperTest {
 
     final Set<DbInstitutionEmailAddress> dbAddresses = mapper.modelToDb(modelInst, dbInst);
 
-    assertThat(dbAddresses.size()).isEqualTo(sortedDistinctAddresses.size());
+    assertThat(dbAddresses).hasSize(sortedDistinctAddresses.size());
 
     for (final DbInstitutionEmailAddress dbAddress : dbAddresses) {
       assertThat(sortedDistinctAddresses).contains(dbAddress.getEmailAddress());
