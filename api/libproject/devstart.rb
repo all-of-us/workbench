@@ -2118,54 +2118,6 @@ Common.register_command({
   :fn => ->(*args) { connect_to_cloud_db_binlog("connect-to-cloud-db-binlog", *args) }
 })
 
-
-def deploy_gcs_artifacts(cmd_name, args)
-  ensure_docker cmd_name, args
-
-  common = Common.new
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = false
-  op.add_option(
-    "--dry-run",
-    ->(opts, _) { opts.dry_run = true},
-    "Don't actually push, just log the command lines which would be " +
-    "executed on a real invocation."
-  )
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-  auth_domain_group = get_auth_domain_group(gcc.project)
-
-  Dir.chdir("cluster-resources") do
-    common.run_inline(%W{./build.rb build-snippets-menu})
-    run_inline_or_log(op.opts.dry_run, %W{
-      gsutil cp
-      initialize_notebook_cluster.sh
-      start_notebook_cluster.sh
-      activity-checker-extension.js
-      aou-download-policy-extension.js
-      aou-upload-policy-extension.js
-      generated/aou-snippets-menu.js
-      gs://#{gcc.project}-cluster-resources/
-    })
-    # This bucket must be readable by all AoU researchers and their pet service accounts
-    # account (https://github.com/DataBiosphere/leonardo/issues/220). Sharing with all
-    # registered users. The firecloud.org check is to avoid circular requirements in
-    # environment setup
-    if !auth_domain_group.nil? and !auth_domain_group.empty?
-      run_inline_or_log(op.opts.dry_run, %W{
-        gsutil iam ch group:#{auth_domain_group}:objectViewer gs://#{gcc.project}-cluster-resources
-      })
-    end
-  end
-end
-
-Common.register_command({
-  :invocation => "deploy-gcs-artifacts",
-  :description => "Deploys any GCS artifacts associated with this environment.",
-  :fn => ->(*args) { deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
-})
-
 def deploy_app(cmd_name, args, with_cron, with_gsuite_admin, with_queue)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
@@ -2212,7 +2164,7 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin, with_queue)
     get_gsuite_admin_key(gcc.project)
   end
   Dir.chdir("cluster-resources") do
-    common.run_inline(%W{./build.rb generate-static-files})
+    common.run_inline(%W{./build.rb build-snippets-menu})
   end
   common.run_inline %W{gradle :appengineStage}
   promote = "--no-promote"
@@ -2423,11 +2375,8 @@ def deploy(cmd_name, args)
 
     common.run_inline %W{gradle loadDataDictionary -PappArgs=#{op.opts.dry_run ? true : false}}
 
-    common.status "Pushing GCS artifacts..."
-    dry_flag = op.opts.dry_run ? %W{--dry-run} : []
-    deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}} + dry_flag)
-
     # Keep the cloud proxy context open for the service account credentials.
+    dry_flag = op.opts.dry_run ? %W{--dry-run} : []
     deploy_args = %W{
       --project #{gcc.project}
       --version #{op.opts.version}
@@ -2527,8 +2476,6 @@ def create_project_resources(gcc)
   end
   common.status "Creating GCS bucket to store credentials..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
-  common.status "Creating GCS bucket to store scripts..."
-  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-cluster-resources/}
   common.status "Creating Cloud SQL instances..."
   common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
                        --activation-policy=ALWAYS --backup-start-time 00:00 --require-ssl
@@ -2607,7 +2554,6 @@ def setup_cloud_project(cmd_name, *args)
 
   create_project_resources(gcc)
   setup_project_data(gcc, op.opts.cdr_db_name)
-  deploy_gcs_artifacts(cmd_name, %W{--project #{gcc.project}})
 end
 
 Common.register_command({

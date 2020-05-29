@@ -44,7 +44,6 @@
     "debugQueries": true
   },
   "googleCloudStorageService": {
-    "clusterResourcesBucketName": "all-of-us-rw-perf-cluster-resources",
     "credentialsBucketName": "all-of-us-rw-perf-credentials",
     "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },

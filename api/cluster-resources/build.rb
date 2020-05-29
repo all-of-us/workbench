@@ -2,6 +2,7 @@
 
 require 'fileutils'
 require_relative "../../aou-utils/workbench"
+require_relative "../../../aou-utils/utils/common"
 
 def build_snippets_menu()
   tmpl = File.read("aou-snippets-menu.js.template")
@@ -25,31 +26,15 @@ def build_snippets_menu()
     tmpl = tmpl.insert i, File.read(path)
   end
 
-  FileUtils.mkdir_p "generated"
-  File.write("generated/aou-snippets-menu.js", tmpl)
+  out = "../src/main/webapp/static/aou-snippets-menu.js"
+  File.write(out, tmpl)
+  Common.new.status "Wrote generated menu to GAE static dir: #{out}"
 end
 
 Common.register_command({
   :invocation => "build-snippets-menu",
   :description => "Builds the templated snippets menu Jupyter extension",
   :fn => ->() { build_snippets_menu }
-})
-
-def generate_static_files()
-  static_files_directory = "../src/main/webapp/static"
-  FileUtils.cp("activity-checker-extension.js", static_files_directory)
-  FileUtils.cp("aou-download-policy-extension.js", static_files_directory)
-  FileUtils.cp("aou-upload-policy-extension.js", static_files_directory)
-  FileUtils.cp("initialize_notebook_cluster.sh", static_files_directory)
-  FileUtils.cp("start_notebook_cluster.sh", static_files_directory)
-  build_snippets_menu()
-  FileUtils.cp("generated/aou-snippets-menu.js", static_files_directory)
-end
-
-Common.register_command({
-  :invocation => "generate-static-files",
-  :description => "Copies files from the cluster resources directory into our static files",
-  :fn => ->() { generate_static_files }
 })
 
 Workbench.handle_argv_or_die(__FILE__)

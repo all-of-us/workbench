@@ -130,10 +130,8 @@ public class WorkbenchConfig {
   }
 
   public static class GoogleCloudStorageServiceConfig {
-    public String clusterResourcesBucketName;
     public String credentialsBucketName;
     public String emailImagesBucketName;
-    public String demosBucketName;
   }
 
   public static class GoogleDirectoryServiceConfig {
