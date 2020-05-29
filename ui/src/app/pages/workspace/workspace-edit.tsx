@@ -1194,7 +1194,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <FlexColumn>
                 <FlexRow>
                 <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
-                             disabled={this.isMode(WorkspaceEditMode.Edit)}
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
