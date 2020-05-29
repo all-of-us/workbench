@@ -5,8 +5,8 @@
 set -x
 
 # Runs before every Jupyter notebook cluster startup, including both creation
-# and resumes. This file is copied to the GCS bucket <PROJECT>-cluster-resources
-# and its GCS path is passed in as jupyterStartUserScriptUri during notebook
+# and resumes. This file is served as a static asset from the Workbench API
+# server and its path is passed in as jupyterStartUserScriptUri during notebook
 # cluster creation. This runs after initialize_notebook_cluster.sh on creation.
 
 pushd /usr/local/share/wondershaper
