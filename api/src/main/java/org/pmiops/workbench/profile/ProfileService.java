@@ -10,6 +10,10 @@ import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
@@ -20,18 +24,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProfileService {
   private final FreeTierBillingService freeTierBillingService;
+  private final InstitutionDao institutionDao;
+  private final InstitutionService institutionService;
   private final ProfileMapper profileMapper;
   private final UserDao userDao;
   private final UserService userService;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
-  private final InstitutionDao institutionDao;
 
   @Autowired
   public ProfileService(
       FreeTierBillingService freeTierBillingService,
       InstitutionDao institutionDao,
+      InstitutionService institutionService,
       ProfileMapper profileMapper,
       UserDao userDao,
       UserService userService,
@@ -40,6 +46,7 @@ public class ProfileService {
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
     this.freeTierBillingService = freeTierBillingService;
     this.institutionDao = institutionDao;
+    this.institutionService = institutionService;
     this.profileMapper = profileMapper;
     this.userDao = userDao;
     this.userService = userService;
@@ -82,31 +89,58 @@ public class ProfileService {
     return profile;
   }
 
-  public boolean validateVerifiedInstitution(
-      VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation) {
-    // inst short name needs to match table in DB
-    // disp name needs to lineup with inst short name
-    // inst role enum needs to exist
-    // inst role other text - if role is other - needs to exist
+  public void verifyInstitutionalAffiliation(Profile profile) {
+    VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        profile.getVerifiedInstitutionalAffiliation();
+
+    if (verifiedInstitutionalAffiliation == null) {
+      throw new BadRequestException("Institutional affiliation cannot be empty");
+    }
+
     Optional<DbInstitution> institution =
         institutionDao.findOneByShortName(
             verifiedInstitutionalAffiliation.getInstitutionShortName());
-    if (!institution.isPresent()
-        || !institution
-            .get()
-            .getDisplayName()
-            .equals(verifiedInstitutionalAffiliation.getInstitutionDisplayName())
-        || verifiedInstitutionalAffiliation.getInstitutionalRoleEnum().equals(null)
-        || (verifiedInstitutionalAffiliation
-                .getInstitutionalRoleEnum()
-                .equals(InstitutionalRole.OTHER)
-            && (verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText().equals("")
-                || verifiedInstitutionalAffiliation
-                    .getInstitutionalRoleOtherText()
-                    .equals(null)))) {
-      return false;
-    } else {
-      return true;
+    if (!institution.isPresent()) {
+      throw new NotFoundException(
+          String.format(
+              "Could not find institution %s in database",
+              verifiedInstitutionalAffiliation.getInstitutionShortName()));
+    }
+    if (!institution
+        .get()
+        .getDisplayName()
+        .equals(verifiedInstitutionalAffiliation.getInstitutionDisplayName())) {
+      // No need to throw here, the shortname is the canonical identifier and we can squash the
+      // displayname
+      verifiedInstitutionalAffiliation.setInstitutionDisplayName(institution.get().getDisplayName());
+    }
+    if (verifiedInstitutionalAffiliation.getInstitutionalRoleEnum() == null) {
+      throw new BadRequestException("Institutional role cannot be empty");
+    }
+    if (verifiedInstitutionalAffiliation.getInstitutionalRoleEnum().equals(InstitutionalRole.OTHER)
+        && (verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText().equals("")
+            || verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText() == null)) {
+      throw new BadRequestException(
+          "Institutional role description cannot be empty when institutional role is set to Other");
+    }
+
+    String contactEmail = profile.getContactEmail();
+    DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation =
+        verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+            profile.getVerifiedInstitutionalAffiliation(), institutionService);
+    if (!institutionService.validateAffiliation(dbVerifiedAffiliation, contactEmail)) {
+      final String msg =
+          Optional.ofNullable(dbVerifiedAffiliation)
+              .map(
+                  affiliation ->
+                      String.format(
+                          "Contact email %s is not a valid member of institution '%s'",
+                          contactEmail, affiliation.getInstitution().getShortName()))
+              .orElse(
+                  String.format(
+                      "Contact email %s does not have a valid institutional affiliation",
+                      contactEmail));
+      throw new BadRequestException(msg);
     }
   }
 }

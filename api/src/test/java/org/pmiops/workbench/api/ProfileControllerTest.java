@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import com.google.rpc.BadRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -757,7 +758,35 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateVerifiedInstitutionalAffiliation_changeForbidden() {
+  public void updateVerifiedInstitutionalAffiliation_invalidDomain() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    ArrayList<String> emailDomains = new ArrayList<>();
+    emailDomains.add("@broadinstitute.org");
+    emailDomains.add("@broad.org");
+
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailDomains(emailDomains)
+            .duaTypeEnum(DuaType.MASTER);
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(broad.getShortName())
+            .institutionalRoleEnum(InstitutionalRole.ADMIN);
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    //CONTACT_EMAIL is an @example.com
+    createUser();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void updateVerifiedInstitutionalAffiliation_noSuchInstitution() {
     config.featureFlags.requireInstitutionalVerification = true;
 
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
@@ -777,8 +806,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateProfile(profile);
   }
 
-  @Test(expected = BadRequestException.class)
-  public void updateVerifiedInstitutionalAffiliation_addForbidden() {
+  @Test
+  public void updateVerifiedInstitutionalAffiliation() {
     // necessary to create a user without one
     config.featureFlags.requireInstitutionalVerification = false;
     createUser();
