@@ -25,7 +25,7 @@ class Researcher extends UserToAffiliate {
   final String institutionDisplayName;
   final String duaSigned;
   final String redCapComplete;
-  
+
   private static final int COLUMN_LENGTH = 8;
   private static final String AFFIRMATIVE = "Yes";
 
