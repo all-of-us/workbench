@@ -74,7 +74,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(institution -> institutionMapper.dbToModel(institution, this))
+        .map(this::toModel)
         .collect(Collectors.toList());
   }
 
@@ -89,7 +89,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   public Optional<Institution> getInstitution(final String shortName) {
     return institutionDao
         .findOneByShortName(shortName)
-        .map(institution -> institutionMapper.dbToModel(institution, this));
+        .map(this::toModel);
   }
 
   @Override
@@ -106,7 +106,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     final DbInstitution dbInstitution =
         institutionDao.save(institutionMapper.modelToDb(institutionToCreate));
     populateAuxTables(institutionToCreate, dbInstitution);
-    return institutionMapper.dbToModel(dbInstitution, this);
+    return toModel(dbInstitution);
   }
 
   @Override
@@ -142,7 +142,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                   institutionDao.save(
                       institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId));
               populateAuxTables(institutionToUpdate, dbObjectToUpdate);
-              return institutionMapper.dbToModel(dbObjectToUpdate, this);
+              return toModel(dbObjectToUpdate);
             });
   }
 
@@ -152,8 +152,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     if (dbAffiliation == null) {
       return false;
     }
-    return validateInstitutionalEmail(
-        institutionMapper.dbToModel(dbAffiliation.getInstitution(), this), contactEmail);
+    return validateInstitutionalEmail(toModel(dbAffiliation.getInstitution()), contactEmail);
   }
 
   @Override
@@ -254,6 +253,10 @@ public class InstitutionServiceImpl implements InstitutionService {
   public boolean validateOperationalUser(DbInstitution institution) {
     return institution != null
         && institution.getShortName().equals(OPERATIONAL_USER_INSTITUTION_SHORT_NAME);
+  }
+
+  private Institution toModel(DbInstitution dbInstitution) {
+    return institutionMapper.dbToModel(dbInstitution, this);
   }
 
   private void populateAuxTables(
