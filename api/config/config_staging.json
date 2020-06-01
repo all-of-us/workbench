@@ -13,7 +13,7 @@
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:0.0.1",
-    "welderDockerImage": "broadinstitute/welder-server:e6562d0"
+    "welderDockerImage": "broadinstitute/welder-server:7ae1a62"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
