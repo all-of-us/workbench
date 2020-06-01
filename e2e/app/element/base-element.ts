@@ -28,7 +28,7 @@ export default class BaseElement extends Container {
    * If there is no element matching xpath selector, null is returned.
    * @param {WaitForSelectorOptions} waitOptions
    */
-  async waitForXPath(waitOptions?: WaitForSelectorOptions): Promise<this> {
+  async waitForXPath(waitOptions: WaitForSelectorOptions = {visible: true}): Promise<this> {
     if (this.element === undefined) {
       this.element = await this.page.waitForXPath(this.xpath, waitOptions);
     }

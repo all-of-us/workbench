@@ -23,7 +23,7 @@ export default class SelectMenu extends Container {
    * @param {string} textValue Partial or full string to click in Select.
    * @param {number} maxAttempts Default try count is 2.
    */
-  async select(textValue: string, maxAttempts: number = 2): Promise<void> {
+  async clickMenuItem(textValue: string, maxAttempts: number = 2): Promise<void> {
 
     const clickText = async () => {
       await this.open(2);
