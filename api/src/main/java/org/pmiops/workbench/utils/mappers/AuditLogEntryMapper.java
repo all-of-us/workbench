@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.Streams;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,7 @@ import org.pmiops.workbench.utils.FieldValues;
 public interface AuditLogEntryMapper {
   AuditAgent logEntryToAgent(AuditLogEntry auditLogEntry);
 
-  default AuditEventBundleHeader logEntryToSubActionHeader(AuditLogEntry auditLogEntry) {
+  default AuditEventBundleHeader logEntryToEventBundleHeader(AuditLogEntry auditLogEntry) {
     return new AuditEventBundleHeader()
         .target(logEntryToTarget(auditLogEntry))
         .agent(logEntryToAgent(auditLogEntry))
@@ -59,24 +60,36 @@ public interface AuditLogEntryMapper {
   default List<AuditAction> logEntriesToActions(List<AuditLogEntry> logEntries) {
     final Multimap<String, AuditLogEntry> actionIdToRows =
         Multimaps.index(logEntries, AuditLogEntry::getActionId);
-    final ImmutableList.Builder<AuditAction> resultBuilder = ImmutableList.builder();
-    actionIdToRows
+    return actionIdToRows
         .asMap()
-        .forEach(
-            (actionId, rows) -> {
-              resultBuilder.add(buildAuditAction(actionId, rows));
-            });
-    return resultBuilder.build();
+        .values()
+        .stream()
+        .map(this::buildAuditAction)
+        .collect(ImmutableList.toImmutableList());
   }
 
-  default AuditAction buildAuditAction(String actionId, Collection<AuditLogEntry> logEntries) {
-    final AuditAction result = new AuditAction().actionId(actionId);
+  /**
+   *
+   * @param logEntries Collection of AuditLogEntry objectsthat have a common Action ID,
+   *                   which should be the same event time, given the unofficial but surprisingly
+   *                   harshly enforced non-schema schama.
+   */
+  default AuditAction buildAuditAction(Collection<AuditLogEntry> logEntries) {
+    final AuditLogEntry firstEntry = logEntries.stream()
+       .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("logEntries collection must not be empty"));
+
+    final AuditAction result = new AuditAction()
+        .actionId(firstEntry.getActionId())
+        .actionTime(firstEntry.getEventTime());
+
     final Multimap<AuditEventBundleHeader, AuditLogEntry> headerToLogEntries =
-        Multimaps.index(logEntries, this::logEntryToSubActionHeader);
+        Multimaps.index(logEntries, this::logEntryToEventBundleHeader);
     final List<AuditEventBundle> eventBundles =
         headerToLogEntries.asMap().entrySet().stream()
             .map(e -> buildEventBundle(e.getKey(), e.getValue()))
             .collect(Collectors.toList());
+
     return result.eventBundles(eventBundles);
   }
 
@@ -87,6 +100,7 @@ public interface AuditLogEntryMapper {
         .propertyChanges(
             logEntries.stream()
                 .map(this::logEntryToTargetPropertyChange)
+                .flatMap(Streams::stream)
                 .collect(Collectors.toList()));
   }
 
