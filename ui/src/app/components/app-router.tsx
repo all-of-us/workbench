@@ -4,6 +4,13 @@ import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, 
 
 const {Fragment} = React;
 
+interface Guards {
+  [index: number]: {
+    checkGuard: () => boolean;
+    redirectPath: string;
+  };
+}
+
 export const usePath = () => {
   const {path} = useRouteMatch();
   return path;
@@ -23,8 +30,9 @@ export const AppRoute = ({path, data = {}, component: Component}): React.ReactEl
   </Route>;
 };
 
-export const ProtectedRoutes = ({path, guards, children}): React.ReactElement => {
-  const {redirectPath = false} = fp.find(({needsRedirect}) => needsRedirect(), guards) || {};
+export const ProtectedRoutes = (
+  {path, guards, children}: {path: string, guards: Guards, children: any[] }): React.ReactElement => {
+  const { redirectPath } = fp.find(({checkGuard}) => checkGuard(), guards);
   const location = useLocation();
   return redirectPath ? <AppRoute
       path={path}
