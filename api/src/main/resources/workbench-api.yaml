@@ -7427,10 +7427,16 @@ definitions:
       Represents the results of a query into the audit dataset in BigQery without
       filtering or transformation.
     required:
+      - actions
       - logEntries
       - query
       - userDatabaseId
     properties:
+      actions:
+        description: Re-constructed objects for each composite action in the query results.
+        type: array
+        items:
+          "$ref": "#/definitions/AuditAction"
       logEntries:
         type: array
         items:
@@ -7528,11 +7534,11 @@ definitions:
         description: Time of the earliest event (row) for this action.
         type: string
         format: date-time
-      subActions:
+      eventBundles:
         type: array
         items:
-          "$ref": "#/definitions/AuditSubAction"
-  AuditSubAction:
+          "$ref": "#/definitions/AuditEventBundle"
+  AuditEventBundle:
     description: >
       Composite header for an AuditAction's sub-actions. Useful as a map key, plus it contains
       information about the agent, target, and action type (of which there can be multiplpe per
@@ -7540,12 +7546,12 @@ definitions:
     type: object
     properties:
       header:
-        "$ref": "#/definitions/AuditSubActionHeader"
+        "$ref": "#/definitions/AuditEventBundleHeader"
       propertyChanges:
         type: array
         items:
           "$ref": "#/definitions/AuditTargetPropertyChange"
-  AuditSubActionHeader:
+  AuditEventBundleHeader:
     type: object
     properties:
       actionType:

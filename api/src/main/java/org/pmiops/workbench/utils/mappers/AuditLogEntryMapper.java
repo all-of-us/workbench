@@ -7,14 +7,16 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.elasticsearch.common.Strings;
 import org.mapstruct.Mapper;
 import org.pmiops.workbench.model.AuditAction;
 import org.pmiops.workbench.model.AuditAgent;
+import org.pmiops.workbench.model.AuditEventBundle;
+import org.pmiops.workbench.model.AuditEventBundleHeader;
 import org.pmiops.workbench.model.AuditLogEntry;
-import org.pmiops.workbench.model.AuditSubAction;
-import org.pmiops.workbench.model.AuditSubActionHeader;
 import org.pmiops.workbench.model.AuditTarget;
 import org.pmiops.workbench.model.AuditTargetPropertyChange;
 import org.pmiops.workbench.utils.FieldValues;
@@ -23,8 +25,8 @@ import org.pmiops.workbench.utils.FieldValues;
 public interface AuditLogEntryMapper {
   AuditAgent logEntryToAgent(AuditLogEntry auditLogEntry);
 
-  default AuditSubActionHeader logEntryToSubActionHeader(AuditLogEntry auditLogEntry) {
-    return new AuditSubActionHeader()
+  default AuditEventBundleHeader logEntryToSubActionHeader(AuditLogEntry auditLogEntry) {
+    return new AuditEventBundleHeader()
         .target(logEntryToTarget(auditLogEntry))
         .agent(logEntryToAgent(auditLogEntry))
         .actionType(auditLogEntry.getActionType());
@@ -32,7 +34,27 @@ public interface AuditLogEntryMapper {
 
   AuditTarget logEntryToTarget(AuditLogEntry auditLogEntry);
 
-  AuditTargetPropertyChange logEntryToTargetPropertyChange(AuditLogEntry auditLogEntry);
+  /**
+   * Build an AuditTargetPropertyChange object from the relevant fields in the AuditLogEntry, unless
+   * all of those are null, in which case return an empty optional
+   *
+   * @param auditLogEntry
+   * @return
+   */
+  default Optional<AuditTargetPropertyChange> logEntryToTargetPropertyChange(
+      AuditLogEntry auditLogEntry) {
+    if ((Strings.isNullOrEmpty(auditLogEntry.getTargetProperty())
+            && Strings.isNullOrEmpty(auditLogEntry.getPreviousValue()))
+        && Strings.isNullOrEmpty(auditLogEntry.getNewValue())) {
+      return Optional.empty();
+    } else {
+      return Optional.of(
+          new AuditTargetPropertyChange()
+              .targetProperty(auditLogEntry.getTargetProperty())
+              .previousValue(auditLogEntry.getPreviousValue())
+              .newValue(auditLogEntry.getNewValue()));
+    }
+  }
 
   default List<AuditAction> logEntriesToActions(List<AuditLogEntry> logEntries) {
     final Multimap<String, AuditLogEntry> actionIdToRows =
@@ -49,19 +71,18 @@ public interface AuditLogEntryMapper {
 
   default AuditAction buildAuditAction(String actionId, Collection<AuditLogEntry> logEntries) {
     final AuditAction result = new AuditAction().actionId(actionId);
-    final Multimap<AuditSubActionHeader, AuditLogEntry> headerToLogEntries =
+    final Multimap<AuditEventBundleHeader, AuditLogEntry> headerToLogEntries =
         Multimaps.index(logEntries, this::logEntryToSubActionHeader);
-    final List<AuditSubAction> subActions =
+    final List<AuditEventBundle> eventBundles =
         headerToLogEntries.asMap().entrySet().stream()
-            .map(e -> buildSubAction(e.getKey(), e.getValue()))
+            .map(e -> buildEventBundle(e.getKey(), e.getValue()))
             .collect(Collectors.toList());
-    result.subActions(subActions);
-    return result;
+    return result.eventBundles(eventBundles);
   }
 
-  default AuditSubAction buildSubAction(
-      AuditSubActionHeader header, Collection<AuditLogEntry> logEntries) {
-    return new AuditSubAction()
+  default AuditEventBundle buildEventBundle(
+      AuditEventBundleHeader header, Collection<AuditLogEntry> logEntries) {
+    return new AuditEventBundle()
         .header(header)
         .propertyChanges(
             logEntries.stream()
