@@ -96,11 +96,11 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getSubmitButton(): Promise<Button> {
-    return await Button.forLabel(this.page, {name: 'Submit'});
+    return await Button.findByName(this.page, {name: 'Submit'});
   }
 
   async getNextButton(): Promise<Button> {
-    return await Button.forLabel(this.page, {name: 'Next'});
+    return await Button.findByName(this.page, {name: 'Next'});
   }
 
   async agreementLoaded(): Promise<boolean> {
@@ -117,19 +117,19 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getPrivacyStatementCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_PRIVACY_STATEMENT});
+    return await Checkbox.findByName(this.page, {normalizeSpace: LABEL_ALIAS.READ_PRIVACY_STATEMENT});
   }
 
   async getTermsOfUseCheckbox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.READ_TERMS_OF_USE});
+    return await Checkbox.findByName(this.page, {normalizeSpace: LABEL_ALIAS.READ_TERMS_OF_USE});
   }
 
   async getInstitutionNameInput(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, {name: LABEL_ALIAS.INSTITUTION_NAME});
+    return await Textbox.findByName(this.page, {name: LABEL_ALIAS.INSTITUTION_NAME});
   }
 
   async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return await Textarea.forLabel(this.page, {normalizeSpace: LABEL_ALIAS.RESEARCH_BACKGROUND});
+    return await Textarea.findByName(this.page, {normalizeSpace: LABEL_ALIAS.RESEARCH_BACKGROUND});
   }
 
   async getUsernameDomain(): Promise<unknown> {
@@ -140,11 +140,11 @@ export default class CreateAccountPage extends BasePage {
   async fillInFormFields(fields: { label: string; value: string; }[]): Promise<string> {
     let newUserName;
     for (const field of fields) {
-      const textbox = await Textbox.forLabel(this.page, {name: field.label});
+      const textbox = await Textbox.findByName(this.page, {name: field.label});
       await textbox.type(field.value);
       await textbox.tabKey();
       if (field.label === 'New Username') {
-        await ClrIconLink.forLabel(this.page, {name: field.label, iconShape: 'success-standard'});
+        await ClrIconLink.findByName(this.page, {name: field.label, iconShape: 'success-standard'});
         newUserName = field.value; // store new username for return
       }
     }
@@ -153,24 +153,24 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string) {
-    const dropdown = await SelectMenu.forLabel(this.page, FIELD.institutionSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FIELD.institutionSelect.textOption);
     await dropdown.clickMenuItem(selectTextValue);
   }
 
   async getInstitutionValue() {
-    const dropdown = await SelectMenu.forLabel(this.page, FIELD.institutionSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FIELD.institutionSelect.textOption);
     return await dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
-    const dropdown = await SelectMenu.forLabel(this.page, FIELD.educationLevelSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FIELD.educationLevelSelect.textOption);
     await dropdown.clickMenuItem(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
-    const dropdown = await SelectMenu.forLabel(this.page, FIELD.birthYearSelect.textOption);
+    const dropdown = await SelectMenu.findByName(this.page, FIELD.birthYearSelect.textOption);
     await dropdown.clickMenuItem(year);
   }
 
@@ -185,12 +185,12 @@ export default class CreateAccountPage extends BasePage {
 
     await this.selectInstitution(INSTITUTION_VALUE.BROAD);
     console.log(await this.getInstitutionValue());
-    const emailAddressTextbox = await Textbox.forLabel(this.page, FIELD.institutionEmailTextbox.textOption);
+    const emailAddressTextbox = await Textbox.findByName(this.page, FIELD.institutionEmailTextbox.textOption);
     await emailAddressTextbox.type(config.institutionContactEmail);
     await emailAddressTextbox.tabKey(); // tab out to start email validation
-    await ClrIconLink.forLabel(this.page, {containsText: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorLevel: 2, iconShape: 'success-standard'});
+    await ClrIconLink.findByName(this.page, {containsText: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorLevel: 2, iconShape: 'success-standard'});
 
-    const roleSelect = await SelectMenu.forLabel(this.page, FIELD.describeRole.textOption);
+    const roleSelect = await SelectMenu.findByName(this.page, FIELD.describeRole.textOption);
     await roleSelect.clickMenuItem(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
 

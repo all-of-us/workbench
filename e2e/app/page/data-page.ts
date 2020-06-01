@@ -54,11 +54,11 @@ export default class DataPage extends AuthenticatedPage {
   }
 
   async getAddDataSetsButton(): Promise<ClrIconLink> {
-    return ClrIconLink.forLabel(this.page, {name: LabelAlias.Datasets, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: LabelAlias.Datasets, iconShape: 'plus-circle'});
   }
 
   async getAddCohortsButton(): Promise<ClrIconLink> {
-    return ClrIconLink.forLabel(this.page, {name: LabelAlias.Cohorts, iconShape: 'plus-circle'});
+    return ClrIconLink.findByName(this.page, {name: LabelAlias.Cohorts, iconShape: 'plus-circle'});
   }
 
 }

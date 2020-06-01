@@ -11,7 +11,7 @@ export default class Select extends BaseElement {
 
   private selectedOption;
    
-  static async forLabel(
+  static async findByName(
      page: Page,
      xOpt: XPathOptions,
      container?: Container,

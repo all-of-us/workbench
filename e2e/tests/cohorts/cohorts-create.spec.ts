@@ -77,7 +77,7 @@ describe('User can create new Cohorts', () => {
     await waitForText(page, 'Cohort Saved Successfully');
 
     // Clean up: delete cohort
-    const cohortLink = await Link.forLabel(page, {name: cohortName});
+    const cohortLink = await Link.findByName(page, {name: cohortName});
     await cohortLink.clickAndWait();
     await waitWhileLoading(page);
     await waitForText(page, newTotalCount, {xpath: FieldSelector.TotalCount});

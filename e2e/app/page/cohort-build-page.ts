@@ -55,7 +55,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
-    const createCohortButton = await Button.forLabel(this.page, {name: 'Create Cohort'});
+    const createCohortButton = await Button.findByName(this.page, {name: 'Create Cohort'});
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click();
 
@@ -73,7 +73,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const descriptionTextarea = await dialog.waitForTextarea('DESCRIPTION');
     await descriptionTextarea.type(description);
 
-    const saveButton = await Button.forLabel(this.page, {name: 'Save'});
+    const saveButton = await Button.findByName(this.page, {name: 'Save'});
     await saveButton.waitUntilEnabled();
     await saveButton.click();
     await dialog.waitUntilDialogIsClosed();
@@ -83,7 +83,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async deleteCohort(): Promise<string> {
-    const trashIcon = await ClrIconLink.forLabel(this.page, {iconShape: 'trash'});
+    const trashIcon = await ClrIconLink.findByName(this.page, {iconShape: 'trash'});
     await trashIcon.click();
     return this.deleteCohortConfirmationDialog();
   }
@@ -94,7 +94,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   async deleteCohortConfirmationDialog(): Promise<string> {
     const dialog = new Dialog(this.page);
     const contentText = await dialog.getContent();
-    const deleteButton = await Button.forLabel(this.page, {type: ElementType.Button, normalizeSpace: 'Delete Cohort'}, dialog);
+    const deleteButton = await Button.findByName(this.page, {type: ElementType.Button, normalizeSpace: 'Delete Cohort'}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),

@@ -41,7 +41,7 @@ export default class CreateCriteriaModal extends Dialog {
   }
 
   async waitForPhysicalMeasurementCriteriaLink(criteriaType: PhysicalMeasurementsCriteria): Promise<ClrIconLink> {
-    return ClrIconLink.forLabel(this.page, {type: ElementType.Icon, name: criteriaType, iconShape: 'slider', ancestorLevel: 2}, this);
+    return ClrIconLink.findByName(this.page, {type: ElementType.Icon, name: criteriaType, iconShape: 'slider', ancestorLevel: 2}, this);
   }
 
   /**
@@ -58,7 +58,7 @@ export default class CreateCriteriaModal extends Dialog {
     const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
 
-    const selectMenu = await SelectMenu.forLabel(this.page, {ancestorLevel: 2});
+    const selectMenu = await SelectMenu.findByName(this.page, {ancestorLevel: 2});
     await selectMenu.clickMenuItem(filterSign);
 
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});

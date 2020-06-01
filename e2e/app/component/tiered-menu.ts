@@ -12,10 +12,9 @@ export default class TieredMenu extends Container {
 
   /**
    * Select menu item(s).
-   * @param {ElementHandle} menuParentElement
-   * @param {string | string[]} selectMenuItems
+   * @param {string[]} menuItems
    */
-  async clickMenuItem(selectMenuItems: string[]): Promise<void> {
+  async clickMenuItem(menuItems: string[]): Promise<void> {
     // menu dropdown must be open and visible
     await this.page.waitForXPath(`${this.xpath}/ul`, {visible: true});
 
@@ -28,9 +27,9 @@ export default class TieredMenu extends Container {
     };
 
     // iterate thru array in an orderly fashion
-    const num = selectMenuItems.length;
+    const num = menuItems.length;
     for (let i=0; i<num; i++) {
-      const menuItem = await findLink(selectMenuItems[i]);
+      const menuItem = await findLink(menuItems[i]);
       if (i >= (num - 1)) {
         await menuItem.click();
       }
