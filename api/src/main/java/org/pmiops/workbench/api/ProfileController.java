@@ -19,6 +19,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -885,7 +886,12 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<UserAuditLogQueryResponse> getAuditLogEntries(
-      String userId, Integer limit, Long after, Long before) {
-    return null;
+      String userName, Integer limit, Long afterMillis, Long beforeMillisNullable) {
+    long userDatabaseId = Optional.ofNullable(userDao.findUserByUsername(userName)).map(DbUser::getUserId).orElseThrow(new NotFoundException(""));
+    final DateTime after = new DateTime(afterMillis);
+    final DateTime before =
+        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
+    return ResponseEntity.ok(
+        actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
   }
 }
