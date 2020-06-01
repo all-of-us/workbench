@@ -24,7 +24,7 @@ export const AppRoute = ({path, data = {}, component: Component}): React.ReactEl
 };
 
 export const ProtectedRoutes = ({path, guards, children}): React.ReactElement => {
-  const {redirectPath} = fp.find(({needsRedirect}) => needsRedirect(), guards) || {};
+  const {redirectPath = false} = fp.find(({needsRedirect}) => needsRedirect(), guards) || {};
   const location = useLocation();
   return redirectPath ? <AppRoute
       path={path}

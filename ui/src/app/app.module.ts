@@ -19,7 +19,7 @@ import {SignInService} from './services/sign-in.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
-import {AppRouterComponent} from './components/app-router-example';
+import {AppRouting} from './app-routing';
 import {BugReportComponent} from './components/bug-report';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
@@ -30,7 +30,6 @@ import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
-import {CookiePolicyComponent} from './pages/cookie-policy';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {CreateReviewModalComponent} from './pages/data/cohort-review/create-review-modal';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -49,6 +48,7 @@ import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
+import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
 
@@ -142,7 +142,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
-    CookiePolicyComponent,
     CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,
@@ -166,11 +165,12 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,
+    WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
     HomepageComponent,
-    AppRouterComponent
+    AppRouting
   ],
   providers: [
     {

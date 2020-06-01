@@ -4,6 +4,8 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
+import {AppRouting} from './app-routing';
+
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {DataUserCodeOfConductComponent} from 'app/pages/profile/data-user-code-of-conduct';
@@ -15,7 +17,6 @@ import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
-import {CookiePolicyComponent} from './pages/cookie-policy';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -31,16 +32,14 @@ import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
-// Import {WorkspaceListComponent} from './pages/workspace/workspace-list';
+import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
-import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {DisabledGuard} from './guards/disabled-guard.service';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
-import {AppRouterComponent} from './components/app-router-example';
 
 declare let gtag: Function;
 
@@ -49,10 +48,6 @@ const routes: Routes = [
     path: 'login',
     component: SignInComponent,
     data: {title: 'Sign In'}
-  }, {
-    path: 'cookie-policy',
-    component: CookiePolicyComponent,
-    data: {title: 'Cookie Policy'}
   }, {
     path: 'user-disabled',
     component: UserDisabledComponent,
@@ -85,9 +80,13 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            component: AppRouterComponent,
-            data: {}
-          }, {
+            component: WorkspaceListComponent,
+            data: {
+              title: 'View Workspaces',
+              breadcrumb: BreadcrumbType.Workspaces
+            }
+          },
+          {
             /* TODO The children under ./views need refactoring to use the data
              * provided by the route rather than double-requesting it.
              */
@@ -101,27 +100,25 @@ const routes: Routes = [
                 data: {
                   title: 'View Workspace Details',
                   breadcrumb: BreadcrumbType.Workspace,
-                  helpContentKey: 'about'
+                  helpContent: 'about'
                 }
-              },
-              {
+              }, {
                 path: 'edit',
                 component: WorkspaceEditComponent,
                 data: {
                   title: 'Edit Workspace',
                   mode: WorkspaceEditMode.Edit,
                   breadcrumb: BreadcrumbType.WorkspaceEdit,
-                  helpContentKey: 'edit'
+                  helpContent: 'edit'
                 }
-              },
-              {
+              }, {
                 path: 'duplicate',
                 component: WorkspaceEditComponent,
                 data: {
                   title: 'Duplicate Workspace',
                   mode: WorkspaceEditMode.Duplicate,
                   breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                  helpContentKey: 'duplicate'
+                  helpContent: 'duplicate'
                 }
               },
               {
@@ -133,20 +130,20 @@ const routes: Routes = [
                     data: {
                       title: 'View Notebooks',
                       breadcrumb: BreadcrumbType.Workspace,
-                      helpContentKey: 'notebooks'
+                      helpContent: 'notebooks'
                     }
                   }, {
                     path: ':nbName',
                     component: NotebookRedirectComponent,
                     data: {
-                      // Use the (urldecoded) captured value nbName
+                      // use the (urldecoded) captured value nbName
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
                       // The iframe we use to display the Jupyter notebook does something strange
                       // to the height calculation of the container, which is normally set to auto.
                       // Setting this flag sets the container to 100% so that no content is clipped.
                       contentFullHeightOverride: true,
-                      helpContentKey: NOTEBOOK_HELP_CONTENT,
+                      helpContent: 'notebookStorage',
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
@@ -156,7 +153,7 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      helpContentKey: NOTEBOOK_HELP_CONTENT,
+                      helpContent: 'notebookStorage',
                       notebookHelpSidebarStyles: true,
                       minimizeChrome: true
                     }
@@ -172,7 +169,7 @@ const routes: Routes = [
                     data: {
                       title: 'Data Page',
                       breadcrumb: BreadcrumbType.Workspace,
-                      helpContentKey: 'data'
+                      helpContent: 'data'
                     }
                   },
                   {
@@ -181,7 +178,7 @@ const routes: Routes = [
                     data: {
                       title: 'Dataset Page',
                       breadcrumb: BreadcrumbType.Dataset,
-                      helpContentKey: 'datasetBuilder'
+                      helpContent: 'datasetBuilder'
                     }
                   },
                   {
@@ -190,7 +187,7 @@ const routes: Routes = [
                     data: {
                       title: 'Edit Dataset',
                       breadcrumb: BreadcrumbType.Dataset,
-                      helpContentKey: 'datasetBuilder'
+                      helpContent: 'datasetBuilder'
                     }
                   }, {
                     path: 'cohorts',
@@ -201,7 +198,7 @@ const routes: Routes = [
                         data: {
                           title: 'Cohort Actions',
                           breadcrumb: BreadcrumbType.Cohort,
-                          helpContentKey: 'cohortBuilder'
+                          helpContent: 'cohortBuilder'
                         },
                       },
                       {
@@ -217,7 +214,7 @@ const routes: Routes = [
                             data: {
                               title: 'Review Cohort Participants',
                               breadcrumb: BreadcrumbType.Cohort,
-                              helpContentKey: 'reviewParticipants'
+                              helpContent: 'reviewParticipants'
                             }
                           }, {
                             path: 'participants',
@@ -225,7 +222,7 @@ const routes: Routes = [
                             data: {
                               title: 'Review Cohort Participants',
                               breadcrumb: BreadcrumbType.Cohort,
-                              helpContentKey: 'reviewParticipants'
+                              helpContent: 'reviewParticipants'
                             }
                           }, {
                             path: 'cohort-description',
@@ -233,7 +230,7 @@ const routes: Routes = [
                             data: {
                               title: 'Review Cohort Description',
                               breadcrumb: BreadcrumbType.Cohort,
-                              helpContentKey: 'cohortDescription'
+                              helpContent: 'cohortDescription'
                             }
                           }, {
                             path: 'participants/:pid',
@@ -242,7 +239,7 @@ const routes: Routes = [
                               title: 'Participant Detail',
                               breadcrumb: BreadcrumbType.Participant,
                               shouldReuse: true,
-                              helpContentKey: 'reviewParticipantDetail'
+                              helpContent: 'reviewParticipantDetail'
                             }
                           }
                         ],
@@ -255,7 +252,7 @@ const routes: Routes = [
                     data: {
                       title: 'Search Concepts',
                       breadcrumb: BreadcrumbType.SearchConcepts,
-                      helpContentKey: 'conceptSets'
+                      helpContent: 'conceptSets'
                     }
                   },
                   {
@@ -266,7 +263,7 @@ const routes: Routes = [
                       data: {
                         title: 'Concept Set',
                         breadcrumb: BreadcrumbType.ConceptSet,
-                        helpContentKey: 'conceptSets'
+                        helpContent: 'conceptSets'
                       },
                     }, {
                       path: ':csid/actions',
@@ -274,7 +271,7 @@ const routes: Routes = [
                       data: {
                         title: 'Concept Set Actions',
                         breadcrumb: BreadcrumbType.ConceptSet,
-                        helpContentKey: 'conceptSets'
+                        helpContent: 'conceptSets'
                       },
                     }, ]
                   }
@@ -306,13 +303,17 @@ const routes: Routes = [
         path: 'profile',
         component: ProfilePageComponent,
         data: {title: 'Profile'}
-      },
-      {
-        path: '**',
-        component: AppRouterComponent,
-        data: {title: 'Create Workspace'}
+      }, {
+        path: 'workspaces/build',
+        component: WorkspaceEditComponent,
+        data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
       }
     ]
+  },
+  {
+    path: '**',
+    component: AppRouting,
+    data: {title: 'Sign In'}
   }
 ];
 

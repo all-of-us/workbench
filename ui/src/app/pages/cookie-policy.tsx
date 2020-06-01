@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -6,7 +5,6 @@ import {Header, SmallHeader} from 'app/components/headers';
 import {AouTitle} from 'app/components/text-wrappers';
 import {SIGNED_OUT_HEADER_IMAGE} from 'app/pages/login/sign-in';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
 
 const styles = {
@@ -48,7 +46,7 @@ const COOKIE_DELETION_LINK = 'https://www.aboutcookies.org/how-to-delete-cookies
 const GOOGLE_PRIVACY_LINK = 'https://policies.google.com/privacy';
 const ZENDESK_PRIVACY_LINK = 'https://www.zendesk.com/company/customers-partners/privacy-policy/';
 
-export class CookiePolicy extends React.Component<{}, {}> {
+export class CookiePolicyComponent extends React.Component<{}, {}> {
   render() {
     return <React.Fragment>
       <div style={{width: '100%', height: '3.5rem',
@@ -147,14 +145,5 @@ export class CookiePolicy extends React.Component<{}, {}> {
             link</StyledAnchorTag>.</div>
       </FadeBox>
     </React.Fragment>;
-  }
-}
-
-@Component({
-  template: '<div #root></div>'
-})
-export class CookiePolicyComponent extends ReactWrapperBase {
-  constructor() {
-    super(CookiePolicy, []);
   }
 }
