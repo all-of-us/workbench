@@ -12,8 +12,6 @@ import com.google.gson.Gson;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -246,31 +244,14 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
                 createDataSetRequest(
-                    Arrays.asList(dbConditionConceptSet),
-                    Arrays.asList(dbCohort1),
-                    Arrays.asList(Domain.CONDITION),
+                    ImmutableList.of(dbConditionConceptSet),
+                    ImmutableList.of(dbCohort1),
+                    ImmutableList.of(Domain.CONDITION),
                     false,
                     PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
-    assertThat(code)
-        .contains(
-            "import pandas\n"
-                + "import os\n"
-                + "\n"
-                + "# This query represents dataset \"null\" for domain \"condition\"\n"
-                + "dataset_00000000_condition_sql =");
-
-    String query = extractPythonQuery(code, 1);
-
-    try {
-      TableResult result =
-          bigQueryService.executeQuery(
-              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
-      assertThat(result.getTotalRows()).isEqualTo(1L);
-    } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
-    }
+    assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
   }
 
   @Test
@@ -282,9 +263,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAME,
                 KernelTypeEnum.R.toString(),
                 createDataSetRequest(
-                    Arrays.asList(dbConditionConceptSet),
-                    Arrays.asList(dbCohort1),
-                    Arrays.asList(Domain.CONDITION),
+                    ImmutableList.of(dbConditionConceptSet),
+                    ImmutableList.of(dbCohort1),
+                    ImmutableList.of(Domain.CONDITION),
                     false,
                     PrePackagedConceptSetEnum.NONE))
             .getBody()
@@ -316,35 +297,15 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
                 createDataSetRequest(
-                    Arrays.asList(dbConditionConceptSet, dbProcedureConceptSet),
-                    Arrays.asList(dbCohort1),
-                    Arrays.asList(Domain.CONDITION, Domain.PROCEDURE),
+                    ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
+                    ImmutableList.of(dbCohort1),
+                    ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
                     false,
                     PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
 
-    String query = extractPythonQuery(code, 1);
-
-    try {
-      TableResult result =
-          bigQueryService.executeQuery(
-              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
-      assertThat(result.getTotalRows()).isEqualTo(1L);
-    } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
-    }
-
-    query = extractPythonQuery(code, 3);
-
-    try {
-      TableResult result =
-          bigQueryService.executeQuery(
-              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
-      assertThat(result.getTotalRows()).isEqualTo(1L);
-    } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
-    }
+    assertAndExecutePythonQuery(code, 3, Domain.CONDITION);
   }
 
   @Test
@@ -356,24 +317,15 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
                 createDataSetRequest(
-                    Arrays.asList(dbConditionConceptSet),
-                    Arrays.asList(dbCohort1, dbCohort2),
-                    Arrays.asList(Domain.CONDITION),
+                    ImmutableList.of(dbConditionConceptSet),
+                    ImmutableList.of(dbCohort1, dbCohort2),
+                    ImmutableList.of(Domain.CONDITION),
                     false,
                     PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
 
-    String query = extractPythonQuery(code, 1);
-
-    try {
-      TableResult result =
-          bigQueryService.executeQuery(
-              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
-      assertThat(result.getTotalRows()).isEqualTo(1L);
-    } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
-    }
+    assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
   }
 
   @Test
@@ -385,23 +337,15 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
                 createDataSetRequest(
-                    Arrays.asList(dbConditionConceptSet),
-                    new ArrayList<>(),
-                    Arrays.asList(Domain.CONDITION),
+                    ImmutableList.of(dbConditionConceptSet),
+                    ImmutableList.of(),
+                    ImmutableList.of(Domain.CONDITION),
                     true,
                     PrePackagedConceptSetEnum.NONE))
             .getBody()
             .getCode();
-    String query = extractPythonQuery(code, 1);
 
-    try {
-      TableResult result =
-          bigQueryService.executeQuery(
-              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
-      assertThat(result.getTotalRows()).isEqualTo(1L);
-    } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
-    }
+    assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
   }
 
   @Test
@@ -413,23 +357,15 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
                 createDataSetRequest(
-                    new ArrayList<>(),
-                    Arrays.asList(dbCohort1),
-                    Arrays.asList(Domain.PERSON),
+                    ImmutableList.of(),
+                    ImmutableList.of(dbCohort1),
+                    ImmutableList.of(Domain.PERSON),
                     false,
                     PrePackagedConceptSetEnum.DEMOGRAPHICS))
             .getBody()
             .getCode();
-    String query = extractPythonQuery(code, 1);
 
-    try {
-      TableResult result =
-          bigQueryService.executeQuery(
-              QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
-      assertThat(result.getTotalRows()).isEqualTo(1L);
-    } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
-    }
+    assertAndExecutePythonQuery(code, 1, Domain.PERSON);
   }
 
   @Test
@@ -441,14 +377,31 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 WORKSPACE_NAME,
                 KernelTypeEnum.PYTHON.toString(),
                 createDataSetRequest(
-                    new ArrayList<>(),
-                    Arrays.asList(dbCohort1),
-                    Arrays.asList(Domain.SURVEY),
+                    ImmutableList.of(),
+                    ImmutableList.of(dbCohort1),
+                    ImmutableList.of(Domain.SURVEY),
                     false,
                     PrePackagedConceptSetEnum.SURVEY))
             .getBody()
             .getCode();
-    String query = extractPythonQuery(code, 1);
+
+    assertAndExecutePythonQuery(code, 1, Domain.SURVEY);
+  }
+
+  private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
+    assertThat(code)
+        .contains(
+            "import pandas\n"
+                + "import os\n"
+                + "\n"
+                + "# This query represents dataset \"null\" for domain \""
+                + domain.toString().toLowerCase()
+                + "\"\n"
+                + "dataset_00000000_"
+                + domain.toString().toLowerCase()
+                + "_sql =");
+
+    String query = extractPythonQuery(code, index);
 
     try {
       TableResult result =
