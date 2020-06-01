@@ -6,7 +6,7 @@ import {xPathOptionToXpath} from './xpath-defaults';
 
 export default class Link extends BaseElement {
    
-  static async forLabel(
+  static async findByName(
      page: Page,
      xOpt: XPathOptions,
      container?: Container,

@@ -20,31 +20,31 @@ export default class WebComponent {
   }
 
   async asCheckBox(): Promise<Checkbox> {
-    return await Checkbox.forLabel(this.page, this.xpathOptions);
+    return await Checkbox.findByName(this.page, this.xpathOptions);
   }
 
   async asTextBox(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, this.xpathOptions);
+    return await Textbox.findByName(this.page, this.xpathOptions);
   }
 
   async asTextArea(): Promise<Textarea> {
-    return await Textarea.forLabel(this.page, this.xpathOptions);
+    return await Textarea.findByName(this.page, this.xpathOptions);
   }
 
   async asRadioButton(): Promise<RadioButton> {
-    return await RadioButton.forLabel(this.page, this.xpathOptions);
+    return await RadioButton.findByName(this.page, this.xpathOptions);
   }
 
   async asButton(): Promise<Button> {
-    return await Button.forLabel(this.page, this.xpathOptions);
+    return await Button.findByName(this.page, this.xpathOptions);
   }
 
   async asSelect(): Promise<Select> {
-    return await Select.forLabel(this.page, this.xpathOptions);
+    return await Select.findByName(this.page, this.xpathOptions);
   }
 
   async asLink(): Promise<Link> {
-    return await Link.forLabel(this.page, this.xpathOptions);
+    return await Link.findByName(this.page, this.xpathOptions);
   }
 
 }

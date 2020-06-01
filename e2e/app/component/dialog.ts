@@ -38,15 +38,15 @@ export default class Dialog extends Container {
   }
 
   async waitForButton(buttonLabel: ButtonLabel): Promise<Button> {
-    return Button.forLabel(this.page, {containsText: buttonLabel, type: ElementType.Button}, this);
+    return Button.findByName(this.page, {containsText: buttonLabel, type: ElementType.Button}, this);
   }
 
   async waitForTextbox(textboxName: string): Promise<Textbox> {
-    return Textbox.forLabel(this.page, {name: textboxName}, this);
+    return Textbox.findByName(this.page, {name: textboxName}, this);
   }
 
   async waitForTextarea(textareaName: string): Promise<Textarea> {
-    return Textarea.forLabel(this.page, {name: textareaName}, this);
+    return Textarea.findByName(this.page, {name: textareaName}, this);
   }
 
   async waitUntilDialogIsClosed(): Promise<void> {

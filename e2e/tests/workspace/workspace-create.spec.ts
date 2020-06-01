@@ -33,7 +33,7 @@ describe('Creating new workspaces', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
-    const createNewWorkspaceButton  = await Button.forLabel(page, FIELD.createNewWorkspaceButton.textOption );
+    const createNewWorkspaceButton  = await Button.findByName(page, FIELD.createNewWorkspaceButton.textOption );
     await createNewWorkspaceButton.clickAndWait();
 
     // fill out new workspace name

@@ -148,7 +148,7 @@ export default class GoogleLoginPage {
   }
 
   async clickCreateAccountButton(): Promise<void> {
-    const button = await Button.forLabel(this.page, {name: 'Create Account'});
+    const button = await Button.findByName(this.page, {name: 'Create Account'});
     await button.clickWithEval();
   }
 
