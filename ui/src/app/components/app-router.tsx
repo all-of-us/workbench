@@ -9,12 +9,12 @@ export const usePath = () => {
   return path;
 };
 
-export const SubRoute = ({children}) => <Switch>{children}</Switch>;
-export const AppRouter = ({children}) => <BrowserRouter><SubRoute>{children}</SubRoute></BrowserRouter>;
+export const SubRoute = ({children}): React.ReactElement => <Switch>{children}</Switch>;
+export const AppRouter = ({children}): React.ReactElement => <BrowserRouter><SubRoute>{children}</SubRoute></BrowserRouter>;
 
-export const RouteLink = ({path, style = {}, children}) => <Link style={{...style}} to={path}>{children}</Link>;
+export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
-export const AppRoute = ({path, data = {}, component: Component}) => {
+export const AppRoute = ({path, data = {}, component: Component}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
 
@@ -23,7 +23,7 @@ export const AppRoute = ({path, data = {}, component: Component}) => {
   </Route>;
 };
 
-export const ProtectedRoutes = ({path, guards, children}) => {
+export const ProtectedRoutes = ({path, guards, children}): React.ReactElement => {
   const {redirectPath} = fp.find(({needsRedirect}) => needsRedirect(), guards) || {};
   const location = useLocation();
   return redirectPath ? <AppRoute
@@ -32,7 +32,7 @@ export const ProtectedRoutes = ({path, guards, children}) => {
   : <Fragment>{children}</Fragment>;
 };
 
-export const Navigate = ({to}) => {
+export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();
   return <Redirect to={{pathname: to, state: {from: location}}}/>;
 };
