@@ -94,7 +94,9 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
                     .list()
                     .setPageToken(pageToken.orElse(null))
                     .execute();
-            projects.addAll(resp.getProjects());
+            if (resp.getProjects() != null) {
+              projects.addAll(resp.getProjects());
+            }
 
             // The API does not specify null or empty string; treat both as empty to be safe.
             pageToken =

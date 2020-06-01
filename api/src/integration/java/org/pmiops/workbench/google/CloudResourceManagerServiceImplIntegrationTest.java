@@ -23,14 +23,25 @@ public class CloudResourceManagerServiceImplIntegrationTest extends BaseIntegrat
   // This is a single hand created user in the fake-research-aou.org gsuite.
   // It has one project that has been shared with it, AoU CRM Integration Test
   // in the firecloud dev domain.
-  private final String CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL =
+  private final String SINGLE_WORKSPACE_TEST_USER_EMAIL =
       "cloud-resource-manager-integration-test@fake-research-aou.org";
+  // This user was hand-created in the test environment and has never signed in.
+  private final String NEVER_SIGNED_IN_TEST_USER_EMAIL =
+      "cloud-resource-manager-integration-test-no-sign-in@fake-research-aou.org";
 
   @Test
-  public void testGetAllProjectsForUser() throws Exception {
+  public void testGetAllProjectsForUserSingleWorkspaceUser() throws Exception {
     DbUser testUser = new DbUser();
-    testUser.setUsername(CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL);
+    testUser.setUsername(SINGLE_WORKSPACE_TEST_USER_EMAIL);
     List<Project> projectList = service.getAllProjectsForUser(testUser);
     assertThat(projectList.size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testGetAllProjectsForUserNeverSignedInUser() throws Exception {
+    DbUser testUser = new DbUser();
+    testUser.setUsername(NEVER_SIGNED_IN_TEST_USER_EMAIL);
+    List<Project> projectList = service.getAllProjectsForUser(testUser);
+    assertThat(projectList).isEmpty();
   }
 }
