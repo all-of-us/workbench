@@ -142,6 +142,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AdminUserComponent,
     AdminUsersComponent,
     AppComponent,
+    AppRouting,
     BugReportComponent,
     CohortActionsComponent,
     CohortReviewComponent,
@@ -177,8 +178,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
-    HomepageComponent,
-    AppRouting
+    HomepageComponent
   ],
   providers: [
     {
