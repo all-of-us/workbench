@@ -388,7 +388,9 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      profileService.verifyInstitutionalAffiliation(request.getProfile());
+      request.getProfile().setVerifiedInstitutionalAffiliation(
+          profileService.validateInstitutionalAffiliation(request.getProfile())
+      );
     }
 
     final Profile profile = request.getProfile();
@@ -684,7 +686,9 @@ public class ProfileController implements ProfileApiDelegate {
 
     updateInstitutionalAffiliations(updatedProfile, user);
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      profileService.verifyInstitutionalAffiliation(updatedProfile);
+      updatedProfile.setVerifiedInstitutionalAffiliation(
+        profileService.validateInstitutionalAffiliation(updatedProfile)
+      );
     }
 
     userService.updateUserWithConflictHandling(user);

@@ -89,7 +89,7 @@ public class ProfileService {
     return profile;
   }
 
-  public void verifyInstitutionalAffiliation(Profile profile) {
+  public VerifiedInstitutionalAffiliation validateInstitutionalAffiliation(Profile profile) {
     VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         profile.getVerifiedInstitutionalAffiliation();
 
@@ -119,8 +119,8 @@ public class ProfileService {
       throw new BadRequestException("Institutional role cannot be empty");
     }
     if (verifiedInstitutionalAffiliation.getInstitutionalRoleEnum().equals(InstitutionalRole.OTHER)
-        && (verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText().equals("")
-            || verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText() == null)) {
+        && (verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText() == null
+            || verifiedInstitutionalAffiliation.getInstitutionalRoleOtherText().equals(""))) {
       throw new BadRequestException(
           "Institutional role description cannot be empty when institutional role is set to Other");
     }
@@ -143,5 +143,7 @@ public class ProfileService {
                       contactEmail));
       throw new BadRequestException(msg);
     }
+
+    return verifiedInstitutionalAffiliation;
   }
 }
