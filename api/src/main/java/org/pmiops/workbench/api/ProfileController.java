@@ -703,7 +703,6 @@ public class ProfileController implements ProfileApiDelegate {
     Profile profile = profileService.getProfile(dbUser);
 
     profile.setVerifiedInstitutionalAffiliation(verifiedInstitution);
-    profileService.verifyInstitutionalAffiliation(profile);
     this.updateProfile(profile);
 
     return ResponseEntity.ok(new EmptyResponse());

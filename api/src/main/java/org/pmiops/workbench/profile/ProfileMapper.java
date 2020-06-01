@@ -5,7 +5,6 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.institution.InstitutionalAffiliationMapper;
-import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -20,8 +19,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
       CommonMappers.class,
       DemographicSurveyMapper.class,
       InstitutionalAffiliationMapper.class,
-      PageVisitMapper.class,
-      VerifiedInstitutionalAffiliationMapper.class
+      PageVisitMapper.class
     })
 public interface ProfileMapper {
   @Mapping(target = "contactEmailFailure", ignore = true) // I don't think we actually use this

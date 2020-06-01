@@ -40,10 +40,9 @@ public class ProfileServiceTest {
 
   @TestConfiguration
   @MockBean({
-    FreeTierBillingService.class,
-    InstitutionDao.class,
-    InstitutionService.class,
-    UserService.class,
+      FreeTierBillingService.class,
+      InstitutionService.class,
+      UserService.class
   })
   @Import({
     AddressMapperImpl.class,
