@@ -40,7 +40,6 @@ import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/com
 
 import {environment} from 'environments/environment';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
-
 import {DisabledGuard} from './guards/disabled-guard.service';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
