@@ -1,16 +1,13 @@
 package org.pmiops.workbench.actionaudit;
 
-import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import org.joda.time.DateTime;
 import org.pmiops.workbench.api.BigQueryService;
@@ -19,7 +16,6 @@ import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
 import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
-import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.mappers.AuditLogEntryMapper;
 import org.springframework.stereotype.Service;
 
@@ -79,10 +75,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
-    final List<AuditLogEntry> logEntries =
-        StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
-            .map(this::fieldValueListToAditLogEntry)
-            .collect(ImmutableList.toImmutableList());
+    final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
 
     return new WorkspaceAuditLogQueryResponse()
         .logEntries(logEntries)
@@ -137,10 +130,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
-    final List<AuditLogEntry> logEntries =
-        StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
-            .map(this::fieldValueListToAditLogEntry)
-            .collect(ImmutableList.toImmutableList());
+    final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
 
     return new UserAuditLogQueryResponse()
         .logEntries(logEntries)
@@ -157,22 +147,6 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
         .put(
             "before",
             QueryParameterValue.timestamp(before.getMillis() * MICROSECONDS_IN_MILLISECOND));
-  }
-
-  private AuditLogEntry fieldValueListToAditLogEntry(FieldValueList row) {
-    final AuditLogEntry entry = new AuditLogEntry();
-    FieldValues.getString(row, "action_id").ifPresent(entry::setActionId);
-    FieldValues.getString(row, "action_type").ifPresent(entry::setActionType);
-    FieldValues.getLong(row, "agent_id").ifPresent(entry::setAgentId);
-    FieldValues.getString(row, "agent_type").ifPresent(entry::setAgentType);
-    FieldValues.getString(row, "agent_username").ifPresent(entry::setAgentUsername);
-    FieldValues.getDateTime(row, "event_time").ifPresent(entry::setEventTime);
-    FieldValues.getString(row, "new_value").ifPresent(entry::setNewValue);
-    FieldValues.getString(row, "prev_value").ifPresent(entry::setPreviousValue);
-    FieldValues.getLong(row, "target_id").ifPresent(entry::setTargetId);
-    FieldValues.getString(row, "target_property").ifPresent(entry::setTargetProperty);
-    FieldValues.getString(row, "target_type").ifPresent(entry::setTargetType);
-    return entry;
   }
 
   private String getReplacedQueryText(QueryJobConfiguration queryJobConfiguration) {

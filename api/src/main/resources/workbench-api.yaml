@@ -1043,19 +1043,19 @@ paths:
           description: No module exists with name submitted
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/users/{userId}/audit":
+  "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
     get:
       tags:
         - profile
       description: 'Fetch audit logs involving this user as either a subject or object.'
       operationId: getAuditLogEntries
       parameters:
-        - name: userName
+        - name: usernameWithoutGsuiteDomain
           in: path
           type: string
           required: true
           description: >
-            Firecloud Namespace for the AoU workspace to be queried.
+            Username of user, not including the "@aou-fake.biz".
         - name: limit
           in: query
           type: integer

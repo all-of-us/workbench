@@ -877,17 +877,29 @@ public class ProfileController implements ProfileApiDelegate {
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getUsername());
     directoryService.deleteUser(user.getUsername().split("@")[0]);
     userDao.delete(user.getUserId());
-    profileAuditor.fireDeleteAction(
-        user.getUserId(),
-        user.getUsername()); // not sure if user profider will survive the next line
+    profileAuditor.fireDeleteAction(user.getUserId(), user.getUsername());
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
   public ResponseEntity<UserAuditLogQueryResponse> getAuditLogEntries(
-      String userName, Integer limit, Long afterMillis, Long beforeMillisNullable) {
-    long userDatabaseId = Optional.ofNullable(userDao.findUserByUsername(userName)).map(DbUser::getUserId).orElseThrow(new NotFoundException(""));
+      String usernameWithoutGsuiteDomain,
+      Integer limit,
+      Long afterMillis,
+      Long beforeMillisNullable) {
+    final String username =
+        String.format(
+            "%s@%s",
+            usernameWithoutGsuiteDomain,
+            workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
+    final long userDatabaseId =
+        Optional.ofNullable(userDao.findUserByUsername(username))
+            .map(DbUser::getUserId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("User %s not found", usernameWithoutGsuiteDomain)));
     final DateTime after = new DateTime(afterMillis);
     final DateTime before =
         Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
