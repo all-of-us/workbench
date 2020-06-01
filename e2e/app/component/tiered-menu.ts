@@ -15,7 +15,7 @@ export default class TieredMenu extends Container {
    * @param {ElementHandle} menuParentElement
    * @param {string | string[]} selectMenuItems
    */
-  async select(selectMenuItems: string[]): Promise<void> {
+  async clickMenuItem(selectMenuItems: string[]): Promise<void> {
     // menu dropdown must be open and visible
     await this.page.waitForXPath(`${this.xpath}/ul`, {visible: true});
 

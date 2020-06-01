@@ -40,7 +40,7 @@ export default class DataPage extends AuthenticatedPage {
 
   async selectWorkspaceAction(action: WorkspaceAction): Promise<void> {
     const ellipsisMenu = new EllipsisMenu(this.page, './/*[@data-test-id="workspace-menu-button"]');
-    return ellipsisMenu.selectAction(action);
+    return ellipsisMenu.clickAction(action);
   }
 
   /**

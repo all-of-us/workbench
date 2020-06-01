@@ -154,7 +154,7 @@ export default class CreateAccountPage extends BasePage {
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string) {
     const dropdown = await SelectMenu.forLabel(this.page, FIELD.institutionSelect.textOption);
-    await dropdown.select(selectTextValue);
+    await dropdown.clickMenuItem(selectTextValue);
   }
 
   async getInstitutionValue() {
@@ -165,13 +165,13 @@ export default class CreateAccountPage extends BasePage {
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string) {
     const dropdown = await SelectMenu.forLabel(this.page, FIELD.educationLevelSelect.textOption);
-    await dropdown.select(selectTextValue);
+    await dropdown.clickMenuItem(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string) {
     const dropdown = await SelectMenu.forLabel(this.page, FIELD.birthYearSelect.textOption);
-    await dropdown.select(year);
+    await dropdown.clickMenuItem(year);
   }
 
   // Combined steps to make test code cleaner and shorter
@@ -191,7 +191,7 @@ export default class CreateAccountPage extends BasePage {
     await ClrIconLink.forLabel(this.page, {containsText: LABEL_ALIAS.INSTITUTION_EMAIL, ancestorLevel: 2, iconShape: 'success-standard'});
 
     const roleSelect = await SelectMenu.forLabel(this.page, FIELD.describeRole.textOption);
-    await roleSelect.select(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
+    await roleSelect.clickMenuItem(INSTITUTION_ROLE_VALUE.UNDERGRADUATE_STUDENT);
   }
 
   // Step 3: Accepting Terms of Use and Privacy statement.

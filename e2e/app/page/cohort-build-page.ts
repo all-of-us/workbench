@@ -51,7 +51,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
 
   async selectMenuCriteria(menuItemLinks: string[], groupNum: number = 1) {
     const menu = await this.openTieredMenu(groupNum);
-    await menu.select(menuItemLinks);
+    await menu.clickMenuItem(menuItemLinks);
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {

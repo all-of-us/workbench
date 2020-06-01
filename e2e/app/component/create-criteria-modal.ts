@@ -59,7 +59,7 @@ export default class CreateCriteriaModal extends Dialog {
     await link.click();
 
     const selectMenu = await SelectMenu.forLabel(this.page, {ancestorLevel: 2});
-    await selectMenu.select(filterSign);
+    await selectMenu.clickMenuItem(filterSign);
 
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
     await numberField.type('30');
