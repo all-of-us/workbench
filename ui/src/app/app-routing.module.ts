@@ -13,6 +13,7 @@ import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
+import {AdminUsersComponent} from './pages/admin/admin-users';
 import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
@@ -28,6 +29,8 @@ import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-detai
 import {HomepageComponent} from './pages/homepage/homepage';
 import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
+import {SessionExpiredComponent} from './pages/session-expired';
+import {SignInAgainComponent} from './pages/sign-in-again';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
@@ -48,6 +51,14 @@ const routes: Routes = [
     path: 'login',
     component: SignInComponent,
     data: {title: 'Sign In'}
+  }, {
+    path: 'session-expired',
+    component: SessionExpiredComponent,
+    data: {title: 'You have been signed out'}
+  }, {
+    path: 'sign-in-again',
+    component: SignInAgainComponent,
+    data: {title: 'You have been signed out'}
   }, {
     path: 'user-disabled',
     component: UserDisabledComponent,
@@ -280,30 +291,50 @@ const routes: Routes = [
           }]
       },
       {
-        path: 'admin/review-workspace',
-        component: AdminReviewWorkspaceComponent,
-        data: {title: 'Review Workspaces'}
-      }, {
-        path: 'admin/user',
-        component: AdminUserComponent,
-        data: {title: 'User Admin Table'}
-      }, {
-        path: 'admin/banner',
-        component: AdminBannerComponent,
-        data: {title: 'Create Banner'}
-      }, {
-        path: 'admin/workspaces',
-        component: AdminWorkspaceSearchComponent,
-        data: { title: 'Workspace Admin'},
-      }, {
-        path: 'admin/workspaces/:workspaceNamespace',
-        component: AdminWorkspaceComponent,
-        data: { title: 'Workspace Admin'}
-      }, {
+        path: 'admin',
+        children: [
+          {
+            path: 'review-workspace',
+            component: AdminReviewWorkspaceComponent,
+            data: {title: 'Review Workspaces'}
+          },
+          {
+            path: 'users',
+            component: AdminUsersComponent,
+            data: {title: 'User Admin Table'}
+          },
+          {
+            path: 'users/:usernameWithoutGsuiteDomain',
+            component: AdminUserComponent,
+            data: {title: 'User Admin'}
+          },
+          {
+            path: 'user', // included for backwards compatibility
+            component: AdminUsersComponent,
+            data: {title: 'User Admin Table'}
+          },
+          {
+            path: 'banner',
+            component: AdminBannerComponent,
+            data: {title: 'Create Banner'}
+          },
+          {
+            path: 'workspaces',
+            component: AdminWorkspaceSearchComponent,
+            data: { title: 'Workspace Admin'},
+          },
+          {
+            path: 'workspaces/:workspaceNamespace',
+            component: AdminWorkspaceComponent,
+            data: { title: 'Workspace Admin'}
+          }]
+      },
+      {
         path: 'profile',
         component: ProfilePageComponent,
         data: {title: 'Profile'}
-      }, {
+      },
+      {
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}

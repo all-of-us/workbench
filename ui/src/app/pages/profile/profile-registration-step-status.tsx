@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { Button } from 'app/components/buttons';
-import {FlexColumn, FlexRow} from 'app/components/flex';
+import {FlexColumn} from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {environment} from 'environments/environment';
 
@@ -11,20 +11,21 @@ const styles = reactStyles({
   container: {
     backgroundColor: colors.white,
     color: colors.primary,
-    flex: '0 0 420px',
+    height: '225px',
+    width: '220px',
     borderRadius: 8,
     marginBottom: '10px',
-    padding: 21
+    padding: 14,
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`
   },
   title: {
     color: colors.primary,
-    width: 420,
     fontSize: 16,
     fontWeight: 600,
     marginBottom: 6
   },
   button: {
-    height: 38
+    height: '38px'
   },
   successButton: {
     backgroundColor: colors.success,
@@ -41,6 +42,7 @@ const styles = reactStyles({
 });
 
 interface Props {
+  containerStylesOverride?: React.CSSProperties;
   title: string | React.ReactNode;
   wasBypassed: boolean;
   isComplete: boolean;
@@ -60,34 +62,32 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
       incompleteButtonText,
       completedButtonText,
       completeStep,
-      completionTimestamp,
       children
     } = props;
 
     if (environment.enableProfileCapsFeatures) {
       return (
-        <div style={styles.container}>
+        <FlexColumn style={{...styles.container, ...props.containerStylesOverride}}>
           <div style={styles.title}>
             { title }
           </div>
-          <FlexColumn>
-            <div>
-              { isComplete ? (
-                <FlexRow>
-                  <FlexColumn>
-                    <div>{ wasBypassed ? 'Bypassed By Admin on:' : completedButtonText + ' on:' }
-                    </div>
-                    <div>{new Date(completionTimestamp).toDateString()}</div>
-                    <Button disabled={true} data-test-id='completed-button'
-                            style={{backgroundColor: colors.success,
-                              width: 'max-content', marginTop: '1rem',
-                              cursor: 'default'}}>
-                      <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{completedButtonText}
-                    </Button>
-                  </FlexColumn>
+          <FlexColumn style={{justifyContent: 'space-between', flex: '1 1 auto'}}>
 
-                </FlexRow>
-              ) : (
+            { isComplete ? (
+              <React.Fragment>
+                <div style={props.childrenStyle}>
+                  { children }
+                </div>
+                <Button disabled={true} data-test-id='completed-button'
+                        style={{...styles.button, backgroundColor: colors.success,
+                          width: 'max-content', cursor: 'default'}}>
+                  <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
+                </Button>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                {/*This div exists to ensure spacing is consistent. We want to put the button at the bottom of the flex box*/}
+                <div/>
                 <Button
                   type='purplePrimary'
                   style={ styles.button }
@@ -95,13 +95,10 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
                 >
                   { incompleteButtonText }
                 </Button>
-              ) }
-            </div>
-            <div style={{marginLeft: '2.5rem', ...props.childrenStyle}}>
-              { children }
-            </div>
+              </React.Fragment>
+            ) }
           </FlexColumn>
-        </div>
+        </FlexColumn>
       );
     } else { // TODO (RW-3441): delete this block below once enableProfileCapsFeatures is removed
       return (
@@ -112,21 +109,12 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
           <div style={{ display: 'flex' }}>
             <div style={styles.buttonContainerToDeleteWithEnableProfileCapsFeatures}>
               { isComplete ? (
-                <Button
-                  type='purplePrimary'
-                  style={ {...styles.button, ...styles.successButton} }
-                  disabled={true}
-                >
+                <Button type='purplePrimary' style={ {...styles.button, ...styles.successButton} } disabled={true}>
                   <ClrIcon shape='check' style={ {width: 40, marginLeft: -10 } }/>
-                  { wasBypassed ?
-                    'Bypassed By Admin' : completedButtonText }
+                  { wasBypassed ? 'Bypassed By Admin' : completedButtonText }
                 </Button>
               ) : (
-                <Button
-                  type='purplePrimary'
-                  style={ styles.button }
-                  onClick={ completeStep }
-                >
+                <Button type='purplePrimary' style={ styles.button } onClick={ completeStep }>
                   { incompleteButtonText }
                 </Button>
               ) }

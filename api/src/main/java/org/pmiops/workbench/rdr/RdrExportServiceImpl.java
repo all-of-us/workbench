@@ -7,11 +7,9 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -29,11 +27,9 @@ import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.RdrResearcher;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
-import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
 import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
 import org.pmiops.workbench.rdr.model.ResearcherVerifiedInstitutionalAffiliation;
@@ -58,7 +54,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   private InstitutionService institutionService;
   private WorkspaceService workspaceService;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
-
+  private final RdrMapper rdrMapper;
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
 
@@ -67,6 +63,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       Clock clock,
       Provider<RdrApi> rdrApiProvider,
       RdrExportDao rdrExportDao,
+      RdrMapper rdrMapper,
       WorkspaceDao workspaceDao,
       InstitutionService institutionService,
       WorkspaceService workspaceService,
@@ -75,6 +72,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.clock = clock;
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = rdrApiProvider;
+    this.rdrMapper = rdrMapper;
     this.workspaceDao = workspaceDao;
     this.institutionService = institutionService;
     this.workspaceService = workspaceService;
@@ -268,50 +266,16 @@ public class RdrExportServiceImpl implements RdrExportService {
                   new ResearcherVerifiedInstitutionalAffiliation()
                       .institutionShortName(
                           verifiedInstitutionalAffiliation.getInstitution().getShortName())
+                      .institutionDisplayName(
+                          verifiedInstitutionalAffiliation.getInstitution().getDisplayName())
                       .institutionalRole(role));
             });
     return researcher;
   }
 
   private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
-    RdrWorkspace rdrWorkspace = new RdrWorkspace();
-    rdrWorkspace.setWorkspaceId((int) dbWorkspace.getWorkspaceId());
-    rdrWorkspace.setName(dbWorkspace.getName());
-
-    rdrWorkspace.setCreationTime(dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
-    rdrWorkspace.setModifiedTime(
-        dbWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
-
-    RdrWorkspace.StatusEnum workspaceRDRStatus =
-        dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE
-            ? RdrWorkspace.StatusEnum.ACTIVE
-            : RdrWorkspace.StatusEnum.INACTIVE;
-
-    rdrWorkspace.setStatus(workspaceRDRStatus);
+    RdrWorkspace rdrWorkspace = rdrMapper.toRdrModel(dbWorkspace);
     setExcludeFromPublicDirectory(dbWorkspace.getCreator(), rdrWorkspace);
-
-    rdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
-    rdrWorkspace.setDiseaseFocusedResearchName(dbWorkspace.getDiseaseOfFocus());
-    rdrWorkspace.setOtherPurpose(dbWorkspace.getOtherPurpose());
-    rdrWorkspace.setOtherPurposeDetails(dbWorkspace.getOtherPurposeDetails());
-    rdrWorkspace.setMethodsDevelopment(dbWorkspace.getMethodsDevelopment());
-    rdrWorkspace.setControlSet(dbWorkspace.getControlSet());
-    rdrWorkspace.setAncestry(dbWorkspace.getAncestry());
-    rdrWorkspace.setSocialBehavioral(dbWorkspace.getSocialBehavioral());
-    rdrWorkspace.setPopulationHealth(dbWorkspace.getPopulationHealth());
-    rdrWorkspace.setDrugDevelopment(dbWorkspace.getDrugDevelopment());
-    rdrWorkspace.setCommercialPurpose(dbWorkspace.getCommercialPurpose());
-    rdrWorkspace.setEducational(dbWorkspace.getEducational());
-    rdrWorkspace.setEthicalLegalSocialImplications(dbWorkspace.getEthics());
-    rdrWorkspace.setScientificApproaches(dbWorkspace.getScientificApproach());
-    rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
-    rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
-    rdrWorkspace.setReviewRequested(dbWorkspace.getReviewRequested());
-
-    rdrWorkspace.setFocusOnUnderrepresentedPopulations(
-        dbWorkspace.getSpecificPopulationsEnum().size() > 0);
-    rdrWorkspace.setWorkspaceDemographic(
-        toRdrWorkspaceDemographics(dbWorkspace.getSpecificPopulationsEnum()));
 
     if (dbWorkspace.getSpecificPopulationsEnum().contains(SpecificPopulationEnum.OTHER)) {
       rdrWorkspace.getWorkspaceDemographic().setOthers(dbWorkspace.getOtherPopulationDetails());
@@ -344,74 +308,6 @@ public class RdrExportServiceImpl implements RdrExportService {
       return null;
     }
     return rdrWorkspace;
-  }
-
-  RdrWorkspaceDemographic toRdrWorkspaceDemographics(
-      Set<SpecificPopulationEnum> dbPopulationEnumSet) {
-    RdrWorkspaceDemographic rdrDemographic = new RdrWorkspaceDemographic();
-
-    rdrDemographic.setAccessToCare(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.ACCESS_TO_CARE)
-            ? RdrWorkspaceDemographic.AccessToCareEnum.NOT_EASILY_ACCESS_CARE
-            : RdrWorkspaceDemographic.AccessToCareEnum.UNSET);
-
-    rdrDemographic.setDisabilityStatus(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.DISABILITY_STATUS)
-            ? RdrWorkspaceDemographic.DisabilityStatusEnum.DISABILITY
-            : RdrWorkspaceDemographic.DisabilityStatusEnum.UNSET);
-
-    rdrDemographic.setEducationLevel(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.EDUCATION_LEVEL)
-            ? RdrWorkspaceDemographic.EducationLevelEnum.LESS_THAN_HIGH_SCHOOL
-            : RdrWorkspaceDemographic.EducationLevelEnum.UNSET);
-
-    rdrDemographic.setIncomeLevel(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.INCOME_LEVEL)
-            ? RdrWorkspaceDemographic.IncomeLevelEnum.BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
-            : RdrWorkspaceDemographic.IncomeLevelEnum.UNSET);
-
-    rdrDemographic.setGeography(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.GEOGRAPHY)
-            ? RdrWorkspaceDemographic.GeographyEnum.RURAL
-            : RdrWorkspaceDemographic.GeographyEnum.UNSET);
-
-    rdrDemographic.setSexualOrientation(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.SEXUAL_ORIENTATION)
-            ? RdrWorkspaceDemographic.SexualOrientationEnum.OTHER_THAN_STRAIGHT
-            : RdrWorkspaceDemographic.SexualOrientationEnum.UNSET);
-
-    rdrDemographic.setGenderIdentity(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.GENDER_IDENTITY)
-            ? RdrWorkspaceDemographic.GenderIdentityEnum.OTHER_THAN_MAN_WOMAN
-            : RdrWorkspaceDemographic.GenderIdentityEnum.UNSET);
-
-    rdrDemographic.setSexAtBirth(
-        dbPopulationEnumSet.contains(SpecificPopulationEnum.SEX)
-            ? RdrWorkspaceDemographic.SexAtBirthEnum.INTERSEX
-            : RdrWorkspaceDemographic.SexAtBirthEnum.UNSET);
-
-    rdrDemographic.setRaceEthnicity(
-        dbPopulationEnumSet.stream()
-            .map(RdrExportEnums::specificPopulationToRaceEthnicity)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList()));
-
-    if (rdrDemographic.getRaceEthnicity().isEmpty()) {
-      rdrDemographic.setRaceEthnicity(
-          Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.UNSET));
-    }
-
-    rdrDemographic.setAge(
-        dbPopulationEnumSet.stream()
-            .map(RdrExportEnums::specificPopulationToAge)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList()));
-
-    if (rdrDemographic.getAge().isEmpty()) {
-      rdrDemographic.setAge(Arrays.asList(RdrWorkspaceDemographic.AgeEnum.UNSET));
-    }
-
-    return rdrDemographic;
   }
 
   /**

@@ -2,6 +2,7 @@ package org.pmiops.workbench.institution;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
+
+  private static final Logger log = Logger.getLogger(InstitutionServiceImpl.class.getName());
 
   private final InstitutionDao institutionDao;
   private final InstitutionUserInstructionsDao institutionUserInstructionsDao;
@@ -54,7 +57,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(institutionMapper::dbToModel)
+        .map(institution -> institutionMapper.dbToModel(institution, this))
         .collect(Collectors.toList());
   }
 
@@ -67,7 +70,8 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public Optional<Institution> getInstitution(final String shortName) {
-    return getDbInstitution(shortName).map(institutionMapper::dbToModel);
+    return getDbInstitution(shortName)
+        .map(institution -> institutionMapper.dbToModel(institution, this));
   }
 
   @Override
@@ -85,7 +89,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public Institution createInstitution(final Institution institutionToCreate) {
     return institutionMapper.dbToModel(
-        institutionDao.save(institutionMapper.modelToDb(institutionToCreate)));
+        institutionDao.save(institutionMapper.modelToDb(institutionToCreate)), this);
   }
 
   @Override
@@ -102,6 +106,10 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
   }
 
+  // The @Transactional annotation below is a hack to make the command line tool LoadInstitutions
+  // work similarly to our API endpoints.  It's necessary because our command line tools don't set
+  // up the proper transactional or session context.  See RW-4968
+  @Transactional
   @Override
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
@@ -113,7 +121,7 @@ public class InstitutionServiceImpl implements InstitutionService {
               // an update
               final DbInstitution dbObjectToUpdate =
                   institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId);
-              return institutionMapper.dbToModel(institutionDao.save(dbObjectToUpdate));
+              return institutionMapper.dbToModel(institutionDao.save(dbObjectToUpdate), this);
             });
   }
 
@@ -124,7 +132,7 @@ public class InstitutionServiceImpl implements InstitutionService {
       return false;
     }
     return validateInstitutionalEmail(
-        institutionMapper.dbToModel(dbAffiliation.getInstitution()), contactEmail);
+        institutionMapper.dbToModel(dbAffiliation.getInstitution(), this), contactEmail);
   }
 
   @Override
@@ -132,7 +140,16 @@ public class InstitutionServiceImpl implements InstitutionService {
     try {
       // TODO RW-4489: UserService should handle initial email validation
       new InternetAddress(contactEmail).validate();
-    } catch (AddressException | NullPointerException e) {
+    } catch (AddressException e) {
+      log.info(
+          String.format(
+              "Contact email '%s' validation threw an AddressException: %s",
+              contactEmail, e.getMessage()));
+      return false;
+    } catch (NullPointerException e) {
+      log.info(
+          String.format(
+              "Contact email '%s' validation threw a NullPointerException", contactEmail));
       return false;
     }
 
@@ -140,19 +157,32 @@ public class InstitutionServiceImpl implements InstitutionService {
     // Confirm if the email address is in the allowed email list
     if (institution.getDuaTypeEnum() != null
         && institution.getDuaTypeEnum().equals(DuaType.RESTRICTED)) {
-      return institution.getEmailAddresses().contains(contactEmail);
+      final boolean validated = institution.getEmailAddresses().contains(contactEmail);
+      log.info(
+          String.format(
+              "Contact email '%s' validated against RESTRICTED-DUA institution '%s': address %s",
+              contactEmail, institution.getShortName(), validated ? "MATCHED" : "DID NOT MATCH"));
+      return validated;
     }
 
     // If Agreement Type is NULL assume DUA Agreement is MASTER
     // If Institution agreement type is master confirm if the contact email has valid/allowed domain
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
-    return institution.getEmailDomains().contains(contactEmailDomain);
+    final boolean validated = institution.getEmailDomains().contains(contactEmailDomain);
+    log.info(
+        String.format(
+            "Contact email '%s' validated against MASTER-DUA institution '%s': domain %s %s",
+            contactEmail,
+            institution.getShortName(),
+            contactEmailDomain,
+            validated ? "MATCHED" : "DID NOT MATCH"));
+    return validated;
   }
 
   @Override
   public Optional<String> getInstitutionUserInstructions(final String shortName) {
     return institutionUserInstructionsDao
-        .getByInstitutionId(getDbInstitutionOrThrow(shortName).getInstitutionId())
+        .getByInstitution(getDbInstitutionOrThrow(shortName))
         .map(DbInstitutionUserInstructions::getUserInstructions);
   }
 
@@ -166,7 +196,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     // so the call to save() replaces it
 
     institutionUserInstructionsDao
-        .getByInstitutionId(dbInstructions.getInstitutionId())
+        .getByInstitution(dbInstructions.getInstitution())
         .ifPresent(
             existingDbEntry ->
                 dbInstructions.setInstitutionUserInstructionsId(
@@ -179,7 +209,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Transactional // TODO: understand why this is necessary
   public boolean deleteInstitutionUserInstructions(final String shortName) {
     final DbInstitution institution = getDbInstitutionOrThrow(shortName);
-    return institutionUserInstructionsDao.deleteByInstitutionId(institution.getInstitutionId()) > 0;
+    return institutionUserInstructionsDao.deleteByInstitution(institution) > 0;
   }
 
   @Override

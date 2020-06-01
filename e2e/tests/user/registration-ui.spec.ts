@@ -2,6 +2,7 @@ import BaseElement from 'app/element/base-element';
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
 import {config} from 'resources/workbench-config';
+import {waitForText} from 'utils/waits-utils';
 
 
 describe('User registration tests:', () => {
@@ -11,14 +12,11 @@ describe('User registration tests:', () => {
     await loginPage.load();
 
     // Click the create account button to start new-user-registration flow.
-    const createAccountButton = await loginPage.createAccountButton();
-    await createAccountButton.click();
+    await loginPage.clickCreateAccountButton();
 
     const createAccountPage = new CreateAccountPage(page);
     // Step 1: Checking Accepting Terms of Service.
-    const pdfPage =  await createAccountPage.getPdfPage();
-    // expecting pdf document
-    expect(await pdfPage.jsonValue()).toBe(true);
+    expect(await createAccountPage.agreementLoaded()).toBe(true);
 
     // Before user read all pdf pages, checkboxes are unchecked and disabled
     const privacyStatementCheckbox = await createAccountPage.getPrivacyStatementCheckbox();
@@ -35,7 +33,7 @@ describe('User registration tests:', () => {
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
     // scroll to last pdf file will enables checkboxes
-    await createAccountPage.scrollToLastPdfPage();
+    await createAccountPage.readAgreement();
     expect(await privacyStatementCheckbox.isDisabled()).toBe(false);
     expect(await termsOfUseCheckbox.isDisabled()).toBe(false);
 
@@ -60,12 +58,11 @@ describe('User registration tests:', () => {
     await loginPage.load();
 
     // Click the create account button to start new-user-registration flow.
-    const createAccountButton = await loginPage.createAccountButton();
-    await createAccountButton.click();
+    await loginPage.clickCreateAccountButton();
 
     const createAccountPage = new CreateAccountPage(page);
     // Step 1 of 3: Accepting Terms of Service.
-    await createAccountPage.scrollToLastPdfPage();
+    await createAccountPage.readAgreement();
 
     // check checkboxes
     await (await createAccountPage.getPrivacyStatementCheckbox()).check();
@@ -84,7 +81,7 @@ describe('User registration tests:', () => {
     await nextButton.clickWithEval();
 
     // Step 3 of 3: Enter user information.
-    expect(await createAccountPage.waitForTextExists('Create your account')).toBeTruthy();
+    expect(await waitForText(page, 'Create your account')).toBeTruthy();
 
     // verify username domain
     expect(await createAccountPage.getUsernameDomain()).toBe(config.userEmailDomain);
@@ -92,7 +89,7 @@ describe('User registration tests:', () => {
     // verify all input fields are visible and editable on this page
     const allInputs = await page.$$('input');
     for (const aInput of allInputs) {
-      const elem = new BaseElement(page, aInput);
+      const elem = BaseElement.asBaseElement(page, aInput);
       const isDisabled = await elem.isDisabled();
       expect(isDisabled).toBe(false);
       const value = await elem.getTextContent();

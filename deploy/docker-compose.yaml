@@ -1,7 +1,7 @@
 version: "3"
 services:
   deploy:
-    image: allofustest/workbench:buildimage-0.0.16
+    image: allofustest/workbench:buildimage-0.0.17
     entrypoint: /bootstrap-docker.sh
     user: circleci
     environment:
@@ -9,10 +9,12 @@ services:
       - WORKBENCH_VERSION
     volumes:
       # Cache the codebase and gradle for deployment only.
-      - gradle-cache:/.gradle
+      - gradle-cache:/home/circleci/.gradle
       - workbench:/home/circleci/workbench
+      - yarn-cache:/home/circleci/.cache/yarn
       - ./bootstrap-docker.sh:/bootstrap-docker.sh
 
 volumes:
   workbench:
   gradle-cache:
+  yarn-cache:

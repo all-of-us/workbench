@@ -12,7 +12,7 @@ handlers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
     X-XSS-Protection: 1
     X-Content-Type-Options: "nosniff"
-    Content-Security-Policy: "default-src 'none'; frame-ancestors 'none'; report-uri /content-security-report"
+    Content-Security-Policy: "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'self'; report-uri /content-security-report"
 - url: /.*
   static_files: dist/index.html
   upload: dist/index.html
@@ -65,8 +65,10 @@ handlers:
         https://*.googleapis.com
         https://*.zdassets.com
         https://aousupporthelp.zendesk.com
+        https://aousupporthelp1580753096.zendesk.com
         https://www.google-analytics.com;
       child-src
+        'self'
         https://accounts.google.com
         https://leonardo.dsde-dev.broadinstitute.org
         https://notebooks.firecloud.org;

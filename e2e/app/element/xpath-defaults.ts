@@ -1,73 +1,81 @@
-import TextOptions from './text-options';
+import Container from 'app/container';
+import {ElementType, XPathOptions} from 'app/xpath-options';
 
-function textXpathHelper(opts: TextOptions) {
-  let findText;
-  if (opts.text) {
-    findText = opts.text;
-    return `text()='${findText}' or @aria-label='${findText}' or @placeholder='${findText}'`;
-  } else if (opts.textContains) {
-    findText = opts.textContains;
-    return `contains(text(), '${findText}') or contains(@aria-label, '${findText}') or contains(@placeholder, '${findText}')`;
-  } else if (opts.normalizeSpace) {
-    findText = opts.normalizeSpace;
-    return `contains(normalize-space(), '${findText}')`;
+export function iframeXpath(label: string) {
+  return `//body[@id='body']//*[contains(@aria-label, '${label}')]//iframe`;
+}
+
+export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): string {
+
+  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape} = xOpts;
+
+  // optional function parameters check
+  if (type === 'icon') {
+    if (iconShape === undefined) {
+      throw new Error(`Incorrect XPathOptions configuration for Icon: set "iconShape" value.`);
+    }
+  } else {
+    if (name === undefined && normalizeSpace === undefined && containsText === undefined) {
+      throw new Error(`Incorrect XPathOptions configuration for label name: 
+      Cannot find a text parameter: set "name", "containsText" or "normalizeSpace" value.`);
+    }
   }
-}
 
-/**
- * Label. It can be partial or full string.
- * @param label
- */
-export function labelXpath(opts: TextOptions) {
-  return `(//label | //*)[${textXpathHelper(opts)}]`;
-}
-
-/**
- * any [@role=button] element with specified label.
- * @param label
- */
-export function buttonXpath(opts: TextOptions) {
-  const role = `@role='button'`;
-  const txt = textXpathHelper(opts);
-  return `(//button[${txt}] | //*[${txt} and ${role}])`;
-}
-
-export function inputXpath(opts: TextOptions) {
-  const numSlashes = opts.inputType === 'checkbox' ? '/' : '//';
-  const nodeLevel = `ancestor::node()[${opts.ancestorNodeLevel}]`;
-  if (opts.inputType !== undefined) {
-    return `${labelXpath(opts)}/${nodeLevel}${numSlashes}input[@type='${opts.inputType}']`;
+  let str;
+  if (name !== undefined) {
+    str = `text()="${name}" or @aria-label="${name}" or @placeholder="${name}"`;
+  } else if (containsText !== undefined) {
+    str = `contains(text(),"${containsText}") or contains(@aria-label,"${containsText}") or contains(@placeholder,"${containsText}")`;
+  } else if (normalizeSpace !== undefined) {
+    str = `contains(normalize-space(),"${normalizeSpace}")`;
   }
-  // return all input nodes
-  return `${labelXpath(opts)}/${nodeLevel}//input`;
-}
 
-/**
- * a IMAGE element with specified label.
- * @param label
- */
-export function imageXpath(label: string) {
-  return `//*[normalize-space(text())='${label}']//*[@role='img']`
-}
+  const containerXpath = (container === undefined) ? '' : container.getXpath();
+  const textExpr = `(${containerXpath}//label | ${containerXpath}//*)[${str}]`;
+  const nodeLevel = `ancestor::node()[${ancestorLevel}]`;
 
-/**
- * Clickable element with label. It can be a link or button.
- * @param label
- */
-export function clickableXpath(label: string) {
-  return `(//a | //span | //*[@role='button'])[normalize-space(text())='${label}' or contains(@aria-label,'${label}')]`;
-}
-
-/**
- * clr-icon element with specified label.
- * @param label:
- * @param shapeValue:
- */
-export function clrIconXpath(opts: TextOptions, shapeValue: string) {
-  if (Object.keys(opts).length === 0) {
-    return `//clr-icon[@shape='${shapeValue}'][*[@role='img']]`; // anywhere on page
+  let selector;
+  switch (type) {
+  case ElementType.Button:
+    selector = `(${containerXpath}//button | ${containerXpath}//*[@role="button"])[${str}]`;
+    break;
+  case ElementType.Icon: // clickable icon
+    const tag = (iconShape === undefined) ? '*' : `clr-icon[@shape="${iconShape}"]`;
+    if (name === undefined && containsText === undefined && normalizeSpace === undefined) {
+        // not tied to a specific label
+      selector = `//${tag}[*[@role="img"]]`;
+    } else {
+      selector = `//*[${textExpr}]/${nodeLevel}//${tag}[*[@role="img"]]`;
+    }
+    break;
+  case ElementType.Checkbox:
+    selector = `${textExpr}/${nodeLevel}/input[@type="${type}"]`;
+    break;
+  case ElementType.RadioButton:
+  case ElementType.Textbox:
+    selector = `${textExpr}/${nodeLevel}//input[@type="${type}"]`;
+    break;
+  case ElementType.Link:
+    selector = `(${containerXpath}//a | ${containerXpath}//span | ${containerXpath}//*[@role='button'])[${str}]`;
+    break;
+  case ElementType.Textarea:
+  case ElementType.Select:
+    selector = `${textExpr}/${nodeLevel}//${type}`;
+    break;
+  case ElementType.Dropdown:
+    selector = `${textExpr}/${nodeLevel}//*[contains(concat(" ", normalize-space(@class), " ")," p-dropdown ")]`;
+    break;
+  default:
+    console.debug(`Implement unhandled type: ${type}. 
+    XPathOptions configuration: 
+      "type": ${type}, 
+      "name": ${name}, 
+      "containsText": ${containsText}, 
+      "normalizeSpace: ${normalizeSpace}, 
+      "ancestorLevel": ${ancestorLevel}, 
+      "iconShape": ${iconShape}`);
+    throw new Error(`Implement unhandled type: ${type}`);
   }
-  // next to a label
-  const nodeLevel = opts.ancestorNodeLevel || 1;
-  return `//*[${textXpathHelper(opts)}]/ancestor::node()[${nodeLevel}]//clr-icon[@shape='${shapeValue}'][*[@role='img']]`;
+
+  return this.xpath = selector;
 }

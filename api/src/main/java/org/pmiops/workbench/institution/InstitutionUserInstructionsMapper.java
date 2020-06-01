@@ -7,13 +7,15 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapStructConfig.class)
 public interface InstitutionUserInstructionsMapper {
   @Mapping(target = "institutionUserInstructionsId", ignore = true)
-  @Mapping(target = "institutionId", ignore = true) // set by setFields()
+  @Mapping(target = "institution", ignore = true) // set by setFields()
   @Mapping(target = "userInstructions", ignore = true) // set by setFields()
   DbInstitutionUserInstructions modelToDb(
       InstitutionUserInstructions modelObject, @Context InstitutionService institutionService);
@@ -24,14 +26,12 @@ public interface InstitutionUserInstructionsMapper {
       InstitutionUserInstructions modelObject,
       @Context InstitutionService institutionService) {
 
-    final long institutionId =
-        institutionService
-            .getDbInstitutionOrThrow(modelObject.getInstitutionShortName())
-            .getInstitutionId();
+    final DbInstitution institution =
+        institutionService.getDbInstitutionOrThrow(modelObject.getInstitutionShortName());
     final PolicyFactory removeAllTags = new HtmlPolicyBuilder().toFactory();
     final String sanitizedInstructions =
         removeAllTags.sanitize(modelObject.getInstructions()).trim();
 
-    target.setInstitutionId(institutionId).setUserInstructions(sanitizedInstructions);
+    target.setInstitution(institution).setUserInstructions(sanitizedInstructions);
   }
 }

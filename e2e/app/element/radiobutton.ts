@@ -1,30 +1,25 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
-import TextOptions from './text-options';
+import Container from 'app/container';
+import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {findRadiobutton} from './xpath-finder';
+import {xPathOptionToXpath} from './xpath-defaults';
 
 export default class RadioButton extends BaseElement {
    
   static async forLabel(
      page: Page,
-     textOptions: TextOptions,
-     waitOptions: WaitForSelectorOptions = {visible: true},
-     throwErr = true): Promise<RadioButton> {
+     xOpt: XPathOptions,
+     container?: Container,
+     waitOptions: WaitForSelectorOptions = {visible: true}): Promise<RadioButton> {
 
-    let element: RadioButton;
-    try {
-      const radioElement = await findRadiobutton(page, textOptions, waitOptions);
-      element = new RadioButton(page, radioElement);
-    } catch (e) {
-      if (throwErr) {
-        console.error(`FAILED finding Radiobutton: "${JSON.stringify(textOptions)}".`);
-        throw e;
-      }
-    }
-    return element;
+    xOpt.type = ElementType.RadioButton;
+    const radioButtonXpath = xPathOptionToXpath(xOpt, container);
+    const radioButton = new RadioButton(page, radioButtonXpath);
+    await radioButton.waitForXPath(waitOptions);
+    return radioButton;
   }
 
-  async isSelected() {
+  async isSelected(): Promise<boolean> {
     await this.element.focus();
     const is = await this.getProperty('checked');
     return !!is;
@@ -44,7 +39,7 @@ export default class RadioButton extends BaseElement {
   /**
    * Unselect a RadioButton.
    */
-  async unSelect() {
+  async unSelect(): Promise<void> {
     const is = await this.isSelected();
     if (is) {
       await this.click();

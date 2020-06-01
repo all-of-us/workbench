@@ -409,6 +409,12 @@ export function generateDomain(domain: FetchDomain): Domain {
   return Domain[d];
 }
 
+export function displayDateWithoutHours(time: number): string {
+  const date = new Date(time);
+  // datetime formatting to slice off weekday and exact time
+  return date.toLocaleString('en-us', {month: 'short', day: 'numeric', year: 'numeric'});
+}
+
 // To convert datetime strings into human-readable dates
 export function displayDate(time: Number): string {
   const date = new Date(Number(time));

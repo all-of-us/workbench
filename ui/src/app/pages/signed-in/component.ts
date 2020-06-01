@@ -51,6 +51,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   zendeskLoadError = false;
   showInactivityModal = false;
   private profileLoadingSub: Subscription;
+  private signOutNavigateSub: Subscription;
   private subscriptions = [];
 
   private getUserActivityTimer: () => Timeout;
@@ -88,17 +89,20 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     });
 
-    this.signInService.isSignedIn$.subscribe(signedIn => {
+    this.signOutNavigateSub = this.signInService.isSignedIn$.subscribe(signedIn => {
       if (!signedIn) {
         this.signOut();
       }
     });
+    this.subscriptions.push(this.signOutNavigateSub);
 
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.minimizeChrome = minimizeChrome;
     }));
 
-    this.signOutIfLocalStorageInactivityElapsed();
+    // As a special case, if we determine the user is inactive immediately after
+    // signing in
+    this.signOutIfLocalStorageInactivityElapsed('/sign-in-again');
 
     this.startUserActivityTracker();
     this.startInactivityMonitoring();
@@ -112,17 +116,20 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     return Date.now() - parseInt(lastActive, 10);
   }
 
-  private signOutIfLocalStorageInactivityElapsed(): void {
+  private signOutIfLocalStorageInactivityElapsed(continuePath?: string): void {
     const elapsedMs = this.getInactivityElapsedMs();
     if (elapsedMs && elapsedMs > environment.inactivityTimeoutSeconds * 1000) {
-      this.signOut();
+      this.signOut(continuePath);
     }
   }
 
-  signOut(): void {
+  signOut(continuePath?: string): void {
     window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
+    // Unsubscribe from our standard signout navigation handler before signing out, so we can handle
+    // different navigation scenarios explicitly within this method.
+    this.signOutNavigateSub.unsubscribe();
     this.signInService.signOut();
-    navigateSignOut();
+    navigateSignOut(continuePath);
   }
 
   startUserActivityTracker() {
@@ -139,7 +146,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   private startInactivityTimers(elapsedMs: number = 0) {
     clearTimeout(this.logoutTimer);
     this.logoutTimer = setTimeout(
-      () => this.signOut(),
+      () => this.signOut('/session-expired'),
       Math.max(0, environment.inactivityTimeoutSeconds * 1000 - elapsedMs));
 
     clearTimeout(this.inactivityModalTimer);

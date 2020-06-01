@@ -101,4 +101,15 @@ public class DbVerifiedInstitutionalAffiliation {
   public int hashCode() {
     return Objects.hash(user, institution, institutionalRoleEnum, institutionalRoleOtherText);
   }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "DbVerifiedInstitutionalAffiliation{user=%s, institution=%s, "
+            + "institutionalRoleEnum=%s, institutionalRoleOtherText='%s'}",
+        user.getUsername(),
+        institution.getShortName(),
+        DbStorageEnums.institutionalRoleFromStorage(institutionalRoleEnum),
+        institutionalRoleOtherText);
+  }
 }

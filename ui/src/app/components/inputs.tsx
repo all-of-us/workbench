@@ -117,6 +117,7 @@ export const TextArea = ({style = {}, onChange, ...props}) => {
 };
 
 interface TextAreaWithLengthValidationMessageProps {
+  heightOverride?: {};
   id: string;
   initialText: string;
   maxCharacters: number;
@@ -180,7 +181,7 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
 
     return <React.Fragment>
       <TextArea
-          style={{...styles.textBoxWithLengthValidationTextBoxStyle, ...this.props.textBoxStyleOverrides}}
+          style={{...styles.textBoxWithLengthValidationTextBoxStyle, ...this.props.textBoxStyleOverrides, ...this.props.heightOverride}}
           id={id}
           value={text}
           onBlur={() => this.updateShowTooShortWarning()}
@@ -417,11 +418,33 @@ export class DatePicker extends React.Component<
   }
 }
 
-export const Toggle = ({name, enabled, onToggle, ...props}) => {
-  return <label style={{display: 'flex', flexDirection: 'row', paddingBottom: '.5rem'}}>
-    <Switch onChange={onToggle} checked={enabled} checkedIcon={false}
-            {...props}
-    />
-    <span style={{marginLeft: '.5rem'}}>{name}</span>
-  </label>;
-};
+interface ToggleProps {
+  name: string;
+  checked: boolean;
+  disabled?: boolean;
+  onToggle: (checked) => void;
+  style?: React.CSSProperties;
+  height?: number;
+  width?: number;
+}
+
+export class Toggle extends React.Component<ToggleProps>  {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const {name, checked, disabled, onToggle, style, height, width} = this.props;
+    return <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center', paddingBottom: '.5rem', ...style}}>
+      <Switch
+          onChange={onToggle}
+          checked={checked}
+          checkedIcon={false}
+          disabled={disabled}
+          height={height}
+          width={width}
+      />
+      <span style={{marginLeft: '.5rem'}}>{name}</span>
+    </label>;
+  }
+}

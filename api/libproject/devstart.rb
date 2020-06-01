@@ -135,7 +135,7 @@ def ensure_docker(cmd_name, args=nil)
 end
 
 def init_new_cdr_db(args)
-  Common.new.run_inline %W{docker-compose run cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
+  Common.new.run_inline %W{docker-compose run --rm cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
 end
 
 # exec against a live local API server - used for script access to a local API
@@ -210,7 +210,7 @@ def dev_up()
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
       common.run_inline %W{
-        docker-compose run db-scripts ./run-migrations.sh main
+        docker-compose run --rm db-scripts ./run-migrations.sh main
       }
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
@@ -219,7 +219,7 @@ def dev_up()
     common.status "Loading configs & data..."
     bm = Benchmark.measure {
       common.run_inline %W{
-        docker-compose run api-scripts ./libproject/load_local_data_and_configs.sh
+        docker-compose run --rm api-scripts ./libproject/load_local_data_and_configs.sh
       }
     }
     common.status "Loading configs complete (#{format_benchmark(bm)})"
@@ -395,7 +395,7 @@ Common.register_command({
 
 def validate_swagger(cmd_name, args)
   ensure_docker cmd_name, args
-  Common.new.run_inline %W{gradle validateSwagger} + args
+  Common.new.run_inline %W{./gradlew validateSwagger} + args
 end
 
 Common.register_command({
@@ -631,7 +631,7 @@ Common.register_command({
 def run_local_all_migrations()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  common.run_inline %W{docker-compose run --rm db-scripts ./run-migrations.sh main}
 
   init_new_cdr_db %W{--cdr-db-name cdr}
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
@@ -771,7 +771,7 @@ Common.register_command({
 def run_local_rw_migrations()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  common.run_inline %W{docker-compose run --rm db-scripts ./run-migrations.sh main}
 end
 
 Common.register_command({
@@ -782,7 +782,9 @@ Common.register_command({
 
 def make_bq_denormalized_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.cdr_date = Date.today.to_s
+  date = Time.new
+  date = date.year.to_s + "-" + date.month.to_s + "-" + date.day.to_s
+  op.opts.cdr_date = date.to_s
   op.opts.data_browser = false
   op.opts.dry_run = false
   op.add_option(
@@ -814,7 +816,7 @@ def make_bq_denormalized_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -846,7 +848,7 @@ def make_bq_denormalized_review(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -884,7 +886,7 @@ def make_bq_denormalized_search_events(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -922,7 +924,7 @@ def make_bq_denormalized_search_person(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -954,7 +956,7 @@ def make_bq_denormalized_dataset(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -986,7 +988,7 @@ def make_bq_dataset_linking(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -1025,7 +1027,7 @@ def generate_cb_criteria_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.dry_run}}
 end
 
 Common.register_command({
@@ -1067,7 +1069,7 @@ def generate_private_cdr_counts(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.workbench_project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
   end
 end
 
@@ -1119,7 +1121,7 @@ def copy_bq_tables(cmd_name, *args)
   ServiceAccountContext.new(op.opts.sa_project).run do
     common = Common.new
     common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
-    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
+    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
   end
 end
 
@@ -1160,7 +1162,7 @@ def cloudsql_import(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-cloudsql-import
+    common.run_inline %W{docker-compose run --rm db-cloudsql-import
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket} --file #{op.opts.file}}
   end
@@ -1177,7 +1179,7 @@ Import bucket of files or a single file in a bucket to a cloudsql database",
 
 def generate_local_cdr_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-cdr-db.sh} + args
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-local-cdr-db.sh} + args
 end
 
 Common.register_command({
@@ -1190,7 +1192,7 @@ Creates and populates local mysql database from data in bucket made by generate-
 
 def generate_local_count_dbs(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-count-dbs.sh} + args
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-local-count-dbs.sh} + args
 end
 
 Common.register_command({
@@ -1203,7 +1205,7 @@ Creates and populates local mysql databases cdr<VERSION> from data in bucket mad
 
 def mysqldump_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-mysqldump.sh} + args
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-mysqldump.sh} + args
 end
 
 
@@ -1229,7 +1231,7 @@ def local_mysql_import(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run db-local-mysql-import
+  common.run_inline %W{docker-compose run --rm db-local-mysql-import
         --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket}}
 end
 Common.register_command({
@@ -1243,7 +1245,7 @@ Imports .sql file to local mysql instance",
 def run_drop_cdr_db()
   ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
+  common.run_inline %W{docker-compose run --rm cdr-scripts ./run-drop-db.sh}
 end
 
 Common.register_command({
@@ -1259,7 +1261,7 @@ Common.register_command({
   :fn => ->(*args) { run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-def write_db_creds_file(project, cdr_db_name, root_password, workbench_password)
+def write_db_creds_file(project, cdr_db_name, root_password, workbench_password, readonly_password)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -1277,6 +1279,8 @@ def write_db_creds_file(project, cdr_db_name, root_password, workbench_password)
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
+      db_creds_file.puts "DEV_READONLY_DB_USER=dev-readonly"
+      db_creds_file.puts "DEV_READONLY_DB_PASSWORD=#{readonly_password}"
       db_creds_file.close
 
       copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
@@ -1574,7 +1578,7 @@ Common.register_command({
     :fn => ->(*args) {load_institutions(LOAD_INSTITUTIONS_CMD, *args)}
 })
 
-def populate_ops_user_affiliations(cmd_name, *args)
+def populate_user_affiliations(cmd_name, *args)
   common = Common.new
   ensure_docker(cmd_name, args)
 
@@ -1592,7 +1596,15 @@ def populate_ops_user_affiliations(cmd_name, *args)
       "--import-filename [import-filename]",
       String,
       ->(opts, v) { opts.importFilename = v},
-      "CSV File containing list of ops users to assign the ops institution")
+      "CSV File containing list of users to apply affiliations")
+
+  op.add_typed_option(
+      "--user-type [user-type]",
+      String,
+      ->(opts, v) { opts.userType = v},
+      "Which user type to populate: OPS or RESEARCHERS")
+
+  op.add_validator ->(opts) { raise ArgumentError unless (opts.importFilename and opts.userType)}
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -1605,7 +1617,8 @@ def populate_ops_user_affiliations(cmd_name, *args)
   end
 
   gradle_args = ([
-      ["--import-filename", op.opts.importFilename]
+      ["--import-filename", op.opts.importFilename],
+      ["--user-type", op.opts.userType]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   if op.opts.dry_run
     gradle_args += ["--dry-run"]
@@ -1615,17 +1628,17 @@ def populate_ops_user_affiliations(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle populateOpsUserAffiliations
+        gradle populateUserAffiliations
        -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
 
-POPULATE_OPS_USER_AFFILIATIONS_CMD = "populate-ops-user-affiliations"
+POPULATE_USER_AFFILIATIONS_CMD = "populate-user-affiliations"
 
 Common.register_command({
-    :invocation => POPULATE_OPS_USER_AFFILIATIONS_CMD,
-    :description => "Populate the institutional affiliations for the ops users in the specified CSV file.",
-    :fn => ->(*args) {populate_ops_user_affiliations(POPULATE_OPS_USER_AFFILIATIONS_CMD, *args)}
+    :invocation => POPULATE_USER_AFFILIATIONS_CMD,
+    :description => "Populate the institutional affiliations for the users in the specified CSV file.",
+    :fn => ->(*args) {populate_user_affiliations(POPULATE_USER_AFFILIATIONS_CMD, *args)}
 })
 
 def delete_workspaces(cmd_name, *args)
@@ -1737,7 +1750,7 @@ def set_authority_local(cmd_name, *args)
 
   app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]"]
   common = Common.new
-  common.run_inline %W{docker-compose run api-scripts ./gradlew setAuthority} + app_args
+  common.run_inline %W{docker-compose run --rm api-scripts ./gradlew setAuthority} + app_args
 end
 
 Common.register_command({
@@ -1994,7 +2007,7 @@ def update_cdr_versions_local(cmd_name, *args)
   versions_file = 'config/cdr_versions_local.json'
   app_args = ["-PappArgs=['/w/api/" + versions_file + "',false]"]
   common = Common.new
-  common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions} + app_args
+  common.run_inline %W{docker-compose run --rm api-scripts ./gradlew updateCdrVersions} + app_args
 end
 
 Common.register_command({
@@ -2020,20 +2033,42 @@ def connect_to_cloud_db(cmd_name, *args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-    "--root",
-    ->(opts, _) { opts.root = true },
-    "Connect as root")
+    "--db-user [user]",
+    ->(opts, v) { opts.db_user = v },
+    "Optional database user to connect as, defaults to 'dev-readonly'. " +
+    "To perform mutations use 'workbench'. Avoid using 'root' unless " +
+    "absolutely necessary.")
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
+
+  if op.opts.db_user.nil? || op.opts.db_user.empty?
+    op.opts.db_user = "dev-readonly"
+  end
+
   env = read_db_vars(gcc)
+  user_to_password = {
+    "dev-readonly" => env["DEV_READONLY_DB_PASSWORD"],
+    "workbench" => env["WORKBENCH_DB_PASSWORD"],
+    "root" => env["MYSQL_ROOT_PASSWORD"]
+  }
+  unless user_to_password.has_key?(op.opts.db_user)
+    Common.new.error(
+      "invalid --db-user provided, wanted one of #{user_to_password.keys}, got '#{op.opts.db_user}'")
+    exit 1
+  end
+  db_password = user_to_password[op.opts.db_user]
+
   CloudSqlProxyContext.new(gcc.project).run do
-    password = op.opts.root ? env["MYSQL_ROOT_PASSWORD"] : env["WORKBENCH_DB_PASSWORD"]
-    user = op.opts.root ? "root" : env["WORKBENCH_DB_USER"]
+    if op.opts.db_user == "dev-readonly"
+      common.status ""
+      common.status "Database session will be read-only; use --db-user to change this"
+      common.status ""
+    end
     common.run_inline %W{
-      mysql --host=127.0.0.1 --port=3307 --user=#{user}
-      --database=#{env["DB_NAME"]} --password=#{password}},
-      password
+      mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user}
+      --database=#{env["DB_NAME"]} --password=#{db_password}},
+      db_password
   end
 end
 
@@ -2055,11 +2090,10 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     common.status "\n" + "*" * 80
     common.status "Listing available journal files: "
 
-    # "root" is required for binlog access.
-    password = env["MYSQL_ROOT_PASSWORD"]
+    password = env["DEV_READONLY_DB_PASSWORD"]
     run_with_redirects(
       "echo 'SHOW BINARY LOGS;' | " +
-      "mysql --host=127.0.0.1 --port=3307 --user=root " +
+      "mysql --host=127.0.0.1 --port=3307 --user=dev-readonly " +
       "--database=#{env['DB_NAME']} --password=#{password}", password)
     common.status "*" * 80
 
@@ -2073,7 +2107,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     # Work out of /tmp for easy local file redirection. We don't want binlogs
     # winding up back in Workbench source control accidentally.
     run_with_redirects(
-      "export MYSQL_HOME=$(with-mysql-login.sh root #{password}); " +
+      "export MYSQL_HOME=$(with-mysql-login.sh dev-readonly #{password}); " +
       "cd /tmp; /bin/bash", password)
   end
 end
@@ -2211,13 +2245,35 @@ Common.register_command({
   :fn => ->(*args) { deploy_api("deploy-api", args) }
 })
 
-def create_workbench_db()
+def create_or_update_workbench_db()
+  # This method assumes that a cloud SQL proxy is active, and that appropriate
+  # env variables are exported to correspond to the target environment.
   run_with_redirects(
     "cat db/create_db.sql | envsubst | " \
     "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
     ENV["MYSQL_ROOT_PASSWORD"]
   )
 end
+
+def create_or_update_workbench_db_cmd(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
+    # with_cloud_proxy_and_db_env loads env vars into scope which parameterize this call
+    create_or_update_workbench_db
+  end
+end
+
+Common.register_command({
+  :invocation => "create-or-update-workbench-db",
+  :description => "Creates or updates the Workbench database and users.\n" \
+                  "This can be used in the event that new users or permissions " \
+                  "are added to create_db.sql, as this is not currently rerun " \
+                  "during deployment. This process is separate from Liquibase " \
+                  "migrations as these changes may require root, be necessary " \
+                  "to bootstrap Liquibase, or require sensitive variables such " \
+                  "as passwords which are unavailable to Liquibase.",
+  :fn => ->(*args) { create_or_update_workbench_db_cmd("create-or-update-workbench-db", args) }
+})
 
 def migrate_database(dry_run = false)
   common = Common.new
@@ -2490,12 +2546,14 @@ def create_project_resources(gcc)
 end
 
 def setup_project_data(gcc, cdr_db_name)
-  root_password, workbench_password = random_password(), random_password()
+  root_password = random_password()
+  workbench_password = random_password()
+  readonly_password = random_password()
 
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password)
+  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password, readonly_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root --host % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
@@ -2517,7 +2575,7 @@ def setup_project_data(gcc, cdr_db_name)
 
 
     common.status "Setting up databases and users..."
-    create_workbench_db
+    create_or_update_workbench_db
 
     common.status "Running schema migrations..."
     migrate_database

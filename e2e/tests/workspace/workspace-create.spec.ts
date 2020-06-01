@@ -1,10 +1,9 @@
 import Link from 'app/element/link';
 import DataPage from 'app/page/data-page';
 import WorkspacesPage, {FIELD} from 'app/page/workspaces-page';
-import {signIn} from 'utils/app-utils';
+import {signIn, performActions} from 'utils/test-utils';
 import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
-import {performActions} from 'utils/test-utils';
 import {makeWorkspaceName} from 'utils/str-utils';
 
 describe('Creating new workspaces', () => {
@@ -24,7 +23,7 @@ describe('Creating new workspaces', () => {
     // Pick out few sentenses to verify
     expect(dialogTextContent).toContain('Primary purpose of your project (Question 1)');
     expect(dialogTextContent).toContain('Summary of research purpose (Question 2)');
-    expect(dialogTextContent).toContain('Will be displayed publicly to inform All of Us Research participants.');
+    expect(dialogTextContent).toContain('Will be displayed publicly to inform All of Us research participants.');
     expect(dialogTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
     await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
@@ -35,7 +34,7 @@ describe('Creating new workspaces', () => {
     await workspacesPage.load();
 
     const createNewWorkspaceButton  = await Button.forLabel(page, FIELD.createNewWorkspaceButton.textOption );
-    await workspacesPage.clickAndWait(createNewWorkspaceButton);
+    await createNewWorkspaceButton.clickAndWait();
 
     // fill out new workspace name
     const newWorkspaceName = await workspacesPage.fillOutWorkspaceName();
@@ -78,8 +77,8 @@ describe('Creating new workspaces', () => {
     const dataPage = new DataPage(page);
     await dataPage.waitForLoad();
 
-    const workspaceLink = new Link(page);
-    await workspaceLink.withXpath(`//a[text()='${workspaceName}']`, {visible: true});
+    const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
+    await workspaceLink.waitForXPath({visible: true});
     expect(await workspaceLink.isVisible()).toBe(true);
   }
 

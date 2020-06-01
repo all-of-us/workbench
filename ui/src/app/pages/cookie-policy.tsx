@@ -2,8 +2,8 @@ import {StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SmallHeader} from 'app/components/headers';
+import {PublicLayout} from 'app/components/public-layout';
 import {AouTitle} from 'app/components/text-wrappers';
-import {SIGNED_OUT_HEADER_IMAGE} from 'app/pages/login/sign-in';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
 
@@ -48,13 +48,8 @@ const ZENDESK_PRIVACY_LINK = 'https://www.zendesk.com/company/customers-partners
 
 export class CookiePolicyComponent extends React.Component<{}, {}> {
   render() {
-    return <React.Fragment>
-      <div style={{width: '100%', height: '3.5rem',
-        borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`}}>
-        <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
-             src={SIGNED_OUT_HEADER_IMAGE}/>
-      </div>
-      <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%', color: colors.primary}}>
+    return <PublicLayout>
+      <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '100%', color: colors.primary}}>
         <Header style={styles.header}><AouTitle/> Cookie Policy</Header>
         <div style={styles.textSection}>
           The <AouTitle/> platform uses cookies to help provide you with the best experience we can.
@@ -144,6 +139,6 @@ export class CookiePolicyComponent extends React.Component<{}, {}> {
           information on how to do this can be found at the following <StyledAnchorTag href={COOKIE_DELETION_LINK}>
             link</StyledAnchorTag>.</div>
       </FadeBox>
-    </React.Fragment>;
+    </PublicLayout>;
   }
 }

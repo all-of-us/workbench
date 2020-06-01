@@ -4,7 +4,7 @@ export const environment: Environment = {
   displayTag: 'preprod',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'https://api.preprod-workbench.researchallofus.org',
-  captchaSiteKey: '6LcsXeQUAAAAAIqvC_rqpUExWsoK4kE9siunPeCG',
+  captchaSiteKey: '6LceVfYUAAAAAFInPvKl_bGoiyGyA3Y3dVp4o8Ly',
   clientId: '589109405884-bmoj9ra8849rqeepuamk8jpu102iq363.apps.googleusercontent.com',
   leoApiUrl: 'https://notebooks.firecloud.org',
   publicUiUrl: 'https://databrowser.researchallofus.org',
@@ -21,7 +21,7 @@ export const environment: Environment = {
   inactivityWarningBeforeSeconds: 5 * 60,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
-  enableProfileCapsFeatures: false,
+  enableProfileCapsFeatures: true,
   enableNewConceptTabs: false,
   enableFooter: false
 };

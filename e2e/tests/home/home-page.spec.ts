@@ -1,11 +1,9 @@
-import ClrIconLink from 'app/element/clr-icon-link';
-import Link from 'app/element/link';
 import BaseElement from 'app/element/base-element';
-import HomePage, {LABEL_ALIAS as HOME_PAGE_LABEL_ALIAS} from 'app/page/home-page';
+import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'utils/app-utils';
+import {signIn} from 'utils/test-utils';
 
 
 describe('Home page ui tests', () => {
@@ -15,11 +13,11 @@ describe('Home page ui tests', () => {
   });
 
   test('Check visibility of Workspace cards', async () => {
-    const cards = await WorkspaceCard.getAllCards(page);
+    const cards = await WorkspaceCard.findAllCards(page);
     let width;
     let height;
     for (const card of cards) {
-      const cardElem = new BaseElement(page, card.asElementHandle());
+      const cardElem = BaseElement.asBaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.getSize();
       expect(size).toBeTruthy();
@@ -47,9 +45,10 @@ describe('Home page ui tests', () => {
     }
   });
 
-   // Click See All Workspaces link => Opens Your Workspaces page
-  test('Click on See All Workspace link', async () => {
-    const seeAllWorkspacesLink = await Link.forLabel(page, HOME_PAGE_LABEL_ALIAS.SEE_ALL_WORKSPACES);
+   // Click See All workspaces link => Opens Your Workspaces page
+  test('Click on See All workspace link', async () => {
+    const homePage = new HomePage(page);
+    const seeAllWorkspacesLink = await homePage.getSeeAllWorkspacesLink();
     await seeAllWorkspacesLink.click();
     const workspaces = new WorkspacesPage(page);
     await workspaces.waitForLoad();
@@ -70,7 +69,8 @@ describe('Home page ui tests', () => {
   });
 
   test('Check Create New Workspace link on Home page', async () => {
-    const plusIcon = await ClrIconLink.forLabel(page, {normalizeSpace: HOME_PAGE_LABEL_ALIAS.CREATE_NEW_WORKSPACE}, 'plus-circle');
+    const homePage = new HomePage(page);
+    const plusIcon = await homePage.getCreateNewWorkspaceLink();
     expect(plusIcon).toBeTruthy();
     const classname = await plusIcon.getProperty('className');
     expect(classname).toBe('is-solid');

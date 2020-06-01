@@ -78,7 +78,7 @@ export const AccountCreationOptions = {
       value: InstitutionalRole.MIDCAREER},
     {label: `Late career tenured researcher`,
       value: InstitutionalRole.LATECAREER},
-    {label: `Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research Coordinator or other roles)`,
+    {label: `Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research Coordinator, or other roles)`,
       value: InstitutionalRole.PROJECTPERSONNEL},
     {label: 'Research Assistant (pre-doctoral)',
       value: InstitutionalRole.PREDOCTORAL},
@@ -138,7 +138,7 @@ export const AccountCreationOptions = {
       roles: Object.keys(InstitutionalRole).map(k => InstitutionalRole[k])}
   ],
   race: [
-    {label: `American Indian or Alaska Native (AIAN)`, value: Race.AIAN},
+    {label: `American Indian or Alaska Native (AI/AN)`, value: Race.AIAN},
     {label: `Black or African American`, value: Race.AA},
     {label: `Asian`, value: Race.ASIAN},
     {label: `Native Hawaiian or Other Pacific Islander`, value: Race.NHOPI},
@@ -170,7 +170,7 @@ export const AccountCreationOptions = {
     {label: 'Never attended school/no formal education', value: Education.NOEDUCATION},
     {label: 'Primary/Middle School/High School (Grades 1 through 12/GED)', value: Education.GRADES112},
     {label: 'Some college, Associate Degree or ' +
-      'Technical school (1 to 3 years) or current undergraduate student', value: Education.UNDERGRADUATE},
+      'Technical school (1 to 3 years), or current undergraduate student', value: Education.UNDERGRADUATE},
     {label: 'College graduate (4 years or more) or current post-graduate trainee', value: Education.COLLEGEGRADUATE},
     {label: 'Master’s degree', value: Education.MASTER},
     {label: 'Doctorate', value: Education.DOCTORATE}

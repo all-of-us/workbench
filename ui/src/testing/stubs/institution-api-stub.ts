@@ -1,4 +1,5 @@
 import {
+  CheckEmailRequest,
   CheckEmailResponse,
   DuaType,
   GetInstitutionsResponse,
@@ -13,7 +14,8 @@ export const defaultInstitutions: Array<Institution> = [{
   displayName: 'Vanderbilt University Medical Center',
   organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
   emailDomains: ['vumc.org'],
-  duaTypeEnum: DuaType.MASTER
+  duaTypeEnum: DuaType.MASTER,
+  userInstructions: 'Vanderbilt User Instruction'
 }, {
   shortName: 'Broad',
   displayName: 'Broad Institute',
@@ -25,7 +27,8 @@ export const defaultInstitutions: Array<Institution> = [{
   shortName: 'Verily',
   displayName: 'Verily LLC',
   organizationTypeEnum: OrganizationType.INDUSTRY,
-  emailDomains: ['verily.com', 'google.com']
+  emailDomains: ['verily.com', 'google.com'],
+  userInstructions: 'Verily User Instruction'
 }];
 
 export class InstitutionApiStub extends InstitutionApi {
@@ -65,8 +68,9 @@ export class InstitutionApiStub extends InstitutionApi {
   }
 
   getInstitutions(shortName: string): Promise<GetInstitutionsResponse> {
-    return new Promise(resolve => {
-      return {institutions: this.institutions};
+    return new Promise((resolve, reject) => {
+      const institution = {institutions: this.institutions};
+      resolve(institution);
     });
   }
 
@@ -93,8 +97,9 @@ export class InstitutionApiStub extends InstitutionApi {
     });
   }
 
-  async checkEmail(shortName: string, email: string, options?: any): Promise<CheckEmailResponse> {
-    const domain = email.substring(email.lastIndexOf('@') + 1);
+  async checkEmail(shortName: string, request: CheckEmailRequest, options?: any): Promise<CheckEmailResponse> {
+    const {contactEmail} = request;
+    const domain = contactEmail.substring(contactEmail.lastIndexOf('@') + 1);
 
     const institution = this.institutions.find(x => x.shortName === shortName);
     if (!institution) {
@@ -104,7 +109,7 @@ export class InstitutionApiStub extends InstitutionApi {
     const response: CheckEmailResponse = {
       isValidMember: false
     };
-    if (institution.emailAddresses && institution.emailAddresses.includes(email)) {
+    if (institution.emailAddresses && institution.emailAddresses.includes(contactEmail)) {
       response.isValidMember = true;
     } else if (institution.emailDomains && institution.emailDomains.includes(domain)) {
       response.isValidMember = true;

@@ -10,9 +10,10 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     uses = {
       AddressMapper.class,
       CommonMappers.class,
@@ -53,9 +54,6 @@ public interface ProfileMapper {
   @Mapping(target = "dataAccessLevelEnum", ignore = true) // derived property
   @Mapping(target = "degreesEnum", ignore = true) // derived property
   @Mapping(target = "emailVerificationStatusEnum", ignore = true) // derived property
-  @Mapping(
-      target = "firstRegistrationCompletionTime",
-      ignore = true) // used only in UserService.updateDataAccessLevel
   @Mapping(target = "freeTierCreditsLimitDaysOverride", ignore = true) // unused
   @Mapping(
       target = "freeTierCreditsLimitDollarsOverride",

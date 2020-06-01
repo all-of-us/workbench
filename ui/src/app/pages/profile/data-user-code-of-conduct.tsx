@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {PdfViewer} from 'app/components/pdf-viewer';
+import {HtmlViewer} from 'app/components/html-viewer';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-v2';
@@ -16,7 +16,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
-import {serverConfigStore} from 'app/utils/navigation';
+import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';
@@ -68,6 +68,7 @@ interface State {
   initialPublic: string;
   page: DataUserCodeOfConductPage;
   submitting: boolean;
+  proceedDisabled: boolean;
 }
 
 export const DataUserCodeOfConduct = withUserProfile()(
@@ -82,7 +83,8 @@ export const DataUserCodeOfConduct = withUserProfile()(
         initialMonitoring: '',
         initialPublic: '',
         page: DataUserCodeOfConductPage.CONTENT,
-        submitting: false
+        submitting: false,
+        proceedDisabled: true
       };
     }
 
@@ -91,13 +93,14 @@ export const DataUserCodeOfConduct = withUserProfile()(
       const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.getValue());
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
-        window.history.back();
+        navigate(['/']);
       });
     }
 
     render() {
       const {profileState: {profile}} = this.props;
-      const {initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic, page, submitting} = this.state;
+      const {proceedDisabled, initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic,
+        page, submitting} = this.state;
       const errorsV2 = validate({initialNameV2, initialWorkV2, initialSanctionsV2}, {
         initialNameV2: {
           presence: {allowEmpty: false},
@@ -128,11 +131,12 @@ export const DataUserCodeOfConduct = withUserProfile()(
         return <FlexColumn style={styles.dataUserCodeOfConductPage}>
           {
             page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
-              <div style={{marginTop: '2rem', marginBottom: '1rem'}}>
-                <PdfViewer
-                    pdfPath={'assets/documents/data-user-code-of-conduct-v3.pdf'}
-                />
-              </div>
+              <HtmlViewer
+                  ariaLabel='data user code of conduct agreement'
+                  containerStyles={{margin: '2rem 0 1rem'}}
+                  filePath={'assets/documents/data-user-code-of-conduct.html'}
+                  onLastPage={() => this.setState({proceedDisabled: false})}
+              />
               <FlexRow style={styles.dataUserCodeOfConductFooter}>
                 Please read the above document in its entirety before proceeding to sign the Data User Code of Conduct.
                 <Button
@@ -144,6 +148,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 </Button>
                 <Button
                     data-test-id={'ducc-next-button'}
+                    disabled={proceedDisabled}
                     onClick={() => this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
                 >
                   Proceed

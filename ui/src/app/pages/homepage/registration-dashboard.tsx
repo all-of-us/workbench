@@ -8,6 +8,7 @@ import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -71,18 +72,21 @@ const styles = reactStyles({
   },
 });
 
-function redirectToGoogleSecurity(): void {
-  AnalyticsTracker.Registration.TwoFactorAuth();
-  let url = 'https://myaccount.google.com/u/2/signinoptions/two-step-verification/enroll';
-  const {profile} = userProfileStore.getValue();
-  // The profile should always be available at this point, but avoid making an
-  // implicit hard dependency on that, since the authuser'less URL is still useful.
-  if (profile.username) {
-    // Attach the authuser, in case users are using Google multilogin - their
-    // AoU researcher account is unlikely to be their primary Google login.
-    url += `?authuser=${profile.username}`;
+export function getTwoFactorSetupUrl(): string {
+  const accountChooserBase = 'https://accounts.google.com/AccountChooser';
+  const url = new URL(accountChooserBase);
+  // If available, set the 'Email' param to give Google a hint that we want to access the
+  // target URL as this specific G Suite user. This helps guide users when multi-login is in use.
+  if (userProfileStore.getValue()) {
+    url.searchParams.set('Email', userProfileStore.getValue().profile.username);
   }
-  window.open(url, '_blank');
+  url.searchParams.set('continue', 'https://myaccount.google.com/signinoptions/two-step-verification/enroll');
+  return url.toString();
+}
+
+function redirectToTwoFactorSetup(): void {
+  AnalyticsTracker.Registration.TwoFactorAuth();
+  window.open(getTwoFactorSetupUrl(), '_blank');
 }
 
 function redirectToNiH(): void {
@@ -131,13 +135,13 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionTimestamp: (profile: Profile) => {
       return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
     },
-    onClick: redirectToGoogleSecurity
+    onClick: redirectToTwoFactorSetup
   }, {
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Workbench account to your eRA Commons account. There is no exchange of personal data in this step.',
+    description: 'Connect your Researcher Workbench account to your eRA Commons account. There is no exchange of personal data in this step.',
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
@@ -149,7 +153,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionPropsKey: 'trainingCompleted',
     title: <span><i>All of Us</i> Responsible Conduct of Research Training</span>,
     description: <div>Complete ethics training courses to understand the privacy safeguards and the
-      compliance requirements for using the <i>All of Us</i> Dataset.</div>,
+      compliance requirements for using the <AoU/> dataset.</div>,
     buttonText: 'Complete training',
     featureFlag: serverConfigStore.getValue().enableComplianceTraining,
     completedText: 'Completed',
@@ -161,7 +165,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'dataUserCodeOfConduct',
     completionPropsKey: 'dataUserCodeOfConductCompleted',
     title: 'Data User Code of Conduct',
-    description: <span>Sign the data user code of conduct consenting to the <i>All of Us</i> data use policy.</span>,
+    description: <span>Sign the Data User Code of Conduct consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
@@ -398,7 +402,15 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
              data-test-id='success-message'>
           You successfully completed all the required steps to access the Researcher Workbench.
           <Button style={{marginLeft: '0.5rem'}}
-                  onClick={() => window.location.reload()}>Get Started</Button>
+                  onClick={() => {
+                    // Quirk / hack note: the goal here is to send the user to the homepage once they've completed
+                    // all access modules. Normally we would just navigate(['']) to do this. However, because
+                    // of the way this dashboard is rendered *within* the homepage component, a call to
+                    // navigate is not enough to trigger the normal homepage to load. As a workaround, we
+                    // explicitly clear the search query and redirect to the root path.
+                    window.location.pathname = '/';
+                    window.location.search = '';
+                  }}>Get Started</Button>
         </div>
       }
       {this.state.twoFactorAuthModalOpen && <Modal width={500}>
@@ -414,7 +426,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
               <Button onClick = {() => this.setState({twoFactorAuthModalOpen: false})}
                       type='secondary' style={styles.twoFactorAuthModalCancelButton}>Cancel</Button>
               <Button onClick = {() => {
-                redirectToGoogleSecurity();
+                redirectToTwoFactorSetup();
                 this.setState((state) => ({
                   accessTaskKeyToButtonAsRefresh: state.accessTaskKeyToButtonAsRefresh.set('twoFactorAuth', true),
                   twoFactorAuthModalOpen: false

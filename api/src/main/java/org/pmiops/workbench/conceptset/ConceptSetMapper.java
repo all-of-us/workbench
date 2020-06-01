@@ -5,9 +5,10 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-    componentModel = "spring",
+    config = MapStructConfig.class,
     uses = {CommonMappers.class})
 public interface ConceptSetMapper {
 

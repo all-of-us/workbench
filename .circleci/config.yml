@@ -1,5 +1,9 @@
 version: 2.1
 
+# https://circleci.com/orbs/registry/
+orbs:
+  browser-tools: circleci/browser-tools@1.0.0
+
 # -------------------------
 #   PARAMETERS
 # -------------------------
@@ -7,29 +11,48 @@ parameters:
   circleci_service_account:
     type: string
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
+  workbench_image:
+    type: string
+    default: "allofustest/workbench:buildimage-0.0.17"
+  mysql_image:
+    type: string
+    default: "circleci/mysql:5.7"
 
 # -------------------------
 #   ANCHORS
 # -------------------------
 anchors:
+  java_env: &java_env
+    # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+    # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+    # https://circleci.com/blog/how-to-handle-java-oom-errors/
+    #
+    # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
+    # so we bumped this down further to 2G.
+    JAVA_TOOL_OPTIONS: -Xmx2g
+    # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    TERM: dumb
+    MYSQL_ROOT_PASSWORD: ubuntu
+
+  mysql_env: &mysql_env
+    MYSQL_ROOT_PASSWORD: ubuntu
+    MYSQL_USER: ubuntu
+    MYSQL_PASSWORD: ubuntu
+
+  e2e_env: &e2e_env
+    CI: true
+    NODE_ENV: development
+
   defaults: &defaults
     docker:
-      - image: allofustest/workbench:buildimage-0.0.16
+      - image: << pipeline.parameters.workbench_image >>
     working_directory: ~/workbench
 
   java_defaults: &java_defaults
     <<: *defaults
     environment:
-      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-      # https://circleci.com/blog/how-to-handle-java-oom-errors/
-      #
-      # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
-      # so we bumped this down further to 2G.
-      JAVA_TOOL_OPTIONS: -Xmx2g
-      # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-      TERM: dumb
+      <<: *java_env
 
   # See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
   # Job runs for master branch only
@@ -54,12 +77,6 @@ anchors:
       # Workbench release tag format example: v5-3-rc1
       only: /^v[0-9]+-[0-9]+-rc[0-9]+$/
 
-  # Job runs for all branches EXCEPT all tag and master branches
-  filter_pull_request_branch: &filter_pull_request_branch
-    tags:
-      ignore: /.*/
-    branches:
-      ignore: master
 
 # -------------------------
 #   COMMANDS
@@ -84,20 +101,20 @@ commands:
           command: git submodule update --init --recursive
 
   halt_job_noncode_changes:
-    description: "Halt job and succeed early if no code changes on master branch"
+    description: "Halt job and succeed early if no code changes on non-master branch"
     steps:
       - run:
           command: |
             if [ ${CIRCLE_BRANCH} != "" ] &&
               [ ${CIRCLE_BRANCH} != "master" ] &&
               ! git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvE '(.md$)|(.pdf$)'; then
-                echo "No code changes in non-master branch. halting job."
+                echo "No code changes on non-master branch. halting job."
                 circleci step halt
             fi
-          name: Halt job and succeed early if no code changes on master branch
+          name: Halt job and succeed early if no code changes on non-master branch
 
   ensure_branch_has_changes:
-    description: "Ensure branch has changes to code in specified directory"
+    description: Halt job and succeed early if no code changes in << parameters.dir_name >> directory on non-master branch
     parameters:
       dir_name:
         type: enum
@@ -108,10 +125,10 @@ commands:
             if [ ${CIRCLE_BRANCH} != "" ] &&
               [ ${CIRCLE_BRANCH} != "master" ] &&
               [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep << parameters.dir_name >>/ | wc -l | xargs) == 0 ]; then
-                echo "No relevant changes in << parameters.dir_name >> directory in non-master branch. Skipping."
+                echo "No relevant changes in << parameters.dir_name >> directory on non-master branch. halting job."
                 circleci step halt
             fi
-          name: Ensure branch has changes to code in specified directory
+          name: Halt job and succeed early if no code changes in << parameters.dir_name >> directory on non-master branch
 
   install_ui_dependencies:
     description: "workbench/ui: yarn install, save and restore cache"
@@ -185,6 +202,7 @@ commands:
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
     steps:
+      - install_e2e_dependencies
       - run:
           name: Update Puppeteer test environment variables
           command: |
@@ -196,12 +214,71 @@ commands:
           name: Run puppeteer e2e tests
           working_directory: ~/workbench/e2e
           # parallelism used to run e2e tests
-          command: yarn test:ci $(circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings --timings-type=classname --show-counts)
+          command: |
+            circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
+            yarn test:ci $(cat /tmp/tests-to-run)
+          no_output_timeout: 15m
       - store_artifacts:
           path: e2e/logs
           destination: logs
       - store_test_results:
           path: ~/workbench/e2e/logs
+
+
+  start_local_api:
+    description: "Start local API server"
+    steps:
+      - manage_api_cache:
+          restore: true
+      - run:
+          # MySQL sometimes refuses connections by the time we attempt to apply
+          # data migrations. Watch the port for 2m for startup.
+          name: Await MySQL startup
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - run:
+          name: Run Local Migrations
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-migrations
+      - run:
+          name: Launch local API server
+          working_directory: ~/workbench/api
+          # tail -f is important here, it keeps this process running indefinitely
+          command: ./project.rb start-local-api && tail -f build/dev-appserver-out/dev_appserver.out
+          background: true
+      - run:
+          name: Wait for local API server to start
+          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
+
+  start_local_ui:
+    description: "Start local UI server"
+    parameters:
+      connect_local_api:
+        type: boolean
+        default: false
+    steps:
+      - install_ui_dependencies
+      - when:
+          condition: << parameters.connect_local_api >>
+          steps:
+            - run:
+                name: Launch local UI server
+                working_directory: ~/workbench/ui
+                # Start local UI server that connects to local api server
+                command: yarn dev-up --configuration=local
+                background: true
+      - unless:
+          condition: << parameters.connect_local_api >>
+          steps:
+            - run:
+                name: Launch local UI server
+                working_directory: ~/workbench/ui
+                # Start local UI server that connects to "test" api
+                command: yarn dev-up
+                background: true
+      - run:
+          name: Wait for local UI server to start
+          command: dockerize -wait tcp://localhost:4200 -timeout 4m
+
 
 # -------------------------
 #        JOBS
@@ -243,37 +320,21 @@ jobs:
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
     docker:
-      - image: allofustest/workbench:buildimage-0.0.16
-      - image: mysql:5.7
+      - image: << pipeline.parameters.workbench_image >>
+      - image: << pipeline.parameters.mysql_image >>
         environment:
-          - MYSQL_ROOT_PASSWORD=ubuntu
-          - MYSQL_USER=ubuntu
-          - MYSQL_PASSWORD=ubuntu
+          <<: *mysql_env
     working_directory: ~/workbench
     environment:
-      JAVA_TOOL_OPTIONS: -Xmx2g
-      TERM: dumb
-      MYSQL_ROOT_PASSWORD: ubuntu
-      # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+      <<: *java_env
     steps:
       - checkout_init_git
-      - manage_api_cache:
-          restore: true
       - activate_service_account_credential
-      - run:
-          # MySQL sometimes refuses connections by the time we attempt to apply
-          # data migrations. Watch the port for 2m for startup.
-          name: Await MySQL start up
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
-      - run:
-          name: Run local migrations
-          working_directory: ~/workbench/api
-          command: ./project.rb run-local-migrations
+      - start_local_api
       - run:
           name: Local API tests on running server
           working_directory: ~/workbench/api
-          command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
+          command: ./project.rb run-local-api-tests && ./project.rb stop-local-api
       - manage_api_cache:
           save: true
 
@@ -346,6 +407,9 @@ jobs:
           save: true
 
   api-bigquery-test:
+    # We're hitting OOM failures as of 13 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
+    # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
+    resource_class: medium+
     <<: *java_defaults
     steps:
       - checkout_init_git
@@ -365,6 +429,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout_init_git
+      - ensure_branch_has_changes:
+          dir_name: "ui"
       - run:
           name: Download Swagger CLI
           working_directory: ~/workbench
@@ -398,23 +464,6 @@ jobs:
           root: .
           paths:
             - ui
-
-  # Run Puppeteer e2e UI tests on Workbench deployed "test" environment.
-  puppeteer-e2e-test:
-    <<: *defaults
-    docker:
-      - image: circleci/node:12.16.2-browsers
-    environment:
-      WORKBENCH_ENV: dev
-      CI: true
-      NODE_ENV: development
-    working_directory: ~/workbench
-    parallelism: 3
-    steps:
-      - checkout_init_git
-      - halt_job_noncode_changes
-      - install_e2e_dependencies
-      - run_e2e_test
 
   ui-deploy-to-test:
     <<: *defaults
@@ -462,7 +511,6 @@ jobs:
       - manage_api_cache:
           save: true
 
-
   deploy-perf:
     <<: *defaults
     steps:
@@ -485,6 +533,44 @@ jobs:
       - manage_api_cache:
           save: true
 
+  # Run Puppeteer e2e UI tests on deployed "test" environment.
+  puppeteer-e2e-test:
+    <<: *defaults
+    environment:
+      <<: *e2e_env
+      WORKBENCH_ENV: dev
+    working_directory: ~/workbench
+    parallelism: 3
+    steps:
+      - checkout_init_git
+      - halt_job_noncode_changes
+      - browser-tools/install-browser-tools
+      - run_e2e_test
+
+  # Deploy UI local server then run Puppeteer e2e tests on deployed "local" environment.
+  puppeteer-e2e-local-ui:
+    <<: *defaults
+    environment:
+      <<: *e2e_env
+      WORKBENCH_ENV: local
+    resource_class: medium+
+    working_directory: ~/workbench
+    parallelism: 1
+    steps:
+      - run:
+          name: Skip job if this is not a pull request
+          command: |
+            echo "PR: $CI_PULL_REQUEST"
+            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} == "master" ] ; then
+              echo "Not a PR, skipping Puppeteer tests"
+              circleci-agent step halt
+            fi
+      - checkout_init_git
+      - halt_job_noncode_changes
+      - browser-tools/install-browser-tools
+      - start_local_ui
+      - run_e2e_test
+
 workflows:
   build-test-deploy:
     jobs:
@@ -495,6 +581,7 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
+      - puppeteer-e2e-local-ui
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           filters: *filter_only_master_branch

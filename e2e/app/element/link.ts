@@ -1,26 +1,22 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
+import Container from 'app/container';
+import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {findClickable} from './xpath-finder';
+import {xPathOptionToXpath} from './xpath-defaults';
 
 export default class Link extends BaseElement {
    
   static async forLabel(
      page: Page,
-     aElementName: string,
-     options: WaitForSelectorOptions = {visible: true},
-     throwErr = true): Promise<Link> {
+     xOpt: XPathOptions,
+     container?: Container,
+     waitOptions: WaitForSelectorOptions = {visible: true}): Promise<Link> {
 
-    let element: Link;
-    try {
-      const linkElement = await findClickable(page, aElementName, options);
-      element = new BaseElement(page, linkElement);
-    } catch (e) {
-      if (throwErr) {
-        console.error(`FAILED finding Link: "${aElementName}".`);
-        throw e;
-      }
-    }
-    return element;
+    xOpt.type = ElementType.Link;
+    const linkXpath = xPathOptionToXpath(xOpt, container);
+    const link = new Link(page, linkXpath);
+    await link.waitForXPath(waitOptions);
+    return link;
   }
 
 

@@ -1,7 +1,7 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
+import {HtmlViewer} from 'app/components/html-viewer';
 import {CheckBox} from 'app/components/inputs';
-import {PdfViewer} from 'app/components/pdf-viewer';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
@@ -35,8 +35,8 @@ const styles = reactStyles({
 export interface AccountCreationTosProps {
   // Callback which will be called by this component when the user clicks "Next".
   onComplete: () => void;
-  // Path to the Terms of Service PDF file to be displayed.
-  pdfPath: string;
+  // Path to the Terms of Service file to be displayed.
+  filePath: string;
   // Coming from Institution page
   afterPrev: boolean;
 }
@@ -45,10 +45,6 @@ interface AccountCreationTosState {
   hasReadEntireTos: boolean;
   hasAckedPrivacyStatement: boolean;
   hasAckedTermsOfService: boolean;
-  // Whether the PDF document is currently being loaded. A spinner will show while true.
-  loadingPdf: boolean;
-  // Once the PDF has been loaded, this value contains the number of pages in the PDF document.
-  numPages: number;
 }
 
 export class AccountCreationTos extends React.Component<
@@ -60,9 +56,7 @@ export class AccountCreationTos extends React.Component<
     this.state = {
       hasReadEntireTos: props.afterPrev,
       hasAckedPrivacyStatement: props.afterPrev,
-      hasAckedTermsOfService: props.afterPrev,
-      loadingPdf: true,
-      numPages: 0,
+      hasAckedTermsOfService: props.afterPrev
     };
   }
 
@@ -71,10 +65,11 @@ export class AccountCreationTos extends React.Component<
 
     return <FlexColumn data-test-id='account-creation-tos'
                        style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
-      <PdfViewer
+      <HtmlViewer
+          ariaLabel='terms of service agreement'
           containerStyles={{backgroundColor: colors.white}}
-          onLastPageRender={() => this.setState({hasReadEntireTos: true})}
-          pdfPath={this.props.pdfPath}
+          onLastPage={() => this.setState({hasReadEntireTos: true})}
+          filePath={this.props.filePath}
       />
       <FlexRow
         style={{display: 'inline-flex', padding: '1rem', maxWidth: '1000px', margin: 'auto'}}>
@@ -85,7 +80,7 @@ export class AccountCreationTos extends React.Component<
             </div>
             <div style={{fontWeight: 400}}>
                 By clicking below, or continuing with the registration process or accessing the
-                Workbench, You agree to these Terms and make the following certifications:
+                Researcher Workbench, you agree to these terms and make the following certifications:
             </div>
           </div>
           <div style={{marginBottom: '.25rem'}}>
@@ -112,7 +107,7 @@ export class AccountCreationTos extends React.Component<
                         styles.disabledCheckboxLabel}
                       wrapperStyle={{marginBottom: '0.5rem'}}
                       label={<span>
-              I have read, understand, and agree to the Terms described above.</span>}
+              I have read, understand, and agree to the Terms of Use described above.</span>}
             /></div>
         </div>
         <FlexColumn style={{paddingLeft: '3rem', alignItems: 'center', justifyContent: 'center'}}>

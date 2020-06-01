@@ -1,27 +1,22 @@
 import {Page, WaitForSelectorOptions} from 'puppeteer';
-import TextOptions from './text-options';
+import Container from 'app/container';
+import {ElementType, XPathOptions} from 'app/xpath-options';
 import BaseElement from './base-element';
-import {findCheckbox} from './xpath-finder';
+import {xPathOptionToXpath} from './xpath-defaults';
 
 export default class Checkbox extends BaseElement {
    
   static async forLabel(
      page: Page,
-     textOptions: TextOptions,
-     waitOptions: WaitForSelectorOptions = {visible: true},
-     throwErr = true): Promise<Checkbox> {
+     xOpt: XPathOptions,
+     container?: Container,
+     waitOptions: WaitForSelectorOptions = {visible: true}): Promise<Checkbox> {
 
-    let element: Checkbox;
-    try {
-      const checkboxElement = await findCheckbox(page, textOptions, waitOptions);
-      element = new Checkbox(page, checkboxElement);
-    } catch (e) {
-      if (throwErr) {
-        console.error(`FAILED finding Checkbox: "${JSON.stringify(textOptions)}".`);
-        throw e;
-      }
-    }
-    return element;
+    xOpt.type = ElementType.Checkbox;
+    const checkboxXpath = xPathOptionToXpath(xOpt, container);
+    const checkbox = new Checkbox(page, checkboxXpath);
+    await checkbox.waitForXPath(waitOptions);
+    return checkbox;
   }
 
   /**
@@ -68,7 +63,8 @@ export default class Checkbox extends BaseElement {
     if (checked) {
       return this.check();
     }
-    return this.unCheck();
+    await this.unCheck();
+    return;
   }
 
 }

@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import * as fp from 'lodash/fp';
 
+import {PUBLIC_HEADER_IMAGE} from 'app/components/public-layout';
 import {AccountCreation} from 'app/pages/login/account-creation/account-creation';
 import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
 import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
@@ -112,8 +113,6 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
     smallerBackgroundImgSrc: 'assets/images/congrats-female-standing.png'
   }]]
 );
-
-export const SIGNED_OUT_HEADER_IMAGE = '/assets/images/all-of-us-logo.svg';
 
 
 export interface SignInProps extends ServerConfigProps, WindowSizeProps {
@@ -305,7 +304,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
         })}/>;
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
-          pdfPath='/assets/documents/terms-of-service.pdf'
+          filePath='/assets/documents/aou-tos.html'
           onComplete={() => {
             AnalyticsTracker.Registration.TOS();
             this.setState({
@@ -346,7 +345,7 @@ export class SignInReactImpl extends React.Component<SignInProps, SignInState> {
       <FlexColumn data-test-id='sign-in-page'
                   style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
         <div><img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
-                  src={SIGNED_OUT_HEADER_IMAGE}/></div>
+                  src={PUBLIC_HEADER_IMAGE}/></div>
         {this.renderSignInStep(this.state.currentStep)}
       </FlexColumn>
       {environment.enableFooter && <Footer type={FooterTypeEnum.Registration} />}
