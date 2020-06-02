@@ -519,6 +519,7 @@ export const ListModifierPage = withCurrentWorkspace()(
                 style={styles.select}
                 onChange={(e) => this.selectChange(e.value, i)}
                 options={options}
+                optionValue='value'
                 itemTemplate={(e) => this.optionTemplate(e, name)}/>
               {operator && name !== ModifierType.ENCOUNTERS && <React.Fragment>
                 {this.renderInput(i, '0', mod.type)}
