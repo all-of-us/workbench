@@ -4,6 +4,8 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
+import {AppRouting} from './app-routing';
+
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {DataUserCodeOfConductComponent} from 'app/pages/profile/data-user-code-of-conduct';
@@ -16,7 +18,6 @@ import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
-import {CookiePolicyComponent} from './pages/cookie-policy';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -51,10 +52,6 @@ const routes: Routes = [
     path: 'login',
     component: SignInComponent,
     data: {title: 'Sign In'}
-  }, {
-    path: 'cookie-policy',
-    component: CookiePolicyComponent,
-    data: {title: 'Cookie Policy'}
   }, {
     path: 'session-expired',
     component: SessionExpiredComponent,
@@ -117,8 +114,7 @@ const routes: Routes = [
                   breadcrumb: BreadcrumbType.Workspace,
                   helpContentKey: 'about'
                 }
-              },
-              {
+              }, {
                 path: 'edit',
                 component: WorkspaceEditComponent,
                 data: {
@@ -127,8 +123,7 @@ const routes: Routes = [
                   breadcrumb: BreadcrumbType.WorkspaceEdit,
                   helpContentKey: 'edit'
                 }
-              },
-              {
+              }, {
                 path: 'duplicate',
                 component: WorkspaceEditComponent,
                 data: {
@@ -346,6 +341,9 @@ const routes: Routes = [
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
       }
     ]
+  }, {
+    path: '**',
+    component: AppRouting
   }
 ];
 
