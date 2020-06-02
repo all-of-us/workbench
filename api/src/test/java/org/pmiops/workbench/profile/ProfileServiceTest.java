@@ -3,12 +3,15 @@ package org.pmiops.workbench.profile;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -50,8 +53,10 @@ public class ProfileServiceTest {
   @Autowired ProfileService profileService;
   @Autowired UserDao userDao;
 
+  DbInstitution dbInstitution;
+
   @TestConfiguration
-  @MockBean({FreeTierBillingService.class, InstitutionService.class, UserService.class})
+  @MockBean({FreeTierBillingService.class, UserService.class})
   @Import({
     AddressMapperImpl.class,
     DemographicSurveyMapperImpl.class,
@@ -63,6 +68,13 @@ public class ProfileServiceTest {
     CommonMappers.class
   })
   static class Configuration {}
+
+  @Before
+  public void setUp() {
+    dbInstitution = new DbInstitution();
+    dbInstitution.setShortName("Broad");
+    dbInstitution.setDisplayName("The Broad Institute");
+  }
 
   @Test
   public void testGetProfile_empty() {
@@ -107,23 +119,29 @@ public class ProfileServiceTest {
             .verifiedInstitutionalAffiliation(affiliation)
             .contactEmail("kibitz@broadinstitute.org");
 
-    DbInstitution dbInstitution = new DbInstitution();
-    dbInstitution.setShortName("Broad");
-    dbInstitution.setDisplayName("The Broad Institute");
-
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(dbInstitution));
 
-    when(mockInstitutionService.validateAffiliation(
-            any(DbVerifiedInstitutionalAffiliation.class), anyString()))
-        .thenReturn(true);
-
+    DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation = new DbVerifiedInstitutionalAffiliation();
+    dbVerifiedInstitutionalAffiliation.setInstitution(dbInstitution);
+    dbVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.OTHER);
+    dbVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText("Kibitzing");
     when(mockVerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-            affiliation, mockInstitutionService))
-        .thenReturn(new DbVerifiedInstitutionalAffiliation());
+        affiliation, mockInstitutionService))
+        .thenReturn(dbVerifiedInstitutionalAffiliation);
+
+    when(mockInstitutionService.validateAffiliation(
+        dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
+        .thenReturn(true);
 
     VerifiedInstitutionalAffiliation validatedAffiliation =
         profileService.validateInstitutionalAffiliation(profile);
     assertThat(validatedAffiliation).isEqualTo(affiliation);
+
+    ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy = ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
+    ArgumentCaptor<String> unusedSpy = ArgumentCaptor.forClass(String.class);
+    verify(mockInstitutionService).validateAffiliation(affiliationSpy.capture(), unusedSpy.capture());
+
+    assertThat(affiliationSpy.getValue().getInstitution().getShortName()).isEqualTo("Broad");
   }
 
   @Test
@@ -139,10 +157,6 @@ public class ProfileServiceTest {
         new Profile()
             .verifiedInstitutionalAffiliation(affiliation)
             .contactEmail("kibitz@broadinstitute.org");
-
-    DbInstitution dbInstitution = new DbInstitution();
-    dbInstitution.setShortName("Broad");
-    dbInstitution.setDisplayName("The Broad Institute");
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(dbInstitution));
 
@@ -194,10 +208,6 @@ public class ProfileServiceTest {
             .verifiedInstitutionalAffiliation(affiliation)
             .contactEmail("kibitz@broadinstitute.org");
 
-    DbInstitution dbInstitution = new DbInstitution();
-    dbInstitution.setShortName("Broad");
-    dbInstitution.setDisplayName("The Broad Institute");
-
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(dbInstitution));
 
     when(mockInstitutionService.validateAffiliation(
@@ -229,10 +239,6 @@ public class ProfileServiceTest {
 
     Profile profile = new Profile().verifiedInstitutionalAffiliation(affiliation);
 
-    DbInstitution dbInstitution = new DbInstitution();
-    dbInstitution.setShortName("Broad");
-    dbInstitution.setDisplayName("The Broad Institute");
-
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(dbInstitution));
 
     profileService.validateInstitutionalAffiliation(profile);
@@ -247,10 +253,6 @@ public class ProfileServiceTest {
             .institutionalRoleEnum(InstitutionalRole.OTHER);
 
     Profile profile = new Profile().verifiedInstitutionalAffiliation(affiliation);
-
-    DbInstitution dbInstitution = new DbInstitution();
-    dbInstitution.setShortName("Broad");
-    dbInstitution.setDisplayName("The Broad Institute");
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(dbInstitution));
 
@@ -270,10 +272,6 @@ public class ProfileServiceTest {
         new Profile()
             .verifiedInstitutionalAffiliation(affiliation)
             .contactEmail("kibitz@broadinstitute.org");
-
-    DbInstitution dbInstitution = new DbInstitution();
-    dbInstitution.setShortName("Broad");
-    dbInstitution.setDisplayName("The Broad Institute");
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(dbInstitution));
 
