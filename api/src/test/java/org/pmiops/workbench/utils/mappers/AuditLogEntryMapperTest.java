@@ -43,11 +43,12 @@ public class AuditLogEntryMapperTest {
 
   @Test
   public void testLogEntryToAgent() {
-    final AuditLogEntry logEntry = new AuditLogEntry()
-        .actionType("CREATE")
-        .agentId(AGENT_ID)
-        .agentType(USER_AGENT_TYPE)
-        .agentUsername(AGENT_USERNAME);
+    final AuditLogEntry logEntry =
+        new AuditLogEntry()
+            .actionType("CREATE")
+            .agentId(AGENT_ID)
+            .agentType(USER_AGENT_TYPE)
+            .agentUsername(AGENT_USERNAME);
     final AuditAgent auditAgent = auditLogEntryMapper.logEntryToAgent(logEntry);
     assertThat(auditAgent.getAgentId()).isEqualTo(AGENT_ID);
     assertThat(auditAgent.getAgentType()).isEqualTo(USER_AGENT_TYPE);
@@ -56,13 +57,14 @@ public class AuditLogEntryMapperTest {
 
   @Test
   public void testLogEntryToEventBundleHeader() {
-    final AuditLogEntry logEntry = new AuditLogEntry()
-        .agentId(AGENT_ID)
-        .agentUsername(AGENT_USERNAME)
-        .agentType(USER_AGENT_TYPE)
-        .actionType(ACTION_TYPE_DELETE)
-        .targetId(TARGET_ID)
-        .targetType(TARGET_TYPE_WORKSPACE);
+    final AuditLogEntry logEntry =
+        new AuditLogEntry()
+            .agentId(AGENT_ID)
+            .agentUsername(AGENT_USERNAME)
+            .agentType(USER_AGENT_TYPE)
+            .actionType(ACTION_TYPE_DELETE)
+            .targetId(TARGET_ID)
+            .targetType(TARGET_TYPE_WORKSPACE);
     final AuditEventBundleHeader header = auditLogEntryMapper.logEntryToEventBundleHeader(logEntry);
     assertThat(header.getActionType()).isEqualTo(ACTION_TYPE_DELETE);
     assertThat(header.getAgent().getAgentUsername()).isEqualTo(AGENT_USERNAME);
@@ -74,10 +76,11 @@ public class AuditLogEntryMapperTest {
 
   @Test
   public void testLogEntryToTargetPropertyChange() {
-    final AuditLogEntry logEntry = new AuditLogEntry()
-        .targetProperty(TARGET_PROPERTY)
-        .previousValue(PREVIOUS_VALUE)
-        .newValue(NEW_VALUE);
+    final AuditLogEntry logEntry =
+        new AuditLogEntry()
+            .targetProperty(TARGET_PROPERTY)
+            .previousValue(PREVIOUS_VALUE)
+            .newValue(NEW_VALUE);
     final Optional<AuditTargetPropertyChange> propertyMaybe =
         auditLogEntryMapper.logEntryToTargetPropertyChange(logEntry);
     assertThat(propertyMaybe).isPresent();
@@ -85,77 +88,70 @@ public class AuditLogEntryMapperTest {
         .hasValue(TARGET_PROPERTY);
     assertThat(propertyMaybe.map(AuditTargetPropertyChange::getPreviousValue))
         .hasValue(PREVIOUS_VALUE);
-    assertThat(propertyMaybe.map(AuditTargetPropertyChange::getNewValue))
-        .hasValue(NEW_VALUE);
+    assertThat(propertyMaybe.map(AuditTargetPropertyChange::getNewValue)).hasValue(NEW_VALUE);
   }
 
   @Test
   public void testLogEntryToTargetPropertyChange_createdValue() {
-    final AuditLogEntry logEntry = new AuditLogEntry()
-        .targetProperty(TARGET_PROPERTY)
-        .previousValue(null)
-        .newValue(NEW_VALUE);
+    final AuditLogEntry logEntry =
+        new AuditLogEntry().targetProperty(TARGET_PROPERTY).previousValue(null).newValue(NEW_VALUE);
     final Optional<AuditTargetPropertyChange> propertyMaybe =
         auditLogEntryMapper.logEntryToTargetPropertyChange(logEntry);
     assertThat(propertyMaybe).isPresent();
     assertThat(propertyMaybe.map(AuditTargetPropertyChange::getTargetProperty))
         .hasValue(TARGET_PROPERTY);
     assertThat(propertyMaybe.get().getPreviousValue()).isNull();
-    assertThat(propertyMaybe.map(AuditTargetPropertyChange::getNewValue))
-        .hasValue(NEW_VALUE);
+    assertThat(propertyMaybe.map(AuditTargetPropertyChange::getNewValue)).hasValue(NEW_VALUE);
   }
 
   /**
-   * At the moment, and historically, we write empty stings to the audit stream for things
-   * like workspace properties (when empty). Make sure they propagate, unless/until we tighten things
+   * At the moment, and historically, we write empty stings to the audit stream for things like
+   * workspace properties (when empty). Make sure they propagate, unless/until we tighten things
    * upstream.
    */
   @Test
   public void testLogEntryToTargetPropertyChange_toleratesEmptyString() {
-    final AuditLogEntry logEntry = new AuditLogEntry()
-        .targetProperty(TARGET_PROPERTY)
-        .previousValue(null)
-        .newValue("");
+    final AuditLogEntry logEntry =
+        new AuditLogEntry().targetProperty(TARGET_PROPERTY).previousValue(null).newValue("");
     final Optional<AuditTargetPropertyChange> propertyMaybe =
         auditLogEntryMapper.logEntryToTargetPropertyChange(logEntry);
     assertThat(propertyMaybe).isPresent();
     assertThat(propertyMaybe.map(AuditTargetPropertyChange::getTargetProperty))
         .hasValue(TARGET_PROPERTY);
     assertThat(propertyMaybe.get().getPreviousValue()).isNull();
-    assertThat(propertyMaybe.map(AuditTargetPropertyChange::getNewValue))
-        .hasValue("");
+    assertThat(propertyMaybe.map(AuditTargetPropertyChange::getNewValue)).hasValue("");
   }
 
   @Test
   public void testLogEntryToTargetPropertyChange_emptyIfNoProperty() {
-    assertThat(auditLogEntryMapper.logEntryToTargetPropertyChange(new AuditLogEntry()))
-        .isEmpty();
+    assertThat(auditLogEntryMapper.logEntryToTargetPropertyChange(new AuditLogEntry())).isEmpty();
   }
 
   @Test
   public void testBuildAuditAction_loginAction() {
-    final AuditAction auditAction = auditLogEntryMapper.buildAuditAction(
-        ImmutableList.of(
-          new AuditLogEntry()
-              .actionId(ACTION_ID)
-              .actionType(LOGIN_ACTION_TYPE)
-              .agentId(AGENT_ID)
-              .agentType(USER_AGENT_TYPE)
-              .agentUsername(AGENT_USERNAME)
-              .eventTime(EVENT_TIME)
-              .newValue(null)
-              .previousValue(null)
-              .targetId(null)
-              .targetProperty(null)
-              .targetType(WORKBENCH_TARGET_TYPE)
-        ));
+    final AuditAction auditAction =
+        auditLogEntryMapper.buildAuditAction(
+            ImmutableList.of(
+                new AuditLogEntry()
+                    .actionId(ACTION_ID)
+                    .actionType(LOGIN_ACTION_TYPE)
+                    .agentId(AGENT_ID)
+                    .agentType(USER_AGENT_TYPE)
+                    .agentUsername(AGENT_USERNAME)
+                    .eventTime(EVENT_TIME)
+                    .newValue(null)
+                    .previousValue(null)
+                    .targetId(null)
+                    .targetProperty(null)
+                    .targetType(WORKBENCH_TARGET_TYPE)));
     assertThat(auditAction.getActionId()).isEqualTo(ACTION_ID);
     assertThat(auditAction.getActionTime()).isEqualTo(EVENT_TIME);
 
     assertThat(auditAction.getEventBundles()).hasSize(1);
 
     final AuditEventBundle eventBundle = auditAction.getEventBundles().get(0);
-    assertThat(eventBundle.getHeader().getTarget().getTargetType()).isEqualTo(WORKBENCH_TARGET_TYPE);
+    assertThat(eventBundle.getHeader().getTarget().getTargetType())
+        .isEqualTo(WORKBENCH_TARGET_TYPE);
     assertThat(eventBundle.getHeader().getTarget().getTargetId()).isNull();
     assertThat(eventBundle.getHeader().getAgent().getAgentId()).isEqualTo(AGENT_ID);
     assertThat(eventBundle.getHeader().getAgent().getAgentType()).isEqualTo(USER_AGENT_TYPE);

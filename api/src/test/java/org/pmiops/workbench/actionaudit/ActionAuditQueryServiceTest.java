@@ -25,6 +25,7 @@ import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.utils.FakeSinglePage;
 import org.pmiops.workbench.utils.FieldValues;
+import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -107,7 +108,7 @@ public class ActionAuditQueryServiceTest {
   @Autowired private ActionAuditQueryService actionAuditQueryService;
 
   @TestConfiguration
-  @Import({ActionAuditQueryServiceImpl.class})
+  @Import({ActionAuditQueryServiceImpl.class, AuditLogEntryMapperImpl.class})
   static class Configuration {
 
     @Bean

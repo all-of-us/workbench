@@ -60,28 +60,25 @@ public interface AuditLogEntryMapper {
   default List<AuditAction> logEntriesToActions(List<AuditLogEntry> logEntries) {
     final Multimap<String, AuditLogEntry> actionIdToRows =
         Multimaps.index(logEntries, AuditLogEntry::getActionId);
-    return actionIdToRows
-        .asMap()
-        .values()
-        .stream()
+    return actionIdToRows.asMap().values().stream()
         .map(this::buildAuditAction)
         .collect(ImmutableList.toImmutableList());
   }
 
   /**
-   *
-   * @param logEntries Collection of AuditLogEntry objectsthat have a common Action ID,
-   *                   which should be the same event time, given the unofficial but surprisingly
-   *                   harshly enforced non-schema schama.
+   * @param logEntries Collection of AuditLogEntry objectsthat have a common Action ID, which should
+   *     be the same event time, given the unofficial but surprisingly harshly enforced non-schema
+   *     schama.
    */
   default AuditAction buildAuditAction(Collection<AuditLogEntry> logEntries) {
-    final AuditLogEntry firstEntry = logEntries.stream()
-       .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("logEntries collection must not be empty"));
+    final AuditLogEntry firstEntry =
+        logEntries.stream()
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalArgumentException("logEntries collection must not be empty"));
 
-    final AuditAction result = new AuditAction()
-        .actionId(firstEntry.getActionId())
-        .actionTime(firstEntry.getEventTime());
+    final AuditAction result =
+        new AuditAction().actionId(firstEntry.getActionId()).actionTime(firstEntry.getEventTime());
 
     final Multimap<AuditEventBundleHeader, AuditLogEntry> headerToLogEntries =
         Multimaps.index(logEntries, this::logEntryToEventBundleHeader);
