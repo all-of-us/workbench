@@ -25,7 +25,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   private static final int MICROSECONDS_IN_MILLISECOND = 1000;
   private static final long MAX_QUERY_LIMIT = 1000L;
 
-  private AuditLogEntryMapper auditLogEntryMapper;
+  private final AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 

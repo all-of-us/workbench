@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.bigquery.BigQuery;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -166,7 +165,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     ActionAuditQueryServiceImpl.class,
     AddressMapperImpl.class,
     AuditLogEntryMapperImpl.class,
-    BigQueryService.class,
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
@@ -181,7 +179,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
   })
-  @MockBean({BigQuery.class})
+  @MockBean({BigQueryService.class})
   static class Configuration {
     @Bean
     @Primary
