@@ -31,7 +31,7 @@ export const AppRoute = ({path, data = {}, component: Component}): React.ReactEl
 };
 
 export const ProtectedRoutes = (
-  {path, guards, children}: {path: string, guards: Guards, children: React.ReactNode }): React.ReactElement => {
+  {path, guards, children}: {path: string, guards: Guards, children: React.ReactNode[] }): React.ReactElement => {
   const { redirectPath } = fp.find(({checkGuard}) => checkGuard(), guards);
   const location = useLocation();
   return redirectPath ? <AppRoute
