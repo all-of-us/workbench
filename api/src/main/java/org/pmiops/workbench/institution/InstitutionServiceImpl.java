@@ -285,6 +285,8 @@ public class InstitutionServiceImpl implements InstitutionService {
               .institutionShortName(modelInstitution.getShortName())
               .instructions(userInstructions));
     } else {
+      // Remove institution entry from institution_user_instructions table if user_instructions is
+      // now empty or NULL
       institutionUserInstructionsDao
           .getByInstitution(dbInstitution)
           .ifPresent(
