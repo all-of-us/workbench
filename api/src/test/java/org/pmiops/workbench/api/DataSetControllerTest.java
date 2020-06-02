@@ -243,6 +243,7 @@ public class DataSetControllerTest {
 
   @TestConfiguration
   @Import({
+    WorkspaceResourcesServiceImpl.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,

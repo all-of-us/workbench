@@ -27,8 +27,9 @@ describe('SideNav', () => {
   it('disables options when user not registered', () => {
     const wrapper = mount(<SideNav {...props} profile={{...ProfileStubVariables.PROFILE_STUB,
       dataAccessLevel: DataAccessLevel.Unregistered}}/>);
+    wrapper.setState({showUserOptions: true});
     // These are our expected items to be disabled when you are not registered
-    let disabledItemText = ['Your Workspaces', 'Featured Workspaces', 'User Support'];
+    let disabledItemText = ['Profile', 'Your Workspaces', 'Featured Workspaces', 'User Support'];
     const sideNavItems = wrapper.find(SideNavItem);
     let disabledItems = sideNavItems.filterWhere(sideNavItem => sideNavItem.props().disabled);
     sideNavItems.forEach(sideNavItem => {

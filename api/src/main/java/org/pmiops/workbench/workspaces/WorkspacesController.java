@@ -85,13 +85,9 @@ import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.zendesk.ZendeskRequests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.zendesk.client.v2.Zendesk;
-import org.zendesk.client.v2.ZendeskException;
-import org.zendesk.client.v2.model.Request;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {

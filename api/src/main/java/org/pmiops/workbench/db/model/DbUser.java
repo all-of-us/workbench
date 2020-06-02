@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
@@ -326,7 +328,9 @@ public class DbUser {
 
   @Transient
   public List<Degree> getDegreesEnum() {
-    if (degrees == null) return null;
+    if (degrees == null) {
+      return null;
+    }
     return this.degrees.stream()
         .map(
             (degreeObject) -> {
@@ -719,5 +723,18 @@ public class DbUser {
 
   public void setAddress(DbAddress address) {
     this.address = address;
+  }
+
+  // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation
+  // can be removed once we have a proper equals() / hashCode()
+
+  public static boolean equalUsernames(DbUser a, DbUser b) {
+    return Objects.equals(
+        Optional.ofNullable(a).map(DbUser::getUsername),
+        Optional.ofNullable(b).map(DbUser::getUsername));
+  }
+
+  public static int usernameHashCode(DbUser dbUser) {
+    return (dbUser == null) ? 0 : Objects.hashCode(dbUser.getUsername());
   }
 }

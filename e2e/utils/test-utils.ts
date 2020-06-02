@@ -101,7 +101,7 @@ export async function newUserRegistrationSelfBypass(page: Page) {
   const selfBypassXpath = '//*[@data-test-id="self-bypass"]';
   await Promise.race([
     page.waitForXPath(selfBypassXpath, {visible: true, timeout: 60000}),
-    Link.forLabel(page, {name: LABEL_ALIAS.SEE_ALL_WORKSPACES}),
+    Link.findByName(page, {name: LABEL_ALIAS.SEE_ALL_WORKSPACES}),
   ]);
 
   // check to see if it is the Self-Bypass link
@@ -149,11 +149,11 @@ export async function performAction(
 
   switch (identifier.textOption.type.toLowerCase()) {
   case 'radio':
-    const radioELement = await RadioButton.forLabel(page, identifier.textOption);
+    const radioELement = await RadioButton.findByName(page, identifier.textOption);
     await radioELement.select();
     break;
   case 'checkbox':
-    const checkboxElement = await Checkbox.forLabel(page, identifier.textOption);
+    const checkboxElement = await Checkbox.findByName(page, identifier.textOption);
     await checkboxElement.toggle(selected);
     if (value) {
         // For Checkbox and its required Textarea or Textbox. Set value in Textbox or Textarea if Checkbox is checked.
@@ -162,12 +162,12 @@ export async function performAction(
     }
     break;
   case 'text':
-    const textboxElement = await Textbox.forLabel(page, identifier.textOption);
+    const textboxElement = await Textbox.findByName(page, identifier.textOption);
     await textboxElement.type(value, {delay: 0});
     await textboxElement.tabKey();
     break;
   case 'textarea':
-    const textareaElement = await Textarea.forLabel(page, identifier.textOption);
+    const textareaElement = await Textarea.findByName(page, identifier.textOption);
     await textareaElement.paste(value);
     await textareaElement.tabKey();
     break;

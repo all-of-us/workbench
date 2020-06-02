@@ -25,6 +25,8 @@ import org.springframework.test.context.junit4.SpringRunner;
   InstitutionMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
+  InstitutionEmailDomainMapperImpl.class,
+  InstitutionEmailAddressMapperImpl.class,
 })
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

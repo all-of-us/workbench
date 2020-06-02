@@ -9,6 +9,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.institution.InstitutionEmailAddressMapperImpl;
+import org.pmiops.workbench.institution.InstitutionEmailDomainMapperImpl;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -28,6 +30,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
   InstitutionMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
+  InstitutionEmailDomainMapperImpl.class,
+  InstitutionEmailAddressMapperImpl.class,
 })
 @EnableTransactionManagement
 public class LoadInstitutions {

@@ -6,7 +6,7 @@ import {Page} from 'puppeteer';
 
 export default class SelectMenu extends Container {
 
-  static async forLabel(page: Page, xOpt: XPathOptions = {}, container?: Container): Promise<SelectMenu> {
+  static async findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): Promise<SelectMenu> {
     xOpt.type = ElementType.Dropdown;
     const menuXpath = xPathOptionToXpath(xOpt, container);
     const selectMenu = new SelectMenu(page, menuXpath);
@@ -23,7 +23,7 @@ export default class SelectMenu extends Container {
    * @param {string} textValue Partial or full string to click in Select.
    * @param {number} maxAttempts Default try count is 2.
    */
-  async select(textValue: string, maxAttempts: number = 2): Promise<void> {
+  async clickMenuItem(textValue: string, maxAttempts: number = 2): Promise<void> {
 
     const clickText = async () => {
       await this.open(2);
@@ -70,7 +70,7 @@ export default class SelectMenu extends Container {
    */
   private async open(maxAttempts: number = 1): Promise<void> {
     const click = async () => {
-      await this.toggleOpenClose();
+      await this.toggle();
       const opened = await this.isOpen();
       if (opened) {
         return;
@@ -84,7 +84,7 @@ export default class SelectMenu extends Container {
     return click();
   }
 
-  private async toggleOpenClose(): Promise<void> {
+  private async toggle(): Promise<void> {
     const selector = this.xpath + '/*[@class="p-dropdown-trigger"]';
     const dropdownTrigger = await this.page.waitForXPath(selector, { visible: true });
     await dropdownTrigger.hover();

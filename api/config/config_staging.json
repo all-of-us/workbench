@@ -13,7 +13,7 @@
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:0.0.1",
-    "welderDockerImage": "broadinstitute/welder-server:e6562d0"
+    "welderDockerImage": "broadinstitute/welder-server:7ae1a62"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
@@ -41,7 +41,6 @@
     "debugQueries": true
   },
   "googleCloudStorageService": {
-    "clusterResourcesBucketName": "all-of-us-rw-staging-cluster-resources",
     "credentialsBucketName": "all-of-us-rw-staging-credentials",
     "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
@@ -105,7 +104,9 @@
     "enableEventDateModifier": false
   },
   "actionAudit": {
-    "logName": "workbench-action-audit-staging"
+    "logName": "workbench-action-audit-staging",
+    "bigQueryDataset": "workbench_action_audit_staging",
+    "bigQueryTable": "workbench_action_audit_staging"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-staging.appspot.com",

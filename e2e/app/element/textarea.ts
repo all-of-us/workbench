@@ -6,7 +6,7 @@ import {xPathOptionToXpath} from './xpath-defaults';
 
 export default class Textarea extends BaseElement {
 
-  static async forLabel(
+  static async findByName(
      page: Page,
      xOpt: XPathOptions,
      container?: Container,

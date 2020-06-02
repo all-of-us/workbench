@@ -66,7 +66,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   * 4: return
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    const link = await Button.forLabel(this.page, FIELD.createNewWorkspaceButton.textOption);
+    const link = await Button.findByName(this.page, FIELD.createNewWorkspaceButton.textOption);
     await link.clickAndWait();
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
@@ -115,7 +115,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await increaseWellness.asCheckBox()).check();
 
     // 5. Population of interest: use default values. Using default value
-    const noRadiobutton = await RadioButton.forLabel(this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption);
+    const noRadiobutton = await RadioButton.findByName(this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption);
     await noRadiobutton.select();
 
     // 6. Request for Review of Research Purpose Description. Using default value

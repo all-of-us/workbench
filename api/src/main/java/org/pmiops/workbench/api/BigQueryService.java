@@ -112,6 +112,7 @@ public class BigQueryService {
         .collect(Collectors.toMap(Field::getName, s -> index.getAndIncrement()));
   }
 
+  // TODO(jaycarlton): replace or merge these with FieldValues methods.
   public Long getLong(List<FieldValue> row, int index) {
     if (row.get(index).isNull()) {
       throw new BigQueryException(500, "FieldValue is null at position: " + index);

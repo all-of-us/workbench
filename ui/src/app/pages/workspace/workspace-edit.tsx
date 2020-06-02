@@ -1194,7 +1194,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <FlexColumn>
                 <FlexRow>
                 <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
-                             disabled={this.isMode(WorkspaceEditMode.Edit)}
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
@@ -1204,12 +1203,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 </FlexRow>
                 <FlexRow>
                 <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
-                             disabled={this.isMode(WorkspaceEditMode.Edit)}
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', false);
                              }}
-                             checked={
-                               reviewRequested === false}/>
+                             checked={reviewRequested === false}/>
                 <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
                   have no concerns at this time about potential stigmatization based on my study.</label>
                 </FlexRow>
