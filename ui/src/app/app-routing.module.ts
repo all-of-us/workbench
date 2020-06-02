@@ -343,8 +343,7 @@ const routes: Routes = [
     ]
   }, {
     path: '**',
-    component: AppRouting,
-    data: {title: 'Sign In'}
+    component: AppRouting
   }
 ];
 
