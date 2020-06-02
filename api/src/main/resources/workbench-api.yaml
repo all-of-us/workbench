@@ -1055,14 +1055,17 @@ paths:
           type: string
           required: true
           description: >
-            Username of user, not including the "@aou-fake.biz".
+            Username of user, not including the environment-specific domain, e.g.
+            "@fake-research-aou.org".
         - name: limit
           in: query
           type: integer
           required: false
           default: 100
           description: >
-            Maximum number of entries to return, sorted by timestamp descending.
+            Maximum number of entries to return, sorted by timestamp descending. This entry count
+            also determines (in a less predictable way) how many bundled actions are in the
+            response.
         - name: after
           description: >
             Earliest time matched by the query (inclusive). Epoch millis.
@@ -7424,7 +7427,7 @@ definitions:
   UserAuditLogQueryResponse:
     type: object
     description: >
-      Represents the results of a query into the audit dataset in BigQery without
+      Represents the results of a query into the audit dataset in BigQuery without
       filtering or transformation.
     required:
       - actions
@@ -7521,8 +7524,9 @@ definitions:
   AuditAction:
     type: object
     description: >
-      A user or system action in the audit system. May contain multiple agents, targets, and action
-      types.
+      A user- or administrator-visible system action in the audit log. Becasue a single action taken
+      may have effects on more than on target, each action may contain multiple agents, targets,
+      and action types.
     properties:
       actionId:
         description: Unique ID for this action. Used for grouping similar events under a
@@ -7531,10 +7535,14 @@ definitions:
           so we only type it as a String.
         type: string
       actionTime:
-        description: Time of the earliest event (row) for this action.
+        description: Time of the earliest event (row) for this action. It's assumed that all rows in
+          an action occur at the same time.
         type: string
         format: date-time
       eventBundles:
+        description: >
+          Within an action there might be sub-actions, or event bundles, that describe effects on
+          different targets, for example when sharing a workspace with other users.
         type: array
         items:
           "$ref": "#/definitions/AuditEventBundle"
@@ -7546,12 +7554,23 @@ definitions:
     type: object
     properties:
       header:
+        description: >
+          Unique header for this event bundle within the parent action. Consists of agent,
+          target, and action type information.
         "$ref": "#/definitions/AuditEventBundleHeader"
       propertyChanges:
+        description: >
+          List of property changes corresponding to this event bundle. For example, with a
+          workspace create event, there may be many field changed from null to their initial
+          values.
         type: array
         items:
           "$ref": "#/definitions/AuditTargetPropertyChange"
   AuditEventBundleHeader:
+    description: >
+      Unique header for this event bundle within the parent action. Consists of agent,
+      target, and action type information. This tuple is used internally to filter the
+      rows of each action.
     type: object
     properties:
       actionType:
@@ -7561,6 +7580,9 @@ definitions:
       target:
         "$ref": "#/definitions/AuditTarget"
   AuditAgent:
+    description: >
+      Composite object containing audited agent information. See AuditLogEntry for individual
+      fields.
     type: object
     properties:
       agentId:
@@ -7571,6 +7593,9 @@ definitions:
       agentUsername:
         type: string
   AuditTarget:
+    description: >
+      Composite object containing audited target information. See AuditLogEntry for individual
+      fields.
     type: object
     properties:
       targetId:
@@ -7579,6 +7604,9 @@ definitions:
       targetType:
         type: string
   AuditTargetPropertyChange:
+    description: >
+      Composite object containing audited target property changes. See AuditLogEntry for individual
+      fields.
     type: object
     properties:
       targetProperty:
