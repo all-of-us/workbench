@@ -1,7 +1,9 @@
 import Container from 'app/container';
-import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import {ElementHandle, Page} from 'puppeteer';
-import {ElementType} from '../xpath-options';
+import {Page} from 'puppeteer';
+import {ElementType} from 'app/xpath-options';
+import Button from 'app/element/button';
+import Textbox from 'app/element/textbox';
+import Textarea from 'app/element/textarea';
 
 export enum ButtonLabel {
   Confirm = 'Confirm',
@@ -18,38 +20,37 @@ const Selector = {
 
 export default class Dialog extends Container {
 
-  private dialogElement: ElementHandle;
-
   constructor(page: Page, xpath: string = Selector.defaultDialog) {
     super(page, xpath);
   }
 
   async getContent(): Promise<string> {
-    await this.findDialog();
-    const modalText = await (await this.dialogElement.getProperty('innerText')).jsonValue();
+    const dialog = await this.page.waitForXPath(this.xpath, {visible: true});
+    const modalText = await (await dialog.getProperty('innerText')).jsonValue();
     console.debug('dialog: \n' + modalText);
     return modalText.toString();
   }
 
   async clickButton(buttonLabel: ButtonLabel): Promise<void> {
     const button = await this.waitForButton(buttonLabel);
+    await button.waitUntilEnabled();
     return button.click();
   }
 
-  async waitForButton(buttonLabel: ButtonLabel): Promise<ElementHandle> {
-    const selector = xPathOptionToXpath({name: buttonLabel, type: ElementType.Button}, this);
-    return this.page.waitForXPath(selector, {visible: true});
+  async waitForButton(buttonLabel: ButtonLabel): Promise<Button> {
+    return Button.findByName(this.page, {containsText: buttonLabel, type: ElementType.Button}, this);
+  }
+
+  async waitForTextbox(textboxName: string): Promise<Textbox> {
+    return Textbox.findByName(this.page, {name: textboxName}, this);
+  }
+
+  async waitForTextarea(textareaName: string): Promise<Textarea> {
+    return Textarea.findByName(this.page, {name: textareaName}, this);
   }
 
   async waitUntilDialogIsClosed(): Promise<void> {
     await this.page.waitForXPath(this.xpath, {visible: false});
-  }
-
-  async findDialog(): Promise<ElementHandle> {
-    if (this.dialogElement === undefined) {
-      this.dialogElement = await this.page.waitForXPath(this.xpath, {visible: true});
-    }
-    return this.dialogElement;
   }
 
   async waitUntilVisible(): Promise<void> {

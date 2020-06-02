@@ -4,9 +4,9 @@
 # and can be found via the Leo API's Cluster.stagingBucket.
 set -x
 
-# Initializes a Jupyter notebook cluster. This file is copied to the GCS bucket
-# <PROJECT>-cluster-resources and its GCS path is passed in as
-# jupyterUserScriptUri during notebook cluster creation.
+# Initializes a Jupyter notebook cluster. This file is hosted from the Workbench
+# API server and its path is passed in as jupyterUserScriptUri during notebook
+# cluster creation.
 
 # As of initial Workbench launch, we will not be offering or have a need for
 # Spark on notebooks clusters. Disable the kernels to avoid presenting spurious

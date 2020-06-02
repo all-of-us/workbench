@@ -250,7 +250,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   async getCreateWorkspaceButton(): Promise<Button> {
-    return Button.forLabel(this.page, FIELD.createWorkspaceButton.textOption);
+    return Button.findByName(this.page, FIELD.createWorkspaceButton.textOption);
   }
 
   async getDuplicateWorkspaceButton(): Promise<Button> {
@@ -260,11 +260,11 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   async getCancelButton(): Promise<Button> {
-    return Button.forLabel(this.page, FIELD.cancelWorkspaceButton.textOption);
+    return Button.findByName(this.page, FIELD.cancelWorkspaceButton.textOption);
   }
 
   async getWorkspaceNameTextbox(): Promise<Textbox> {
-    return await Textbox.forLabel(this.page, FIELD.workspaceNameTextbox.textOption);
+    return await Textbox.findByName(this.page, FIELD.workspaceNameTextbox.textOption);
   }
 
   question1_researchPurpose(): WebComponent {
@@ -314,7 +314,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
    * @param {string} optionValue: 1 for "Synthetic DataSet 1". 2 for "Synthetic DataSet 2".
    */
   async selectDataSet(optionValue: string = '2') {
-    const dataSetSelect = await Select.forLabel(this.page, FIELD.dataSetSelect.textOption);
+    const dataSetSelect = await Select.findByName(this.page, FIELD.dataSetSelect.textOption);
     await dataSetSelect.selectOption(optionValue);
   }
 
@@ -323,7 +323,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
    * @param {string} billingAccount
    */
   async selectBillingAccount(billingAccount: string = 'Use All of Us free credits') {
-    const billingAccountSelect = await Select.forLabel(this.page, FIELD.billingAccountSelect.textOption);
+    const billingAccountSelect = await Select.findByName(this.page, FIELD.billingAccountSelect.textOption);
     await billingAccountSelect.selectOption(billingAccount);
   }
 
@@ -401,7 +401,7 @@ export default class WorkspaceEditPage extends AuthenticatedPage {
   }
 
   async clickShareWithCollaboratorsCheckbox() {
-    const elemt = await Checkbox.forLabel(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
+    const elemt = await Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
     await elemt.check();
   }
 

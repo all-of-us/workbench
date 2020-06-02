@@ -25,7 +25,7 @@ export default class EllipsisMenu {
     return actionTextsArray;
   }
 
-  async selectAction(action: WorkspaceAction) {
+  async clickAction(action: WorkspaceAction) {
     await this.clickEllipsis();
     const selector = `${this.rootXpath}//*[@role='button' and text()='${action}']`;
     const link = await this.page.waitForXPath(selector, {visible: true});

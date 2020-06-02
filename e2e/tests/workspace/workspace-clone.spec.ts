@@ -27,7 +27,7 @@ describe('Clone workspace', () => {
       const aWorkspaceCard: WorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
       await aWorkspaceCard.asElementHandle().hover();
       // click on Ellipsis "Duplicate"
-      await (aWorkspaceCard.getEllipsis()).selectAction(WorkspaceAction.DUPLICATE);
+      await (aWorkspaceCard.getEllipsis()).clickAction(WorkspaceAction.DUPLICATE);
 
       // fill out Workspace Name should be just enough for clone successfully
       await (await workspacesPage.getWorkspaceNameTextbox()).clear();

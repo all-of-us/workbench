@@ -30,7 +30,8 @@ import org.springframework.context.annotation.Bean;
  */
 public class PopulateUserAffiliations {
 
-  private List<User> parseUsers(final String filename, final String userTypes) throws IOException {
+  private List<UserToAffiliate> parseUsers(final String filename, final String userTypes)
+      throws IOException {
     if (userTypes.equals("OPS")) {
       return OpsUser.parseInput(filename);
     } else if (userTypes.equals("RESEARCHERS")) {
@@ -76,9 +77,9 @@ public class PopulateUserAffiliations {
       final String userTypes = opts.getOptionValue(userType.getLongOpt());
 
       // process whole file before taking any action
-      final List<User> users = parseUsers(filename, userTypes);
+      final List<UserToAffiliate> users = parseUsers(filename, userTypes);
 
-      for (final User user : users) {
+      for (final UserToAffiliate user : users) {
         user.populateAffiliation(dryRun, userDao, institutionDao, affiliationDao);
       }
     };

@@ -23,8 +23,11 @@ All of Us uses a custom docker image for our notebook servers, which is defined
 Notably, this image is configured for client-side [egress limiting via wondershaper](https://docs.google.com/document/d/1SO77UGE41lH5ffa0Gg6KoiMszc6I33dIbm48sA-_5-U/edit)
 Finally, All of Us configures all Leo clusters with a set of startup scripts and
 Jupyter extensions such as code snippets and data use reminders, as described
-[here](../cluster-resources). These static assets are all hosted publicly via
+[here](../src/main/webapp/static). These static assets are all hosted publicly via
 the Workench API server, allowing Leonardo to pull them onto the VM at runtime.
+Of particular interest is the [snippets-menu](../snippets-menu) extension which
+mirrors code snippets from https://github.com/all-of-us/workbench-snippets and
+is dynamically generated at deployment time.
 
 Note: some of the configuration choices here are necessitated by our use of
 VPC-SC in production. See [details here](https://docs.google.com/document/d/1BLfrlNC6UpZuTU38QNBXrFcqIHewAx0i2mYaP3GIrV0/edit).
@@ -65,9 +68,9 @@ for details on how a notebook server is created.
 
 - When necessitated by a user action in the Workbench, e.g. opening a notebook
   in a workspace, a new notebook server will be created if none exists.
-- If a notebook exists in the STOPPED state when needed (e.g. due to autopause)
+- If a notebook server exists in the STOPPED state when needed (e.g. due to autopause)
   it will be resumed.
-- If a notebook remains idle for >30m (no UI interaction or active kernels), it
+- If a notebook server remains idle for >30m (no UI interaction or active kernels), it
   will be autopaused.
 - A user can manually request a "reset" of their notebook server if there is an
   issue, which is implemented as a deleteCluster -> createCluster.
