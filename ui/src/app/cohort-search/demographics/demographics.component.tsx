@@ -5,6 +5,7 @@ import * as React from 'react';
 import {ageCountStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
+import {NumberInput} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -22,13 +23,9 @@ const styles = reactStyles({
     padding: '0.5rem 0 1.5rem 1rem'
   },
   ageInput: {
-    border: `1px solid ${colors.black}`,
-    borderRadius: '3px',
-    fontSize: '0.5rem',
-    fontWeight: 300,
+    fontSize: '13px',
     marginTop: '0.25rem',
-    padding: '0 0.5rem',
-    width: '1rem',
+    padding: '0 0 0 0.5rem',
   },
   ageLabel: {
     fontSize: '14px',
@@ -493,13 +490,13 @@ export class Demographics extends React.Component<Props, State> {
               Age Range
             </div>
             <div style={styles.sliderContainer}>
-              <input style={styles.ageInput}
-                type='number'
-                id='min-age'
-                min={defaultMinAge} max={maxAge}
-                value={minAge}
-                onBlur={() => this.onMinBlur()}
-                onChange={(e) => this.onMinChange(e.target.value)}/>
+              <div style={{width: '2.5rem'}}>
+                <NumberInput style={styles.ageInput}
+                  min={defaultMinAge} max={maxAge}
+                  value={minAge}
+                  onBlur={() => this.onMinBlur()}
+                  onChange={(v) => this.onMinChange(v)}/>
+              </div>
               <div style={serverConfigStore.getValue().enableCBAgeTypeOptions
                 ? {...styles.slider, marginBottom: '0.75rem'}
                 : styles.slider}>
@@ -520,13 +517,13 @@ export class Demographics extends React.Component<Props, State> {
                   start={[+defaultMinAge, +defaultMaxAge]}
                   step={1}/>
               </div>
-              <input style={styles.ageInput}
-                type='number'
-                id='max-age'
-                min={minAge} max={defaultMaxAge}
-                value={maxAge}
-                onBlur={() => this.onMaxBlur()}
-                onChange={(e) => this.onMaxChange(e.target.value)}/>
+              <div style={{width: '2.5rem'}}>
+                <NumberInput style={styles.ageInput}
+                  min={minAge} max={defaultMaxAge}
+                  value={maxAge}
+                  onBlur={() => this.onMaxBlur()}
+                  onChange={(v) => this.onMaxChange(v)}/>
+              </div>
             </div>
             {serverConfigStore.getValue().enableCBAgeTypeOptions && <div style={{marginLeft: '1rem'}}>
               {ageTypes.map((ageTypeRadio, a) => <div key={a} style={{display: 'inline-block', marginRight: '0.5rem'}}>
