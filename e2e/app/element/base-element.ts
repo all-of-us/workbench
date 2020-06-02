@@ -64,7 +64,7 @@ export default class BaseElement extends Container {
       throw new Error('The element is undefined.');
     }
     const p = await this.element.asElement().getProperty(propertyName);
-    return await p.jsonValue();
+    return p.jsonValue();
   }
 
   /**
@@ -139,11 +139,16 @@ export default class BaseElement extends Container {
 
   async type(text: string, options?: { delay: number }): Promise<void> {
     await this.focus();
+    await this.clear();
     return this.element.asElement().type(text, options);
   }
 
   async pressKeyboard(key: string, options?: { text?: string, delay?: number }): Promise<void> {
     return this.element.asElement().press(key, options);
+  }
+
+  async pressReturnKey(): Promise<void> {
+    return this.pressKeyboard(String.fromCharCode(13));
   }
 
   /**

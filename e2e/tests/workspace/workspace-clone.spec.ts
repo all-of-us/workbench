@@ -1,6 +1,6 @@
 import WorkspacesPage from 'app/page/workspaces-page';
 import {signIn} from 'utils/test-utils';
-import {WorkspaceAccessLevel, WorkspaceAction} from 'app/page-identifiers';
+import {WorkspaceAccessLevel, EllipsisMenuAction} from 'app/page-identifiers';
 import DataPage from 'app/page/data-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import * as fp from 'lodash/fp';
@@ -27,7 +27,7 @@ describe('Clone workspace', () => {
       const aWorkspaceCard: WorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
       await aWorkspaceCard.asElementHandle().hover();
       // click on Ellipsis "Duplicate"
-      await (aWorkspaceCard.getEllipsis()).clickAction(WorkspaceAction.DUPLICATE);
+      await (aWorkspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.DUPLICATE);
 
       // fill out Workspace Name should be just enough for clone successfully
       await (await workspacesPage.getWorkspaceNameTextbox()).clear();
@@ -69,7 +69,7 @@ describe('Clone workspace', () => {
       const dataPage = new DataPage(page);
       await dataPage.waitForLoad();
 
-      await dataPage.selectWorkspaceAction(WorkspaceAction.DUPLICATE);
+      await dataPage.selectWorkspaceAction(EllipsisMenuAction.DUPLICATE);
 
       const workspacesPage = new WorkspacesPage(page);
 

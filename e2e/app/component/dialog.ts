@@ -12,6 +12,7 @@ export enum ButtonLabel {
   Calculate = 'Calculate',
   AddThis = 'ADD THIS',
   Finish = 'Finish',
+  Rename = 'Rename',
 }
 
 const Selector = {
@@ -50,7 +51,7 @@ export default class Dialog extends Container {
   }
 
   async waitUntilDialogIsClosed(): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {visible: false});
+    await this.page.waitForXPath(this.xpath, {hidden: true});
   }
 
   async waitUntilVisible(): Promise<void> {

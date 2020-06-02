@@ -2,13 +2,12 @@ import {Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForNumericalString} from 'utils/waits-utils';
 import {makeRandomName} from 'utils/str-utils';
-import CreateCriteriaModal, {FilterSign, PhysicalMeasurementsCriteria} from 'app/component/create-criteria-modal';
 import Dialog from 'app/component/dialog';
-import TieredMenu from 'app/component/tiered-menu';
 import Button from 'app/element/button';
 import {ElementType} from 'app/xpath-options';
-import ClrIconLink from '../element/clr-icon-link';
+import ClrIconLink from 'app/element/clr-icon-link';
 import AuthenticatedPage from './authenticated-page';
+import CohortParticipantsGroup from './cohort-participants-group';
 const faker = require('faker/locale/en_US');
 
 const PageTitle = 'Build Cohort Criteria';
@@ -35,23 +34,6 @@ export default class CohortBuildPage extends AuthenticatedPage {
       console.log(`CohortBuildPage isLoaded() encountered ${e}`);
       return false;
     }
-  }
-
-  async includePhysicalMeasurement(groupNum: number, criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
-    await this.selectMenuCriteria(['Physical Measurements'], groupNum);
-    const modal = new CreateCriteriaModal(this.page);
-    await modal.waitUntilVisible();
-    return modal.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
-  }
-
-  async includeDemographicsDeceased(groupNum: number): Promise<string> {
-    await this.selectMenuCriteria(['Demographics', 'Deceased'], groupNum);
-    return waitForNumericalString(this.page, this.getIncludedGroupCountXpath(groupNum));
-  }
-
-  async selectMenuCriteria(menuItemLinks: string[], groupNum: number = 1) {
-    const menu = await this.openTieredMenu(groupNum);
-    await menu.clickMenuItem(menuItemLinks);
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
@@ -83,18 +65,34 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async deleteCohort(): Promise<string> {
-    const trashIcon = await ClrIconLink.findByName(this.page, {iconShape: 'trash'});
-    await trashIcon.click();
-    return this.deleteCohortConfirmationDialog();
+    await this.getDeleteButton().then(b => b.click());
+    return this.deleteConfirmationDialog();
   }
 
   /**
-   * Confirm delete cohort.
+   * Click DELETE COHORT button in Cohort Delete Confirmation dialog.
+   * @return {string} Dialog textContent.
    */
-  async deleteCohortConfirmationDialog(): Promise<string> {
+  async deleteConfirmationDialog(): Promise<string> {
     const dialog = new Dialog(this.page);
     const contentText = await dialog.getContent();
     const deleteButton = await Button.findByName(this.page, {type: ElementType.Button, normalizeSpace: 'Delete Cohort'}, dialog);
+    await Promise.all([
+      deleteButton.click(),
+      dialog.waitUntilDialogIsClosed(),
+    ]);
+    await waitWhileLoading(this.page);
+    return contentText;
+  }
+
+  /**
+   * Click DISCARD CHANGES button in Confirmation dialog.
+   * @return {string} Dialog textContent.
+   */
+  async discardChangesConfirmationDialog(): Promise<string> {
+    const dialog = new Dialog(this.page);
+    const contentText = await dialog.getContent();
+    const deleteButton = await Button.findByName(this.page, {type: ElementType.Button, normalizeSpace: 'Discard Changes'}, dialog);
     await Promise.all([
       deleteButton.click(),
       dialog.waitUntilDialogIsClosed(),
@@ -104,26 +102,50 @@ export default class CohortBuildPage extends AuthenticatedPage {
     return contentText;
   }
 
+  /**
+   * Find the Cohort Total Count.
+   * @return {string} Total Count string.
+   */
   async getTotalCount(): Promise<string> {
     return waitForNumericalString(this.page, FieldSelector.TotalCount);
   }
 
-  getAddCriteriaButtonXpath(groupNum: number): string {
-    return `${this.getIncludeGroupRootXpath(groupNum)}/ancestor::node()[1]/*[normalize-space()="Add Criteria"]/button`;
+  /**
+   * Find DELETE (trash icon) button in Cohort Build page.
+   * @return {ClrIconLink}
+   */
+  async getDeleteButton(): Promise<ClrIconLink> {
+    return ClrIconLink.findByName(this.page, {iconShape: 'trash'});
   }
 
-  getIncludedGroupCountXpath(groupNum: number): string {
-    return `${this.getIncludeGroupRootXpath(groupNum)}/ancestor::node()[1]${FieldSelector.GroupCount}`;
+  /**
+   * Find EXPORT button in Cohort Build page.
+   */
+  async getExportButton(): Promise<ClrIconLink> {
+    return ClrIconLink.findByName(this.page, {iconShape: 'export'});
   }
 
-  getIncludeGroupRootXpath(groupNum: number): string {
-    return `//*[@id="list-include-groups"]//*[normalize-space()="Group ${groupNum}"]`;
+  /**
+   * Find COPY button in Cohort Build page.
+   */
+  async getCopyButton(): Promise<ClrIconLink> {
+    return ClrIconLink.findByName(this.page, {iconShape: 'copy'});
   }
 
-  private async openTieredMenu(groupNum: number): Promise<TieredMenu> {
-    const addCriteriaButton = await this.page.waitForXPath(this.getAddCriteriaButtonXpath(groupNum), {visible: true});
-    await addCriteriaButton.click(); // Click dropdown trigger to open menu
-    return new TieredMenu(this.page);
+  /**
+   * Include Participants Group.
+   * @param groupName
+   */
+  findIncludeParticipantsGroup(groupName: string): CohortParticipantsGroup {
+    const group = new CohortParticipantsGroup(this.page);
+    group.setXpath(`//*[@id="list-include-groups"]//*[normalize-space()="${groupName}"]`);
+    return group;
+  }
+
+  findExcludeParticipantsGroup(groupName: string): CohortParticipantsGroup {
+    const group = new CohortParticipantsGroup(this.page);
+    group.setXpath(`//*[@id="list-exclude-groups"]//*[normalize-space()="${groupName}"]`);
+    return group;
   }
 
 }
