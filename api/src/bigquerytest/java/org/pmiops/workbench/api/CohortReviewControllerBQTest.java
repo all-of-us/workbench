@@ -87,7 +87,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, CohortReviewController.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
@@ -96,7 +96,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
-    CohortReviewController.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     BigQueryTestService.class,

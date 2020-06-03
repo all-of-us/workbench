@@ -1,0 +1,22 @@
+[
+  {
+    "type": "STRING",
+    "name": "DENORMALIZED_NAME",
+    "mode": "NULLABLE"
+  },
+  {
+    "type": "STRING",
+    "name": "OMOP_SQL",
+    "mode": "NULLABLE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "JOIN_VALUE",
+    "type": "STRING"
+  },
+  {
+    "type": "STRING",
+    "name": "DOMAIN",
+    "mode": "NULLABLE"
+  }
+]
