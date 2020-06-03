@@ -21,9 +21,11 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.AuditLogEntry;
+import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.utils.FakeSinglePage;
 import org.pmiops.workbench.utils.FieldValues;
+import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -56,7 +58,7 @@ public class ActionAuditQueryServiceTest {
   private static final String USERNAME = "jay@unit-test-aou.org";
   private static final DateTime EVENT_DATETIME = DateTime.parse("2010-06-30T01:20+02:00");
   public static final long EVENT_TIME_SECONDS = EVENT_DATETIME.getMillis() / 1000;
-  private static final List<FieldValueList> RESULT_ROWS =
+  private static final List<FieldValueList> WORKSPACE_RESULT_ROWS =
       ImmutableList.of(
           FieldValues.buildFieldValueList(
               WORKSPACE_QUERY_SCHEMA.getFields(),
@@ -91,20 +93,22 @@ public class ActionAuditQueryServiceTest {
                     null
                   })));
   private static final Page<FieldValueList> WORKSPACE_QUERY_RESULT_PAGE =
-      new FakeSinglePage<>(RESULT_ROWS);
-  private static final TableResult TABLE_RESULT =
-      new TableResult(WORKSPACE_QUERY_SCHEMA, RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
+      new FakeSinglePage<>(WORKSPACE_RESULT_ROWS);
+  private static final TableResult WORKSPACE_TABLE_RESULT =
+      new TableResult(
+          WORKSPACE_QUERY_SCHEMA, WORKSPACE_RESULT_ROWS.size(), WORKSPACE_QUERY_RESULT_PAGE);
   private static final TableResult EMPTY_RESULT = new EmptyTableResult();
   private static final long DEFAULT_LIMIT = 100L;
   private static final DateTime DEFAULT_AFTER_INCLUSIVE = DateTime.parse("205-02-14T01:20+02:00");
   private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-08-30T01:20+02:00");
   private static final long TIME_TOLERANCE_MILLIS = 500;
+  private static final long USER_DB_ID = 11223344L;
 
   @MockBean private BigQueryService mockBigQueryService;
   @Autowired private ActionAuditQueryService actionAuditQueryService;
 
   @TestConfiguration
-  @Import({ActionAuditQueryServiceImpl.class})
+  @Import({ActionAuditQueryServiceImpl.class, AuditLogEntryMapperImpl.class})
   static class Configuration {
 
     @Bean
@@ -133,7 +137,9 @@ public class ActionAuditQueryServiceTest {
 
   @Test
   public void testQueryEventsFromWorkspace_returnsRows() {
-    doReturn(TABLE_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
+    doReturn(WORKSPACE_TABLE_RESULT)
+        .when(mockBigQueryService)
+        .executeQuery(any(QueryJobConfiguration.class));
 
     final WorkspaceAuditLogQueryResponse response =
         actionAuditQueryService.queryEventsForWorkspace(
@@ -141,7 +147,7 @@ public class ActionAuditQueryServiceTest {
             DEFAULT_LIMIT,
             DEFAULT_AFTER_INCLUSIVE,
             DEFAULT_BEFORE_EXCLUSIVE);
-    assertThat(response.getLogEntries()).hasSize(RESULT_ROWS.size());
+    assertThat(response.getLogEntries()).hasSize(WORKSPACE_RESULT_ROWS.size());
 
     final AuditLogEntry row1 = response.getLogEntries().get(0);
     assertThat(row1.getActionId()).isEqualTo(ACTION_ID_1);
@@ -156,5 +162,17 @@ public class ActionAuditQueryServiceTest {
     assertThat(row2.getActionId()).isEqualTo(ACTION_ID_1);
     assertThat(row2.getTargetType()).isEqualTo("WORKSPACE");
     assertThat(row2.getPreviousValue()).isNull();
+  }
+
+  @Test
+  public void testQueryUserEvents() {
+    doReturn(EMPTY_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
+
+    final UserAuditLogQueryResponse response =
+        actionAuditQueryService.queryEventsForUser(
+            USER_DB_ID, DEFAULT_LIMIT, DEFAULT_AFTER_INCLUSIVE, DEFAULT_BEFORE_EXCLUSIVE);
+    assertThat(response.getLogEntries()).isEmpty();
+    assertThat(response.getUserDatabaseId()).isEqualTo(USER_DB_ID);
+    assertThat(response.getQuery()).contains("SELECT");
   }
 }
