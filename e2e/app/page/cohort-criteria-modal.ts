@@ -108,13 +108,23 @@ export default class CohortCriteriaModal extends Dialog {
     const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 2}, this);
     await selectMenu.clickMenuItem(filterSign);
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
-    await numberField.type(String(filterValue));
-    await numberField.press('Tab', { delay: 100 });
+    // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
+    // Error: "Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation."
+    await numberField.focus();
+    await numberField.click();
+    await this.page.keyboard.type(String(filterValue));
+    await numberField.press('Tab', { delay: 200 });
 
+    let participantResult;
     await this.clickButton(ButtonLabel.Calculate);
-    const participantResult = await this.waitForParticipantResult();
+    try {
+      participantResult = await this.waitForParticipantResult();
+    } catch (e) {
+      // Retry one more time.
+      await this.clickButton(ButtonLabel.Calculate);
+      participantResult = await this.waitForParticipantResult();
+    }
     console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
-
     return participantResult;
   }
 
