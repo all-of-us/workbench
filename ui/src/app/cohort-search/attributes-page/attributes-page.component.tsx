@@ -174,8 +174,8 @@ export const AttributesPage = withCurrentWorkspace() (
         loading: true,
         options: [
           {label: 'Equals', value: Operator.EQUAL},
-          {label: 'Greater than or Equal to', value: Operator.GREATERTHANOREQUALTO},
-          {label: 'Less than or Equal to', value: Operator.LESSTHANOREQUALTO},
+          {label: 'Greater Than or Equal To', value: Operator.GREATERTHANOREQUALTO},
+          {label: 'Less Than or Equal To', value: Operator.LESSTHANOREQUALTO},
           {label: 'Between', value: Operator.BETWEEN},
         ],
       };
