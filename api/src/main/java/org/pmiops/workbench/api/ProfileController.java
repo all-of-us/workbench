@@ -896,10 +896,7 @@ public class ProfileController implements ProfileApiDelegate {
     final long userDatabaseId =
         Optional.ofNullable(userDao.findUserByUsername(username))
             .map(DbUser::getUserId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("User %s not found", usernameWithoutGsuiteDomain)));
+            .orElseThrow(() -> new NotFoundException(String.format("User %s not found", username)));
     final DateTime after = new DateTime(afterMillis);
     final DateTime before =
         Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());

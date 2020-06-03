@@ -7548,9 +7548,10 @@ definitions:
           "$ref": "#/definitions/AuditEventBundle"
   AuditEventBundle:
     description: >
-      Composite header for an AuditAction's sub-actions. Useful as a map key, plus it contains
-      information about the agent, target, and action type (of which there can be multiplpe per
-      action.
+      Collection of an AuditAction's sub-actions. Useful as a map key, plus it contains
+      information about the agent, target, and action type (of which there can be multiple per
+      action). Additionally, any property changes are coalesced into an array under the
+      propertyChanges property.
     type: object
     properties:
       header:

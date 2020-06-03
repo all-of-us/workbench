@@ -101,7 +101,7 @@ public interface AuditLogEntryMapper {
                 .collect(Collectors.toList()));
   }
 
-  default AuditLogEntry fieldValueListToAditLogEntry(FieldValueList row) {
+  default AuditLogEntry fieldValueListToAuditLogEntry(FieldValueList row) {
     final AuditLogEntry entry = new AuditLogEntry();
     FieldValues.getString(row, "action_id").ifPresent(entry::setActionId);
     FieldValues.getString(row, "action_type").ifPresent(entry::setActionType);
@@ -119,7 +119,7 @@ public interface AuditLogEntryMapper {
 
   default ImmutableList<AuditLogEntry> tableResultToLogEntries(TableResult tableResult) {
     return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
-        .map(this::fieldValueListToAditLogEntry)
+        .map(this::fieldValueListToAuditLogEntry)
         .collect(ImmutableList.toImmutableList());
   }
 }

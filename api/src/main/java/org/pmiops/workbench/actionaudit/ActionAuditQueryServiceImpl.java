@@ -24,6 +24,25 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
   private static final int MICROSECONDS_IN_MILLISECOND = 1000;
   private static final long MAX_QUERY_LIMIT = 1000L;
+  private static final String QUERY_FORMAT =
+      "SELECT\n"
+          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,\n"
+          + "  jsonPayload.agent_type AS agent_type,\n"
+          + "  CAST(jsonPayload.agent_id AS INT64) AS agent_id,\n"
+          + "  jsonPayload.agent_email AS agent_username,\n"
+          + "  jsonPayload.action_id AS action_id,\n"
+          + "  jsonPayload.action_type AS action_type,\n"
+          + "  jsonPayload.target_type AS target_type,\n"
+          + "  CAST(jsonPayload.target_id AS INT64) AS target_id,\n"
+          + "  jsonPayload.target_property AS target_property,\n"
+          + "  jsonPayload.prev_value AS prev_value,\n"
+          + "  jsonPayload.new_value AS new_value\n"
+          + "FROM %s\n"
+          + "WHERE %s AND\n"
+          + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
+          + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
+          + "ORDER BY event_time, agent_id, action_id\n"
+          + "LIMIT @limit";
 
   private final AuditLogEntryMapper auditLogEntryMapper;
   private final BigQueryService bigQueryService;
@@ -41,29 +60,10 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   @Override
   public WorkspaceAuditLogQueryResponse queryEventsForWorkspace(
       long workspaceDatabaseId, long limit, DateTime after, DateTime before) {
-
-    final String queryString =
-        String.format(
-            "SELECT\n"
-                + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,\n"
-                + "  jsonPayload.agent_type AS agent_type,\n"
-                + "  CAST(jsonPayload.agent_id AS INT64) AS agent_id,\n"
-                + "  jsonPayload.agent_email AS agent_username,\n"
-                + "  jsonPayload.action_id AS action_id,\n"
-                + "  jsonPayload.action_type AS action_type,\n"
-                + "  jsonPayload.target_type AS target_type,\n"
-                + "  CAST(jsonPayload.target_id AS INT64) AS target_id,\n"
-                + "  jsonPayload.target_property AS target_property,\n"
-                + "  jsonPayload.prev_value AS prev_value,\n"
-                + "  jsonPayload.new_value AS new_value\n"
-                + "FROM %s\n"
-                + "WHERE jsonPayload.target_id = @workspace_db_id AND\n"
-                + "  jsonPayload.target_type = 'WORKSPACE' AND\n"
-                + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
-                + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
-                + "ORDER BY event_time, agent_id, action_id\n"
-                + "LIMIT @limit",
-            getTableName());
+    final String whereClausePrefix =
+        "jsonPayload.target_id = @workspace_db_id AND\n"
+            + "  jsonPayload.target_type = 'WORKSPACE' AND\n";
+    final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -97,28 +97,10 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
   public UserAuditLogQueryResponse queryEventsForUser(
       long userDatabaseId, long limit, DateTime after, DateTime before) {
 
-    final String queryString =
-        String.format(
-            "SELECT\n"
-                + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) as event_time,\n"
-                + "  jsonPayload.agent_type AS agent_type,\n"
-                + "  CAST(jsonPayload.agent_id AS INT64) AS agent_id,\n"
-                + "  jsonPayload.agent_email AS agent_username,\n"
-                + "  jsonPayload.action_id AS action_id,\n"
-                + "  jsonPayload.action_type AS action_type,\n"
-                + "  jsonPayload.target_type AS target_type,\n"
-                + "  CAST(jsonPayload.target_id AS INT64) AS target_id,\n"
-                + "  jsonPayload.target_property AS target_property,\n"
-                + "  jsonPayload.prev_value AS prev_value,\n"
-                + "  jsonPayload.new_value AS new_value\n"
-                + "FROM %s\n"
-                + "WHERE ((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
-                + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER')) AND\n"
-                + "  @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) AND\n"
-                + "  TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
-                + "ORDER BY event_time, agent_id, action_id\n"
-                + "LIMIT @limit",
-            getTableName());
+    final String whereClausePrefix =
+        "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
+            + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER'))";
+    final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)

@@ -35,6 +35,7 @@ public class AuditLogEntryMapperTest {
   public static final String LOGIN_ACTION_TYPE = "LOGIN";
   public static final DateTime EVENT_TIME = new DateTime(1579013840545L);
   public static final String WORKBENCH_TARGET_TYPE = "WORKBENCH";
+
   @Autowired private AuditLogEntryMapper auditLogEntryMapper;
 
   @TestConfiguration
@@ -59,10 +60,10 @@ public class AuditLogEntryMapperTest {
   public void testLogEntryToEventBundleHeader() {
     final AuditLogEntry logEntry =
         new AuditLogEntry()
-            .agentId(AGENT_ID)
-            .agentUsername(AGENT_USERNAME)
-            .agentType(USER_AGENT_TYPE)
             .actionType(ACTION_TYPE_DELETE)
+            .agentId(AGENT_ID)
+            .agentType(USER_AGENT_TYPE)
+            .agentUsername(AGENT_USERNAME)
             .targetId(TARGET_ID)
             .targetType(TARGET_TYPE_WORKSPACE);
     final AuditEventBundleHeader header = auditLogEntryMapper.logEntryToEventBundleHeader(logEntry);
@@ -100,7 +101,7 @@ public class AuditLogEntryMapperTest {
     assertThat(propertyMaybe).isPresent();
     assertThat(propertyMaybe.map(AuditTargetPropertyChange::getTargetProperty))
         .hasValue(TARGET_PROPERTY);
-    assertThat(propertyMaybe.get().getPreviousValue()).isNull();
+    assertThat(propertyMaybe.map(AuditTargetPropertyChange::getPreviousValue)).isEmpty();
     assertThat(propertyMaybe.map(AuditTargetPropertyChange::getNewValue)).hasValue(NEW_VALUE);
   }
 
