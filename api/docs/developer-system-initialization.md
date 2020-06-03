@@ -12,7 +12,7 @@ Earlier editions of this document recommended choosing a default project, but th
 no longer considered a best practice. Since we have many nearly identical and similarly-named
 GCP projects, you should instead pass `--project=all-of-us-workbench-test`
 to every `gcloud` command. The reasoning is that by using default projects via
-`gclod config set project` you introduce the ability to operate on the wrong project
+`gcloud config set project` you introduce the ability to operate on the wrong project
 silently.
 
 ## Git Repository Initialization
@@ -29,22 +29,7 @@ cd workbench
 git submodule update --init --recursive
 ```
 
-Then set up [git secrets](#git-secrets) and [git lfs](#git-lfs) and fire up the [development servers](#running-the-dev-servers).
-
-## git-lfs
-
-### Setup
-
-Download the git-lfs tool.
-If you are on a mac, run:
-```Shell
-  brew install git-lfs
-```
-
-Enable git lfs in the top level directory.
-```Shell
-  git lfs install
-```
+Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers).
 
 ## git-secrets
 
