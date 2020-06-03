@@ -1,8 +1,7 @@
 import Container from 'app/container';
 import {ElementHandle, Page} from 'puppeteer';
 
-const defaultXpath = '//*[contains(concat(" ", normalize-space(@class)), " p-tieredmenu") ' +
-   'and contains(concat(" ", normalize-space(@class)), " p-menu-overlay-visible")]';
+const defaultXpath = '//*[contains(concat(" ", normalize-space(@class)), " p-menu-overlay-visible")]';
 
 export default class TieredMenu extends Container {
 
@@ -33,6 +32,7 @@ export default class TieredMenu extends Container {
       if (i >= (num - 1)) {
         await menuItem.click();
       }
+      await menuItem.dispose();
     }
 
   }

@@ -18,7 +18,7 @@ describe('Creating new workspaces', () => {
     await workspacesPage.load();
 
     // create workspace with "No Review Requested" radiobutton selected
-    const dialogTextContent = await workspacesPage.createWorkspace(newWorkspaceName, 'Use All of Us free credits',);
+    const dialogTextContent = await workspacesPage.createWorkspace(newWorkspaceName);
 
     // Pick out few sentenses to verify
     expect(dialogTextContent).toContain('Primary purpose of your project (Question 1)');

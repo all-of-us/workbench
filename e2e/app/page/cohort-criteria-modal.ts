@@ -1,12 +1,15 @@
+import {Page} from 'puppeteer';
 import ClrIconLink from 'app/element/clr-icon-link';
 import {ElementType} from 'app/xpath-options';
-import {Page} from 'puppeteer';
 import {waitForNumericalString} from 'utils/waits-utils';
 import {xPathOptionToXpath} from 'app/element/xpath-defaults';
-import Dialog, {ButtonLabel} from './dialog';
-import SelectMenu from './select-menu';
+import {waitWhileLoading} from 'utils/test-utils';
+import Textbox from 'app/element/textbox';
+import Dialog, {ButtonLabel} from 'app/component/dialog';
+import SelectMenu from 'app/component/select-menu';
+import Table from 'app/component/table';
 
-const defaultXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " crit-modal-container ")]';
+const defaultXpath = '//*[contains(concat(" ", normalize-space(@class)), " crit-modal-container")]';
 
 export enum PhysicalMeasurementsCriteria {
   BloodPressure = 'Blood Pressure',
@@ -27,6 +30,7 @@ export enum PhysicalMeasurementsCriteria {
 }
 
 export enum FilterSign {
+  Any = 'Any',
   AnyValue = 'Any value',
   Equals = 'Equals',
   GreaterThanOrEqualTo = 'Greater Than or Equal To',
@@ -34,7 +38,7 @@ export enum FilterSign {
   Between = 'Between',
 }
 
-export default class CreateCriteriaModal extends Dialog {
+export default class CohortCriteriaModal extends Dialog {
 
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page, xpath);
@@ -50,23 +54,22 @@ export default class CreateCriteriaModal extends Dialog {
    * @param {FilterSign}  filterSign
    * @param {number} filterValue
    */
-  async filterPhysicalMeasurementValue(
-     criteriaName: PhysicalMeasurementsCriteria,
-     filterSign: FilterSign,
-     filterValue: number): Promise<string> {
+  async filterPhysicalMeasurementValue(criteriaName: PhysicalMeasurementsCriteria,
+                                       filterSign: FilterSign,
+                                       filterValue: number): Promise<string> {
 
     const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
 
-    const selectMenu = await SelectMenu.findByName(this.page, {ancestorLevel: 2});
+    const selectMenu = await SelectMenu.findByName(this.page, {ancestorLevel: 2}, this);
     await selectMenu.clickMenuItem(filterSign);
 
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
-    await numberField.type('30');
+    await numberField.type(String(filterValue));
 
     await this.clickButton(ButtonLabel.Calculate);
-    const participantResult = await this.getParticipantsResult();
-    console.debug(`${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
+    const participantResult = await this.waitForParticipantResult();
+    console.debug(`Physical Measurements ${criteriaName}: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
 
     // Find criteria in Selected Criteria Content Box.
     const removeSelectedCriteriaIconSelector = xPathOptionToXpath({type: ElementType.Icon, iconShape: 'times-circle'}, this);
@@ -84,10 +87,45 @@ export default class CreateCriteriaModal extends Dialog {
     return participantResult;
   }
 
-  async getParticipantsResult(): Promise<string> {
+  async waitForParticipantResult(): Promise<string> {
     const selector = `${this.xpath}//*[text()="Results"]/parent::*//span`;
     return waitForNumericalString(this.page, selector);
   }
 
+  async getConditionSearchResultsTable(): Promise<Table> {
+    return new Table(this.page, '//table[@class="p-datatable"]', this);
+  }
+
+  async searchCondition(searchWord: string): Promise<Table> {
+    const searchFilterTextbox = await Textbox.findByName(this.page, {name: 'Search Conditions by code or description'}, this);
+    await searchFilterTextbox.type(searchWord);
+    await searchFilterTextbox.pressReturnKey();
+    await waitWhileLoading(this.page);
+    return this.getConditionSearchResultsTable();
+  }
+
+  async addAgeModifier(filterSign: FilterSign, filterValue: number): Promise<string> {
+    const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 2}, this);
+    await selectMenu.clickMenuItem(filterSign);
+    const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
+    // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
+    // Error: "Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation."
+    await numberField.focus();
+    await numberField.click();
+    await this.page.keyboard.type(String(filterValue));
+    await numberField.press('Tab', { delay: 200 });
+
+    let participantResult;
+    await this.clickButton(ButtonLabel.Calculate);
+    try {
+      participantResult = await this.waitForParticipantResult();
+    } catch (e) {
+      // Retry one more time.
+      await this.clickButton(ButtonLabel.Calculate);
+      participantResult = await this.waitForParticipantResult();
+    }
+    console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
+    return participantResult;
+  }
 
 }
