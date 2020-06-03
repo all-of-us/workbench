@@ -2,18 +2,31 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.db.model.DbStorageEnums.domainToStorage;
 
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldList;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValue.Attribute;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.Before;
@@ -29,6 +42,8 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValuePair;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +55,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 public class DataSetServiceTest {
+
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder(
               "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
@@ -50,6 +66,10 @@ public class DataSetServiceTest {
                   .setValue(Long.toString(101L))
                   .build())
           .build();
+  private static final ImmutableList<Long> COHORT_IDS = ImmutableList.of(101L, 102L);
+  private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
+  private static final String TEST_CDR_DATA_SET_ID = "synthetic_cdr20180606";
+  private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
 
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
@@ -59,13 +79,14 @@ public class DataSetServiceTest {
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private DataSetDao dataSetDao;
 
+  @MockBean private BigQueryService mockBigQueryService;
+  @MockBean private CohortDao mockCohortDao;
+
   private DataSetServiceImpl dataSetServiceImpl;
 
   @TestConfiguration
   @MockBean({
-    BigQueryService.class,
     CdrBigQuerySchemaConfigService.class,
-    CohortDao.class,
     ConceptBigQueryService.class,
     ConceptSetDao.class,
     CohortQueryBuilder.class,
@@ -271,5 +292,63 @@ public class DataSetServiceTest {
         .isEqualTo("\uD83D\uDCAF");
     assertThat((DataSetServiceImpl.capitalizeFirstCharacterOnly("マリオに感謝しますが、私たちの王女は別の城にいます")))
         .isEqualTo("マリオに感謝しますが、私たちの王女は別の城にいます");
+  }
+
+  @Test
+  public void testDomainToBigQueryConfig() {
+    mockLinkingTableQuery(ImmutableList.of("FROM `" + TEST_CDR_TABLE + ".person` person"));
+    final DataSetRequest dataSetRequest =
+        new DataSetRequest()
+            .conceptSetIds(Collections.emptyList())
+            .cohortIds(new ArrayList<>())
+            .domainValuePairs(new ArrayList<>())
+            .name("blah")
+            .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
+            .cohortIds(COHORT_IDS)
+            .domainValuePairs(
+                ImmutableList.of(new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID")));
+    final Gson gson = new Gson();
+    final String cohortCriteriaJson =
+        gson.toJson(
+            new SearchRequest()
+                .includes(ImmutableList.of())
+                .excludes(ImmutableList.of())
+                .dataFilters(ImmutableList.of()),
+            SearchRequest.class);
+
+    final DbCohort dbCohort = new DbCohort();
+    dbCohort.setCriteria(cohortCriteriaJson);
+    dbCohort.setCohortId(COHORT_IDS.get(0));
+
+    doReturn(ImmutableList.of(dbCohort)).when(mockCohortDao).findAllByCohortIdIn(anyList());
+
+    final Map<String, QueryJobConfiguration> result =
+        dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
+    assertThat(result).hasSize(1);
+  }
+
+  private void mockLinkingTableQuery(Collection<String> domainBaseTables) {
+    final TableResult tableResultMock = mock(TableResult.class);
+
+    final FieldList schema =
+        FieldList.of(
+            ImmutableList.of(
+                Field.of("OMOP_SQL", LegacySQLTypeName.STRING),
+                Field.of("JOIN_VALUE", LegacySQLTypeName.STRING)));
+
+    doReturn(
+            domainBaseTables.stream()
+                .map(
+                    domainBaseTable -> {
+                      ArrayList<FieldValue> rows = new ArrayList<>();
+                      rows.add(FieldValue.of(Attribute.PRIMITIVE, "PERSON_ID"));
+                      rows.add(FieldValue.of(Attribute.PRIMITIVE, domainBaseTable));
+                      return FieldValueList.of(rows, schema);
+                    })
+                .collect(ImmutableList.toImmutableList()))
+        .when(tableResultMock)
+        .getValues();
+
+    doReturn(tableResultMock).when(mockBigQueryService).executeQuery(any());
   }
 }
