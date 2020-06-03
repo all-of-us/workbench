@@ -1,0 +1,37 @@
+[
+  {
+    "type": "INTEGER",
+    "name": "PERSON_ID",
+    "mode": "NULLABLE"
+  },
+  {
+    "type": "TIMESTAMP",
+    "name": "SURVEY_DATETIME",
+    "mode": "NULLABLE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "SURVEY",
+    "type": "STRING"
+  },
+  {
+    "type": "INTEGER",
+    "name": "QUESTION_CONCEPT_ID",
+    "mode": "NULLABLE"
+  },
+  {
+    "type": "STRING",
+    "name": "QUESTION",
+    "mode": "NULLABLE"
+  },
+  {
+    "type": "INTEGER",
+    "name": "ANSWER_CONCEPT_ID",
+    "mode": "NULLABLE"
+  },
+  {
+    "type": "STRING",
+    "name": "ANSWER",
+    "mode": "NULLABLE"
+  }
+]

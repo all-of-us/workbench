@@ -19,6 +19,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -67,6 +69,7 @@ import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
+import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -187,60 +190,63 @@ public class ProfileController implements ProfileApiDelegate {
 
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
 
+  private final ActionAuditQueryService actionAuditQueryService;
+  private final AddressMapper addressMapper;
+  private final CaptchaVerificationService captchaVerificationService;
+  private final Clock clock;
+  private final CloudStorageService cloudStorageService;
+  private final DemographicSurveyMapper demographicSurveyMapper;
+  private final DirectoryService directoryService;
+  private final FireCloudService fireCloudService;
+  private final InstitutionService institutionService;
+  private final ProfileAuditor profileAuditor;
   private final ProfileService profileService;
   private final Provider<DbUser> userProvider;
-  private final Provider<UserAuthentication> userAuthenticationProvider;
-  private final UserDao userDao;
-  private final Clock clock;
-  private final UserService userService;
-  private final FireCloudService fireCloudService;
-  private final DirectoryService directoryService;
-  private final CloudStorageService cloudStorageService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<MailService> mailServiceProvider;
-  private final ProfileAuditor profileAuditor;
-  private final InstitutionService institutionService;
+  private final Provider<UserAuthentication> userAuthenticationProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserDao userDao;
+  private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
-  private final CaptchaVerificationService captchaVerificationService;
-  private final DemographicSurveyMapper demographicSurveyMapper;
-  private final AddressMapper addressMapper;
 
   @Autowired
   ProfileController(
+      ActionAuditQueryService actionAuditQueryService,
+      AddressMapper addressMapper,
+      CaptchaVerificationService captchaVerificationService,
+      Clock clock,
+      CloudStorageService cloudStorageService,
+      DemographicSurveyMapper demographicSurveyMapper,
+      DirectoryService directoryService,
+      FireCloudService fireCloudService,
+      InstitutionService institutionService,
+      ProfileAuditor profileAuditor,
       ProfileService profileService,
       Provider<DbUser> userProvider,
-      Provider<UserAuthentication> userAuthenticationProvider,
-      UserDao userDao,
-      Clock clock,
-      UserService userService,
-      FireCloudService fireCloudService,
-      DirectoryService directoryService,
-      CloudStorageService cloudStorageService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<MailService> mailServiceProvider,
-      ProfileAuditor profileAuditor,
-      InstitutionService institutionService,
-      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
-      CaptchaVerificationService captchaVerificationService,
-      DemographicSurveyMapper demographicSurveyMapper,
-      AddressMapper addressMapper) {
-    this.profileService = profileService;
-    this.userProvider = userProvider;
-    this.userAuthenticationProvider = userAuthenticationProvider;
-    this.userDao = userDao;
+      Provider<UserAuthentication> userAuthenticationProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      UserDao userDao,
+      UserService userService,
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+    this.actionAuditQueryService = actionAuditQueryService;
+    this.addressMapper = addressMapper;
+    this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
-    this.userService = userService;
-    this.fireCloudService = fireCloudService;
-    this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.demographicSurveyMapper = demographicSurveyMapper;
+    this.directoryService = directoryService;
+    this.fireCloudService = fireCloudService;
+    this.institutionService = institutionService;
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
-    this.institutionService = institutionService;
+    this.profileService = profileService;
+    this.userAuthenticationProvider = userAuthenticationProvider;
+    this.userDao = userDao;
+    this.userProvider = userProvider;
+    this.userService = userService;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
-    this.captchaVerificationService = captchaVerificationService;
-    this.demographicSurveyMapper = demographicSurveyMapper;
-    this.addressMapper = addressMapper;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -871,10 +877,30 @@ public class ProfileController implements ProfileApiDelegate {
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getUsername());
     directoryService.deleteUser(user.getUsername().split("@")[0]);
     userDao.delete(user.getUserId());
-    profileAuditor.fireDeleteAction(
-        user.getUserId(),
-        user.getUsername()); // not sure if user profider will survive the next line
+    profileAuditor.fireDeleteAction(user.getUserId(), user.getUsername());
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<UserAuditLogQueryResponse> getAuditLogEntries(
+      String usernameWithoutGsuiteDomain,
+      Integer limit,
+      Long afterMillis,
+      Long beforeMillisNullable) {
+    final String username =
+        String.format(
+            "%s@%s",
+            usernameWithoutGsuiteDomain,
+            workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
+    final long userDatabaseId =
+        Optional.ofNullable(userDao.findUserByUsername(username))
+            .map(DbUser::getUserId)
+            .orElseThrow(() -> new NotFoundException(String.format("User %s not found", username)));
+    final DateTime after = new DateTime(afterMillis);
+    final DateTime before =
+        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
+    return ResponseEntity.ok(
+        actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
   }
 }

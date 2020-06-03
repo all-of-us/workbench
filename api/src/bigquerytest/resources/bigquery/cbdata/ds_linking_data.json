@@ -1,0 +1,992 @@
+[
+  {
+    "DENORMALIZED_NAME": "CONDITION_STATUS_SOURCE_VALUE",
+    "OMOP_SQL": "c_occurrence.CONDITION_STATUS_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_TYPE_CONCEPT_ID",
+    "OMOP_SQL": "c_occurrence.CONDITION_TYPE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_END_DATETIME",
+    "OMOP_SQL": "c_occurrence.CONDITION_END_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_SOURCE_CONCEPT_ID",
+    "OMOP_SQL": "c_occurrence.CONDITION_SOURCE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_ID",
+    "OMOP_SQL": "c_occurrence.VISIT_OCCURRENCE_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_SOURCE_VALUE",
+    "OMOP_SQL": "c_occurrence.CONDITION_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_STATUS_CONCEPT_ID",
+    "OMOP_SQL": "c_occurrence.CONDITION_STATUS_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "PERSON_ID",
+    "OMOP_SQL": "c_occurrence.PERSON_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CORE_TABLE_FOR_DOMAIN",
+    "OMOP_SQL": "CORE_TABLE_FOR_DOMAIN",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "STOP_REASON",
+    "OMOP_SQL": "c_occurrence.STOP_REASON",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_CONCEPT_ID",
+    "OMOP_SQL": "c_occurrence.CONDITION_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_START_DATETIME",
+    "OMOP_SQL": "c_occurrence.CONDITION_START_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.condition_occurrence` c_occurrence",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_TYPE_CONCEPT_NAME",
+    "OMOP_SQL": "c_type.concept_name as CONDITION_TYPE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` c_type on c_occurrence.CONDITION_TYPE_CONCEPT_ID = c_type.CONCEPT_ID",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "CONDITION_STATUS_CONCEPT_NAME",
+    "OMOP_SQL": "c_status.concept_name as CONDITION_STATUS_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` c_status on c_occurrence.CONDITION_STATUS_CONCEPT_ID = c_status.CONCEPT_ID",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_NAME",
+    "OMOP_SQL": "c_standard_concept.concept_name as STANDARD_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` c_standard_concept on c_occurrence.CONDITION_CONCEPT_ID = c_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_CODE",
+    "OMOP_SQL": "c_standard_concept.concept_code as STANDARD_CONCEPT_CODE",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` c_standard_concept on c_occurrence.CONDITION_CONCEPT_ID = c_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_VOCABULARY",
+    "OMOP_SQL": "c_standard_concept.vocabulary_id as STANDARD_VOCABULARY",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` c_standard_concept on c_occurrence.CONDITION_CONCEPT_ID = c_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_NAME",
+    "OMOP_SQL": "c_source_concept.concept_name as SOURCE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` c_source_concept on c_occurrence.CONDITION_SOURCE_CONCEPT_ID = c_source_concept.CONCEPT_ID",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_CODE",
+    "OMOP_SQL": "c_source_concept.concept_code as SOURCE_CONCEPT_CODE",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` c_source_concept on c_occurrence.CONDITION_SOURCE_CONCEPT_ID = c_source_concept.CONCEPT_ID",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_VOCABULARY",
+    "OMOP_SQL": "c_source_concept.vocabulary_id as SOURCE_VOCABULARY",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` c_source_concept on c_occurrence.CONDITION_SOURCE_CONCEPT_ID = c_source_concept.CONCEPT_ID",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_CONCEPT_NAME",
+    "OMOP_SQL": "visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.visit_occurrence` v on c_occurrence.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID left join `${projectId}.${dataSetId}.concept` visit on v.visit_concept_id = visit.concept_id",
+    "DOMAIN": "Condition"
+  },
+  {
+    "DENORMALIZED_NAME": "ROUTE_SOURCE_VALUE",
+    "OMOP_SQL": "d_exposure.ROUTE_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "CORE_TABLE_FOR_DOMAIN",
+    "OMOP_SQL": "CORE_TABLE_FOR_DOMAIN",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "VERBATIM_END_DATE",
+    "OMOP_SQL": "d_exposure.VERBATIM_END_DATE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "STOP_REASON",
+    "OMOP_SQL": "d_exposure.STOP_REASON",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "SIG",
+    "OMOP_SQL": "d_exposure.SIG",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DOSE_UNIT_SOURCE_VALUE",
+    "OMOP_SQL": "d_exposure.DOSE_UNIT_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "QUANTITY",
+    "OMOP_SQL": "d_exposure.QUANTITY",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DRUG_CONCEPT_ID",
+    "OMOP_SQL": "d_exposure.DRUG_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DRUG_EXPOSURE_START_DATETIME",
+    "OMOP_SQL": "d_exposure.DRUG_EXPOSURE_START_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DRUG_SOURCE_VALUE",
+    "OMOP_SQL": "d_exposure.DRUG_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "LOT_NUMBER",
+    "OMOP_SQL": "d_exposure.LOT_NUMBER",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "ROUTE_CONCEPT_ID",
+    "OMOP_SQL": "d_exposure.ROUTE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "REFILLS",
+    "OMOP_SQL": "d_exposure.REFILLS",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DRUG_SOURCE_CONCEPT_ID",
+    "OMOP_SQL": "d_exposure.DRUG_SOURCE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "PERSON_ID",
+    "OMOP_SQL": "d_exposure.PERSON_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DAYS_SUPPLY",
+    "OMOP_SQL": "d_exposure.DAYS_SUPPLY",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DRUG_TYPE_CONCEPT_ID",
+    "OMOP_SQL": "d_exposure.DRUG_TYPE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_ID",
+    "OMOP_SQL": "d_exposure.VISIT_OCCURRENCE_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DRUG_EXPOSURE_END_DATETIME",
+    "OMOP_SQL": "d_exposure.DRUG_EXPOSURE_END_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.drug_exposure` d_exposure",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "ROUTE_CONCEPT_NAME",
+    "OMOP_SQL": "d_route.concept_name as ROUTE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` d_route on d_exposure.ROUTE_CONCEPT_ID = d_route.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "DRUG_TYPE_CONCEPT_NAME",
+    "OMOP_SQL": "d_type.concept_name as DRUG_TYPE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` d_type on d_exposure.drug_type_concept_id = d_type.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_VOCABULARY",
+    "OMOP_SQL": "d_standard_concept.vocabulary_id as STANDARD_VOCABULARY",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` d_standard_concept on d_exposure.DRUG_CONCEPT_ID = d_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_NAME",
+    "OMOP_SQL": "d_standard_concept.concept_name as STANDARD_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` d_standard_concept on d_exposure.DRUG_CONCEPT_ID = d_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_CODE",
+    "OMOP_SQL": "d_standard_concept.concept_code as STANDARD_CONCEPT_CODE",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` d_standard_concept on d_exposure.DRUG_CONCEPT_ID = d_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_VOCABULARY",
+    "OMOP_SQL": "d_source_concept.vocabulary_id as SOURCE_VOCABULARY",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` d_source_concept on d_exposure.DRUG_SOURCE_CONCEPT_ID = d_source_concept.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_CODE",
+    "OMOP_SQL": "d_source_concept.concept_code as SOURCE_CONCEPT_CODE",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` d_source_concept on d_exposure.DRUG_SOURCE_CONCEPT_ID = d_source_concept.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_NAME",
+    "OMOP_SQL": "d_source_concept.concept_name as SOURCE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` d_source_concept on d_exposure.DRUG_SOURCE_CONCEPT_ID = d_source_concept.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_CONCEPT_NAME",
+    "OMOP_SQL": "d_visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.visit_occurrence` v on d_exposure.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID LEFT JOIN `${projectId}.${dataSetId}.concept` d_visit on v.VISIT_CONCEPT_ID = d_visit.CONCEPT_ID",
+    "DOMAIN": "Drug"
+  },
+  {
+    "DENORMALIZED_NAME": "MEASUREMENT_SOURCE_CONCEPT_ID",
+    "OMOP_SQL": "measurement.MEASUREMENT_SOURCE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "RANGE_LOW",
+    "OMOP_SQL": "measurement.RANGE_LOW",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "VALUE_AS_CONCEPT_ID",
+    "OMOP_SQL": "measurement.VALUE_AS_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "UNIT_SOURCE_VALUE",
+    "OMOP_SQL": "measurement.UNIT_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "PERSON_ID",
+    "OMOP_SQL": "measurement.PERSON_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "CORE_TABLE_FOR_DOMAIN",
+    "OMOP_SQL": "CORE_TABLE_FOR_DOMAIN",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "RANGE_HIGH",
+    "OMOP_SQL": "measurement.RANGE_HIGH",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "VALUE_SOURCE_VALUE",
+    "OMOP_SQL": "measurement.VALUE_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "MEASUREMENT_CONCEPT_ID",
+    "OMOP_SQL": "measurement.MEASUREMENT_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "MEASUREMENT_DATETIME",
+    "OMOP_SQL": "measurement.MEASUREMENT_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "MEASUREMENT_SOURCE_VALUE",
+    "OMOP_SQL": "measurement.MEASUREMENT_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "OPERATOR_CONCEPT_ID",
+    "OMOP_SQL": "measurement.OPERATOR_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "MEASUREMENT_TYPE_CONCEPT_ID",
+    "OMOP_SQL": "measurement.MEASUREMENT_TYPE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "UNIT_CONCEPT_ID",
+    "OMOP_SQL": "measurement.UNIT_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "VALUE_AS_NUMBER",
+    "OMOP_SQL": "measurement.VALUE_AS_NUMBER",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_ID",
+    "OMOP_SQL": "measurement.VISIT_OCCURRENCE_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.measurement` measurement",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "UNIT_CONCEPT_NAME",
+    "OMOP_SQL": "m_unit.concept_name as UNIT_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_unit on measurement.unit_concept_id = m_unit.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "VALUE_AS_CONCEPT_NAME",
+    "OMOP_SQL": "m_value.concept_name as VALUE_AS_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_value on measurement.value_as_concept_id = m_value.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "OPERATOR_CONCEPT_NAME",
+    "OMOP_SQL": "m_operator.concept_name as OPERATOR_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_operator on measurement.operator_concept_id = m_operator.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "MEASUREMENT_TYPE_CONCEPT_NAME",
+    "OMOP_SQL": "m_type.concept_name as MEASUREMENT_TYPE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_type on measurement.measurement_type_concept_id = m_type.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_VOCABULARY",
+    "OMOP_SQL": "m_standard_concept.vocabulary_id as STANDARD_VOCABULARY",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_standard_concept on measurement.measurement_concept_id = m_standard_concept.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_CODE",
+    "OMOP_SQL": "m_standard_concept.concept_code as STANDARD_CONCEPT_CODE",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_standard_concept on measurement.measurement_concept_id = m_standard_concept.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_NAME",
+    "OMOP_SQL": "m_standard_concept.concept_name as STANDARD_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_standard_concept on measurement.measurement_concept_id = m_standard_concept.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_CODE",
+    "OMOP_SQL": "m_source_concept.concept_code as SOURCE_CONCEPT_CODE",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_source_concept on measurement.measurement_source_concept_id = m_source_concept.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_VOCABULARY",
+    "OMOP_SQL": "m_source_concept.vocabulary_id as SOURCE_VOCABULARY",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_source_concept on measurement.measurement_source_concept_id = m_source_concept.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_NAME",
+    "OMOP_SQL": "m_source_concept.concept_name as SOURCE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` m_source_concept on measurement.measurement_source_concept_id = m_source_concept.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_CONCEPT_NAME",
+    "OMOP_SQL": "m_visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.visit_occurrence` v on measurement.visit_occurrence_id = v.visit_occurrence_id left join `${projectId}.${dataSetId}.concept` m_visit on v.visit_concept_id = m_visit.concept_id",
+    "DOMAIN": "Measurement"
+  },
+  {
+    "DENORMALIZED_NAME": "QUALIFIER_CONCEPT_ID",
+    "OMOP_SQL": "observation.QUALIFIER_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "CORE_TABLE_FOR_DOMAIN",
+    "OMOP_SQL": "CORE_TABLE_FOR_DOMAIN",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_ID",
+    "OMOP_SQL": "observation.VISIT_OCCURRENCE_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "questionnaire_response_id",
+    "OMOP_SQL": "observation.questionnaire_response_id",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "QUALIFIER_SOURCE_VALUE",
+    "OMOP_SQL": "observation.QUALIFIER_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "VALUE_AS_CONCEPT_ID",
+    "OMOP_SQL": "observation.VALUE_AS_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "UNIT_CONCEPT_ID",
+    "OMOP_SQL": "observation.UNIT_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "value_source_concept_id",
+    "OMOP_SQL": "observation.value_source_concept_id",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "UNIT_SOURCE_VALUE",
+    "OMOP_SQL": "observation.UNIT_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "value_source_value",
+    "OMOP_SQL": "observation.value_source_value",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "VALUE_AS_STRING",
+    "OMOP_SQL": "observation.VALUE_AS_STRING",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "VALUE_AS_NUMBER",
+    "OMOP_SQL": "observation.VALUE_AS_NUMBER",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "OBSERVATION_SOURCE_VALUE",
+    "OMOP_SQL": "observation.OBSERVATION_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "OBSERVATION_TYPE_CONCEPT_ID",
+    "OMOP_SQL": "observation.OBSERVATION_TYPE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "OBSERVATION_SOURCE_CONCEPT_ID",
+    "OMOP_SQL": "observation.OBSERVATION_SOURCE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "PERSON_ID",
+    "OMOP_SQL": "observation.PERSON_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "OBSERVATION_CONCEPT_ID",
+    "OMOP_SQL": "observation.OBSERVATION_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "OBSERVATION_DATETIME",
+    "OMOP_SQL": "observation.OBSERVATION_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.ds_observation` observation",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "UNIT_CONCEPT_NAME",
+    "OMOP_SQL": "o_unit.concept_name as UNIT_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_unit on observation.unit_concept_id = o_unit.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "VALUE_AS_CONCEPT_NAME",
+    "OMOP_SQL": "o_value.concept_name as VALUE_AS_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_value on observation.value_as_concept_id = o_value.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "OBSERVATION_TYPE_CONCEPT_NAME",
+    "OMOP_SQL": "o_type.concept_name as OBSERVATION_TYPE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_type on observation.OBSERVATION_TYPE_CONCEPT_ID = o_type.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "QUALIFIER_CONCEPT_NAME",
+    "OMOP_SQL": "o_qualifier.concept_name as QUALIFIER_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_qualifier on observation.qualifier_concept_id = o_qualifier.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_VOCABULARY",
+    "OMOP_SQL": "o_standard_concept.vocabulary_id as STANDARD_VOCABULARY",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_standard_concept on observation.OBSERVATION_CONCEPT_ID = o_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_CODE",
+    "OMOP_SQL": "o_standard_concept.concept_code as STANDARD_CONCEPT_CODE",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_standard_concept on observation.OBSERVATION_CONCEPT_ID = o_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_NAME",
+    "OMOP_SQL": "o_standard_concept.concept_name as STANDARD_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_standard_concept on observation.OBSERVATION_CONCEPT_ID = o_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_CODE",
+    "OMOP_SQL": "o_source_concept.concept_code as SOURCE_CONCEPT_CODE",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_source_concept on observation.OBSERVATION_SOURCE_CONCEPT_ID = o_source_concept.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_VOCABULARY",
+    "OMOP_SQL": "o_source_concept.vocabulary_id as SOURCE_VOCABULARY",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_source_concept on observation.OBSERVATION_SOURCE_CONCEPT_ID = o_source_concept.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_NAME",
+    "OMOP_SQL": "o_source_concept.concept_name as SOURCE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` o_source_concept on observation.OBSERVATION_SOURCE_CONCEPT_ID = o_source_concept.CONCEPT_ID",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_CONCEPT_NAME",
+    "OMOP_SQL": "o_visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.visit_occurrence` v on observation.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID left join `${projectId}.${dataSetId}.concept` o_visit on v.visit_concept_id = o_visit.concept_id",
+    "DOMAIN": "Observation"
+  },
+  {
+    "DENORMALIZED_NAME": "CORE_TABLE_FOR_DOMAIN",
+    "OMOP_SQL": "CORE_TABLE_FOR_DOMAIN",
+    "JOIN_VALUE": "FROM `${projectId}.${dataSetId}.person` person",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "ETHNICITY_CONCEPT_ID",
+    "OMOP_SQL": "person.ETHNICITY_CONCEPT_ID",
+    "JOIN_VALUE": "FROM `${projectId}.${dataSetId}.person` person",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "GENDER_CONCEPT_ID",
+    "OMOP_SQL": "person.GENDER_CONCEPT_ID",
+    "JOIN_VALUE": "FROM `${projectId}.${dataSetId}.person` person",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "RACE_CONCEPT_ID",
+    "OMOP_SQL": "person.RACE_CONCEPT_ID",
+    "JOIN_VALUE": "FROM `${projectId}.${dataSetId}.person` person",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "DATE_OF_BIRTH",
+    "OMOP_SQL": "person.BIRTH_DATETIME as DATE_OF_BIRTH",
+    "JOIN_VALUE": "FROM `${projectId}.${dataSetId}.person` person",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "SEX_AT_BIRTH_CONCEPT_ID",
+    "OMOP_SQL": "person.SEX_AT_BIRTH_CONCEPT_ID",
+    "JOIN_VALUE": "FROM `${projectId}.${dataSetId}.person` person",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "PERSON_ID",
+    "OMOP_SQL": "person.PERSON_ID",
+    "JOIN_VALUE": "FROM `${projectId}.${dataSetId}.person` person",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "RACE",
+    "OMOP_SQL": "p_race_concept.concept_name as RACE",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_race_concept on person.race_concept_id = p_race_concept.CONCEPT_ID",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "GENDER",
+    "OMOP_SQL": "p_gender_concept.concept_name as GENDER",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_gender_concept on person.gender_concept_id = p_gender_concept.CONCEPT_ID",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "ETHNICITY",
+    "OMOP_SQL": "p_ethnicity_concept.concept_name as ETHNICITY",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_ethnicity_concept on person.ethnicity_concept_id = p_ethnicity_concept.CONCEPT_ID",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "SEX_AT_BIRTH",
+    "OMOP_SQL": "p_sex_at_birth_concept.concept_name as SEX_AT_BIRTH",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_sex_at_birth_concept on person.sex_at_birth_concept_id = p_sex_at_birth_concept.CONCEPT_ID",
+    "DOMAIN": "Person"
+  },
+  {
+    "DENORMALIZED_NAME": "PROCEDURE_TYPE_CONCEPT_ID",
+    "OMOP_SQL": "procedure.PROCEDURE_TYPE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "PROCEDURE_CONCEPT_ID",
+    "OMOP_SQL": "procedure.PROCEDURE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "PROCEDURE_DATETIME",
+    "OMOP_SQL": "procedure.PROCEDURE_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "QUANTITY",
+    "OMOP_SQL": "procedure.QUANTITY",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "MODIFIER_CONCEPT_ID",
+    "OMOP_SQL": "procedure.MODIFIER_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "QUALIFIER_SOURCE_VALUE",
+    "OMOP_SQL": "procedure.QUALIFIER_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "PROCEDURE_SOURCE_CONCEPT_ID",
+    "OMOP_SQL": "procedure.PROCEDURE_SOURCE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "PROCEDURE_SOURCE_VALUE",
+    "OMOP_SQL": "procedure.PROCEDURE_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "CORE_TABLE_FOR_DOMAIN",
+    "OMOP_SQL": "CORE_TABLE_FOR_DOMAIN",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_ID",
+    "OMOP_SQL": "procedure.VISIT_OCCURRENCE_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "PERSON_ID",
+    "OMOP_SQL": "procedure.PERSON_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` procedure",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "PROCEDURE_TYPE_CONCEPT_NAME",
+    "OMOP_SQL": "p_type.concept_name as PROCEDURE_TYPE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_type on procedure.PROCEDURE_TYPE_CONCEPT_ID = p_type.CONCEPT_ID",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "MODIFIER_CONCEPT_NAME",
+    "OMOP_SQL": "p_modifier.concept_name as MODIFIER_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_modifier on procedure.MODIFIER_CONCEPT_ID = p_modifier.CONCEPT_ID",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_CODE",
+    "OMOP_SQL": "p_standard_concept.concept_code as STANDARD_CONCEPT_CODE",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_standard_concept on procedure.PROCEDURE_CONCEPT_ID = p_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_NAME",
+    "OMOP_SQL": "p_standard_concept.concept_name as STANDARD_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_standard_concept on procedure.PROCEDURE_CONCEPT_ID = p_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_VOCABULARY",
+    "OMOP_SQL": "p_standard_concept.vocabulary_id as STANDARD_VOCABULARY",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_standard_concept on procedure.PROCEDURE_CONCEPT_ID = p_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_VOCABULARY",
+    "OMOP_SQL": "p_source_concept.vocabulary_id as SOURCE_VOCABULARY",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_source_concept on procedure.PROCEDURE_SOURCE_CONCEPT_ID = p_source_concept.CONCEPT_ID",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_CODE",
+    "OMOP_SQL": "p_source_concept.concept_code as SOURCE_CONCEPT_CODE",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_source_concept on procedure.PROCEDURE_SOURCE_CONCEPT_ID = p_source_concept.CONCEPT_ID",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_NAME",
+    "OMOP_SQL": "p_source_concept.concept_name as SOURCE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` p_source_concept on procedure.PROCEDURE_SOURCE_CONCEPT_ID = p_source_concept.CONCEPT_ID",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_OCCURRENCE_CONCEPT_NAME",
+    "OMOP_SQL": "p_visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.visit_occurrence` v on procedure.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID left join `${projectId}.${dataSetId}.concept` p_visit on v.visit_concept_id = p_visit.concept_id",
+    "DOMAIN": "Procedure"
+  },
+  {
+    "DENORMALIZED_NAME": "SURVEY_DATETIME",
+    "OMOP_SQL": "answer.survey_datetime",
+    "JOIN_VALUE": " ",
+    "DOMAIN": "Survey"
+  },
+  {
+    "DENORMALIZED_NAME": "ANSWER_CONCEPT_ID",
+    "OMOP_SQL": "answer.answer_concept_id",
+    "JOIN_VALUE": " ",
+    "DOMAIN": "Survey"
+  },
+  {
+    "DENORMALIZED_NAME": "SURVEY",
+    "OMOP_SQL": "answer.survey",
+    "JOIN_VALUE": " ",
+    "DOMAIN": "Survey"
+  },
+  {
+    "DENORMALIZED_NAME": "PERSON_ID",
+    "OMOP_SQL": "answer.person_id",
+    "JOIN_VALUE": " ",
+    "DOMAIN": "Survey"
+  },
+  {
+    "DENORMALIZED_NAME": "ANSWER",
+    "OMOP_SQL": "answer.answer",
+    "JOIN_VALUE": " ",
+    "DOMAIN": "Survey"
+  },
+  {
+    "DENORMALIZED_NAME": "QUESTION_CONCEPT_ID",
+    "OMOP_SQL": "answer.question_concept_id",
+    "JOIN_VALUE": " ",
+    "DOMAIN": "Survey"
+  },
+  {
+    "DENORMALIZED_NAME": "QUESTION",
+    "OMOP_SQL": "answer.question",
+    "JOIN_VALUE": " ",
+    "DOMAIN": "Survey"
+  },
+  {
+    "DENORMALIZED_NAME": "CORE_TABLE_FOR_DOMAIN",
+    "OMOP_SQL": "CORE_TABLE_FOR_DOMAIN",
+    "JOIN_VALUE": " FROM `${projectId}.${dataSetId}.ds_survey` answer",
+    "DOMAIN": "Survey"
+  },
+  {
+    "DENORMALIZED_NAME": "ADMITTING_SOURCE_CONCEPT_ID",
+    "OMOP_SQL": "visit.ADMITTING_SOURCE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_CONCEPT_ID",
+    "OMOP_SQL": "visit.VISIT_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_START_DATETIME",
+    "OMOP_SQL": "visit.VISIT_START_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "PERSON_ID",
+    "OMOP_SQL": "visit.PERSON_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "DISCHARGE_TO_CONCEPT_ID",
+    "OMOP_SQL": "visit.DISCHARGE_TO_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_END_DATETIME",
+    "OMOP_SQL": "visit.VISIT_END_DATETIME",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_TYPE_CONCEPT_ID",
+    "OMOP_SQL": "visit.VISIT_TYPE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_SOURCE_CONCEPT_ID",
+    "OMOP_SQL": "visit.VISIT_SOURCE_CONCEPT_ID",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "DISCHARGE_TO_SOURCE_VALUE",
+    "OMOP_SQL": "visit.DISCHARGE_TO_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "CORE_TABLE_FOR_DOMAIN",
+    "OMOP_SQL": "CORE_TABLE_FOR_DOMAIN",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "ADMITTING_SOURCE_VALUE",
+    "OMOP_SQL": "visit.ADMITTING_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_SOURCE_VALUE",
+    "OMOP_SQL": "visit.VISIT_SOURCE_VALUE",
+    "JOIN_VALUE": "from `${projectId}.${dataSetId}.procedure_occurrence` visit",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "VISIT_TYPE_CONCEPT_NAME",
+    "OMOP_SQL": "v_type.concept_name as VISIT_TYPE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` v_type on visit.VISIT_TYPE_CONCEPT_ID = v_type.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "DISCHARGE_TO_CONCEPT_NAME",
+    "OMOP_SQL": "v_discharge.concept_name as DISCHARGE_TO_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` v_discharge on visit.DISCHARGE_TO_CONCEPT_ID = v_discharge.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_CODE",
+    "OMOP_SQL": "v_standard_concept.concept_code as STANDARD_CONCEPT_CODE",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` v_standard_concept on visit.VISIT_CONCEPT_ID = v_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_VOCABULARY",
+    "OMOP_SQL": "v_standard_concept.vocabulary_id as STANDARD_VOCABULARY",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` v_standard_concept on visit.VISIT_CONCEPT_ID = v_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "STANDARD_CONCEPT_NAME",
+    "OMOP_SQL": "v_standard_concept.concept_name as STANDARD_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` v_standard_concept on visit.VISIT_CONCEPT_ID = v_standard_concept.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_VOCABULARY",
+    "OMOP_SQL": "v_source_concept.vocabulary_id as SOURCE_VOCABULARY",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` v_source_concept on visit.VISIT_SOURCE_CONCEPT_ID = v_source_concept.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_CODE",
+    "OMOP_SQL": "v_source_concept.concept_code as SOURCE_CONCEPT_CODE",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` v_source_concept on visit.VISIT_SOURCE_CONCEPT_ID = v_source_concept.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "SOURCE_CONCEPT_NAME",
+    "OMOP_SQL": "v_source_concept.concept_name as SOURCE_CONCEPT_NAME",
+    "JOIN_VALUE": "LEFT JOIN `${projectId}.${dataSetId}.concept` v_source_concept on visit.VISIT_SOURCE_CONCEPT_ID = v_source_concept.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  },
+  {
+    "DENORMALIZED_NAME": "ADMITTING_SOURCE_CONCEPT_NAME",
+    "OMOP_SQL": "v_admitting_source_concept.concept_name as ADMITTING_SOURCE_CONCEPT_NAME",
+    "JOIN_VALUE": "left join `${projectId}.${dataSetId}.concept` v_admitting_source_concept on visit.ADMITTING_SOURCE_CONCEPT_ID = v_admitting_source_concept.CONCEPT_ID",
+    "DOMAIN": "Visit"
+  }
+]

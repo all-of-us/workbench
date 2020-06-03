@@ -1,0 +1,11 @@
+[
+  {
+    "PERSON_ID": "1",
+    "SURVEY_DATETIME": "2020-01-31 00:00:00 UTC",
+    "SURVEY": "The Basics",
+    "QUESTION_CONCEPT_ID": 1,
+    "QUESTION": "Question",
+    "ANSWER_CONCEPT_ID": 1,
+    "ANSWER": "NO"
+  }
+]

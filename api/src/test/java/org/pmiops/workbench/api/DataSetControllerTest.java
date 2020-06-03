@@ -321,10 +321,8 @@ public class DataSetControllerTest {
     workspace.setBillingAccountName("billing-account");
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    stubGetWorkspace(
-        workspace.getNamespace(), workspace.getName(), USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspaceAcl(
-        workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName());
+    stubGetWorkspaceAcl(workspace.getNamespace());
 
     SearchRequest searchRequest = SearchRequests.males();
 
@@ -464,28 +462,26 @@ public class DataSetControllerTest {
         .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
   }
 
-  private void stubGetWorkspace(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
+  private void stubGetWorkspace(String ns, String name) {
     FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
-    fcWorkspace.setCreatedBy(creator);
+    fcWorkspace.setCreatedBy(DataSetControllerTest.USER_EMAIL);
     fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
-  private void stubGetWorkspaceAcl(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
+  private void stubGetWorkspaceAcl(String ns) {
     FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
     FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(access.toString());
+        new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.OWNER.toString());
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
-        ImmutableMap.of(creator, accessLevelEntry);
+        ImmutableMap.of(DataSetControllerTest.USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(ns, name))
+    when(fireCloudService.getWorkspaceAclAsService(ns, DataSetControllerTest.WORKSPACE_NAME))
         .thenReturn(workspaceAccessLevelResponse);
   }
 
@@ -580,221 +576,17 @@ public class DataSetControllerTest {
     assertThat(response.getCode()).isEmpty();
   }
 
-  @Test
-  public void testGetPythonQuery() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
-
-    ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
-
-    mockLinkingTableQuery(tables);
-
-    DataSetCodeResponse response =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
-            .getBody();
-    verify(mockBigQueryService, times(1)).executeQuery(any());
-    String formattedSql =
-        BASIC_FORMATTER.format(
-            "SELECT PERSON_ID FROM `"
-                + TEST_CDR_TABLE
-                + ".condition_occurrence` c_occurrence WHERE \n"
-                + "(condition_concept_id IN (123) OR \n"
-                + "condition_source_concept_id IN (123)) \n"
-                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
-                + TEST_CDR_TABLE
-                + ".person` person WHERE "
-                + NAMED_PARAMETER_VALUE.getValue());
-
-    assertThat(response.getCode())
-        .contains(
-            "import pandas\nimport os\n\n"
-                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
-                + FULL_PREFIX
-                + "sql = \"\"\"");
-
-    assertThat(response.getCode()).contains(formattedSql);
-
-    assertThat(response.getCode())
-        .contains(
-            FULL_PREFIX
-                + "df = pandas.read_gbq("
-                + FULL_PREFIX
-                + "sql, dialect=\"standard\")"
-                + "\n"
-                + "\n"
-                + FULL_PREFIX
-                + "df.head(5)");
-  }
-
-  @Test
-  public void testGetRQuery() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
-
-    ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
-
-    mockLinkingTableQuery(tables);
-
-    DataSetCodeResponse response =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
-            .getBody();
-    verify(mockBigQueryService, times(1)).executeQuery(any());
-    String prefix = "dataset_00000000_condition_";
-    String formatSql =
-        BASIC_FORMATTER.format(
-            "SELECT PERSON_ID FROM `"
-                + TEST_CDR_TABLE
-                + ".condition_occurrence` c_occurrence WHERE \n"
-                + "(condition_concept_id IN (123) OR \n"
-                + "condition_source_concept_id IN (123)) \n"
-                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
-                + TEST_CDR_TABLE
-                + ".person` person WHERE "
-                + NAMED_PARAMETER_VALUE.getValue());
-    assertThat(response.getCode())
-        .contains(
-            "library(bigrquery)\n"
-                + "\n# This query represents dataset \"blah\" for domain \"condition\"\n"
+    verify(bigQueryService, times(1)).executeQuery(any());
+        sqlFormatter.format(
                 + prefix
-                + "sql <- paste(\"");
-    assertThat(response.getCode()).contains(formatSql);
-  }
-
-  @Test
-  public void testGetQueryTwoDomains() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_TWO_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    DomainValuePair drugDomainValue = new DomainValuePair();
-    drugDomainValue.setDomain(Domain.DRUG);
-    drugDomainValue.setValue("PERSON_ID");
-    domainValuePairs.add(drugDomainValue);
-    dataSet.setDomainValuePairs(domainValuePairs);
-
-    ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
-    tables.add("FROM `" + TEST_CDR_TABLE + ".drug_exposure` d_exposure");
-
-    mockLinkingTableQuery(tables);
-
-    DataSetCodeResponse response =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
-            .getBody();
-    verify(mockBigQueryService, times(2)).executeQuery(any());
-    assertThat(response.getCode()).contains("condition_df");
-    assertThat(response.getCode()).contains("drug_df");
-  }
-
-  @Test
-  public void testGetQuerySurveyDomains() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_SURVEY_ID);
-    List<DomainValuePair> domainValuePairs = mockSurveyDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
-
-    ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `" + TEST_CDR_TABLE + ".ds_survey`");
-
-    mockLinkingTableQuery(tables);
-
-    DataSetCodeResponse response =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
-            .getBody();
-    verify(mockBigQueryService, times(1)).executeQuery(any());
-    assertThat(response.getCode()).contains("observation_df");
-    assertThat(response.getCode()).contains("ds_survey");
-  }
-
-  @Test
-  public void testGetQueryTwoCohorts() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValuePairList = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairList);
-
-    ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
-
-    mockLinkingTableQuery(tables);
-
-    DataSetCodeResponse response =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
-            .getBody();
-
-    assertThat(response.getCode()).containsMatch("UNION");
-    assertThat(response.getCode()).containsMatch("DISTINCT SELECT");
-  }
-
-  @Test
-  public void testGetQueryDemographic() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
-    dataSet.setPrePackagedConceptSet(PrePackagedConceptSetEnum.DEMOGRAPHICS);
-    List<DomainValuePair> domainValuePairs = new ArrayList<>();
-    domainValuePairs.add(new DomainValuePair().domain(Domain.PERSON).value("GENDER"));
-    dataSet.setDomainValuePairs(domainValuePairs);
-
-    ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `" + TEST_CDR_TABLE + ".person` person");
-
-    mockLinkingTableQuery(tables);
-
-    DataSetCodeResponse response =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
-            .getBody();
-    /* this should produces the following query
-       import pandas
-
-       blah_person_sql = """SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person
-       WHERE person.PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person`
-       person UNION DISTINCT SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person)"""
-
-       blah_person_query_config = {
-         'query': {
-         'parameterMode': 'NAMED',
-         'queryParameters': [
-
-           ]
-         }
-       }
-    */
-
-    String queryToVerify =
-        BASIC_FORMATTER.format(
-            "SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person");
-    assertThat(response.getCode()).contains("person_sql = ");
-    assertThat(response.getCode().contains(queryToVerify));
-    // For demographic unlike other domains WHERE should be followed by person.person_id rather than
-    // concept_id
-    assertThat(response.getCode()).contains("person.PERSON_ID IN (");
-  }
-
+            prefix
+                + prefix
+                + prefix
+    verify(bigQueryService, times(1)).executeQuery(any());
+        sqlFormatter.format(
+    verify(bigQueryService, times(2)).executeQuery(any());
+    verify(bigQueryService, times(1)).executeQuery(any());
+        sqlFormatter.format(
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
@@ -802,10 +594,10 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest().name(null);
 
     List<Long> cohortIds = new ArrayList<>();
-    cohortIds.add(1l);
+    cohortIds.add(1L);
 
     List<Long> conceptIds = new ArrayList<>();
-    conceptIds.add(1l);
+    conceptIds.add(1L);
 
     List<DomainValuePair> valuePairList = new ArrayList<>();
     DomainValuePair domainValue = new DomainValuePair();
