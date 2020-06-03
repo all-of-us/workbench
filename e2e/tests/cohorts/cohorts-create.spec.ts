@@ -1,17 +1,14 @@
-import {PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
+import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
 import {ButtonLabel} from 'app/component/dialog';
-import WorkspaceCard from 'app/component/workspace-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
-import {EllipsisMenuAction, WorkspaceAccessLevel} from 'app/page-identifiers';
+import {EllipsisMenuAction} from 'app/page-identifiers';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import DataPage, {LabelAlias} from 'app/page/data-page';
-import WorkspacesPage from 'app/page/workspaces-page';
-import * as fp from 'lodash/fp';
-import {makeWorkspaceName} from 'utils/str-utils';
-import {signIn, waitWhileLoading} from 'utils/test-utils';
+import {findWorkspace, signIn, waitWhileLoading} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
+import Button from 'app/element/button';
 
 
 describe('User can create new Cohorts', () => {
@@ -29,12 +26,9 @@ describe('User can create new Cohorts', () => {
    * Renaming Group 1 and 2 names.
    */
   test('Add Cohort of Physical Measurements BMI', async () => {
-    const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.load();
 
-    // Create new workspace for new Cohort.
-    const newWorkspaceName = makeWorkspaceName();
-    await workspacesPage.createWorkspace(newWorkspaceName);
+    const workspaceCard = await findWorkspace(page);
+    await workspaceCard.clickWorkspaceName();
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
@@ -127,18 +121,14 @@ describe('User can create new Cohorts', () => {
    * Delete cohort.
    */
   test('Add Cohort of EKG condition with modifiers', async () => {
-    const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.load();
 
-    // Choose one existing workspace on "Your Workspaces" page
-    const workspaceCard = new WorkspaceCard(page);
-    const retrievedWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
-    const oneWorkspaceCard: WorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
-    await oneWorkspaceCard.clickWorkspaceName();
+    const workspaceCard = await findWorkspace(page);
+    await workspaceCard.clickWorkspaceName();
 
-    // Wait for the Data page
+    // Wait for the Data page.
     const dataPage = new DataPage(page);
     await dataPage.waitForLoad();
+    // Save url
     const workspaceDataUrl = await page.url();
 
     // Click Add Cohorts button
@@ -168,16 +158,14 @@ describe('User can create new Cohorts', () => {
     const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, modal);
     await addIcon.click();
 
-    // Bug RW-5017
-/*
     // Click Next button to add modifier
     const nextButton = await Button.findByName(page, {name: 'Next'}, modal);
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
     // Add Condition Modifiers: Age At Event >= 50
-    await modal.ageModifier(FilterSign.GreaterThanEqualTo, 50);
-*/
+    await modal.addAgeModifier(FilterSign.GreaterThanOrEqualTo, 50);
+
     // Click FINISH button. Criteria dialog closes.
     await modal.clickButton(ButtonLabel.Finish);
 

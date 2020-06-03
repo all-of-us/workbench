@@ -5,7 +5,7 @@ import AuthenticatedPage from 'app/page/authenticated-page';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import ClrIconLink from 'app/element/clr-icon-link';
-import DataResourceCard from '../component/data-resource-card';
+import DataResourceCard from 'app/component/data-resource-card';
 import CohortBuildPage from './cohort-build-page';
 
 export enum LabelAlias {

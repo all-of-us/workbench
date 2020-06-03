@@ -1,11 +1,7 @@
 import {PhysicalMeasurementsCriteria} from 'app/page/cohort-criteria-modal';
-import WorkspaceCard from 'app/component/workspace-card';
-import {WorkspaceAccessLevel} from 'app/page-identifiers';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DataPage, {LabelAlias} from 'app/page/data-page';
-import WorkspacesPage from 'app/page/workspaces-page';
-import * as fp from 'lodash/fp';
-import {signIn} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 
@@ -22,15 +18,10 @@ describe('Cohorts UI tests', () => {
    * Confirm Discard Changes.
    */
   test('Discard Changes', async () => {
-    const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.load();
+    const workspaceCard = await findWorkspace(page);
+    await workspaceCard.clickWorkspaceName();
 
-    // Choose one existing workspace on "Your Workspaces" page
-    const workspaceCard = new WorkspaceCard(page);
-    const retrievedWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
-    const oneWorkspaceCard: WorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
-    await oneWorkspaceCard.clickWorkspaceName();
-
+    // Wait for the Data page.
     const dataPage = new DataPage(page);
     await dataPage.waitForLoad();
 

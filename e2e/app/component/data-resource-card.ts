@@ -11,6 +11,8 @@ const DataResourceCardSelector = {
 
 export enum CardType {
   Cohort = 'Cohort',
+  ConceptSet = 'Concept Set',
+  Notebook = 'Notebook',
 }
 
 /**

@@ -30,12 +30,12 @@ export enum PhysicalMeasurementsCriteria {
 }
 
 export enum FilterSign {
+  Any = 'Any',
   AnyValue = 'Any value',
   Equals = 'Equals',
   GreaterThanOrEqualTo = 'Greater Than or Equal To',
   LessThanOrEqualTo = 'Less Than or Equal To',
   Between = 'Between',
-  GreaterThanEqualTo = 'Greater Than or Equal To',
 }
 
 export default class CohortCriteriaModal extends Dialog {
@@ -109,6 +109,7 @@ export default class CohortCriteriaModal extends Dialog {
     await selectMenu.clickMenuItem(filterSign);
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
     await numberField.type(String(filterValue));
+    await numberField.press('Tab', { delay: 100 });
 
     await this.clickButton(ButtonLabel.Calculate);
     const participantResult = await this.waitForParticipantResult();

@@ -127,7 +127,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     // click CREATE WORKSPACE button
     const createButton = await this.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
-    return await editPage.clickCreateFinishButton(createButton);
+    return editPage.clickCreateFinishButton(createButton);
   }
 
   /**
