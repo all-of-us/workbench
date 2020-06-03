@@ -404,8 +404,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
     final QueryJobConfiguration participantIdQuery =
         cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
-    //    final QueryJobConfiguration participantQueryConfig =
-    //        bigQueryService.filterBigQueryConfig(participantIdQuery);
     final AtomicReference<String> participantQuery =
         new AtomicReference<>(participantIdQuery.getQuery());
     final ImmutableMap.Builder<String, QueryParameterValue> cohortNamedParametersBuilder =
