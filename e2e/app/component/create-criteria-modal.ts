@@ -29,8 +29,8 @@ export enum PhysicalMeasurementsCriteria {
 export enum FilterSign {
   AnyValue = 'Any value',
   Equals = 'Equals',
-  GreaterThanOrEqualTo = 'Greater than or Equal to',
-  LessThanOrEqualTo = 'Less than or Equal to',
+  GreaterThanOrEqualTo = 'Greater Than or Equal To',
+  LessThanOrEqualTo = 'Less Than or Equal To',
   Between = 'Between',
 }
 
