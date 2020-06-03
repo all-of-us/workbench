@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -72,7 +71,6 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -179,26 +177,22 @@ public class DataSetControllerTest {
   private static final String FULL_PREFIX = String.format("dataset_%s_condition_", PREFIX);
 
   private static DbUser currentUser;
-
   private Workspace workspace;
 
-  @Autowired private BillingProjectBufferService billingProjectBufferService;
-  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortsController cohortsController;
-  @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private ConceptSetsController conceptSetsController;
   @Autowired private DataSetController dataSetController;
-  @Autowired private DataSetService dataSetService;
-  @Autowired private FireCloudService fireCloudService;
-  @Autowired private NotebooksService notebooksService;
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
+  @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
+  @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
   @MockBean private BigQueryService mockBigQueryService;
-
-  //  @Mock Provider<DbUser> userProvider;
+  @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
+  @MockBean private FireCloudService fireCloudService;
+  @MockBean private NotebooksService mockNotebooksService;
 
   @TestConfiguration
   @Import({
@@ -221,26 +215,20 @@ public class DataSetControllerTest {
     UserServiceTestConfiguration.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
-    WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class
   })
   @MockBean({
-    BillingProjectBufferService.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
     CloudStorageService.class,
     CohortCloningService.class,
     CohortMaterializationService.class,
-    CohortQueryBuilder.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DataSetMapper.class,
     DirectoryService.class,
-    FireCloudService.class,
     FreeTierBillingService.class,
-    FreeTierBillingService.class,
-    NotebooksService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
@@ -292,21 +280,23 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    doAnswer(
-            invocation -> {
-              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
-              return entry;
-            })
-        .when(billingProjectBufferService)
-        .assignBillingProject(any());
+    //    doAnswer(
+    //            invocation -> {
+    //              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
+    //              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+    //              return entry;
+    //            })
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setFireCloudProjectName(UUID.randomUUID().toString());
+
+    doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any());
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =
         gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"), CdrBigQuerySchemaConfig.class);
 
-    when(cdrBigQuerySchemaConfigService.getConfig()).thenReturn(cdrBigQuerySchemaConfig);
+    doReturn(cdrBigQuerySchemaConfig).when(mockCdrBigQuerySchemaConfigService).getConfig();
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
@@ -436,7 +426,7 @@ public class DataSetControllerTest {
             .getBody();
     CONCEPT_SET_TWO_ID = conceptSetTwo.getId();
 
-    when(cohortQueryBuilder.buildParticipantIdQuery(any()))
+    when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
             QueryJobConfiguration.newBuilder(
                     "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person WHERE @"
@@ -880,10 +870,10 @@ public class DataSetControllerTest {
             .kernelType(KernelTypeEnum.PYTHON);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
-    verify(notebooksService, never()).getNotebookContents(any(), any());
+    verify(mockNotebooksService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
-    verify(notebooksService, times(1))
+    verify(mockNotebooksService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
   }
 
@@ -916,7 +906,7 @@ public class DataSetControllerTest {
 
     String notebookName = "Hello World";
 
-    when(notebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName))
+    when(mockNotebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName))
         .thenReturn(
             new JSONObject()
                 .put("cells", new JSONArray())
@@ -931,25 +921,11 @@ public class DataSetControllerTest {
             .notebookName(notebookName);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
-    verify(notebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
+    verify(mockNotebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
-    verify(notebooksService, times(1))
+    verify(mockNotebooksService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
-  }
-
-  @Test
-  public void testGetQueryPersonDomainNoConceptSets() {
-    DataSetRequest dataSetRequest = buildEmptyDataSetRequest().addCohortIdsItem(COHORT_ONE_ID);
-    dataSetRequest.setDomainValuePairs(mockDomainValuePairWithPerson());
-
-    mockLinkingTableQuery(ImmutableList.of("FROM `" + TEST_CDR_TABLE + ".person` person"));
-
-    // TODO(jaycarlton): it's odd to execute something on the controller but verify it on the
-    // service
-    final Map<String, QueryJobConfiguration> result =
-        dataSetService.domainToBigQueryConfig(dataSetRequest);
-    assertThat(result).hasSize(1);
   }
 
   @Test
