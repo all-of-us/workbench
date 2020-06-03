@@ -280,12 +280,6 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    //    doAnswer(
-    //            invocation -> {
-    //              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-    //              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
-    //              return entry;
-    //            })
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setFireCloudProjectName(UUID.randomUUID().toString());
 
@@ -576,17 +570,6 @@ public class DataSetControllerTest {
     assertThat(response.getCode()).isEmpty();
   }
 
-    verify(bigQueryService, times(1)).executeQuery(any());
-        sqlFormatter.format(
-                + prefix
-            prefix
-                + prefix
-                + prefix
-    verify(bigQueryService, times(1)).executeQuery(any());
-        sqlFormatter.format(
-    verify(bigQueryService, times(2)).executeQuery(any());
-    verify(bigQueryService, times(1)).executeQuery(any());
-        sqlFormatter.format(
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
