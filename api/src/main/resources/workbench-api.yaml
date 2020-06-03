@@ -937,7 +937,9 @@ paths:
     get:
       tags:
         - workspaceAdmin
-      description: 'Fetch audit logs involving this workspace as either a subject or object.'
+      description: >
+        Fetch audit logs involving this workspace as either a subject or object. Requires the
+        RESEARCHER_DATA_VIEW authority.
       operationId: getAuditLogEntries
       parameters:
         - name: workspaceNamespace
@@ -1047,7 +1049,9 @@ paths:
     get:
       tags:
         - profile
-      description: 'Fetch audit logs involving this user as either a subject or object.'
+      description: >
+        Fetch audit logs involving this user as either a subject or object. Requires the
+        RESEARCHER_DATA_VIEW authority.
       operationId: getAuditLogEntries
       parameters:
         - name: usernameWithoutGsuiteDomain
@@ -1207,7 +1211,7 @@ paths:
       tags:
       - workspaceAdmin
       description: 'Given a workspace namespace (Google Cloud Platform  Project ID),
-        returns workspace details. Requires the WORKSPACES_VIEW authority.'
+        returns workspace details. Requires the RESEARCHER_DATA_VIEW authority.'
       operationId: getFederatedWorkspaceDetails
       responses:
         200:
@@ -1225,7 +1229,7 @@ paths:
       tags:
       - workspaceAdmin
       description: 'Returns a time series of cloud storage traffic for the given project.
-        Requires the WORKSPACES_VIEW authority.'
+        Requires the RESEARCHER_DATA_VIEW authority.'
       operationId: getCloudStorageTraffic
       responses:
         200:
