@@ -56,6 +56,8 @@ import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -269,6 +271,8 @@ public class ConceptsControllerTest {
     CohortReviewMapperImpl.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
+    UserMapperImpl.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
     CommonMappers.class

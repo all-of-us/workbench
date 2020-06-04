@@ -72,6 +72,7 @@ public class WorkspaceMapperTest {
     CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
     WorkspaceMapperImpl.class,
   })
   @MockBean({UserDao.class, WorkspaceDao.class})

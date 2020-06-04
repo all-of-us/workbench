@@ -42,6 +42,7 @@ import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -81,7 +82,7 @@ public class UserMetricsControllerTest {
   private DbWorkspace dbWorkspace2;
 
   @TestConfiguration
-  @Import({CohortMapperImpl.class, CommonMappers.class})
+  @Import({CohortMapperImpl.class, CommonMappers.class, FirecloudMapperImpl.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
