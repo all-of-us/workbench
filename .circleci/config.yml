@@ -308,6 +308,11 @@ jobs:
             TEST_FILES=$(circleci tests glob "**/src/test/java/org/pmiops/workbench/**/*.java")
             COUNT_TESTS_CMD='echo $TEST_FILES | sort |tr " " "\n" | wc -l'
             echo "Total test files : `eval $COUNT_TEST_FILE_CMD`"
+      - run:
+          name: run tests
+          working_directory: ~/workbench/api
+          command: |
+            TEST_FILES=$(circleci tests glob "**/src/test/java/org/pmiops/workbench/**/*.java")
 
             CLASSNAMES=$(echo "$TEST_FILES" \
               | cut -c 1- | sed 's@/@.@g' \
@@ -315,9 +320,19 @@ jobs:
               | circleci tests split --split-by=timings --timings-type=classname)
 
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
-            echo "Prepared arguments for gradle: $GRADLE_ARGS"
+            ./gradlew test $GRADLE_ARGS
+      - run:
+          name: print tests
+          working_directory: ~/workbench/api
+          command: |
+            CLASSNAMES=$(circleci tests glob "**/src/test/java/org/pmiops/workbench/**/*.java" \
+              | sed 's@.*/src/test/java/@@' \
+              | sed 's@/@.@g' \
+              | sed 's/.\{5\}$//' \
+              | circleci tests split --split-by=timings --timings-type=classname)
 
-            ./gradle test $GRADLE_ARGS
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
+            ./gradlew --no-daemon test $GRADLE_ARGS
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
