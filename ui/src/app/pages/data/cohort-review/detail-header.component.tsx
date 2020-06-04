@@ -1,4 +1,4 @@
-import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inputs';
+import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
 import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -496,8 +496,7 @@ export const DetailHeader = withCurrentWorkspace()(
                   Age Range:
                 </div>
                 <div style={otherStyles.filterInput}>
-                  <TextInput
-                    type='number'
+                  <NumberInput
                     min='0'
                     max='120'
                     value={ageMin}
@@ -508,8 +507,7 @@ export const DetailHeader = withCurrentWorkspace()(
                   and
                 </div>
                 <div style={otherStyles.filterInput}>
-                  <TextInput
-                    type='number'
+                  <NumberInput
                     min='0'
                     max='120'
                     value={ageMax}
