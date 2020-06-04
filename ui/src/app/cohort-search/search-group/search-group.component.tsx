@@ -8,6 +8,7 @@ import {criteriaMenuOptionsStore, searchRequestStore, wizardStore} from 'app/coh
 import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {RenameModal} from 'app/components/rename-modal';
 import {Spinner} from 'app/components/spinners';
@@ -105,10 +106,9 @@ const styles = reactStyles({
     padding: '0 0.25rem',
   },
   timeInput: {
-    border: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
-    borderRadius: '0.1rem',
     height: '1.4rem',
     marginLeft: '0.5rem',
+    padding: '0 0.25rem',
     verticalAlign: 'middle',
     width: '3rem'
   },
@@ -582,8 +582,9 @@ export const SearchGroup = withCurrentWorkspace()(
                 {temporalEnumToText(time)} <ClrIcon shape='caret down' size={12}/>
               </button>
               {time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
-                <input style={styles.timeInput} type='number' value={timeValue} min={0}
-                  onChange={(v) => this.setTimeValue(v.target.value)}/>
+                <NumberInput style={styles.timeInput}
+                  value={timeValue} min={0}
+                  onChange={(v) => this.setTimeValue(v)}/>
               }
             </div>
             {/* Temporal group 1 items */}
