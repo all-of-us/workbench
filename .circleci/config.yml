@@ -285,6 +285,7 @@ commands:
 # -------------------------
 jobs:
   api-build-test:
+    parallelism: 2
     # We're hitting OOM failures as of 1 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
@@ -298,16 +299,33 @@ jobs:
       - run:
           name: Validate Swagger definitions
           working_directory: ~/workbench/api
-          command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+              ./project.rb validate-swagger --project-prop verboseTestLogging=yes
+            fi
+      - run:
+          name: print tests
+          working_directory: ~/workbench/api
+          command: |
+            CLASSNAMES=$(circleci tests glob "src/test/java/org/pmiops/workbench/**/*.java" \
+              | cut -c 1- | sed 's@/@.@g' \
+              | sed 's/.\{5\}$//' \
+              | circleci tests split --split-by=timings --timings-type=classname)
+
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
+            echo "Prepared arguments for gradle: $GRADLE_ARGS"
       - run:
           name: Run Java unit tests
           working_directory: ~/workbench/api
-          command: ./project.rb test
+          # command: ./project.rb test
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
           working_directory: ~/workbench/api
-          command: ./gradlew spotlessCheck
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+              ./gradlew spotlessCheck
+            fi
       - store_test_results:
            path: ~/workbench/api/build/test-results/test
       - manage_api_cache:
@@ -560,27 +578,7 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
-      - api-local-test
       - api-build-test
-      - ui-build-test
-      - api-bigquery-test
-      - api-integration-test
-      - puppeteer-e2e-local-ui
-      # Run deployment to "test" on master merges.
-      - api-deploy-to-test:
-          filters: *filter_only_master_branch
-          requires:
-            - api-build-test
-      - ui-deploy-to-test:
-          filters: *filter_only_master_branch
-          requires:
-            - ui-build-test
-      # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
-      - puppeteer-e2e-test:
-          filters: *filter_only_master_branch
-          requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
 
   deploy-staging:
     jobs:
