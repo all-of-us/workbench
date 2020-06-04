@@ -18,6 +18,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {DuaTypes, OrganizationTypeOptions} from './admin-institution-options';
 
 const styles = reactStyles({
   label: {
@@ -31,15 +32,20 @@ const styles = reactStyles({
   }
 });
 
+enum InstitutionMode {
+  ADD,
+  EDIT
+}
+
 interface InstitutionEditState {
   apiErrorMsg: string;
-  isAddInstitution: boolean;
+  institutionMode: InstitutionMode;
   institution: Institution;
   invalidEmailAddress: boolean;
   invalidEmailAddressMsg: string;
   invalidEmailDomain: boolean;
   invalidEmailDomainsMsg: string;
-  showOtherInstitution: boolean;
+  showOtherInstitutionTextBox: boolean;
   showBackButtonWarning: boolean;
   showApiError: boolean;
 }
@@ -52,7 +58,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     super(props);
     this.state = {
       apiErrorMsg: '',
-      isAddInstitution: true,
+      institutionMode: InstitutionMode.ADD,
       institution: {
         shortName: '',
         displayName: '',
@@ -62,7 +68,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
       invalidEmailAddressMsg: '',
       invalidEmailDomain: false,
       invalidEmailDomainsMsg: '',
-      showOtherInstitution: false,
+      showOtherInstitutionTextBox: false,
       showBackButtonWarning: false,
       showApiError: false
     };
@@ -74,13 +80,13 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
       institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);
       title = institutionToEdit.displayName;
       this.setState({
-        isAddInstitution: false,
+        institutionMode: InstitutionMode.EDIT,
         institution: institutionToEdit,
-        showOtherInstitution: institutionToEdit.organizationTypeEnum === OrganizationType.OTHER
+        showOtherInstitutionTextBox: institutionToEdit.organizationTypeEnum === OrganizationType.OTHER
       });
     } else {
       title = 'Add new Institution';
-      this.setState({isAddInstitution: true});
+      this.setState({institutionMode: InstitutionMode.ADD});
     }
 
   }
@@ -90,7 +96,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
       {label: 'Industry', value: OrganizationType.INDUSTRY},
       {label: 'Academic Research Institution', value: OrganizationType.ACADEMICRESEARCHINSTITUTION},
       {label: 'Educational Institution', value: OrganizationType.EDUCATIONALINSTITUTION},
-      {label: 'Health Center non profit', value: OrganizationType.HEALTHCENTERNONPROFIT},
+      {label: 'Health Center/ Non-Profit', value: OrganizationType.HEALTHCENTERNONPROFIT},
       {label: 'Other', value: OrganizationType.OTHER}
     ];
     return options;
@@ -109,11 +115,12 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   validateEmailAddresses() {
     const invalidEmailAddress = [];
     const {emailAddresses} = this.state.institution;
-    this.state.institution.emailAddresses = emailAddresses.filter(
+    const emailAddressWithNO = emailAddresses.filter(
       emailAddress => {
         return emailAddress !== '' || !!emailAddress;
       });
 
+    this.setState(fp.set(['institution', 'emailAddresses'], emailAddressWithNO));
     this.state.institution.emailAddresses.map(emailAddress => {
       const errors = validate({
         emailAddress
@@ -134,7 +141,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
 
   // Filter out empty line or empty email addresses like <email1>,,<email2>
   // Confirm each email domain matches with regex
-  validateEmailDomain() {
+  validateEmailDomains() {
     const invalidEmailDomain = [];
     const {emailDomains} = this.state.institution;
     this.state.institution.emailDomains =  emailDomains.filter(emailDomain => emailDomain);
@@ -156,21 +163,21 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     return;
   }
 
-  setEmailDomain(emailDomains, attribute) {
+  setEmailDomains(emailDomains, attribute) {
     const emailDomainList = emailDomains.split(/[,\n]+/);
     this.setState(fp.set(['institution', attribute], emailDomainList));
   }
 
   // Check if the fields have not been edited
   fieldsNotEdited() {
-    return (this.state.isAddInstitution && !this.fieldsNotEditedAddInstitution)
+    return (this.isAddInstitutionMode && !this.fieldsNotEditedAddInstitution)
         || (institutionToEdit && this.fieldsNotEditedEditInstitution);
   }
 
   get fieldsNotEditedAddInstitution() {
     const {institution} = this.state;
-    return institution.displayName || institution.organizationTypeOtherText ||
-        institution.organizationTypeEnum || institution.duaTypeEnum || institution.emailAddresses || institution.emailDomains;
+    return institution.displayName || institution.userInstructions ||
+      institution.organizationTypeEnum || institution.duaTypeEnum || institution.emailAddresses || institution.emailDomains;
   }
 
   get fieldsNotEditedEditInstitution() {
@@ -185,9 +192,9 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   }
 
 
-  noEmptyRequiredFields() {
+  validateRequiredFields() {
     const {institution} = this.state;
-    let emailValid = true;
+    let emailValid = false;
     if (institution.duaTypeEnum) {
       emailValid = institution.duaTypeEnum === DuaType.MASTER ?
           institution.emailDomains !== undefined : institution.emailAddresses !== undefined;
@@ -203,14 +210,13 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   // b) email address/Domain are not valid
   // c) Required fields are not empty
   disableSave(errors) {
-    return this.noEmptyRequiredFields() || (errors && errors.displayName) || this.fieldsNotEdited()
+    return this.validateRequiredFields() || errors || this.fieldsNotEdited()
       || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }
 
   async saveInstitution() {
     const {institution} = this.state;
     if (institution) {
-      this.setState({invalidEmailAddress: false});
       if (institution.duaTypeEnum === DuaType.MASTER) {
         institution.emailAddresses = [];
       } else {
@@ -239,7 +245,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     this.setState({apiErrorMsg: errorMsg, showApiError: true});
   }
   updateInstitutionRole(institutionRole) {
-    this.setState({showOtherInstitution: institutionRole === OrganizationType.OTHER});
+    this.setState({showOtherInstitutionTextBox: institutionRole === OrganizationType.OTHER});
     this.setState(fp.set(['institution', 'organizationTypeEnum'], institutionRole));
   }
 
@@ -255,28 +261,31 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     navigate(['admin/institution']);
   }
 
-  isEmailAddressValid() {
+  validateEmailAddressPresence() {
     return this.state.institution.duaTypeEnum === DuaType.RESTRICTED && !this.state.institution.emailAddresses;
   }
 
-  isEmailDomainValid() {
+  validateEmailDomainPresence() {
     return this.state.institution.duaTypeEnum === DuaType.MASTER && !this.state.institution.emailDomains;
   }
 
   get buttonText() {
-    return !this.state.isAddInstitution ? 'SAVE' : 'ADD';
+    return !this.isAddInstitutionMode ? 'SAVE' : 'ADD';
   }
 
+  get isAddInstitutionMode() {
+    return this.state.institutionMode === InstitutionMode.ADD;
+  }
 
   render() {
-    const {institution, isAddInstitution, showOtherInstitution} = this.state;
+    const {institution, showOtherInstitutionTextBox} = this.state;
     const {
       displayName, organizationTypeEnum, duaTypeEnum
     } = institution;
     const errors = validate({
       displayName,
-      'emailAddresses': !this.isEmailAddressValid(),
-      'emailDomain': !this.isEmailDomainValid(),
+      'emailAddresses': !this.validateEmailAddressPresence(),
+      'emailDomain': !this.validateEmailDomainPresence(),
       organizationTypeEnum,
       duaTypeEnum
     }, {
@@ -306,7 +315,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
                   {errors.displayName && <li>Display Name should be of at most 80 Characters</li>}
                 </BulletAlignedUnorderedList>
               </div>
-            } disable={isAddInstitution}>
+            } disable={this.isAddInstitutionMode}>
               <Button type='primary' disabled={this.disableSave(errors)} onClick={() => this.saveInstitution()}>
                 {this.buttonText}
               </Button>
@@ -319,63 +328,63 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
                 value={fp.startCase(institution.displayName)}
                 inputId='displayName'
                 inputName='displayName'
-                placeholder='New Username'
+                placeholder='Display Name'
                 labelStyle={styles.label}
                 inputStyle={{width: '16rem', marginTop: '0.3rem'}}
                 labelText='Institution Name'
                 onChange={v => this.setState(fp.set(['institution', 'displayName'], v))}
             />
             <div style={{color: colors.danger}} data-test-id='displayNameError'>
-              {!isAddInstitution && errors && errors.displayName}
+              {!this.isAddInstitutionMode && errors && errors.displayName}
               </div>
             <label style={styles.label}>Institution Type</label>
-            <Dropdown style={{width: '16rem'}} data-test-id='role-dropdown'
-                      placeholder='Your Role'
-                      options={this.institutionTypeOptions}
+            <Dropdown style={{width: '16rem'}} data-test-id='organization-dropdown'
+                      placeholder='Organization Type'
+                      options={OrganizationTypeOptions}
                       value={institution.organizationTypeEnum}
                       onChange={v => this.updateInstitutionRole(v.value)}/>
-            <div style={{color: colors.danger}}>{!isAddInstitution && errors && errors.organizationTypeEnum}</div>
+            <div style={{color: colors.danger}}>{!this.isAddInstitutionMode && errors && errors.organizationTypeEnum}</div>
 
-            {showOtherInstitution && <TextInputWithLabel value={institution.organizationTypeOtherText}
+            {showOtherInstitutionTextBox && <TextInputWithLabel value={institution.organizationTypeOtherText}
                onChange={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v))}
                inputStyle={{width: '16rem', marginTop: '0.8rem'}}/>}
             <label style={styles.label}>Agreement Type</label>
             <Dropdown style={{width: '16rem'}} data-test-id='agreement-dropdown'
                       placeholder='Your Agreement'
-                      options={this.institutionAgreementTypeOptions}
+                      options={DuaTypes}
                       value={institution.duaTypeEnum}
                       onChange={v => this.setState(fp.set(['institution', 'duaTypeEnum'], v.value))}/>
             {institution.duaTypeEnum === DuaType.RESTRICTED && <FlexColumn data-test-id='emailAddress' style={{width: '16rem'}}>
-              <label style={styles.label}>Accepted Email Address</label>
+              <label style={styles.label}>Accepted Email Addresses</label>
               <TextArea value={institution.emailAddresses && institution.emailAddresses.join(',\n')}
                         data-test-id='emailAddressInput'
                         onBlur={(v) => this.validateEmailAddresses()}
-                  onChange={(v) => this.setEmailDomain(v, 'emailAddresses')}/>
+                  onChange={(v) => this.setEmailDomains(v, 'emailAddresses')}/>
               {this.state.invalidEmailAddress && <div data-test-id='emailAddressError' style={{color: colors.danger}}>
                 {this.state.invalidEmailAddressMsg}
                 </div>}
             </FlexColumn>}
             {institution.duaTypeEnum === DuaType.MASTER && <FlexColumn data-test-id='emailDomain' style={{width: '16rem'}}>
-              <label style={styles.label}>Accepted Email Domain</label>
-              <TextArea value={institution.emailDomains && institution.emailDomains.join(',\n')} onBlur={(v) => this.validateEmailDomain()}
+              <label style={styles.label}>Accepted Email Domains</label>
+              <TextArea value={institution.emailDomains && institution.emailDomains.join(',\n')} onBlur={(v) => this.validateEmailDomains()}
                         data-test-id='emailDomainInput'
-                        onChange={(v) => this.setEmailDomain(v, 'emailDomains')}/>
+                        onChange={(v) => this.setEmailDomains(v, 'emailDomains')}/>
               {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
                 {this.state.invalidEmailDomainsMsg}
                 </div>}
             </FlexColumn>}
           </FlexColumn>
           <FlexColumn style={{width: '50%', marginRight: '1rem'}}>
-            <label style={{...styles.label, marginTop: '0rem'}}>User instruction (Optional)</label>
+            <label style={{...styles.label, marginTop: '0rem'}}>User Email Instructions Text (Optional)</label>
             <TextArea
-                id={'areaOfResearch'}
+                id={'userEmailInstructions'}
                 value={institution.userInstructions}
                 onChange={(s: string) => this.setState(fp.set(['institution', 'userInstructions'], s))}
             />
           </FlexColumn>
         </FlexRow>
         {this.state.showBackButtonWarning && <Modal>
-          <ModalTitle>Information not saved</ModalTitle>
+          <ModalTitle>Institution not saved</ModalTitle>
           <ModalFooter>
             <Button onClick={() => this.setState({showBackButtonWarning: false})}
                     type='secondary' style={{marginRight: '2rem'}}>Finish Saving</Button>

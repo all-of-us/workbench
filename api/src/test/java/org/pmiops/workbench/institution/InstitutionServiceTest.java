@@ -275,11 +275,14 @@ public class InstitutionServiceTest {
         .containsExactlyElementsIn(similarInstViaDb.getEmailAddresses());
   }
 
-  // Display Name cannot be empty
-  @Test(expected = BadRequestException.class)
+  @Test
   public void test_InstitutionNotFound() {
     assertThat(service.getInstitution("missing")).isEmpty();
-    assertThat(service.updateInstitution("missing", new Institution())).isEmpty();
+    Institution updateInstitution =
+        new Institution()
+            .displayName("Try To Update")
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
+    assertThat(service.updateInstitution("missing", updateInstitution)).isEmpty();
   }
 
   @Test(expected = ConflictException.class)
@@ -594,6 +597,42 @@ public class InstitutionServiceTest {
     service.createInstitution(institution_EmailAddress);
   }
 
+  @Test(expected = BadRequestException.class)
+  public void test_createInstitution_DisplayNameWithSpaces() {
+    Institution institution_EmailAddress =
+        new Institution()
+            .displayName("     ")
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
+            .organizationTypeEnum(OrganizationType.INDUSTRY);
+    service.createInstitution(institution_EmailAddress);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void test_createInstitution_OtherOrganizationType_noOtherText() {
+    Institution institution_withOtherOrganizationType =
+        new Institution()
+            .displayName("     ")
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
+            .organizationTypeEnum(OrganizationType.OTHER);
+    service.createInstitution(institution_withOtherOrganizationType);
+  }
+
+  @Test
+  public void test_createInstitution_OtherOrganizationType() {
+    Institution institution_withOtherOrganizationType =
+        new Institution()
+            .displayName("     ")
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com"))
+            .emailDomains(Collections.EMPTY_LIST)
+            .organizationTypeEnum(OrganizationType.OTHER)
+            .organizationTypeOtherText("Some text");
+    assertThat(service.createInstitution(institution_withOtherOrganizationType))
+        .isEqualTo(institution_withOtherOrganizationType);
+  }
+
   @Test
   public void test_updateInstitution_RemoveUserInstructionFromExistingInstitution() {
     Institution institution_WithUserInstructions =
@@ -601,6 +640,7 @@ public class InstitutionServiceTest {
             .displayName("No Organization")
             .duaTypeEnum(DuaType.RESTRICTED)
             .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com"))
+            .emailDomains(Collections.EMPTY_LIST)
             .organizationTypeEnum(OrganizationType.INDUSTRY)
             .userInstructions("Some user instructions");
     Institution createdInstitution = service.createInstitution(institution_WithUserInstructions);
@@ -608,12 +648,12 @@ public class InstitutionServiceTest {
 
     Institution institutionNoUserInstruction =
         institution_WithUserInstructions.userInstructions("");
-    Institution updatedInstitution =
-        service
-            .updateInstitution(
-                institution_WithUserInstructions.getShortName(), institutionNoUserInstruction)
-            .get();
-    assertThat(updatedInstitution.getUserInstructions()).isNull();
+
+    Institution expectedUpdateInstitution = institution_WithUserInstructions.userInstructions(null);
+    assertThat(
+            service.updateInstitution(
+                institution_WithUserInstructions.getShortName(), institutionNoUserInstruction))
+        .hasValue(expectedUpdateInstitution);
   }
 
   private DbUser createUser(String contactEmail) {

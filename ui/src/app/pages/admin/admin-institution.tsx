@@ -14,6 +14,7 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+import {OrganizationTypeOptions} from './admin-institution-options';
 
 
 const styles = reactStyles({
@@ -83,14 +84,13 @@ export class AdminInstitution extends React.Component<{}, State> {
   }
 
   renderOrganizationType(row, col) {
-    switch ( row['organizationTypeEnum']) {
-      case OrganizationType.ACADEMICRESEARCHINSTITUTION: return 'Academic Research Institution';
-      case OrganizationType.HEALTHCENTERNONPROFIT: return 'Health Center Non-Profit';
-      case OrganizationType.EDUCATIONALINSTITUTION: return 'Educational Institution';
-      case OrganizationType.INDUSTRY: return 'Industry';
-      case OrganizationType.OTHER: return 'Other - ' + row['organizationTypeOtherText'];
-      default: return 'Other';
+    // This should fail if the organization value is not in list
+    const organizationLabel = OrganizationTypeOptions
+      .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
+    if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
+      return organizationLabel + ' - ' + row['organizationTypeOtherText'];
     }
+    return organizationLabel;
   }
 
   renderDuaType(row, col) {

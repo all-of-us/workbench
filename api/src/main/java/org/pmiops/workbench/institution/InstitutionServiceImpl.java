@@ -1,5 +1,6 @@
 package org.pmiops.workbench.institution;
 
+import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,8 +10,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.Strings;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
@@ -322,10 +321,10 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   private void validateInstitution(Institution institutionRequest) {
-    if (StringUtils.isEmpty(institutionRequest.getDisplayName())) {
+    if (Strings.isNullOrEmpty(institutionRequest.getDisplayName())) {
       throw new BadRequestException("Display Name cannot be empty");
     }
-    if (StringUtils.isEmpty(institutionRequest.getShortName())) {
+    if (Strings.isNullOrEmpty(institutionRequest.getShortName())) {
       institutionRequest.setShortName(generateShortName(institutionRequest.getDisplayName()));
     }
     if (institutionRequest.getDuaTypeEnum() == null) {
@@ -333,10 +332,10 @@ public class InstitutionServiceImpl implements InstitutionService {
       institutionRequest.setDuaTypeEnum(DuaType.MASTER);
     }
     if (institutionRequest.getOrganizationTypeEnum() == null) {
-      throw new BadRequestException("Organization type cannot by null");
+      throw new BadRequestException("Organization type cannot be null");
     }
     if (institutionRequest.getOrganizationTypeEnum().equals(OrganizationType.OTHER)
-        && StringUtils.isEmpty(institutionRequest.getOrganizationTypeOtherText())) {
+        && Strings.isNullOrEmpty(institutionRequest.getOrganizationTypeOtherText())) {
       throw new BadRequestException("If organization type is OTHER, additional text is needed");
     }
 
@@ -349,7 +348,7 @@ public class InstitutionServiceImpl implements InstitutionService {
               emailAddress -> {
                 try {
                   new InternetAddress(emailAddress).validate();
-                } catch (AddressException e) {
+                } catch (AddressException | NullPointerException ex) {
                   throw new BadRequestException("Email Address is not valid");
                 }
               });

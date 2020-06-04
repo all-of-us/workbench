@@ -1,5 +1,5 @@
 import {registerApiClient} from'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import {DuaType} from 'generated';
 import {InstitutionApi} from 'generated/fetch';
@@ -29,17 +29,22 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should throw error in case of duplicate display name', async() => {
-    const wrapper = component();
+  it('should throw error for existing Institution if display name is more than 80 characters', async () => {
+    urlParamsStore.next({
+      institutionId: 'Verily'
+    });
+    const wrapper = mount(<AdminInstitutionEdit/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    const testInput = fp.repeat(81, 'a');
+    const testInput = fp.repeat(83, 'a');
     const displayNameText = wrapper.find('[id="displayName"]').first();
     displayNameText.simulate('change', {target: {value: testInput}});
     displayNameText.simulate('blur');
+    expect(wrapper.find('[data-test-id="displayNameError"]').first().prop('children'))
+      .toContain('Display name must be 80 characters or less');
   });
 
-  it('should appropriate text input on selection agreement type', async() => {
+  it('should show appropriate section after changing agreement type', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -59,9 +64,11 @@ describe('AdminInstitutionEditSpec', () => {
     expect(emailDomainDiv.length).toBe(2);
 
     const emailDomainLabel = emailDomainDiv.first().props().children[0];
-    expect(emailDomainLabel.props.children).toBe('Accepted Email Domain');
+    expect(emailDomainLabel.props.children).toBe('Accepted Email Domains');
 
-    agreementTypeDropDown.props.onChange({originalEvent: undefined, value: DuaType.RESTRICTED, target: {name: 'name', id: '', value: DuaType.RESTRICTED}});
+    agreementTypeDropDown.props.onChange(
+        {originalEvent: undefined, value: DuaType.RESTRICTED,
+          target: {name: 'name', id: '', value: DuaType.RESTRICTED}});
     await waitOneTickAndUpdate(wrapper);
 
     emailAddressDiv = wrapper.find('[data-test-id="emailAddress"]');
@@ -71,7 +78,7 @@ describe('AdminInstitutionEditSpec', () => {
 
     const emailAddressLabel = emailAddressDiv.first().props().children[0];
 
-    expect(emailAddressLabel.props.children).toBe('Accepted Email Address');
+    expect(emailAddressLabel.props.children).toBe('Accepted Email Addresses');
 
   });
 
@@ -85,6 +92,7 @@ describe('AdminInstitutionEditSpec', () => {
     agreementTypeDropDown.props.onChange(
         {originalEvent: undefined, value: DuaType.RESTRICTED, target: {name: 'name', id: '', value: DuaType.RESTRICTED}});
     await waitOneTickAndUpdate(wrapper);
+
     // In case of a single entry which is not in the correct format
     wrapper.find('[data-test-id="emailAddressInput"]').first().simulate('change', {target: {value: 'invalidEmail@domain'}});
     wrapper.find('[data-test-id="emailAddressInput"]').first().simulate('blur');
@@ -92,7 +100,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(emailAddressError.first().props().children)
       .toBe('Following Email Addresses are not valid : invalidEmail@domain');
 
-    // Multiple Email Address entries with a mix of correct and incorrect format
+    // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
     wrapper.find('[data-test-id="emailAddressInput"]').first()
       .simulate('change', {target: {value: 'invalidEmail@domain@org,' +
         '\ncorrectEmail@someDomain.org.com,\n invalidEmail,\n justDomain.org,' +

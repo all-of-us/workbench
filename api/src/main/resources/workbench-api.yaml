@@ -2352,7 +2352,7 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
         409:
-          description: Throw confict Exception, if Institution with same display Name exist
+          description: Institution with same display Name already exist
           schema:
             "$ref": "#/definitions/ErrorResponse"
 
