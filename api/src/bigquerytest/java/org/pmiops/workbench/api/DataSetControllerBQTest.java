@@ -12,9 +12,11 @@ import com.google.gson.Gson;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
@@ -292,7 +294,13 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             "library(bigrquery)\n"
                 + "\n# This query represents dataset \"null\" for domain \"condition\"\n"
                 + "dataset_00000000_condition_sql <- paste(\"");
-    String query = extractRQuery(code);
+    String query =
+        extractRQuery(
+            code,
+            "condition_occurrence",
+            "cb_search_person",
+            "cb_search_all_events",
+            "cb_criteria");
 
     try {
       TableResult result =
@@ -457,17 +465,26 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @NotNull
-  private String extractRQuery(String code) {
+  private String extractRQuery(String code, String... tableNames) {
     String query = code.split("\"")[5];
-    query =
-        query.replace(
-            "`condition_occurrence`",
-            String.format(
-                "`%s`",
-                testWorkbenchConfig.bigquery.projectId
-                    + "."
-                    + testWorkbenchConfig.bigquery.dataSetId
-                    + ".condition_occurrence"));
-    return query;
+    return Arrays.stream(tableNames)
+        .map(
+            tableName ->
+                (Function<String, String>)
+                    s ->
+                        replaceTableName(
+                            s,
+                            tableName,
+                            testWorkbenchConfig.bigquery.projectId,
+                            testWorkbenchConfig.bigquery.dataSetId))
+        .reduce(Function.identity(), Function::andThen)
+        .apply(query);
+  }
+
+  private static String replaceTableName(
+      String s, String tableName, String projectId, String dataSetId) {
+    return s.replace(
+        "`" + tableName + "`",
+        String.format("`%s`", projectId + "." + dataSetId + "." + tableName));
   }
 }
