@@ -315,10 +315,6 @@ jobs:
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
             echo "Prepared arguments for gradle: $GRADLE_ARGS"
       - run:
-          name: Run Java unit tests
-          working_directory: ~/workbench/api
-          # command: ./project.rb test
-      - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
           working_directory: ~/workbench/api
