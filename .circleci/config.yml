@@ -188,17 +188,16 @@ commands:
                 name: "save api gradle cache"
                 paths:
                   - ~/.gradle
-                  - ~/.m2
-                key: v123-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                key: v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - when:
           condition: << parameters.restore >>
           steps:
             - restore_cache:
                 name: "restore api gradle cache"
                 keys:
-                  - v123-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v123-gradle-cache-master
-                  - v123-gradle-cache-
+                  - v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                  - v1-gradle-cache-master
+                  - v1-gradle-cache-
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
@@ -293,6 +292,8 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - ensure_branch_has_changes:
+          dir_name: "api"
       - manage_api_cache:
           restore: true
       - run:
@@ -303,7 +304,7 @@ jobs:
               ./project.rb validate-swagger --project-prop verboseTestLogging=yes
             fi
       - run:
-          name: print tests
+          name: Run Java unit tests
           working_directory: ~/workbench/api
           command: |
             CLASSNAMES=$(circleci tests glob "src/test/java/org/pmiops/workbench/**/*.java" \
@@ -314,7 +315,6 @@ jobs:
 
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
             ./gradlew --no-daemon test $GRADLE_ARGS
-          when: always
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
@@ -324,7 +324,7 @@ jobs:
               ./gradlew spotlessCheck
             fi
       - store_test_results:
-           path: ~/workbench/api/build/test-results/test
+          path: ~/workbench/api/build/test-results/test
       - manage_api_cache:
           save: true
 
@@ -575,7 +575,27 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
+      - api-local-test
       - api-build-test
+      - ui-build-test
+      - api-bigquery-test
+      - api-integration-test
+      - puppeteer-e2e-local-ui
+      # Run deployment to "test" on master merges.
+      - api-deploy-to-test:
+          filters: *filter_only_master_branch
+          requires:
+            - api-build-test
+      - ui-deploy-to-test:
+          filters: *filter_only_master_branch
+          requires:
+            - ui-build-test
+      # On master merges, run Puppeteer e2e tests after ui and api deployed to "test" env successfully.
+      - puppeteer-e2e-test:
+          filters: *filter_only_master_branch
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
 
   deploy-staging:
     jobs:
