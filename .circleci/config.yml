@@ -188,16 +188,17 @@ commands:
                 name: "save api gradle cache"
                 paths:
                   - ~/.gradle
-                key: v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                  - ~/.m2
+                key: v123-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - when:
           condition: << parameters.restore >>
           steps:
             - restore_cache:
                 name: "restore api gradle cache"
                 keys:
-                  - v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v1-gradle-cache-master
-                  - v1-gradle-cache-
+                  - v123-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                  - v123-gradle-cache-master
+                  - v123-gradle-cache-
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
@@ -285,7 +286,7 @@ commands:
 # -------------------------
 jobs:
   api-build-test:
-    parallelism: 2
+    parallelism: 3
     # We're hitting OOM failures as of 1 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
