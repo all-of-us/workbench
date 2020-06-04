@@ -312,6 +312,8 @@ jobs:
 
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
             echo "Prepared arguments for gradle: $GRADLE_ARGS"
+
+            ./gradlew test $GRADLE_ARGS
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
