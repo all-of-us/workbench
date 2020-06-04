@@ -286,7 +286,7 @@ commands:
 # -------------------------
 jobs:
   api-build-test:
-    parallelism: 4
+    parallelism: 5
     # We're hitting OOM failures as of 1 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
