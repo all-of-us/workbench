@@ -600,6 +600,7 @@ tasks.withType(Test) {
   testLogging {
     // Causes the correct line to be reported on an exception.
     exceptionFormat "full"
+    jvmArgs '--enable-preview'
   }
   def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
   if (verboseTestLogging == 'yes') {

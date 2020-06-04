@@ -305,13 +305,6 @@ jobs:
           name: print tests
           working_directory: ~/workbench/api
           command: |
-            TEST_FILES=$(circleci tests glob "**/src/test/java/org/pmiops/workbench/**/*.java")
-            COUNT_TESTS_CMD='echo $TEST_FILES | sort |tr " " "\n" | wc -l'
-            echo "Total test files : `eval $COUNT_TEST_FILE_CMD`"
-      - run:
-          name: print tests
-          working_directory: ~/workbench/api
-          command: |
             CLASSNAMES=$(circleci tests glob "**/src/test/java/org/pmiops/workbench/**/*.java" \
               | sed 's@.*/src/test/java/@@' \
               | sed 's@/@.@g' \
