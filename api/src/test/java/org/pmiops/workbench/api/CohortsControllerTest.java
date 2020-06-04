@@ -412,20 +412,11 @@ public class CohortsControllerTest {
     assertThat(cohorts.size()).isEqualTo(2);
   }
 
-  @Test
+  @Test(expected = ServerErrorException.class)
   public void testCreateCohortBadCriteria() {
     Cohort cohort = createDefaultCohort();
     cohort.setCriteria(badCohortCriteria);
-    try {
-      cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
-      fail("Should have thrown ServerErrorException");
-    } catch (ServerErrorException e) {
-      assertThat(e.getMessage())
-          .isEqualTo(
-              String.format(
-                  "Could not save Cohort (\"/%s/%s/%s\")",
-                  workspace.getNamespace(), 1, cohort.getName()));
-    }
+    cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
   }
 
   @Test
