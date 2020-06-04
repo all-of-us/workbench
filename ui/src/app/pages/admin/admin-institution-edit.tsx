@@ -12,6 +12,7 @@ import {TextInputWithLabel} from 'app/pages/login/account-creation/common';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
+import {convertAPIError} from 'app/utils/errors';
 import {navigate} from 'app/utils/navigation';
 import {DuaType, Institution, OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -237,10 +238,11 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     }
   }
 
-  handleError(rejectReason) {
+  async handleError(rejectReason) {
     let errorMsg = 'Error while saving Institution. Please try again later';
+    const error = await convertAPIError(rejectReason);
     if (rejectReason.status === 409) {
-      errorMsg  = 'Institution with Name ' + this.state.institution.displayName + ' already exist';
+      errorMsg  = error.message;
     }
     this.setState({apiErrorMsg: errorMsg, showApiError: true});
   }
