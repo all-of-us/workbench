@@ -846,4 +846,9 @@ public class DataSetControllerTest {
         .containsExactly(
             new DomainValue().value("field_one"), new DomainValue().value("field_two"));
   }
+
+  @Test
+  public void testFail() {
+    assertThat(true).isFalse();
+  }
 }
