@@ -29,6 +29,18 @@ public class WorkspaceExportRow {
   @CsvBindByPosition(position = 1)
   private String creatorUsername;
 
+  public String getInstitution() {
+    return institution;
+  }
+
+  public void setInstitution(String institution) {
+    this.institution = institution;
+  }
+
+  @CsvBindByName(column = "Institution")
+  @CsvBindByPosition(position = 2)
+  private String institution;
+
   public String getCreatorFirstSignIn() {
     return creatorFirstSignIn;
   }
@@ -38,7 +50,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "First Sign In")
-  @CsvBindByPosition(position = 2)
+  @CsvBindByPosition(position = 3)
   private String creatorFirstSignIn;
 
   public String getCreatorRegistrationState() {
@@ -50,8 +62,56 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Registration State")
-  @CsvBindByPosition(position = 3)
+  @CsvBindByPosition(position = 4)
   private String creatorRegistrationState;
+
+  public String getTwoFactorAuthCompletionDate() {
+    return twoFactorAuthCompletionDate;
+  }
+
+  public void setTwoFactorAuthCompletionDate(String twoFactorAuthCompletionDate) {
+    this.twoFactorAuthCompletionDate = twoFactorAuthCompletionDate;
+  }
+
+  @CsvBindByName(column = "2fa Completion Date")
+  @CsvBindByPosition(position = 5)
+  private String twoFactorAuthCompletionDate;
+
+  public String getEraCompletionDate() {
+    return eraCompletionDate;
+  }
+
+  public void setEraCompletionDate(String eraCompletionDate) {
+    this.eraCompletionDate = eraCompletionDate;
+  }
+
+  @CsvBindByName(column = "eRA Completion Date")
+  @CsvBindByPosition(position = 6)
+  private String eraCompletionDate;
+
+  public String getTrainingCompletionDate() {
+    return trainingCompletionDate;
+  }
+
+  public void setTrainingCompletionDate(String trainingCompletionDate) {
+    this.trainingCompletionDate = trainingCompletionDate;
+  }
+
+  @CsvBindByName(column = "Training Completion Date")
+  @CsvBindByPosition(position = 7)
+  private String trainingCompletionDate;
+
+  public String getDuccCompletionDate() {
+    return duccCompletionDate;
+  }
+
+  public void setDuccCompletionDate(String duccCompletionDate) {
+    this.duccCompletionDate = duccCompletionDate;
+  }
+
+  @CsvBindByName(column = "DUCC Completion Date")
+  @CsvBindByPosition(position = 8)
+  private String duccCompletionDate;
 
   public String getProjectId() {
     return projectId;
@@ -62,7 +122,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Project ID")
-  @CsvBindByPosition(position = 4)
+  @CsvBindByPosition(position = 9)
   private String projectId;
 
   public String getName() {
@@ -74,7 +134,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Name")
-  @CsvBindByPosition(position = 5)
+  @CsvBindByPosition(position = 10)
   private String name;
 
   public String getCreatedDate() {
@@ -86,7 +146,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Created Date")
-  @CsvBindByPosition(position = 6)
+  @CsvBindByPosition(position = 11)
   private String createdDate;
 
   public String getCollaborators() {
@@ -98,7 +158,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Other users in the workspace")
-  @CsvBindByPosition(position = 7)
+  @CsvBindByPosition(position = 12)
   private String collaborators;
 
   public String getCohortNames() {
@@ -110,7 +170,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Cohort Names")
-  @CsvBindByPosition(position = 8)
+  @CsvBindByPosition(position = 13)
   private String cohortNames;
 
   public String getCohortCount() {
@@ -122,7 +182,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Cohort Count")
-  @CsvBindByPosition(position = 9)
+  @CsvBindByPosition(position = 14)
   private String cohortCount;
 
   public String getConceptSetNames() {
@@ -134,7 +194,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Concept Set Names")
-  @CsvBindByPosition(position = 10)
+  @CsvBindByPosition(position = 15)
   private String conceptSetNames;
 
   public String getConceptSetCount() {
@@ -146,7 +206,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Concept Set Count")
-  @CsvBindByPosition(position = 11)
+  @CsvBindByPosition(position = 16)
   private String conceptSetCount;
 
   public String getDatasetNames() {
@@ -158,7 +218,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Dataset Names")
-  @CsvBindByPosition(position = 12)
+  @CsvBindByPosition(position = 17)
   private String datasetNames;
 
   public String getDatasetCount() {
@@ -170,7 +230,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Dataset Count")
-  @CsvBindByPosition(position = 13)
+  @CsvBindByPosition(position = 18)
   private String datasetCount;
 
   public String getNotebookNames() {
@@ -182,7 +242,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Notebook Names")
-  @CsvBindByPosition(position = 14)
+  @CsvBindByPosition(position = 19)
   private String notebookNames;
 
   public String getNotebooksCount() {
@@ -194,7 +254,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Notebook Count")
-  @CsvBindByPosition(position = 15)
+  @CsvBindByPosition(position = 20)
   private String notebooksCount;
 
   public String getWorkspaceSpending() {
@@ -206,7 +266,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Spending")
-  @CsvBindByPosition(position = 16)
+  @CsvBindByPosition(position = 21)
   private String workspaceSpending;
 
   public String getReviewForStigmatizingResearch() {
@@ -218,7 +278,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Review for Stigmatizing research (Y/N)")
-  @CsvBindByPosition(position = 17)
+  @CsvBindByPosition(position = 22)
   private String reviewForStigmatizingResearch;
 
   public String getWorkspaceLastUpdatedDate() {
@@ -230,7 +290,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Last Updated Date")
-  @CsvBindByPosition(position = 18)
+  @CsvBindByPosition(position = 23)
   private String workspaceLastUpdatedDate;
 
   public String getActive() {
@@ -242,6 +302,6 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Is Workspace active? (Y/N)")
-  @CsvBindByPosition(position = 19)
+  @CsvBindByPosition(position = 24)
   private String active;
 }
