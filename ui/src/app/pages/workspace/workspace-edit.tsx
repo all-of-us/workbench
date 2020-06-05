@@ -611,60 +611,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
     }
 
-    get isOtherPrimaryPurposeValid() {
-      const rp = this.state.workspace.researchPurpose;
-      return !rp.otherPurpose ||
-          (rp.otherPurposeDetails && rp.otherPurposeDetails.length <= 500);
-    }
-
-    get isSpecificPopulationValid() {
-      const researchPurpose = this.state.workspace.researchPurpose;
-      return (
-          !this.state.populationChecked ||
-          (
-              researchPurpose.populationDetails &&
-              researchPurpose.populationDetails.length !== 0
-          )
-      );
-    }
-
-    get isOtherSpecificPopulationValid() {
-      const researchPurpose = this.state.workspace.researchPurpose;
-      // Avoids null pointers. We don't want to show this error message if nothing is selected yet.
-      if (!this.isSpecificPopulationValid) {
-        return true;
-      }
-      return !fp.includes(SpecificPopulationEnum.OTHER, researchPurpose.populationDetails) ||
-          (researchPurpose.otherPopulationDetails && researchPurpose.otherPopulationDetails.length <= 100);
-    }
-
-    get isDiseaseOfFocusValid() {
-      const researchPurpose = this.state.workspace.researchPurpose;
-      return !researchPurpose.diseaseFocusedResearch ||
-        researchPurpose.diseaseOfFocus && researchPurpose.diseaseOfFocus.length <= 80;
-    }
-
-    get isDisseminateResearchValid() {
-      const researchPurpose = this.state.workspace.researchPurpose;
-      return researchPurpose.disseminateResearchFindingList &&
-          researchPurpose.disseminateResearchFindingList.length !== 0;
-    }
-
-    get isOtherDisseminateResearchValid() {
-      const researchPurpose = this.state.workspace.researchPurpose;
-      return !fp.includes(DisseminateResearchEnum.OTHER, researchPurpose.disseminateResearchFindingList) ||
-              (researchPurpose.otherDisseminateResearchFindings && researchPurpose.otherDisseminateResearchFindings.length <= 100);
-    }
-
-
-
-    get isResearchOutcome() {
-      const researchPurpose = this.state.workspace.researchPurpose;
-      return researchPurpose.researchOutcomeList && researchPurpose.researchOutcomeList.length !== 0 ;
-    }
-
-    updatePrimaryPurpose(cateogry, value) {
-      this.updateResearchPurpose(cateogry, value);
+    updatePrimaryPurpose(category, value) {
+      this.updateResearchPurpose(category, value);
       if (!value && !this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose)) {
         // If all research purpose cateogries are unselected un check the Research Purpose checkbox
         this.setState({selectResearchPurpose: false});
@@ -849,8 +797,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return options;
     }
 
-    render() {
-      const {enableBillingUpgrade} = serverConfigStore.getValue();
+    private validate(): any {
       const {
         populationChecked,
         workspace: {
@@ -858,18 +805,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           billingAccountName,
           researchPurpose: {
             anticipatedFindings,
+            diseaseFocusedResearch,
+            diseaseOfFocus,
+            disseminateResearchFindingList,
             intendedStudy,
+            otherDisseminateResearchFindings,
+            otherPopulationDetails,
+            otherPurpose,
+            otherPurposeDetails,
+            populationDetails,
             scientificApproach,
+            researchOutcomeList,
             reviewRequested
           }
-        },
-        showConfirmationModal
+        }
       } = this.state;
-      const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
-      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
-      // defined below in the OverlayPanel declaration
-      let freeTierBalancePanel: OverlayPanel;
-      const errors = validate({
+      let values: object = {
         name,
         billingAccountName,
         anticipatedFindings,
@@ -877,15 +828,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         populationChecked,
         reviewRequested,
         scientificApproach,
-        'primaryPurpose': this.primaryPurposeIsSelected,
-        'otherPrimaryPurpose': this.isOtherPrimaryPurposeValid,
-        'specificPopulation': this.isSpecificPopulationValid,
-        'otherSpecificPopulation': this.isOtherSpecificPopulationValid,
-        'diseaseOfFocus': this.isDiseaseOfFocusValid,
-        'researchOutcoming': this.isResearchOutcome,
-        'disseminate': this.isDisseminateResearchValid,
-        'otherDisseminateResearchFindings': this.isOtherDisseminateResearchValid
-      }, {
+        researchOutcomeList,
+        disseminateResearchFindingList,
+        'primaryPurpose': this.primaryPurposeIsSelected
+      };
+      // TODO: This validation spec should include erorr messages which get
+      // surfaced directly. Currently these constraints are entirely separate
+      // from the user facing error strings we render.
+      const constraints: object = {
         name: {
           length: { minimum: 1, maximum: 80 }
         },
@@ -895,16 +845,84 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         anticipatedFindings: {length: { minimum: 1, maximum: 1000 }},
         reviewRequested: { presence: true },
         scientificApproach: { length: { minimum: 1, maximum: 1000 } },
-        primaryPurpose: { truthiness: true },
-        otherPrimaryPurpose: {truthiness: true},
-        specificPopulation: { truthiness: true },
-        diseaseOfFocus: { truthiness: true },
-        researchOutcoming: {truthiness: true},
-        disseminate: {truthiness: true},
-        otherDisseminateResearchFindings: {truthiness: true},
-        otherSpecificPopulation: {truthiness: true}
+        researchOutcomeList: { presence: {allowEmpty: false} },
+        disseminateResearchFindingList: { presence: {allowEmpty: false} },
+        primaryPurpose: { truthiness: true }
+      };
 
-      });
+      // Conditionally include optional fields for validation.
+      if (otherPurpose) {
+        values = {...values, otherPurposeDetails};
+        constraints['otherPurposeDetails'] = {
+          presence: {
+            allowEmpty: false
+          },
+          length: {
+            maximum: 500
+          }
+        }
+      }
+      if (populationChecked) {
+        values = {...values, populationDetails};
+        constraints['populationDetails'] = {
+          presence: true
+        }
+      }
+      if (populationDetails &&
+          populationDetails.includes(SpecificPopulationEnum.OTHER)) {
+        values = {...values, otherPopulationDetails};
+        constraints['otherPopulationDetails'] = {
+          presence: {
+            allowEmpty: false
+          },
+          length: {
+            maximum: 100
+          }
+        }
+      }
+      if (diseaseFocusedResearch) {
+        values = {...values, diseaseOfFocus};
+        constraints['diseaseOfFocus'] = {
+          presence: {
+            allowEmpty: false
+          },
+          length: {
+            maximum: 80
+          }
+        }
+      }
+      if (disseminateResearchFindingList &&
+          disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
+        values = {...values, otherDisseminateResearchFindings};
+        constraints['otherDisseminateResearchFindings'] = {
+          presence: {
+            allowEmpty: false
+          },
+          length: {
+            maximum: 100
+          }
+        }
+      }
+      return validate(values, constraints);
+    }
+
+    render() {
+      const {enableBillingUpgrade} = serverConfigStore.getValue();
+      const {
+        populationChecked,
+        workspace: {
+          researchPurpose: {
+            reviewRequested
+          }
+        },
+        showConfirmationModal
+      } = this.state;
+      const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
+      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
+      // defined below in the OverlayPanel declaration
+      let freeTierBalancePanel: OverlayPanel;
+
+      const errors = this.validate();
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '1120px'}}>
           {this.state.loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
@@ -1229,20 +1247,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.primaryPurpose && <li> You must choose at least one primary research
                   purpose (Question 1)</li>}
                 {errors.diseaseOfFocus && <li> You must specify a disease of focus and it should be at most 80 characters</li>}
-                {errors.otherPrimaryPurpose && <li> Other primary purpose should be of at most 500 characters</li>}
+                {errors.otherPurposeDetails && <li> Other primary purpose should not be blank and should be at most 500 characters</li>}
                 {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
                   (Question 2.1)</i> must be between 0 and 1000 characters</li>}
                 {errors.scientificApproach && <li> Answer for <i>What are the scientific
                   approaches you plan to use for your study (Question 2.2)</i> must be between 0 and 1000 characters</li>}
                 {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
                   from the study? (Question 2.3)</i> must be between 0 and 1000 characters</li>}
-                {errors.disseminate && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
+                {errors.disseminateResearchFindingList && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
                 {errors.otherDisseminateResearchFindings && <li>
                     Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}
-                {errors.researchOutcoming && <li> You must specify the outcome of the research (Question 4)</li>}
+                {errors.researchOutcomeList && <li> You must specify the outcome of the research (Question 4)</li>}
                 {errors.populationChecked && <li>You must pick an answer Population of interest question (Question 5)</li>}
-                {errors.specificPopulation && <li> You must specify a population of study (Question 5)</li>}
-                {errors.otherSpecificPopulation && <li>
+                {errors.populationDetails && <li> You must specify a population of study (Question 5)</li>}
+                {errors.otherPopulationDetails && <li>
                     Specific Population Other text should not be blank and should be at most 100 characters</li>}
                 {errors.reviewRequested && <li>You must pick an answer for review of stigmatizing research (Question 6)</li>}
               </BulletAlignedUnorderedList>
