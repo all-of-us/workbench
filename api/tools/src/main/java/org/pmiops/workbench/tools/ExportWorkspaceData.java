@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -249,23 +250,21 @@ public class ExportWorkspaceData {
     row.setCreatorUsername(user.getUsername());
     row.setInstitution(verifiedInstitutionName);
     row.setCreatorFirstSignIn(
-        user.getFirstSignInTime() == null ? "" : dateFormat.format(user.getFirstSignInTime()));
+        Optional.ofNullable(user.getFirstSignInTime()).map(dateFormat::format).orElse(""));
     row.setTwoFactorAuthCompletionDate(
-        user.getTwoFactorAuthCompletionTime() == null
-            ? ""
-            : dateFormat.format(user.getTwoFactorAuthCompletionTime()));
+        Optional.ofNullable(user.getTwoFactorAuthCompletionTime())
+            .map(dateFormat::format)
+            .orElse(""));
     row.setEraCompletionDate(
-        user.getEraCommonsCompletionTime() == null
-            ? ""
-            : dateFormat.format(user.getEraCommonsCompletionTime()));
+        Optional.ofNullable(user.getEraCommonsCompletionTime()).map(dateFormat::format).orElse(""));
     row.setTrainingCompletionDate(
-        user.getComplianceTrainingCompletionTime() == null
-            ? ""
-            : dateFormat.format(user.getComplianceTrainingCompletionTime()));
+        Optional.ofNullable(user.getComplianceTrainingCompletionTime())
+            .map(dateFormat::format)
+            .orElse(""));
     row.setDuccCompletionDate(
-        user.getDataUseAgreementCompletionTime() == null
-            ? ""
-            : dateFormat.format(user.getDataUseAgreementCompletionTime()));
+        Optional.ofNullable(user.getDataUseAgreementCompletionTime())
+            .map(dateFormat::format)
+            .orElse(""));
     row.setCreatorRegistrationState(user.getDataAccessLevelEnum().toString());
 
     return row;
