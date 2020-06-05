@@ -342,8 +342,7 @@ describe('WorkspaceEdit', () => {
 
   it ('should show error message if Disease of focus is more than 80 characters', async() => {
     const wrapper = component();
-    let diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
-    expect(diseaseNameError).toBeUndefined();
+    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeUndefined();
 
     wrapper.find('[data-test-id="researchPurpose-checkbox"]').at(1).simulate('change', { target: { checked: true } })
     wrapper.find('[data-test-id="diseaseFocusedResearch-checkbox"]').at(1).simulate('change', { target: { checked: true } });
@@ -353,9 +352,8 @@ describe('WorkspaceEdit', () => {
     const validInput = fp.repeat(8, 'a');
     wrapper.find('[data-test-id="search-input"]').first().simulate('change', {target: {value: validInput}});
 
-    diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
-    expect(diseaseNameError).toBeUndefined();
-    //
+    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeUndefined();
+
     const inValidInput = fp.repeat(81, 'b');
     wrapper.find('[data-test-id="search-input"]').first().simulate('change', {target: {value: inValidInput}});
     expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeDefined();
@@ -364,12 +362,10 @@ describe('WorkspaceEdit', () => {
   it ('should show error message if Other text for disseminate research is more than 100 characters', async() => {
     const wrapper = component();
     wrapper.find('[data-test-id="OTHER-checkbox"]').at(1).simulate('change', { target: { checked: true } });
-    let otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
     const validInput = fp.repeat(8, 'a');
     wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: validInput}});
 
-    otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
-    expect(otherDisseminateResearchFindingsError).toBeUndefined();
+    expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeUndefined();
     const inValidInput = fp.repeat(101, 'b');
     wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: inValidInput}});
     expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeDefined();
@@ -385,8 +381,7 @@ describe('WorkspaceEdit', () => {
     const validInput = fp.repeat(100, 'a');
     wrapper.find('[data-test-id="other-specialPopulation-text"]').first().simulate('change', {target: {value: validInput}});
 
-    let otherPopulationDetailsError = getSaveButtonDisableMsg(wrapper, 'otherPopulationDetails');
-    expect(otherPopulationDetailsError).toBeUndefined();
+    expect(getSaveButtonDisableMsg(wrapper, 'otherPopulationDetails')).toBeUndefined();
 
     const inValidInput = fp.repeat(101, 'a');
     wrapper.find('[data-test-id="other-specialPopulation-text"]').first().simulate('change', {target: {value: inValidInput}});
