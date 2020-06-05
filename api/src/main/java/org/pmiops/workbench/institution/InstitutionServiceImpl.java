@@ -112,7 +112,8 @@ public class InstitutionServiceImpl implements InstitutionService {
       populateAuxTables(institutionToCreate, dbInstitution);
       return toModel(dbInstitution);
     } catch (DataIntegrityViolationException ex) {
-      throw new ConflictException("Display Name cannot be same");
+      throw new ConflictException(
+          "DataIntegrityException: Please check that you are not creating an Institute which already exists");
     }
   }
 
@@ -154,7 +155,8 @@ public class InstitutionServiceImpl implements InstitutionService {
                 return toModel(dbObjectToUpdate);
               });
     } catch (DataIntegrityViolationException ex) {
-      throw new ConflictException("Display Name already exist");
+      throw new ConflictException(
+          "DataIntegrityException: Please check that you are not creating an Institute which already exists");
     }
   }
 
