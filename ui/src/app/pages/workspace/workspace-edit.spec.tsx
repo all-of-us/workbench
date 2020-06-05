@@ -393,4 +393,16 @@ describe('WorkspaceEdit', () => {
 
     expect(getSaveButtonDisableMsg(wrapper, 'otherPopulationDetails')).toBeDefined();
   });
+
+  it ('should show error message when other disseminate checked but empty', async() => {
+    const wrapper = component();
+    wrapper.find('[data-test-id="OTHER-checkbox"]').at(1).simulate('change', { target: { checked: true } });
+    const validInput = fp.repeat(8, 'a');
+    wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: validInput}});
+
+    expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeUndefined();
+    const inValidInput = fp.repeat(8, ' ');
+    wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: inValidInput}});
+    expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeDefined();
+  });
 });
