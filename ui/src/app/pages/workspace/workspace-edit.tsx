@@ -797,6 +797,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return options;
     }
 
+    /**
+     * Validates the current workspace state. This is a pass-through to validate.js
+     * which returns the standard error object if any validation errors occur.
+     */
     private validate(): any {
       const {
         populationChecked,
@@ -832,7 +836,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         disseminateResearchFindingList,
         'primaryPurpose': this.primaryPurposeIsSelected
       };
-      // TODO: This validation spec should include erorr messages which get
+      // TODO: This validation spec should include error messages which get
       // surfaced directly. Currently these constraints are entirely separate
       // from the user facing error strings we render.
       const constraints: object = {
