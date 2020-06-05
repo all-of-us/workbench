@@ -249,14 +249,14 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
 
   validateEmailAddressPresence() {
     const {institution} = this.state;
-    return this.state.institution.duaTypeEnum === DuaType.RESTRICTED
-      && institution.emailAddresses && institution.emailAddresses.length > 0;
+    return this.state.institution.duaTypeEnum === DuaType.MASTER ||
+      institution.emailAddresses && institution.emailAddresses.length > 0;
   }
 
   validateEmailDomainPresence() {
     const {institution} = this.state;
-    return this.state.institution.duaTypeEnum === DuaType.MASTER
-      && institution.emailDomains && institution.emailDomains.length > 0;
+    return this.state.institution.duaTypeEnum === DuaType.RESTRICTED ||
+      institution.emailDomains && institution.emailDomains.length > 0;
   }
 
   get buttonText() {
