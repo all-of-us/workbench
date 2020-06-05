@@ -860,13 +860,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           length: {
             maximum: 500
           }
-        }
+        };
       }
       if (populationChecked) {
         values = {...values, populationDetails};
         constraints['populationDetails'] = {
           presence: true
-        }
+        };
       }
       if (populationDetails &&
           populationDetails.includes(SpecificPopulationEnum.OTHER)) {
@@ -878,7 +878,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           length: {
             maximum: 100
           }
-        }
+        };
       }
       if (diseaseFocusedResearch) {
         values = {...values, diseaseOfFocus};
@@ -889,7 +889,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           length: {
             maximum: 80
           }
-        }
+        };
       }
       if (disseminateResearchFindingList &&
           disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
@@ -901,7 +901,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           length: {
             maximum: 100
           }
-        }
+        };
       }
       return validate(values, constraints);
     }
@@ -1254,7 +1254,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   approaches you plan to use for your study (Question 2.2)</i> must be between 0 and 1000 characters</li>}
                 {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
                   from the study? (Question 2.3)</i> must be between 0 and 1000 characters</li>}
-                {errors.disseminateResearchFindingList && <li> You must specific how you plan to disseminate your research findings (Question 3)</li>}
+                {errors.disseminateResearchFindingList && <li>
+                  You must specific how you plan to disseminate your research findings (Question 3)</li>}
                 {errors.otherDisseminateResearchFindings && <li>
                     Disseminate Research Findings Other text should not be blank and should be at most 100 characters</li>}
                 {errors.researchOutcomeList && <li> You must specify the outcome of the research (Question 4)</li>}
