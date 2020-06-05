@@ -92,37 +92,18 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
 
   }
 
-  get institutionTypeOptions() {
-    const options = [
-      {label: 'Industry', value: OrganizationType.INDUSTRY},
-      {label: 'Academic Research Institution', value: OrganizationType.ACADEMICRESEARCHINSTITUTION},
-      {label: 'Educational Institution', value: OrganizationType.EDUCATIONALINSTITUTION},
-      {label: 'Health Center/ Non-Profit', value: OrganizationType.HEALTHCENTERNONPROFIT},
-      {label: 'Other', value: OrganizationType.OTHER}
-    ];
-    return options;
-  }
-
-  get institutionAgreementTypeOptions() {
-    const options = [
-      {label: 'Master', value: DuaType.MASTER},
-      {label: 'Individual', value: DuaType.RESTRICTED}
-    ];
-    return options;
-  }
-
   // Filter out empty line or empty email addresses like <email1>,,<email2>
   // Confirm each email is a valid email using validate.js
   validateEmailAddresses() {
     const invalidEmailAddress = [];
     const {emailAddresses} = this.state.institution;
-    const emailAddressWithNO = emailAddresses.filter(
+    const updatedEmailAddress = emailAddresses.filter(
       emailAddress => {
         return emailAddress !== '' || !!emailAddress;
       });
 
-    this.setState(fp.set(['institution', 'emailAddresses'], emailAddressWithNO));
-    this.state.institution.emailAddresses.map(emailAddress => {
+    this.setState(fp.set(['institution', 'emailAddresses'], updatedEmailAddress));
+    updatedEmailAddress.map(emailAddress => {
       const errors = validate({
         emailAddress
       }, {
@@ -145,8 +126,11 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   validateEmailDomains() {
     const invalidEmailDomain = [];
     const {emailDomains} = this.state.institution;
-    this.state.institution.emailDomains =  emailDomains.filter(emailDomain => emailDomain);
-    this.state.institution.emailDomains.map(emailDomain => {
+    const emailDomainsWithNoEmptyString =
+      emailDomains.filter(emailDomain => emailDomain.trim() !== '');
+    this.setState(fp.set(['institution', 'emailDomains'], emailDomainsWithNoEmptyString));
+
+    emailDomainsWithNoEmptyString.map(emailDomain => {
       const errors = validate({
         emailDomain
       }, {
@@ -227,7 +211,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
         institution.organizationTypeOtherText = null;
       }
     }
-    if (this.props.urlParams.institutionId) {
+    if (InstitutionMode.EDIT) {
       await institutionApi().updateInstitution(this.props.urlParams.institutionId, institution)
         .then(value => this.backNavigate())
         .catch(reason => this.handleError(reason));
@@ -264,11 +248,15 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   }
 
   validateEmailAddressPresence() {
-    return this.state.institution.duaTypeEnum === DuaType.RESTRICTED && !this.state.institution.emailAddresses;
+    const {institution} = this.state;
+    return this.state.institution.duaTypeEnum === DuaType.RESTRICTED
+      && institution.emailAddresses && institution.emailAddresses.length > 0;
   }
 
   validateEmailDomainPresence() {
-    return this.state.institution.duaTypeEnum === DuaType.MASTER && !this.state.institution.emailDomains;
+    const {institution} = this.state;
+    return this.state.institution.duaTypeEnum === DuaType.MASTER
+      && institution.emailDomains && institution.emailDomains.length > 0;
   }
 
   get buttonText() {
@@ -286,8 +274,8 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     } = institution;
     const errors = validate({
       displayName,
-      'emailAddresses': !this.validateEmailAddressPresence(),
-      'emailDomain': !this.validateEmailDomainPresence(),
+      'emailAddresses': this.validateEmailAddressPresence(),
+      'emailDomain': this.validateEmailDomainPresence(),
       organizationTypeEnum,
       duaTypeEnum
     }, {

@@ -156,4 +156,21 @@ describe('AdminInstitutionEditSpec', () => {
     expect(emailAddressError.length).toBe(0);
 
   });
+
+  it ('Should ignore empty string in email Domain', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+    const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
+    agreementTypeDropDown.props.onChange(
+        {originalEvent: undefined, value: DuaType.MASTER, target: {name: 'name', id: '', value: DuaType.MASTER}});
+    await waitOneTickAndUpdate(wrapper);
+
+    // Single Entry with incorrect Email Domain format
+    wrapper.find('[data-test-id="emailDomainInput"]').first()
+      .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
+    wrapper.find('[data-test-id="emailDomainInput"]').first().simulate('blur');
+    expect(wrapper.find('[data-test-id="emailDomainInput"]').first().prop('value'))
+      .toBe('validEmail.com,\njustSomeRandom.domain');
+  });
 });
