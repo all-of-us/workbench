@@ -245,7 +245,7 @@ export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...pro
 });
 
 export const NumberInput = React.forwardRef((
-    {style = {}, value, min, max, onChange, onBlur, ...props}:
+    {style = {}, value, onChange, onBlur, ...props}:
     {style?: React.CSSProperties, value: string, onChange: Function, onBlur?: Function, [key: string]: any},
     ref: React.Ref<HTMLInputElement>
   ) => {
