@@ -322,7 +322,7 @@ jobs:
               | sed 's/\.[^.]*$//' \
               | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i}')
-            java -version && gradle -v && gradle --no-daemon test $GRADLE_ARGS --scan
+            java -version && gradle -v && gradle --no-daemon test $GRADLE_ARGS --stacktrace
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
