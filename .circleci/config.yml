@@ -295,7 +295,7 @@ jobs:
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     # resource_class: medium+
     environment:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=1 -Dkotlin.incremental=false
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
       JAVA_TOOL_OPTIONS: -Xmx1536m
     steps:
       - checkout_init_git
@@ -322,7 +322,7 @@ jobs:
               | sed 's/\.[^.]*$//' \
               | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i}')
-            java -version && gradle -v && gradle --no-daemon test $GRADLE_ARGS --stacktrace
+            java -version && gradle -v && gradle test $GRADLE_ARGS
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
