@@ -295,7 +295,7 @@ jobs:
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     # resource_class: medium+
     environment:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=1 -Dkotlin.incremental=false
       JAVA_TOOL_OPTIONS: -Xmx1536m
     steps:
       - checkout_init_git
