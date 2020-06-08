@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -6,7 +5,6 @@ import {Header, SmallHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import {AouTitle} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
 
 const styles = {
@@ -48,7 +46,7 @@ const COOKIE_DELETION_LINK = 'https://www.aboutcookies.org/how-to-delete-cookies
 const GOOGLE_PRIVACY_LINK = 'https://policies.google.com/privacy';
 const ZENDESK_PRIVACY_LINK = 'https://www.zendesk.com/company/customers-partners/privacy-policy/';
 
-export class CookiePolicy extends React.Component<{}, {}> {
+export class CookiePolicyComponent extends React.Component<{}, {}> {
   render() {
     return <PublicLayout>
       <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '100%', color: colors.primary}}>
@@ -142,14 +140,5 @@ export class CookiePolicy extends React.Component<{}, {}> {
             link</StyledAnchorTag>.</div>
       </FadeBox>
     </PublicLayout>;
-  }
-}
-
-@Component({
-  template: '<div #root></div>'
-})
-export class CookiePolicyComponent extends ReactWrapperBase {
-  constructor() {
-    super(CookiePolicy, []);
   }
 }

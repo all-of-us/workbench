@@ -141,6 +141,13 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     for (DbUser user : userService.getAllUsers()) {
       userCount++;
       try {
+        // User accounts are registered with Terra on first sign-in. Users who have never signed in
+        // are therefore unusable for impersonated calls to Terra to check on their eRA commons
+        // status.
+        if (user.getFirstSignInTime() == null) {
+          continue;
+        }
+
         Timestamp oldTime = user.getEraCommonsCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 

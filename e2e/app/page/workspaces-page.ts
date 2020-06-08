@@ -66,7 +66,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   * 4: return
   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    const link = await Button.forLabel(this.page, FIELD.createNewWorkspaceButton.textOption);
+    const link = await Button.findByName(this.page, FIELD.createNewWorkspaceButton.textOption);
     await link.clickAndWait();
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
@@ -76,7 +76,10 @@ export default class WorkspacesPage extends WorkspaceEditPage {
   /**
    * Create a simple and basic new workspace end-to-end.
    */
-  async createWorkspace(workspaceName: string, billingAccount: string, reviewRequest: boolean = false): Promise<string> {
+  async createWorkspace(
+     workspaceName: string,
+     billingAccount: string = 'Use All of Us free credits',
+     reviewRequest: boolean = false): Promise<string> {
 
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
@@ -85,8 +88,8 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).tabKey();
 
-    // select Synthetic Data Set 2
-    await editPage.selectDataSet('2');
+    // select Synthetic Data Set 3
+    await editPage.selectDataSet('3');
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
@@ -115,7 +118,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await (await increaseWellness.asCheckBox()).check();
 
     // 5. Population of interest: use default values. Using default value
-    const noRadiobutton = await RadioButton.forLabel(this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption);
+    const noRadiobutton = await RadioButton.findByName(this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption);
     await noRadiobutton.select();
 
     // 6. Request for Review of Research Purpose Description. Using default value
@@ -124,7 +127,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     // click CREATE WORKSPACE button
     const createButton = await this.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
-    return await editPage.clickCreateFinishButton(createButton);
+    return editPage.clickCreateFinishButton(createButton);
   }
 
   /**

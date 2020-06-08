@@ -1,9 +1,7 @@
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'utils/test-utils';
-import {WorkspaceAccessLevel, WorkspaceAction} from 'app/page-identifiers';
+import {findWorkspace, signIn} from 'utils/test-utils';
+import {EllipsisMenuAction} from 'app/page-identifiers';
 import DataPage from 'app/page/data-page';
-import WorkspaceCard from 'app/component/workspace-card';
-import * as fp from 'lodash/fp';
 
 describe('Clone workspace', () => {
 
@@ -15,21 +13,14 @@ describe('Clone workspace', () => {
   describe('From "Your Workspaces" page using Workspace card ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
-      const workspacesPage = new WorkspacesPage(page);
-      await workspacesPage.load();
 
-      // choose one workspace on "Your Workspaces" page for clone from
-      const workspaceCard = new WorkspaceCard(page);
-      const retrievedWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
-      if (retrievedWorkspaces.length === 0) {
-        throw new Error('Failed to find one existing workspace. Cannot continue clone-workspace test.');
-      }
-      const aWorkspaceCard: WorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
-      await aWorkspaceCard.asElementHandle().hover();
+      const workspaceCard = await findWorkspace(page);
+      await workspaceCard.asElementHandle().hover();
       // click on Ellipsis "Duplicate"
-      await (aWorkspaceCard.getEllipsis()).selectAction(WorkspaceAction.DUPLICATE);
+      await (workspaceCard.getEllipsis()).clickAction(EllipsisMenuAction.DUPLICATE);
 
       // fill out Workspace Name should be just enough for clone successfully
+      const workspacesPage = new WorkspacesPage(page);
       await (await workspacesPage.getWorkspaceNameTextbox()).clear();
       const cloneWorkspaceName = await workspacesPage.fillOutWorkspaceName();
 
@@ -57,19 +48,14 @@ describe('Clone workspace', () => {
   describe('From "Data" page using side ellipsis menu', () => {
 
     test('As OWNER, user can clone workspace', async () => {
-       // choose one workspace on "Home" page for clone from
-      const workspaceCard = new WorkspaceCard(page);
-      const retrievedWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
-      if (retrievedWorkspaces.length === 0) {
-        throw new Error('Failed to find one existing workspace. Cannot continue clone-workspace test.');
-      }
-      const aWorkspaceCard = fp.shuffle(retrievedWorkspaces)[0];
-      await aWorkspaceCard.clickWorkspaceName();
+
+      const workspaceCard = await findWorkspace(page);
+      await workspaceCard.clickWorkspaceName();
 
       const dataPage = new DataPage(page);
       await dataPage.waitForLoad();
 
-      await dataPage.selectWorkspaceAction(WorkspaceAction.DUPLICATE);
+      await dataPage.selectWorkspaceAction(EllipsisMenuAction.DUPLICATE);
 
       const workspacesPage = new WorkspacesPage(page);
 

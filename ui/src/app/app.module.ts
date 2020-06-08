@@ -19,6 +19,7 @@ import {SignInService} from './services/sign-in.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
+import {AppRouting} from './app-routing';
 import {BugReportComponent} from './components/bug-report';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
@@ -30,7 +31,6 @@ import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
-import {CookiePolicyComponent} from './pages/cookie-policy';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {CreateReviewModalComponent} from './pages/data/cohort-review/create-review-modal';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -144,13 +144,13 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AdminUserComponent,
     AdminUsersComponent,
     AppComponent,
+    AppRouting,
     BugReportComponent,
     CohortActionsComponent,
     CohortReviewComponent,
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
-    CookiePolicyComponent,
     CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,
@@ -180,7 +180,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
-    HomepageComponent,
+    HomepageComponent
   ],
   providers: [
     {

@@ -27,6 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -88,6 +89,7 @@ import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -161,7 +163,9 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @TestConfiguration
   @Import({
+    ActionAuditQueryServiceImpl.class,
     AddressMapperImpl.class,
+    AuditLogEntryMapperImpl.class,
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
@@ -176,6 +180,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
   })
+  @MockBean({BigQueryService.class})
   static class Configuration {
     @Bean
     @Primary

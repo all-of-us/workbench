@@ -6,8 +6,13 @@ import Textbox from 'app/element/textbox';
 import GoogleLoginPage from 'app/page/google-login';
 import HomePage, {LABEL_ALIAS} from 'app/page/home-page';
 import {XPathOptions, ElementType} from 'app/xpath-options';
+import * as fp from 'lodash/fp';
 import {JSHandle, Page} from 'puppeteer';
 import {waitForText} from 'utils/waits-utils';
+import WorkspaceCard from 'app/component/workspace-card';
+import {WorkspaceAccessLevel} from 'app/page-identifiers';
+import WorkspacesPage from 'app/page/workspaces-page';
+import {makeWorkspaceName} from './str-utils';
 
 export async function signIn(page: Page): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
@@ -24,7 +29,7 @@ export async function signIn(page: Page): Promise<void> {
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeOut: number = 60000): Promise<void> {
+export async function waitWhileLoading(page: Page, timeOut: number = 90000): Promise<void> {
   // wait maximum 1 second for either spinner to show up
   const spinSelector = '.spinner, svg';
   let spinner: JSHandle;
@@ -101,7 +106,7 @@ export async function newUserRegistrationSelfBypass(page: Page) {
   const selfBypassXpath = '//*[@data-test-id="self-bypass"]';
   await Promise.race([
     page.waitForXPath(selfBypassXpath, {visible: true, timeout: 60000}),
-    Link.forLabel(page, {name: LABEL_ALIAS.SEE_ALL_WORKSPACES}),
+    Link.findByName(page, {name: LABEL_ALIAS.SEE_ALL_WORKSPACES}),
   ]);
 
   // check to see if it is the Self-Bypass link
@@ -149,11 +154,11 @@ export async function performAction(
 
   switch (identifier.textOption.type.toLowerCase()) {
   case 'radio':
-    const radioELement = await RadioButton.forLabel(page, identifier.textOption);
+    const radioELement = await RadioButton.findByName(page, identifier.textOption);
     await radioELement.select();
     break;
   case 'checkbox':
-    const checkboxElement = await Checkbox.forLabel(page, identifier.textOption);
+    const checkboxElement = await Checkbox.findByName(page, identifier.textOption);
     await checkboxElement.toggle(selected);
     if (value) {
         // For Checkbox and its required Textarea or Textbox. Set value in Textbox or Textarea if Checkbox is checked.
@@ -162,16 +167,43 @@ export async function performAction(
     }
     break;
   case 'text':
-    const textboxElement = await Textbox.forLabel(page, identifier.textOption);
+    const textboxElement = await Textbox.findByName(page, identifier.textOption);
     await textboxElement.type(value, {delay: 0});
     await textboxElement.tabKey();
     break;
   case 'textarea':
-    const textareaElement = await Textarea.forLabel(page, identifier.textOption);
+    const textareaElement = await Textarea.findByName(page, identifier.textOption);
     await textareaElement.paste(value);
     await textareaElement.tabKey();
     break;
   default:
     throw new Error(`${identifier} is not recognized.`);
   }
+
+}
+
+/**
+ * Find an exsting workspace. Create a new workspace if none exists.
+ * @param {boolean} createNew Create a new workspace, without regard to any existing workspaces or not.
+ */
+export async function findWorkspace(page: Page, createNew: boolean = false): Promise<WorkspaceCard> {
+  const workspacesPage = new WorkspacesPage(page);
+  await workspacesPage.load();
+
+  const workspaceCard = new WorkspaceCard(page);
+  let existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
+
+  if (existingWorkspaces.length === 0 || createNew) {
+    // Create new workspace
+    const workspaceName = makeWorkspaceName();
+    await workspacesPage.createWorkspace(workspaceName);
+
+    await workspacesPage.load();
+    existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.OWNER);
+  }
+
+  const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];
+  const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
+  console.log(`Found a workspace: ${workspaceCardName}`);
+  return oneWorkspaceCard;
 }

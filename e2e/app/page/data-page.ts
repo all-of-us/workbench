@@ -1,22 +1,25 @@
 import {Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
+import {EllipsisMenuAction} from 'app/page-identifiers';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import {WorkspaceAction, PageTab} from 'app/page-identifiers';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
+import ClrIconLink from 'app/element/clr-icon-link';
+import DataResourceCard from 'app/component/data-resource-card';
+import CohortBuildPage from './cohort-build-page';
 
+export enum LabelAlias {
+  Data = 'Data',
+  Analysis = 'Analysis',
+  About = 'About',
+  Cohorts = 'Cohorts',
+  Datasets = 'Datasets',
+  CohortReviews = 'Cohort Reviews',
+  ConceptSets = 'Concept Sets',
+  ShowAll = 'Show All',
+}
 
-export const TAB_SELECTOR = {
-  cohortsTab: '//*[@role="button"][(text()="Cohorts")]',
-  dataSetsTab: '//*[@role="button"][(text()="Datasets")]',
-  cohortReviewsTab: '//*[@role="button"][(text()="Cohort Reviews")]',
-  conceptSetsTab: '//*[@role="button"][(text()="Concept Sets")]',
-  showAllTab: '//*[@role="button"][(text()="Show All")]',
-};
-
-export const PAGE = {
-  TITLE: 'Data Page',
-};
+const PageTitle = 'Data Page';
 
 export default class DataPage extends AuthenticatedPage {
 
@@ -27,8 +30,7 @@ export default class DataPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     try {
       await Promise.all([
-        await waitForDocumentTitle(this.page, PAGE.TITLE),
-        this.page.waitForXPath(TAB_SELECTOR.showAllTab, {visible: true}),
+        waitForDocumentTitle(this.page, PageTitle),
         waitWhileLoading(this.page),
       ]);
       return true;
@@ -38,27 +40,40 @@ export default class DataPage extends AuthenticatedPage {
     }
   }
 
-  async selectWorkspaceAction(action: WorkspaceAction) {
+  async selectWorkspaceAction(action: EllipsisMenuAction): Promise<void> {
     const ellipsisMenu = new EllipsisMenu(this.page, './/*[@data-test-id="workspace-menu-button"]');
-    await ellipsisMenu.selectAction(action);
+    return ellipsisMenu.clickAction(action);
   }
 
   /**
    * Select DATA, ANALYSIS or ABOUT page tab.
    * @param tabName
    */
-  async selectTab(tabName: PageTab): Promise<void> {
-    const selector = '//*[@aria-selected and @role="button"]';
-    await this.page.waitForXPath(selector, {visible: true});
-    const tabs = await this.page.$x(selector);
-    for (const tab of tabs) {
-      const contentProp = await tab.getProperty('textContent');
-      if (await contentProp.jsonValue() === tabName) {
-        return tab.click();
-      }
-      await tab.dispose();
-    }
-    throw new Error(`Failed to find page tab with name ${tabName}`);
+  async openTab(tabName: LabelAlias): Promise<void> {
+    const selector = `//*[@id="workspace-top-nav-bar"]/*[@aria-selected and @role="button" and text()="${tabName}"]`;
+    const tab = await this.page.waitForXPath(selector, {visible: true});
+    return tab.click();
+  }
+
+  async getAddDataSetsButton(): Promise<ClrIconLink> {
+    return ClrIconLink.findByName(this.page, {name: LabelAlias.Datasets, iconShape: 'plus-circle'});
+  }
+
+  async getAddCohortsButton(): Promise<ClrIconLink> {
+    return ClrIconLink.findByName(this.page, {name: LabelAlias.Cohorts, iconShape: 'plus-circle'});
+  }
+
+  /**
+   * Delete cohort by look up its name using Ellipsis menu.
+   * @param {string} cohortName
+   */
+  async deleteCohort(cohortName: string): Promise<string> {
+    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
+    const menu = await cohortCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.DELETE, false);
+    const dialogContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
+    console.log(`Cohort "${cohortName}" deleted.`);
+    return dialogContent;
   }
 
 }

@@ -7,6 +7,7 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {NumberInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewStore, filterStateStore, getVocabOptions, multiOptions, vocabOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -147,10 +148,8 @@ const styles = reactStyles({
     backgroundColor: '#dae6ed',
     marginLeft: '5px'
   },
-  textInput: {
+  numberInput: {
     width: '85%',
-    height: '1.5rem',
-    padding: '0 0 0 5px',
     border: 0,
     backgroundColor: 'transparent',
     outline: 'none',
@@ -487,12 +486,11 @@ export const ParticipantsTable = withCurrentWorkspace()(
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {column === 'participantId' && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
-            <input
-              type='number'
+            <NumberInput
               ref={(i) => ip = i}
-              style={styles.textInput}
+              style={styles.numberInput}
               value={filters.PARTICIPANTID}
-              onChange={(e) => this.onInputChange(e.target.value)}
+              onChange={(v) => this.onInputChange(v)}
               placeholder={'Search'} />
           </div>}
           {!!options && options.map((opt, i) => (

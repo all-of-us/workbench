@@ -270,6 +270,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href='/profile'
           active={this.props.profileActive}
+          disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
         />
       }
       {
@@ -345,7 +346,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.WORKSPACESVIEW) && this.state.showAdminOptions && <SideNavItem
+        profile.authorities.includes(Authority.RESEARCHERDATAVIEW) && this.state.showAdminOptions && <SideNavItem
             content={'Workspaces'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/workspaces'}

@@ -65,6 +65,17 @@ export const styles = {
     verticalAlign: 'middle',
   },
 
+  inputStyle: {
+    backgroundColor: colors.white,
+    borderColor: inputBorderColor,
+    borderRadius: 3,
+    borderStyle: 'solid',
+    borderWidth: 1,
+    height: '1.5rem',
+    padding: '0 0.5rem',
+    width: '100%'
+  },
+
   textBoxWithLengthValidationTextBoxStyle: {
     height: '15rem',
     resize: 'none',
@@ -229,29 +240,29 @@ export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...pro
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
     onBlur={onBlur ? (e => onBlur(e.target.value)) : undefined}
     type='text'
-    style={{
-      width: '100%', height: '1.5rem',
-      borderColor: inputBorderColor, borderWidth: 1,
-      borderStyle: 'solid', borderRadius: 3,
-      padding: '0 0.5rem',
-      backgroundColor: colors.white,
-      ...style
-    }}
+    style={{...styles.inputStyle, ...style}}
   />;
 });
 
-export const NumberInput = ({style = {}, value, onChange, ...props}) => {
-  return <TextInput
+export const NumberInput = React.forwardRef((
+    {style = {}, value, onChange, onBlur, ...props}:
+    {style?: React.CSSProperties, value: string, onChange: Function, onBlur?: Function, [key: string]: any},
+    ref: React.Ref<HTMLInputElement>
+  ) => {
+  return <input
     {...props}
+    ref={ref}
     type='number'
+    style={{...styles.inputStyle, ...style}}
     value={fp.cond([
       [fp.isUndefined, () => undefined],
       [fp.isNull, () => ''],
       [fp.stubTrue, v => v.toString()]
     ])(value)}
-    onChange={onChange ? (v => onChange(v === '' ? null : +v)) : undefined}
+    onChange={onChange ? (v => onChange(v.target.value === '' ? null : +v.target.value)) : undefined}
+    onBlur={onBlur ? (v => onBlur(v.target.value)) : undefined}
   />;
-};
+});
 
 export const RadioButton = ({ onChange, ...props }) => {
   return <input

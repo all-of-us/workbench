@@ -19,54 +19,13 @@ deploy their own instance of the Researcher Workbench solely from the code here.
 MapStruct [Best Practices](api/docs/mapstruct.md) and [Tutorial](api/docs/tutorials/mapstruct-tutorial.md)
 
 ## Setup for Development
-
-System requirements:
-
-  * [Docker CE](https://www.docker.com/community-edition)
-    * Docker must be installed to build and run code (For Google workstations, see http://go/installdocker).
-    * __IMPORTANT__: be sure to allocate ~70-80% of available memory and swap to the Docker Engine. This should be
-      at least 12GB memory and 2GB swap to avoid OOM isues. See https://docs.docker.com/docker-for-mac/#advanced for
-      screenshots and instructions for Mac.
-  * [Ruby](https://www.ruby-lang.org/en/downloads/)
-    * Our team's dev/ops scripts are written in Ruby. Most common operations are launched via the project.rb script at the root of each sub-project.
-  * [Python](https://www.python.org/downloads/) >= 2.7.9
-    * Python is required by some project-specific scripts and by the Google Cloud Platform tools.
-  * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
-
-For local development, also install:
-
-  * [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
-  * [Node.js](https://nodejs.org/en/) >= 8.  Currently known to work up to 12.16.
-  * [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-  * [Docker sync](https://docker-sync.io)
-    * `sudo gem install docker-sync`
-    * If you'd prefer to install as non-root, you can [follow instructions for user-level install](https://docker-sync.readthedocs.io/en/latest/getting-started/installation.html).
-
-After you've installed `gcloud`, login using your `pmi-ops` account:
-
-```shell
-gcloud auth login
-gsutil config (choose all-of-us-workbench-test as your default project)
-```
-
-To initialize the project, run the following:
-
-```shell
-git clone https://github.com/all-of-us/workbench
-cd workbench
-git submodule update --init --recursive
-```
-
-Then set up [git secrets](#git-secrets) and [git lfs](#git-lfs) and fire up the [development servers](#running-the-dev-servers). Optionally, you can [set up your Intellij](https://docs.google.com/document/d/1DtESBapEzvuti7xODTFPHorwmLM7LybF-6D5lhbIkLU/edit) for UI or API work.
-
-Before doing any development, you must run the following from `/api`:
-```Shell
-./gradlew compileGeneratedJava appengineRun
-```
-This will generate compiled Java and MapStruct files that are necessary for the app to compile. On Macs, this command will never complete - when it has gotten to 97% it will hang forever. It can safely be `ctrl+c`'d at that point.
+* [Software Requirements](api/docs/developer-system-requirements.md)
+* [System Initialization](api/docs/developer-system-initialization.md)
+* [Intellij Setup](https://docs.google.com/document/d/1DtESBapEzvuti7xODTFPHorwmLM7LybF-6D5lhbIkLU/edit?usp=sharing)
+ for UI, API, and tooling work.
 
 ## Development Process
-
+### Using Git
 To make changes, do:
 
 ```shell
@@ -281,55 +240,6 @@ in the Chrome console).
 
 __NOTE:__ In order to test out a custom UI version in the browser, you must whitelist the base URL with the OAuth 2.0 client ID for the test Workbech environment. A common pattern is to use your GitHub username as the App Engine version name, so this setup only needs to be done once. See [this doc](https://docs.google.com/document/d/15-ktzL3Hdt5rpdFAS3z-v5vSNfk_LtjtPHCvbshjeZo/edit) for instructions.
 
-## git-lfs
-
-### Setup
-
-Download the git-lfs tool.
-If you are on a mac, run:
-```Shell
-  brew install git-lfs
-```
-
-Enable git lfs in the top level directory.
-```Shell
-  git lfs install
-```
-
-## git-secrets
-
-### Setup
-
-Download the git-secrets tool.
-If you are on a mac, run:
-```Shell
-  brew install git-secrets
-```
-If you are on Linux, run:
-```Shell
-rm -rf git-secrets
-git clone https://github.com/awslabs/git-secrets.git
-cd git-secrets
-sudo make install && sudo chmod o+rx /usr/local/bin/git-secrets
-cd ..
-rm -rf git-secrets
-```
-### Running
-
-git-secrets by default runs every time you make a commit. But if you
-want to manually scan:
-#### The Repository
-```Shell
-git secrets --scan
-```
-#### A File(s)
-```Shell
-git secrets --scan /path/to/file (/other/path/to/file *)
-```
-#### A Directory (recursively)
-```Shell
-git secrets --scan -r /path/to/directory
-```
 
 ## API Server Configuration
 
@@ -609,5 +519,6 @@ oauth2l reset
 ```
 
 ### Action Audit System
-We have a framework for user action auditing with its own [query system](doc/action-audit-queries.md).
-Read more about its implementation [here](doc/action-audit-implementation.md).
+We have a Stackdriver- and BigQuery-powered framework for user action auditing that supports
+flexible [queries](api/docs/action-audit-queries.md). Read more about its design, structure, and
+implementation in this [document](api/docs/action-audit.md).

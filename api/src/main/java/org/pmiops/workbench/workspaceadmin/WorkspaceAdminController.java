@@ -70,7 +70,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.WORKSPACES_VIEW})
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<CloudStorageTraffic> getCloudStorageTraffic(String workspaceNamespace) {
     CloudStorageTraffic response = new CloudStorageTraffic().receivedBytes(new ArrayList<>());
 
@@ -92,7 +92,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.WORKSPACES_VIEW})
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<AdminFederatedWorkspaceDetailsResponse> getFederatedWorkspaceDetails(
       String workspaceNamespace) {
     Optional<DbWorkspace> workspaceMaybe =
@@ -157,7 +157,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
    *     convenient for pagination based on time intervals.
    */
   @Override
-  @AuthorityRequired({Authority.WORKSPACES_VIEW})
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<WorkspaceAuditLogQueryResponse> getAuditLogEntries(
       String workspaceNamespace,
       Integer limit,
