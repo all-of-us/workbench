@@ -86,7 +86,7 @@ describe('Clone workspace', () => {
       await newPage.setUserAgent(userAgent);
       await signIn(newPage);
 
-      const response = await newPage.goto(workspaceDataUrl, {waitUntil: ['domcontentloaded','networkidle0']});
+      const response = await newPage.goto(workspaceDataUrl, {waitUntil: ['domcontentloaded','networkidle0'], timeout: 60000});
       expect(await response.status()).toEqual(200);
 
       await newPage.close();
