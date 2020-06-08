@@ -319,7 +319,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         (profile.authorities.includes(Authority.ACCESSCONTROLADMIN)
           || profile.authorities.includes(Authority.COMMUNICATIONSADMIN)
           || profile.authorities.includes(Authority.WORKSPACESVIEW)
-          || profile.authorities.includes(Authority.RESEARCHERDATAVIEW)
           || profile.authorities.includes(Authority.INSTITUTIONADMIN)) && <SideNavItem
                 icon='user'
                 content='Admin'
