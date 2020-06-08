@@ -108,13 +108,7 @@ public class DataSetServiceTest {
 
     final DbCohort cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
-    when(cohortQueryBuilder.buildParticipantIdQuery(any()))
-        .thenReturn(
-            QueryJobConfiguration.newBuilder(
-                    "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
-                .build());
-    when(bigQueryService.filterBigQueryConfig(any(QueryJobConfiguration.class)))
-        .thenReturn(QUERY_JOB_CONFIGURATION_1);
+    when(cohortQueryBuilder.buildParticipantIdQuery(any())).thenReturn(QUERY_JOB_CONFIGURATION_1);
   }
 
   private DbCohort buildSimpleCohort() {
