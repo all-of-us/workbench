@@ -89,7 +89,7 @@ public class ProfileService {
     return profile;
   }
 
-  public VerifiedInstitutionalAffiliation validateInstitutionalAffiliation(Profile profile) {
+  public void validateInstitutionalAffiliation(Profile profile) {
     VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         profile.getVerifiedInstitutionalAffiliation();
 
@@ -105,15 +105,6 @@ public class ProfileService {
           String.format(
               "Could not find institution %s in database",
               verifiedInstitutionalAffiliation.getInstitutionShortName()));
-    }
-    if (!institution
-        .get()
-        .getDisplayName()
-        .equals(verifiedInstitutionalAffiliation.getInstitutionDisplayName())) {
-      // No need to throw here, the shortname is the canonical identifier and we can squash the
-      // displayname
-      verifiedInstitutionalAffiliation.setInstitutionDisplayName(
-          institution.get().getDisplayName());
     }
     if (verifiedInstitutionalAffiliation.getInstitutionalRoleEnum() == null) {
       throw new BadRequestException("Institutional role cannot be empty");
@@ -143,7 +134,17 @@ public class ProfileService {
                       contactEmail));
       throw new BadRequestException(msg);
     }
-
-    return verifiedInstitutionalAffiliation;
   }
+
+
+//  public DbVerifiedInstitutionalAffiliation updateVerifiedInstitutionalAffiliation(DbUser user, DbVerifiedInstitutionalAffiliation verifiedAffiliation) {
+//    verifiedAffiliation.setUser(user);
+//    verifiedInstitutionalAffiliationDao.save(verifiedAffiliation);
+//    Optional<DbVerifiedInstitutionalAffiliation> updatedAffiliation = verifiedInstitutionalAffiliationDao.findFirstByUser(user);
+
+//    if (!updatedAffiliation.isPresent()) {
+//      throw
+//    }
+//  }
 }
+

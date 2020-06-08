@@ -757,7 +757,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateVerifiedInstitutionalAffiliation_invalidDomain() {
+  public void create_verifiedInstitutionalAffiliation_invalidDomain() {
     config.featureFlags.requireInstitutionalVerification = true;
 
     ArrayList<String> emailDomains = new ArrayList<>();
@@ -801,8 +801,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionDisplayName("The Narrow Institute?")
             .institutionalRoleEnum(InstitutionalRole.PRE_DOCTORAL);
 
-    profile.setVerifiedInstitutionalAffiliation(newAffil);
-    profileController.updateProfile(profile);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), newAffil);
   }
 
   @Test
@@ -813,9 +812,21 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     config.featureFlags.requireInstitutionalVerification = true;
 
-    final Profile profile = profileController.getMe().getBody();
     final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
-    profile.setVerifiedInstitutionalAffiliation(toAdd);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), toAdd);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_removeVerifiedInstitutionalAffiliationForbidden() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
+    createUser();
+
+    final Profile profile = profileController.getMe().getBody();
+    profile.setVerifiedInstitutionalAffiliation(null);
     profileController.updateProfile(profile);
   }
 
@@ -828,9 +839,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
     createUser();
 
-    final Profile profile = profileController.getMe().getBody();
-    profile.setVerifiedInstitutionalAffiliation(null);
-    profileController.updateProfile(profile);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
   }
 
   @Test

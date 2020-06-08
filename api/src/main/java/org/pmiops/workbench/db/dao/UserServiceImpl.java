@@ -393,7 +393,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbUser = userDao.save(dbUser);
       if (requireInstitutionalVerification) {
         dbVerifiedAffiliation.setUser(dbUser);
-        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);g
+        this.verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
       }
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(userName);

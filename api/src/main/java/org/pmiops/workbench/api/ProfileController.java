@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -388,10 +389,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      request
-          .getProfile()
-          .setVerifiedInstitutionalAffiliation(
-              profileService.validateInstitutionalAffiliation(request.getProfile()));
+      profileService.validateInstitutionalAffiliation(request.getProfile());
     }
 
     final Profile profile = request.getProfile();
@@ -649,11 +647,21 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     DbUser user = userProvider.get();
 
-    // Save current profile for audit trail. Continue to use the userProvider (instead
-    // of info on previousProfile) to ensure addition of audit system doesn't change behavior.
-    // That is, in the (rare, hopefully) condition that the old profile gives incorrect information,
-    // the update will still work as well as it would have.
+    // Save current profile for audit trail.
     final Profile previousProfile = profileService.getProfile(user);
+    final VerifiedInstitutionalAffiliation updatedAffil = updatedProfile.getVerifiedInstitutionalAffiliation();
+    final VerifiedInstitutionalAffiliation prevAffil =
+        previousProfile.getVerifiedInstitutionalAffiliation();
+    if (!Objects.equals(updatedAffil, prevAffil)) {
+      throw new BadRequestException("Cannot update Verified Institutional Affiliation");
+    }
+
+    updateProfileForUser(user, updatedProfile, previousProfile);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
     validateUpdatedProfile(updatedProfile, previousProfile);
 
     if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
@@ -687,27 +695,26 @@ public class ProfileController implements ProfileApiDelegate {
 
     updateInstitutionalAffiliations(updatedProfile, user);
     if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      updatedProfile.setVerifiedInstitutionalAffiliation(
-          profileService.validateInstitutionalAffiliation(updatedProfile));
+      profileService.validateInstitutionalAffiliation(updatedProfile);
     }
 
     userService.updateUserWithConflictHandling(user);
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
-
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
   @Override
   public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
-      Long userId, VerifiedInstitutionalAffiliation verifiedInstitution) {
+      Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {
     DbUser dbUser = userDao.findUserByUserId(userId);
-    Profile profile = profileService.getProfile(dbUser);
+    Profile updatedProfile = profileService.getProfile(dbUser);
+    updatedProfile.setVerifiedInstitutionalAffiliation(verifiedAffiliation);
 
-    profile.setVerifiedInstitutionalAffiliation(verifiedInstitution);
-    this.updateProfile(profile);
+    Profile oldProfile = profileService.getProfile(dbUser);
+
+    this.updateProfileForUser(dbUser, updatedProfile, oldProfile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
