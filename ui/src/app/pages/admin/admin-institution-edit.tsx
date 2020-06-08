@@ -80,6 +80,9 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     if (this.props.urlParams.institutionId) {
       institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);
       title = institutionToEdit.displayName;
+      if (!institutionToEdit.duaTypeEnum) {
+        institutionToEdit.duaTypeEnum = DuaType.MASTER;
+      }
       this.setState({
         institutionMode: InstitutionMode.EDIT,
         institution: institutionToEdit,
@@ -148,9 +151,9 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
     return;
   }
 
-  setEmailDomains(emailDomains, attribute) {
-    const emailDomainList = emailDomains.split(/[,\n]+/);
-    this.setState(fp.set(['institution', attribute], emailDomainList));
+  setEmails(emailInput, attribute) {
+    const emailList = emailInput.split(/[,\n]+/);
+    this.setState(fp.set(['institution', attribute], emailList.map(email => email.trim())));
   }
 
   // Check if the fields have not been edited
@@ -349,7 +352,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
               <TextArea value={institution.emailAddresses && institution.emailAddresses.join(',\n')}
                         data-test-id='emailAddressInput'
                         onBlur={(v) => this.validateEmailAddresses()}
-                  onChange={(v) => this.setEmailDomains(v, 'emailAddresses')}/>
+                  onChange={(v) => this.setEmails(v, 'emailAddresses')}/>
               {this.state.invalidEmailAddress && <div data-test-id='emailAddressError' style={{color: colors.danger}}>
                 {this.state.invalidEmailAddressMsg}
                 </div>}
@@ -358,7 +361,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
               <label style={styles.label}>Accepted Email Domains</label>
               <TextArea value={institution.emailDomains && institution.emailDomains.join(',\n')} onBlur={(v) => this.validateEmailDomains()}
                         data-test-id='emailDomainInput'
-                        onChange={(v) => this.setEmailDomains(v, 'emailDomains')}/>
+                        onChange={(v) => this.setEmails(v, 'emailDomains')}/>
               {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
                 {this.state.invalidEmailDomainsMsg}
                 </div>}
