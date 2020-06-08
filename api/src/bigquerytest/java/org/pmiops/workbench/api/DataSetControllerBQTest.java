@@ -32,9 +32,9 @@ import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -103,7 +103,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private Provider<DbUser> userProvider;
 
   @Autowired
-  @Qualifier(CommonConfig.DATASET_PREFIX_CODE)
+  @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
   Provider<String> prefixProvider;
 
   @Autowired private WorkspaceDao workspaceDao;
@@ -146,7 +146,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     }
 
     @Bean
-    @Qualifier(CommonConfig.DATASET_PREFIX_CODE)
+    @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
     String prefixCode() {
       return "00000000";
     }
