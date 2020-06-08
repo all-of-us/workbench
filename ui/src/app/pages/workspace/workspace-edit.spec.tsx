@@ -325,61 +325,50 @@ describe('WorkspaceEdit', () => {
 
   it ('should show error message if Other primary purpose is more than 500 characters', async() => {
     const wrapper = component();
-    let otherPrimaryPurposeError = getSaveButtonDisableMsg(wrapper, 'otherPrimaryPurpose');
-    expect(otherPrimaryPurposeError).toBeUndefined();
+    expect(getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')).toBeUndefined();
     wrapper.find('[data-test-id="otherPurpose-checkbox"]').at(1).simulate('change', { target: { checked: true } });
 
-    otherPrimaryPurposeError = getSaveButtonDisableMsg(wrapper, 'otherPrimaryPurpose');
-    expect(otherPrimaryPurposeError[0]).toBe('Other primary purpose must be true');
+    expect(getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')).toBeDefined();
 
     // Other Primary Purpose
     const validInput = fp.repeat(500, 'a');
     wrapper.find('[data-test-id="otherPrimaryPurposeText"]').first().simulate('change', {target: {value: validInput}});
-    otherPrimaryPurposeError = getSaveButtonDisableMsg(wrapper, 'otherPrimaryPurpose');
-    expect(otherPrimaryPurposeError).toBeUndefined();
+    expect(getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')).toBeUndefined();
 
     const inValidInput = fp.repeat(501, 'b');
     wrapper.find('[data-test-id="otherPrimaryPurposeText"]').first().simulate('change', {target: {value: inValidInput}});
-    otherPrimaryPurposeError = getSaveButtonDisableMsg(wrapper, 'otherPrimaryPurpose');
-    expect(otherPrimaryPurposeError[0]).toBe('Other primary purpose must be true');
+    expect(getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')).toBeDefined();
   });
 
   it ('should show error message if Disease of focus is more than 80 characters', async() => {
     const wrapper = component();
-    let diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
-    expect(diseaseNameError).toBeUndefined();
+    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeUndefined();
 
     wrapper.find('[data-test-id="researchPurpose-checkbox"]').at(1).simulate('change', { target: { checked: true } })
     wrapper.find('[data-test-id="diseaseFocusedResearch-checkbox"]').at(1).simulate('change', { target: { checked: true } });
 
-    diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
-    expect(diseaseNameError[0]).toBe('Disease of focus must be true');
+    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeDefined();
 
     const validInput = fp.repeat(8, 'a');
     wrapper.find('[data-test-id="search-input"]').first().simulate('change', {target: {value: validInput}});
 
-    diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
-    expect(diseaseNameError).toBeUndefined();
-    //
+    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeUndefined();
+
     const inValidInput = fp.repeat(81, 'b');
     wrapper.find('[data-test-id="search-input"]').first().simulate('change', {target: {value: inValidInput}});
-    diseaseNameError = getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus');
-    expect(fp.first(diseaseNameError)).toBe('Disease of focus must be true');
+    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeDefined();
   });
 
   it ('should show error message if Other text for disseminate research is more than 100 characters', async() => {
     const wrapper = component();
     wrapper.find('[data-test-id="OTHER-checkbox"]').at(1).simulate('change', { target: { checked: true } });
-    let otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
     const validInput = fp.repeat(8, 'a');
     wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: validInput}});
 
-    otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
-    expect(otherDisseminateResearchFindingsError).toBeUndefined();
+    expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeUndefined();
     const inValidInput = fp.repeat(101, 'b');
     wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: inValidInput}});
-    otherDisseminateResearchFindingsError = getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings');
-    expect(fp.first(otherDisseminateResearchFindingsError)).toBe('Other disseminate research findings must be true');
+    expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeDefined();
   });
 
   it ('should show error message if Other text for Special Population is more than 100 characters', async() => {
@@ -392,13 +381,23 @@ describe('WorkspaceEdit', () => {
     const validInput = fp.repeat(100, 'a');
     wrapper.find('[data-test-id="other-specialPopulation-text"]').first().simulate('change', {target: {value: validInput}});
 
-    let otherSpecificPopulationError = getSaveButtonDisableMsg(wrapper, 'otherSpecificPopulation');
-    expect(otherSpecificPopulationError).toBeUndefined();
+    expect(getSaveButtonDisableMsg(wrapper, 'otherPopulationDetails')).toBeUndefined();
 
     const inValidInput = fp.repeat(101, 'a');
     wrapper.find('[data-test-id="other-specialPopulation-text"]').first().simulate('change', {target: {value: inValidInput}});
 
-    otherSpecificPopulationError = getSaveButtonDisableMsg(wrapper, 'otherSpecificPopulation');
-    expect(fp.first(otherSpecificPopulationError)).toBe('Other specific population must be true');
+    expect(getSaveButtonDisableMsg(wrapper, 'otherPopulationDetails')).toBeDefined();
+  });
+
+  it ('should show error message when other disseminate checked but empty', async() => {
+    const wrapper = component();
+    wrapper.find('[data-test-id="OTHER-checkbox"]').at(1).simulate('change', { target: { checked: true } });
+    const validInput = fp.repeat(8, 'a');
+    wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: validInput}});
+
+    expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeUndefined();
+    const inValidInput = fp.repeat(8, ' ');
+    wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: inValidInput}});
+    expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeDefined();
   });
 });
