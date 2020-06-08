@@ -2352,7 +2352,7 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
         409:
-          description: Institution with same display Name already exist
+          description: DataIntegrityViolationException was thrown, possibly due to an attempt to create a duplicate Institution.
           schema:
             "$ref": "#/definitions/ErrorResponse"
 

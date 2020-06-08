@@ -200,7 +200,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
   }
 
   async saveInstitution() {
-    const {institution} = this.state;
+    const {institution, institutionMode} = this.state;
     if (institution) {
       if (institution.duaTypeEnum === DuaType.MASTER) {
         institution.emailAddresses = [];
@@ -211,7 +211,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
         institution.organizationTypeOtherText = null;
       }
     }
-    if (InstitutionMode.EDIT) {
+    if (institutionMode === InstitutionMode.EDIT) {
       await institutionApi().updateInstitution(this.props.urlParams.institutionId, institution)
         .then(value => this.backNavigate())
         .catch(reason => this.handleError(reason));
