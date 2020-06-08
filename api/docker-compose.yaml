@@ -19,22 +19,9 @@ services:
       - db:/var/lib/mysql
     ports:
       - 127.0.0.1:3306:3306
-  elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.3
-    ports:
-      - 127.0.0.1:9200:9200
-    environment:
-      # Disable bootstrap checks so users don't have to fiddle with
-      # vm.max_map_count. Note that this file is not used in production
-      # deployments; bootstrap checks are still enabled for production
-      # deployments.
-      - "transport.host=localhost"
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
   api:
     depends_on:
       - db
-      - elastic
     build:
       context: ./src/dev/server
     image: allofustest/workbench-dev-api:local
@@ -54,8 +41,6 @@ services:
       - 127.0.0.1:8081:8081
       - 127.0.0.1:8001:8001
   es-scripts:
-    depends_on:
-      - elastic
     build:
       context: ./src/dev/server
     image: allofustest/workbench-dev-api:local
