@@ -135,16 +135,4 @@ public class ProfileService {
       throw new BadRequestException(msg);
     }
   }
-
-
-//  public DbVerifiedInstitutionalAffiliation updateVerifiedInstitutionalAffiliation(DbUser user, DbVerifiedInstitutionalAffiliation verifiedAffiliation) {
-//    verifiedAffiliation.setUser(user);
-//    verifiedInstitutionalAffiliationDao.save(verifiedAffiliation);
-//    Optional<DbVerifiedInstitutionalAffiliation> updatedAffiliation = verifiedInstitutionalAffiliationDao.findFirstByUser(user);
-
-//    if (!updatedAffiliation.isPresent()) {
-//      throw
-//    }
-//  }
 }
-

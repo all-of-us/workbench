@@ -120,22 +120,25 @@ public class ProfileServiceTest {
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(dbInstitution));
 
-    DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation = new DbVerifiedInstitutionalAffiliation();
+    DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
+        new DbVerifiedInstitutionalAffiliation();
     dbVerifiedInstitutionalAffiliation.setInstitution(dbInstitution);
     dbVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
     when(mockVerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-        affiliation, mockInstitutionService))
+            affiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
     when(mockInstitutionService.validateAffiliation(
-        dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
+            dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
         .thenReturn(true);
 
     profileService.validateInstitutionalAffiliation(profile);
 
-    ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy = ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
+    ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy =
+        ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
     ArgumentCaptor<String> unusedSpy = ArgumentCaptor.forClass(String.class);
-    verify(mockInstitutionService).validateAffiliation(affiliationSpy.capture(), unusedSpy.capture());
+    verify(mockInstitutionService)
+        .validateAffiliation(affiliationSpy.capture(), unusedSpy.capture());
 
     assertThat(affiliationSpy.getValue().getInstitution().getShortName()).isEqualTo("Broad");
   }
@@ -156,22 +159,26 @@ public class ProfileServiceTest {
 
     when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(dbInstitution));
 
-    DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation = new DbVerifiedInstitutionalAffiliation();
+    DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
+        new DbVerifiedInstitutionalAffiliation();
     dbVerifiedInstitutionalAffiliation.setInstitution(dbInstitution);
     dbVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
     when(mockVerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-        affiliation, mockInstitutionService))
+            affiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
     when(mockInstitutionService.validateAffiliation(
-        dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
-        .thenReturn(true);;
+            dbVerifiedInstitutionalAffiliation, "kibitz@broadinstitute.org"))
+        .thenReturn(true);
+    ;
 
     profileService.validateInstitutionalAffiliation(profile);
 
-    ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy = ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
+    ArgumentCaptor<DbVerifiedInstitutionalAffiliation> affiliationSpy =
+        ArgumentCaptor.forClass(DbVerifiedInstitutionalAffiliation.class);
     ArgumentCaptor<String> unusedSpy = ArgumentCaptor.forClass(String.class);
-    verify(mockInstitutionService).validateAffiliation(affiliationSpy.capture(), unusedSpy.capture());
+    verify(mockInstitutionService)
+        .validateAffiliation(affiliationSpy.capture(), unusedSpy.capture());
 
     assertThat(affiliationSpy.getValue().getInstitution().getShortName()).isEqualTo("Broad");
   }

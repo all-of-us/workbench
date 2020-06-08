@@ -59,6 +59,7 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
@@ -647,9 +648,13 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     DbUser user = userProvider.get();
 
-    // Save current profile for audit trail.
+    // Save current profile for audit trail. Continue to use the userProvider (instead
+    // of info on previousProfile) to ensure addition of audit system doesn't change behavior.
+    // That is, in the (rare, hopefully) condition that the old profile gives incorrect information,
+    // the update will still work as well as it would have.
     final Profile previousProfile = profileService.getProfile(user);
-    final VerifiedInstitutionalAffiliation updatedAffil = updatedProfile.getVerifiedInstitutionalAffiliation();
+    final VerifiedInstitutionalAffiliation updatedAffil =
+        updatedProfile.getVerifiedInstitutionalAffiliation();
     final VerifiedInstitutionalAffiliation prevAffil =
         previousProfile.getVerifiedInstitutionalAffiliation();
     if (!Objects.equals(updatedAffil, prevAffil)) {
@@ -710,6 +715,10 @@ public class ProfileController implements ProfileApiDelegate {
       Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {
     DbUser dbUser = userDao.findUserByUserId(userId);
     Profile updatedProfile = profileService.getProfile(dbUser);
+
+    Optional<Institution> institution = institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());
+    institution.ifPresent(i -> verifiedAffiliation.setInstitutionDisplayName(i.getDisplayName()));
+
     updatedProfile.setVerifiedInstitutionalAffiliation(verifiedAffiliation);
 
     Profile oldProfile = profileService.getProfile(dbUser);
