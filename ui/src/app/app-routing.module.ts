@@ -41,6 +41,8 @@ import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/com
 import {environment} from 'environments/environment';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {DisabledGuard} from './guards/disabled-guard.service';
+import {AdminInstitutionComponent} from './pages/admin/admin-institution';
+import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
@@ -328,6 +330,18 @@ const routes: Routes = [
             path: 'workspaces/:workspaceNamespace',
             component: AdminWorkspaceComponent,
             data: { title: 'Workspace Admin'}
+          }, {
+            path: 'institution',
+            component: AdminInstitutionComponent,
+            data: { title: 'Institution Admin'}
+          }, {
+            path: 'institution/add',
+            component: AdminInstitutionEditComponent,
+            data: { title: 'Institution Admin'},
+          }, {
+            path: 'institution/edit/:institutionId',
+            component: AdminInstitutionEditComponent,
+            data: { title: 'Institution Admin'},
           }]
       },
       {

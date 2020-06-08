@@ -2402,6 +2402,15 @@ paths:
           description: 'The Institution created by this operation.'
           schema:
             "$ref": "#/definitions/Institution"
+        400:
+          description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        409:
+          description: DataIntegrityViolationException was thrown, possibly due to an attempt to create a duplicate Institution.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
   "/v1/institutions/publicDetails":
     get:
       tags:

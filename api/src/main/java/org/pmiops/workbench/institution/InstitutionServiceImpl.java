@@ -1,14 +1,15 @@
 package org.pmiops.workbench.institution;
 
+import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.elasticsearch.common.Strings;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
@@ -18,13 +19,16 @@ import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,10 +105,16 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public Institution createInstitution(final Institution institutionToCreate) {
-    final DbInstitution dbInstitution =
-        institutionDao.save(institutionMapper.modelToDb(institutionToCreate));
-    populateAuxTables(institutionToCreate, dbInstitution);
-    return toModel(dbInstitution);
+    validateInstitution(institutionToCreate);
+    try {
+      final DbInstitution dbInstitution =
+          institutionDao.save(institutionMapper.modelToDb(institutionToCreate));
+      populateAuxTables(institutionToCreate, dbInstitution);
+      return toModel(dbInstitution);
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException(
+          "DataIntegrityException: Please check that you are not creating an Institute which already exists");
+    }
   }
 
   @Override
@@ -128,20 +138,26 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
-    return institutionDao
-        .findOneByShortName(shortName)
-        .map(DbInstitution::getInstitutionId)
-        .map(
-            dbId -> {
-              // create new DB object, but mark it with the original's ID to indicate that this is
-              // an update
+    validateInstitution(institutionToUpdate);
+    try {
+      return institutionDao
+          .findOneByShortName(shortName)
+          .map(DbInstitution::getInstitutionId)
+          .map(
+              dbId -> {
+                // create new DB object, but mark it with the original's ID to indicate that this is
+                // an update
 
-              final DbInstitution dbObjectToUpdate =
-                  institutionDao.save(
-                      institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId));
-              populateAuxTables(institutionToUpdate, dbObjectToUpdate);
-              return toModel(dbObjectToUpdate);
-            });
+                final DbInstitution dbObjectToUpdate =
+                    institutionDao.save(
+                        institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId));
+                populateAuxTables(institutionToUpdate, dbObjectToUpdate);
+                return toModel(dbObjectToUpdate);
+              });
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException(
+          "DataIntegrityException: Please check that you are not creating an Institute which already exists");
+    }
   }
 
   @Override
@@ -269,6 +285,13 @@ public class InstitutionServiceImpl implements InstitutionService {
           new InstitutionUserInstructions()
               .institutionShortName(modelInstitution.getShortName())
               .instructions(userInstructions));
+    } else {
+      // Remove institution entry from institution_user_instructions table if user_instructions is
+      // now empty or NULL
+      institutionUserInstructionsDao
+          .getByInstitution(dbInstitution)
+          .ifPresent(
+              userInstruction -> institutionUserInstructionsDao.deleteByInstitution(dbInstitution));
     }
   }
 
@@ -288,5 +311,49 @@ public class InstitutionServiceImpl implements InstitutionService {
     institutionEmailAddressMapper
         .modelToDb(modelInstitution, dbInstitution)
         .forEach(institutionEmailAddressDao::save);
+  }
+
+  // Take first 76 characters from display Name (with no spaces) and append 3 random number
+  private String generateShortName(String displayName) {
+    Random r = new Random();
+    displayName = displayName.replaceAll("\\s", "");
+    String shortName = displayName.length() > 76 ? displayName.substring(0, 76) : displayName;
+    shortName = shortName + r.nextInt(500) + 1;
+    return shortName;
+  }
+
+  private void validateInstitution(Institution institutionRequest) {
+    if (Strings.isNullOrEmpty(institutionRequest.getDisplayName())) {
+      throw new BadRequestException("Display Name cannot be empty");
+    }
+    if (Strings.isNullOrEmpty(institutionRequest.getShortName())) {
+      institutionRequest.setShortName(generateShortName(institutionRequest.getDisplayName()));
+    }
+    if (institutionRequest.getDuaTypeEnum() == null) {
+      // For Existing Institutions
+      institutionRequest.setDuaTypeEnum(DuaType.MASTER);
+    }
+    if (institutionRequest.getOrganizationTypeEnum() == null) {
+      throw new BadRequestException("Organization type cannot be null");
+    }
+    if (institutionRequest.getOrganizationTypeEnum().equals(OrganizationType.OTHER)
+        && Strings.isNullOrEmpty(institutionRequest.getOrganizationTypeOtherText())) {
+      throw new BadRequestException("If organization type is OTHER, additional text is needed");
+    }
+
+    // If Agreement type is Restricted confirm Each Email address in list is valid
+    if (institutionRequest.getDuaTypeEnum().equals(DuaType.RESTRICTED)
+        && !institutionRequest.getEmailAddresses().isEmpty()) {
+      institutionRequest
+          .getEmailAddresses()
+          .forEach(
+              emailAddress -> {
+                try {
+                  new InternetAddress(emailAddress).validate();
+                } catch (AddressException | NullPointerException ex) {
+                  throw new BadRequestException("Email Address is not valid");
+                }
+              });
+    }
   }
 }

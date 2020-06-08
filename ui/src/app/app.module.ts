@@ -81,6 +81,7 @@ import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {UserDisabledComponent} from 'app/pages/user-disabled';
 import {FooterComponent} from './components/footer';
 import {AdminInstitutionComponent} from './pages/admin/admin-institution';
+import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
 
 
 
@@ -136,6 +137,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   declarations: [
     AdminBannerComponent,
     AdminInstitutionComponent,
+    AdminInstitutionEditComponent,
     AdminWorkspaceComponent,
     AdminWorkspaceSearchComponent,
     AdminReviewWorkspaceComponent,
