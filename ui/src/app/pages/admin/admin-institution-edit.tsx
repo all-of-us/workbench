@@ -315,7 +315,7 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
         <FlexRow>
           <FlexColumn style={{width: '50%'}}>
             <TextInputWithLabel
-                value={fp.startCase(institution.displayName)}
+                value={institution.displayName}
                 inputId='displayName'
                 inputName='displayName'
                 placeholder='Display Name'
