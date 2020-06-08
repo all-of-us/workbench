@@ -28,12 +28,12 @@
     "isDefault": true,
     "name": "Synthetic Dataset v3",
     "dataAccessLevel": 1,
+    "genomicsEnabled": true,
     "bigqueryProject": "fc-aou-cdr-synth-test",
     "bigqueryDataset": "SR2019q4r3",
     "creationTime": "2020-05-07 00:00:00Z",
     "releaseNumber": 3,
     "numParticipants": 234525,
-    "cdrDbName": "synth_r_2019q4_1",
-    "enableGenomics": true
+    "cdrDbName": "synth_r_2019q4_1"
   }
 ]
