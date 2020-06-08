@@ -36,7 +36,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
-import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;

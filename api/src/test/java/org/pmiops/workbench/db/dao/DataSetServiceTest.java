@@ -326,7 +326,8 @@ public class DataSetServiceTest {
         dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
     assertThat(result).hasSize(1);
     assertThat(result.get("PERSON").getNamedParameters()).hasSize(1);
-    assertThat(result.get("PERSON").getNamedParameters().get("foo_101").getValue()).isEqualTo("101");
+    assertThat(result.get("PERSON").getNamedParameters().get("foo_101").getValue())
+        .isEqualTo("101");
   }
 
   private void mockLinkingTableQuery(Collection<String> domainBaseTables) {
