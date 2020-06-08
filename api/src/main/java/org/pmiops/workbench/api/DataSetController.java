@@ -38,6 +38,7 @@ import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -132,7 +133,7 @@ public class DataSetController implements DataSetApiDelegate {
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
-      @Qualifier(CommonConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
+      @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       WorkspaceService workspaceService,
       ConceptSetMapper conceptSetMapper) {
     this.bigQueryService = bigQueryService;

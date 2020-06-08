@@ -300,8 +300,8 @@ public class DataSetServiceTest {
     final DataSetRequest dataSetRequest =
         new DataSetRequest()
             .conceptSetIds(Collections.emptyList())
-            .cohortIds(new ArrayList<>())
-            .domainValuePairs(new ArrayList<>())
+            .cohortIds(Collections.emptyList())
+            .domainValuePairs(Collections.emptyList())
             .name("blah")
             .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE)
             .cohortIds(COHORT_IDS)
@@ -311,9 +311,9 @@ public class DataSetServiceTest {
     final String cohortCriteriaJson =
         gson.toJson(
             new SearchRequest()
-                .includes(ImmutableList.of())
-                .excludes(ImmutableList.of())
-                .dataFilters(ImmutableList.of()),
+                .includes(Collections.emptyList())
+                .excludes(Collections.emptyList())
+                .dataFilters(Collections.emptyList()),
             SearchRequest.class);
 
     final DbCohort dbCohort = new DbCohort();
@@ -325,6 +325,8 @@ public class DataSetServiceTest {
     final Map<String, QueryJobConfiguration> result =
         dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
     assertThat(result).hasSize(1);
+    assertThat(result.get("PERSON").getNamedParameters()).hasSize(1);
+    assertThat(result.get("PERSON").getNamedParameters().get("foo_101").getValue()).isEqualTo("101");
   }
 
   private void mockLinkingTableQuery(Collection<String> domainBaseTables) {

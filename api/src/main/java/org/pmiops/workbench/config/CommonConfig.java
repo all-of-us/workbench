@@ -14,9 +14,6 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class CommonConfig {
-
-  public static final String DATASET_PREFIX_CODE = "DATASET_PREFIX_CODE";
-
   @Bean
   JsonFactory jsonFactory() {
     return new JacksonFactory();
@@ -30,12 +27,5 @@ public class CommonConfig {
   @Bean
   Random random() {
     return new SecureRandom();
-  }
-
-  @Bean
-  @Qualifier(DATASET_PREFIX_CODE)
-  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  String randomCharacters() {
-    return RandomStringUtils.randomNumeric(8);
   }
 }

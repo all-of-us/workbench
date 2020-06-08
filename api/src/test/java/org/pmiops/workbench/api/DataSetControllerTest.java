@@ -70,6 +70,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -272,7 +273,7 @@ public class DataSetControllerTest {
     }
 
     @Bean
-    @Qualifier(CommonConfig.DATASET_PREFIX_CODE)
+    @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
     String prefixCode() {
       return "00000000";
     }
