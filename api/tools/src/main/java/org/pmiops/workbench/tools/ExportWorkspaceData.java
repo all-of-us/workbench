@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -120,6 +122,7 @@ public class ExportWorkspaceData {
   private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private UserDao userDao;
   private WorkspacesApi workspacesApi;
+  private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Bean
   public CommandLineRunner run(
@@ -130,7 +133,8 @@ public class ExportWorkspaceData {
       NotebooksService notebooksService,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       UserDao userDao,
-      WorkspacesApi workspacesApi) {
+      WorkspacesApi workspacesApi,
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
     this.workspaceDao = workspaceDao;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
@@ -139,14 +143,17 @@ public class ExportWorkspaceData {
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.userDao = userDao;
     this.workspacesApi = workspacesApi;
+    this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
 
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
 
+      log.info("collecting all users");
       List<WorkspaceExportRow> rows = new ArrayList<>();
       Set<DbUser> usersWithoutWorkspaces =
           Streams.stream(userDao.findAll()).collect(Collectors.toSet());
 
+      log.info("collecting / converting all workspaces");
       for (DbWorkspace workspace : this.workspaceDao.findAll()) {
         rows.add(toWorkspaceExportRow(workspace));
         usersWithoutWorkspaces.remove(workspace.getCreator());
@@ -156,6 +163,7 @@ public class ExportWorkspaceData {
         }
       }
 
+      log.info("converting users without workspaces");
       for (DbUser user : usersWithoutWorkspaces) {
         rows.add(toWorkspaceExportRow(user));
       }
@@ -163,6 +171,7 @@ public class ExportWorkspaceData {
       final CustomMappingStrategy mappingStrategy = new CustomMappingStrategy();
       mappingStrategy.setType(WorkspaceExportRow.class);
 
+      log.info("writing the output CSV");
       try (FileWriter writer =
           new FileWriter(opts.getOptionValue(exportFilenameOpt.getLongOpt()))) {
         new StatefulBeanToCsvBuilder(writer)
@@ -229,11 +238,32 @@ public class ExportWorkspaceData {
   }
 
   private WorkspaceExportRow toWorkspaceExportRow(DbUser user) {
+    String verifiedInstitutionName =
+        verifiedInstitutionalAffiliationDao
+            .findFirstByUser(user)
+            .map(via -> via.getInstitution().getDisplayName())
+            .orElse("");
+
     WorkspaceExportRow row = new WorkspaceExportRow();
     row.setCreatorContactEmail(user.getContactEmail());
     row.setCreatorUsername(user.getUsername());
+    row.setInstitution(verifiedInstitutionName);
     row.setCreatorFirstSignIn(
-        user.getFirstSignInTime() == null ? "" : dateFormat.format(user.getFirstSignInTime()));
+        Optional.ofNullable(user.getFirstSignInTime()).map(dateFormat::format).orElse(""));
+    row.setTwoFactorAuthCompletionDate(
+        Optional.ofNullable(user.getTwoFactorAuthCompletionTime())
+            .map(dateFormat::format)
+            .orElse(""));
+    row.setEraCompletionDate(
+        Optional.ofNullable(user.getEraCommonsCompletionTime()).map(dateFormat::format).orElse(""));
+    row.setTrainingCompletionDate(
+        Optional.ofNullable(user.getComplianceTrainingCompletionTime())
+            .map(dateFormat::format)
+            .orElse(""));
+    row.setDuccCompletionDate(
+        Optional.ofNullable(user.getDataUseAgreementCompletionTime())
+            .map(dateFormat::format)
+            .orElse(""));
     row.setCreatorRegistrationState(user.getDataAccessLevelEnum().toString());
 
     return row;

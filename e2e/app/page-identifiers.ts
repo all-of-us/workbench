@@ -6,11 +6,12 @@ export enum WorkspaceAccessLevel {
    WRITER = 'WRITER',
 }
 
-export enum WorkspaceAction {
+export enum EllipsisMenuAction {
    DUPLICATE  = 'Duplicate',
    DELETE = 'Delete',
    EDIT = 'Edit',
    SHARE = 'Share',
+   REVIEW = 'Review',
 }
 
 export enum PageUrl {

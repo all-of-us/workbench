@@ -319,7 +319,8 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         (profile.authorities.includes(Authority.ACCESSCONTROLADMIN)
           || profile.authorities.includes(Authority.COMMUNICATIONSADMIN)
-          || profile.authorities.includes(Authority.WORKSPACESVIEW)) && <SideNavItem
+          || profile.authorities.includes(Authority.RESEARCHERDATAVIEW)
+          || profile.authorities.includes(Authority.INSTITUTIONADMIN)) && <SideNavItem
                 icon='user'
                 content='Admin'
                 parentOnClick={() => this.onToggleAdmin()}
@@ -345,7 +346,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.WORKSPACESVIEW) && this.state.showAdminOptions && <SideNavItem
+        profile.authorities.includes(Authority.RESEARCHERDATAVIEW) && this.state.showAdminOptions && <SideNavItem
             content={'Workspaces'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/workspaces'}

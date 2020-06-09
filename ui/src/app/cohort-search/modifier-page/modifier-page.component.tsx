@@ -3,7 +3,7 @@ import {encountersStore, wizardStore} from 'app/cohort-search/search-state.servi
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {DatePicker} from 'app/components/inputs';
+import {DatePicker, NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -49,13 +49,6 @@ const styles = reactStyles({
     height: '1.6rem',
     paddingLeft: '0.5rem',
     marginRight: '1rem',
-  },
-  number: {
-    borderRadius: '3px',
-    border: '1px solid #a6a6a6',
-    width: '3rem',
-    height: '1.6rem',
-    verticalAlign: 'middle',
   },
   date: {
     width: '6.5rem',
@@ -474,8 +467,8 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {values} = this.state.formState[index];
       switch (type) {
         case 'number':
-          return <input type='number' style={styles.number} value={values[field]}
-            onChange={e => this.inputChange(index, field, e.target.value)}/>;
+          return <NumberInput style={{padding: '0 0.25rem', width: '3rem'}} value={values[field]}
+            onChange={v => this.inputChange(index, field, v)}/>;
         case 'date':
           return <div style={styles.date}>
             <DatePicker

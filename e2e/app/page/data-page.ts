@@ -1,15 +1,17 @@
 import {Page} from 'puppeteer';
 import EllipsisMenu from 'app/component/ellipsis-menu';
-import {WorkspaceAction} from 'app/page-identifiers';
+import {EllipsisMenuAction} from 'app/page-identifiers';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import ClrIconLink from 'app/element/clr-icon-link';
+import DataResourceCard from 'app/component/data-resource-card';
+import CohortBuildPage from './cohort-build-page';
 
 export enum LabelAlias {
-  Data = 'DATA',
-  Analysis = 'ANALYSIS',
-  About = 'ABOUT',
+  Data = 'Data',
+  Analysis = 'Analysis',
+  About = 'About',
   Cohorts = 'Cohorts',
   Datasets = 'Datasets',
   CohortReviews = 'Cohort Reviews',
@@ -38,7 +40,7 @@ export default class DataPage extends AuthenticatedPage {
     }
   }
 
-  async selectWorkspaceAction(action: WorkspaceAction): Promise<void> {
+  async selectWorkspaceAction(action: EllipsisMenuAction): Promise<void> {
     const ellipsisMenu = new EllipsisMenu(this.page, './/*[@data-test-id="workspace-menu-button"]');
     return ellipsisMenu.clickAction(action);
   }
@@ -59,6 +61,19 @@ export default class DataPage extends AuthenticatedPage {
 
   async getAddCohortsButton(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, {name: LabelAlias.Cohorts, iconShape: 'plus-circle'});
+  }
+
+  /**
+   * Delete cohort by look up its name using Ellipsis menu.
+   * @param {string} cohortName
+   */
+  async deleteCohort(cohortName: string): Promise<string> {
+    const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
+    const menu = await cohortCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.DELETE, false);
+    const dialogContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
+    console.log(`Cohort "${cohortName}" deleted.`);
+    return dialogContent;
   }
 
 }

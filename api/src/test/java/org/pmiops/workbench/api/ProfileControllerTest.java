@@ -74,6 +74,7 @@ import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
@@ -376,7 +377,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .displayName("The Broad Institute")
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
             .emailDomains(Collections.singletonList("example.com"))
-            .duaTypeEnum(DuaType.RESTRICTED);
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -400,7 +402,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .displayName("The Broad Institute")
             .emailAddresses(Collections.singletonList("institution@example.com"))
             .emailDomains(Collections.singletonList("example.com"))
-            .duaTypeEnum(DuaType.MASTER);
+            .duaTypeEnum(DuaType.MASTER)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -422,7 +425,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailDomains(Collections.singletonList("example.com"));
+            .emailDomains(Collections.singletonList("example.com"))
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -721,7 +725,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .shortName("Broad")
             .displayName("The Broad Institute")
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-            .duaTypeEnum(DuaType.RESTRICTED);
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     // "Broad" is the only institution
@@ -1230,7 +1235,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .shortName("Broad")
             .displayName("The Broad Institute")
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-            .duaTypeEnum(DuaType.RESTRICTED);
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     return new VerifiedInstitutionalAffiliation()

@@ -54,7 +54,7 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
     selector = `${textExpr}//${type}`;
     break;
   case ElementType.Dropdown:
-    selector = `${textExpr}//*[contains(concat(" ", normalize-space(@class), " ")," p-dropdown ")]`;
+    selector = `${textExpr}//*[contains(concat(" ", normalize-space(@class))," p-dropdown")]`;
     break;
   default:
     console.debug(`Implement unhandled type: ${type}. 

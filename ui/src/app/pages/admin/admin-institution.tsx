@@ -7,12 +7,14 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase} from 'app/utils';
 import {reactStyles} from 'app/utils';
+import {navigateByUrl} from 'app/utils/navigation';
 import {Institution} from 'generated/fetch';
 import {DuaType, OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+import {OrganizationTypeOptions} from './admin-institution-options';
 
 
 const styles = reactStyles({
@@ -76,15 +78,19 @@ export class AdminInstitution extends React.Component<{}, State> {
     }
   }
 
+  renderInstitutionName(row, col) {
+    const link = 'admin/institution/edit/' + row['shortName'];
+    return <a href={link}> {row['displayName']}</a>;
+  }
+
   renderOrganizationType(row, col) {
-    switch ( row['organizationTypeEnum']) {
-      case OrganizationType.ACADEMICRESEARCHINSTITUTION: return 'Academic Research Institution';
-      case OrganizationType.HEALTHCENTERNONPROFIT: return 'Health Center Non-Profit';
-      case OrganizationType.EDUCATIONALINSTITUTION: return 'Educational Institution';
-      case OrganizationType.INDUSTRY: return 'Industry';
-      case OrganizationType.OTHER: return 'Other - ' + row['organizationTypeOtherText'];
-      default: return 'Other';
+    // This should fail if the organization value is not in list
+    const organizationLabel = OrganizationTypeOptions
+      .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
+    if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
+      return organizationLabel + ' - ' + row['organizationTypeOtherText'];
     }
+    return organizationLabel;
   }
 
   renderDuaType(row, col) {
@@ -117,6 +123,7 @@ export class AdminInstitution extends React.Component<{}, State> {
           <label>Institution admin table</label>
               <Button type='secondaryLight'
                       style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
+                      onClick={() => navigateByUrl('admin/institution/add')}
                       data-test-id='add-institution'>
                 <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
               </Button>
@@ -127,7 +134,7 @@ export class AdminInstitution extends React.Component<{}, State> {
                    rows={10} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}
                    paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
                    currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
-          <Column field='displayName' header='Institution Name'
+          <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
                   bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
           <Column field='organizationTypeEnum' header='Institution Type'
                   body={this.renderOrganizationType} bodyStyle={styles.text}

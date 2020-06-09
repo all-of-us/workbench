@@ -13,7 +13,9 @@ describe('Workspace ui tests', () => {
 
   test('Workspace cards all have same ui size', async () => {
     // on Home page
-    expect(await new HomePage(page).isLoaded()).toBe(true);
+    const homePage = new HomePage(page);
+    await homePage.waitForLoad();
+    expect(await homePage.isLoaded()).toBe(true);
 
     const cards = await WorkspaceCard.findAllCards(page);
     let width;
