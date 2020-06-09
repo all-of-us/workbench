@@ -284,7 +284,8 @@ commands:
 #        JOBS
 # -------------------------
 jobs:
-  api-build-test:
+  api-unit-test:
+    parallelism: 4
     # We're hitting OOM failures as of 1 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
     # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
     resource_class: medium+
@@ -298,18 +299,43 @@ jobs:
       - run:
           name: Validate Swagger definitions
           working_directory: ~/workbench/api
-          command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+              ./project.rb validate-swagger --project-prop verboseTestLogging=yes
+            fi
       - run:
           name: Run Java unit tests
           working_directory: ~/workbench/api
-          command: ./project.rb test
+          # See: https://circleci.com/docs/2.0/language-java/#sample-configuration
+          # Short explanation on commands:
+          #   Find all unit tests recursively in "api/src/test/java/" directories.
+          #   Strips off "src/test/java/" substring;
+          #   Replaces all path separator "/" with ".";
+          #   Removes file extensions.
+          #   Append "--tests" in front of file name.
+          command: |
+            CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
+              | cut -c 1- \
+              | sed 's@src/test/java/@@' \
+              | sed 's@/@.@g' \
+              | sed 's/\.[^.]*$//' \
+              | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i}')
+            java -version && gradle -v && gradle test $GRADLE_ARGS
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
           working_directory: ~/workbench/api
-          command: ./gradlew spotlessCheck
+          command: |
+            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+              ./gradlew spotlessCheck
+            fi
       - store_test_results:
            path: ~/workbench/api/build/test-results/test
+      # Save JUnit test results in artifacts because it provides the timing info on tests.
+      - store_artifacts:
+          path: ~/workbench/api/build/test-results/test
+          destination: JunitTestResult
       - manage_api_cache:
           save: true
 
@@ -561,7 +587,7 @@ workflows:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
       - api-local-test
-      - api-build-test
+      - api-unit-test
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
@@ -570,7 +596,7 @@ workflows:
       - api-deploy-to-test:
           filters: *filter_only_master_branch
           requires:
-            - api-build-test
+            - api-unit-test
       - ui-deploy-to-test:
           filters: *filter_only_master_branch
           requires:
@@ -586,7 +612,7 @@ workflows:
     jobs:
       - api-local-test:
           filters: *filter_only_release_tags
-      - api-build-test:
+      - api-unit-test:
           filters: *filter_only_release_tags
       - ui-build-test:
           filters: *filter_only_release_tags
@@ -601,7 +627,7 @@ workflows:
           filters: *filter_only_release_tags
           requires:
             - api-local-test
-            - api-build-test
+            - api-unit-test
             - api-bigquery-test
             - api-deps-check
             - api-integration-test
@@ -610,7 +636,7 @@ workflows:
           filters: *filter_only_release_tags
           requires:
             - api-local-test
-            - api-build-test
+            - api-unit-test
             - api-bigquery-test
             - api-deps-check
             - api-integration-test
