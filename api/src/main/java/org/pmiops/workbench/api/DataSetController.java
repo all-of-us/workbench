@@ -31,13 +31,13 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -81,6 +81,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -93,6 +94,7 @@ public class DataSetController implements DataSetApiDelegate {
   private DataSetService dataSetService;
 
   private Provider<DbUser> userProvider;
+  private Provider<String> prefixProvider;
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
@@ -130,6 +132,7 @@ public class DataSetController implements DataSetApiDelegate {
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
+      @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       WorkspaceService workspaceService,
       ConceptSetMapper conceptSetMapper) {
     this.bigQueryService = bigQueryService;
@@ -145,6 +148,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
+    this.prefixProvider = prefixProvider;
     this.workspaceService = workspaceService;
     this.conceptSetMapper = conceptSetMapper;
   }
@@ -261,7 +265,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   @VisibleForTesting
   public String generateRandomEightCharacterQualifier() {
-    return RandomStringUtils.randomNumeric(8);
+    return prefixProvider.get();
   }
 
   public ResponseEntity<DataSetCodeResponse> generateCode(

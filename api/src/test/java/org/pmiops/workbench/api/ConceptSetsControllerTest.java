@@ -75,8 +75,10 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapperImpl;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -222,22 +224,24 @@ public class ConceptSetsControllerTest {
 
   @TestConfiguration
   @Import({
-    WorkspaceResourcesServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CommonMappers.class,
+    ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetsController.class,
-    ConceptService.class,
     ConceptSetService.class,
     DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
+    UserMapperImpl.class,
     UserServiceTestConfiguration.class,
-    WorkspacesController.class,
     WorkspaceMapperImpl.class,
+    WorkspaceResourcesServiceImpl.class,
+    WorkspacesController.class,
     WorkspaceServiceImpl.class,
   })
   @MockBean({
@@ -248,11 +252,11 @@ public class ConceptSetsControllerTest {
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
+    FreeTierBillingService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
-    WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    FreeTierBillingService.class
+    WorkspaceAuditor.class,
   })
   static class Configuration {
 

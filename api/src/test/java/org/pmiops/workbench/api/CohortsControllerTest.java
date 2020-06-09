@@ -92,8 +92,10 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapperImpl;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -186,25 +188,27 @@ public class CohortsControllerTest {
 
   @TestConfiguration
   @Import({
-    WorkspaceServiceImpl.class,
-    WorkspaceResourcesServiceImpl.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
-    ConceptSetMapperImpl.class,
-    ConceptSetService.class,
-    ConceptService.class,
-    DataSetMapperImpl.class,
-    NotebooksServiceImpl.class,
-    WorkspacesController.class,
     CohortsController.class,
-    ConceptSetsController.class,
-    WorkspaceMapperImpl.class,
     CommonMappers.class,
+    ConceptService.class,
+    ConceptSetMapperImpl.class,
+    ConceptSetsController.class,
+    ConceptSetService.class,
+    DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
+    NotebooksServiceImpl.class,
+    UserMapperImpl.class,
     UserServiceTestConfiguration.class,
+    WorkspaceMapperImpl.class,
+    WorkspaceResourcesServiceImpl.class,
+    WorkspacesController.class,
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -216,12 +220,12 @@ public class CohortsControllerTest {
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,
+    FreeTierBillingService.class,
     LeonardoNotebooksClient.class,
     MonitoringService.class,
     UserRecentResourceService.class,
-    WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    FreeTierBillingService.class
+    WorkspaceAuditor.class
   })
   static class Configuration {
 

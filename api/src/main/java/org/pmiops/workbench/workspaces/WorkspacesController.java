@@ -84,7 +84,7 @@ import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -94,12 +94,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
-  private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
+  private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
   private final BillingProjectBufferService billingProjectBufferService;
-  private final WorkspaceResourcesService workspaceResourcesService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
@@ -107,48 +106,49 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final FreeTierBillingService freeTierBillingService;
   private final LogsBasedMetricService logsBasedMetricService;
   private final NotebooksService notebooksService;
-  private final UserDao userDao;
   private final Provider<DbUser> userProvider;
-  private final UserService userService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserDao userDao;
+  private final UserService userService;
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceMapper workspaceMapper;
+  private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
-      WorkspaceService workspaceService,
-      WorkspaceResourcesService workspaceResourcesService,
       CdrVersionDao cdrVersionDao,
-      UserDao userDao,
-      Provider<DbUser> userProvider,
-      FireCloudService fireCloudService,
-      CloudStorageService cloudStorageService,
-      FreeTierBillingService freeTierBillingService,
       Clock clock,
+      CloudStorageService cloudStorageService,
+      FireCloudService fireCloudService,
+      FreeTierBillingService freeTierBillingService,
+      LogsBasedMetricService logsBasedMetricService,
       NotebooksService notebooksService,
-      UserService userService,
+      Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      UserDao userDao,
+      UserService userService,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
-      LogsBasedMetricService logsBasedMetricService) {
+      WorkspaceResourcesService workspaceResourcesService,
+      WorkspaceService workspaceService) {
     this.billingProjectBufferService = billingProjectBufferService;
-    this.workspaceService = workspaceService;
-    this.workspaceResourcesService = workspaceResourcesService;
     this.cdrVersionDao = cdrVersionDao;
-    this.userDao = userDao;
-    this.userProvider = userProvider;
+    this.clock = clock;
+    this.cloudStorageService = cloudStorageService;
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
-    this.cloudStorageService = cloudStorageService;
-    this.clock = clock;
+    this.logsBasedMetricService = logsBasedMetricService;
     this.notebooksService = notebooksService;
+    this.userDao = userDao;
+    this.userProvider = userProvider;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
-    this.logsBasedMetricService = logsBasedMetricService;
+    this.workspaceResourcesService = workspaceResourcesService;
+    this.workspaceService = workspaceService;
   }
 
   private String getRegisteredUserDomainEmail() {

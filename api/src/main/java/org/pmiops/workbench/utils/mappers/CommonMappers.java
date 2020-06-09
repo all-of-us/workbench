@@ -7,15 +7,8 @@ import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -73,39 +66,6 @@ public class CommonMappers {
   @Named("etagToCdrVersion")
   public int etagToCdrVersion(String etag) {
     return Etags.toVersion(etag);
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  //                                  ENUMS                                  //
-  /////////////////////////////////////////////////////////////////////////////
-
-  public DataAccessLevel dataAccessLevelFromStorage(Short dataAccessLevel) {
-    return DbStorageEnums.dataAccessLevelFromStorage(dataAccessLevel);
-  }
-
-  public Short dataAccessLevelToStorage(DataAccessLevel dataAccessLevel) {
-    return DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
-  }
-
-  public WorkspaceAccessLevel fcAccessLevelToApiAccessLevel(FirecloudWorkspaceAccessEntry acl) {
-    return WorkspaceAccessLevel.fromValue(acl.getAccessLevel());
-  }
-
-  public WorkspaceAccessLevel fcWorkspaceResponseToApiWorkspaceAccessLevel(
-      FirecloudWorkspaceResponse fcResponse) {
-    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-      return WorkspaceAccessLevel.OWNER;
-    } else {
-      return WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel());
-    }
-  }
-
-  public AnnotationType annotationTypeFromStorage(Short annotationType) {
-    return DbStorageEnums.annotationTypeFromStorage(annotationType);
-  }
-
-  public Short annotationTypeToStorage(AnnotationType annotationType) {
-    return DbStorageEnums.annotationTypeToStorage(annotationType);
   }
 
   public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {

@@ -182,8 +182,10 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapperImpl;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -275,47 +277,49 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
-    WorkspaceResourcesServiceImpl.class,
     CdrVersionService.class,
-    NotebooksServiceImpl.class,
-    WorkspacesController.class,
-    WorkspaceServiceImpl.class,
-    CommonMappers.class,
+    CohortAnnotationDefinitionController.class,
     CohortAnnotationDefinitionMapperImpl.class,
     CohortAnnotationDefinitionServiceImpl.class,
-    CohortsController.class,
-    CohortFactoryImpl.class,
     CohortCloningService.class,
+    CohortFactoryImpl.class,
     CohortMapperImpl.class,
-    CohortReviewMapperImpl.class,
     CohortReviewController.class,
-    CohortAnnotationDefinitionController.class,
+    CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
+    CohortsController.class,
+    CommonMappers.class,
+    ConceptSetMapperImpl.class,
+    ConceptSetsController.class,
+    ConceptSetService.class,
     DataSetController.class,
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
+    FirecloudMapperImpl.class,
     FreeTierBillingService.class,
+    LogsBasedMetricServiceFakeImpl.class,
+    NotebooksServiceImpl.class,
     ReviewQueryBuilder.class,
-    ConceptSetService.class,
-    ConceptSetsController.class,
-    ConceptSetMapperImpl.class,
+    UserMapperImpl.class,
     WorkspaceMapperImpl.class,
-    LogsBasedMetricServiceFakeImpl.class
+    WorkspaceResourcesServiceImpl.class,
+    WorkspacesController.class,
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
-    BillingProjectBufferService.class,
-    CohortMaterializationService.class,
-    ConceptBigQueryService.class,
-    CdrBigQuerySchemaConfigService.class,
-    FireCloudService.class,
-    CloudStorageService.class,
     BigQueryService.class,
+    BillingProjectBufferService.class,
+    CdrBigQuerySchemaConfigService.class,
+    CloudStorageService.class,
+    CohortMaterializationService.class,
     CohortQueryBuilder.class,
-    MailService.class,
-    UserService.class,
-    UserRecentResourceService.class,
+    ConceptBigQueryService.class,
     ConceptService.class,
+    FireCloudService.class,
+    MailService.class,
     MonitoringService.class,
+    UserRecentResourceService.class,
+    UserService.class,
     WorkspaceAuditor.class
   })
   static class Configuration {

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.utils;
+package org.pmiops.workbench.utils.mappers;
 
 import static org.mapstruct.NullValuePropertyMappingStrategy.*;
 
@@ -14,31 +14,29 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
     config = MapStructConfig.class,
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
     uses = {
-      CommonMappers.class,
       CohortMapper.class,
       CohortReviewMapper.class,
+      CommonMappers.class,
       ConceptSetMapper.class,
-      DataSetMapper.class
+      DataSetMapper.class,
+      DbStorageEnums.class,
+      FirecloudMapper.class
     })
 public interface WorkspaceMapper {
 
@@ -132,10 +130,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceNamespace", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
-
-  @Mapping(target = "email", source = "user.username")
-  @Mapping(target = "role", source = "acl")
-  UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry acl);
 
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")

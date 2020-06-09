@@ -4,6 +4,7 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
@@ -95,4 +96,6 @@ public interface UserService {
   DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
 
   int getCurrentDuccVersion();
+
+  Optional<DbUser> getByUsername(String username);
 }

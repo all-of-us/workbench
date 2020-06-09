@@ -34,6 +34,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
+import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -66,10 +67,12 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -98,6 +101,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private NotebooksService notebooksService;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<DbUser> userProvider;
+
+  @Autowired
+  @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
+  Provider<String> prefixProvider;
+
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceService workspaceService;
 
@@ -128,12 +136,19 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     FreeTierBillingService.class,
     NotebooksServiceImpl.class,
     Provider.class,
+    UserMapper.class,
     WorkspaceMapperImpl.class
   })
   static class Configuration {
     @Bean
     public Clock clock() {
       return CLOCK;
+    }
+
+    @Bean
+    @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
+    String prefixCode() {
+      return "00000000";
     }
   }
 
@@ -174,6 +189,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 fireCloudService,
                 notebooksService,
                 userProvider,
+                prefixProvider,
                 workspaceService,
                 conceptSetMapper));
 

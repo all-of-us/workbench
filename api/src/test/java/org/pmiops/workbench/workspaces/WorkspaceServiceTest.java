@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import com.google.api.services.cloudbilling.Cloudbilling;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -18,8 +17,6 @@ import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -38,16 +35,21 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.utils.WorkspaceMapper;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.UserMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -64,6 +66,18 @@ public class WorkspaceServiceTest {
     CommonMappers.class,
     DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
+    WorkspaceServiceImpl.class
+  })
+  @MockBean({
+    ConceptSetService.class,
+    CohortCloningService.class,
+    DataSetService.class,
+    FirecloudMapper.class,
+    FireCloudService.class,
+    ProfileMapper.class,
+    UserDao.class,
+    FreeTierBillingService.class,
+    UserMapper.class
   })
   static class Configuration {
     @Bean
@@ -75,55 +89,39 @@ public class WorkspaceServiceTest {
       workbenchConfig.featureFlags.enableBillingLockout = true;
       return workbenchConfig;
     }
+
+    @Bean
+    @Scope("prototype")
+    DbUser user() {
+      return currentUser;
+    }
   }
 
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private UserDao userDao;
+  @MockBean private Clock mockClock;
+  @MockBean private FireCloudService mockFireCloudService;
+
+  @Autowired private Provider<DbUser> userProvider;
   @Autowired private UserRecentWorkspaceDao userRecentWorkspaceDao;
-  @Autowired private WorkspaceMapper workspaceMapper;
-  @Autowired private Provider<WorkbenchConfig> mockWorkbenchConfigProvider;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceService workspaceService;
 
-  @Mock private CohortCloningService mockCohortCloningService;
-  @Mock private ConceptSetService mockConceptSetService;
-  @Mock private DataSetService mockDataSetService;
-  @Mock private Provider<DbUser> mockUserProvider;
-  @Mock private FireCloudService mockFireCloudService;
-  @Mock private Provider<Cloudbilling> mockCloudbillingProvider;
-  @Mock private Clock mockClock;
-  @Mock private FreeTierBillingService freeTierBillingService;
+  private static DbUser currentUser;
 
-  private WorkspaceService workspaceService;
+  private final List<FirecloudWorkspaceResponse> firecloudWorkspaceResponses = new ArrayList<>();
+  private final List<DbWorkspace> dbWorkspaces = new ArrayList<>();
+  private static final Instant NOW = Instant.parse("1985-11-05T22:04:00.00Z");
+  private static final long USER_ID = 1L;
+  private static final String DEFAULT_USERNAME = "mock@mock.com";
+  private static final String DEFAULT_WORKSPACE_NAMESPACE = "namespace";
 
-  private List<FirecloudWorkspaceResponse> mockWorkspaceResponses = new ArrayList<>();
-  private List<DbWorkspace> mockWorkspaces = new ArrayList<>();
-  private AtomicLong workspaceIdIncrementer = new AtomicLong(1);
-  private Instant NOW = Instant.now();
-  private long USER_ID = 1L;
-  private String DEFAULT_USERNAME = "mock@mock.com";
-  private String DEFAULT_WORKSPACE_NAMESPACE = "namespace";
+  private final AtomicLong workspaceIdIncrementer = new AtomicLong(1);
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
-    workspaceService =
-        new WorkspaceServiceImpl(
-            mockCloudbillingProvider,
-            mockCloudbillingProvider,
-            mockClock,
-            mockCohortCloningService,
-            mockConceptSetService,
-            mockDataSetService,
-            mockFireCloudService,
-            userDao,
-            mockUserProvider,
-            userRecentWorkspaceDao,
-            mockWorkbenchConfigProvider,
-            workspaceDao,
-            workspaceMapper,
-            freeTierBillingService);
+    doReturn(NOW).when(mockClock).instant();
 
-    mockWorkspaceResponses.clear();
-    mockWorkspaces.clear();
+    firecloudWorkspaceResponses.clear();
+    dbWorkspaces.clear();
     addMockedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "reader",
@@ -155,11 +153,13 @@ public class WorkspaceServiceTest {
         WorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.ACTIVE);
 
-    doReturn(mockWorkspaceResponses).when(mockFireCloudService).getWorkspaces(any());
-    DbUser mockUser = mock(DbUser.class);
-    doReturn(mockUser).when(mockUserProvider).get();
-    doReturn(DEFAULT_USERNAME).when(mockUser).getUsername();
-    doReturn(USER_ID).when(mockUser).getUserId();
+    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces(any());
+
+    currentUser = new DbUser();
+    currentUser.setUsername(DEFAULT_USERNAME);
+    currentUser.setUserId(USER_ID);
+    currentUser.setDisabled(false);
+    currentUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
   }
 
   private FirecloudWorkspaceResponse mockFirecloudWorkspaceResponse(
@@ -203,7 +203,7 @@ public class WorkspaceServiceTest {
     FirecloudWorkspaceResponse mockWorkspaceResponse =
         mockFirecloudWorkspaceResponse(
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
-    mockWorkspaceResponses.add(mockWorkspaceResponse);
+    firecloudWorkspaceResponses.add(mockWorkspaceResponse);
     doReturn(mockWorkspaceResponse)
         .when(mockFireCloudService)
         .getWorkspace(workspaceNamespace, workspaceName);
@@ -216,7 +216,7 @@ public class WorkspaceServiceTest {
                 workspaceNamespace,
                 activeStatus));
 
-    mockWorkspaces.add(dbWorkspace);
+    dbWorkspaces.add(dbWorkspace);
     return dbWorkspace;
   }
 
@@ -268,14 +268,14 @@ public class WorkspaceServiceTest {
 
   @Test
   public void updateRecentWorkspaces() {
-    mockWorkspaces.forEach(
+    dbWorkspaces.forEach(
         workspace -> {
           // Need a new 'now' each time or else we won't have lastAccessDates that are different
           // from each other
           workspaceService.updateRecentWorkspaces(
               workspace,
               USER_ID,
-              Timestamp.from(NOW.minusSeconds(mockWorkspaces.size() - workspace.getWorkspaceId())));
+              Timestamp.from(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId())));
         });
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT);
@@ -285,10 +285,10 @@ public class WorkspaceServiceTest {
             .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     List<Long> expectedIds =
-        mockWorkspaces
+        dbWorkspaces
             .subList(
-                mockWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
-                mockWorkspaces.size())
+                dbWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
+                dbWorkspaces.size())
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
@@ -299,15 +299,15 @@ public class WorkspaceServiceTest {
   public void updateRecentWorkspaces_multipleUsers() {
     long OTHER_USER_ID = 2L;
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(0), OTHER_USER_ID, Timestamp.from(NOW));
-    mockWorkspaces.forEach(
+        dbWorkspaces.get(0), OTHER_USER_ID, Timestamp.from(NOW));
+    dbWorkspaces.forEach(
         workspace -> {
           // Need a new 'now' each time or else we won't have lastAccessDates that are different
           // from each other
           workspaceService.updateRecentWorkspaces(
               workspace,
               USER_ID,
-              Timestamp.from(NOW.minusSeconds(mockWorkspaces.size() - workspace.getWorkspaceId())));
+              Timestamp.from(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId())));
         });
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
 
@@ -322,36 +322,36 @@ public class WorkspaceServiceTest {
             .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     List<Long> expectedIds =
-        mockWorkspaces
+        dbWorkspaces
             .subList(
-                mockWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
-                mockWorkspaces.size())
+                dbWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
+                dbWorkspaces.size())
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     assertThat(actualIds).containsAllIn(expectedIds);
 
-    DbUser mockUser = mock(DbUser.class);
-    doReturn(mockUser).when(mockUserProvider).get();
-    doReturn(DEFAULT_USERNAME).when(mockUser).getUsername();
-    doReturn(OTHER_USER_ID).when(mockUser).getUserId();
-    List<DbUserRecentWorkspace> otherRecentWorkspaces = workspaceService.getRecentWorkspaces();
+    currentUser.setUsername(DEFAULT_USERNAME);
+    currentUser.setUserId(OTHER_USER_ID);
+
+    final List<DbUserRecentWorkspace> otherRecentWorkspaces =
+        workspaceService.getRecentWorkspaces();
     assertThat(otherRecentWorkspaces.size()).isEqualTo(1);
     assertThat(otherRecentWorkspaces.get(0).getWorkspaceId())
-        .isEqualTo(mockWorkspaces.get(0).getWorkspaceId());
+        .isEqualTo(dbWorkspaces.get(0).getWorkspaceId());
   }
 
   @Test
   public void updateRecentWorkspaces_flipFlop() {
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(4)));
+        dbWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(4)));
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(3)));
+        dbWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(3)));
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(2)));
+        dbWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(2)));
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(1)));
-    workspaceService.updateRecentWorkspaces(mockWorkspaces.get(0), USER_ID, Timestamp.from(NOW));
+        dbWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(1)));
+    workspaceService.updateRecentWorkspaces(dbWorkspaces.get(0), USER_ID, Timestamp.from(NOW));
 
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(2);

@@ -73,7 +73,8 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.UserMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -88,27 +89,26 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollector {
-  private static final Logger logger = Logger.getLogger(WorkspaceServiceImpl.class.getName());
 
-  private static final String FC_OWNER_ROLE = "OWNER";
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
+  private static final String FC_OWNER_ROLE = "OWNER";
 
-  private final Provider<Cloudbilling> endUserCloudbillingProvider;
-  private final Provider<Cloudbilling> serviceAccountCloudbillingProvider;
+  private final Clock clock;
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
-  private final UserDao userDao;
+  private final FireCloudService fireCloudService;
+  private final FreeTierBillingService freeTierBillingService;
+  private final Provider<Cloudbilling> endUserCloudbillingProvider;
+  private final Provider<Cloudbilling> serviceAccountCloudbillingProvider;
   private final Provider<DbUser> userProvider;
-  private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserDao userDao;
+  private final UserMapper userMapper;
+  private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
-  private final FreeTierBillingService freeTierBillingService;
-
-  private FireCloudService fireCloudService;
-  private Clock clock;
 
   @Autowired
   public WorkspaceServiceImpl(
@@ -126,7 +126,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      FreeTierBillingService freeTierBillingService) {
+      FreeTierBillingService freeTierBillingService,
+      UserMapper userMapper) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
@@ -141,6 +142,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.freeTierBillingService = freeTierBillingService;
+    this.userMapper = userMapper;
   }
 
   /**
@@ -571,7 +573,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
+        userRoles.add(userMapper.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()

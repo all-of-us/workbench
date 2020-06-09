@@ -2,12 +2,10 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +16,7 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValue.Attribute;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -32,13 +31,13 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,7 +46,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -55,40 +53,27 @@ import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
-import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
-import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
-import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.concept.ConceptService;
-import org.pmiops.workbench.conceptset.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.CohortReviewDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -125,9 +110,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -135,13 +118,14 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.WorkspaceMapper;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapperImpl;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -161,6 +145,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DataSetControllerTest {
+
   private static final String COHORT_ONE_NAME = "cohort";
   private static final String COHORT_TWO_NAME = "cohort two";
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
@@ -187,74 +172,53 @@ public class DataSetControllerTest {
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
-  private static DbUser currentUser;
+  private static final BasicFormatterImpl BASIC_FORMATTER = new BasicFormatterImpl();
+  private static final String PREFIX = "00000000";
+  private static final String FULL_PREFIX = String.format("dataset_%s_condition_", PREFIX);
 
+  private static DbUser currentUser;
   private Workspace workspace;
 
-  @Autowired BillingProjectBufferService billingProjectBufferService;
-  @Autowired BigQueryService bigQueryService;
-  @Autowired CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-  @Autowired WorkspaceResourcesService workspaceResourcesService;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CdrVersionService cdrVersionService;
-  @Autowired CloudStorageService cloudStorageService;
-  @Autowired Provider<Cloudbilling> cloudBillingProvider;
-  @Autowired CohortDao cohortDao;
-  @Autowired CohortFactory cohortFactory;
-  @Autowired CohortMapper cohortMapper;
-  @Autowired CohortMaterializationService cohortMaterializationService;
-  @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired CohortReviewMapper cohortReviewMapper;
-  @Autowired CohortReviewService cohortReviewService;
-  @Autowired ConceptBigQueryService conceptBigQueryService;
-  @Autowired ConceptDao conceptDao;
-  @Autowired ConceptService conceptService;
-  @Autowired ConceptSetService conceptSetService;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired DataSetDao dataSetDao;
-  @Mock DataSetMapper dataSetMapper;
-  @Autowired ConceptSetMapper conceptSetMapper;
-  @Autowired DataSetService dataSetService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired FreeTierBillingService freeTierBillingService;
-  @Autowired CohortQueryBuilder cohortQueryBuilder;
-  @Autowired TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
-  @Autowired UserDao userDao;
-  @Mock Provider<DbUser> userProvider;
-  @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
-  @Autowired NotebooksService notebooksService;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired UserService userService;
-  @Autowired WorkspaceDao workspaceDao;
-  @Autowired WorkspaceService workspaceService;
-  @Autowired WorkspaceAuditor workspaceAuditor;
-  @Autowired WorkspaceMapper workspaceMapper;
-  @Autowired LogsBasedMetricService logsBasedMetricService;
-  @MockBean MonitoringService mockMonitoringService;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private CohortsController cohortsController;
+  @Autowired private ConceptSetsController conceptSetsController;
+  @Autowired private DataSetController dataSetController;
+  @Autowired private UserDao userDao;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspacesController workspacesController;
+
+  @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
+  @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
+  @MockBean private BigQueryService mockBigQueryService;
+  @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
+  @MockBean private FireCloudService fireCloudService;
+  @MockBean private NotebooksService mockNotebooksService;
 
   @TestConfiguration
   @Import({
-    WorkspaceResourcesServiceImpl.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
+    CohortsController.class,
+    CommonMappers.class,
     ConceptService.class,
     ConceptSetMapperImpl.class,
+    ConceptSetsController.class,
     ConceptSetService.class,
+    DataSetController.class,
     DataSetServiceImpl.class,
-    TestBigQueryCdrSchemaConfig.class,
-    WorkspacesController.class,
-    WorkspaceServiceImpl.class,
-    WorkspaceMapperImpl.class,
-    CommonMappers.class,
+    FirecloudMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
+    TestBigQueryCdrSchemaConfig.class,
+    UserMapperImpl.class,
     UserServiceTestConfiguration.class,
+    WorkspaceMapperImpl.class,
+    WorkspaceResourcesServiceImpl.class,
+    WorkspacesController.class,
+    WorkspaceServiceImpl.class
   })
   @MockBean({
-    BillingProjectBufferService.class,
-    BigQueryService.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
     CloudStorageService.class,
@@ -262,17 +226,12 @@ public class DataSetControllerTest {
     CohortMaterializationService.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
-    DataSetService.class,
     DataSetMapper.class,
-    FireCloudService.class,
-    FreeTierBillingService.class,
     DirectoryService.class,
-    NotebooksService.class,
-    CohortQueryBuilder.class,
+    FreeTierBillingService.class,
     UserRecentResourceService.class,
-    WorkspaceAuditor.class,
     UserServiceAuditor.class,
-    FreeTierBillingService.class
+    WorkspaceAuditor.class,
   })
   static class Configuration {
 
@@ -304,104 +263,34 @@ public class DataSetControllerTest {
 
     @Bean
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
       workbenchConfig.featureFlags.enableBillingLockout = true;
       workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
       workbenchConfig.billing.accountId = "free-tier";
       return workbenchConfig;
     }
-  }
 
-  private DataSetController dataSetController;
-  private BasicFormatterImpl sqlFormatter = new BasicFormatterImpl();
+    @Bean
+    @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
+    String prefixCode() {
+      return "00000000";
+    }
+  }
 
   @Before
   public void setUp() throws Exception {
-    TestMockFactory testMockFactory = new TestMockFactory();
-    dataSetService =
-        new DataSetServiceImpl(
-            bigQueryService,
-            cdrBigQuerySchemaConfigService,
-            cohortDao,
-            conceptBigQueryService,
-            conceptSetDao,
-            cohortQueryBuilder,
-            dataSetDao);
-    dataSetController =
-        spy(
-            new DataSetController(
-                bigQueryService,
-                CLOCK,
-                cdrVersionDao,
-                cohortDao,
-                conceptService,
-                conceptSetDao,
-                dataDictionaryEntryDao,
-                dataSetDao,
-                dataSetMapper,
-                dataSetService,
-                fireCloudService,
-                notebooksService,
-                userProvider,
-                workspaceService,
-                conceptSetMapper));
-    WorkspacesController workspacesController =
-        new WorkspacesController(
-            billingProjectBufferService,
-            workspaceService,
-            workspaceResourcesService,
-            cdrVersionDao,
-            userDao,
-            userProvider,
-            fireCloudService,
-            cloudStorageService,
-            freeTierBillingService,
-            CLOCK,
-            notebooksService,
-            userService,
-            workbenchConfigProvider,
-            workspaceAuditor,
-            workspaceMapper,
-            logsBasedMetricService);
-    CohortsController cohortsController =
-        new CohortsController(
-            workspaceService,
-            cohortDao,
-            cdrVersionDao,
-            cohortFactory,
-            cohortReviewDao,
-            conceptSetDao,
-            cohortMaterializationService,
-            userProvider,
-            CLOCK,
-            cdrVersionService,
-            userRecentResourceService);
-    ConceptSetsController conceptSetsController =
-        new ConceptSetsController(
-            workspaceService,
-            conceptSetService,
-            conceptService,
-            conceptBigQueryService,
-            userRecentResourceService,
-            userProvider,
-            CLOCK,
-            conceptSetMapper);
-    doAnswer(
-            invocation -> {
-              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
-              return entry;
-            })
-        .when(billingProjectBufferService)
-        .assignBillingProject(any());
-    testMockFactory.stubCreateFcWorkspace(fireCloudService);
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setFireCloudProjectName(UUID.randomUUID().toString());
+
+    doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any());
+    TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =
         gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"), CdrBigQuerySchemaConfig.class);
 
-    when(cdrBigQuerySchemaConfigService.getConfig()).thenReturn(cdrBigQuerySchemaConfig);
+    doReturn(cdrBigQuerySchemaConfig).when(mockCdrBigQuerySchemaConfigService).getConfig();
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
@@ -410,7 +299,6 @@ public class DataSetControllerTest {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
-    when(userProvider.get()).thenReturn(user);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
@@ -530,7 +418,7 @@ public class DataSetControllerTest {
             .getBody();
     CONCEPT_SET_TWO_ID = conceptSetTwo.getId();
 
-    when(cohortQueryBuilder.buildParticipantIdQuery(any()))
+    when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
             QueryJobConfiguration.newBuilder(
                     "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person WHERE @"
@@ -546,7 +434,7 @@ public class DataSetControllerTest {
     // but _does not_ call the real methods in the rest of the bigQueryService.
     // I tried .thenCallRealMethod() which ended up giving a null pointer from the mock,
     // as opposed to calling through.
-    when(bigQueryService.filterBigQueryConfig(any()))
+    when(mockBigQueryService.filterBigQueryConfig(any()))
         .thenAnswer(
             (InvocationOnMock invocation) -> {
               Object[] args = invocation.getArguments();
@@ -557,7 +445,6 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
-    when(dataSetController.generateRandomEightCharacterQualifier()).thenReturn("00000000");
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
@@ -613,23 +500,29 @@ public class DataSetControllerTest {
     return domainValues;
   }
 
-  private void mockLinkingTableQuery(ArrayList<String> domainBaseTables) {
-    TableResult tableResultMock = mock(TableResult.class);
-    ArrayList<FieldValueList> values = new ArrayList<>();
-    domainBaseTables.forEach(
-        domainBaseTable -> {
-          ArrayList<Field> schemaFields = new ArrayList<>();
-          schemaFields.add(Field.of("OMOP_SQL", LegacySQLTypeName.STRING));
-          schemaFields.add(Field.of("JOIN_VALUE", LegacySQLTypeName.STRING));
-          FieldList schema = FieldList.of(schemaFields);
-          ArrayList<FieldValue> rows = new ArrayList<>();
-          rows.add(FieldValue.of(FieldValue.Attribute.PRIMITIVE, "PERSON_ID"));
-          rows.add(FieldValue.of(FieldValue.Attribute.PRIMITIVE, domainBaseTable));
-          FieldValueList fieldValueList = FieldValueList.of(rows, schema);
-          values.add(fieldValueList);
-        });
-    doReturn(values).when(tableResultMock).getValues();
-    doReturn(tableResultMock).when(bigQueryService).executeQuery(any());
+  private void mockLinkingTableQuery(Collection<String> domainBaseTables) {
+    final TableResult tableResultMock = mock(TableResult.class);
+
+    final FieldList schema =
+        FieldList.of(
+            ImmutableList.of(
+                Field.of("OMOP_SQL", LegacySQLTypeName.STRING),
+                Field.of("JOIN_VALUE", LegacySQLTypeName.STRING)));
+
+    doReturn(
+            domainBaseTables.stream()
+                .map(
+                    domainBaseTable -> {
+                      ArrayList<FieldValue> rows = new ArrayList<>();
+                      rows.add(FieldValue.of(Attribute.PRIMITIVE, "PERSON_ID"));
+                      rows.add(FieldValue.of(Attribute.PRIMITIVE, domainBaseTable));
+                      return FieldValueList.of(rows, schema);
+                    })
+                .collect(ImmutableList.toImmutableList()))
+        .when(tableResultMock)
+        .getValues();
+
+    doReturn(tableResultMock).when(mockBigQueryService).executeQuery(any());
   }
 
   @Test
@@ -752,10 +645,10 @@ public class DataSetControllerTest {
             .kernelType(KernelTypeEnum.PYTHON);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
-    verify(notebooksService, never()).getNotebookContents(any(), any());
+    verify(mockNotebooksService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
-    verify(notebooksService, times(1))
+    verify(mockNotebooksService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
   }
 
@@ -788,7 +681,7 @@ public class DataSetControllerTest {
 
     String notebookName = "Hello World";
 
-    when(notebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName))
+    when(mockNotebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName))
         .thenReturn(
             new JSONObject()
                 .put("cells", new JSONArray())
@@ -803,33 +696,16 @@ public class DataSetControllerTest {
             .notebookName(notebookName);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
-    verify(notebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
+    verify(mockNotebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
-    verify(notebooksService, times(1))
+    verify(mockNotebooksService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
   }
 
   @Test
-  public void testGetQueryPersonDomainNoConceptSets() {
-    DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
-    dataSetRequest = dataSetRequest.addCohortIdsItem(COHORT_ONE_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePairWithPerson();
-    dataSetRequest.setDomainValuePairs(domainValuePairs);
-
-    ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `" + TEST_CDR_TABLE + ".person` person");
-
-    mockLinkingTableQuery(tables);
-
-    final Map<String, QueryJobConfiguration> result =
-        dataSetService.domainToBigQueryConfig(dataSetRequest);
-    assertThat(result).isNotEmpty();
-  }
-
-  @Test
   public void testGetValuesFromDomain() {
-    when(bigQueryService.getTableFieldsFromDomain(Domain.CONDITION))
+    when(mockBigQueryService.getTableFieldsFromDomain(Domain.CONDITION))
         .thenReturn(
             FieldList.of(
                 Field.of("FIELD_ONE", LegacySQLTypeName.STRING),
@@ -840,7 +716,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, Domain.CONDITION.toString())
             .getBody()
             .getItems();
-    verify(bigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
+    verify(mockBigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
 
     assertThat(domainValues)
         .containsExactly(
