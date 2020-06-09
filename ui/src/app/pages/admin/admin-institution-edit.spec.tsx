@@ -44,22 +44,30 @@ describe('AdminInstitutionEditSpec', () => {
       .toContain('Display name must be 80 characters or less');
   });
 
+  it('should default DUA to Master', async () => {
+    urlParamsStore.next({
+      institutionId: 'Verily'
+    });
+    const wrapper = mount(<AdminInstitutionEdit/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]');
+    expect(agreementTypeDropDown.first().props().value).toBe(DuaType.MASTER);
+  });
+
   it('should show appropriate section after changing agreement type', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     const testInput = fp.repeat(81, 'a');
-    let emailAddressDiv = wrapper.find('[data-test-id="emailAddress"]');
-    let emailDomainDiv = wrapper.find('[data-test-id="emailDomain"]');
-    expect(emailAddressDiv.length).toBe(0);
-    expect(emailDomainDiv.length).toBe(0);
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange({originalEvent: undefined, value: DuaType.MASTER, target: {name: 'name', id: '', value: DuaType.MASTER}});
     await waitOneTickAndUpdate(wrapper);
 
-    emailAddressDiv = wrapper.find('[data-test-id="emailAddress"]');
-    emailDomainDiv = wrapper.find('[data-test-id="emailDomain"]');
+    let emailAddressDiv = wrapper.find('[data-test-id="emailAddress"]');
+    let emailDomainDiv = wrapper.find('[data-test-id="emailDomain"]');
     expect(emailAddressDiv.length).toBe(0);
     expect(emailDomainDiv.length).toBe(2);
 
@@ -108,7 +116,7 @@ describe('AdminInstitutionEditSpec', () => {
     wrapper.find('[data-test-id="emailAddressInput"]').first().simulate('blur');
     emailAddressError = wrapper.find('[data-test-id="emailAddressError"]');
     expect(emailAddressError.first().props().children)
-      .toBe('Following Email Addresses are not valid : invalidEmail@domain@org ,  invalidEmail ,  justDomain.org');
+      .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org');
 
     // Single correct format Email Address entries
     wrapper.find('[data-test-id="emailAddressInput"]').first()
@@ -145,7 +153,7 @@ describe('AdminInstitutionEditSpec', () => {
     wrapper.find('[data-test-id="emailDomainInput"]').first().simulate('blur');
     emailAddressError = wrapper.find('[data-test-id="emailDomainError"]');
     expect(emailAddressError.first().props().children)
-      .toBe('Following Email Domains are not valid : someEmailAddress@domain@org ,  ' +
+      .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
           'justSomeText , broadinstitute.org#wrongTest');
 
 
@@ -172,5 +180,22 @@ describe('AdminInstitutionEditSpec', () => {
     wrapper.find('[data-test-id="emailDomainInput"]').first().simulate('blur');
     expect(wrapper.find('[data-test-id="emailDomainInput"]').first().prop('value'))
       .toBe('validEmail.com,\njustSomeRandom.domain');
+  });
+
+  it ('Should ignore whitespaces in email address', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+    const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
+    agreementTypeDropDown.props.onChange(
+        {originalEvent: undefined, value: DuaType.MASTER, target: {name: 'name', id: '', value: DuaType.MASTER}});
+    await waitOneTickAndUpdate(wrapper);
+
+    // Single Entry with incorrect Email Domain format
+    wrapper.find('[data-test-id="emailDomainInput"]').first()
+        .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
+    wrapper.find('[data-test-id="emailDomainInput"]').first().simulate('blur');
+    expect(wrapper.find('[data-test-id="emailDomainInput"]').first().prop('value'))
+        .toBe('someDomain.com,\njustSomeRandom.domain');
   });
 });
