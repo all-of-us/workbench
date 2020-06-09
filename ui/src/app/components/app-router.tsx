@@ -4,11 +4,9 @@ import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, 
 
 const {Fragment} = React;
 
-interface Guards {
-  [index: number]: {
-    checkGuard: () => boolean;
-    redirectPath: string;
-  };
+export interface Guard {
+  checkGuard: () => boolean;
+  redirectPath: string;
 }
 
 export const usePath = () => {
@@ -31,8 +29,8 @@ export const AppRoute = ({path, data = {}, component: Component}): React.ReactEl
 };
 
 export const ProtectedRoutes = (
-  {path, guards, children}: {path: string, guards: Guards, children: React.ReactNode[] }): React.ReactElement => {
-  const { redirectPath } = fp.find(({checkGuard}) => checkGuard(), guards);
+  {path, guards, children}: {path: string, guards: Guard[], children: any }): React.ReactElement => {
+  const { redirectPath = null } = fp.find(({checkGuard}) => checkGuard(), guards) || {};
   const location = useLocation();
   return redirectPath ? <AppRoute
       path={path}

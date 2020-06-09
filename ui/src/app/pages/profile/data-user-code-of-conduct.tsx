@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HtmlViewer} from 'app/components/html-viewer';
@@ -266,11 +265,3 @@ export const DataUserCodeOfConduct = withUserProfile()(
     }
   });
 
-@Component({
-  template: '<div #root style="height: 100%"></div>'
-})
-export class DataUserCodeOfConductComponent extends ReactWrapperBase {
-  constructor() {
-    super(DataUserCodeOfConduct, []);
-  }
-}
