@@ -1,9 +1,11 @@
 package org.pmiops.workbench.opsgenie;
 
-import org.pmiops.workbench.model.EgressEvent;
+import com.ifountain.opsgenie.client.swagger.ApiException;
+import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
+import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
 
 public interface OpsGenieService {
 
-  // Creates an Opsgenie alert for a high-egress event detected in the Workbench system.
-  public void createEgressEventAlert(EgressEvent egressEvent);
+  // Create (or potentially update) an OpsGenie alert
+  SuccessResponse createAlert(CreateAlertRequest createAlertRequest) throws ApiException;
 }
