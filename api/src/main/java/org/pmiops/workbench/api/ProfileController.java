@@ -716,7 +716,12 @@ public class ProfileController implements ProfileApiDelegate {
     DbUser dbUser = userDao.findUserByUserId(userId);
     Profile updatedProfile = profileService.getProfile(dbUser);
 
-    Optional<Institution> institution = institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());
+    if (verifiedAffiliation == null) {
+      throw new BadRequestException("Cannot delete Verified Institutional Affiliation.");
+    }
+
+    Optional<Institution> institution =
+        institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());
     institution.ifPresent(i -> verifiedAffiliation.setInstitutionDisplayName(i.getDisplayName()));
 
     updatedProfile.setVerifiedInstitutionalAffiliation(verifiedAffiliation);
