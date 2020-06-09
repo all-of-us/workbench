@@ -5,7 +5,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {SearchGroup} from 'app/cohort-search/search-group/search-group.component';
-import {criteriaMenuOptionsStore, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {criteriaMenuOptionsStore, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -115,6 +115,7 @@ const css = `
 
 interface Props {
   groups: Array<any>;
+  setSearchContext: (context: any) => void;
   role: keyof SearchRequest;
   updated: number;
   updateRequest: Function;
@@ -198,7 +199,7 @@ export class SearchGroupList extends React.Component<Props, State> {
     if (!!domain.children) {
       return {label: domain.name, items: domain.children.map((dt) => this.mapCriteriaMenuItem(dt, temporalGroup))};
     }
-    return {label: domain.name, command: () => this.launchWizard(domain)};
+    return {label: domain.name, command: () => this.launchSearch(domain)};
   }
 
   get criteriaMenuItems() {
@@ -214,7 +215,7 @@ export class SearchGroupList extends React.Component<Props, State> {
       ];
   }
 
-  launchWizard(criteria: any) {
+  launchSearch(criteria: any) {
     this.criteriaMenu.hide();
     const {role} = this.props;
     const {domain, type, standard} = criteria;
@@ -229,11 +230,11 @@ export class SearchGroupList extends React.Component<Props, State> {
     const groupId = null;
     const item = initItem(itemId, domain);
     context = {item, domain, type, standard, role, groupId, itemId};
-    wizardStore.next(context);
+    this.props.setSearchContext(context);
   }
 
   render() {
-    const {groups, role, updated, updateRequest} = this.props;
+    const {groups, setSearchContext, role, updated, updateRequest} = this.props;
     const {index} = this.state;
     return <React.Fragment>
       <style>{css}</style>
@@ -243,7 +244,12 @@ export class SearchGroupList extends React.Component<Props, State> {
         </h2>
       </div>
       {groups.map((group, g) => <div key={g}>
-        <SearchGroup group={group} index={g + index} role={role} updated={updated} updateRequest={updateRequest}/>
+        <SearchGroup group={group}
+                     index={g + index}
+                     setSearchContext={setSearchContext}
+                     role={role}
+                     updated={updated}
+                     updateRequest={updateRequest}/>
         <div style={styles.circleWrapper}>
           <div style={styles.circle}>AND</div>
         </div>
@@ -273,12 +279,13 @@ export class SearchGroupList extends React.Component<Props, State> {
   template: '<div #root></div>'
 })
 export class SearchGroupListComponent extends ReactWrapperBase {
-  @Input('role') role: Props['role'];
   @Input('groups') groups: Props['groups'];
+  @Input('setSearchContext') setSearchContext: Props['setSearchContext'];
+  @Input('role') role: Props['role'];
   @Input('updated') updated: Props['updated'];
   @Input('updateRequest') updateRequest: Props['updateRequest'];
 
   constructor() {
-    super(SearchGroupList, ['groups', 'role', 'updated', 'updateRequest']);
+    super(SearchGroupList, ['groups', 'setSearchContext', 'role', 'updated', 'updateRequest']);
   }
 }

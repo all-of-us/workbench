@@ -1,12 +1,11 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import * as React from 'react';
-import {Subscription} from 'rxjs/Subscription';
 
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
 import {ListModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
-import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
@@ -36,6 +35,12 @@ interface Selection extends Criteria {
   parameterId: string;
 }
 
+interface Props {
+  closeSearch: () => void;
+  searchContext: any;
+  setSearchContext: (context: any) => void;
+}
+
 interface State {
   attributesNode: Criteria;
   autocompleteSelection: Criteria;
@@ -52,12 +57,10 @@ interface State {
   selections: Array<Selection>;
   title: string;
   treeSearchTerms: string;
-  wizard: any;
 }
 
-export class CBModal extends React.Component<{}, State> {
-  subscription: Subscription;
-  constructor(props: any) {
+export class CBModal extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       attributesNode: undefined,
@@ -75,40 +78,36 @@ export class CBModal extends React.Component<{}, State> {
       selections: [],
       title: '',
       treeSearchTerms: '',
-      wizard: {}
     };
   }
 
   componentDidMount(): void {
-    this.subscription = wizardStore
-      .filter(wizard => !!wizard)
-      .subscribe(wizard => {
-        // reset to default each time the modal is opened
-        if (!this.state.open) {
-          const selections = wizard.item.searchParameters;
-          const selectedIds = selections.map(s => s.parameterId);
-          if (wizard.type === CriteriaType.DECEASED) {
-            this.selectDeceased();
-          } else {
-            const title = wizard.domain === DomainType.PERSON ? typeToTitle(wizard.type) : domainToTitle(wizard.domain);
-            let backMode, hierarchyNode, mode;
-            if (this.initTree) {
-              hierarchyNode = {
-                domainId: wizard.domain,
-                type: wizard.type,
-                isStandard: wizard.standard,
-                id: 0,
-              };
-              backMode = 'tree';
-              mode = 'tree';
-            } else {
-              backMode = 'list';
-              mode = 'list';
-            }
-            this.setState({backMode, hierarchyNode, mode, open: true, selectedIds, selections, title, wizard});
-          }
+    const {searchContext: {domain, item, standard, type}} = this.props;
+    // reset to default each time the modal is opened
+    if (!this.state.open) {
+      const selections = item.searchParameters;
+      const selectedIds = selections.map(s => s.parameterId);
+      if (type === CriteriaType.DECEASED) {
+        this.selectDeceased();
+      } else {
+        const title = domain === DomainType.PERSON ? typeToTitle(type) : domainToTitle(domain);
+        let backMode, hierarchyNode, mode;
+        if (this.initTree) {
+          hierarchyNode = {
+            domainId: domain,
+            type: type,
+            isStandard: standard,
+            id: 0,
+          };
+          backMode = 'tree';
+          mode = 'tree';
+        } else {
+          backMode = 'list';
+          mode = 'list';
         }
-      });
+        this.setState({backMode, hierarchyNode, mode, open: true, selectedIds, selections, title});
+      }
+    }
   }
 
   setScroll = (id: string) => {
@@ -120,23 +119,6 @@ export class CBModal extends React.Component<{}, State> {
     this.setState({loadingSubtree: false});
   }
 
-  componentWillUnmount(): void {
-    this.subscription.unsubscribe();
-  }
-
-  close = () => {
-    wizardStore.next(undefined);
-    this.setState({
-      attributesNode: undefined,
-      autocompleteSelection: undefined,
-      hierarchyNode: undefined,
-      loadingSubtree: false,
-      open: false,
-      selectedIds: [],
-      selections: [], treeSearchTerms: ''
-    });
-  }
-
   back = () => {
     if (this.state.mode === 'tree') {
       this.setState({autocompleteSelection: undefined, backMode: 'list', hierarchyNode: undefined, mode: 'list'});
@@ -146,7 +128,8 @@ export class CBModal extends React.Component<{}, State> {
   }
 
   finish = () => {
-    const {selections, wizard: {domain, groupId, item, role, type}} = this.state;
+    const {searchContext: {domain, groupId, item, role, type}} = this.props;
+    const {selections} = this.state;
     if (domain === DomainType.PERSON) {
       triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
     }
@@ -167,7 +150,7 @@ export class CBModal extends React.Component<{}, State> {
       searchRequest[role].push(group);
     }
     searchRequestStore.next(searchRequest);
-    this.close();
+    this.props.closeSearch();
   }
 
   get attributeTitle() {
@@ -176,21 +159,22 @@ export class CBModal extends React.Component<{}, State> {
   }
 
   get showModifiers() {
-    const {wizard: {domain}} = this.state;
+    const {searchContext: {domain}} = this.props;
     return domain !== DomainType.PHYSICALMEASUREMENT &&
       domain !== DomainType.PERSON &&
       domain !== DomainType.SURVEY;
   }
 
   get initTree() {
-    const {wizard: {domain}} = this.state;
+    const {searchContext: {domain}} = this.props;
     return domain === DomainType.PHYSICALMEASUREMENT
       || domain === DomainType.SURVEY
       || domain === DomainType.VISIT;
   }
 
   get showDataBrowserLink() {
-    const {mode, wizard: {domain}} = this.state;
+    const {searchContext: {domain}} = this.props;
+    const {mode} = this.state;
     return (domain === DomainType.CONDITION
       || domain === DomainType.PROCEDURE
       || domain === DomainType.MEASUREMENT
@@ -199,7 +183,7 @@ export class CBModal extends React.Component<{}, State> {
   }
 
   get treeClass() {
-    const {wizard: {domain, type}} = this.state;
+    const {searchContext: {domain, type}} = this.props;
     if (domain === DomainType.PERSON) {
       return type === CriteriaType.AGE ? 'col-md-12' : 'col-md-6';
     }
@@ -207,11 +191,12 @@ export class CBModal extends React.Component<{}, State> {
   }
 
   get sidebarClass() {
-    return this.state.wizard.domain === DomainType.PERSON ? 'col-md-6' : 'col-md-4';
+    return this.props.searchContext.domain === DomainType.PERSON ? 'col-md-6' : 'col-md-4';
   }
 
   setMode = (newMode: any) => {
-    const {mode, wizard: {domain}} = this.state;
+    const {searchContext: {domain}} = this.props;
+    const {mode} = this.state;
     let {backMode} = this.state;
     if (newMode === 'modifiers') {
       triggerEvent(
@@ -294,8 +279,9 @@ export class CBModal extends React.Component<{}, State> {
   }
 
   render() {
+    const {closeSearch, searchContext, searchContext: {domain, type}, setSearchContext} = this.props;
     const {attributesNode, autocompleteSelection, conceptType, count, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
-      selectedIds, selections, title, treeSearchTerms, wizard, wizard: {domain, type}} = this.state;
+      selectedIds, selections, title, treeSearchTerms} = this.state;
     let modalClass = 'crit-modal-content';
     if (domain === DomainType.PERSON) {
       modalClass += ' demographics';
@@ -310,7 +296,7 @@ export class CBModal extends React.Component<{}, State> {
     if (['tree', 'list', 'modifiers', 'attributes'].includes(mode)) {
       treeClass += 'show';
     }
-    return !!wizard ? <div className='crit-modal-container'>
+    return !!searchContext ? <div className='crit-modal-container'>
       <div className={modalClass}>
         <div className='container title-margin'>
           <div className='row'>
@@ -384,17 +370,18 @@ export class CBModal extends React.Component<{}, State> {
                     {/* List View */}
                     <div className={'panel-left' + mode === 'list' ? 'show' : ''}>
                       <ListSearch hierarchy={this.showHierarchy}
+                        searchContext={searchContext}
                         select={this.addSelection}
                         selectedIds={selectedIds}
-                        setAttributes={this.setAttributes}
-                        wizard={wizard}/>
+                        setAttributes={this.setAttributes}/>
                     </div>
                     {/* Modifiers Page */}
                     <div className={'panel-left' + mode === 'list' ? 'modifiers' : ''}>
                       {this.showModifiers && <ListModifierPage
                         disabled={this.modifiersFlag}
+                        searchContext={searchContext}
                         selections={selections}
-                        wizard={wizard}/>}
+                        setSearchContext={setSearchContext}/>}
                     </div>
                        {/* Attributes Page */}
                     <div className={'panel-left' + mode === 'list' ? 'attributes' : ''}>
@@ -407,7 +394,7 @@ export class CBModal extends React.Component<{}, State> {
                 </React.Fragment>}
                 {type === CriteriaType.AGE && <div className='footer'>
                   <button
-                    onClick={this.close}
+                    onClick={closeSearch}
                     className='btn btn-link'>
                     Cancel
                   </button>
@@ -423,7 +410,7 @@ export class CBModal extends React.Component<{}, State> {
               <div className='content right'>
                 <SelectionList
                   back={this.back}
-                  close={this.close}
+                  close={closeSearch}
                   disableFinish={disableFinish}
                   domain={domain}
                   finish={this.finish}
@@ -445,7 +432,10 @@ export class CBModal extends React.Component<{}, State> {
   template: '<div #root></div>'
 })
 export class ModalComponent extends ReactWrapperBase {
+  @Input('closeSearch') closeSearch: Props['closeSearch'];
+  @Input('searchContext') searchContext: Props['searchContext'];
+  @Input('setSearchContext') setSearchContext: Props['setSearchContext'];
   constructor() {
-    super(CBModal, []);
+    super(CBModal, ['closeSearch', 'searchContext', 'setSearchContext']);
   }
 }

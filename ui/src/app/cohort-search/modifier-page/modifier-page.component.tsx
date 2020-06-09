@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {encountersStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {encountersStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -181,16 +181,20 @@ interface Selection extends Criteria {
 
 interface Props {
   disabled: Function;
+  searchContext: any;
   selections: Array<Selection>;
-  wizard: any;
+  setSearchContext: (context: any) => void;
   workspace: WorkspaceData;
 }
 
 interface State {
-  formState: any;
+  calculateError: boolean;
   count: number;
+  formErrors: Array<string>;
+  formState: any;
+  formUntouched: boolean;
+  initialFormState: boolean;
   visitCounts: any;
-  error: boolean;
   loading: boolean;
 }
 
@@ -233,10 +237,13 @@ export const ListModifierPage = withCurrentWorkspace()(
             value: Operator.GREATERTHANOREQUALTO,
           }]
         }],
+        formErrors: [],
+        formUntouched: false,
+        initialFormState: true,
         loading: false,
         count: null,
         visitCounts: undefined,
-        error: false,
+        calculateError: false,
       };
       this.updateInput = fp.debounce(300, () => this.updateMods());
     }
@@ -304,10 +311,10 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     getExisting() {
-      const {wizard} = this.props;
+      const {searchContext} = this.props;
       const {formState} = this.state;
       // This reseeds the form state with existing data if we're editing an existing item
-      wizard.item.modifiers.forEach(existing => {
+      searchContext.item.modifiers.forEach(existing => {
         const index = formState.findIndex(mod => existing.name === mod.name);
         if (index > -1) {
           const mod = formState[index];
@@ -356,9 +363,9 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     updateMods() {
-      const {wizard} = this.props;
+      const {searchContext, setSearchContext} = this.props;
       const {formState} = this.state;
-      wizard.item.modifiers = formState.reduce((acc, mod) => {
+      searchContext.item.modifiers = formState.reduce((acc, mod) => {
         const {name, operator, values} = mod;
         if (operator) {
           switch (name) {
@@ -376,23 +383,24 @@ export const ListModifierPage = withCurrentWorkspace()(
         }
         return acc;
       }, []);
-      wizardStore.next(wizard);
+      this.validateValues();
+      setSearchContext(searchContext);
     }
 
     get addEncounters() {
-      const {wizard: {domain}} = this.props;
+      const {searchContext: {domain}} = this.props;
       return ![DomainType.PHYSICALMEASUREMENT, DomainType.VISIT].includes(domain);
     }
 
-    calculate = () => {
+    calculate = async() => {
       const {
         selections,
-        wizard: {domain, item: {modifiers}, role},
+        searchContext: {domain, item: {modifiers}, role},
         workspace: {cdrVersionId}
       } = this.props;
       this.trackEvent('Calculate');
       try {
-        this.setState({loading: true, count: null, error: false});
+        this.setState({loading: true, count: null, calculateError: false});
         const request = {
           includes: [],
           excludes: [],
@@ -405,18 +413,16 @@ export const ListModifierPage = withCurrentWorkspace()(
           }],
           dataFilters: []
         };
-        cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
-          this.setState({count: response, loading: false});
-        }, () => this.setState({loading: false, error: true}));
+        await cohortBuilderApi().countParticipants(+cdrVersionId, request)
+          .then(response => this.setState({count: response, loading: false}));
       } catch (error) {
         console.error(error);
-        // TODO this is not catching errors. Need to try again with the new api call
-        this.setState({loading: false, error: true});
+        this.setState({loading: false, calculateError: true});
       }
     }
 
     trackEvent = (label: string) => {
-      const {wizard: {domain}} = this.props;
+      const {searchContext: {domain}} = this.props;
       triggerEvent(
         'Cohort Builder Search',
         'Click',
@@ -449,7 +455,9 @@ export const ListModifierPage = withCurrentWorkspace()(
         }
         return acc;
       }, new Set());
-      return {errors, initialState, untouched};
+      const disableFinish = errors.length > 0 || untouched;
+      this.props.disabled(disableFinish);
+      this.setState({formErrors: Array.from(errors), formUntouched: untouched, initialFormState: initialState});
     }
 
     optionTemplate = (opt: any, name: any) => {
@@ -482,25 +490,22 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     render() {
-      const {count, error, formState, loading} = this.state;
+      const {count, calculateError, formErrors, formState, formUntouched, initialFormState, loading} = this.state;
       const tooltip = `Dates are consistently shifted within a participant’s record
       by a time period of up to 364 days backwards to de-identify patient data.
       The date shift differs across participants.`;
-      const {errors, initialState, untouched} = this.validateValues();
-      const disableFinish = !!errors.size || untouched || loading;
-      this.props.disabled(disableFinish);
-      const disabled = disableFinish || initialState;
+      const disableCalculate = formErrors.length > 0 || formUntouched || initialFormState;
       return <div style={{marginTop: '1rem'}}>
         <div style={styles.header}>
           The following modifiers are optional and apply to all selected criteria
         </div>
-        {error && <div style={styles.error}>
+        {calculateError && <div style={styles.error}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
             shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
-        {!!errors.size && <div style={styles.errors}>
-          {Array.from(errors).map((err, e) => <div key={e} style={styles.errorItem}>
+        {formErrors.length > 0 && <div style={styles.errors}>
+          {formErrors.map((err, e) => <div key={e} style={styles.errorItem}>
             {err}
           </div>)}
         </div>}
@@ -533,8 +538,8 @@ export const ListModifierPage = withCurrentWorkspace()(
         <div style={styles.footer}>
           <div style={styles.row}>
             <div style={columns.col3}>
-              <Button type='primary' style={disabled ? button.disabled : button.active}
-                disabled={disabled} onClick={() => this.calculate()}>
+              <Button type='primary' style={disableCalculate ? button.disabled : button.active}
+                disabled={disableCalculate} onClick={() => this.calculate()}>
                 {loading &&
                   <Spinner size={16} style={{marginRight: '0.25rem', marginLeft: '-0.25rem'}}/>
                 }
@@ -560,10 +565,11 @@ export const ListModifierPage = withCurrentWorkspace()(
 })
 export class ModifierPageComponent extends ReactWrapperBase {
   @Input('disabled') disabled: Props['disabled'];
+  @Input('searchContext') searchContext: Props['searchContext'];
   @Input('selections') selections: Props['selections'];
-  @Input('wizard') wizard: Props['wizard'];
+  @Input('setSearchContext') setSearchContext: Props['setSearchContext'];
 
   constructor() {
-    super(ListModifierPage, ['disabled', 'selections', 'wizard']);
+    super(ListModifierPage, ['disabled', 'searchContext', 'selections', 'setSearchContext']);
   }
 }

@@ -7,7 +7,6 @@ import {DemographicsComponent} from 'app/cohort-search/demographics/demographics
 import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
-import {wizardStore} from 'app/cohort-search/search-state.service';
 import {SelectionListComponent} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTreeComponent} from 'app/cohort-search/tree/tree.component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -45,10 +44,6 @@ describe('ModalComponent', () => {
     })
       .compileComponents();
     currentWorkspaceStore.next(workspaceDataStub);
-    wizardStore.next({
-      domain: DomainType.MEASUREMENT,
-      item: {modifiers: [], searchParameters: []}
-    });
   }));
 
   beforeEach(() => {

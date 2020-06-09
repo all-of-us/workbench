@@ -33,6 +33,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   updatingCohort = false;
   updateGroupListsCount = 0;
   cohortChanged = false;
+  searchContext: any;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -107,5 +108,13 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   updating = () => {
     this.updatingCohort = true;
+  }
+
+  setSearchContext = (context: any) => {
+    this.searchContext = context;
+  }
+
+  closeSearch = () => {
+    this.searchContext = undefined;
   }
 }

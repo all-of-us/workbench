@@ -13,7 +13,6 @@ import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-pa
 import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {SearchGroupListComponent} from 'app/cohort-search/search-group-list/search-group-list.component';
-import {wizardStore} from 'app/cohort-search/search-state.service';
 import {SelectionListComponent} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTreeComponent} from 'app/cohort-search/tree/tree.component';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
@@ -79,10 +78,6 @@ describe('CohortSearchComponent', () => {
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       cdrVersionId: '1',
-    });
-    wizardStore.next({
-      domain: DomainType.MEASUREMENT,
-      item: {modifiers: [], searchParameters: []}
     });
   }));
 

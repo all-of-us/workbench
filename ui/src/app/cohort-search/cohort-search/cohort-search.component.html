@@ -9,6 +9,7 @@
           <app-list-search-group-list
             [role]="'includes'"
             [groups]="criteria.includes"
+            [setSearchContext]="setSearchContext"
             [updated]="updateGroupListsCount"
             [updateRequest]="updateRequest">
           </app-list-search-group-list>
@@ -19,6 +20,7 @@
             *ngIf="overview"
             [role]="'excludes'"
             [groups]="criteria.excludes"
+            [setSearchContext]="setSearchContext"
             [updated]="updateGroupListsCount"
             [updateRequest]="updateRequest">
           </app-list-search-group-list>
@@ -39,7 +41,10 @@
     </div>
   </div>
 </div>
-<app-list-modal></app-list-modal>
+<app-list-modal *ngIf="searchContext"
+  [closeSearch]="closeSearch"
+  [searchContext]="searchContext"
+  [setSearchContext]="setSearchContext"></app-list-modal>
 <clr-modal [(clrModalOpen)]="modalOpen" [clrModalClosable]="false">
   <h3 class="modal-title">Warning! </h3>
   <div class="modal-body">
