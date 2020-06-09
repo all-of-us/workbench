@@ -63,8 +63,7 @@ export default class Checkbox extends BaseElement {
     if (checked) {
       return this.check();
     }
-    await this.unCheck();
-    return;
+    return this.unCheck();
   }
 
 }

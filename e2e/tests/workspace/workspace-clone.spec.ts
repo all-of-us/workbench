@@ -53,8 +53,6 @@ describe('Clone workspace', () => {
       await workspaceCard.clickWorkspaceName();
 
       const dataPage = new DataPage(page);
-      await dataPage.waitForLoad();
-
       await dataPage.selectWorkspaceAction(EllipsisMenuAction.DUPLICATE);
 
       const workspacesPage = new WorkspacesPage(page);

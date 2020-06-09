@@ -97,7 +97,7 @@ export default class CohortCriteriaModal extends Dialog {
   }
 
   async searchCondition(searchWord: string): Promise<Table> {
-    const searchFilterTextbox = await Textbox.findByName(this.page, {name: 'Search Conditions by code or description'}, this);
+    const searchFilterTextbox = await Textbox.findByName(this.page, {containsText: 'by code or description'}, this);
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturnKey();
     await waitWhileLoading(this.page);

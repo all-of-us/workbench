@@ -23,7 +23,6 @@ describe('Cohorts UI tests', () => {
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
-    await dataPage.waitForLoad();
 
     const addCohortsButton = await dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();

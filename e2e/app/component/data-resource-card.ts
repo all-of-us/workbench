@@ -13,6 +13,7 @@ export enum CardType {
   Cohort = 'Cohort',
   ConceptSet = 'Concept Set',
   Notebook = 'Notebook',
+  Dataset = 'Dataset',
 }
 
 /**
@@ -100,7 +101,7 @@ export default class DataResourceCard {
   }
 
   /**
-   * Find card type: Cohort, DataSets or Concept Sets.
+   * Find card type: Cohort, Datasets or Concept Sets.
    */
   async getCardType() : Promise<unknown> {
     const [element] = await this.cardElement.$x(DataResourceCardSelector.cardTypeXpath);
@@ -136,6 +137,18 @@ export default class DataResourceCard {
       this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
       elemts[0].click(),
     ]);
+  }
+
+  /**
+   * Determine if resource card with specified name exists.
+   * @param {string} cardName
+   * @param {CardType} cardType
+   */
+  async cardExists(cardName: string, cardType: CardType):  Promise<boolean> {
+    const cards = await this.getResourceCard(cardType);
+    const names = await Promise.all(cards.map(item => item.getResourceName()));
+    const filterdList = names.filter(name => name === cardName);
+    return filterdList.length === 1;
   }
 
   private asCard(elementHandle: ElementHandle): DataResourceCard {

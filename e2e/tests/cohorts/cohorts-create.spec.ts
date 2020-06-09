@@ -32,7 +32,6 @@ describe('User can create new Cohorts', () => {
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
-    await dataPage.waitForLoad();
 
     // No cohorts in new workspace.
     const cardsCount = (await DataResourceCard.findAllCards(page)).length;
@@ -127,7 +126,7 @@ describe('User can create new Cohorts', () => {
 
     // Wait for the Data page.
     const dataPage = new DataPage(page);
-    await dataPage.waitForLoad();
+
     // Save url
     const workspaceDataUrl = await page.url();
 
@@ -203,7 +202,7 @@ describe('User can create new Cohorts', () => {
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
     cohortCard = await DataResourceCard.findCard(page, cohortName);
-    const menu = await cohortCard.getEllipsis();
+    const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.DUPLICATE, false);
     await waitWhileLoading(page);
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;

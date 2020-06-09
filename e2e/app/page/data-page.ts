@@ -6,6 +6,11 @@ import {waitWhileLoading} from 'utils/test-utils';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 import ClrIconLink from 'app/element/clr-icon-link';
 import DataResourceCard from 'app/component/data-resource-card';
+import Dialog from 'app/component/dialog';
+import Button from 'app/element/button';
+import Textarea from 'app/element/textarea';
+import Textbox from 'app/element/textbox';
+import {ElementType} from 'app/xpath-options';
 import CohortBuildPage from './cohort-build-page';
 
 export enum LabelAlias {
@@ -50,12 +55,12 @@ export default class DataPage extends AuthenticatedPage {
    * @param tabName
    */
   async openTab(tabName: LabelAlias): Promise<void> {
-    const selector = `//*[@id="workspace-top-nav-bar"]/*[@aria-selected and @role="button" and text()="${tabName}"]`;
+    const selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${tabName}"]`;
     const tab = await this.page.waitForXPath(selector, {visible: true});
     return tab.click();
   }
 
-  async getAddDataSetsButton(): Promise<ClrIconLink> {
+  async getAddDatasetButton(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, {name: LabelAlias.Datasets, iconShape: 'plus-circle'});
   }
 
@@ -69,11 +74,59 @@ export default class DataPage extends AuthenticatedPage {
    */
   async deleteCohort(cohortName: string): Promise<string> {
     const cohortCard = await DataResourceCard.findCard(this.page, cohortName);
-    const menu = await cohortCard.getEllipsis();
+    const menu = cohortCard.getEllipsis();
     await menu.clickAction(EllipsisMenuAction.DELETE, false);
     const dialogContent = await (new CohortBuildPage(this.page)).deleteConfirmationDialog();
     console.log(`Cohort "${cohortName}" deleted.`);
     return dialogContent;
+  }
+
+  /**
+   * Delete Dataset thru Ellipsis menu located inside the Dataset Resource card.
+   * @param {string} datasetName
+   */
+  async deleteDataset(datasetName: string): Promise<string> {
+    const dataSetCard = await DataResourceCard.findCard(this.page, datasetName);
+    const menu = dataSetCard.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.DELETE, false);
+
+    const dialog = new Dialog(this.page);
+    const dialogContentText = await dialog.getContent();
+    const deleteButton = await Button.findByName(this.page, {type: ElementType.Button, normalizeSpace: 'Delete Dataset'}, dialog);
+    await Promise.all([
+      deleteButton.click(),
+      dialog.waitUntilDialogIsClosed(),
+    ]);
+    await waitWhileLoading(this.page);
+
+    console.log(`Dataset "${datasetName}" deleted.`);
+    return dialogContentText;
+  }
+
+  /**
+   * Rename Dataset thru the Ellipsis menu located inside the Dataset Resource card.
+   * @param {string} datasetName
+   * @param {string} newDatasetName
+   */
+  async renameDataset(datasetName: string, newDatasetName: string): Promise<void> {
+    const card = await DataResourceCard.findCard(this.page, datasetName);
+    const menu = card.getEllipsis();
+    await menu.clickAction(EllipsisMenuAction.RenameDataset, false);
+
+    const dialog = new Dialog(this.page);
+
+    const newNameTextbox = new Textbox(this.page, '//*[@id="new-name"]');
+    await newNameTextbox.type(newDatasetName);
+
+    const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, dialog);
+    await descriptionTextarea.type('Puppeteer automation rename dataset.');
+
+    const renameButton = await Button.findByName(this.page, {normalizeSpace: 'Rename Dataset'}, dialog);
+    await Promise.all([
+      renameButton.click(),
+      dialog.waitUntilDialogIsClosed(120000), // Rename Dataset can be very slow sometimes.
+    ]);
+    return waitWhileLoading(this.page);
   }
 
 }
