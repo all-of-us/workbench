@@ -73,8 +73,8 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -89,28 +89,26 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollector {
-  private static final Logger logger = Logger.getLogger(WorkspaceServiceImpl.class.getName());
 
-  private static final String FC_OWNER_ROLE = "OWNER";
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
+  private static final String FC_OWNER_ROLE = "OWNER";
 
-  private final Provider<Cloudbilling> endUserCloudbillingProvider;
-  private final Provider<Cloudbilling> serviceAccountCloudbillingProvider;
+  private final Clock clock;
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
-  private final UserDao userDao;
+  private final FireCloudService fireCloudService;
+  private final FreeTierBillingService freeTierBillingService;
+  private final Provider<Cloudbilling> endUserCloudbillingProvider;
+  private final Provider<Cloudbilling> serviceAccountCloudbillingProvider;
   private final Provider<DbUser> userProvider;
-  private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserDao userDao;
+  private final UserMapper userMapper;
+  private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
-  private final FreeTierBillingService freeTierBillingService;
-  private final UserMapper userMapper;
-
-  private final FireCloudService fireCloudService;
-  private final Clock clock;
 
   @Autowired
   public WorkspaceServiceImpl(

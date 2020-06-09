@@ -6,7 +6,7 @@ import {xPathOptionToXpath} from './xpath-defaults';
 
 export default class ClrIconLink extends BaseElement {
 
-  static async forLabel(
+  static async findByName(
      page: Page,
      xOpt: XPathOptions,
      container?: Container,
@@ -17,6 +17,16 @@ export default class ClrIconLink extends BaseElement {
     const iconLink = new ClrIconLink(page, iconXpath);
     await iconLink.waitForXPath(waitOptions);
     return iconLink;
+  }
+
+  /**
+   * Is Icon disabled?
+   * clr-icon itself cannot tell us if it is disabled. We have to use parent element.
+   */
+  async isDisabled(): Promise<boolean> {
+    const selector = `${this.xpath}/ancestor::node()[1]`;
+    const elemt = await this.page.waitForXPath(selector);
+    return ClrIconLink.asBaseElement(this.page, elemt).isCursorNotAllowed();
   }
 
 }

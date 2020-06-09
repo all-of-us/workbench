@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class CommonConfig {
-
   @Bean
   JsonFactory jsonFactory() {
     return new JacksonFactory();

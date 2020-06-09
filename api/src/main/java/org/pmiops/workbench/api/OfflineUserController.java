@@ -1,9 +1,12 @@
 package org.pmiops.workbench.api;
 
+import com.google.api.services.cloudresourcemanager.model.ResourceId;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -17,6 +20,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,16 +47,6 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-  }
-
-  private boolean timestampsEqual(Timestamp a, Timestamp b) {
-    if (a != null) {
-      return a.equals(b);
-    } else if (b != null) {
-      return b.equals(a);
-    } else {
-      return a == b;
-    }
   }
 
   /**
@@ -95,7 +89,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
 
-        if (!timestampsEqual(newTime, oldTime)) {
+        if (!Objects.equals(newTime, oldTime)) {
           log.info(
               String.format(
                   "Compliance training completion changed for user %s. Old %s, new %s",
@@ -147,6 +141,13 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     for (DbUser user : userService.getAllUsers()) {
       userCount++;
       try {
+        // User accounts are registered with Terra on first sign-in. Users who have never signed in
+        // are therefore unusable for impersonated calls to Terra to check on their eRA commons
+        // status.
+        if (user.getFirstSignInTime() == null) {
+          continue;
+        }
+
         Timestamp oldTime = user.getEraCommonsCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
@@ -156,7 +157,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
-        if (!timestampsEqual(newTime, oldTime)) {
+        if (!Objects.equals(newTime, oldTime)) {
           log.info(
               String.format(
                   "eRA Commons completion changed for user %s. Old %s, new %s",
@@ -220,7 +221,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
-        if (!timestampsEqual(newTime, oldTime)) {
+        if (!Objects.equals(newTime, oldTime)) {
           log.info(
               String.format(
                   "Two-factor auth completion changed for user %s. Old %s, new %s",
@@ -262,22 +263,42 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkAuditProjectAccess() {
-    for (DbUser user : userService.getAllUsers()) {
+    int errorCount = 0;
+    List<DbUser> users = userService.getAllUsers();
+    for (DbUser user : users) {
       // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
-      List<String> unauthorizedLogs =
-          cloudResourceManagerService.getAllProjectsForUser(user).stream()
-              .filter(project -> !(WHITELISTED_ORG_IDS.contains(project.getParent().getId())))
-              .map(project -> project.getName() + " in organization " + project.getParent().getId())
-              .collect(Collectors.toList());
-      if (unauthorizedLogs.size() > 0) {
-        log.log(
-            Level.WARNING,
-            "User "
-                + user.getUsername()
-                + " has access to projects: "
-                + String.join(", ", unauthorizedLogs));
+      try {
+        List<String> unauthorizedLogs =
+            cloudResourceManagerService.getAllProjectsForUser(user).stream()
+                .filter(
+                    project ->
+                        project.getParent() == null
+                            || !(WHITELISTED_ORG_IDS.contains(project.getParent().getId())))
+                .map(
+                    project ->
+                        project.getName()
+                            + " in organization "
+                            + Optional.ofNullable(project.getParent())
+                                .map(ResourceId::getId)
+                                .orElse("[none]"))
+                .collect(Collectors.toList());
+        if (unauthorizedLogs.size() > 0) {
+          log.warning(
+              "User "
+                  + user.getUsername()
+                  + " has access to projects: "
+                  + String.join(", ", unauthorizedLogs));
+        }
+      } catch (IOException e) {
+        log.log(Level.SEVERE, "failed to audit project access for user " + user.getUsername(), e);
+        errorCount++;
       }
     }
+    if (errorCount > 0) {
+      log.severe(String.format("encountered errors on %d/%d users", errorCount, users.size()));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+    log.info(String.format("successfully audited %d users", users.size()));
     return ResponseEntity.noContent().build();
   }
 }

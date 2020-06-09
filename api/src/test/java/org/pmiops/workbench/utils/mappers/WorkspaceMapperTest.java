@@ -30,8 +30,6 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.utils.WorkspaceMapper;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -74,6 +72,7 @@ public class WorkspaceMapperTest {
     CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
     WorkspaceMapperImpl.class,
   })
   @MockBean({UserDao.class, WorkspaceDao.class})

@@ -13,7 +13,7 @@
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:0.0.1",
-    "welderDockerImage": "broadinstitute/welder-server:e6562d0"
+    "welderDockerImage": "broadinstitute/welder-server:7ae1a62"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
@@ -44,7 +44,6 @@
     "debugQueries": true
   },
   "googleCloudStorageService": {
-    "clusterResourcesBucketName": "all-of-us-rw-perf-cluster-resources",
     "credentialsBucketName": "all-of-us-rw-perf-credentials",
     "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
@@ -108,7 +107,9 @@
     "enableEventDateModifier": false
   },
   "actionAudit": {
-    "logName": "workbench-action-audit-perf"
+    "logName": "workbench-action-audit-perf",
+    "bigQueryDataset": "workbench_action_audit_perf",
+    "bigQueryTable": "workbench_action_audit_perf"
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",

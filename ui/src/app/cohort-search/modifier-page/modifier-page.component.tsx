@@ -3,7 +3,7 @@ import {encountersStore, wizardStore} from 'app/cohort-search/search-state.servi
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {DatePicker} from 'app/components/inputs';
+import {DatePicker, NumberInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -11,7 +11,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
+import {Criteria, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
@@ -49,13 +49,6 @@ const styles = reactStyles({
     height: '1.6rem',
     paddingLeft: '0.5rem',
     marginRight: '1rem',
-  },
-  number: {
-    borderRadius: '3px',
-    border: '1px solid #a6a6a6',
-    width: '3rem',
-    height: '1.6rem',
-    verticalAlign: 'middle',
   },
   date: {
     width: '6.5rem',
@@ -182,8 +175,13 @@ const validatorFuncs = {
   }
 };
 
+interface Selection extends Criteria {
+  parameterId: string;
+}
+
 interface Props {
   disabled: Function;
+  selections: Array<Selection>;
   wizard: any;
   workspace: WorkspaceData;
 }
@@ -388,7 +386,8 @@ export const ListModifierPage = withCurrentWorkspace()(
 
     calculate = () => {
       const {
-        wizard: {domain, item: {modifiers, searchParameters}, role},
+        selections,
+        wizard: {domain, item: {modifiers}, role},
         workspace: {cdrVersionId}
       } = this.props;
       this.trackEvent('Calculate');
@@ -400,7 +399,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           [role]: [{
             items: [{
               type: domain,
-              searchParameters: searchParameters.map(mapParameter),
+              searchParameters: selections.map(mapParameter),
               modifiers: modifiers
             }]
           }],
@@ -468,8 +467,8 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {values} = this.state.formState[index];
       switch (type) {
         case 'number':
-          return <input type='number' style={styles.number} value={values[field]}
-            onChange={e => this.inputChange(index, field, e.target.value)}/>;
+          return <NumberInput style={{padding: '0 0.25rem', width: '3rem'}} value={values[field]}
+            onChange={v => this.inputChange(index, field, v)}/>;
         case 'date':
           return <div style={styles.date}>
             <DatePicker
@@ -519,6 +518,7 @@ export const ListModifierPage = withCurrentWorkspace()(
                 style={styles.select}
                 onChange={(e) => this.selectChange(e.value, i)}
                 options={options}
+                optionValue='value'
                 itemTemplate={(e) => this.optionTemplate(e, name)}/>
               {operator && name !== ModifierType.ENCOUNTERS && <React.Fragment>
                 {this.renderInput(i, '0', mod.type)}
@@ -560,9 +560,10 @@ export const ListModifierPage = withCurrentWorkspace()(
 })
 export class ModifierPageComponent extends ReactWrapperBase {
   @Input('disabled') disabled: Props['disabled'];
+  @Input('selections') selections: Props['selections'];
   @Input('wizard') wizard: Props['wizard'];
 
   constructor() {
-    super(ListModifierPage, ['disabled', 'wizard']);
+    super(ListModifierPage, ['disabled', 'selections', 'wizard']);
   }
 }

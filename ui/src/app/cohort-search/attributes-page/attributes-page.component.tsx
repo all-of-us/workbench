@@ -12,7 +12,7 @@ import {
 } from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {CheckBox} from 'app/components/inputs';
+import {CheckBox, NumberInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -60,13 +60,6 @@ const styles = reactStyles({
   dropdown: {
     width: '12rem',
     marginRight: '1rem',
-  },
-  number: {
-    borderRadius: '3px',
-    border: '1px solid #a6a6a6',
-    width: '3rem',
-    height: '1.6rem',
-    verticalAlign: 'middle',
   },
   categorical: {
     width: '25%',
@@ -174,8 +167,8 @@ export const AttributesPage = withCurrentWorkspace() (
         loading: true,
         options: [
           {label: 'Equals', value: Operator.EQUAL},
-          {label: 'Greater than or Equal to', value: Operator.GREATERTHANOREQUALTO},
-          {label: 'Less than or Equal to', value: Operator.LESSTHANOREQUALTO},
+          {label: 'Greater Than or Equal To', value: Operator.GREATERTHANOREQUALTO},
+          {label: 'Less Than or Equal To', value: Operator.LESSTHANOREQUALTO},
           {label: 'Between', value: Operator.BETWEEN},
         ],
       };
@@ -525,17 +518,19 @@ export const AttributesPage = withCurrentWorkspace() (
                     placeholder='Select Operator' onChange={(e) => this.selectChange(a, e.value)}/>
                 </div>
                 {![null, 'ANY'].includes(attr.operator) && <div>
-                  <input style={styles.number} type='number' value={attr.operands[0] || ''}
+                  <NumberInput style={{padding: '0 0.25rem', width: '3rem'}}
+                    value={attr.operands[0] || ''}
                     min={attr.MIN} max={attr.MAX}
-                    onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
+                    onChange={(v) => this.inputChange(v, a, 0)}/>
                   {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
                 </div>}
                 {attr.operator === Operator.BETWEEN && <React.Fragment>
                   <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
                   <div>
-                    <input style={styles.number} type='number' value={attr.operands[1] || ''}
+                    <NumberInput style={{padding: '0 0.25rem', width: '3rem'}}
+                      value={attr.operands[1] || ''}
                       min={attr.MIN} max={attr.MAX}
-                      onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
+                      onChange={(v) => this.inputChange(v, a, 1)}/>
                     {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
                   </div>
                 </React.Fragment>}

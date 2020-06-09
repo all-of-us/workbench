@@ -76,8 +76,10 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapperImpl;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -87,33 +89,34 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, CohortReviewController.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
   @Import({
-    WorkspaceServiceImpl.class,
+    BigQueryTestService.class,
+    CohortCloningService.class,
     CohortMapperImpl.class,
+    CohortQueryBuilder.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
-    CohortReviewController.class,
+    CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
-    BigQueryTestService.class,
+    FirecloudMapperImpl.class,
     ReviewQueryBuilder.class,
-    CohortCloningService.class,
-    CohortQueryBuilder.class,
     SearchGroupItemQueryBuilder.class,
+    UserMapperImpl.class,
     WorkspaceMapperImpl.class,
-    CommonMappers.class
+    WorkspaceServiceImpl.class
   })
   @MockBean({
-    FireCloudService.class,
-    UserRecentResourceService.class,
     CohortFactory.class,
     ConceptSetService.class,
     DataSetService.class,
-    FreeTierBillingService.class
+    FireCloudService.class,
+    FreeTierBillingService.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
 

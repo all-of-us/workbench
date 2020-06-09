@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.model.Project;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,9 +66,16 @@ public class OfflineUserControllerTest {
   }
 
   private DbUser createUser(String email) {
+    return createUser(email, true);
+  }
+
+  private DbUser createUser(String email, boolean signedIn) {
     DbUser user = new DbUser();
     user.setUsername(email);
     user.setUserId(incrementedUserId);
+    if (signedIn) {
+      user.setFirstSignInTime(Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z")));
+    }
     incrementedUserId++;
     return user;
   }
@@ -75,7 +84,8 @@ public class OfflineUserControllerTest {
     return Arrays.asList(
         createUser("a@fake-research-aou.org"),
         createUser("b@fake-research-aou.org"),
-        createUser("c@fake-research-aou.org"));
+        createUser("c@fake-research-aou.org"),
+        createUser("never-signed-in@fake-research-aou.org", false));
   }
 
   @Test
@@ -85,7 +95,7 @@ public class OfflineUserControllerTest {
     // Mock out the service under test to simply return the passed user argument.
     doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusV1(any(), any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
-    verify(userService, times(3)).syncComplianceTrainingStatusV1(any(), any());
+    verify(userService, times(4)).syncComplianceTrainingStatusV1(any(), any());
   }
 
   @Test
@@ -95,7 +105,7 @@ public class OfflineUserControllerTest {
     // Mock out the service under test to simply return the passed user argument.
     doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusV2(any(), any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
-    verify(userService, times(3)).syncComplianceTrainingStatusV2(any(), any());
+    verify(userService, times(4)).syncComplianceTrainingStatusV2(any(), any());
   }
 
   @Test(expected = ServerErrorException.class)
@@ -109,7 +119,7 @@ public class OfflineUserControllerTest {
             argThat(user -> user.getUsername().equals("a@fake-research-aou.org")), any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
     // Even when a single call throws an exception, we call the service for all users.
-    verify(userService, times(3)).syncComplianceTrainingStatusV1(any(), any());
+    verify(userService, times(4)).syncComplianceTrainingStatusV1(any(), any());
   }
 
   @Test(expected = ServerErrorException.class)
@@ -123,7 +133,7 @@ public class OfflineUserControllerTest {
             argThat(user -> user.getUsername().equals("a@fake-research-aou.org")), any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
     // Even when a single call throws an exception, we call the service for all users.
-    verify(userService, times(3)).syncComplianceTrainingStatusV2(any(), any());
+    verify(userService, times(4)).syncComplianceTrainingStatusV2(any(), any());
   }
 
   @Test
@@ -153,10 +163,10 @@ public class OfflineUserControllerTest {
   }
 
   @Test
-  public void testBulkProjectAudit() {
+  public void testBulkProjectAudit() throws Exception {
     List<Project> projectList = new ArrayList<>();
     doReturn(projectList).when(cloudResourceManagerService).getAllProjectsForUser(any());
     offlineUserController.bulkAuditProjectAccess();
-    verify(cloudResourceManagerService, times(3)).getAllProjectsForUser(any());
+    verify(cloudResourceManagerService, times(4)).getAllProjectsForUser(any());
   }
 }

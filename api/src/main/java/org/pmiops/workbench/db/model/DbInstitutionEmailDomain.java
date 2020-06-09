@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,7 +32,7 @@ public class DbInstitutionEmailDomain {
     return this;
   }
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   @JoinColumn(name = "institution_id", nullable = false)
   public DbInstitution getInstitution() {
     return institution;
@@ -54,7 +53,8 @@ public class DbInstitutionEmailDomain {
     return this;
   }
 
-  // logical equality: data members without the ID field
+  // omit ID field from equality so equivalent objects match regardless
+  // of whether they are actually present in the DB
 
   @Override
   public boolean equals(Object o) {
@@ -67,12 +67,12 @@ public class DbInstitutionEmailDomain {
 
     DbInstitutionEmailDomain that = (DbInstitutionEmailDomain) o;
 
-    return Objects.equals(institution, that.institution)
-        && Objects.equals(emailDomain, that.emailDomain);
+    return Objects.equals(emailDomain, that.emailDomain)
+        && Objects.equals(institution, that.institution);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(institution, emailDomain);
+    return Objects.hash(emailDomain, institution);
   }
 }

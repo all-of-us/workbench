@@ -934,6 +934,56 @@ paths:
           description: A list of workspaces
           schema:
             "$ref": "#/definitions/WorkspaceListResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/audit":
+    get:
+      tags:
+        - workspaceAdmin
+      description: >
+        Fetch audit logs involving this workspace as either a subject or object. Requires the
+        RESEARCHER_DATA_VIEW authority.
+      operationId: getAuditLogEntries
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          type: string
+          required: true
+          description: >
+            Firecloud Namespace for the AoU workspace to be queried.
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 100
+          description: >
+            Maximum number of entries to return, sorted by timestamp descending.
+        - name: after
+          description: >
+            Earliest time matched by the query (inclusive). Epoch millis.
+
+            Note that while Swagger allows a date-time formatted string query parameter,
+            it appears Spring doesn't handle that well today. It gives the error message described
+            at https://github.com/swagger-api/swagger-codegen/issues/4113.
+          in: query
+          type: integer
+          format: int64
+          required: false
+          default: 0
+        - name: before
+          description: >
+             Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
+             since Epoch (though declared as a string). Defaults to current timestamp.
+          in: query
+          type: integer
+          format: int64
+          required: false
+      responses:
+        200:
+          description: >
+            List of rows matching the query result. queryMetadata contains
+            the workspaceDatabaaseId (for post-processing) as well as the query actually
+            executed (as a starting point for exploring manually in BigQuery).
+          schema:
+            "$ref": "#/definitions/WorkspaceAuditLogQueryResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list":
     get:
       summary: Get details of Python files from google Bucket directory notebook
@@ -996,6 +1046,59 @@ paths:
           description: No module exists with name submitted
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
+    get:
+      tags:
+        - profile
+      description: >
+        Fetch audit logs involving this user as either a subject or object. Requires the
+        RESEARCHER_DATA_VIEW authority.
+      operationId: getAuditLogEntries
+      parameters:
+        - name: usernameWithoutGsuiteDomain
+          in: path
+          type: string
+          required: true
+          description: >
+            Username of user, not including the environment-specific domain, e.g.
+            "@fake-research-aou.org".
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 100
+          description: >
+            Maximum number of entries to return, sorted by timestamp descending. This entry count
+            also determines (in a less predictable way) how many bundled actions are in the
+            response.
+        - name: after
+          description: >
+            Earliest time matched by the query (inclusive). Epoch millis.
+
+            Note that while Swagger allows a date-time formatted string query parameter,
+            it appears Spring doesn't handle that well today. It gives the error message described
+            at https://github.com/swagger-api/swagger-codegen/issues/4113.
+          in: query
+          type: integer
+          format: int64
+          required: false
+          default: 0
+        - name: before
+          description: >
+            Upper bound on timestamp of most recent result (exclusive). Specified as milliseconds
+            since Epoch (though declared as a string). Defaults to current timestamp.
+          in: query
+          type: integer
+          format: int64
+          required: false
+      responses:
+        200:
+          description: >
+            List of rows matching the query result. queryMetadata contains
+            the workspaceDatabaaseId (for post-processing) as well as the query actually
+            executed (as a starting point for exploring manually in BigQuery).
+          schema:
+            "$ref": "#/definitions/UserAuditLogQueryResponse"
   "/v1/admin/users/{userId}/bypass-access-requirement":
     post:
       tags:
@@ -1109,7 +1212,7 @@ paths:
       tags:
       - workspaceAdmin
       description: 'Given a workspace namespace (Google Cloud Platform  Project ID),
-        returns workspace details. Requires the WORKSPACES_VIEW authority.'
+        returns workspace details. Requires the RESEARCHER_DATA_VIEW authority.'
       operationId: getFederatedWorkspaceDetails
       responses:
         200:
@@ -1127,7 +1230,7 @@ paths:
       tags:
       - workspaceAdmin
       description: 'Returns a time series of cloud storage traffic for the given project.
-        Requires the WORKSPACES_VIEW authority.'
+        Requires the RESEARCHER_DATA_VIEW authority.'
       operationId: getCloudStorageTraffic
       responses:
         200:
@@ -2300,6 +2403,15 @@ paths:
           description: 'The Institution created by this operation.'
           schema:
             "$ref": "#/definitions/Institution"
+        400:
+          description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        409:
+          description: DataIntegrityViolationException was thrown, possibly due to an attempt to create a duplicate Institution.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
   "/v1/institutions/publicDetails":
     get:
       tags:
@@ -3717,18 +3829,19 @@ definitions:
     x-aou-note: |
       Authorities are a tool used to add discrete permissions to users. We currently
       define the following authorities:
-       1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
+        * REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
           the user has requested review to approve or reject.
-       2) DEVELOPER: Grants access to some internal-only
+        * DEVELOPER: Grants access to some internal-only
           administrative endpoints, including group management and cluster
           management. Intended to be granted for devops needs, e.g. for oncall.
-       3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
+        * ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
           to perform actions on a user's enabled status and manual verification.
-       4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
-       5) COMMUNICATIONS_ADMIN: Allows a user to post a Status Alert banner
-       6) SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all clusters in a project
-       7) INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
-
+        * FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
+        * COMMUNICATIONS_ADMIN: Allows a user to post a Status Alert banner
+        * SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all clusters in a project
+        * INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
+        * RESEARCHER_DATA_VIEW: Allows a user to view admin-only data (or aggregations of data)
+            for users, workspaces, and similar user-created content.
       Note on enum names: Swagger trims any common prefix from enum values' corresponding
       Java fields by default; this has no side-effect currently as there is
       no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
@@ -3742,7 +3855,7 @@ definitions:
     - COMMUNICATIONS_ADMIN
     - SECURITY_ADMIN
     - INSTITUTION_ADMIN
-    - WORKSPACES_VIEW
+    - RESEARCHER_DATA_VIEW
   PageVisit:
     type: object
     properties:
@@ -7305,6 +7418,226 @@ definitions:
         type: integer
         format: int64
       conceptName:
+        type: string
+  WorkspaceAuditLogQueryResponse:
+    type: object
+    description: >
+      Represents the results of a query into the audit dataset in BigQery without
+      filtering or transformation.
+    required:
+    - logEntries
+    - query
+    - workspaceDatabaseId
+    properties:
+      actions:
+        description: Re-constructed objects for each composite action in the query results.
+        type: array
+        items:
+          "$ref": "#/definitions/AuditAction"
+      logEntries:
+        type: array
+        items:
+          "$ref": "#/definitions/AuditLogEntry"
+      query:
+        description: Copy of the query used in BigQuery to assist in further exploration or
+          debugging.
+        type: string
+      workspaceDatabaseId:
+        description: >
+          ID in the MySQL database and BigQuery Audit Database for the workspace queried.
+        type: integer
+        format: int64
+  UserAuditLogQueryResponse:
+    type: object
+    description: >
+      Represents the results of a query into the audit dataset in BigQuery without
+      filtering or transformation.
+    required:
+      - actions
+      - logEntries
+      - query
+      - userDatabaseId
+    properties:
+      actions:
+        description: Re-constructed objects for each composite action in the query results.
+        type: array
+        items:
+          "$ref": "#/definitions/AuditAction"
+      logEntries:
+        type: array
+        items:
+          "$ref": "#/definitions/AuditLogEntry"
+      query:
+        description: Copy of the query used in BigQuery to assist in further exploration or
+          debugging.
+        type: string
+      userDatabaseId:
+        description: >
+          ID in the MySQL database and BigQuery Audit Database for the user queried.
+        type: integer
+        format: int64
+  AuditLogEntry:
+    description: >
+      Representation of the BigQuery Audit Log entry, post-translation from Stackdriver logging.
+      All fields are treated as optional here, as there are no non-null constraints in the BigQuery
+      dataset.
+
+      It's possible that due to some error now or in the past that some columns might not match
+      their expected values, nothing in this type definition is stricter than the BigQuery schema.
+    type: object
+    properties:
+      actionId:
+        description: Unique ID for this action. Used for grouping similar events under a
+          single action, though in this representation we're returning a straight list of rows.
+          This is technically a UUID, but this may change in the future (to a shorter random string),
+          so we only type it as a String.
+        type: string
+      actionType:
+        description: >
+          Defines what action is taking place in this event. (There can be several ACTION_TYPEs
+          in a single Action assigned to different events. String representation of the ActionType
+          enum (not generated).
+        type: string
+      agentId:
+        description: >
+          ID for the Agent (typically a User). If there's a SQL table for this agent type,
+          this this is the PK for that table (e.g. user_id).
+        type: integer
+        format: int64
+      agentType:
+        description: >
+          A member of the org.pmiops.workbench.actionaudit.AgentType enum (not generated). Since
+          this is typed as a string in BigQuery (and not constrained to that type), we don't try
+          to narrow the type in the admin API.
+        type: string
+      agentUsername:
+        description: >
+          Username of the user or administrator taking the action. This is the agent_email column
+          in BigQuery.
+        type: string
+        format: email
+      eventTime:
+        description: >
+          Timestamp recorded at time of the event. Called timestamp in the BigQuery table. Even
+          though it says string, it's actually a integer over the wire.
+        type: string
+        format: date-time
+      newValue:
+        description: Value of the target property (if any) after the event.
+        type: string
+      previousValue:
+        description: >
+          Value of the target property at the instant of this event beginning. prev_value in BigQuery.
+        type: string
+      targetId:
+        description: >
+          Database ID of the corresponding table for the target entity.
+        type: integer
+        format: int64
+      targetProperty:
+        description: >
+          Property on the target entity affected by this event. One of several internal enums such
+          as WorkspaceTargetProperty.
+        type: string
+      targetType:
+        description: >
+          Type of target. Described by the enum TargetType (which is not generated). Left as string
+          since BigQuery doesn't enforce the enum membership.
+        type: string
+  AuditAction:
+    type: object
+    description: >
+      A user- or administrator-visible system action in the audit log. Becasue a single action taken
+      may have effects on more than on target, each action may contain multiple agents, targets,
+      and action types.
+    properties:
+      actionId:
+        description: Unique ID for this action. Used for grouping similar events under a
+          single action, though in this representation we're returning a straight list of rows.
+          This is technically a UUID, but this may change in the future (to a shorter random string),
+          so we only type it as a String.
+        type: string
+      actionTime:
+        description: Time of the earliest event (row) for this action. It's assumed that all rows in
+          an action occur at the same time.
+        type: string
+        format: date-time
+      eventBundles:
+        description: >
+          Within an action there might be sub-actions, or event bundles, that describe effects on
+          different targets, for example when sharing a workspace with other users.
+        type: array
+        items:
+          "$ref": "#/definitions/AuditEventBundle"
+  AuditEventBundle:
+    description: >
+      Collection of an AuditAction's sub-actions. Useful as a map key, plus it contains
+      information about the agent, target, and action type (of which there can be multiple per
+      action). Additionally, any property changes are coalesced into an array under the
+      propertyChanges property.
+    type: object
+    properties:
+      header:
+        description: >
+          Unique header for this event bundle within the parent action. Consists of agent,
+          target, and action type information.
+        "$ref": "#/definitions/AuditEventBundleHeader"
+      propertyChanges:
+        description: >
+          List of property changes corresponding to this event bundle. For example, with a
+          workspace create event, there may be many field changed from null to their initial
+          values.
+        type: array
+        items:
+          "$ref": "#/definitions/AuditTargetPropertyChange"
+  AuditEventBundleHeader:
+    description: >
+      Unique header for this event bundle within the parent action. Consists of agent,
+      target, and action type information. This tuple is used internally to filter the
+      rows of each action.
+    type: object
+    properties:
+      actionType:
+        type: string
+      agent:
+        "$ref": "#/definitions/AuditAgent"
+      target:
+        "$ref": "#/definitions/AuditTarget"
+  AuditAgent:
+    description: >
+      Composite object containing audited agent information. See AuditLogEntry for individual
+      fields.
+    type: object
+    properties:
+      agentId:
+        type: integer
+        format: int64
+      agentType:
+        type: string
+      agentUsername:
+        type: string
+  AuditTarget:
+    description: >
+      Composite object containing audited target information. See AuditLogEntry for individual
+      fields.
+    type: object
+    properties:
+      targetId:
+        type: integer
+        format: int64
+      targetType:
+        type: string
+  AuditTargetPropertyChange:
+    description: >
+      Composite object containing audited target property changes. See AuditLogEntry for individual
+      fields.
+    type: object
+    properties:
+      targetProperty:
+        type: string
+      previousValue:
+        type: string
+      newValue:
         type: string
   WorkspaceUserAdminView:
     type: object

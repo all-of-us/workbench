@@ -3,7 +3,7 @@ import * as React from 'react';
 import {validate} from 'validate.js';
 
 import {Button} from 'app/components/buttons';
-import {ValidationError} from 'app/components/inputs';
+import {NumberInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {cohortReviewStore} from 'app/services/review-state.service';
@@ -27,8 +27,6 @@ const styles = reactStyles({
   input: {
     height: '1.25rem',
     width: '10rem',
-    border: '1px solid #c5c5c5',
-    borderRadius: '3px',
   },
   cancel: {
     color: '#000000',
@@ -125,13 +123,11 @@ export const CreateReviewModal = withCurrentWorkspace()(
           <ValidationError>
             {summarizeErrors(numberOfParticipants && errors && errors.numberOfParticipants)}
           </ValidationError>
-          <input type='number'
+          <NumberInput
             value={numberOfParticipants}
             style={styles.input}
             placeholder='NUMBER OF PARTICIPANTS'
-            onChange={e => this.setState(
-              {numberOfParticipants: e.target.value}
-            )}/>
+            onChange={v => this.setState({numberOfParticipants: v})}/>
         </ModalBody>
         <ModalFooter>
           <Button style={styles.cancel}

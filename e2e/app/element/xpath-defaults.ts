@@ -14,56 +14,47 @@ export function xPathOptionToXpath(xOpts: XPathOptions, container?: Container): 
     if (iconShape === undefined) {
       throw new Error(`Incorrect XPathOptions configuration for Icon: set "iconShape" value.`);
     }
-  } else {
-    if (name === undefined && normalizeSpace === undefined && containsText === undefined) {
-      throw new Error(`Incorrect XPathOptions configuration for label name: 
-      Cannot find a text parameter: set "name", "containsText" or "normalizeSpace" value.`);
-    }
   }
 
-  let str;
+  let str = '';
   if (name !== undefined) {
-    str = `text()="${name}" or @aria-label="${name}" or @placeholder="${name}"`;
+    str = `[text()="${name}" or @aria-label="${name}" or @placeholder="${name}"]`;
   } else if (containsText !== undefined) {
-    str = `contains(text(),"${containsText}") or contains(@aria-label,"${containsText}") or contains(@placeholder,"${containsText}")`;
+    str = `[contains(text(),"${containsText}") or contains(@aria-label,"${containsText}") or contains(@placeholder,"${containsText}")]`;
   } else if (normalizeSpace !== undefined) {
-    str = `contains(normalize-space(),"${normalizeSpace}")`;
+    str = `[contains(normalize-space(),"${normalizeSpace}")]`;
   }
 
-  const containerXpath = (container === undefined) ? '' : container.getXpath();
-  const textExpr = `(${containerXpath}//label | ${containerXpath}//*)[${str}]`;
   const nodeLevel = `ancestor::node()[${ancestorLevel}]`;
+  const containerXpath = (container === undefined) ? '' : container.getXpath();
+  // empty str means element is not tied to a specific label.
+  const textExpr = (str === '') ? `${containerXpath}` : `(${containerXpath}//label | ${containerXpath}//*)${str}/${nodeLevel}`;
 
   let selector;
   switch (type) {
   case ElementType.Button:
-    selector = `(${containerXpath}//button | ${containerXpath}//*[@role="button"])[${str}]`;
+    selector = `(${containerXpath}//button | ${containerXpath}//*[@role="button"])${str}`;
     break;
   case ElementType.Icon: // clickable icon
     const tag = (iconShape === undefined) ? '*' : `clr-icon[@shape="${iconShape}"]`;
-    if (name === undefined && containsText === undefined && normalizeSpace === undefined) {
-        // not tied to a specific label
-      selector = `//${tag}[*[@role="img"]]`;
-    } else {
-      selector = `//*[${textExpr}]/${nodeLevel}//${tag}[*[@role="img"]]`;
-    }
+    selector = `${textExpr}//${tag}[*[@role="img"]]`;
     break;
   case ElementType.Checkbox:
-    selector = `${textExpr}/${nodeLevel}/input[@type="${type}"]`;
+    selector = `${textExpr}/input[@type="${type}"]`;
     break;
   case ElementType.RadioButton:
   case ElementType.Textbox:
-    selector = `${textExpr}/${nodeLevel}//input[@type="${type}"]`;
+    selector = `${textExpr}//input[@type="${type}"]`;
     break;
   case ElementType.Link:
-    selector = `(${containerXpath}//a | ${containerXpath}//span | ${containerXpath}//*[@role='button'])[${str}]`;
+    selector = `(${containerXpath}//a | ${containerXpath}//span | ${containerXpath}//*[@role='button'])${str}`;
     break;
   case ElementType.Textarea:
   case ElementType.Select:
-    selector = `${textExpr}/${nodeLevel}//${type}`;
+    selector = `${textExpr}//${type}`;
     break;
   case ElementType.Dropdown:
-    selector = `${textExpr}/${nodeLevel}//*[contains(concat(" ", normalize-space(@class), " ")," p-dropdown ")]`;
+    selector = `${textExpr}//*[contains(concat(" ", normalize-space(@class))," p-dropdown")]`;
     break;
   default:
     console.debug(`Implement unhandled type: ${type}. 

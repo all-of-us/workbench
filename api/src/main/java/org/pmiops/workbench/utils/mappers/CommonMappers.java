@@ -68,10 +68,6 @@ public class CommonMappers {
     return Etags.toVersion(etag);
   }
 
-  /////////////////////////////////////////////////////////////////////////////
-  //                                  ENUMS                                  //
-  /////////////////////////////////////////////////////////////////////////////
-
   public BillingStatus checkBillingFeatureFlag(BillingStatus billingStatus) {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       return BillingStatus.ACTIVE;

@@ -1,0 +1,17 @@
+[
+  {
+    "procedure_occurrence_id": 1,
+    "person_id": 1,
+    "procedure_concept_id": 1,
+    "procedure_date": "1967-01-31",
+    "procedure_datetime": "1967-01-31 00:00:00 UTC",
+    "modifier_concept_id": 1,
+    "procedure_type_concept_id": 1,
+    "quantity": 1,
+    "provider_id": 1,
+    "visit_occurrence_id": 1,
+    "procedure_source_value": "1",
+    "procedure_source_concept_id": 1,
+    "qualifier_source_value": "s"
+  }
+]

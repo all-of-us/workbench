@@ -1,7 +1,10 @@
 package org.pmiops.workbench.institution;
 
+import com.google.common.base.Strings;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -9,18 +12,23 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.InstitutionDao;
+import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
+import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
 import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,27 +37,40 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private static final Logger log = Logger.getLogger(InstitutionServiceImpl.class.getName());
 
+  private final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
+
   private final InstitutionDao institutionDao;
+  private final InstitutionEmailDomainDao institutionEmailDomainDao;
+  private final InstitutionEmailAddressDao institutionEmailAddressDao;
   private final InstitutionUserInstructionsDao institutionUserInstructionsDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final InstitutionMapper institutionMapper;
+  private final InstitutionEmailDomainMapper institutionEmailDomainMapper;
+  private final InstitutionEmailAddressMapper institutionEmailAddressMapper;
   private final InstitutionUserInstructionsMapper institutionUserInstructionsMapper;
   private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
-  private final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
   @Autowired
   InstitutionServiceImpl(
       InstitutionDao institutionDao,
+      InstitutionEmailDomainDao institutionEmailDomainDao,
+      InstitutionEmailAddressDao institutionEmailAddressDao,
       InstitutionUserInstructionsDao institutionUserInstructionsDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       InstitutionMapper institutionMapper,
+      InstitutionEmailDomainMapper institutionEmailDomainMapper,
+      InstitutionEmailAddressMapper institutionEmailAddressMapper,
       InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
       PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
     this.institutionDao = institutionDao;
+    this.institutionEmailDomainDao = institutionEmailDomainDao;
+    this.institutionEmailAddressDao = institutionEmailAddressDao;
     this.institutionUserInstructionsDao = institutionUserInstructionsDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.institutionMapper = institutionMapper;
+    this.institutionEmailDomainMapper = institutionEmailDomainMapper;
+    this.institutionEmailAddressMapper = institutionEmailAddressMapper;
     this.institutionUserInstructionsMapper = institutionUserInstructionsMapper;
     this.publicInstitutionDetailsMapper = publicInstitutionDetailsMapper;
   }
@@ -57,7 +78,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public List<Institution> getInstitutions() {
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(institution -> institutionMapper.dbToModel(institution, this))
+        .map(this::toModel)
         .collect(Collectors.toList());
   }
 
@@ -70,26 +91,30 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public Optional<Institution> getInstitution(final String shortName) {
-    return getDbInstitution(shortName)
-        .map(institution -> institutionMapper.dbToModel(institution, this));
+    return institutionDao.findOneByShortName(shortName).map(this::toModel);
   }
 
   @Override
   public DbInstitution getDbInstitutionOrThrow(final String shortName) {
-    return getDbInstitution(shortName)
+    return institutionDao
+        .findOneByShortName(shortName)
         .orElseThrow(
             () ->
                 new NotFoundException(String.format("Could not find Institution '%s'", shortName)));
   }
 
-  private Optional<DbInstitution> getDbInstitution(final String shortName) {
-    return institutionDao.findOneByShortName(shortName);
-  }
-
   @Override
   public Institution createInstitution(final Institution institutionToCreate) {
-    return institutionMapper.dbToModel(
-        institutionDao.save(institutionMapper.modelToDb(institutionToCreate)), this);
+    validateInstitution(institutionToCreate);
+    try {
+      final DbInstitution dbInstitution =
+          institutionDao.save(institutionMapper.modelToDb(institutionToCreate));
+      populateAuxTables(institutionToCreate, dbInstitution);
+      return toModel(dbInstitution);
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException(
+          "DataIntegrityException: Please check that you are not creating an Institute which already exists");
+    }
   }
 
   @Override
@@ -113,16 +138,26 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public Optional<Institution> updateInstitution(
       final String shortName, final Institution institutionToUpdate) {
-    return getDbInstitution(shortName)
-        .map(DbInstitution::getInstitutionId)
-        .map(
-            dbId -> {
-              // create new DB object, but mark it with the original's ID to indicate that this is
-              // an update
-              final DbInstitution dbObjectToUpdate =
-                  institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId);
-              return institutionMapper.dbToModel(institutionDao.save(dbObjectToUpdate), this);
-            });
+    validateInstitution(institutionToUpdate);
+    try {
+      return institutionDao
+          .findOneByShortName(shortName)
+          .map(DbInstitution::getInstitutionId)
+          .map(
+              dbId -> {
+                // create new DB object, but mark it with the original's ID to indicate that this is
+                // an update
+
+                final DbInstitution dbObjectToUpdate =
+                    institutionDao.save(
+                        institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId));
+                populateAuxTables(institutionToUpdate, dbObjectToUpdate);
+                return toModel(dbObjectToUpdate);
+              });
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException(
+          "DataIntegrityException: Please check that you are not creating an Institute which already exists");
+    }
   }
 
   @Override
@@ -131,8 +166,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     if (dbAffiliation == null) {
       return false;
     }
-    return validateInstitutionalEmail(
-        institutionMapper.dbToModel(dbAffiliation.getInstitution(), this), contactEmail);
+    return validateInstitutionalEmail(toModel(dbAffiliation.getInstitution()), contactEmail);
   }
 
   @Override
@@ -180,6 +214,22 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
+  public List<String> getEmailDomains(String institutionShortName) {
+    return new ArrayList<>(
+        institutionEmailDomainMapper.dbDomainsToStrings(
+            institutionEmailDomainDao.getByInstitution(
+                getDbInstitutionOrThrow(institutionShortName))));
+  }
+
+  @Override
+  public List<String> getEmailAddresses(String institutionShortName) {
+    return new ArrayList<>(
+        institutionEmailAddressMapper.dbAddressesToStrings(
+            institutionEmailAddressDao.getByInstitution(
+                getDbInstitutionOrThrow(institutionShortName))));
+  }
+
+  @Override
   public Optional<String> getInstitutionUserInstructions(final String shortName) {
     return institutionUserInstructionsDao
         .getByInstitution(getDbInstitutionOrThrow(shortName))
@@ -188,9 +238,11 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public void setInstitutionUserInstructions(final InstitutionUserInstructions userInstructions) {
+    final DbInstitution dbInstitution =
+        getDbInstitutionOrThrow(userInstructions.getInstitutionShortName());
 
     final DbInstitutionUserInstructions dbInstructions =
-        institutionUserInstructionsMapper.modelToDb(userInstructions, this);
+        institutionUserInstructionsMapper.modelToDb(userInstructions, dbInstitution);
 
     // if a DbInstitutionUserInstructions entry already exists for this Institution, retrieve its ID
     // so the call to save() replaces it
@@ -216,5 +268,92 @@ public class InstitutionServiceImpl implements InstitutionService {
   public boolean validateOperationalUser(DbInstitution institution) {
     return institution != null
         && institution.getShortName().equals(OPERATIONAL_USER_INSTITUTION_SHORT_NAME);
+  }
+
+  private Institution toModel(DbInstitution dbInstitution) {
+    return institutionMapper.dbToModel(dbInstitution, this);
+  }
+
+  private void populateAuxTables(
+      final Institution modelInstitution, final DbInstitution dbInstitution) {
+    setInstitutionEmailDomains(modelInstitution, dbInstitution);
+    setInstitutionEmailAddresses(modelInstitution, dbInstitution);
+
+    final String userInstructions = modelInstitution.getUserInstructions();
+    if (!Strings.isNullOrEmpty(userInstructions)) {
+      setInstitutionUserInstructions(
+          new InstitutionUserInstructions()
+              .institutionShortName(modelInstitution.getShortName())
+              .instructions(userInstructions));
+    } else {
+      // Remove institution entry from institution_user_instructions table if user_instructions is
+      // now empty or NULL
+      institutionUserInstructionsDao
+          .getByInstitution(dbInstitution)
+          .ifPresent(
+              userInstruction -> institutionUserInstructionsDao.deleteByInstitution(dbInstitution));
+    }
+  }
+
+  // note that this replaces all email domains for this institution with the passed-in domains
+  private void setInstitutionEmailDomains(
+      final Institution modelInstitution, final DbInstitution dbInstitution) {
+    institutionEmailDomainDao.deleteByInstitution(dbInstitution);
+    institutionEmailDomainMapper
+        .modelToDb(modelInstitution, dbInstitution)
+        .forEach(institutionEmailDomainDao::save);
+  }
+
+  // note that this replaces all email addresses for this institution with the passed-in addresses
+  private void setInstitutionEmailAddresses(
+      final Institution modelInstitution, final DbInstitution dbInstitution) {
+    institutionEmailAddressDao.deleteByInstitution(dbInstitution);
+    institutionEmailAddressMapper
+        .modelToDb(modelInstitution, dbInstitution)
+        .forEach(institutionEmailAddressDao::save);
+  }
+
+  // Take first 76 characters from display Name (with no spaces) and append 3 random number
+  private String generateShortName(String displayName) {
+    Random r = new Random();
+    displayName = displayName.replaceAll("\\s", "");
+    String shortName = displayName.length() > 76 ? displayName.substring(0, 76) : displayName;
+    shortName = shortName + r.nextInt(500) + 1;
+    return shortName;
+  }
+
+  private void validateInstitution(Institution institutionRequest) {
+    if (Strings.isNullOrEmpty(institutionRequest.getDisplayName())) {
+      throw new BadRequestException("Display Name cannot be empty");
+    }
+    if (Strings.isNullOrEmpty(institutionRequest.getShortName())) {
+      institutionRequest.setShortName(generateShortName(institutionRequest.getDisplayName()));
+    }
+    if (institutionRequest.getDuaTypeEnum() == null) {
+      // For Existing Institutions
+      institutionRequest.setDuaTypeEnum(DuaType.MASTER);
+    }
+    if (institutionRequest.getOrganizationTypeEnum() == null) {
+      throw new BadRequestException("Organization type cannot be null");
+    }
+    if (institutionRequest.getOrganizationTypeEnum().equals(OrganizationType.OTHER)
+        && Strings.isNullOrEmpty(institutionRequest.getOrganizationTypeOtherText())) {
+      throw new BadRequestException("If organization type is OTHER, additional text is needed");
+    }
+
+    // If Agreement type is Restricted confirm Each Email address in list is valid
+    if (institutionRequest.getDuaTypeEnum().equals(DuaType.RESTRICTED)
+        && !institutionRequest.getEmailAddresses().isEmpty()) {
+      institutionRequest
+          .getEmailAddresses()
+          .forEach(
+              emailAddress -> {
+                try {
+                  new InternetAddress(emailAddress).validate();
+                } catch (AddressException | NullPointerException ex) {
+                  throw new BadRequestException("Email Address is not valid");
+                }
+              });
+    }
   }
 }

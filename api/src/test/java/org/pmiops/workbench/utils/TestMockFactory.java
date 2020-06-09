@@ -85,26 +85,24 @@ public class TestMockFactory {
                 .approved(false));
   }
 
-  public FirecloudWorkspace createFirecloudWorkspace(String ns, String name, String creator) {
-    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
-    fcWorkspace.setNamespace(ns);
-    fcWorkspace.setWorkspaceId(ns);
-    fcWorkspace.setName(name);
-    fcWorkspace.setCreatedBy(creator);
-    fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
-    return fcWorkspace;
+  public static FirecloudWorkspace createFirecloudWorkspace(
+      String ns, String name, String creator) {
+    return new FirecloudWorkspace()
+        .namespace(ns)
+        .workspaceId(ns)
+        .name(name)
+        .createdBy(creator)
+        .bucketName(WORKSPACE_BUCKET_NAME);
   }
 
   public ListClusterResponse createFirecloudListClusterResponse() {
-    ListClusterResponse listClusterResponse =
-        new ListClusterResponse()
-            .clusterName("cluster")
-            .googleProject("google-project")
-            .status(ClusterStatus.STOPPED);
-    return listClusterResponse;
+    return new ListClusterResponse()
+        .clusterName("cluster")
+        .googleProject("google-project")
+        .status(ClusterStatus.STOPPED);
   }
 
-  public void stubCreateFcWorkspace(FireCloudService fireCloudService) {
+  public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {
     doAnswer(
             invocation -> {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];

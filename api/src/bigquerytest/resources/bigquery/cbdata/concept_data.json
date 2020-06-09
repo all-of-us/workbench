@@ -1,0 +1,14 @@
+[
+  {
+    "concept_id": 1,
+    "concept_name": "name",
+    "domain_id": "CONDITION",
+    "vocabulary_id": "ICD9CM",
+    "concept_class_id": "1",
+    "standard_concept": "S",
+    "concept_code": "code",
+    "valid_start_date": "2020-02-03",
+    "valid_end_date": "2020-02-03",
+    "invalid_reason": "1"
+  }
+]

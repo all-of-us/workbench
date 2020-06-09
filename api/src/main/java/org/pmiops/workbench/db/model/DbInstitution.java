@@ -1,20 +1,12 @@
 package org.pmiops.workbench.db.model;
 
-import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.persistence.CascadeType;
+import com.google.common.base.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.OrganizationType;
 
@@ -28,8 +20,6 @@ public class DbInstitution {
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
   private Short duaTypeEnum;
-  @NotNull private Set<DbInstitutionEmailDomain> emailDomains = Sets.newHashSet();
-  @NotNull private Set<DbInstitutionEmailAddress> emailAddresses = Sets.newHashSet();
 
   public DbInstitution() {}
 
@@ -95,66 +85,29 @@ public class DbInstitution {
     return this;
   }
 
-  @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
-  @NotNull
-  public Set<DbInstitutionEmailDomain> getEmailDomains() {
-    return emailDomains;
+  // omit ID field from equality so equivalent objects match regardless
+  // of whether they are actually present in the DB
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbInstitution that = (DbInstitution) o;
+
+    return Objects.equal(shortName, that.shortName)
+        && Objects.equal(displayName, that.displayName)
+        && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
+        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
+        && Objects.equal(duaTypeEnum, that.duaTypeEnum);
   }
 
-  /**
-   * Effectively: do an in-place this.emailDomains = emailDomains
-   *
-   * <p>Hibernate doesn't like it when you reassign collections. Instead, modify in-place. First,
-   * call retainAll() to subset DB rows to those we wish to keep: the intersection of old and new.
-   * Then, call addAll() to add the diff(new - old) rows.
-   *
-   * <p>https://stackoverflow.com/questions/5587482/hibernate-a-collection-with-cascade-all-delete-orphan-was-no-longer-referenc
-   *
-   * @param emailDomains the new collection of domains for this Institution
-   */
-  public DbInstitution setEmailDomains(final Collection<DbInstitutionEmailDomain> emailDomains) {
-    final Set<DbInstitutionEmailDomain> attachedDomains =
-        Optional.ofNullable(emailDomains)
-            .map(Collection::stream)
-            .orElse(Stream.empty())
-            .map(domain -> domain.setInstitution(this))
-            .collect(Collectors.toSet());
-    // modifies this set so that its value is the intersection of the two sets
-    this.emailDomains.retainAll(attachedDomains);
-    this.emailDomains.addAll(Sets.difference(attachedDomains, this.emailDomains));
-
-    return this;
-  }
-
-  @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
-  @NotNull
-  public Set<DbInstitutionEmailAddress> getEmailAddresses() {
-    return emailAddresses;
-  }
-
-  /**
-   * Effectively: do an in-place this.emailAddresses = emailAddresses
-   *
-   * <p>Hibernate doesn't like it when you reassign collections. Instead, modify in-place. First,
-   * call retainAll() to subset DB rows to those we wish to keep: the intersection of old and new.
-   * Then, call addAll() to add the diff(new - old) rows.
-   *
-   * <p>https://stackoverflow.com/questions/5587482/hibernate-a-collection-with-cascade-all-delete-orphan-was-no-longer-referenc
-   *
-   * @param emailAddresses the new collection of addresses for this Institution
-   */
-  public DbInstitution setEmailAddresses(
-      final Collection<DbInstitutionEmailAddress> emailAddresses) {
-    final Set<DbInstitutionEmailAddress> attachedAddresses =
-        Optional.ofNullable(emailAddresses)
-            .map(Collection::stream)
-            .orElse(Stream.empty())
-            .map(address -> address.setInstitution(this))
-            .collect(Collectors.toSet());
-    // modifies this set so that its value is the intersection of the two sets
-    this.emailAddresses.retainAll(attachedAddresses);
-    this.emailAddresses.addAll(Sets.difference(attachedAddresses, this.emailAddresses));
-
-    return this;
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(
+        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, duaTypeEnum);
   }
 }

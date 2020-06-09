@@ -4,6 +4,9 @@ import java.util.Arrays;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.ModifierType;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -51,6 +54,23 @@ public class SearchRequests {
               .ancestorData(false);
       searchGroupItem.addSearchParametersItem(parameter);
     }
+    return searchRequest(searchGroupItem);
+  }
+
+  public static SearchRequest modifierRequest(
+      String groupType, String type, String code, Modifier... modifiers) {
+    SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
+    SearchParameter parameter =
+        new SearchParameter()
+            .domain(groupType)
+            .type(type)
+            .group(true)
+            .conceptId(1L)
+            .value(code)
+            .standard(false)
+            .ancestorData(false);
+    searchGroupItem.addSearchParametersItem(parameter);
+    searchGroupItem.setModifiers(Arrays.asList(modifiers));
     return searchRequest(searchGroupItem);
   }
 
@@ -122,6 +142,25 @@ public class SearchRequests {
   public static SearchRequest icd9Codes() {
     return codesRequest(
         DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), ICD9_GROUP_CODE);
+  }
+
+  public static SearchRequest icd9CodeWithModifiers() {
+    return modifierRequest(
+        DomainType.CONDITION.toString(),
+        CriteriaType.ICD9CM.toString(),
+        ICD9_GROUP_CODE,
+        new Modifier()
+            .name(ModifierType.AGE_AT_EVENT)
+            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+            .operands(Arrays.asList("22")),
+        new Modifier()
+            .name(ModifierType.ENCOUNTERS)
+            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+            .operands(Arrays.asList("1")),
+        new Modifier()
+            .name(ModifierType.NUM_OF_OCCURRENCES)
+            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+            .operands(Arrays.asList("2")));
   }
 
   public static SearchRequest males() {

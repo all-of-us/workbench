@@ -458,9 +458,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .append(")");
     }
 
-    final String completeQuery = queryBuilder.toString();
-
-    return buildQueryJobConfiguration(cohortParameters, completeQuery);
+    return buildQueryJobConfiguration(cohortParameters, queryBuilder.toString());
   }
 
   private void validateConceptSetSelection(Domain domain, List<DbConceptSet> conceptSetsSelected) {

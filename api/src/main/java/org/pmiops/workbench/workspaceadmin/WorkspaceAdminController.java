@@ -9,7 +9,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.joda.time.DateTime;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.WorkspaceAdminApiDelegate;
 import org.pmiops.workbench.db.dao.UserService;
@@ -44,6 +46,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
+  private ActionAuditQueryService actionAuditQueryService;
   private final CloudMonitoringService cloudMonitoringService;
   private FirecloudMapper firecloudMapper;
   private final FireCloudService fireCloudService;
@@ -56,8 +59,8 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Autowired
   public WorkspaceAdminController(
+      ActionAuditQueryService actionAuditQueryService,
       CloudMonitoringService cloudMonitoringService,
-      FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
       LeonardoNotebooksClient leonardoNotebooksClient,
       UserMapper userMapper,
@@ -65,6 +68,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       WorkspaceAdminService workspaceAdminService,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService) {
+    this.actionAuditQueryService = actionAuditQueryService;
     this.cloudMonitoringService = cloudMonitoringService;
     this.firecloudMapper = firecloudMapper;
     this.fireCloudService = fireCloudService;
@@ -77,7 +81,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.WORKSPACES_VIEW})
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<CloudStorageTraffic> getCloudStorageTraffic(String workspaceNamespace) {
     CloudStorageTraffic response = new CloudStorageTraffic().receivedBytes(new ArrayList<>());
 
@@ -99,7 +103,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.WORKSPACES_VIEW})
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<AdminFederatedWorkspaceDetailsResponse> getFederatedWorkspaceDetails(
       String workspaceNamespace) {
     final Optional<DbWorkspace> workspaceMaybe =
@@ -146,6 +150,38 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     } else {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+  }
+
+  /**
+   * Get all audit log entries for this workspace
+   *
+   * @param workspaceNamespace Firecloud namespace for workspace
+   * @param limit upper limit (inclusive) for this query
+   * @param afterMillis lowest timestamp matched (inclusive)
+   * @param beforeMillisNullable latest timestamp matched (exclusive). The half-open interval is
+   *     convenient for pagination based on time intervals.
+   */
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<WorkspaceAuditLogQueryResponse> getAuditLogEntries(
+      String workspaceNamespace,
+      Integer limit,
+      Long afterMillis,
+      @Nullable Long beforeMillisNullable) {
+    final long workspaceDatabaseId =
+        workspaceAdminService
+            .getFirstWorkspaceByNamespace(workspaceNamespace)
+            .map(DbWorkspace::getWorkspaceId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "No workspace found with Firecloud namespace %s", workspaceNamespace)));
+    final DateTime after = new DateTime(afterMillis);
+    final DateTime before =
+        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
+    return ResponseEntity.ok(
+        actionAuditQueryService.queryEventsForWorkspace(workspaceDatabaseId, limit, after, before));
   }
 
   private WorkspaceUserAdminView toAdminView(UserRole userRole) {

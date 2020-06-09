@@ -91,11 +91,15 @@ def publish_cdr(cmd_name, args)
   op.parse.validate
 
   # This is a grep filter. It matches all tables, by default.
-  table_filter = ""
+  table_match_filter = ""
   if op.opts.table_prefixes
     prefixes = op.opts.table_prefixes.split(",")
-    table_filter = "^\\(#{prefixes.join("\\|")}\\)"
+    table_match_filter = "^\\(#{prefixes.join("\\|")}\\)"
   end
+
+  # This is a grep -v filter. It skips cohort builder build-only tables, which
+  # follow the convention of having the prefix prep_. See RW-4863.
+  table_skip_filter = "^prep_"
 
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
@@ -126,10 +130,14 @@ def publish_cdr(cmd_name, args)
     # Copy through an intermediate project and delete after (include TTL in case later steps fail).
     # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
     common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
-    common.run_inline %W{./copy-bq-dataset.sh #{source_dataset} #{ingest_dataset} #{env.fetch(:source_cdr_project)} #{table_filter}}
+    common.run_inline %W{./copy-bq-dataset.sh
+        #{source_dataset} #{ingest_dataset} #{env.fetch(:source_cdr_project)}
+        #{table_match_filter} #{table_skip_filter}}
 
     common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
-    common.run_inline %W{./copy-bq-dataset.sh #{ingest_dataset} #{dest_dataset} #{env.fetch(:ingest_cdr_project)} #{table_filter}}
+    common.run_inline %W{./copy-bq-dataset.sh
+        #{ingest_dataset} #{dest_dataset} #{env.fetch(:ingest_cdr_project)}
+        #{table_match_filter} #{table_skip_filter}}
 
     # Delete the intermediate dataset.
     common.run_inline %W{bq rm -rf --dataset #{ingest_dataset}}

@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -25,6 +26,8 @@ import org.springframework.test.context.junit4.SpringRunner;
   InstitutionMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
+  InstitutionEmailDomainMapperImpl.class,
+  InstitutionEmailAddressMapperImpl.class,
 })
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -40,7 +43,10 @@ public class VerifiedInstitutionalAffiliationMapperTest {
   public void setUp() {
     testInstitution =
         institutionService.createInstitution(
-            new Institution().shortName("Broad").displayName("The Broad Institute"));
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
   }
 
   @Test

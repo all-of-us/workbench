@@ -1,5 +1,7 @@
 import {ElementHandle, Page} from 'puppeteer';
-import {WorkspaceAction} from 'app/page-identifiers';
+import {EllipsisMenuAction} from 'app/page-identifiers';
+import {GroupAction} from '../page/cohort-participants-group';
+import TieredMenu from './tiered-menu';
 
 export default class EllipsisMenu {
 
@@ -25,16 +27,30 @@ export default class EllipsisMenu {
     return actionTextsArray;
   }
 
-  async selectAction(action: WorkspaceAction) {
+  async clickAction(action: EllipsisMenuAction, waitForNav: boolean = true): Promise<void> {
     await this.clickEllipsis();
     const selector = `${this.rootXpath}//*[@role='button' and text()='${action}']`;
     const link = await this.page.waitForXPath(selector, {visible: true});
     // Select a Workspace action starts page navigation event
-    await Promise.all([
-      this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 0}),
-      link.click(),
-    ]);
+    if (waitForNav) {
+      await Promise.all([
+        this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']}),
+        link.click(),
+      ]);
+    } else {
+      await link.click();
+    }
     await link.dispose();
+  }
+
+  /**
+   * Build Cohort Criteria page: Group ellipsis menu
+   * @param {GroupAction} action
+   */
+  async clickParticipantsGroupAction(action: GroupAction): Promise<void> {
+    await this.clickEllipsis();
+    const menu = new TieredMenu(this.page);
+    return menu.clickMenuItem([action.toString()]);
   }
 
   private async clickEllipsis(): Promise<void> {

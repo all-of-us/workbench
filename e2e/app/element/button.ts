@@ -12,7 +12,7 @@ export default class Button extends BaseElement {
    * @param {Container} container Parent node if one exists. Normally, it is a Dialog or Modal window.
    * @param {WaitForSelectorOptions} waitOptions.
    */
-  static async forLabel(
+  static async findByName(
      page: Page,
      xOpt: XPathOptions,
      container?: Container,

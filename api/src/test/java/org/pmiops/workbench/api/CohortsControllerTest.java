@@ -58,6 +58,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
@@ -91,10 +92,10 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -167,6 +168,7 @@ public class CohortsControllerTest {
   DbCdrVersion cdrVersion;
   SearchRequest searchRequest;
   String cohortCriteria;
+  String badCohortCriteria;
   private TestMockFactory testMockFactory;
   @Autowired WorkspaceService workspaceService;
   @Autowired CdrVersionDao cdrVersionDao;
@@ -277,6 +279,48 @@ public class CohortsControllerTest {
 
     searchRequest = SearchRequests.males();
     cohortCriteria = new Gson().toJson(searchRequest);
+    badCohortCriteria =
+        "{\n"
+            + "  \"includes\": [\n"
+            + "    {\n"
+            + "      \"id\": \"includes_7dhyhvbch\",\n"
+            + "      \"items\": [\n"
+            + "        {\n"
+            + "          \"id\": \"items_38kgpbn2e\",\n"
+            + "          \"type\": \"DRUG\",\n"
+            + "          \"searchParameters\": [\n"
+            + "            {\n"
+            + "              \"parameterId\": \"param11332011819\",\n"
+            + "              \"name\": \"Buprenorphine\",\n"
+            + "              \"domain\": \"DRUG\",\n"
+            + "              \"type\": \"RXNORM\",\n"
+            + "              \"group\": false,\n"
+            + "              \"attributes\": [],\n"
+            + "              \"ancestorData\": true,\n"
+            + "              \"standard\": true,\n"
+            + "              \"conceptId\": 1133201,\n"
+            + "              \"value\": \"1819\"\n"
+            + "            }\n"
+            + "          ],\n"
+            + "          \"modifiers\": [\n"
+            + "            {\n"
+            + "              \"name\": \"AGE_AT_EVENT\",\n"
+            + "              \"operator\": {\n"
+            + "                \"label\": \"Any\"\n"
+            + "              },\n"
+            + "              \"operands\": [\n"
+            + "                \"1\"\n"
+            + "              ]\n"
+            + "            }\n"
+            + "          ]\n"
+            + "        }\n"
+            + "      ],\n"
+            + "      \"temporal\": false\n"
+            + "    }\n"
+            + "  ],\n"
+            + "  \"excludes\": [],\n"
+            + "  \"dataFilters\": []\n"
+            + "}";
 
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
@@ -370,6 +414,13 @@ public class CohortsControllerTest {
             .getItems();
     assertThat(cohorts).containsAllOf(c1, c2);
     assertThat(cohorts.size()).isEqualTo(2);
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testCreateCohortBadCriteria() {
+    Cohort cohort = createDefaultCohort();
+    cohort.setCriteria(badCohortCriteria);
+    cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
   }
 
   @Test

@@ -182,8 +182,10 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapperImpl;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -199,8 +201,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.zendesk.client.v2.Zendesk;
-import org.zendesk.client.v2.model.Request;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -277,49 +277,50 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
-    WorkspaceResourcesServiceImpl.class,
     CdrVersionService.class,
-    NotebooksServiceImpl.class,
-    WorkspacesController.class,
-    WorkspaceServiceImpl.class,
-    CommonMappers.class,
+    CohortAnnotationDefinitionController.class,
     CohortAnnotationDefinitionMapperImpl.class,
     CohortAnnotationDefinitionServiceImpl.class,
-    CohortsController.class,
-    CohortFactoryImpl.class,
     CohortCloningService.class,
+    CohortFactoryImpl.class,
     CohortMapperImpl.class,
-    CohortReviewMapperImpl.class,
     CohortReviewController.class,
-    CohortAnnotationDefinitionController.class,
+    CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
+    CohortsController.class,
+    CommonMappers.class,
+    ConceptSetMapperImpl.class,
+    ConceptSetsController.class,
+    ConceptSetService.class,
     DataSetController.class,
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
+    FirecloudMapperImpl.class,
     FreeTierBillingService.class,
+    LogsBasedMetricServiceFakeImpl.class,
+    NotebooksServiceImpl.class,
     ReviewQueryBuilder.class,
-    ConceptSetService.class,
-    ConceptSetsController.class,
-    ConceptSetMapperImpl.class,
+    UserMapperImpl.class,
     WorkspaceMapperImpl.class,
-    LogsBasedMetricServiceFakeImpl.class
+    WorkspaceResourcesServiceImpl.class,
+    WorkspacesController.class,
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
-    BillingProjectBufferService.class,
-    CohortMaterializationService.class,
-    ConceptBigQueryService.class,
-    CdrBigQuerySchemaConfigService.class,
-    FireCloudService.class,
-    CloudStorageService.class,
     BigQueryService.class,
+    BillingProjectBufferService.class,
+    CdrBigQuerySchemaConfigService.class,
+    CloudStorageService.class,
+    CohortMaterializationService.class,
     CohortQueryBuilder.class,
-    MailService.class,
-    UserService.class,
-    UserRecentResourceService.class,
+    ConceptBigQueryService.class,
     ConceptService.class,
+    FireCloudService.class,
+    MailService.class,
     MonitoringService.class,
-    WorkspaceAuditor.class,
-    Zendesk.class
+    UserRecentResourceService.class,
+    UserService.class,
+    WorkspaceAuditor.class
   })
   static class Configuration {
 
@@ -376,7 +377,6 @@ public class WorkspacesControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
-  @Autowired Zendesk mockZendesk;
   @SpyBean @Autowired FreeTierBillingService freeTierBillingService;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
@@ -425,9 +425,6 @@ public class WorkspacesControllerTest {
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
-
-    when(mockZendesk.createRequest(any())).thenReturn(new Request());
-
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
   }
@@ -654,8 +651,6 @@ public class WorkspacesControllerTest {
                 .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
     assertThat(workspace2.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-
-    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
@@ -1019,7 +1014,6 @@ public class WorkspacesControllerTest {
   @Test
   public void testUpdateWorkspaceResearchPurpose() {
     Workspace ws = createWorkspace();
-    ws.getResearchPurpose().reviewRequested(true);
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ResearchPurpose rp =
@@ -1033,7 +1027,8 @@ public class WorkspacesControllerTest {
             .populationHealth(false)
             .socialBehavioral(false)
             .drugDevelopment(false)
-            .additionalNotes(null);
+            .additionalNotes(null)
+            .reviewRequested(false);
     ws.setResearchPurpose(rp);
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
@@ -1053,25 +1048,7 @@ public class WorkspacesControllerTest {
     assertThat(updatedRp.getSocialBehavioral()).isFalse();
     assertThat(updatedRp.getDrugDevelopment()).isFalse();
     assertThat(updatedRp.getAdditionalNotes()).isNull();
-    assertThat(updatedRp.getReviewRequested()).isTrue();
-  }
-
-  @Test
-  public void testUpdateWorkspaceResearchPurpose_cannotUpdateReviewRequest() {
-    Workspace ws = createWorkspace();
-    ws.getResearchPurpose().setReviewRequested(false);
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ws.getResearchPurpose().setReviewRequested(true);
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest().workspace(ws);
-    ResearchPurpose updatedRp =
-        workspacesController
-            .updateWorkspace(ws.getNamespace(), ws.getId(), request)
-            .getBody()
-            .getResearchPurpose();
-
     assertThat(updatedRp.getReviewRequested()).isFalse();
-    assertThat(updatedRp.getTimeRequested()).isNull();
   }
 
   @Test(expected = ForbiddenException.class)
@@ -1268,8 +1245,6 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
-
-    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test

@@ -27,6 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -73,6 +74,7 @@ import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
@@ -87,6 +89,7 @@ import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -160,7 +163,9 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @TestConfiguration
   @Import({
+    ActionAuditQueryServiceImpl.class,
     AddressMapperImpl.class,
+    AuditLogEntryMapperImpl.class,
     DemographicSurveyMapperImpl.class,
     InstitutionalAffiliationMapperImpl.class,
     PageVisitMapperImpl.class,
@@ -175,6 +180,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
   })
+  @MockBean({BigQueryService.class})
   static class Configuration {
     @Bean
     @Primary
@@ -371,7 +377,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .displayName("The Broad Institute")
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
             .emailDomains(Collections.singletonList("example.com"))
-            .duaTypeEnum(DuaType.RESTRICTED);
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -395,7 +402,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .displayName("The Broad Institute")
             .emailAddresses(Collections.singletonList("institution@example.com"))
             .emailDomains(Collections.singletonList("example.com"))
-            .duaTypeEnum(DuaType.MASTER);
+            .duaTypeEnum(DuaType.MASTER)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -417,7 +425,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailDomains(Collections.singletonList("example.com"));
+            .emailDomains(Collections.singletonList("example.com"))
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
@@ -716,7 +725,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .shortName("Broad")
             .displayName("The Broad Institute")
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-            .duaTypeEnum(DuaType.RESTRICTED);
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     // "Broad" is the only institution
@@ -1225,7 +1235,8 @@ public class ProfileControllerTest extends BaseControllerTest {
             .shortName("Broad")
             .displayName("The Broad Institute")
             .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-            .duaTypeEnum(DuaType.RESTRICTED);
+            .duaTypeEnum(DuaType.RESTRICTED)
+            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
     return new VerifiedInstitutionalAffiliation()

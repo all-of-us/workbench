@@ -2,10 +2,13 @@ package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
@@ -15,11 +18,14 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.ConceptSetMapperImpl;
@@ -35,6 +41,7 @@ import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
+import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.ListClusterResponse;
@@ -42,11 +49,13 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -54,6 +63,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -67,7 +77,37 @@ public class WorkspaceAdminControllerTest {
   private static final String DB_WORKSPACE_FIRECLOUD_NAME = "gonewiththewind";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
+  private static final int QUERY_LIMIT = 50;
+  private static final String ACTION_ID = "b937413e-ff66-4e7b-a639-f7947730b2c0";
+  private static final Map<String, String> QUERY_METADATA =
+      ImmutableMap.of(
+          "workspaceDatabaseId", Long.toString(DB_WORKSPACE_ID), "query", "select foo from bar");
+  private static final WorkspaceAuditLogQueryResponse QUERY_RESPONSE =
+      new WorkspaceAuditLogQueryResponse()
+          .logEntries(
+              ImmutableList.of(
+                  new AuditLogEntry()
+                      .actionId(ACTION_ID)
+                      .actionType("CREATE")
+                      .agentId(1111L)
+                      .agentType("ADMINISTRATOR")
+                      .agentUsername(FIRECLOUD_WORKSPACE_CREATOR_USERNAME)
+                      .eventTime(DateTime.parse("2020-02-10T01:20+02:00"))
+                      .newValue("true")
+                      .previousValue(null)
+                      .targetId(DB_WORKSPACE_ID)
+                      .targetProperty("approved")
+                      .targetType("WORKSPACE")))
+          .query("select foo from bar")
+          .workspaceDatabaseId(DB_WORKSPACE_ID);
+  private static final WorkspaceAuditLogQueryResponse EMPTY_QUERY_RESPONSE =
+      new WorkspaceAuditLogQueryResponse()
+          .query("select foo from bar")
+          .workspaceDatabaseId(DB_WORKSPACE_ID);
+  private static final DateTime DEFAULT_AFTER_INCLUSIVE = DateTime.parse("2001-02-14T01:20+02:00");
+  private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-05-01T01:20+02:00");
 
+  @MockBean private ActionAuditQueryService mockActionAuditQueryService;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
@@ -83,6 +123,7 @@ public class WorkspaceAdminControllerTest {
     CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
     WorkspaceAdminController.class,
     WorkspaceMapperImpl.class,
   })
@@ -93,7 +134,7 @@ public class WorkspaceAdminControllerTest {
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
       workbenchConfig.featureFlags.enableBillingLockout = false;
       return workbenchConfig;
@@ -241,5 +282,36 @@ public class WorkspaceAdminControllerTest {
     dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());
     dbWorkspace.setAnticipatedFindings(researchPurpose.getAnticipatedFindings());
     return dbWorkspace;
+  }
+
+  @Test
+  public void testGetAuditLogEntries() {
+    // Don't rely on exact DateTime match
+    doReturn(QUERY_RESPONSE)
+        .when(mockActionAuditQueryService)
+        .queryEventsForWorkspace(anyLong(), anyLong(), any(DateTime.class), any(DateTime.class));
+    final ResponseEntity<WorkspaceAuditLogQueryResponse> response =
+        workspaceAdminController.getAuditLogEntries(
+            WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE,
+            QUERY_LIMIT,
+            DEFAULT_AFTER_INCLUSIVE.getMillis(),
+            DEFAULT_BEFORE_EXCLUSIVE.getMillis());
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isEqualTo(QUERY_RESPONSE);
+  }
+
+  @Test
+  public void testGetAuditLogEntries_noResults() {
+    doReturn(EMPTY_QUERY_RESPONSE)
+        .when(mockActionAuditQueryService)
+        .queryEventsForWorkspace(anyLong(), anyLong(), any(DateTime.class), any(DateTime.class));
+    final ResponseEntity<WorkspaceAuditLogQueryResponse> response =
+        workspaceAdminController.getAuditLogEntries(
+            WorkspaceAdminControllerTest.WORKSPACE_NAMESPACE,
+            QUERY_LIMIT,
+            DEFAULT_AFTER_INCLUSIVE.getMillis(),
+            DEFAULT_BEFORE_EXCLUSIVE.getMillis());
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isEqualTo(EMPTY_QUERY_RESPONSE);
   }
 }

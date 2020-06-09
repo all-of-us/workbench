@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
@@ -40,6 +42,7 @@ import org.pmiops.workbench.model.DuplicateCohortRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -136,6 +139,16 @@ public class CohortsController implements CohortsApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
+    try {
+      // validate the cohort definition
+      new Gson().fromJson(cohort.getCriteria(), SearchRequest.class);
+    } catch (JsonSyntaxException e) {
+      throw new ServerErrorException(
+          String.format(
+              "Could not save Cohort (\"/%s/%s/%s\")",
+              workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), cohort.getName()),
+          e);
+    }
     checkForDuplicateCohortNameException(cohort.getName(), workspace);
 
     DbCohort newCohort =
