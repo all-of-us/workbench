@@ -306,6 +306,10 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
               errors && this.disableSave(errors) && <div>Answer required fields
                 <BulletAlignedUnorderedList>
                   {errors.displayName && <li>Display Name should be of at most 80 Characters</li>}
+                  {errors.organizationTypeEnum && <li>Organization Type should not be empty</li>}
+                  {errors.duaTypeEnum && <li>Agreement Type should not be empty</li>}
+                  {!errors.duaTypeEnum && errors.emailDomain && <li>Email Domain should not be empty</li>}
+                  {!errors.duaTypeEnum && errors.emailAddresses && <li>Email Address should not be empty</li>}
                 </BulletAlignedUnorderedList>
               </div>
             } disable={this.isAddInstitutionMode}>
