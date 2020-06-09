@@ -1087,7 +1087,9 @@ paths:
       - profile
       consumes:
       - application/json
-      description: Updates a user's verified institution. Requires ACCESS_CONTROL_ADMIN authority.
+      description: 'Updates a user''s verified institution. Requires ACCESS_CONTROL_ADMIN authority.
+        This method executes institutional validation - if it is passed an institute that does not
+        exist, or if the user is not a member of that institute, this call will fail.'
       operationId: updateVerifiedInstitutionalAffiliation
       parameters:
       - in: body
