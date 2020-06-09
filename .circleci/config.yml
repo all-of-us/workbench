@@ -307,12 +307,17 @@ jobs:
           name: Run Java unit tests
           working_directory: ~/workbench/api
           # See: https://circleci.com/docs/2.0/language-java/#sample-configuration
-          # Short explanation on commands:
+          # String manipulation - Short explanation on commands:
           #   Find all unit tests recursively in "api/src/test/java/" directories.
           #   Strips off "src/test/java/" substring;
           #   Replaces all path separator "/" with ".";
           #   Removes file extensions.
           #   Append "--tests" in front of file name.
+          #
+          # Example of string before manipulation:
+          # src/test/java/org/pmiops/*********/monitoring/LogsBasedMetricsServiceTest.java src/test/java/org/pmiops/*********/monitoring/MonitoringServiceTest.java
+          # Example of Gradle command after string manipulation:
+          # gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
           command: |
             CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
               | cut -c 1- \
@@ -321,7 +326,7 @@ jobs:
               | sed 's/\.[^.]*$//' \
               | circleci tests split --split-by=timings --timings-type=classname --index=$CIRCLE_NODE_INDEX)
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i}')
-            java -version && gradle -v && gradle test $GRADLE_ARGS
+            gradle test $GRADLE_ARGS
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Java linting
