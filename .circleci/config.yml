@@ -30,8 +30,8 @@ anchors:
     # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
     # so we bumped this down further to 2G.
     JAVA_TOOL_OPTIONS: -Xmx2g
-    # https://docs.gradle.org/6.3/userguide/gradle_daemon.html#sec:disabling_the_daemon
-    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
+    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
     TERM: dumb
     MYSQL_ROOT_PASSWORD: ubuntu
 
@@ -288,9 +288,6 @@ commands:
 jobs:
   api-unit-test:
     parallelism: 4
-    # We're hitting OOM failures as of 1 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
-    # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
-    resource_class: medium+
     <<: *java_defaults
     steps:
       - checkout_init_git
@@ -429,9 +426,6 @@ jobs:
           save: true
 
   api-bigquery-test:
-    # We're hitting OOM failures as of 13 May 2020.  Increase to 6GB RAM by specifying a medium+ machine.
-    # Refers to https://circleci.com/docs/2.0/configuration-reference/#resource_class
-    resource_class: medium+
     <<: *java_defaults
     steps:
       - checkout_init_git
