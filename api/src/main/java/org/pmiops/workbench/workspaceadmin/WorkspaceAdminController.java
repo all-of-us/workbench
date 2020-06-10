@@ -1,51 +1,31 @@
 package org.pmiops.workbench.workspaceadmin;
 
-import com.google.monitoring.v3.Point;
-import com.google.monitoring.v3.TimeSeries;
-import com.google.protobuf.util.Timestamps;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.joda.time.DateTime;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.WorkspaceAdminApiDelegate;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.model.AdminFederatedWorkspaceDetailsResponse;
-import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
-import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.ListClusterResponse;
-import org.pmiops.workbench.model.TimeSeriesPoint;
-import org.pmiops.workbench.model.User;
-import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
-import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
-
 
   private ActionAuditQueryService actionAuditQueryService;
   private final CloudMonitoringService cloudMonitoringService;

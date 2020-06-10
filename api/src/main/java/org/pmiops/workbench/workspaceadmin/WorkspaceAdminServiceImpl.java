@@ -40,7 +40,6 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -148,24 +147,26 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     response.getReceivedBytes().sort(Comparator.comparing(TimeSeriesPoint::getTimestamp));
 
     return response;
-
   }
 
   @Override
   public AdminFederatedWorkspaceDetailsResponse getWorkspaceAdminView(String workspaceNamespace) {
-    final DbWorkspace dbWorkspace = getFirstWorkspaceByNamespace(workspaceNamespace).orElseThrow(() -> new NotFoundException(""));
+    final DbWorkspace dbWorkspace =
+        getFirstWorkspaceByNamespace(workspaceNamespace)
+            .orElseThrow(() -> new NotFoundException(""));
 
     final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
 
     final List<WorkspaceUserAdminView> collaborators =
-        workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName)
-            .stream()
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName).stream()
             .map(this::toWorkspaceUserAdminView)
             .collect(Collectors.toList());
 
-    final AdminWorkspaceObjectsCounts adminWorkspaceObjects = getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId());
+    final AdminWorkspaceObjectsCounts adminWorkspaceObjects =
+        getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId());
 
-    final AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts = getAdminWorkspaceCloudStorageCounts(
+    final AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts =
+        getAdminWorkspaceCloudStorageCounts(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     final List<ListClusterResponse> workbenchListClusterResponses =
@@ -185,16 +186,18 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace();
 
     return new AdminFederatedWorkspaceDetailsResponse()
-            .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
-            .collaborators(collaborators)
-            .resources(adminWorkspaceResources);
+        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
+        .collaborators(collaborators)
+        .resources(adminWorkspaceResources);
   }
 
   private int getNonNotebookFileCount(String bucketName) {
-    return (int) cloudStorageService
-        .getBlobListForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY).stream()
-        .filter(blob -> !NotebooksService.NOTEBOOK_PATTERN.matcher(blob.getName()).matches())
-        .count();
+    return (int)
+        cloudStorageService
+            .getBlobListForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
+            .stream()
+            .filter(blob -> !NotebooksService.NOTEBOOK_PATTERN.matcher(blob.getName()).matches())
+            .count();
   }
 
   private long getStorageSizeBytes(String bucketName) {
@@ -220,8 +223,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
           .userAccountCreatedTime(DateTime.parse(dbUser.getCreationTime().toString()));
 
     } else {
-      return new WorkspaceUserAdminView().userModel(userMapper.toUserApiModel(userRole, null));
+      return new WorkspaceUserAdminView().userModel(userMapper.toApiUser(userRole, null));
     }
   }
-
 }

@@ -6,9 +6,9 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.institution.InstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.Profile;
-import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
+import org.pmiops.workbench.utils.mappers.UserMapper;
 
 @Mapper(
     config = MapStructConfig.class,
@@ -18,7 +18,8 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
       DbStorageEnums.class,
       DemographicSurveyMapper.class,
       InstitutionalAffiliationMapper.class,
-      PageVisitMapper.class
+      PageVisitMapper.class,
+      UserMapper.class
     })
 public interface ProfileMapper {
   @Mapping(target = "contactEmailFailure", ignore = true) // I don't think we actually use this
@@ -65,9 +66,4 @@ public interface ProfileMapper {
       ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]
   @Mapping(target = "version", ignore = true)
   DbUser profileToDbUser(Profile profile);
-
-  //  User toApiUser(DbUser dbUser, Profile profile);
-  @Mapping(source = "contactEmail", target = "email")
-  @Mapping(source = "username", target = "userName")
-  User toApiUser(DbUser dbUser);
 }

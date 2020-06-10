@@ -60,7 +60,7 @@ public class OpsGenieServiceTest {
   public void createEgressEventAlert() throws ApiException {
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
 
-    opsGenieService.createEgressEventAlert(egressEvent);
+    opsGenieService.createAlert(egressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
 
     CreateAlertRequest request = alertRequestCaptor.getValue();
