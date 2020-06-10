@@ -158,7 +158,7 @@ commands:
           name: "restore e2e cache"
           keys:
             - v1-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-            - v1-e2e-cache-{{ .Branch }}
+            - v1-e2e-cache-master
             - v1-e2e-cache-
       - run:
           name: "workbench/e2e: yarn install dependencies"
@@ -199,7 +199,7 @@ commands:
                 name: "restore api gradle cache"
                 keys:
                   - v2-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v2-gradle-cache-{{ .Branch }}
+                  - v2-gradle-cache-master
                   - v2-gradle-cache-
 
   run_e2e_test:
