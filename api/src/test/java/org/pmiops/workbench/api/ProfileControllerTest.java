@@ -767,7 +767,35 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateVerifiedInstitutionalAffiliation_changeForbidden() {
+  public void create_verifiedInstitutionalAffiliation_invalidDomain() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    ArrayList<String> emailDomains = new ArrayList<>();
+    emailDomains.add("@broadinstitute.org");
+    emailDomains.add("@broad.org");
+
+    final Institution broad =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .emailDomains(emailDomains)
+            .duaTypeEnum(DuaType.MASTER);
+    institutionService.createInstitution(broad);
+
+    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(broad.getShortName())
+            .institutionalRoleEnum(InstitutionalRole.ADMIN);
+    createAccountRequest
+        .getProfile()
+        .setVerifiedInstitutionalAffiliation(verifiedInstitutionalAffiliation);
+
+    // CONTACT_EMAIL is an @example.com
+    createUser();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void updateVerifiedInstitutionalAffiliation_noSuchInstitution() {
     config.featureFlags.requireInstitutionalVerification = true;
 
     final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
@@ -783,21 +811,32 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionDisplayName("The Narrow Institute?")
             .institutionalRoleEnum(InstitutionalRole.PRE_DOCTORAL);
 
-    profile.setVerifiedInstitutionalAffiliation(newAffil);
-    profileController.updateProfile(profile);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), newAffil);
   }
 
-  @Test(expected = BadRequestException.class)
-  public void updateVerifiedInstitutionalAffiliation_addForbidden() {
+  @Test
+  public void updateVerifiedInstitutionalAffiliation() {
     // necessary to create a user without one
     config.featureFlags.requireInstitutionalVerification = false;
     createUser();
 
     config.featureFlags.requireInstitutionalVerification = true;
 
-    final Profile profile = profileController.getMe().getBody();
     final VerifiedInstitutionalAffiliation toAdd = createVerifiedInstitutionalAffiliation();
-    profile.setVerifiedInstitutionalAffiliation(toAdd);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), toAdd);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateProfile_removeVerifiedInstitutionalAffiliationForbidden() {
+    config.featureFlags.requireInstitutionalVerification = true;
+
+    final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
+
+    createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
+    createUser();
+
+    final Profile profile = profileController.getMe().getBody();
+    profile.setVerifiedInstitutionalAffiliation(null);
     profileController.updateProfile(profile);
   }
 
@@ -810,9 +849,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.getProfile().setVerifiedInstitutionalAffiliation(original);
     createUser();
 
-    final Profile profile = profileController.getMe().getBody();
-    profile.setVerifiedInstitutionalAffiliation(null);
-    profileController.updateProfile(profile);
+    profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
   }
 
   @Test

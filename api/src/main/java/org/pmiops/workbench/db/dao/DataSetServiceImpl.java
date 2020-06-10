@@ -1,5 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
@@ -14,6 +16,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +34,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.dataset.BigQueryDataSetTableInfo;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -40,6 +44,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -67,9 +72,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
           + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
+
+  private static final String PREVIEW_QUERY =
+      "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}`";
+  private static final String LIMIT_20 = " LIMIT 20";
+
   private static final ImmutableSet<PrePackagedConceptSetEnum>
       CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
-          ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
+          ImmutableSet.of(SURVEY, PrePackagedConceptSetEnum.BOTH);
 
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final int DATA_SET_VERSION = 1;
@@ -235,6 +245,66 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .put(Domain.SURVEY, "answer")
           .put(Domain.VISIT, "visit")
           .build();
+
+  @Override
+  public QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest request) {
+    final Domain domain = request.getDomain();
+    final List<String> values = request.getValues();
+    Map<String, QueryParameterValue> mergedQueryParameterValues = new HashMap<>();
+
+    final List<String> domainValues =
+        bigQueryService.getTableFieldsFromDomain(domain).stream()
+            .map(field -> field.getName().toLowerCase())
+            .collect(Collectors.toList());
+
+    final List<String> filteredDomainColumns =
+        values.stream().distinct().filter(domainValues::contains).collect(Collectors.toList());
+
+    final StringBuilder queryBuilder =
+        new StringBuilder(
+            PREVIEW_QUERY
+                .replace("${columns}", String.join(", ", filteredDomainColumns))
+                .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
+
+    final List<Long> conceptIds =
+        SURVEY.equals(request.getPrePackagedConceptSet())
+            ? conceptBigQueryService.getSurveyQuestionConceptIds()
+            : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
+                .flatMap(cs -> cs.getConceptIds().stream())
+                .collect(Collectors.toList());
+
+    if (!domain.equals(Domain.PERSON)) {
+      mergedQueryParameterValues.put(
+          "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+      queryBuilder.append(" WHERE ").append(BigQueryDataSetTableInfo.getConceptIdIn(domain));
+    }
+
+    if (!request.getIncludesAllParticipants()) {
+      final ImmutableList<QueryAndParameters> queryMapEntries =
+          cohortDao.findAllByCohortIdIn(request.getCohortIds()).stream()
+              .map(this::getCohortQueryStringAndCollectNamedParameters)
+              .collect(ImmutableList.toImmutableList());
+
+      final String unionedCohortQuery =
+          queryMapEntries.stream()
+              .map(QueryAndParameters::getQuery)
+              .collect(Collectors.joining(" UNION DISTINCT "));
+      queryBuilder.append(
+          !domain.equals(Domain.PERSON)
+              ? " AND PERSON_ID in (" + unionedCohortQuery + ")"
+              : " WHERE PERSON_ID in (" + unionedCohortQuery + ")");
+
+      // now merge all the individual maps from each configuration
+      mergedQueryParameterValues.putAll(
+          queryMapEntries.stream()
+              .map(QueryAndParameters::getNamedParameterValues)
+              .flatMap(m -> m.entrySet().stream())
+              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    }
+    queryBuilder.append(LIMIT_20);
+
+    return buildQueryJobConfiguration(mergedQueryParameterValues, queryBuilder.toString());
+  }
 
   @Override
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {

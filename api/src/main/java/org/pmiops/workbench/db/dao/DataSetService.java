@@ -10,6 +10,7 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -26,6 +27,8 @@ public interface DataSetService {
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime);
+
+  QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
   Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
 

@@ -392,12 +392,12 @@ const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...prop
 
 // Enum values are the display values.
 enum PrepackagedConceptSet {
-  DEMOGRAPHICS = 'Demographics',
+  PERSON = 'Demographics',
   SURVEYS = 'All Surveys'
 }
 
 const PREPACKAGED_DOMAINS = {
-  [PrepackagedConceptSet.DEMOGRAPHICS]: Domain.PERSON,
+  [PrepackagedConceptSet.PERSON]: Domain.PERSON,
   [PrepackagedConceptSet.SURVEYS]: Domain.SURVEY
 };
 
@@ -735,9 +735,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     apiEnumToPrePackageConceptSets(v: PrePackagedConceptSetEnum): Set<PrepackagedConceptSet> {
       switch (v) {
         case PrePackagedConceptSetEnum.BOTH:
-          return new Set([PrepackagedConceptSet.DEMOGRAPHICS, PrepackagedConceptSet.SURVEYS]);
-        case PrePackagedConceptSetEnum.DEMOGRAPHICS:
-          return new Set([PrepackagedConceptSet.DEMOGRAPHICS]);
+          return new Set([PrepackagedConceptSet.PERSON, PrepackagedConceptSet.SURVEYS]);
+        case PrePackagedConceptSetEnum.PERSON:
+          return new Set([PrepackagedConceptSet.PERSON]);
         case PrePackagedConceptSetEnum.SURVEY:
           return new Set([PrepackagedConceptSet.SURVEYS]);
         case PrePackagedConceptSetEnum.NONE:
@@ -748,13 +748,13 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     getPrePackagedConceptSetApiEnum() {
       const {selectedPrepackagedConceptSets} = this.state;
-      if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.DEMOGRAPHICS) &&
+      if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.PERSON) &&
           selectedPrepackagedConceptSets.has(PrepackagedConceptSet.SURVEYS)) {
         return PrePackagedConceptSetEnum.BOTH;
       } else if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.SURVEYS)) {
         return PrePackagedConceptSetEnum.SURVEY;
-      } else if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.DEMOGRAPHICS)) {
-        return PrePackagedConceptSetEnum.DEMOGRAPHICS;
+      } else if (selectedPrepackagedConceptSets.has(PrepackagedConceptSet.PERSON)) {
+        return PrePackagedConceptSetEnum.PERSON;
       }
       return PrePackagedConceptSetEnum.NONE;
     }

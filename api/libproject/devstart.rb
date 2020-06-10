@@ -242,8 +242,6 @@ def start_api_reqs()
   common = Common.new
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
-  common.status "Starting elastic..."
-  common.run_inline %W{docker-compose up -d elastic}
 end
 
 Common.register_command({
@@ -257,8 +255,6 @@ def stop_api_reqs()
   common = Common.new
   common.status "Stopping database..."
   common.run_inline %W{docker-compose stop db}
-  common.status "Stopping elastic..."
-  common.run_inline %W{docker-compose stop elastic}
 end
 
 Common.register_command({
