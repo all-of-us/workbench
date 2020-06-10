@@ -1,7 +1,6 @@
 import io.swagger.codegen.DefaultGenerator
 import io.swagger.codegen.config.CodegenConfigurator
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
-import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
@@ -628,6 +627,7 @@ appengine {  // App Engine tasks configuration
     // Give dev_appserver 2 minutes to start up when running appengineStart; by
     // default it will fail after 1 minute. (This is particularly a problem in CircleCI.)
     startSuccessTimeout = 120
+    automaticRestart = true
 
     environment = [GOOGLE_APPLICATION_CREDENTIALS: file("$rootDir/sa-key.json").getAbsolutePath()]
   }
@@ -662,10 +662,6 @@ version = '0.1.0'          // Version in generated output
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-task incrementalHotSwap(type: IncrementalHotSwapTask, dependsOn: 'compileJava') {
-    inputDir = sourceSets.main.java.outputDir
-}
 
 task listProjectAPIs(type: GenerateAPIListingTask)
 
