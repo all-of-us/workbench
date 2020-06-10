@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
-  private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
   private ActionAuditQueryService actionAuditQueryService;
   private final CloudMonitoringService cloudMonitoringService;
@@ -85,73 +84,14 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<CloudStorageTraffic> getCloudStorageTraffic(String workspaceNamespace) {
-    CloudStorageTraffic response = new CloudStorageTraffic().receivedBytes(new ArrayList<>());
-
-    for (TimeSeries timeSeries :
-        cloudMonitoringService.getCloudStorageReceivedBytes(
-            workspaceNamespace, TRAILING_TIME_TO_QUERY)) {
-      for (Point point : timeSeries.getPointsList()) {
-        response.addReceivedBytesItem(
-            new TimeSeriesPoint()
-                .timestamp(Timestamps.toMillis(point.getInterval().getEndTime()))
-                .value(point.getValue().getDoubleValue()));
-      }
-    }
-
-    // Highcharts expects its data to be pre-sorted; we do this on the server side for convenience.
-    response.getReceivedBytes().sort(Comparator.comparing(TimeSeriesPoint::getTimestamp));
-
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(workspaceAdminService.getCloudStorageTraffic(workspaceNamespace));
   }
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<AdminFederatedWorkspaceDetailsResponse> getFederatedWorkspaceDetails(
       String workspaceNamespace) {
-    final Optional<DbWorkspace> workspaceMaybe =
-        workspaceAdminService.getFirstWorkspaceByNamespace(workspaceNamespace);
-    if (workspaceMaybe.isPresent()) {
-      final DbWorkspace dbWorkspace = workspaceMaybe.get();
-
-      final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
-
-      final List<WorkspaceUserAdminView> collaborators =
-          workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName)
-              .stream()
-              .map(this::toAdminView)
-              .collect(Collectors.toList());
-
-      final AdminWorkspaceObjectsCounts adminWorkspaceObjects =
-          workspaceAdminService.getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId());
-
-      final AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts =
-          workspaceAdminService.getAdminWorkspaceCloudStorageCounts(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-
-      final List<ListClusterResponse> workbenchListClusterResponses =
-          leonardoNotebooksClient.listClustersByProjectAsService(workspaceNamespace).stream()
-              .map(firecloudMapper::toApiListClusterResponse)
-              .collect(Collectors.toList());
-
-      final AdminWorkspaceResources adminWorkspaceResources =
-          new AdminWorkspaceResources()
-              .workspaceObjects(adminWorkspaceObjects)
-              .cloudStorage(adminWorkspaceCloudStorageCounts)
-              .clusters(workbenchListClusterResponses);
-
-      final FirecloudWorkspace firecloudWorkspace =
-          fireCloudService
-              .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
-              .getWorkspace();
-
-      return ResponseEntity.ok(
-          new AdminFederatedWorkspaceDetailsResponse()
-              .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
-              .collaborators(collaborators)
-              .resources(adminWorkspaceResources));
-    } else {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
+    return ResponseEntity.ok(workspaceAdminService.getWorkspaceAdminView(workspaceNamespace));
   }
 
   /**
@@ -184,25 +124,5 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
         Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
     return ResponseEntity.ok(
         actionAuditQueryService.queryEventsForWorkspace(workspaceDatabaseId, limit, after, before));
-  }
-
-  private WorkspaceUserAdminView toAdminView(UserRole userRole) {
-    final Optional<DbUser> dbUserMaybe = userService.getByUsername(userRole.getEmail());
-    final User user = new User();
-    if (dbUserMaybe.isPresent()) {
-      final DbUser dbUser = dbUserMaybe.get();
-      user.email(dbUser.getUsername())
-          .givenName(dbUser.getGivenName())
-          .familyName(dbUser.getFamilyName())
-          .email(dbUser.getContactEmail());
-      return new WorkspaceUserAdminView()
-          .userModel(user)
-          .role(userRole.getRole())
-          .userDatabaseId(dbUser.getUserId())
-          .userAccountCreatedTime(DateTime.parse(dbUser.getCreationTime().toString()));
-
-    } else {
-      return new WorkspaceUserAdminView().userModel(userMapper.toUserApiModel(userRole, null));
-    }
   }
 }
