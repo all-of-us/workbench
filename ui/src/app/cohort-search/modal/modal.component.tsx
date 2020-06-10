@@ -9,13 +9,99 @@ import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {ReactWrapperBase} from 'app/utils';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
 import {Criteria, CriteriaType, DomainType, SearchParameter, TemporalMention, TemporalTime} from 'generated/fetch';
 
+const styles = reactStyles({
+  footer: {
+    marginTop: '0.5rem',
+    padding: '0.45rem 0rem',
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    overflowY: 'auto',
+    transform: 'translate(-50%, -50%)',
+    height: '90vh',
+    width: '90vw',
+    backgroundColor: 'white',
+    borderRadius: '4px',
+    display: 'flex',
+    flexFlow: 'column nowrap',
+    justifyContent: 'space-between',
+  },
+  modalContent: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    height: '100%',
+    width: '100%',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    opacity: 0,
+    visibility: 'hidden',
+    transform: 'scale(1.1)',
+    transition: 'visibility 0.25s linear, opacity 0.25s 0s, transform 0.25s',
+    zIndex: 102,
+  },
+  panelLeft: {
+    display: 'none',
+    flex: 1,
+    minWidth: '14rem',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    width: '100%',
+    height: '100%',
+    padding: '0 0.4rem 0 1rem',
+  },
+  panelLeftActive: {
+    animation: 'fadeEffect 1s',
+    display: 'block',
+  },
+  separator: {
+    alignSelf: 'center',
+    display: 'inline-block',
+    margin: '0 0.75rem 0.5rem',
+    boxSizing: 'border-box',
+    height: '26px',
+    width: '1px',
+    border: '1px solid #979797',
+  },
+  tabButton: {
+    borderRadius: 0,
+    letterSpacing: 'normal',
+    margin: '0 1rem'
+  },
+  tabButtonActive: {
+    color: '#216FB4',
+    borderBottom: '7px solid #216FB4',
+    fontSize: '14px',
+    fontWeight: 'bold',
+  },
+  titleBar: {
+    boxShadow: '0 0.12rem 0.125rem 0 #216FB4',
+    marginBottom: '0.5rem',
+    padding: '0rem 1rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    height: '59px',
+    marginTop: '0.5rem',
+  }
+});
 function initGroup(role: string, item: any) {
   return {
     id: generateId(role),
@@ -182,16 +268,44 @@ export class CBModal extends React.Component<Props, State> {
       && (mode === 'list' || mode === 'tree');
   }
 
-  get treeClass() {
+  get leftColumnStyle() {
     const {searchContext: {domain, type}} = this.props;
+    let width = '66.66667%';
     if (domain === DomainType.PERSON) {
-      return type === CriteriaType.AGE ? 'col-md-12' : 'col-md-6';
+      width = type === CriteriaType.AGE ? '100%' : '50%';
     }
-    return 'col-md-8';
+    return {
+      flex: `0 0 ${width}`,
+      maxWidth: width,
+      position: 'relative',
+    } as React.CSSProperties;
   }
 
-  get sidebarClass() {
-    return this.props.searchContext.domain === DomainType.PERSON ? 'col-md-6' : 'col-md-4';
+  get rightColumnStyle() {
+    const width = this.props.searchContext.domain === DomainType.PERSON ? '50%' : '33.33333%';
+    return {
+      flex: `0 0 ${width}`,
+      height: '100%',
+      maxWidth: width,
+      position: 'relative',
+    } as React.CSSProperties;
+  }
+
+  panelLeftStyle(mode: string) {
+    let style = {
+      display: 'none',
+      flex: 1,
+      minWidth: '14rem',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      width: '100%',
+      height: '100%',
+      padding: '0 0.4rem 0 1rem',
+    } as React.CSSProperties;
+    if (this.state.mode === mode) {
+      style = {...style, display: 'block', animation: 'fadeEffect 1s'};
+    }
+    return style;
   }
 
   setMode = (newMode: any) => {
@@ -281,7 +395,7 @@ export class CBModal extends React.Component<Props, State> {
   render() {
     const {closeSearch, searchContext, searchContext: {domain, type}, setSearchContext} = this.props;
     const {attributesNode, autocompleteSelection, conceptType, count, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
-      selectedIds, selections, title, treeSearchTerms} = this.state;
+      open, selectedIds, selections, title, treeSearchTerms} = this.state;
     let modalClass = 'crit-modal-content';
     if (domain === DomainType.PERSON) {
       modalClass += ' demographics';
@@ -296,131 +410,131 @@ export class CBModal extends React.Component<Props, State> {
     if (['tree', 'list', 'modifiers', 'attributes'].includes(mode)) {
       treeClass += 'show';
     }
-    return !!searchContext ? <div className='crit-modal-container'>
-      <div className={modalClass}>
-        <div className='container title-margin'>
-          <div className='row'>
-            <div className={'col padding-zero' + this.treeClass}>
-              <div className='title-bar'>
-                <div className='btn-group btn-link'>
-                  {!attributesNode ? <button
-                    className={'btn tab' + (mode === 'list' || mode === 'tree') ? 'active' : ''}
-                    disabled={selections.length !== 0 && conceptType === 'standard'}
-                    onClick={() => this.setState({mode: this.state.backMode})}>
-                    {title}
-                  </button>
-                  : <button
-                    className={'btn tab' + (mode === 'attributes') ? 'active' : ''}
-                    onClick={() => this.setState({mode: 'attributes'})}>
-                    {this.attributeTitle}
-                  </button>}
-                  {this.showModifiers && <React.Fragment>
-                    <div className='vbar'></div>
-                    <button type='button'
-                      className={'btn tab' + (mode === 'modifiers') ? 'active' : ''}
-                      disabled={selections.length === 0}
-                      onClick={() => this.setMode('modifiers')}>
-                      Modifiers
-                    </button>
-                  </React.Fragment>}
-                </div>
-                <div className='link-container'>
-                  <div className='inner-link-container'>
-                    {domain === DomainType.DRUG && <div>
-                      <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
-                        Explore
-                      </a>
-                      drugs by brand names outside of <i>All of Us</i>.
-                    </div>}
-                    {this.showDataBrowserLink && <div>
-                      Explore Source information on the
-                      <a href={environment.publicUiUrl} target='_blank' rel='noopener noreferrer'>Data Browser.</a>
-                    </div>}
-                  </div>
-                </div>
-                {mode === 'attributes' && <button onClick={this.back} className='btn btn-link btn-icon'>
-                  <ClrIcon size='24' shape='close'/>
-                </button>}
-              </div>
-              <div className='content left'>
-                {domain === DomainType.PERSON ? <Demographics
-                  count={count}
-                  criteriaType={type}
-                  select={this.addSelection}
-                  selectedIds={selectedIds}
-                  selections={selections}/>
-                : <React.Fragment>
-                  {loadingSubtree && <SpinnerOverlay/>}
-                  <div id='tree' className={treeClass}>
-                    {/* Tree View */}
-                    <div className={'panel-left' + mode === 'tree' ? 'show' : ''}>
-                      {hierarchyNode && <CriteriaTree
-                        autocompleteSelection={autocompleteSelection}
-                        back={this.back}
-                        groupSelections={groupSelections}
-                        node={hierarchyNode}
-                        scrollToMatch={this.setScroll}
-                        searchTerms={treeSearchTerms}
-                        select={this.addSelection}
-                        selectedIds={selectedIds}
-                        selectOption={this.setAutocompleteSelection}
-                        setAttributes={this.setAttributes}
-                        setSearchTerms={this.setTreeSearchTerms}/>}
-                    </div>
-                    {/* List View */}
-                    <div className={'panel-left' + mode === 'list' ? 'show' : ''}>
-                      <ListSearch hierarchy={this.showHierarchy}
-                        searchContext={searchContext}
-                        select={this.addSelection}
-                        selectedIds={selectedIds}
-                        setAttributes={this.setAttributes}/>
-                    </div>
-                    {/* Modifiers Page */}
-                    <div className={'panel-left' + mode === 'list' ? 'modifiers' : ''}>
-                      {this.showModifiers && <ListModifierPage
-                        disabled={this.modifiersFlag}
-                        searchContext={searchContext}
-                        selections={selections}
-                        setSearchContext={setSearchContext}/>}
-                    </div>
-                       {/* Attributes Page */}
-                    <div className={'panel-left' + mode === 'list' ? 'attributes' : ''}>
-                      {!!attributesNode && <AttributesPage
-                        close={this.back}
-                        node={attributesNode}
-                        select={this.addSelection}/>}
-                    </div>
-                  </div>
+    return !!searchContext ? <div style={{
+      ...styles.modalOverlay,
+      ...(open ? {opacity: 1, visibility: 'visible', transform: 'scale(1.0'} : {})
+    }}>
+      <div style={{...styles.modalContainer, ...(domain === DomainType.PERSON ? {width: '50vw', height: 'auto'} : {})}}>
+        <div style={styles.modalContent}>
+          <div style={this.leftColumnStyle}>
+            <div style={styles.titleBar}>
+              <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
+                {!attributesNode ? <Button
+                  style={{...styles.tabButton, ...((mode === 'list' || mode === 'tree') ? styles.tabButtonActive : {})}}
+                  type='link'
+                  disabled={selections.length !== 0 && conceptType === 'standard'}
+                  onClick={() => this.setState({mode: this.state.backMode})}>
+                  {title}
+                </Button>
+                : <Button
+                  style={{...styles.tabButton, ...(mode === 'attributes' ? styles.tabButtonActive : {})}}
+                  type='link'
+                  onClick={() => this.setState({mode: 'attributes'})}>
+                  {this.attributeTitle}
+                </Button>}
+                {this.showModifiers && <React.Fragment>
+                  <div style={styles.separator}/>
+                  <Button
+                    style={{...styles.tabButton, ...(mode === 'modifiers' ? styles.tabButtonActive : {})}}
+                    type='link'
+                    disabled={selections.length === 0}
+                    onClick={() => this.setMode('modifiers')}>
+                    Modifiers
+                  </Button>
                 </React.Fragment>}
-                {type === CriteriaType.AGE && <div className='footer'>
-                  <button
-                    onClick={closeSearch}
-                    className='btn btn-link'>
-                    Cancel
-                  </button>
-                  <button
-                    onClick={this.finish}
-                    className='btn btn-primary'>
-                    Finish
-                  </button>
-                </div>}
               </div>
+              <div style={{display: 'table', height: '100%'}}>
+                <div style={{display: 'table', height: '100%', verticalAlign: 'middle'}}>
+                  {domain === DomainType.DRUG && <div>
+                    <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
+                      Explore
+                    </a>
+                    drugs by brand names outside of <i>All of Us</i>.
+                  </div>}
+                  {this.showDataBrowserLink && <div>
+                    Explore Source information on the
+                    <a href={environment.publicUiUrl} target='_blank' rel='noopener noreferrer'>Data Browser.</a>
+                  </div>}
+                </div>
+              </div>
+              {mode === 'attributes' && <Button type='link' onClick={this.back}>
+                <ClrIcon size='24' shape='close'/>
+              </Button>}
             </div>
-            {type !== CriteriaType.AGE && <div className={'col padding-zero' + this.sidebarClass}>
-              <div className='content right'>
-                <SelectionList
-                  back={this.back}
-                  close={closeSearch}
-                  disableFinish={disableFinish}
-                  domain={domain}
-                  finish={this.finish}
-                  removeSelection={this.removeSelection}
-                  selections={selections}
-                  setView={this.setMode}
-                  view={mode}/>
-              </div>
-            </div>}
+            <div style={(domain === DomainType.PERSON && type !== CriteriaType.AGE) ? {marginBottom: '3.5rem'} : {}}>
+              {domain === DomainType.PERSON ? <Demographics
+                count={count}
+                criteriaType={type}
+                select={this.addSelection}
+                selectedIds={selectedIds}
+                selections={selections}/>
+              : <React.Fragment>
+                {loadingSubtree && <SpinnerOverlay/>}
+                <div id='tree' style={loadingSubtree ? {pointerEvents: 'none', opacity: 0.3} : {}}>
+                  {/* Tree View */}
+                  <div style={this.panelLeftStyle('tree')}>
+                    {hierarchyNode && <CriteriaTree
+                      autocompleteSelection={autocompleteSelection}
+                      back={this.back}
+                      groupSelections={groupSelections}
+                      node={hierarchyNode}
+                      scrollToMatch={this.setScroll}
+                      searchTerms={treeSearchTerms}
+                      select={this.addSelection}
+                      selectedIds={selectedIds}
+                      selectOption={this.setAutocompleteSelection}
+                      setAttributes={this.setAttributes}
+                      setSearchTerms={this.setTreeSearchTerms}/>}
+                  </div>
+                  {/* List View */}
+                  <div style={this.panelLeftStyle('list')}>
+                    <ListSearch hierarchy={this.showHierarchy}
+                      searchContext={searchContext}
+                      select={this.addSelection}
+                      selectedIds={selectedIds}
+                      setAttributes={this.setAttributes}/>
+                  </div>
+                  {/* Modifiers Page */}
+                  <div style={this.panelLeftStyle('modifiers')}>
+                    {this.showModifiers && <ListModifierPage
+                      disabled={this.modifiersFlag}
+                      searchContext={searchContext}
+                      selections={selections}
+                      setSearchContext={setSearchContext}/>}
+                  </div>
+                     {/* Attributes Page */}
+                  <div style={this.panelLeftStyle('attributes')}>
+                    {!!attributesNode && <AttributesPage
+                      close={this.back}
+                      node={attributesNode}
+                      select={this.addSelection}/>}
+                  </div>
+                </div>
+              </React.Fragment>}
+              {type === CriteriaType.AGE && <div style={styles.footer}>
+                <Button type='link' onClick={closeSearch}>
+                  Cancel
+                </Button>
+                <Button type='primary' onClick={this.finish}>
+                  Finish
+                </Button>
+              </div>}
+            </div>
           </div>
+          {type !== CriteriaType.AGE && <div style={this.rightColumnStyle}>
+            <div style={{height: '100%'}}>
+              <SelectionList
+                back={this.back}
+                close={closeSearch}
+                disableFinish={disableFinish}
+                domain={domain}
+                finish={this.finish}
+                removeSelection={this.removeSelection}
+                selections={selections}
+                setView={this.setMode}
+                view={mode}/>
+            </div>
+          </div>}
         </div>
       </div>
     </div> : '';
