@@ -377,7 +377,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     ImmutableList.of(dbCohort1),
                     ImmutableList.of(Domain.PERSON),
                     false,
-                    PrePackagedConceptSetEnum.DEMOGRAPHICS))
+                    PrePackagedConceptSetEnum.PERSON))
             .getBody()
             .getCode();
 
