@@ -1,8 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
-
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
+import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
