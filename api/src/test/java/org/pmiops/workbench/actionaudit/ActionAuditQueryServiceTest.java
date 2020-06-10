@@ -35,7 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class ActionAuditQueryServiceTest {
-
+//
   // N.B. Field order must match that of SELECT statement in Workspaces query.
   private static final Schema WORKSPACE_QUERY_SCHEMA =
       Schema.of(
