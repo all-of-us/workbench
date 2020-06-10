@@ -186,18 +186,21 @@ commands:
           steps:
             - save_cache:
                 name: "save api gradle cache"
+                # See https://docs.gradle.org/current/userguide/directory_layout.html#dir:project_root
+                # Save Project-specific cache and Global cache (for everything that’s not project-specific).
                 paths:
+                  - .gradle
                   - ~/.gradle
-                key: v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                key: v2-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - when:
           condition: << parameters.restore >>
           steps:
             - restore_cache:
                 name: "restore api gradle cache"
                 keys:
-                  - v1-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-                  - v1-gradle-cache-master
-                  - v1-gradle-cache-
+                  - v2-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+                  - v2-gradle-cache-master
+                  - v2-gradle-cache-
 
   run_e2e_test:
     description: "Run puppeteer e2e integration tests"
@@ -223,7 +226,6 @@ commands:
           destination: logs
       - store_test_results:
           path: ~/workbench/e2e/logs
-
 
   start_local_api:
     description: "Start local API server"
@@ -307,17 +309,20 @@ jobs:
           name: Run Java unit tests
           working_directory: ~/workbench/api
           # See: https://circleci.com/docs/2.0/language-java/#sample-configuration
-          # String manipulation - Short explanation on commands:
+          # "circleci tests split" command provides each CircleCI node with a list of fully qualified test names to execute.
+          #  JUnit XML test reports provide tests timing data. CircleCI partition tests based on timing data.
+          #
+          # Formatting fully qualified test names for gradle and running them with "gradle test" command. Short explanation on commands:
           #   Find all unit tests recursively in "api/src/test/java/" directories.
           #   Strips off "src/test/java/" substring;
           #   Replaces all path separator "/" with ".";
           #   Removes file extensions.
           #   Append "--tests" in front of file name.
           #
-          # Example of string before manipulation:
-          # src/test/java/org/pmiops/*********/monitoring/LogsBasedMetricsServiceTest.java src/test/java/org/pmiops/*********/monitoring/MonitoringServiceTest.java
-          # Example of Gradle command after string manipulation:
-          # gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
+          # Example of string before formatting:
+          #   src/test/java/org/pmiops/*********/monitoring/LogsBasedMetricsServiceTest.java src/test/java/org/pmiops/*********/monitoring/MonitoringServiceTest.java
+          # Example of Gradle command after formatting:
+          #   gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
           command: |
             CLASSNAMES=$(circleci tests glob "src/test/java/**/*Test.java" "src/test/java/**/*Test.kt" \
               | cut -c 1- \
@@ -398,6 +403,8 @@ jobs:
     <<: *java_defaults
     steps:
       - checkout_init_git
+      - manage_api_cache:
+          restore: true
       - run:
           name: Scan dependencies for vulnerabilities
           working_directory: ~/workbench/api
