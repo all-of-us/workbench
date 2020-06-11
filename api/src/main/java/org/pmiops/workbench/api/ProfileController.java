@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -18,11 +17,8 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
@@ -53,7 +49,6 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Address;
-import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
@@ -61,7 +56,6 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
@@ -69,8 +63,6 @@ import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
-import org.pmiops.workbench.model.UserAuditLogQueryResponse;
-import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.moodle.ApiException;
@@ -277,55 +269,6 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void validateAndCleanProfile(Profile profile) throws BadRequestException {
-    // Validation steps, which yield a BadRequestException if errors are found.
-    String userName = profile.getUsername();
-    if (userName == null || userName.length() < 3 || userName.length() > 64) {
-      throw new BadRequestException(
-          "Username should be at least 3 characters and not more than 64 characters");
-    }
-    validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
-    validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
-
-    // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
-    profile.setDemographicSurvey(
-        Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
-    profile.setInstitutionalAffiliations(
-        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
-    // We always store the username as all lowercase.
-    profile.setUsername(profile.getUsername().toLowerCase());
-  }
-
-  private void validateUpdatedProfile(Profile updatedProfile, Profile prevProfile)
-      throws BadRequestException {
-    validateAndCleanProfile(updatedProfile);
-    if (StringUtils.isEmpty(updatedProfile.getAreaOfResearch())) {
-      throw new BadRequestException("Research background cannot be empty");
-    }
-    Optional.ofNullable(updatedProfile.getAddress())
-        .orElseThrow(() -> new BadRequestException("Address must not be empty"));
-
-    Address updatedProfileAddress = updatedProfile.getAddress();
-    if (StringUtils.isEmpty(updatedProfileAddress.getStreetAddress1())
-        || StringUtils.isEmpty(updatedProfileAddress.getCity())
-        || StringUtils.isEmpty(updatedProfileAddress.getState())
-        || StringUtils.isEmpty(updatedProfileAddress.getCountry())
-        || StringUtils.isEmpty(updatedProfileAddress.getZipCode())) {
-      throw new BadRequestException(
-          "Address cannot have empty street Address 1/city/state/country or Zip Code");
-    }
-    if (updatedProfile.getContactEmail() != null
-        && !updatedProfile.getContactEmail().equals(prevProfile.getContactEmail())) {
-      // See RW-1488.
-      throw new BadRequestException("Changing email is not currently supported");
-    }
-    if (updatedProfile.getUsername() != null
-        && !updatedProfile.getUsername().equals(prevProfile.getUsername())) {
-      // See RW-1488.
-      throw new BadRequestException("Changing username is not supported");
-    }
-  }
-
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
     try {
       return userDao.save(dbUser);
@@ -406,7 +349,7 @@ public class ProfileController implements ProfileApiDelegate {
     Optional.ofNullable(profile.getAddress())
         .orElseThrow(() -> new BadRequestException("Address must not be empty"));
 
-    validateAndCleanProfile(profile);
+    profileService.validateAndCleanProfile(profile);
 
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
@@ -667,76 +610,9 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    updateProfileForUser(user, updatedProfile, previousProfile);
+    profileService.updateProfileForUser(user, updatedProfile, previousProfile);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  private void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
-    validateUpdatedProfile(updatedProfile, previousProfile);
-
-    if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
-        || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
-      userService.setDataUseAgreementNameOutOfDate(
-          updatedProfile.getGivenName(), updatedProfile.getFamilyName());
-    }
-
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-
-    user.setGivenName(updatedProfile.getGivenName());
-    user.setFamilyName(updatedProfile.getFamilyName());
-    user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
-    user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
-    user.setAddress(addressMapper.addressToDbAddress(updatedProfile.getAddress()));
-    user.getAddress().setUser(user);
-    DbDemographicSurvey dbDemographicSurvey =
-        demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
-            updatedProfile.getDemographicSurvey());
-
-    if (user.getDemographicSurveyCompletionTime() == null && dbDemographicSurvey != null) {
-      user.setDemographicSurveyCompletionTime(now);
-    }
-
-    if (dbDemographicSurvey != null && dbDemographicSurvey.getUser() == null) {
-      dbDemographicSurvey.setUser(user);
-    }
-
-    user.setDemographicSurvey(dbDemographicSurvey);
-    user.setLastModifiedTime(now);
-
-    updateInstitutionalAffiliations(updatedProfile, user);
-    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
-      profileService.validateInstitutionalAffiliation(updatedProfile);
-    }
-
-    userService.updateUserWithConflictHandling(user);
-
-    final Profile appliedUpdatedProfile = profileService.getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
-  }
-
-  @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
-  @Override
-  public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
-      Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {
-    DbUser dbUser = userDao.findUserByUserId(userId);
-    Profile updatedProfile = profileService.getProfile(dbUser);
-
-    if (verifiedAffiliation == null) {
-      throw new BadRequestException("Cannot delete Verified Institutional Affiliation.");
-    }
-
-    Optional<Institution> institution =
-        institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());
-    institution.ifPresent(i -> verifiedAffiliation.setInstitutionDisplayName(i.getDisplayName()));
-
-    updatedProfile.setVerifiedInstitutionalAffiliation(verifiedAffiliation);
-
-    Profile oldProfile = profileService.getProfile(dbUser);
-
-    this.updateProfileForUser(dbUser, updatedProfile, oldProfile);
-
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   private void updateInstitutionalAffiliations(Profile updatedProfile, DbUser user) {
@@ -777,47 +653,13 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<UserListResponse> getAllUsers() {
-    UserListResponse response = new UserListResponse();
-    List<Profile> responseList = new ArrayList<>();
-    for (DbUser user : userDao.findUsers()) {
-      responseList.add(profileService.getProfile(user));
-    }
-    response.setProfileList(responseList);
-    return ResponseEntity.ok(response);
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Profile> getUser(Long userId) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return ResponseEntity.ok(profileService.getProfile(user));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Profile> getUserByUsername(String username) {
-    DbUser user = userDao.findUserByUsername(username);
-    return ResponseEntity.ok(profileService.getProfile(user));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> bypassAccessRequirement(
-      Long userId, AccessBypassRequest request) {
-    updateBypass(userId, request);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
   public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(
-      AccessBypassRequest request) {
+      AccessBypassRequest accessBypassRequest) {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     long userId = userProvider.get().getUserId();
-    updateBypass(userId, request);
+    userService.updateBypassTime(userId, accessBypassRequest);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -836,48 +678,6 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void updateBypass(long userId, AccessBypassRequest request) {
-    Timestamp valueToSet;
-    Timestamp previousValue;
-    Boolean bypassed = request.getIsBypassed();
-    DbUser user = userDao.findUserByUserId(userId);
-    if (bypassed) {
-      valueToSet = new Timestamp(clock.instant().toEpochMilli());
-    } else {
-      valueToSet = null;
-    }
-    switch (request.getModuleName()) {
-      case DATA_USE_AGREEMENT:
-        previousValue = user.getDataUseAgreementBypassTime();
-        userService.setDataUseAgreementBypassTime(userId, valueToSet);
-        break;
-      case COMPLIANCE_TRAINING:
-        previousValue = user.getComplianceTrainingBypassTime();
-        userService.setComplianceTrainingBypassTime(userId, valueToSet);
-        break;
-      case BETA_ACCESS:
-        previousValue = user.getBetaAccessBypassTime();
-        userService.setBetaAccessBypassTime(userId, valueToSet);
-        break;
-      case ERA_COMMONS:
-        previousValue = user.getEraCommonsBypassTime();
-        userService.setEraCommonsBypassTime(userId, valueToSet);
-        break;
-      case TWO_FACTOR_AUTH:
-        previousValue = user.getTwoFactorAuthBypassTime();
-        userService.setTwoFactorAuthBypassTime(userId, valueToSet);
-        break;
-      default:
-        throw new BadRequestException(
-            "There is no access module named: " + request.getModuleName().toString());
-    }
-    userService.logAdminUserAction(
-        userId,
-        "set bypass status for module " + request.getModuleName().toString() + " to " + bypassed,
-        previousValue,
-        valueToSet);
-  }
-
   @Override
   public ResponseEntity<Void> deleteProfile() {
     if (!workbenchConfigProvider.get().featureFlags.unsafeAllowDeleteUser) {
@@ -890,27 +690,5 @@ public class ProfileController implements ProfileApiDelegate {
     profileAuditor.fireDeleteAction(user.getUserId(), user.getUsername());
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @Override
-  public ResponseEntity<UserAuditLogQueryResponse> getAuditLogEntries(
-      String usernameWithoutGsuiteDomain,
-      Integer limit,
-      Long afterMillis,
-      Long beforeMillisNullable) {
-    final String username =
-        String.format(
-            "%s@%s",
-            usernameWithoutGsuiteDomain,
-            workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
-    final long userDatabaseId =
-        Optional.ofNullable(userDao.findUserByUsername(username))
-            .map(DbUser::getUserId)
-            .orElseThrow(() -> new NotFoundException(String.format("User %s not found", username)));
-    final DateTime after = new DateTime(afterMillis);
-    final DateTime before =
-        Optional.ofNullable(beforeMillisNullable).map(DateTime::new).orElse(DateTime.now());
-    return ResponseEntity.ok(
-        actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
   }
 }

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.profile;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Optional;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -7,6 +9,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
+import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -15,6 +18,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -134,5 +138,67 @@ public class ProfileService {
                       contactEmail));
       throw new BadRequestException(msg);
     }
+  }
+
+  public void updateProfileForUser(DbUser user, Profile updatedProfile, Profile previousProfile) {
+    validateUpdatedProfile(updatedProfile, previousProfile);
+
+    if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
+        || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
+      userService.setDataUseAgreementNameOutOfDate(
+          updatedProfile.getGivenName(), updatedProfile.getFamilyName());
+    }
+
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+
+    user.setGivenName(updatedProfile.getGivenName());
+    user.setFamilyName(updatedProfile.getFamilyName());
+    user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
+    user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
+    user.setAddress(addressMapper.addressToDbAddress(updatedProfile.getAddress()));
+    user.getAddress().setUser(user);
+    DbDemographicSurvey dbDemographicSurvey =
+        demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
+            updatedProfile.getDemographicSurvey());
+
+    if (user.getDemographicSurveyCompletionTime() == null && dbDemographicSurvey != null) {
+      user.setDemographicSurveyCompletionTime(now);
+    }
+
+    if (dbDemographicSurvey != null && dbDemographicSurvey.getUser() == null) {
+      dbDemographicSurvey.setUser(user);
+    }
+
+    user.setDemographicSurvey(dbDemographicSurvey);
+    user.setLastModifiedTime(now);
+
+    updateInstitutionalAffiliations(updatedProfile, user);
+    if (workbenchConfigProvider.get().featureFlags.requireInstitutionalVerification) {
+      profileService.validateInstitutionalAffiliation(updatedProfile);
+    }
+
+    userService.updateUserWithConflictHandling(user);
+
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+  }
+
+  public void validateAndCleanProfile(Profile profile) throws BadRequestException {
+    // Validation steps, which yield a BadRequestException if errors are found.
+    String userName = profile.getUsername();
+    if (userName == null || userName.length() < 3 || userName.length() > 64) {
+      throw new BadRequestException(
+          "Username should be at least 3 characters and not more than 64 characters");
+    }
+    validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
+    validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
+
+    // Cleaning steps, which provide non-null fields or apply some cleanup / transformation.
+    profile.setDemographicSurvey(
+        Optional.ofNullable(profile.getDemographicSurvey()).orElse(new DemographicSurvey()));
+    profile.setInstitutionalAffiliations(
+        Optional.ofNullable(profile.getInstitutionalAffiliations()).orElse(new ArrayList<>()));
+    // We always store the username as all lowercase.
+    profile.setUsername(profile.getUsername().toLowerCase());
   }
 }

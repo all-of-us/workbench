@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
@@ -98,4 +99,8 @@ public interface UserService {
   int getCurrentDuccVersion();
 
   Optional<DbUser> getByUsername(String username);
+
+  Optional<DbUser> getByDatabaseId(long databaseId);
+
+  void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 }
