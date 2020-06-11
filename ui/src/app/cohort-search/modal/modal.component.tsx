@@ -82,14 +82,17 @@ const styles = reactStyles({
   },
   tabButton: {
     borderRadius: 0,
+    fontSize: '14px',
+    height: '2.25rem',
     letterSpacing: 'normal',
-    margin: '0 1rem'
+    margin: '0 1rem',
+    padding: '0 0.5rem 0.25rem',
   },
   tabButtonActive: {
     color: '#216FB4',
     borderBottom: '7px solid #216FB4',
-    fontSize: '14px',
     fontWeight: 'bold',
+    padding: '0 0.5rem',
   },
   titleBar: {
     boxShadow: '0 0.12rem 0.125rem 0 #216FB4',
@@ -396,25 +399,11 @@ export class CBModal extends React.Component<Props, State> {
     const {closeSearch, searchContext, searchContext: {domain, type}, setSearchContext} = this.props;
     const {attributesNode, autocompleteSelection, conceptType, count, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
       open, selectedIds, selections, title, treeSearchTerms} = this.state;
-    let modalClass = 'crit-modal-content';
-    if (domain === DomainType.PERSON) {
-      modalClass += ' demographics';
-    }
-    if (type === CriteriaType.AGE) {
-      modalClass += ' age';
-    }
-    let treeClass = 'panel';
-    if (loadingSubtree) {
-      treeClass += ' disableTree';
-    }
-    if (['tree', 'list', 'modifiers', 'attributes'].includes(mode)) {
-      treeClass += 'show';
-    }
     return !!searchContext ? <div style={{
       ...styles.modalOverlay,
       ...(open ? {opacity: 1, visibility: 'visible', transform: 'scale(1.0'} : {})
     }}>
-      <div style={{...styles.modalContainer, ...(domain === DomainType.PERSON ? {width: '50vw', height: 'auto'} : {})}}>
+      <div style={{...styles.modalContainer, ...(domain === DomainType.PERSON ? {width: '70vw', height: 'auto'} : {})}}>
         <div style={styles.modalContent}>
           <div style={this.leftColumnStyle}>
             <div style={styles.titleBar}>
@@ -444,15 +433,15 @@ export class CBModal extends React.Component<Props, State> {
                 </React.Fragment>}
               </div>
               <div style={{display: 'table', height: '100%'}}>
-                <div style={{display: 'table', height: '100%', verticalAlign: 'middle'}}>
+                <div style={{display: 'table-cell', height: '100%', verticalAlign: 'middle'}}>
                   {domain === DomainType.DRUG && <div>
                     <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
                       Explore
                     </a>
-                    drugs by brand names outside of <i>All of Us</i>.
+                    &nbsp;drugs by brand names outside of <i>All of Us</i>.
                   </div>}
                   {this.showDataBrowserLink && <div>
-                    Explore Source information on the
+                    Explore Source information on the&nbsp;
                     <a href={environment.publicUiUrl} target='_blank' rel='noopener noreferrer'>Data Browser.</a>
                   </div>}
                 </div>
@@ -462,12 +451,14 @@ export class CBModal extends React.Component<Props, State> {
               </Button>}
             </div>
             <div style={(domain === DomainType.PERSON && type !== CriteriaType.AGE) ? {marginBottom: '3.5rem'} : {}}>
-              {domain === DomainType.PERSON ? <Demographics
-                count={count}
-                criteriaType={type}
-                select={this.addSelection}
-                selectedIds={selectedIds}
-                selections={selections}/>
+              {domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
+                <Demographics
+                  count={count}
+                  criteriaType={type}
+                  select={this.addSelection}
+                  selectedIds={selectedIds}
+                  selections={selections}/>
+                </div>
               : <React.Fragment>
                 {loadingSubtree && <SpinnerOverlay/>}
                 <div id='tree' style={loadingSubtree ? {pointerEvents: 'none', opacity: 0.3} : {}}>
@@ -512,10 +503,14 @@ export class CBModal extends React.Component<Props, State> {
                 </div>
               </React.Fragment>}
               {type === CriteriaType.AGE && <div style={styles.footer}>
-                <Button type='link' onClick={closeSearch}>
+                <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
+                    type='link'
+                    onClick={closeSearch}>
                   Cancel
                 </Button>
-                <Button type='primary' onClick={this.finish}>
+                <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
+                  type='primary'
+                  onClick={this.finish}>
                   Finish
                 </Button>
               </div>}
