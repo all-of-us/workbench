@@ -39,7 +39,6 @@
   },
   {
     "cdrVersionId": 4,
-    "isDefault": true,
     "name": "Synthetic Dataset v2",
     "dataAccessLevel": 1,
     "bigqueryProject": "fc-aou-cdr-synth-staging",
@@ -49,5 +48,17 @@
     "numParticipants": 946237,
     "cdrDbName": "synth_r_2020q1_3",
     "elasticIndexBaseName": "synth_r_2019q1_1"
+  },
+  {
+    "cdrVersionId": 5,
+    "isDefault": true,
+    "name": "Synthetic Dataset v3",
+    "dataAccessLevel": 1,
+    "bigqueryProject": "fc-aou-cdr-synth-staging",
+    "bigqueryDataset": "SR2019q4r3",
+    "creationTime": "2020-05-07 00:00:00Z",
+    "releaseNumber": 3,
+    "numParticipants": 234525,
+    "cdrDbName": "synth_r_2019q4_1"
   }
 ]
