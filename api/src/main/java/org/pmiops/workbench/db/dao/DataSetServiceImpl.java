@@ -1,10 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
+import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -22,12 +22,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -403,13 +403,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
     final QueryJobConfiguration participantIdQuery =
         cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
-    final QueryJobConfiguration participantQueryConfig =
-        bigQueryService.filterBigQueryConfig(participantIdQuery);
     final AtomicReference<String> participantQuery =
-        new AtomicReference<>(participantQueryConfig.getQuery());
+        new AtomicReference<>(participantIdQuery.getQuery());
     final ImmutableMap.Builder<String, QueryParameterValue> cohortNamedParametersBuilder =
         new ImmutableMap.Builder<>();
-    participantQueryConfig
+    participantIdQuery
         .getNamedParameters()
         .forEach(
             (npKey, npValue) -> {
@@ -755,42 +753,40 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   //    SELECT * FROM cdr.dataset.person WHERE criteria IN (1, 2, 3)
   private static String fillInQueryParams(
       String query, Map<String, QueryParameterValue> queryParameterValueMap) {
-    StringBuilder stringBuilder = new StringBuilder(query);
-    queryParameterValueMap.forEach(
-        (key, value) -> {
-          if (StandardSQLTypeName.ARRAY.equals(value.getType())) {
-            // This handles the replacement of array parameters.
-            // It finds the parameter (specified by `unnest(NAME)`)
-            String stringToReplace = "unnest(@".concat(key.concat(")"));
-            int startingIndex = stringBuilder.indexOf(stringToReplace);
-            stringBuilder.replace(
-                startingIndex,
-                startingIndex + stringToReplace.length(),
-                arraySqlFromQueryParameter(value));
-          } else {
-            // This handles the replacement of non-array parameters.
-            // getValue should always work, because it handles all value types except arrays and
-            // structs.
-            // We do not use structs.
-            String stringToReplace = "@".concat(key);
-            int startingIndex = stringBuilder.indexOf(stringToReplace);
-            Optional.ofNullable(value.getValue())
-                .ifPresent(
-                    v ->
-                        stringBuilder.replace(
-                            startingIndex, startingIndex + stringToReplace.length(), v));
-          }
-        });
-    return stringBuilder.toString();
+    return queryParameterValueMap.entrySet().stream()
+        .map(param -> (Function<String, String>) s -> replaceParameter(s, param))
+        .reduce(Function.identity(), Function::andThen)
+        .apply(query)
+        .replaceAll("unnest", "");
   }
 
-  @NotNull
-  private static String arraySqlFromQueryParameter(QueryParameterValue value) {
-    return String.format(
-        "(%s)",
-        nullableListToEmpty(value.getArrayValues()).stream()
-            .map(QueryParameterValue::getValue)
-            .collect(Collectors.joining(", ")));
+  private static String replaceParameter(
+      String s, Map.Entry<String, QueryParameterValue> parameter) {
+    String value =
+        ARRAY.equals(parameter.getValue().getType())
+            ? nullableListToEmpty(parameter.getValue().getArrayValues()).stream()
+                .map(DataSetServiceImpl::convertSqlTypeToString)
+                .collect(Collectors.joining(", "))
+            : convertSqlTypeToString(parameter.getValue());
+    String key = String.format("@%s", parameter.getKey());
+    return s.replaceAll(key, value);
+  }
+
+  private static String convertSqlTypeToString(QueryParameterValue parameter) {
+    switch (parameter.getType()) {
+      case BOOL:
+        return Boolean.valueOf(parameter.getValue()) ? "1" : "0";
+      case INT64:
+      case FLOAT64:
+      case NUMERIC:
+        return parameter.getValue();
+      case STRING:
+      case TIMESTAMP:
+      case DATE:
+        return String.format("'%s'", parameter.getValue());
+      default:
+        throw new RuntimeException();
+    }
   }
 
   private static String generateNotebookUserCode(
