@@ -12,6 +12,7 @@ import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-sear
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
@@ -30,8 +31,6 @@ const styles = reactStyles({
     left: '50%',
     overflowY: 'auto',
     transform: 'translate(-50%, -50%)',
-    height: '90vh',
-    width: '90vw',
     backgroundColor: 'white',
     borderRadius: '4px',
     display: 'flex',
@@ -50,7 +49,7 @@ const styles = reactStyles({
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: `${addOpacity(colors.black, 0.5)}`,
     opacity: 0,
     visibility: 'hidden',
     transform: 'scale(1.1)',
@@ -78,7 +77,7 @@ const styles = reactStyles({
     boxSizing: 'border-box',
     height: '26px',
     width: '1px',
-    border: '1px solid #979797',
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.6)}`,
   },
   tabButton: {
     borderRadius: 0,
@@ -89,13 +88,13 @@ const styles = reactStyles({
     padding: '0 0.5rem 0.25rem',
   },
   tabButtonActive: {
-    color: '#216FB4',
-    borderBottom: '7px solid #216FB4',
+    color: colors.accent,
+    borderBottom: `7px solid ${colors.accent}`,
     fontWeight: 'bold',
     padding: '0 0.5rem',
   },
   titleBar: {
-    boxShadow: '0 0.12rem 0.125rem 0 #216FB4',
+    boxShadow: `0 0.12rem 0.125rem 0 ${colors.accent}`,
     marginBottom: '0.5rem',
     padding: '0rem 1rem',
     display: 'flex',
@@ -105,6 +104,49 @@ const styles = reactStyles({
     marginTop: '0.5rem',
   }
 });
+
+const css = `
+  .modal-container {
+    height: 90vh;
+    width: 80vw;
+  }
+  .modal-container.demographics {
+    width: 50vw;
+    height: auto;
+  }
+  @media (max-width: 1500px) {
+  .modal-container {
+    width: 90vw;
+  }
+  .modal-container.demographics {
+    width: 70vw;
+  }
+  @media (max-width: 1200px) {
+    .modal-container, .modal-container.demographics {
+      width: 100vw;
+    }
+  }
+  @media (max-height: 700px) {
+    .modal-container {
+      height: 100vh;
+    }
+  }
+  @media (max-height: 400px) {
+    .modal-container.demographics {
+      height: 100vh;
+    }
+    .modal-container.demographics.age {
+      height: auto;
+    }
+  }
+  @media (max-height: 300px) {
+    .modal-container.demographics.age {
+      height: 100vh;
+    }
+  }
+}
+`;
+
 function initGroup(role: string, item: any) {
   return {
     id: generateId(role),
@@ -399,140 +441,144 @@ export class CBModal extends React.Component<Props, State> {
     const {closeSearch, searchContext, searchContext: {domain, type}, setSearchContext} = this.props;
     const {attributesNode, autocompleteSelection, conceptType, count, disableFinish, groupSelections, hierarchyNode, loadingSubtree, mode,
       open, selectedIds, selections, title, treeSearchTerms} = this.state;
-    return !!searchContext ? <div style={{
-      ...styles.modalOverlay,
-      ...(open ? {opacity: 1, visibility: 'visible', transform: 'scale(1.0'} : {})
-    }}>
-      <div style={{...styles.modalContainer, ...(domain === DomainType.PERSON ? {width: '70vw', height: 'auto'} : {})}}>
-        <div style={styles.modalContent}>
-          <div style={this.leftColumnStyle}>
-            <div style={styles.titleBar}>
-              <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
-                {!attributesNode ? <Button
-                  style={{...styles.tabButton, ...((mode === 'list' || mode === 'tree') ? styles.tabButtonActive : {})}}
-                  type='link'
-                  disabled={selections.length !== 0 && conceptType === 'standard'}
-                  onClick={() => this.setState({mode: this.state.backMode})}>
-                  {title}
-                </Button>
-                : <Button
-                  style={{...styles.tabButton, ...(mode === 'attributes' ? styles.tabButtonActive : {})}}
-                  type='link'
-                  onClick={() => this.setState({mode: 'attributes'})}>
-                  {this.attributeTitle}
-                </Button>}
-                {this.showModifiers && <React.Fragment>
-                  <div style={styles.separator}/>
-                  <Button
-                    style={{...styles.tabButton, ...(mode === 'modifiers' ? styles.tabButtonActive : {})}}
+    return !!searchContext ? <React.Fragment>
+      <style>{css}</style>
+      <div style={{
+        ...styles.modalOverlay,
+        ...(open ? {opacity: 1, visibility: 'visible', transform: 'scale(1.0'} : {})
+      }}>
+        <div style={styles.modalContainer}
+          className={`modal-container${domain === DomainType.PERSON ? ' demographics' : ''}${type === CriteriaType.AGE ? ' age' : ''}`}>
+          <div style={styles.modalContent}>
+            <div style={this.leftColumnStyle}>
+              <div style={styles.titleBar}>
+                <div style={{display: 'inline-flex', marginRight: '0.5rem'}}>
+                  {!attributesNode ? <Button
+                    style={{...styles.tabButton, ...((mode === 'list' || mode === 'tree') ? styles.tabButtonActive : {})}}
                     type='link'
-                    disabled={selections.length === 0}
-                    onClick={() => this.setMode('modifiers')}>
-                    Modifiers
+                    disabled={selections.length !== 0 && conceptType === 'standard'}
+                    onClick={() => this.setState({mode: this.state.backMode})}>
+                    {title}
                   </Button>
-                </React.Fragment>}
-              </div>
-              <div style={{display: 'table', height: '100%'}}>
-                <div style={{display: 'table-cell', height: '100%', verticalAlign: 'middle'}}>
-                  {domain === DomainType.DRUG && <div>
-                    <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
-                      Explore
-                    </a>
-                    &nbsp;drugs by brand names outside of <i>All of Us</i>.
-                  </div>}
-                  {this.showDataBrowserLink && <div>
-                    Explore Source information on the&nbsp;
-                    <a href={environment.publicUiUrl} target='_blank' rel='noopener noreferrer'>Data Browser.</a>
-                  </div>}
-                </div>
-              </div>
-              {mode === 'attributes' && <Button type='link' onClick={this.back}>
-                <ClrIcon size='24' shape='close'/>
-              </Button>}
-            </div>
-            <div style={(domain === DomainType.PERSON && type !== CriteriaType.AGE) ? {marginBottom: '3.5rem'} : {}}>
-              {domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
-                <Demographics
-                  count={count}
-                  criteriaType={type}
-                  select={this.addSelection}
-                  selectedIds={selectedIds}
-                  selections={selections}/>
-                </div>
-              : <React.Fragment>
-                {loadingSubtree && <SpinnerOverlay/>}
-                <div id='tree' style={loadingSubtree ? {pointerEvents: 'none', opacity: 0.3} : {}}>
-                  {/* Tree View */}
-                  <div style={this.panelLeftStyle('tree')}>
-                    {hierarchyNode && <CriteriaTree
-                      autocompleteSelection={autocompleteSelection}
-                      back={this.back}
-                      groupSelections={groupSelections}
-                      node={hierarchyNode}
-                      scrollToMatch={this.setScroll}
-                      searchTerms={treeSearchTerms}
-                      select={this.addSelection}
-                      selectedIds={selectedIds}
-                      selectOption={this.setAutocompleteSelection}
-                      setAttributes={this.setAttributes}
-                      setSearchTerms={this.setTreeSearchTerms}/>}
-                  </div>
-                  {/* List View */}
-                  <div style={this.panelLeftStyle('list')}>
-                    <ListSearch hierarchy={this.showHierarchy}
-                      searchContext={searchContext}
-                      select={this.addSelection}
-                      selectedIds={selectedIds}
-                      setAttributes={this.setAttributes}/>
-                  </div>
-                  {/* Modifiers Page */}
-                  <div style={this.panelLeftStyle('modifiers')}>
-                    {this.showModifiers && <ListModifierPage
-                      disabled={this.modifiersFlag}
-                      searchContext={searchContext}
-                      selections={selections}
-                      setSearchContext={setSearchContext}/>}
-                  </div>
-                     {/* Attributes Page */}
-                  <div style={this.panelLeftStyle('attributes')}>
-                    {!!attributesNode && <AttributesPage
-                      close={this.back}
-                      node={attributesNode}
-                      select={this.addSelection}/>}
-                  </div>
-                </div>
-              </React.Fragment>}
-              {type === CriteriaType.AGE && <div style={styles.footer}>
-                <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
+                  : <Button
+                    style={{...styles.tabButton, ...(mode === 'attributes' ? styles.tabButtonActive : {})}}
                     type='link'
-                    onClick={closeSearch}>
-                  Cancel
-                </Button>
-                <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
-                  type='primary'
-                  onClick={this.finish}>
-                  Finish
-                </Button>
-              </div>}
+                    onClick={() => this.setState({mode: 'attributes'})}>
+                    {this.attributeTitle}
+                  </Button>}
+                  {this.showModifiers && <React.Fragment>
+                    <div style={styles.separator}/>
+                    <Button
+                      style={{...styles.tabButton, ...(mode === 'modifiers' ? styles.tabButtonActive : {})}}
+                      type='link'
+                      disabled={selections.length === 0}
+                      onClick={() => this.setMode('modifiers')}>
+                      Modifiers
+                    </Button>
+                  </React.Fragment>}
+                </div>
+                <div style={{display: 'table', height: '100%'}}>
+                  <div style={{display: 'table-cell', height: '100%', verticalAlign: 'middle'}}>
+                    {domain === DomainType.DRUG && <div>
+                      <a href='https://mor.nlm.nih.gov/RxNav/' target='_blank' rel='noopener noreferrer'>
+                        Explore
+                      </a>
+                      &nbsp;drugs by brand names outside of <i>All of Us</i>.
+                    </div>}
+                    {this.showDataBrowserLink && <div>
+                      Explore Source information on the&nbsp;
+                      <a href={environment.publicUiUrl} target='_blank' rel='noopener noreferrer'>Data Browser.</a>
+                    </div>}
+                  </div>
+                </div>
+                {mode === 'attributes' && <Button type='link' onClick={this.back}>
+                  <ClrIcon size='24' shape='close'/>
+                </Button>}
+              </div>
+              <div style={(domain === DomainType.PERSON && type !== CriteriaType.AGE) ? {marginBottom: '3.5rem'} : {}}>
+                {domain === DomainType.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
+                  <Demographics
+                    count={count}
+                    criteriaType={type}
+                    select={this.addSelection}
+                    selectedIds={selectedIds}
+                    selections={selections}/>
+                  </div>
+                : <React.Fragment>
+                  {loadingSubtree && <SpinnerOverlay/>}
+                  <div id='tree' style={loadingSubtree ? {pointerEvents: 'none', opacity: 0.3} : {}}>
+                    {/* Tree View */}
+                    <div style={this.panelLeftStyle('tree')}>
+                      {hierarchyNode && <CriteriaTree
+                        autocompleteSelection={autocompleteSelection}
+                        back={this.back}
+                        groupSelections={groupSelections}
+                        node={hierarchyNode}
+                        scrollToMatch={this.setScroll}
+                        searchTerms={treeSearchTerms}
+                        select={this.addSelection}
+                        selectedIds={selectedIds}
+                        selectOption={this.setAutocompleteSelection}
+                        setAttributes={this.setAttributes}
+                        setSearchTerms={this.setTreeSearchTerms}/>}
+                    </div>
+                    {/* List View */}
+                    <div style={this.panelLeftStyle('list')}>
+                      <ListSearch hierarchy={this.showHierarchy}
+                        searchContext={searchContext}
+                        select={this.addSelection}
+                        selectedIds={selectedIds}
+                        setAttributes={this.setAttributes}/>
+                    </div>
+                    {/* Modifiers Page */}
+                    <div style={this.panelLeftStyle('modifiers')}>
+                      {this.showModifiers && <ListModifierPage
+                        disabled={this.modifiersFlag}
+                        searchContext={searchContext}
+                        selections={selections}
+                        setSearchContext={setSearchContext}/>}
+                    </div>
+                       {/* Attributes Page */}
+                    <div style={this.panelLeftStyle('attributes')}>
+                      {!!attributesNode && <AttributesPage
+                        close={this.back}
+                        node={attributesNode}
+                        select={this.addSelection}/>}
+                    </div>
+                  </div>
+                </React.Fragment>}
+                {type === CriteriaType.AGE && <div style={styles.footer}>
+                  <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
+                      type='link'
+                      onClick={closeSearch}>
+                    Cancel
+                  </Button>
+                  <Button style={{height: '1.5rem', margin: '0.25rem 0.5rem'}}
+                    type='primary'
+                    onClick={this.finish}>
+                    Finish
+                  </Button>
+                </div>}
+              </div>
             </div>
+            {type !== CriteriaType.AGE && <div style={this.rightColumnStyle}>
+              <div style={{height: '100%'}}>
+                <SelectionList
+                  back={this.back}
+                  close={closeSearch}
+                  disableFinish={disableFinish}
+                  domain={domain}
+                  finish={this.finish}
+                  removeSelection={this.removeSelection}
+                  selections={selections}
+                  setView={this.setMode}
+                  view={mode}/>
+              </div>
+            </div>}
           </div>
-          {type !== CriteriaType.AGE && <div style={this.rightColumnStyle}>
-            <div style={{height: '100%'}}>
-              <SelectionList
-                back={this.back}
-                close={closeSearch}
-                disableFinish={disableFinish}
-                domain={domain}
-                finish={this.finish}
-                removeSelection={this.removeSelection}
-                selections={selections}
-                setView={this.setMode}
-                view={mode}/>
-            </div>
-          </div>}
         </div>
       </div>
-    </div> : '';
+    </React.Fragment> : '';
   }
 }
 
