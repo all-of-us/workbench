@@ -13,6 +13,7 @@ import org.pmiops.workbench.model.NonAcademicAffiliation;
 
 @Entity
 @Table(name = "institutional_affiliation")
+@Deprecated   // refers to old-style Institutional Affiliations, to be deleted in RW-4362
 public class DbInstitutionalAffiliation {
 
   private long institutionalAffiliationId;

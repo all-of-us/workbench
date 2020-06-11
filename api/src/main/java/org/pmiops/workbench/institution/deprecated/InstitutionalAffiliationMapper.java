@@ -1,4 +1,4 @@
-package org.pmiops.workbench.institution;
+package org.pmiops.workbench.institution.deprecated;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -9,6 +9,7 @@ import org.pmiops.workbench.model.NonAcademicAffiliation;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
+@Deprecated   // maps old-style Institutional Affiliations, to be deleted in RW-4362
 public interface InstitutionalAffiliationMapper {
   @Mapping(target = "nonAcademicAffiliation", source = "nonAcademicAffiliationEnum")
   InstitutionalAffiliation dbInstitutionalAffiliationToInstitutionalAffiliation(
